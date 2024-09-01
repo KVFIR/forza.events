@@ -6,6 +6,15 @@ module.exports = function(app) {
     createProxyMiddleware({
       target: 'http://localhost:5000',
       changeOrigin: true,
+      withCredentials: true,
+    })
+  );
+  app.use(
+    '/auth',
+    createProxyMiddleware({
+      target: 'http://localhost:5000',
+      changeOrigin: true,
+      withCredentials: true,
     })
   );
 };

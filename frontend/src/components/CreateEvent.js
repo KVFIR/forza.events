@@ -58,16 +58,27 @@ function CreateEvent({ user }) {
     e.preventDefault();
     setError(null);
 
+    if (!user) {
+      console.log('User not authenticated');
+      setError('Вы должны войти в систему для создания события');
+      return;
+    }
+
+    console.log('Attempting to create event for user:', user);
+
     try {
       const response = await axios.post('/api/events', {
         title,
         description,
         date,
         location
+      }, {
+        withCredentials: true
       });
+      console.log('Event created successfully:', response.data);
       navigate(`/events/${response.data._id}`);
     } catch (error) {
-      console.error('Error creating event:', error);
+      console.error('Error creating event:', error.response ? error.response.data : error.message);
       if (error.response) {
         setError(`Failed to create event: ${error.response.data.message}`);
       } else if (error.request) {
