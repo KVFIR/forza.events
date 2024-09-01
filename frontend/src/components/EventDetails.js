@@ -101,7 +101,7 @@ function EventDetails({ user }) {
       } else if (error.response && error.response.data) {
         setError(error.response.data.message);
       } else {
-        setError('Не удалось присоединиться к событию');
+        setError('Failed to join the event');
       }
     }
   };
@@ -117,7 +117,7 @@ function EventDetails({ user }) {
       } else if (error.response && error.response.data) {
         setError(error.response.data.message);
       } else {
-        setError('Не удалось отменить регистрацию на событие');
+        setError('Failed to unregister from the event');
       }
     }
   };
@@ -230,7 +230,7 @@ function EventDetails({ user }) {
                   onClick={handleUnregister}
                   sx={{ mt: 2 }}
                 >
-                  Отменить регистрацию
+                  Unregister
                 </Button>
               ) : (
                 <Button
@@ -239,12 +239,12 @@ function EventDetails({ user }) {
                   onClick={handleJoinEvent}
                   sx={{ mt: 2 }}
                 >
-                  Присоединиться к событию
+                  Join Event
                 </Button>
               )
             )}
             <Typography variant="h6" sx={{ mt: 2 }}>
-              Участники ({event.participants ? event.participants.length : 0})
+            Participants ({event.participants ? event.participants.length : 0})
             </Typography>
             <List>
               {event.participants && event.participants.map((participant) => (

@@ -60,7 +60,7 @@ function CreateEvent({ user }) {
 
     if (!user) {
       console.log('User not authenticated');
-      setError('Вы должны войти в систему для создания события');
+      setError('You must be logged in to create an event');
       return;
     }
 
