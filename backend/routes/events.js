@@ -19,7 +19,7 @@ router.post('/', async (req, res) => {
     description: req.body.description,
     date: req.body.date,
     location: req.body.location,
-    organizer: req.user._id // Предполагается, что пользователь аутентифицирован
+    organizer: '64a2f3d5e2c63e001c3d7c0e' // Temporary hardcoded organizer ID
   });
 
   try {
