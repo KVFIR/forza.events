@@ -1,6 +1,17 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 import { Link } from 'react-router-dom';
+import { 
+  Container, 
+  Typography, 
+  Grid, 
+  Card, 
+  CardContent, 
+  CardActions, 
+  Button, 
+  CircularProgress 
+} from '@mui/material';
+import { Event as EventIcon, LocationOn, ArrowForward } from '@mui/icons-material';
 
 function EventList() {
   const [events, setEvents] = useState([]);
@@ -10,17 +21,11 @@ function EventList() {
   useEffect(() => {
     const fetchEvents = async () => {
       try {
-        console.log('Fetching events...');
         const response = await axios.get('/api/events');
-        console.log('Events response:', response.data);
         setEvents(response.data);
         setLoading(false);
       } catch (err) {
         console.error('Error fetching events:', err);
-        if (err.response) {
-          console.error('Response data:', err.response.data);
-          console.error('Response status:', err.response.status);
-        }
         setError('Failed to fetch events. Please try again later.');
         setLoading(false);
       }
@@ -29,28 +34,58 @@ function EventList() {
     fetchEvents();
   }, []);
 
-  if (loading) return <div>Loading events...</div>;
-  if (error) return <div>{error}</div>;
+  if (loading) return (
+    <Container sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '100vh' }}>
+      <CircularProgress />
+    </Container>
+  );
+
+  if (error) return (
+    <Container>
+      <Typography color="error" variant="h6">{error}</Typography>
+    </Container>
+  );
 
   return (
-    <div className="event-list">
-      <h2>Upcoming Events</h2>
+    <Container maxWidth="lg" sx={{ mt: 4, mb: 4 }}>
+      <Typography variant="h4" component="h1" gutterBottom>
+        Upcoming Events
+      </Typography>
       {events.length === 0 ? (
-        <p>No events found. Why not create one?</p>
+        <Typography variant="body1">No events found. Why not create one?</Typography>
       ) : (
-        <ul>
+        <Grid container spacing={3}>
           {events.map(event => (
-            <li key={event._id}>
-              <Link to={`/events/${event._id}`}>
-                <h3>{event.title}</h3>
-              </Link>
-              <p>Date: {new Date(event.date).toLocaleDateString()}</p>
-              <p>Location: {event.location}</p>
-            </li>
+            <Grid item xs={12} sm={6} md={4} key={event._id}>
+              <Card>
+                <CardContent>
+                  <Typography variant="h6" component="h2" gutterBottom>
+                    {event.title}
+                  </Typography>
+                  <Typography variant="body2" color="text.secondary" sx={{ display: 'flex', alignItems: 'center', mb: 1 }}>
+                    <EventIcon sx={{ mr: 1 }} fontSize="small" />
+                    {new Date(event.date).toLocaleDateString()}
+                  </Typography>
+                  <Typography variant="body2" color="text.secondary" sx={{ display: 'flex', alignItems: 'center' }}>
+                    <LocationOn sx={{ mr: 1 }} fontSize="small" />
+                    {event.location}
+                  </Typography>
+                </CardContent>
+                <CardActions>
+                  <Button 
+                    component={Link} 
+                    to={`/events/${event._id}`} 
+                    endIcon={<ArrowForward />}
+                  >
+                    View Details
+                  </Button>
+                </CardActions>
+              </Card>
+            </Grid>
           ))}
-        </ul>
+        </Grid>
       )}
-    </div>
+    </Container>
   );
 }
 

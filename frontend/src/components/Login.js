@@ -1,5 +1,6 @@
 import React, { useEffect } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
+import { Button, Typography, Container } from '@mui/material';
 
 function Login() {
   const location = useLocation();
@@ -17,10 +18,14 @@ function Login() {
   };
 
   return (
-    <div>
-      <h2>Login</h2>
-      <button onClick={handleLogin}>Login with Discord</button>
-    </div>
+    <Container maxWidth="sm">
+      <Typography variant="h4" component="h1" gutterBottom>
+        Login
+      </Typography>
+      <Button variant="contained" color="primary" onClick={handleLogin}>
+        Login with Discord
+      </Button>
+    </Container>
   );
 }
 

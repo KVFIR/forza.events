@@ -15,6 +15,9 @@ import { ThemeProvider } from '@mui/material/styles';
 import CssBaseline from '@mui/material/CssBaseline';
 import theme from './theme';
 
+import { AppBar, Toolbar, Typography, Button, Box } from '@mui/material';
+import { Link as RouterLink } from 'react-router-dom';
+
 function App() {
   const [user, setUser] = useState(null);
   const [loading, setLoading] = useState(true);
@@ -71,30 +74,14 @@ function App() {
             </Box>
           </Toolbar>
         </AppBar>
-        <div>
-          <nav>
-            <ul>
-              <li><Link to="/">Home</Link></li>
-              <li><Link to="/events">Events</Link></li>
-              <li><Link to="/create-event">Create Event</Link></li>
-              {user && <li><Link to="/profile">Profile</Link></li>}
-              {user ? (
-                <li><button onClick={handleLogout}>Logout</button></li>
-              ) : (
-                <li><Link to="/login">Login</Link></li>
-              )}
-            </ul>
-          </nav>
-
-          <Routes>
-            <Route path="/" element={<Home />} />
-            <Route path="/events" element={<EventList />} />
-            <Route path="/create-event" element={<CreateEvent user={user} />} />
-            <Route path="/login" element={user ? <Navigate to="/" /> : <Login />} />
-            <Route path="/profile" element={user ? <Profile user={user} /> : <Navigate to="/login" />} />
-            <Route path="/events/:id" element={<EventDetails user={user} />} />
-          </Routes>
-        </div>
+        <Routes>
+          <Route path="/" element={<Home />} />
+          <Route path="/events" element={<EventList />} />
+          <Route path="/create-event" element={<CreateEvent user={user} />} />
+          <Route path="/login" element={user ? <Navigate to="/" /> : <Login />} />
+          <Route path="/profile" element={user ? <Profile user={user} /> : <Navigate to="/login" />} />
+          <Route path="/events/:id" element={<EventDetails user={user} />} />
+        </Routes>
       </Router>
     </ThemeProvider>
   );
