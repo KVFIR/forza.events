@@ -1,8 +1,9 @@
-# FORZA.EVENTS - Личный проект
+
+# FORZA.EVENTS
 
 ## Обзор проекта
 
-FORZA.EVENTS - веб-приложение для организации и участия в событиях, связанных с игрой Forza. Использует стек MERN (MongoDB, Express, React, Node.js) с аутентификацией через Discord.
+FORZA.EVENTS - веб-приложение для организации и участия в событиях, связанных с игрой Forza. Использует стек MERN (MongoDB, Express, React, Node.js) с аутентификацией через Discord и Material-UI для стилизации.
 
 ## Быстрый старт
 
@@ -47,8 +48,10 @@ forza.events/
 │   │   │   ├── Home.js
 │   │   │   ├── EventList.js
 │   │   │   ├── CreateEvent.js
-│   │   │   └── EventDetails.js
-│   │   └── App.js
+│   │   │   ├── EventDetails.js
+│   │   │   └── Login.js
+│   │   ├── App.js
+│   │   └── theme.js
 │   └── public/
 └── README.md
 ```
@@ -93,6 +96,8 @@ forza.events/
 - Добавлен профиль пользователя с отображением информации из Discord
 - Реализована функция выхода из системы
 - Добавлена обработка ошибок и уведомления пользователя
+- Улучшен UI с использованием Material-UI компонентов
+- Добавлена функция заполнения тестовыми данными при создании события
 
 ## Следующие шаги
 
@@ -109,6 +114,7 @@ forza.events/
 - [MongoDB Atlas Dashboard](https://cloud.mongodb.com/)
 - [React Documentation](https://reactjs.org/docs/getting-started.html)
 - [Express.js Documentation](https://expressjs.com/)
+- [Material-UI Documentation](https://mui.com/material-ui/getting-started/overview/)
 
 ## Заметки
 
@@ -125,3 +131,4 @@ forza.events/
 - [ ] Интегрировать систему уведомлений
 - [ ] Добавить возможность загрузки изображений для событий
 - [ ] Реализовать систему рейтинга для организаторов событий
+```

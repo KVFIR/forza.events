@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 import { useNavigate } from 'react-router-dom';
-import { TextField, Button, Container, Typography, Box } from '@mui/material';
+import { TextField, Button, Container, Typography, Box, Paper } from '@mui/material';
 
 axios.defaults.baseURL = 'http://localhost:5000';
 
@@ -59,89 +59,102 @@ function CreateEvent({ user }) {
     setError(null);
 
     try {
-      console.log('Sending event data:', { title, description, date, location });
-      const response = await axios.post('/api/events', { title, description, date, location });
-      console.log('Event creation response:', response);
-      navigate('/events'); // Redirect to event list after successful creation
-    } catch (err) {
-      console.error('Error creating event:', err);
-      if (err.response) {
-        console.error('Response data:', err.response.data);
-        console.error('Response status:', err.response.status);
-        console.error('Response headers:', err.response.headers);
-        setError(`Failed to create event. Server responded with: ${err.response.status} ${err.response.statusText}`);
-      } else if (err.request) {
-        console.error('Request:', err.request);
-        setError('Failed to create event. No response received from the server.');
+      const response = await axios.post('/api/events', {
+        title,
+        description,
+        date,
+        location
+      });
+      navigate(`/events/${response.data._id}`);
+    } catch (error) {
+      console.error('Error creating event:', error);
+      if (error.response) {
+        setError(`Failed to create event: ${error.response.data.message}`);
+      } else if (error.request) {
+        setError('Failed to create event: No response received from the server.');
       } else {
-        console.error('Error message:', err.message);
-        setError(`Failed to create event. Error: ${err.message}`);
+        setError(`Failed to create event: ${error.message}`);
       }
     }
   };
 
   return (
     <Container maxWidth="sm">
-      <Typography variant="h4" component="h1" gutterBottom>
-        Create New Event
-      </Typography>
-      <Box component="form" onSubmit={handleSubmit} noValidate sx={{ mt: 1 }}>
-        <TextField
-          margin="normal"
-          required
-          fullWidth
-          id="title"
-          label="Title"
-          name="title"
-          autoFocus
-          value={title}
-          onChange={(e) => setTitle(e.target.value)}
-        />
-        <TextField
-          margin="normal"
-          required
-          fullWidth
-          id="description"
-          label="Description"
-          name="description"
-          multiline
-          rows={4}
-          value={description}
-          onChange={(e) => setDescription(e.target.value)}
-        />
-        <TextField
-          margin="normal"
-          required
-          fullWidth
-          id="date"
-          label="Date"
-          name="date"
-          type="date"
-          InputLabelProps={{
-            shrink: true,
-          }}
-          value={date}
-          onChange={(e) => setDate(e.target.value)}
-        />
-        <TextField
-          margin="normal"
-          required
-          fullWidth
-          id="location"
-          label="Location"
-          name="location"
-          value={location}
-          onChange={(e) => setLocation(e.target.value)}
-        />
-        <Button
-          type="submit"
-          fullWidth
-          variant="contained"
-          sx={{ mt: 3, mb: 2 }}
-        >
-          Create Event
-        </Button>
-      </Box>
+      <Paper elevation={3} sx={{ p: 3, mt: 4 }}>
+        <Typography variant="h4" component="h1" gutterBottom>
+          Create New Event
+        </Typography>
+        <Box component="form" onSubmit={handleSubmit} noValidate sx={{ mt: 1 }}>
+          <TextField
+            margin="normal"
+            required
+            fullWidth
+            id="title"
+            label="Title"
+            name="title"
+            autoFocus
+            value={title}
+            onChange={(e) => setTitle(e.target.value)}
+          />
+          <TextField
+            margin="normal"
+            required
+            fullWidth
+            id="description"
+            label="Description"
+            name="description"
+            multiline
+            rows={4}
+            value={description}
+            onChange={(e) => setDescription(e.target.value)}
+          />
+          <TextField
+            margin="normal"
+            required
+            fullWidth
+            id="date"
+            label="Date"
+            name="date"
+            type="date"
+            InputLabelProps={{
+              shrink: true,
+            }}
+            value={date}
+            onChange={(e) => setDate(e.target.value)}
+          />
+          <TextField
+            margin="normal"
+            required
+            fullWidth
+            id="location"
+            label="Location"
+            name="location"
+            value={location}
+            onChange={(e) => setLocation(e.target.value)}
+          />
+          <Button
+            type="submit"
+            fullWidth
+            variant="contained"
+            sx={{ mt: 3, mb: 2 }}
+          >
+            Create Event
+          </Button>
+          <Button
+            fullWidth
+            variant="outlined"
+            onClick={fillTestData}
+            sx={{ mb: 2 }}
+          >
+            Fill with Test Data
+          </Button>
+        </Box>
+        {error && (
+          <Typography color="error" sx={{ mt: 2 }}>
+            {error}
+          </Typography>
+        )}
+      </Paper>
     </Container>
   );
 }

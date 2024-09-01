@@ -1,6 +1,17 @@
 import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import axios from 'axios';
+import {
+  Container,
+  Typography,
+  Button,
+  TextField,
+  Box,
+  CircularProgress,
+  Paper,
+  Grid
+} from '@mui/material';
+import { Event as EventIcon, LocationOn, Person } from '@mui/icons-material';
 
 function EventDetails({ user }) {
   const [event, setEvent] = useState(null);
@@ -10,6 +21,7 @@ function EventDetails({ user }) {
   const [date, setDate] = useState('');
   const [location, setLocation] = useState('');
   const [error, setError] = useState(null);
+  const [loading, setLoading] = useState(true);
   const { id } = useParams();
   const navigate = useNavigate();
 
@@ -22,8 +34,10 @@ function EventDetails({ user }) {
         setDescription(response.data.description);
         setDate(response.data.date.split('T')[0]);
         setLocation(response.data.location);
+        setLoading(false);
       } catch (error) {
         setError('Failed to fetch event details');
+        setLoading(false);
       }
     };
     fetchEvent();
@@ -68,57 +82,120 @@ function EventDetails({ user }) {
     }
   };
 
-  if (error) return <div>{error}</div>;
-  if (!event) return <div>Loading...</div>;
+  if (loading) return (
+    <Container sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '100vh' }}>
+      <CircularProgress />
+    </Container>
+  );
+
+  if (error) return (
+    <Container>
+      <Typography color="error" variant="h6">{error}</Typography>
+    </Container>
+  );
+
+  if (!event) return null;
 
   const isOrganizer = user && event.organizer && user._id === event.organizer._id;
 
   return (
-    <div className="event-details">
-      <h2>{event.title}</h2>
-      {isEditing ? (
-        <form onSubmit={handleEdit}>
-          <input
-            type="text"
-            value={title}
-            onChange={(e) => setTitle(e.target.value)}
-            required
-          />
-          <textarea
-            value={description}
-            onChange={(e) => setDescription(e.target.value)}
-            required
-          />
-          <input
-            type="date"
-            value={date}
-            onChange={(e) => setDate(e.target.value)}
-            required
-          />
-          <input
-            type="text"
-            value={location}
-            onChange={(e) => setLocation(e.target.value)}
-            required
-          />
-          <button type="submit">Save Changes</button>
-          <button type="button" onClick={() => setIsEditing(false)}>Cancel</button>
-        </form>
-      ) : (
-        <>
-          <p>Date: {new Date(event.date).toLocaleDateString()}</p>
-          <p>Location: {event.location}</p>
-          <p>Description: {event.description}</p>
-          <p>Organizer: {event.organizer ? event.organizer.username : 'Unknown'}</p>
-          {isOrganizer && (
-            <>
-              <button onClick={() => setIsEditing(true)}>Edit Event</button>
-              <button onClick={handleDelete}>Delete Event</button>
-            </>
-          )}
-        </>
-      )}
-    </div>
+    <Container maxWidth="md" sx={{ mt: 4, mb: 4 }}>
+      <Paper elevation={3} sx={{ p: 3 }}>
+        {isEditing ? (
+          <Box component="form" onSubmit={handleEdit} noValidate sx={{ mt: 1 }}>
+            <TextField
+              margin="normal"
+              required
+              fullWidth
+              id="title"
+              label="Title"
+              name="title"
+              value={title}
+              onChange={(e) => setTitle(e.target.value)}
+            />
+            <TextField
+              margin="normal"
+              required
+              fullWidth
+              id="description"
+              label="Description"
+              name="description"
+              multiline
+              rows={4}
+              value={description}
+              onChange={(e) => setDescription(e.target.value)}
+            />
+            <TextField
+              margin="normal"
+              required
+              fullWidth
+              id="date"
+              label="Date"
+              name="date"
+              type="date"
+              InputLabelProps={{
+                shrink: true,
+              }}
+              value={date}
+              onChange={(e) => setDate(e.target.value)}
+            />
+            <TextField
+              margin="normal"
+              required
+              fullWidth
+              id="location"
+              label="Location"
+              name="location"
+              value={location}
+              onChange={(e) => setLocation(e.target.value)}
+            />
+            <Button type="submit" fullWidth variant="contained" sx={{ mt: 3, mb: 2 }}>
+              Save Changes
+            </Button>
+            <Button fullWidth variant="outlined" onClick={() => setIsEditing(false)}>
+              Cancel
+            </Button>
+          </Box>
+        ) : (
+          <>
+            <Typography variant="h4" component="h1" gutterBottom>
+              {event.title}
+            </Typography>
+            <Grid container spacing={2} sx={{ mb: 2 }}>
+              <Grid item xs={12} sm={6}>
+                <Typography variant="body1" sx={{ display: 'flex', alignItems: 'center' }}>
+                  <EventIcon sx={{ mr: 1 }} />
+                  {new Date(event.date).toLocaleDateString()}
+                </Typography>
+              </Grid>
+              <Grid item xs={12} sm={6}>
+                <Typography variant="body1" sx={{ display: 'flex', alignItems: 'center' }}>
+                  <LocationOn sx={{ mr: 1 }} />
+                  {event.location}
+                </Typography>
+              </Grid>
+            </Grid>
+            <Typography variant="body1" sx={{ mb: 2 }}>
+              {event.description}
+            </Typography>
+            <Typography variant="body1" sx={{ display: 'flex', alignItems: 'center' }}>
+              <Person sx={{ mr: 1 }} />
+              {event.organizer ? event.organizer.username : 'Unknown'}
+            </Typography>
+            {isOrganizer && (
+              <Box sx={{ mt: 2 }}>
+                <Button variant="contained" onClick={() => setIsEditing(true)} sx={{ mr: 1 }}>
+                  Edit Event
+                </Button>
+                <Button variant="outlined" color="error" onClick={handleDelete}>
+                  Delete Event
+                </Button>
+              </Box>
+            )}
+          </>
+        )}
+      </Paper>
+    </Container>
   );
 }
 
