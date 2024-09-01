@@ -6,6 +6,7 @@ import EventList from './components/EventList';
 import CreateEvent from './components/CreateEvent';
 import Login from './components/Login';
 import Profile from './components/Profile';
+import EventDetails from './components/EventDetails';
 
 axios.defaults.baseURL = 'http://localhost:5000';
 axios.defaults.withCredentials = true;
@@ -51,7 +52,7 @@ function App() {
           <ul>
             <li><Link to="/">Home</Link></li>
             <li><Link to="/events">Events</Link></li>
-            {user && <li><Link to="/create-event">Create Event</Link></li>}
+            <li><Link to="/create-event">Create Event</Link></li>
             {user && <li><Link to="/profile">Profile</Link></li>}
             {user ? (
               <li><button onClick={handleLogout}>Logout</button></li>
@@ -64,9 +65,10 @@ function App() {
         <Routes>
           <Route path="/" element={<Home />} />
           <Route path="/events" element={<EventList />} />
-          <Route path="/create-event" element={user ? <CreateEvent /> : <Navigate to="/login" />} />
+          <Route path="/create-event" element={<CreateEvent user={user} />} />
           <Route path="/login" element={user ? <Navigate to="/" /> : <Login />} />
           <Route path="/profile" element={user ? <Profile user={user} /> : <Navigate to="/login" />} />
+          <Route path="/events/:id" element={<EventDetails user={user} />} />
         </Routes>
       </div>
     </Router>

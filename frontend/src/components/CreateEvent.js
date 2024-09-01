@@ -1,10 +1,10 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 import { useNavigate } from 'react-router-dom';
 
 axios.defaults.baseURL = 'http://localhost:5000';
 
-function CreateEvent() {
+function CreateEvent({ user }) {
   const [title, setTitle] = useState('');
   const [description, setDescription] = useState('');
   const [date, setDate] = useState('');
@@ -12,11 +12,45 @@ function CreateEvent() {
   const [error, setError] = useState(null);
   const navigate = useNavigate();
 
+  useEffect(() => {
+    if (!user) {
+      navigate('/login');
+    }
+  }, [user, navigate]);
+
+  const getRandomTitle = () => {
+    const adjectives = ['Exciting', 'Amazing', 'Thrilling', 'Epic', 'Awesome'];
+    const nouns = ['Race', 'Challenge', 'Tournament', 'Competition', 'Event'];
+    return `${adjectives[Math.floor(Math.random() * adjectives.length)]} Forza ${nouns[Math.floor(Math.random() * nouns.length)]}`;
+  };
+
+  const getRandomDescription = () => {
+    const descriptions = [
+      'Join us for an unforgettable racing experience!',
+      'Test your skills against the best drivers in the community!',
+      'Compete for glory and amazing prizes!',
+      'Experience the thrill of high-speed racing action!',
+      'Show off your custom rides and racing prowess!'
+    ];
+    return descriptions[Math.floor(Math.random() * descriptions.length)];
+  };
+
+  const getRandomDate = () => {
+    const start = new Date();
+    const end = new Date(start.getTime() + 90 * 24 * 60 * 60 * 1000); // 90 days from now
+    return new Date(start.getTime() + Math.random() * (end.getTime() - start.getTime())).toISOString().split('T')[0];
+  };
+
+  const getRandomLocation = () => {
+    const locations = ['Horizon Festival', 'Goliath Circuit', 'Fortune Island', 'LEGO Valley', 'Needle Climb'];
+    return locations[Math.floor(Math.random() * locations.length)];
+  };
+
   const fillTestData = () => {
-    setTitle('Test Event');
-    setDescription('This is a test event description');
-    setDate('2023-12-31');
-    setLocation('Test Location');
+    setTitle(getRandomTitle());
+    setDescription(getRandomDescription());
+    setDate(getRandomDate());
+    setLocation(getRandomLocation());
   };
 
   const handleSubmit = async (e) => {
