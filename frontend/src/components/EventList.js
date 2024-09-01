@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
-import { Link } from 'react-router-dom';
+import { Link as RouterLink } from 'react-router-dom';
 import { 
   Container, 
   Typography, 
@@ -13,7 +13,7 @@ import {
 } from '@mui/material';
 import { Event as EventIcon, LocationOn, ArrowForward } from '@mui/icons-material';
 
-function EventList() {
+function EventList({ user }) {
   const [events, setEvents] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
@@ -51,6 +51,17 @@ function EventList() {
       <Typography variant="h4" component="h1" gutterBottom>
         Upcoming Events
       </Typography>
+      {user && (
+        <Button
+          component={RouterLink}
+          to="/create-event"
+          variant="contained"
+          color="primary"
+          sx={{ mb: 2 }}
+        >
+          Create Event
+        </Button>
+      )}
       {events.length === 0 ? (
         <Typography variant="body1">No events found. Why not create one?</Typography>
       ) : (
@@ -73,7 +84,7 @@ function EventList() {
                 </CardContent>
                 <CardActions>
                   <Button 
-                    component={Link} 
+                    component={RouterLink} 
                     to={`/events/${event._id}`} 
                     endIcon={<ArrowForward />}
                   >

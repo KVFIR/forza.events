@@ -106,6 +106,22 @@ function EventDetails({ user }) {
     }
   };
 
+  const handleUnregister = async () => {
+    try {
+      const response = await axios.post(`/api/events/${id}/unregister`);
+      setEvent(response.data);
+      setError(null);
+    } catch (error) {
+      if (error.response && error.response.status === 401) {
+        navigate('/login');
+      } else if (error.response && error.response.data) {
+        setError(error.response.data.message);
+      } else {
+        setError('Не удалось отменить регистрацию на событие');
+      }
+    }
+  };
+
   if (loading) return (
     <Container sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '100vh' }}>
       <CircularProgress />
@@ -206,15 +222,26 @@ function EventDetails({ user }) {
               <Person sx={{ mr: 1 }} />
               {event.organizer ? event.organizer.username : 'Unknown'}
             </Typography>
-            {user && event.participants && !event.participants.some(p => p._id === user._id) && (
-              <Button
-                variant="contained"
-                color="primary"
-                onClick={handleJoinEvent}
-                sx={{ mt: 2 }}
-              >
-                Присоединиться к событию
-              </Button>
+            {user && event.participants && (
+              event.participants.some(p => p._id === user._id) ? (
+                <Button
+                  variant="contained"
+                  color="secondary"
+                  onClick={handleUnregister}
+                  sx={{ mt: 2 }}
+                >
+                  Отменить регистрацию
+                </Button>
+              ) : (
+                <Button
+                  variant="contained"
+                  color="primary"
+                  onClick={handleJoinEvent}
+                  sx={{ mt: 2 }}
+                >
+                  Присоединиться к событию
+                </Button>
+              )
             )}
             <Typography variant="h6" sx={{ mt: 2 }}>
               Участники ({event.participants ? event.participants.length : 0})

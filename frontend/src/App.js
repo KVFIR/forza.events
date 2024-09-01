@@ -4,7 +4,6 @@ import axios from 'axios';
 import Home from './components/Home';
 import EventList from './components/EventList';
 import CreateEvent from './components/CreateEvent';
-import Login from './components/Login';
 import Profile from './components/Profile';
 import EventDetails from './components/EventDetails';
 
@@ -64,22 +63,20 @@ function App() {
             <Box>
               <Button color="inherit" component={RouterLink} to="/">Home</Button>
               <Button color="inherit" component={RouterLink} to="/events">Events</Button>
-              <Button color="inherit" component={RouterLink} to="/create-event">Create Event</Button>
               {user && <Button color="inherit" component={RouterLink} to="/profile">Profile</Button>}
               {user ? (
                 <Button color="inherit" onClick={handleLogout}>Logout</Button>
               ) : (
-                <Button color="inherit" component={RouterLink} to="/login">Login</Button>
+                <Button color="inherit" onClick={() => window.location.href = 'http://localhost:5000/auth/discord'}>Login</Button>
               )}
             </Box>
           </Toolbar>
         </AppBar>
         <Routes>
           <Route path="/" element={<Home />} />
-          <Route path="/events" element={<EventList />} />
+          <Route path="/events" element={<EventList user={user} />} />
           <Route path="/create-event" element={<CreateEvent user={user} />} />
-          <Route path="/login" element={user ? <Navigate to="/" /> : <Login />} />
-          <Route path="/profile" element={user ? <Profile user={user} /> : <Navigate to="/login" />} />
+          <Route path="/profile" element={user ? <Profile user={user} /> : <Navigate to="/" />} />
           <Route path="/events/:id" element={<EventDetails user={user} />} />
         </Routes>
       </Router>
