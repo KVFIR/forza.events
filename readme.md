@@ -1,135 +1,107 @@
-**README для работы в Cursor**
 
-Добро пожаловать в проект **FORZA.EVENTS**! Этот документ поможет тебе настроить окружение и работать с проектом, используя редактор Cursor. Ниже приведены инструкции по установке, настройке и работе над проектом.
+`````markdown:readme.md
+# FORZA.EVENTS - Личный проект
 
-### 1. Требования
+## Обзор проекта
 
-Перед началом работы убедись, что у тебя установлены следующие инструменты:
+FORZA.EVENTS - веб-приложение для организации и участия в событиях, связанных с игрой Forza. Использует стек MERN (MongoDB, Express, React, Node.js) с аутентификацией через Discord.
 
-- **Node.js** (версии 14 или выше)
-- **npm** или **yarn** (для управления пакетами)
-- **MongoDB** (если используешь локальную базу данных)
-- **Cursor** (установленный и настроенный для работы с проектами)
+## Быстрый старт
 
-### 2. Клонирование репозитория
+1. Установка:
+   ```bash
+   git clone https://github.com/your-username/forza.events.git
+   cd forza.events
+   cd backend && npm install
+   cd ../frontend && npm install
+   ```
 
-Склонируй репозиторий проекта на свой компьютер:
+2. Настройка `.env` (в папке `backend`):
+   ```
+   MONGO_URI=mongodb://localhost:27017/forza_events
+   DISCORD_CLIENT_ID=your_discord_client_id
+   DISCORD_CLIENT_SECRET=your_discord_client_secret
+   DISCORD_CALLBACK_URL=http://localhost:5000/auth/discord/callback
+   SESSION_SECRET=your_session_secret
+   PORT=5000
+   ```
 
-```bash
-git clone https://github.com/username/forza.events.git
-cd forza.events
+3. Запуск:
+   - Бэкенд: `cd backend && npm run dev`
+   - Фронтенд: `cd frontend && npm start`
+
+## Структура проекта
+
+```
+forza.events/
+├── backend/
+│   ├── models/
+│   │   ├── User.js
+│   │   └── Event.js
+│   ├── routes/
+│   │   └── events.js
+│   ├── middleware/
+│   │   └── auth.js
+│   └── server.js
+├── frontend/
+│   ├── src/
+│   │   ├── components/
+│   │   │   ├── Home.js
+│   │   │   ├── EventList.js
+│   │   │   └── CreateEvent.js
+│   │   └── App.js
+│   └── public/
+└── README.md
 ```
 
-### 3. Установка зависимостей
+## API Endpoints
 
-Установи необходимые зависимости для фронтенда и бэкенда. В Cursor это можно сделать с использованием терминала или встроенных скриптов:
+- `GET /api/events`: Список событий
+- `POST /api/events`: Создание события
+- `GET /auth/discord`: Начало Discord OAuth
+- `GET /auth/discord/callback`: Callback Discord OAuth
 
-Для фронтенда (React):
+## Рабочий процесс
 
-```bash
-cd frontend
-npm install
-```
+1. Создание новой ветки для фичи: `git checkout -b feature/name`
+2. Внесение изменений и локальное тестирование
+3. Коммит изменений: `git commit -am 'Add feature'`
+4. Отправка изменений: `git push origin feature/name`
+5. Слияние ветки с main после завершения работы
 
-Для бэкенда (Node.js + Express):
+## Тестирование
 
-```bash
-cd backend
-npm install
-```
+- Бэкенд: `cd backend && npm test`
+- Фронтенд: `cd frontend && npm test`
 
-### 4. Настройка окружения
+## Полезные команды
 
-Создай файл `.env` в корневой папке бэкенда и добавь туда необходимые переменные окружения. Пример:
+- `npm run dev`: Запуск бэкенда в режиме разработки
+- `npm start`: Запуск фронтенда
+- `npm test`: Запуск тестов
+- `npm run build`: Сборка фронтенда для продакшена
 
-```env
-DISCORD_CLIENT_ID=your_discord_client_id
-DISCORD_CLIENT_SECRET=your_discord_client_secret
-DISCORD_CALLBACK_URL=http://localhost:5000/auth/discord/callback
+## Ресурсы
 
-MONGO_URI=mongodb://localhost:27017/forza_events
-JWT_SECRET=your_jwt_secret_key
-```
+- [Документация Discord OAuth2](https://discord.com/developers/docs/topics/oauth2)
+- [MongoDB Atlas Dashboard](https://cloud.mongodb.com/)
+- [React Documentation](https://reactjs.org/docs/getting-started.html)
+- [Express.js Documentation](https://expressjs.com/)
 
-### 5. Запуск проекта
+## Заметки
 
-Для удобства работы в Cursor проект разбит на два основных компонента: фронтенд и бэкенд.
+- Обновлять `.env.example` при добавлении новых переменных окружения
+- Использовать `console.log()` только для отладки, удалять перед коммитом
+- Придерживаться соглашения о именовании веток: `feature/`, `bugfix/`, `refactor/`
+- Регулярно делать бэкапы базы данных
+- Проверять обновления зависимостей и обновлять их по мере необходимости
 
-#### Запуск бэкенда
+## Идеи для дальнейшего развития
 
-1. Перейди в папку `backend`.
-2. Запусти сервер с помощью:
+- [ ] Добавить систему комментариев к событиям
+- [ ] Реализовать функцию поиска событий
+- [ ] Интегрировать систему уведомлений
+- [ ] Добавить возможность загрузки изображений для событий
+- [ ] Реализовать систему рейтинга для организаторов событий
 
-```bash
-npm run dev
-```
-
-Сервер будет доступен по адресу `http://localhost:5000`.
-
-#### Запуск фронтенда
-
-1. Перейди в папку `frontend`.
-2. Запусти React-приложение:
-
-```bash
-npm start
-```
-
-Фронтенд будет доступен по адресу `http://localhost:3000`.
-
-### 6. Работа в Cursor
-
-Cursor предоставляет удобные инструменты для разработки:
-
-- **Редактирование кода**: Взаимодействуй с компонентами и модулями, используя панели и всплывающие подсказки.
-- **Поиск по проекту**: Используй встроенные возможности поиска для быстрого перехода к нужным файлам или функциям.
-- **Терминал**: Используй терминал в Cursor для выполнения команд, не покидая редактор.
-- **Запуск и отладка**: Запускай сервер и клиент, проверяя их работу прямо из Cursor.
-
-### 7. Тестирование
-
-Проект включает базовые тесты. Для их запуска используй:
-
-```bash
-npm test
-```
-
-Запуск тестов возможен как для фронтенда, так и для бэкенда. Убедись, что все тесты проходят успешно перед тем, как делать коммит.
-
-### 8. Коммит и пуш изменений
-
-После завершения работы над задачей:
-
-1. Закоммить изменения:
-   
-```bash
-git add .
-git commit -m "Описание изменений"
-```
-
-2. Запушь изменения в удаленный репозиторий:
-
-```bash
-git push origin branch_name
-```
-
-### 9. Дополнительные ресурсы
-
-- **Документация Discord OAuth2**: [Discord OAuth2 Guide](https://discord.com/developers/docs/topics/oauth2)
-- **React.js**: [Официальная документация React](https://reactjs.org/docs/getting-started.html)
-- **Node.js**: [Документация Node.js](https://nodejs.org/en/docs/)
-- **Express.js**: [Документация Express.js](https://expressjs.com/)
-
-### 10. Полезные команды
-
-Для удобства работы перечислим несколько полезных команд:
-
-- **npm run dev** - запуск сервера в режиме разработки с автоматической перезагрузкой.
-- **npm start** - запуск фронтенда.
-- **npm test** - запуск тестов.
-
-### Заключение
-
-Теперь ты готов начать работу над проектом в Cursor. Если возникнут вопросы или проблемы, не стесняйся обращаться за помощью к команде или искать решения в документации.
-
-Удачи в разработке!
+`````

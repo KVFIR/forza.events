@@ -1,0 +1,47 @@
+import React, { useState, useEffect } from 'react';
+import axios from 'axios';
+
+function EventList() {
+  const [events, setEvents] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
+
+  useEffect(() => {
+    const fetchEvents = async () => {
+      try {
+        const response = await axios.get('/api/events');
+        setEvents(response.data);
+        setLoading(false);
+      } catch (err) {
+        setError('Failed to fetch events. Please try again later.');
+        setLoading(false);
+      }
+    };
+
+    fetchEvents();
+  }, []);
+
+  if (loading) return <div>Loading events...</div>;
+  if (error) return <div>{error}</div>;
+
+  return (
+    <div className="event-list">
+      <h2>Upcoming Events</h2>
+      {events.length === 0 ? (
+        <p>No events found. Why not create one?</p>
+      ) : (
+        <ul>
+          {events.map(event => (
+            <li key={event._id}>
+              <h3>{event.title}</h3>
+              <p>Date: {new Date(event.date).toLocaleDateString()}</p>
+              <p>Location: {event.location}</p>
+            </li>
+          ))}
+        </ul>
+      )}
+    </div>
+  );
+}
+
+export default EventList;
