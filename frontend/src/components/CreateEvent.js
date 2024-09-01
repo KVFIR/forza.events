@@ -24,6 +24,7 @@ function CreateEvent() {
     setError(null);
 
     try {
+      console.log('Sending event data:', { title, description, date, location });
       const response = await axios.post('/api/events', { title, description, date, location });
       console.log('Event creation response:', response);
       navigate('/events'); // Redirect to event list after successful creation
