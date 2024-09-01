@@ -9,9 +9,13 @@ import {
   Box,
   CircularProgress,
   Paper,
-  Grid
+  Grid,
+  List,
+  ListItem,
+  ListItemText
 } from '@mui/material';
 import { Event as EventIcon, LocationOn, Person } from '@mui/icons-material';
+import { ListItemAvatar, Avatar } from '@mui/material';
 
 function EventDetails({ user }) {
   const [event, setEvent] = useState(null);
@@ -36,12 +40,16 @@ function EventDetails({ user }) {
         setLocation(response.data.location);
         setLoading(false);
       } catch (error) {
-        setError('Failed to fetch event details');
-        setLoading(false);
+        if (error.response && error.response.status === 401) {
+          navigate('/login');
+        } else {
+          setError('Failed to fetch event details');
+          setLoading(false);
+        }
       }
     };
     fetchEvent();
-  }, [id]);
+  }, [id, navigate]);
 
   const handleEdit = async (e) => {
     e.preventDefault();
@@ -78,6 +86,22 @@ function EventDetails({ user }) {
         } else {
           setError(`Failed to delete event: ${error.message}`);
         }
+      }
+    }
+  };
+
+  const handleJoinEvent = async () => {
+    try {
+      const response = await axios.post(`/api/events/${id}/join`);
+      setEvent(response.data);
+      setError(null);
+    } catch (error) {
+      if (error.response && error.response.status === 401) {
+        navigate('/login');
+      } else if (error.response && error.response.data) {
+        setError(error.response.data.message);
+      } else {
+        setError('Не удалось присоединиться к событию');
       }
     }
   };
@@ -182,6 +206,33 @@ function EventDetails({ user }) {
               <Person sx={{ mr: 1 }} />
               {event.organizer ? event.organizer.username : 'Unknown'}
             </Typography>
+            {user && event.participants && !event.participants.some(p => p._id === user._id) && (
+              <Button
+                variant="contained"
+                color="primary"
+                onClick={handleJoinEvent}
+                sx={{ mt: 2 }}
+              >
+                Присоединиться к событию
+              </Button>
+            )}
+            <Typography variant="h6" sx={{ mt: 2 }}>
+              Участники ({event.participants ? event.participants.length : 0})
+            </Typography>
+            <List>
+              {event.participants && event.participants.map((participant) => (
+                <ListItem key={participant._id}>
+                  <ListItemAvatar>
+                    <Avatar
+                      src={`https://cdn.discordapp.com/avatars/${participant.discordId}/${participant.avatar}.png`}
+                      alt={participant.username}
+                      sx={{ width: 40, height: 40 }}
+                    />
+                  </ListItemAvatar>
+                  <ListItemText primary={participant.username} />
+                </ListItem>
+              ))}
+            </List>
             {isOrganizer && (
               <Box sx={{ mt: 2 }}>
                 <Button variant="contained" onClick={() => setIsEditing(true)} sx={{ mr: 1 }}>

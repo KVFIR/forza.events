@@ -20,7 +20,7 @@ router.post('/', isAuthenticated, async (req, res) => {
     description: req.body.description,
     date: req.body.date,
     location: req.body.location,
-    organizer: req.user._id // Используем ID аутентифицированного пользователя
+    organizer: req.user._id
   });
 
   try {
@@ -34,7 +34,9 @@ router.post('/', isAuthenticated, async (req, res) => {
 // Get a specific event
 router.get('/:id', async (req, res) => {
   try {
-    const event = await Event.findById(req.params.id).populate('organizer', 'username');
+    const event = await Event.findById(req.params.id)
+      .populate('organizer', 'username discordId avatar')
+      .populate('participants', 'username discordId avatar');
     if (!event) {
       return res.status(404).json({ message: 'Event not found' });
     }
@@ -80,6 +82,31 @@ router.delete('/:id', isAuthenticated, async (req, res) => {
     
     await Event.findByIdAndDelete(req.params.id);
     res.json({ message: 'Event deleted successfully' });
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
+});
+
+// Join an event
+router.post('/:id/join', isAuthenticated, async (req, res) => {
+  try {
+    const event = await Event.findById(req.params.id);
+    if (!event) {
+      return res.status(404).json({ message: 'Событие не найдено' });
+    }
+    
+    if (event.participants.some(participant => participant.toString() === req.user._id.toString())) {
+      return res.status(400).json({ message: 'Вы уже присоединились к этому событию' });
+    }
+    
+    event.participants.push(req.user._id);
+    await event.save();
+    
+    const updatedEvent = await Event.findById(req.params.id)
+      .populate('organizer', 'username')
+      .populate('participants', 'username');
+    
+    res.json(updatedEvent);
   } catch (error) {
     res.status(500).json({ message: error.message });
   }
