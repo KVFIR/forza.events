@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 import { useNavigate } from 'react-router-dom';
+import { TextField, Button, Container, Typography, Box } from '@mui/material';
 
 axios.defaults.baseURL = 'http://localhost:5000';
 
@@ -80,53 +81,68 @@ function CreateEvent({ user }) {
   };
 
   return (
-    <div className="create-event">
-      <h2>Create New Event</h2>
-      <button type="button" onClick={fillTestData}>Fill Test Data</button>
-      {error && <p className="error">{error}</p>}
-      <form onSubmit={handleSubmit}>
-        <div>
-          <label htmlFor="title">Title:</label>
-          <input
-            type="text"
-            id="title"
-            value={title}
-            onChange={(e) => setTitle(e.target.value)}
-            required
-          />
-        </div>
-        <div>
-          <label htmlFor="description">Description:</label>
-          <textarea
-            id="description"
-            value={description}
-            onChange={(e) => setDescription(e.target.value)}
-            required
-          />
-        </div>
-        <div>
-          <label htmlFor="date">Date:</label>
-          <input
-            type="date"
-            id="date"
-            value={date}
-            onChange={(e) => setDate(e.target.value)}
-            required
-          />
-        </div>
-        <div>
-          <label htmlFor="location">Location:</label>
-          <input
-            type="text"
-            id="location"
-            value={location}
-            onChange={(e) => setLocation(e.target.value)}
-            required
-          />
-        </div>
-        <button type="submit">Create Event</button>
-      </form>
-    </div>
+    <Container maxWidth="sm">
+      <Typography variant="h4" component="h1" gutterBottom>
+        Create New Event
+      </Typography>
+      <Box component="form" onSubmit={handleSubmit} noValidate sx={{ mt: 1 }}>
+        <TextField
+          margin="normal"
+          required
+          fullWidth
+          id="title"
+          label="Title"
+          name="title"
+          autoFocus
+          value={title}
+          onChange={(e) => setTitle(e.target.value)}
+        />
+        <TextField
+          margin="normal"
+          required
+          fullWidth
+          id="description"
+          label="Description"
+          name="description"
+          multiline
+          rows={4}
+          value={description}
+          onChange={(e) => setDescription(e.target.value)}
+        />
+        <TextField
+          margin="normal"
+          required
+          fullWidth
+          id="date"
+          label="Date"
+          name="date"
+          type="date"
+          InputLabelProps={{
+            shrink: true,
+          }}
+          value={date}
+          onChange={(e) => setDate(e.target.value)}
+        />
+        <TextField
+          margin="normal"
+          required
+          fullWidth
+          id="location"
+          label="Location"
+          name="location"
+          value={location}
+          onChange={(e) => setLocation(e.target.value)}
+        />
+        <Button
+          type="submit"
+          fullWidth
+          variant="contained"
+          sx={{ mt: 3, mb: 2 }}
+        >
+          Create Event
+        </Button>
+      </Box>
+    </Container>
   );
 }
 
