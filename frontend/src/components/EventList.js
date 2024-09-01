@@ -9,10 +9,17 @@ function EventList() {
   useEffect(() => {
     const fetchEvents = async () => {
       try {
+        console.log('Fetching events...');
         const response = await axios.get('/api/events');
+        console.log('Events response:', response.data);
         setEvents(response.data);
         setLoading(false);
       } catch (err) {
+        console.error('Error fetching events:', err);
+        if (err.response) {
+          console.error('Response data:', err.response.data);
+          console.error('Response status:', err.response.status);
+        }
         setError('Failed to fetch events. Please try again later.');
         setLoading(false);
       }

@@ -10,7 +10,7 @@ require('dotenv').config();
 const app = express();
 
 // Middleware setup
-app.use(cors());
+app.use(cors({ origin: 'http://localhost:3000', credentials: true }));
 app.use(express.json());
 app.use(session({
   secret: process.env.SESSION_SECRET,
@@ -39,7 +39,7 @@ passport.use(new DiscordStrategy({
   clientID: process.env.DISCORD_CLIENT_ID,
   clientSecret: process.env.DISCORD_CLIENT_SECRET,
   callbackURL: process.env.DISCORD_CALLBACK_URL,
-  scope: ['identify', 'email']
+  scope: ['identify', 'email', 'guilds']
 }, async (accessToken, refreshToken, profile, done) => {
   try {
     let user = await User.findOne({ discordId: profile.id });
@@ -47,9 +47,29 @@ passport.use(new DiscordStrategy({
       user = await User.create({
         discordId: profile.id,
         username: profile.username,
+        discriminator: profile.discriminator,
         email: profile.email,
-        avatar: profile.avatar
+        avatar: profile.avatar,
+        locale: profile.locale,
+        flags: profile.flags,
+        premiumType: profile.premium_type,
+        banner: profile.banner,
+        accentColor: profile.accent_color,
+        guilds: profile.guilds
       });
+    } else {
+      // Update existing user with latest information
+      user.username = profile.username;
+      user.discriminator = profile.discriminator;
+      user.email = profile.email;
+      user.avatar = profile.avatar;
+      user.locale = profile.locale;
+      user.flags = profile.flags;
+      user.premiumType = profile.premium_type;
+      user.banner = profile.banner;
+      user.accentColor = profile.accent_color;
+      user.guilds = profile.guilds;
+      await user.save();
     }
     return done(null, user);
   } catch (error) {
@@ -57,10 +77,39 @@ passport.use(new DiscordStrategy({
   }
 }));
 
+// Discord OAuth routes
+app.get('/auth/discord', passport.authenticate('discord'));
+app.get('/auth/discord/callback', 
+  passport.authenticate('discord', { failureRedirect: '/login' }),
+  (req, res) => {
+    res.redirect('http://localhost:3000/');
+  }
+);
+
+app.get('/api/user', (req, res) => {
+  if (req.user) {
+    res.json(req.user);
+  } else {
+    res.status(401).json({ message: 'Not authenticated' });
+  }
+});
+
+app.get('/auth/logout', (req, res) => {
+  req.logout((err) => {
+    if (err) {
+      return res.status(500).json({ message: 'Error logging out' });
+    }
+    res.clearCookie('connect.sid'); // Clear the session cookie
+    res.json({ message: 'Logged out successfully' });
+  });
+});
+
+// Serialize user for the session
 passport.serializeUser((user, done) => {
   done(null, user.id);
 });
 
+// Deserialize user from the session
 passport.deserializeUser(async (id, done) => {
   try {
     const user = await User.findById(id);
