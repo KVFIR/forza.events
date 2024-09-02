@@ -6,7 +6,7 @@ const eventSchema = new mongoose.Schema({
   date: { type: Date, required: true },
   location: { type: String, required: true },
   organizer: { type: mongoose.Schema.Types.ObjectId, ref: 'User', required: true },
-  participants: [{ type: mongoose.Schema.Types.ObjectId, ref: 'User' }],
+  participants: [{ type: mongoose.Schema.Types.ObjectId, ref: 'User' }], // Убедитесь, что это массив объектов
   createdAt: { type: Date, default: Date.now },
   updatedAt: { type: Date, default: Date.now }
 });

@@ -15,7 +15,9 @@ const eventSchema = Joi.object({
 // Получить все события
 router.get('/', async (req, res) => {
   try {
-    const events = await Event.find().populate('organizer', 'username');
+    const events = await Event.find()
+      .populate('organizer', 'username')
+      .populate('participants', 'username discordId avatar'); // Убедитесь, что участники загружаются как объекты
     res.json(events);
   } catch (error) {
     res.status(500).json({ message: error.message });

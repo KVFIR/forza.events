@@ -12,6 +12,7 @@ const userSchema = new mongoose.Schema({
   banner: String,
   accentColor: String,
   guilds: [{ type: Object }],
+  connections: [{ type: Object }], // Новое поле
   createdAt: { type: Date, default: Date.now },
   updatedAt: { type: Date, default: Date.now }
 });

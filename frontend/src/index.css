@@ -16,38 +16,37 @@ body {
   padding: 20px;
 }
 
-.event-list {
-  display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
-  gap: 20px;
-}
-
-.event-card {
+.profile {
   background-color: #2f3136;
+  padding: 20px;
   border-radius: 8px;
-  padding: 16px;
   box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-  transition: transform 0.2s ease-in-out;
 }
 
-.event-card:hover {
-  transform: translateY(-5px);
+.profile img {
+  border-radius: 50%;
+  margin-bottom: 20px;
 }
 
-.event-card h3 {
-  margin-top: 0;
+.profile h2 {
   color: #7289da;
 }
 
-.event-card p {
+.profile p {
   margin: 8px 0;
 }
 
-.event-card a {
+.profile strong {
   color: #43b581;
-  text-decoration: none;
 }
 
-.event-card a:hover {
-  text-decoration: underline;
+.profile ul {
+  list-style: none;
+  padding: 0;
+}
+
+.profile li {
+  display: flex;
+  align-items: center;
+  margin-bottom: 10px;
 }

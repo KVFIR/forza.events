@@ -4,7 +4,7 @@ import axios from 'axios';
 import Home from './components/Home';
 import EventList from './components/EventList';
 import CreateEvent from './components/CreateEvent';
-import Profile from './components/Profile';
+import UserProfileContainer from './components/UserProfileContainer'; // Импортируем новый компонент
 import EventDetails from './components/EventDetails';
 
 axios.defaults.baseURL = 'http://localhost:5000';
@@ -76,7 +76,7 @@ function App() {
           <Route path="/" element={<Home />} />
           <Route path="/events" element={<EventList user={user} />} />
           <Route path="/create-event" element={<CreateEvent user={user} />} />
-          <Route path="/profile" element={user ? <Profile user={user} /> : <Navigate to="/" />} />
+          <Route path="/profile" element={user ? <UserProfileContainer /> : <Navigate to="/" />} />
           <Route path="/events/:id" element={<EventDetails user={user} />} />
         </Routes>
       </Router>

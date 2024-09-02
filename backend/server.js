@@ -40,9 +40,10 @@ passport.use(new DiscordStrategy({
   clientID: process.env.DISCORD_CLIENT_ID,
   clientSecret: process.env.DISCORD_CLIENT_SECRET,
   callbackURL: process.env.DISCORD_CALLBACK_URL,
-  scope: ['identify', 'email', 'guilds']
+  scope: ['identify', 'email', 'guilds', 'connections'] // Добавляем 'connections'
 }, async (accessToken, refreshToken, profile, done) => {
   try {
+    console.log('Discord profile:', profile); // Добавляем логирование профиля
     let user = await User.findOne({ discordId: profile.id });
     if (!user) {
       user = await User.create({
@@ -56,10 +57,10 @@ passport.use(new DiscordStrategy({
         premiumType: profile.premium_type,
         banner: profile.banner,
         accentColor: profile.accent_color,
-        guilds: profile.guilds
+        guilds: profile.guilds,
+        connections: profile.connections // Сохраняем connections
       });
     } else {
-      // Update existing user with latest information
       user.username = profile.username;
       user.discriminator = profile.discriminator;
       user.email = profile.email;
@@ -70,6 +71,7 @@ passport.use(new DiscordStrategy({
       user.banner = profile.banner;
       user.accentColor = profile.accent_color;
       user.guilds = profile.guilds;
+      user.connections = profile.connections; // Обновляем connections
       await user.save();
     }
     return done(null, user);
