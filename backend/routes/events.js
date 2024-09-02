@@ -162,4 +162,19 @@ router.post('/:id/unregister', isAuthenticated, async (req, res) => {
   }
 });
 
+// Get events for a user
+router.get('/user/:userId', async (req, res) => {
+  try {
+    const events = await Event.find({ 
+      $or: [
+        { organizer: req.params.userId },
+        { participants: req.params.userId }
+      ]
+    }).sort({ date: 1 });
+    res.json(events);
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
+});
+
 module.exports = router;

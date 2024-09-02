@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, memo } from 'react';
 import PropTypes from 'prop-types'; // Импортируем PropTypes
 import axios from 'axios';
 import { Link as RouterLink } from 'react-router-dom';
@@ -9,10 +9,48 @@ import {
   Card, 
   CardContent, 
   CardActions, 
-  Button, 
-  CircularProgress 
+  Button,
+  CircularProgress
 } from '@mui/material';
 import { Event as EventIcon, LocationOn, ArrowForward } from '@mui/icons-material';
+
+const EventCard = memo(({ event }) => (
+  <Grid item xs={12} sm={6} md={4}>
+    <Card>
+      <CardContent>
+        <Typography variant="h6" component="h2" gutterBottom>
+          {event.title}
+        </Typography>
+        <Typography variant="body2" color="text.secondary" sx={{ display: 'flex', alignItems: 'center', mb: 1 }}>
+          <EventIcon sx={{ mr: 1 }} fontSize="small" />
+          {new Date(event.date).toLocaleDateString()}
+        </Typography>
+        <Typography variant="body2" color="text.secondary" sx={{ display: 'flex', alignItems: 'center' }}>
+          <LocationOn sx={{ mr: 1 }} fontSize="small" />
+          {event.location}
+        </Typography>
+      </CardContent>
+      <CardActions>
+        <Button 
+          component={RouterLink} 
+          to={`/events/${event._id}-${event.title.toLowerCase().replace(/\s+/g, '-')}`} 
+          endIcon={<ArrowForward />}
+        >
+          View Details
+        </Button>
+      </CardActions>
+    </Card>
+  </Grid>
+));
+
+EventCard.propTypes = {
+  event: PropTypes.shape({
+    _id: PropTypes.string.isRequired,
+    title: PropTypes.string.isRequired,
+    date: PropTypes.string.isRequired,
+    location: PropTypes.string.isRequired,
+  }).isRequired,
+};
 
 function EventList({ user }) {
   const [events, setEvents] = useState([]);
@@ -68,32 +106,7 @@ function EventList({ user }) {
       ) : (
         <Grid container spacing={3}>
           {events.map(event => (
-            <Grid item xs={12} sm={6} md={4} key={event._id}>
-              <Card>
-                <CardContent>
-                  <Typography variant="h6" component="h2" gutterBottom>
-                    {event.title}
-                  </Typography>
-                  <Typography variant="body2" color="text.secondary" sx={{ display: 'flex', alignItems: 'center', mb: 1 }}>
-                    <EventIcon sx={{ mr: 1 }} fontSize="small" />
-                    {new Date(event.date).toLocaleDateString()}
-                  </Typography>
-                  <Typography variant="body2" color="text.secondary" sx={{ display: 'flex', alignItems: 'center' }}>
-                    <LocationOn sx={{ mr: 1 }} fontSize="small" />
-                    {event.location}
-                  </Typography>
-                </CardContent>
-                <CardActions>
-                  <Button 
-                    component={RouterLink} 
-                    to={`/events/${event._id}`} 
-                    endIcon={<ArrowForward />}
-                  >
-                    View Details
-                  </Button>
-                </CardActions>
-              </Card>
-            </Grid>
+            <EventCard key={event._id} event={event} />
           ))}
         </Grid>
       )}
@@ -101,12 +114,10 @@ function EventList({ user }) {
   );
 }
 
-// Добавляем валидацию пропсов
 EventList.propTypes = {
   user: PropTypes.shape({
     _id: PropTypes.string.isRequired,
-    // Добавьте другие поля, если необходимо
-  }).isRequired,
+  }),
 };
 
 export default EventList;

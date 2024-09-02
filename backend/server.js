@@ -16,7 +16,7 @@ app.use(session({
   secret: process.env.SESSION_SECRET,
   resave: false,
   saveUninitialized: false,
-  cookie: { secure: false } // set to true if using https
+  cookie: { secure: false, maxAge: 24 * 60 * 60 * 1000 } // 24 hours
 }));
 app.use(passport.initialize());
 app.use(passport.session());
@@ -90,7 +90,7 @@ app.get('/auth/discord/callback',
 );
 
 app.get('/api/user', (req, res) => {
-  if (req.user) {
+  if (req.isAuthenticated()) {
     res.json(req.user);
   } else {
     res.status(401).json({ message: 'Not authenticated' });
@@ -129,6 +129,9 @@ app.get('/', (req, res) => {
 
 const eventsRouter = require('./routes/events');
 app.use('/api/events', eventsRouter);
+
+const usersRouter = require('./routes/users');
+app.use('/api/users', usersRouter);
 
 // Start server
 const PORT = process.env.PORT || 5000;
