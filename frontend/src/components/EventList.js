@@ -86,7 +86,7 @@ function EventList({ user }) {
                 <CardActions>
                   <Button 
                     component={RouterLink} 
-                    to={`/events/${event._id}`} 
+                    to={`/events/${event._id}-${event.title.toLowerCase().replace(/\s+/g, '-')}`} 
                     endIcon={<ArrowForward />}
                   >
                     View Details

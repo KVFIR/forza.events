@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import PropTypes from 'prop-types';
-import { useParams, useNavigate } from 'react-router-dom';
+import { useParams, useNavigate, Link } from 'react-router-dom';
 import axios from 'axios';
 import {
   Container,
@@ -36,12 +36,15 @@ function EventDetails({ user }) {
   const [error, setError] = useState(null);
   const [loading, setLoading] = useState(true);
   const { id } = useParams();
+  const eventId = id.split('-')[0]; // Получаем ID события из URL
   const navigate = useNavigate();
 
   useEffect(() => {
     const fetchEvent = async () => {
       try {
-        const response = await axios.get(`/api/events/${id}`);
+        console.log('Fetching event with ID:', eventId);
+        const response = await axios.get(`/api/events/${eventId}`);
+        console.log('Event data received:', response.data);
         setEvent(response.data);
         setTitle(response.data.title);
         setDescription(response.data.description);
@@ -49,6 +52,7 @@ function EventDetails({ user }) {
         setLocation(response.data.location);
         setLoading(false);
       } catch (error) {
+        console.error('Error fetching event:', error);
         if (error.response && error.response.status === 401) {
           navigate('/login');
         } else {
@@ -58,7 +62,7 @@ function EventDetails({ user }) {
       }
     };
     fetchEvent();
-  }, [id, navigate]);
+  }, [eventId, navigate]);
 
   const handleEdit = async (e) => {
     e.preventDefault();
@@ -70,7 +74,7 @@ function EventDetails({ user }) {
     }
 
     try {
-      const response = await axios.put(`/api/events/${id}`, {
+      const response = await axios.put(`/api/events/${eventId}`, {
         title,
         description,
         date,
@@ -86,7 +90,7 @@ function EventDetails({ user }) {
   const handleDelete = async () => {
     if (window.confirm('Are you sure you want to delete this event?')) {
       try {
-        await axios.delete(`/api/events/${id}`);
+        await axios.delete(`/api/events/${eventId}`);
         navigate('/events');
       } catch (error) {
         console.error('Error deleting event:', error);
@@ -108,7 +112,7 @@ function EventDetails({ user }) {
 
   const handleJoinEvent = async () => {
     try {
-      const response = await axios.post(`/api/events/${id}/join`);
+      const response = await axios.post(`/api/events/${eventId}/join`);
       setEvent(response.data);
       setError(null);
     } catch (error) {
@@ -124,7 +128,7 @@ function EventDetails({ user }) {
 
   const handleUnregister = async () => {
     try {
-      const response = await axios.post(`/api/events/${id}/unregister`);
+      const response = await axios.post(`/api/events/${eventId}/unregister`);
       setEvent(response.data);
       setError(null);
     } catch (error) {
@@ -236,7 +240,11 @@ function EventDetails({ user }) {
             </Typography>
             <Typography variant="body1" sx={{ display: 'flex', alignItems: 'center' }}>
               <Person sx={{ mr: 1 }} />
-              {event.organizer ? event.organizer.username : 'Unknown'}
+              {event.organizer ? (
+                <Link to={`/user/${event.organizer._id}`} style={{ textDecoration: 'none', color: 'inherit' }}>
+                  {event.organizer.username}
+                </Link>
+              ) : 'Unknown'}
             </Typography>
             {user && event.participants && (
               event.participants.some(p => p._id === user._id) ? (
@@ -264,7 +272,7 @@ function EventDetails({ user }) {
             </Typography>
             <List>
               {event.participants && event.participants.map((participant) => (
-                <ListItem key={participant._id}>
+                <ListItem key={participant._id} component={Link} to={`/user/${participant._id}`} button>
                   <ListItemAvatar>
                     <Avatar
                       src={`https://cdn.discordapp.com/avatars/${participant.discordId}/${participant.avatar}.png`}

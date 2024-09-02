@@ -6,6 +6,7 @@ import EventList from './components/EventList';
 import CreateEvent from './components/CreateEvent';
 import UserProfileContainer from './components/UserProfileContainer'; // Импортируем новый компонент
 import EventDetails from './components/EventDetails';
+import UserProfile from './components/UserProfile'; // Импортируем новый компонент
 
 axios.defaults.baseURL = 'http://localhost:5000';
 axios.defaults.withCredentials = true;
@@ -24,10 +25,13 @@ function App() {
   useEffect(() => {
     const fetchUser = async () => {
       try {
-        const response = await axios.get('/api/user');
+        const response = await axios.get('/api/user', { withCredentials: true });
         setUser(response.data);
       } catch (error) {
         console.error('Error fetching user:', error);
+        if (error.response && error.response.status === 401) {
+          setUser(null);
+        }
       } finally {
         setLoading(false);
       }
@@ -63,7 +67,7 @@ function App() {
             <Box>
               <Button color="inherit" component={RouterLink} to="/">Home</Button>
               <Button color="inherit" component={RouterLink} to="/events">Events</Button>
-              {user && <Button color="inherit" component={RouterLink} to="/profile">Profile</Button>}
+              {user && <Button color="inherit" component={RouterLink} to={`/user/${user._id}`}>Profile</Button>}
               {user ? (
                 <Button color="inherit" onClick={handleLogout}>Logout</Button>
               ) : (
@@ -78,6 +82,7 @@ function App() {
           <Route path="/create-event" element={<CreateEvent user={user} />} />
           <Route path="/profile" element={user ? <UserProfileContainer /> : <Navigate to="/" />} />
           <Route path="/events/:id" element={<EventDetails user={user} />} />
+          <Route path="/user/:id" element={<UserProfile />} />
         </Routes>
       </Router>
     </ThemeProvider>

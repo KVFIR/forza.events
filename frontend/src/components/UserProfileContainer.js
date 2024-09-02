@@ -8,7 +8,7 @@ function UserProfileContainer() {
 
   useEffect(() => {
     // Получаем данные пользователя
-    axios.get('/api/user')
+    axios.get('/api/users')
       .then(response => {
         console.log('User data:', response.data); // Логируем данные пользователя
         setUser(response.data);
