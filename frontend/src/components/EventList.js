@@ -106,32 +106,7 @@ function EventList({ user }) {
       ) : (
         <Grid container spacing={3}>
           {events.map(event => (
-            <Grid item xs={12} sm={6} md={4} key={event._id}>
-              <Card>
-                <CardContent>
-                  <Typography variant="h6" component="h2" gutterBottom>
-                    {event.title}
-                  </Typography>
-                  <Typography variant="body2" color="text.secondary" sx={{ display: 'flex', alignItems: 'center', mb: 1 }}>
-                    <EventIcon sx={{ mr: 1 }} fontSize="small" />
-                    {new Date(event.date).toLocaleDateString()}
-                  </Typography>
-                  <Typography variant="body2" color="text.secondary" sx={{ display: 'flex', alignItems: 'center' }}>
-                    <LocationOn sx={{ mr: 1 }} fontSize="small" />
-                    {event.location}
-                  </Typography>
-                </CardContent>
-                <CardActions>
-                  <Button 
-                    component={RouterLink} 
-                    to={`/events/${event._id}`} 
-                    endIcon={<ArrowForward />}
-                  >
-                    View Details
-                  </Button>
-                </CardActions>
-              </Card>
-            </Grid>
+            <EventCard key={event._id} event={event} />
           ))}
         </Grid>
       )}
