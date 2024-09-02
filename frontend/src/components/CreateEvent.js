@@ -1,8 +1,16 @@
 import React, { useState, useEffect } from 'react';
-import PropTypes from 'prop-types'; // Импортируем PropTypes
+import PropTypes from 'prop-types';
 import axios from 'axios';
 import { useNavigate } from 'react-router-dom';
 import { TextField, Button, Container, Typography, Box, Paper } from '@mui/material';
+import * as yup from 'yup';
+
+const eventSchema = yup.object().shape({
+  title: yup.string().min(3, 'Title must be at least 3 characters').max(100, 'Title must be at most 100 characters').required('Title is required'),
+  description: yup.string().min(10, 'Description must be at least 10 characters').max(1000, 'Description must be at most 1000 characters').required('Description is required'),
+  date: yup.date().required('Date is required'),
+  location: yup.string().min(3, 'Location must be at least 3 characters').max(100, 'Location must be at most 100 characters').required('Location is required'),
+});
 
 axios.defaults.baseURL = 'http://localhost:5000';
 
@@ -11,7 +19,8 @@ function CreateEvent({ user }) {
   const [description, setDescription] = useState('');
   const [date, setDate] = useState('');
   const [location, setLocation] = useState('');
-  const [error, setError] = useState(null);
+  const [errors, setErrors] = useState({});
+  const [generalError, setGeneralError] = useState(null);
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -57,11 +66,21 @@ function CreateEvent({ user }) {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    setError(null);
+    setErrors({});
 
     if (!user) {
-      console.log('User not authenticated');
-      setError('You must be logged in to create an event');
+      setErrors({ general: 'You must be logged in to create an event' });
+      return;
+    }
+
+    try {
+      await eventSchema.validate({ title, description, date, location }, { abortEarly: false });
+    } catch (validationError) {
+      const newErrors = {};
+      validationError.inner.forEach((err) => {
+        newErrors[err.path] = err.message;
+      });
+      setErrors(newErrors);
       return;
     }
 
@@ -81,11 +100,11 @@ function CreateEvent({ user }) {
     } catch (error) {
       console.error('Error creating event:', error.response ? error.response.data : error.message);
       if (error.response) {
-        setError(`Failed to create event: ${error.response.data.message}`);
+        setGeneralError(`Failed to create event: ${error.response.data.message}`);
       } else if (error.request) {
-        setError('Failed to create event: No response received from the server.');
+        setGeneralError('Failed to create event: No response received from the server.');
       } else {
-        setError(`Failed to create event: ${error.message}`);
+        setGeneralError(`Failed to create event: ${error.message}`);
       }
     }
   };
@@ -107,6 +126,8 @@ function CreateEvent({ user }) {
             autoFocus
             value={title}
             onChange={(e) => setTitle(e.target.value)}
+            error={!!errors.title}
+            helperText={errors.title}
           />
           <TextField
             margin="normal"
@@ -119,6 +140,8 @@ function CreateEvent({ user }) {
             rows={4}
             value={description}
             onChange={(e) => setDescription(e.target.value)}
+            error={!!errors.description}
+            helperText={errors.description}
           />
           <TextField
             margin="normal"
@@ -133,6 +156,8 @@ function CreateEvent({ user }) {
             }}
             value={date}
             onChange={(e) => setDate(e.target.value)}
+            error={!!errors.date}
+            helperText={errors.date}
           />
           <TextField
             margin="normal"
@@ -143,6 +168,8 @@ function CreateEvent({ user }) {
             name="location"
             value={location}
             onChange={(e) => setLocation(e.target.value)}
+            error={!!errors.location}
+            helperText={errors.location}
           />
           <Button
             type="submit"
@@ -161,9 +188,9 @@ function CreateEvent({ user }) {
             Fill with Test Data
           </Button>
         </Box>
-        {error && (
+        {generalError && (
           <Typography color="error" sx={{ mt: 2 }}>
-            {error}
+            {generalError}
           </Typography>
         )}
       </Paper>
@@ -171,11 +198,9 @@ function CreateEvent({ user }) {
   );
 }
 
-// Добавляем валидацию пропсов
 CreateEvent.propTypes = {
   user: PropTypes.shape({
     _id: PropTypes.string.isRequired,
-    // Добавьте другие поля, если необходимо
   }).isRequired,
 };
 

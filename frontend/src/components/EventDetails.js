@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import PropTypes from 'prop-types'; // Импортируем PropTypes
+import PropTypes from 'prop-types';
 import { useParams, useNavigate } from 'react-router-dom';
 import axios from 'axios';
 import {
@@ -17,6 +17,14 @@ import {
 } from '@mui/material';
 import { Event as EventIcon, LocationOn, Person } from '@mui/icons-material';
 import { ListItemAvatar, Avatar } from '@mui/material';
+import * as yup from 'yup';
+
+const eventSchema = yup.object().shape({
+  title: yup.string().min(3, 'Title must be at least 3 characters').max(100, 'Title must be at most 100 characters').required('Title is required'),
+  description: yup.string().min(10, 'Description must be at least 10 characters').max(1000, 'Description must be at most 1000 characters').required('Description is required'),
+  date: yup.date().required('Date is required'),
+  location: yup.string().min(3, 'Location must be at least 3 characters').max(100, 'Location must be at most 100 characters').required('Location is required'),
+});
 
 function EventDetails({ user }) {
   const [event, setEvent] = useState(null);
@@ -54,6 +62,13 @@ function EventDetails({ user }) {
 
   const handleEdit = async (e) => {
     e.preventDefault();
+    try {
+      await eventSchema.validate({ title, description, date, location }, { abortEarly: false });
+    } catch (validationError) {
+      setError(validationError.errors.join(', '));
+      return;
+    }
+
     try {
       const response = await axios.put(`/api/events/${id}`, {
         title,

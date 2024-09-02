@@ -2,6 +2,15 @@ const express = require('express');
 const router = express.Router();
 const Event = require('../models/Event');
 const { isAuthenticated } = require('../middleware/auth');
+const Joi = require('joi');
+
+// Схема валидации для события
+const eventSchema = Joi.object({
+  title: Joi.string().min(3).max(100).required(),
+  description: Joi.string().min(10).max(1000).required(),
+  date: Joi.date().iso().required(),
+  location: Joi.string().min(3).max(100).required(),
+});
 
 // Получить все события
 router.get('/', async (req, res) => {
@@ -15,6 +24,11 @@ router.get('/', async (req, res) => {
 
 // Создать новое событие
 router.post('/', isAuthenticated, async (req, res) => {
+  const { error } = eventSchema.validate(req.body);
+  if (error) {
+    return res.status(400).json({ message: error.details[0].message });
+  }
+
   console.log('Received request to create event. User:', req.user);
   const event = new Event({
     title: req.body.title,
@@ -51,6 +65,11 @@ router.get('/:id', async (req, res) => {
 
 // Update an event
 router.put('/:id', isAuthenticated, async (req, res) => {
+  const { error } = eventSchema.validate(req.body);
+  if (error) {
+    return res.status(400).json({ message: error.details[0].message });
+  }
+
   try {
     const event = await Event.findById(req.params.id);
     if (!event) {
