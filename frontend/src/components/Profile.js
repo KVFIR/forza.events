@@ -1,4 +1,5 @@
 import React from 'react';
+import PropTypes from 'prop-types'; // Импортируем PropTypes
 
 function Profile({ user }) {
   if (!user) {
@@ -69,5 +70,22 @@ function getFlags(flags) {
   // Add more flag checks as needed
   return flagNames.join(', ') || 'None';
 }
+
+// Добавляем валидацию пропсов
+Profile.propTypes = {
+  user: PropTypes.shape({
+    discordId: PropTypes.string.isRequired,
+    avatar: PropTypes.string,
+    username: PropTypes.string.isRequired,
+    discriminator: PropTypes.string,
+    email: PropTypes.string,
+    locale: PropTypes.string,
+    premiumType: PropTypes.number,
+    flags: PropTypes.number,
+    banner: PropTypes.string,
+    accentColor: PropTypes.string,
+    guilds: PropTypes.arrayOf(PropTypes.object),
+  }).isRequired,
+};
 
 export default Profile;

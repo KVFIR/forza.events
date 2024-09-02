@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import PropTypes from 'prop-types'; // Импортируем PropTypes
 import axios from 'axios';
 import { Link as RouterLink } from 'react-router-dom';
 import { 
@@ -99,5 +100,13 @@ function EventList({ user }) {
     </Container>
   );
 }
+
+// Добавляем валидацию пропсов
+EventList.propTypes = {
+  user: PropTypes.shape({
+    _id: PropTypes.string.isRequired,
+    // Добавьте другие поля, если необходимо
+  }).isRequired,
+};
 
 export default EventList;

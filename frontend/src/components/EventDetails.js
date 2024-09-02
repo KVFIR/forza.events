@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import PropTypes from 'prop-types'; // Импортируем PropTypes
 import { useParams, useNavigate } from 'react-router-dom';
 import axios from 'axios';
 import {
@@ -276,5 +277,13 @@ function EventDetails({ user }) {
     </Container>
   );
 }
+
+// Добавляем валидацию пропсов
+EventDetails.propTypes = {
+  user: PropTypes.shape({
+    _id: PropTypes.string.isRequired,
+    // Добавьте другие поля, если необходимо
+  }).isRequired,
+};
 
 export default EventDetails;

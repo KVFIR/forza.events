@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import PropTypes from 'prop-types'; // Импортируем PropTypes
 import axios from 'axios';
 import { useNavigate } from 'react-router-dom';
 import { TextField, Button, Container, Typography, Box, Paper } from '@mui/material';
@@ -169,5 +170,13 @@ function CreateEvent({ user }) {
     </Container>
   );
 }
+
+// Добавляем валидацию пропсов
+CreateEvent.propTypes = {
+  user: PropTypes.shape({
+    _id: PropTypes.string.isRequired,
+    // Добавьте другие поля, если необходимо
+  }).isRequired,
+};
 
 export default CreateEvent;
