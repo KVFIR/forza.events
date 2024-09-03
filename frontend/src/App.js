@@ -1,7 +1,6 @@
-import React, { useState, useEffect, lazy, Suspense } from 'react';
+import React, { useState, useEffect, lazy } from 'react';
 import { BrowserRouter as Router, Route, Routes, Navigate } from 'react-router-dom';
 import axios from 'axios';
-import { CircularProgress } from '@mui/material';
 
 const Home = lazy(() => import('./components/Home'));
 const EventList = lazy(() => import('./components/EventList'));

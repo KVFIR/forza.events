@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useParams, Link as RouterLink } from 'react-router-dom';
 import axios from 'axios';
 import { Container, Typography, Box, Avatar, Paper, CircularProgress, List, ListItem, ListItemAvatar, ListItemText } from '@mui/material';

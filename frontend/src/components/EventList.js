@@ -1,4 +1,4 @@
-import React, { useState, useEffect, memo, useCallback } from 'react';
+import React, { useState, useEffect, memo } from 'react';
 import PropTypes from 'prop-types';
 import axios from 'axios';
 import { Link as RouterLink } from 'react-router-dom';
@@ -14,34 +14,36 @@ import {
 } from '@mui/material';
 import { Event as EventIcon, LocationOn, ArrowForward } from '@mui/icons-material';
 
-const EventCard = memo(({ event }) => (
-  <Grid item xs={12} sm={6} md={4}>
-    <Card>
-      <CardContent>
-        <Typography variant="h6" component="h2" gutterBottom>
-          {event.title}
-        </Typography>
-        <Typography variant="body2" color="text.secondary" sx={{ display: 'flex', alignItems: 'center', mb: 1 }}>
-          <EventIcon sx={{ mr: 1 }} fontSize="small" />
-          {new Date(event.date).toLocaleDateString()}
-        </Typography>
-        <Typography variant="body2" color="text.secondary" sx={{ display: 'flex', alignItems: 'center' }}>
-          <LocationOn sx={{ mr: 1 }} fontSize="small" />
-          {event.location}
-        </Typography>
-      </CardContent>
-      <CardActions>
-        <Button 
-          component={RouterLink} 
-          to={`/events/${event._id}-${event.title.toLowerCase().replace(/\s+/g, '-')}`} 
-          endIcon={<ArrowForward />}
-        >
-          View Details
-        </Button>
-      </CardActions>
-    </Card>
-  </Grid>
-));
+const EventCard = memo(function EventCard({ event }) {
+  return (
+    <Grid item xs={12} sm={6} md={4}>
+      <Card>
+        <CardContent>
+          <Typography variant="h6" component="h2" gutterBottom>
+            {event.title}
+          </Typography>
+          <Typography variant="body2" color="text.secondary" sx={{ display: 'flex', alignItems: 'center', mb: 1 }}>
+            <EventIcon sx={{ mr: 1 }} fontSize="small" />
+            {new Date(event.date).toLocaleDateString()}
+          </Typography>
+          <Typography variant="body2" color="text.secondary" sx={{ display: 'flex', alignItems: 'center' }}>
+            <LocationOn sx={{ mr: 1 }} fontSize="small" />
+            {event.location}
+          </Typography>
+        </CardContent>
+        <CardActions>
+          <Button 
+            component={RouterLink} 
+            to={`/events/${event._id}-${event.title.toLowerCase().replace(/\s+/g, '-')}`} 
+            endIcon={<ArrowForward />}
+          >
+            View Details
+          </Button>
+        </CardActions>
+      </Card>
+    </Grid>
+  );
+});
 
 EventCard.propTypes = {
   event: PropTypes.shape({
@@ -56,15 +58,12 @@ function EventList({ user }) {
   const [events, setEvents] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
-  const [page, setPage] = useState(1);
-  const [hasMore, setHasMore] = useState(true);
 
   useEffect(() => {
     const fetchEvents = async () => {
       try {
         const response = await axios.get(`/api/events?page=${page}&limit=10`);
         setEvents(prevEvents => [...prevEvents, ...response.data.events]);
-        setHasMore(response.data.hasMore);
         setLoading(false);
       } catch (err) {
         console.error('Error fetching events:', err);
