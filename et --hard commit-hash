@@ -1,0 +1,220 @@
+[33mcommit be83b1a41e811aa3a5a9ac9c1a71a7c32f2669f2[m[33m ([m[1;36mHEAD[m[33m -> [m[1;32mmaster[m[33m, [m[1;31morigin/master[m[33m, [m[1;31morigin/HEAD[m[33m)[m
+Merge: ee6b8206a af65e9abf
+Author: KVFIR <hdwegas@gmail.com>
+Date:   Tue Sep 3 13:35:26 2024 +0300
+
+    Merge branch 'master' of https://github.com/KVFIR/forza.events
+
+[33mcommit ee6b8206a02fb90214e271b1cddc4fe79ca15e3a[m
+Author: KVFIR <hdwegas@gmail.com>
+Date:   Tue Sep 3 11:17:45 2024 +0300
+
+    - Delete old .gitattributes and .vscode settings
+    - Remove backend and frontend directories with all their contents
+    - Delete node_modules and package-lock.json files
+
+[33mcommit af65e9abf8212ac930c93b81967b335a2673de2e[m
+Author: KVFIR <hdwegas@gmail.com>
+Date:   Tue Sep 3 11:17:45 2024 +0300
+
+    - Delete old .gitattributes and .vscode settings
+    - Remove backend and frontend directories with all their contents
+    - Delete node_modules and package-lock.json files
+
+[33mcommit 238abd7e05f69f0020138aa5b448a7899fab1282[m
+Author: KVFIR <hdwegas@gmail.com>
+Date:   Mon Sep 2 19:44:41 2024 +0300
+
+    modified:   frontend/src/components/EventList.js
+
+[33mcommit be6b2ae713737d06a492aa63505673b3ffd2ae8d[m
+Merge: bcf36c24c dd345b1b2
+Author: KVFIR <hdwegas@gmail.com>
+Date:   Mon Sep 2 19:44:35 2024 +0300
+
+    Merge branch 'master' of https://github.com/KVFIR/forza.events
+
+[33mcommit bcf36c24cfa8df314cccefa933a2dad4e24e97c2[m
+Author: KVFIR <hdwegas@gmail.com>
+Date:   Mon Sep 2 19:36:50 2024 +0300
+
+    Optimize rendering and improve code quality
+
+[33mcommit dd345b1b28f1a12bc865f71e1196ed3d12274007[m
+Author: KVFIR <hdwegas@gmail.com>
+Date:   Mon Sep 2 19:36:50 2024 +0300
+
+    Implement user profiles and improve event handling
+    
+    - Add user profile functionality (backend/routes/users.js)
+    - Update event routes for user-specific queries (backend/routes/events.js)
+    - Enhance authentication middleware (backend/middleware/auth.js)
+    - Create UserProfile component (frontend/src/components/UserProfile.js)
+    - Update EventDetails and EventList components for better user interaction
+    - Refactor App.js to include new routes and components
+    - Update readme.md with latest project changes and instructions
+
+[33mcommit 51e4371304ed1663e7aaa3da174e0454d802e6db[m
+Author: KVFIR <hdwegas@gmail.com>
+Date:   Mon Sep 2 17:26:50 2024 +0300
+
+    deleted:    frontend/src/utils/testUtils.js
+    deleted:    playground-1.mongodb.js
+
+[33mcommit 53a5f33746f98682b4585ae17d3289ee6d6cdd5f[m
+Author: KVFIR <hdwegas@gmail.com>
+Date:   Mon Sep 2 17:24:16 2024 +0300
+
+    new file:   .vscode/settings.json
+
+[33mcommit a91200e1311cf9d5e4d8ed90010c0c9557a1d1ac[m
+Author: KVFIR <hdwegas@gmail.com>
+Date:   Mon Sep 2 17:18:30 2024 +0300
+
+    - Failed to fix a bug with the display of events in the Profile component.
+    - Updated Event model to correctly store participants.
+    - Updated event receipt route to correctly load participants.
+    - Added logging of user and event data to UserProfileContainer.
+    - Updated README with current project information and startup instructions.
+
+[33mcommit 548de58370d9bfd1ec12b6ea8a09539bf6ceea8f[m
+Author: KVFIR <hdwegas@gmail.com>
+Date:   Mon Sep 2 15:03:13 2024 +0300
+
+    - Updated README.md to include project overview, API, and workflows.
+    - Fixed validation errors in CreateEvent, EventDetails, and EventList components.
+    - Added prop validation using PropTypes.
+    - Updated dependencies in frontend package.json.
+    - Added new files and dependencies in backend and frontend.
+
+[33mcommit 5eb323c637f2d71844d0071118c4b72870880261[m
+Author: KVFIR <hdwegas@gmail.com>
+Date:   Mon Sep 2 14:39:29 2024 +0300
+
+    new file:   frontend/node_modules/.cache/.eslintcache
+
+[33mcommit 1eec23af6f12ecd56004d2004031ffa88d3e552a[m
+Author: KVFIR <hdwegas@gmail.com>
+Date:   Mon Sep 2 14:38:08 2024 +0300
+
+    Add PropTypes validation to components
+
+[33mcommit daa2ad1b03875827cf851c46cc9bd8793e4a0d68[m
+Author: KVFIR <hdwegas@gmail.com>
+Date:   Mon Sep 2 14:37:42 2024 +0300
+
+    Update Babel and ESLint configuration
+
+[33mcommit 1359eeb40f948ff7c937f42a0a9578b1773e542b[m
+Author: KVFIR <hdwegas@gmail.com>
+Date:   Mon Sep 2 11:11:01 2024 +0300
+
+    new file:   frontend/bfg.jar
+
+[33mcommit fcefc58a33583789a934eef1747c52cd160c4d68[m
+Author: KVFIR <hdwegas@gmail.com>
+Date:   Mon Sep 2 11:09:24 2024 +0300
+
+    Track large cache files with Git LFS
+
+[33mcommit 49883fa9440959e60eb5bf9d263961f3864c9d42[m
+Author: KVFIR <hdwegas@gmail.com>
+Date:   Mon Sep 2 10:57:03 2024 +0300
+
+            new file:   .vscode/.gitignore
+
+[33mcommit e9f30924609bc9180ff5344a6ccaefbb75359cca[m
+Author: KVFIR <hdwegas@gmail.com>
+Date:   Mon Sep 2 10:43:03 2024 +0300
+
+            modified:   .vscode/launch.json
+            new file:   frontend/.babelrc
+            new file:   frontend/.eslintrc
+
+[33mcommit 60a4aeb454551f9444f5ea4a45a9db5f9053fe2f[m
+Author: KVFIR <rudolf.jefremov@gmail.com>
+Date:   Mon Sep 2 02:27:56 2024 +0300
+
+    modified:   readme.md
+
+[33mcommit a0f124289248893bc11bdb7e9ecbfca96eaad2ee[m
+Author: KVFIR <rudolf.jefremov@gmail.com>
+Date:   Mon Sep 2 02:24:32 2024 +0300
+
+    Add unregister functionality and improve event management
+    
+    - Implement unregister from event feature
+    - Update EventDetails component to show unregister button
+    - Refactor event joining and unregistering logic
+    - Update README with current project status and next steps
+
+[33mcommit e8a473d3acf5ca4eb782ceb3c6fbb1bfc10b3e1e[m
+Author: KVFIR <rudolf.jefremov@gmail.com>
+Date:   Mon Sep 2 02:23:46 2024 +0300
+
+    Add unregister functionality and improve event management
+    
+    - Implement unregister from event feature
+    - Update EventDetails component to show unregister button
+    - Refactor event joining and unregistering logic
+    - Update README with current project status and next steps
+
+[33mcommit 6fa17446bfcb877262136aa74f0d031c88d2e492[m
+Author: KVFIR <rudolf.jefremov@gmail.com>
+Date:   Mon Sep 2 01:50:13 2024 +0300
+
+    Add participant list with avatars to event details
+    
+    - Update EventDetails component to display participant list with avatars
+    - Modify backend route to populate participant data including Discord avatar
+    - Update README to reflect new features and next steps
+
+[33mcommit 4cef565e8299613dd448bd75c1fcd743a0e4ce23[m
+Author: KVFIR <rudolf.jefremov@gmail.com>
+Date:   Mon Sep 2 00:48:40 2024 +0300
+
+    Update frontend components and add Material-UI styling
+    
+    - Refactor EventDetails, CreateEvent, and Home components
+    - Implement Material-UI components for improved UI
+    - Add random event generation feature in CreateEvent
+    - Update App.js with new imports and routing
+
+[33mcommit 2a680416aa66c8e3e91030544cd9104fe3b340d2[m
+Author: KVFIR <rudolf.jefremov@gmail.com>
+Date:   Mon Sep 2 00:18:47 2024 +0300
+
+    Update dependencies and address security vulnerabilities
+    
+    - Ran npm audit fix --force
+    - Reduced vulnerabilities from 166 to 8
+    - Updated react-scripts to 5.0.1
+    - Remaining: 6 high (nth-check), 2 moderate (postcss)
+
+[33mcommit 3528a5b5c5dac6ecc040696ecc05e47e3b2b1cff[m
+Author: KVFIR <rudolf.jefremov@gmail.com>
+Date:   Sun Sep 1 22:07:42 2024 +0300
+
+    Add event editing and deletion functionality
+    
+    - Implement EventDetails component for viewing and editing events
+    - Update backend routes to support event editing and deletion
+    - Enhance CreateEvent component with test data generation
+    - Update EventList to link to individual event pages
+
+[33mcommit 5b4daf90f5a6ed711a5ac8b71de01851e8570f1a[m
+Author: KVFIR <rudolf.jefremov@gmail.com>
+Date:   Sun Sep 1 21:34:39 2024 +0300
+
+    Implement Discord authentication and user profile
+    
+    - Update User model to include Discord-specific fields
+    - Integrate Discord OAuth2 authentication in backend
+    - Add Login and Profile components in frontend
+    - Update App.js to handle user authentication state
+    - Display user information including Discord guilds in Profile
+    - Implement logout functionality
+
+[33mcommit 65351b7e210fbd337546eaace41c974df57e03d5[m
+Author: KVFIR <rudolf.jefremov@gmail.com>
+Date:   Sun Sep 1 21:08:54 2024 +0300
