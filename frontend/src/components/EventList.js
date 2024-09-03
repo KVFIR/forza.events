@@ -1,5 +1,5 @@
-import React, { useState, useEffect, memo } from 'react';
-import PropTypes from 'prop-types'; // Импортируем PropTypes
+import React, { useState, useEffect, memo, useCallback } from 'react';
+import PropTypes from 'prop-types';
 import axios from 'axios';
 import { Link as RouterLink } from 'react-router-dom';
 import { 
@@ -56,12 +56,15 @@ function EventList({ user }) {
   const [events, setEvents] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+  const [page, setPage] = useState(1);
+  const [hasMore, setHasMore] = useState(true);
 
   useEffect(() => {
     const fetchEvents = async () => {
       try {
-        const response = await axios.get('/api/events');
-        setEvents(response.data);
+        const response = await axios.get(`/api/events?page=${page}&limit=10`);
+        setEvents(prevEvents => [...prevEvents, ...response.data.events]);
+        setHasMore(response.data.hasMore);
         setLoading(false);
       } catch (err) {
         console.error('Error fetching events:', err);
@@ -71,7 +74,7 @@ function EventList({ user }) {
     };
 
     fetchEvents();
-  }, []);
+  }, [page]);
 
   if (loading) return (
     <Container sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '100vh' }}>

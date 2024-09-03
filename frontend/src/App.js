@@ -1,12 +1,14 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, lazy, Suspense } from 'react';
 import { BrowserRouter as Router, Route, Routes, Navigate } from 'react-router-dom';
 import axios from 'axios';
-import Home from './components/Home';
-import EventList from './components/EventList';
-import CreateEvent from './components/CreateEvent';
-import UserProfileContainer from './components/UserProfileContainer'; // Импортируем новый компонент
-import EventDetails from './components/EventDetails';
-import UserProfile from './components/UserProfile'; // Импортируем новый компонент
+import { CircularProgress } from '@mui/material';
+
+const Home = lazy(() => import('./components/Home'));
+const EventList = lazy(() => import('./components/EventList'));
+const CreateEvent = lazy(() => import('./components/CreateEvent'));
+const UserProfileContainer = lazy(() => import('./components/UserProfileContainer'));
+const EventDetails = lazy(() => import('./components/EventDetails'));
+const UserProfile = lazy(() => import('./components/UserProfile'));
 
 axios.defaults.baseURL = 'http://localhost:5000';
 axios.defaults.withCredentials = true;

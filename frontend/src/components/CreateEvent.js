@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import PropTypes from 'prop-types';
 import axios from 'axios';
 import { useNavigate } from 'react-router-dom';
@@ -64,7 +64,7 @@ function CreateEvent({ user }) {
     setLocation(getRandomLocation());
   };
 
-  const handleSubmit = async (e) => {
+  const handleSubmit = useCallback(async (e) => {
     e.preventDefault();
     setErrors({});
 
@@ -84,8 +84,6 @@ function CreateEvent({ user }) {
       return;
     }
 
-    console.log('Attempting to create event for user:', user);
-
     try {
       const response = await axios.post('/api/events', {
         title,
@@ -95,19 +93,12 @@ function CreateEvent({ user }) {
       }, {
         withCredentials: true
       });
-      console.log('Event created successfully:', response.data);
       navigate(`/events/${response.data._id}`);
     } catch (error) {
-      console.error('Error creating event:', error.response ? error.response.data : error.message);
-      if (error.response) {
-        setGeneralError(`Failed to create event: ${error.response.data.message}`);
-      } else if (error.request) {
-        setGeneralError('Failed to create event: No response received from the server.');
-      } else {
-        setGeneralError(`Failed to create event: ${error.message}`);
-      }
+      console.error('Error creating event:', error);
+      setGeneralError('Failed to create event. Please try again later.');
     }
-  };
+  }, [user, title, description, date, location, navigate]);
 
   return (
     <Container maxWidth="sm">

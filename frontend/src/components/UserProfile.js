@@ -1,10 +1,10 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { useParams, Link as RouterLink } from 'react-router-dom';
 import axios from 'axios';
 import { Container, Typography, Box, Avatar, Paper, CircularProgress, List, ListItem, ListItemAvatar, ListItemText } from '@mui/material';
 import { FaYoutube, FaTwitch, FaXbox, FaSteam, FaSpotify, FaReddit, FaTwitter, FaFacebook, FaInstagram } from 'react-icons/fa';
 
-function UserProfile() {
+const UserProfile = React.memo(function UserProfile() {
   const { id } = useParams();
   const [user, setUser] = useState(null);
   const [events, setEvents] = useState([]);
@@ -18,11 +18,15 @@ function UserProfile() {
           axios.get(`/api/users/${id}`),
           axios.get(`/api/events/user/${id}`)
         ]);
+        if (!userResponse.data) {
+          throw new Error('User not found');
+        }
         setUser(userResponse.data);
         setEvents(eventsResponse.data);
         setLoading(false);
       } catch (error) {
-        setError('Failed to fetch user data or events');
+        console.error('Error fetching user data or events:', error);
+        setError(error.message || 'Failed to fetch user data or events');
         setLoading(false);
       }
     };
@@ -121,6 +125,6 @@ function UserProfile() {
       </Paper>
     </Container>
   );
-}
+});
 
 export default UserProfile;

@@ -17,4 +17,7 @@ const userSchema = new mongoose.Schema({
   updatedAt: { type: Date, default: Date.now }
 });
 
+userSchema.index({ discordId: 1 });
+userSchema.index({ username: 1 });
+
 module.exports = mongoose.model('User', userSchema);
