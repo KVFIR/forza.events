@@ -1,91 +1,60 @@
+'use strict';
+
 const express = require('express');
 const passport = require('passport');
-const DiscordStrategy = require('passport-discord').Strategy;
 const session = require('express-session');
 const mongoose = require('mongoose');
 const cors = require('cors');
 const { isAuthenticated } = require('./middleware/auth');
 require('dotenv').config();
 
+// Импортируем конфигурацию Passport
+require('./config/passport');
+
 const app = express();
 
+// Простая функция-обертка для логирования
+const logger = (message, level = 'info') => {
+  const timestamp = new Date().toISOString();
+  console[level](`[${timestamp}] ${level.toUpperCase()}: ${message}`);
+};
+
 // Middleware setup
-app.use(cors({ origin: 'http://localhost:3000', credentials: true }));
+app.use(cors({ origin: process.env.CLIENT_URL, credentials: true }));
 app.use(express.json());
 app.use(session({
   secret: process.env.SESSION_SECRET,
   resave: false,
   saveUninitialized: false,
-  cookie: { secure: false, maxAge: 24 * 60 * 60 * 1000 } // 24 hours
+  cookie: { 
+    secure: process.env.NODE_ENV === 'production',
+    httpOnly: true,
+    maxAge: 24 * 60 * 60 * 1000 // 24 hours
+  }
 }));
 app.use(passport.initialize());
 app.use(passport.session());
 
 // MongoDB connection
 mongoose.connect(process.env.MONGO_URI)
-  .then(() => console.log('Connected to MongoDB'))
+  .then(() => logger('Connected to MongoDB'))
   .catch(err => {
-    console.error('Error connecting to MongoDB:', err.message);
+    logger(`Error connecting to MongoDB: ${err.message}`, 'error');
     process.exit(1);
   });
 
 mongoose.connection.on('error', err => {
-  console.error('MongoDB connection error:', err.message);
+  logger(`MongoDB connection error: ${err.message}`, 'error');
 });
 
 const User = require('./models/User');
-
-// Passport configuration
-passport.use(new DiscordStrategy({
-  clientID: process.env.DISCORD_CLIENT_ID,
-  clientSecret: process.env.DISCORD_CLIENT_SECRET,
-  callbackURL: process.env.DISCORD_CALLBACK_URL,
-  scope: ['identify', 'email', 'guilds', 'connections'] // Добавляем 'connections'
-}, async (accessToken, refreshToken, profile, done) => {
-  try {
-    console.log('Discord profile:', profile); // Добавляем логирование профиля
-    let user = await User.findOne({ discordId: profile.id });
-    if (!user) {
-      user = await User.create({
-        discordId: profile.id,
-        username: profile.username,
-        discriminator: profile.discriminator,
-        email: profile.email,
-        avatar: profile.avatar,
-        locale: profile.locale,
-        flags: profile.flags,
-        premiumType: profile.premium_type,
-        banner: profile.banner,
-        accentColor: profile.accent_color,
-        guilds: profile.guilds,
-        connections: profile.connections // Сохраняем connections
-      });
-    } else {
-      user.username = profile.username;
-      user.discriminator = profile.discriminator;
-      user.email = profile.email;
-      user.avatar = profile.avatar;
-      user.locale = profile.locale;
-      user.flags = profile.flags;
-      user.premiumType = profile.premium_type;
-      user.banner = profile.banner;
-      user.accentColor = profile.accent_color;
-      user.guilds = profile.guilds;
-      user.connections = profile.connections; // Обновляем connections
-      await user.save();
-    }
-    return done(null, user);
-  } catch (error) {
-    return done(error);
-  }
-}));
 
 // Discord OAuth routes
 app.get('/auth/discord', passport.authenticate('discord'));
 app.get('/auth/discord/callback', 
   passport.authenticate('discord', { failureRedirect: '/login' }),
   (req, res) => {
-    res.redirect('http://localhost:3000/');
+    res.redirect(process.env.CLIENT_URL);
   }
 );
 
@@ -102,7 +71,7 @@ app.get('/auth/logout', (req, res) => {
     if (err) {
       return res.status(500).json({ message: 'Error logging out' });
     }
-    res.clearCookie('connect.sid'); // Clear the session cookie
+    res.clearCookie('connect.sid');
     res.json({ message: 'Logged out successfully' });
   });
 });
@@ -135,4 +104,4 @@ app.use('/api/users', usersRouter);
 
 // Start server
 const PORT = process.env.PORT || 5000;
-app.listen(PORT, () => console.log(`Server started on port ${PORT}`));
+app.listen(PORT, () => logger(`Server started on port ${PORT}`));
