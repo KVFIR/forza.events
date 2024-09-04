@@ -1,4 +1,4 @@
-import React, { useState, useEffect, lazy } from 'react';
+import React, { useState, useEffect, lazy, Suspense } from 'react';
 import { BrowserRouter as Router, Route, Routes, Navigate } from 'react-router-dom';
 import axios from 'axios';
 
@@ -16,7 +16,7 @@ import { ThemeProvider } from '@mui/material/styles';
 import CssBaseline from '@mui/material/CssBaseline';
 import theme from './theme';
 
-import { AppBar, Toolbar, Typography, Button, Box } from '@mui/material';
+import { AppBar, Toolbar, Typography, Button, Box, CircularProgress } from '@mui/material';
 import { Link as RouterLink } from 'react-router-dom';
 
 function App() {
@@ -77,14 +77,16 @@ function App() {
             </Box>
           </Toolbar>
         </AppBar>
-        <Routes>
-          <Route path="/" element={<Home />} />
-          <Route path="/events" element={<EventList user={user} />} />
-          <Route path="/create-event" element={<CreateEvent user={user} />} />
-          <Route path="/profile" element={user ? <UserProfileContainer /> : <Navigate to="/" />} />
-          <Route path="/events/:id" element={<EventDetails user={user} />} />
-          <Route path="/user/:id" element={<UserProfile />} />
-        </Routes>
+        <Suspense fallback={<CircularProgress />}>
+          <Routes>
+            <Route path="/" element={<Home />} />
+            <Route path="/events" element={<EventList />} />
+            <Route path="/create-event" element={<CreateEvent user={user} />} />
+            <Route path="/profile" element={user ? <UserProfileContainer /> : <Navigate to="/" />} />
+            <Route path="/events/:id" element={<EventDetails user={user} />} />
+            <Route path="/user/:id" element={<UserProfile />} />
+          </Routes>
+        </Suspense>
       </Router>
     </ThemeProvider>
   );

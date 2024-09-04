@@ -1,60 +1,9 @@
-import React, { useState, useEffect, memo } from 'react';
-import PropTypes from 'prop-types';
+import React, { useState, useEffect } from 'react';
 import axios from 'axios';
-import { Link as RouterLink } from 'react-router-dom';
-import { 
-  Container, 
-  Typography, 
-  Grid, 
-  Card, 
-  CardContent, 
-  CardActions, 
-  Button,
-  CircularProgress
-} from '@mui/material';
-import { Event as EventIcon, LocationOn, ArrowForward } from '@mui/icons-material';
+import { Container, Typography, Grid, CircularProgress } from '@mui/material';
+import EventCard from './EventCard';
 
-const EventCard = memo(function EventCard({ event }) {
-  return (
-    <Grid item xs={12} sm={6} md={4}>
-      <Card>
-        <CardContent>
-          <Typography variant="h6" component="h2" gutterBottom>
-            {event.title}
-          </Typography>
-          <Typography variant="body2" color="text.secondary" sx={{ display: 'flex', alignItems: 'center', mb: 1 }}>
-            <EventIcon sx={{ mr: 1 }} fontSize="small" />
-            {new Date(event.date).toLocaleDateString()}
-          </Typography>
-          <Typography variant="body2" color="text.secondary" sx={{ display: 'flex', alignItems: 'center' }}>
-            <LocationOn sx={{ mr: 1 }} fontSize="small" />
-            {event.location}
-          </Typography>
-        </CardContent>
-        <CardActions>
-          <Button 
-            component={RouterLink} 
-            to={`/events/${event._id}-${event.title.toLowerCase().replace(/\s+/g, '-')}`} 
-            endIcon={<ArrowForward />}
-          >
-            View Details
-          </Button>
-        </CardActions>
-      </Card>
-    </Grid>
-  );
-});
-
-EventCard.propTypes = {
-  event: PropTypes.shape({
-    _id: PropTypes.string.isRequired,
-    title: PropTypes.string.isRequired,
-    date: PropTypes.string.isRequired,
-    location: PropTypes.string.isRequired,
-  }).isRequired,
-};
-
-function EventList({ user }) {
+function EventList() {
   const [events, setEvents] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
@@ -62,64 +11,49 @@ function EventList({ user }) {
   useEffect(() => {
     const fetchEvents = async () => {
       try {
-        const response = await axios.get(`/api/events?page=${page}&limit=10`);
-        setEvents(prevEvents => [...prevEvents, ...response.data.events]);
+        const response = await axios.get('/api/events');
+        setEvents(response.data);
         setLoading(false);
-      } catch (err) {
-        console.error('Error fetching events:', err);
-        setError('Failed to fetch events. Please try again later.');
+      } catch (error) {
+        console.error('Error fetching events:', error);
+        setError('Failed to load events. Please try again later.');
         setLoading(false);
       }
     };
 
     fetchEvents();
-  }, [page]);
+  }, []);
 
-  if (loading) return (
-    <Container sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '100vh' }}>
-      <CircularProgress />
-    </Container>
-  );
+  if (loading) {
+    return (
+      <Container sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '100vh' }}>
+        <CircularProgress />
+      </Container>
+    );
+  }
 
-  if (error) return (
-    <Container>
-      <Typography color="error" variant="h6">{error}</Typography>
-    </Container>
-  );
+  if (error) {
+    return (
+      <Container>
+        <Typography color="error" variant="h6">{error}</Typography>
+      </Container>
+    );
+  }
 
   return (
-    <Container maxWidth="lg" sx={{ mt: 4, mb: 4 }}>
+    <Container maxWidth="lg" sx={{ mt: 4 }}>
       <Typography variant="h4" component="h1" gutterBottom>
-        Upcoming Events
+        Events
       </Typography>
-      {user && (
-        <Button
-          component={RouterLink}
-          to="/create-event"
-          variant="contained"
-          color="primary"
-          sx={{ mb: 2 }}
-        >
-          Create Event
-        </Button>
-      )}
-      {events.length === 0 ? (
-        <Typography variant="body1">No events found. Why not create one?</Typography>
-      ) : (
-        <Grid container spacing={3}>
-          {events.map(event => (
-            <EventCard key={event._id} event={event} />
-          ))}
-        </Grid>
-      )}
+      <Grid container spacing={3}>
+        {events.map((event) => (
+          <Grid item xs={12} sm={6} md={4} key={event._id}>
+            <EventCard event={event} />
+          </Grid>
+        ))}
+      </Grid>
     </Container>
   );
 }
-
-EventList.propTypes = {
-  user: PropTypes.shape({
-    _id: PropTypes.string.isRequired,
-  }),
-};
 
 export default EventList;

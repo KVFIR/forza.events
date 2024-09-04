@@ -1,0 +1,201 @@
+openapi: 3.0.0
+info:
+  title: Event Management API
+  version: 1.0.0
+  description: API для управления событиями
+
+paths:
+  /api/events:
+    get:
+      summary: Получить все события
+      responses:
+        '200':
+          description: Успешный ответ
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Event'
+        '500':
+          description: Внутренняя ошибка сервера
+    post:
+      summary: Создать новое событие
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/EventInput'
+      responses:
+        '201':
+          description: Событие успешно создано
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Event'
+        '400':
+          description: Ошибка валидации или создания события
+        '401':
+          description: Неавторизованный доступ
+
+  /api/events/{id}:
+    delete:
+      summary: Удалить событие
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Событие успешно удалено
+        '403':
+          description: Нет прав на удаление события
+        '404':
+          description: Событие не найдено
+        '500':
+          description: Внутренняя ошибка сервера
+
+  /api/events/{id}/join:
+    post:
+      summary: Присоединиться к событию
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Успешное присоединение к событию
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Event'
+        '400':
+          description: Пользователь уже присоединился к событию
+        '404':
+          description: Событие не найдено
+        '500':
+          description: Внутренняя ошибка сервера
+
+  /api/events/{id}/unregister:
+    post:
+      summary: Отменить регистрацию на событие
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Успешная отмена регистрации на событие
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Event'
+        '400':
+          description: Пользователь не зарегистрирован на событие
+        '404':
+          description: Событие не найдено
+        '500':
+          description: Внутренняя ошибка сервера
+
+  /api/events/user/{userId}:
+    get:
+      summary: Получить события пользователя
+      parameters:
+        - name: userId
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Успешный ответ
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Event'
+        '500':
+          description: Внутренняя ошибка сервера
+
+components:
+  schemas:
+    Event:
+      type: object
+      properties:
+        _id:
+          type: string
+        title:
+          type: string
+        description:
+          type: string
+        date:
+          type: string
+          format: date-time
+        location:
+          type: string
+        organizer:
+          type: object
+          properties:
+            _id:
+              type: string
+            username:
+              type: string
+        participants:
+          type: array
+          items:
+            type: object
+            properties:
+              _id:
+                type: string
+              username:
+                type: string
+              discordId:
+                type: string
+              avatar:
+                type: string
+        createdAt:
+          type: string
+          format: date-time
+        updatedAt:
+          type: string
+          format: date-time
+
+    EventInput:
+      type: object
+      properties:
+        title:
+          type: string
+        description:
+          type: string
+        date:
+          type: string
+          format: date-time
+        location:
+          type: string
+      required:
+        - title
+        - description
+        - date
+        - location
+
+securitySchemes:
+  bearerAuth:
+    type: http
+    scheme: bearer
+    bearerFormat: JWT
