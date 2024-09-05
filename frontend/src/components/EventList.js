@@ -13,10 +13,10 @@ function EventList() {
       try {
         const response = await axios.get('/api/events');
         setEvents(response.data);
-        setLoading(false);
       } catch (error) {
         console.error('Error fetching events:', error);
         setError('Failed to load events. Please try again later.');
+      } finally {
         setLoading(false);
       }
     };

@@ -2,15 +2,7 @@ const express = require('express');
 const router = express.Router();
 const Event = require('../models/Event');
 const { isAuthenticated } = require('../middleware/auth');
-const Joi = require('joi');
-
-// Схема валидации для события
-const eventSchema = Joi.object({
-  title: Joi.string().min(3).max(100).required(),
-  description: Joi.string().min(10).max(1000).required(),
-  date: Joi.date().iso().required(),
-  location: Joi.string().min(3).max(100).required(),
-});
+const { eventSchema } = require('../utils/validationSchemas');
 
 // Получить все события
 router.get('/', async (req, res) => {
@@ -27,9 +19,10 @@ router.get('/', async (req, res) => {
 
 // Создать новое событие
 router.post('/', isAuthenticated, async (req, res) => {
-  const { error } = eventSchema.validate(req.body);
-  if (error) {
-    return res.status(400).json({ message: error.details[0].message });
+  try {
+    eventSchema.validateSync(req.body, { abortEarly: false });
+  } catch (error) {
+    return res.status(400).json({ message: error.errors.join(', ') });
   }
 
   console.log('Received request to create event. User:', req.user);
@@ -175,6 +168,16 @@ router.get('/user/:userId', async (req, res) => {
     res.json(events);
   } catch (error) {
     res.status(500).json({ message: error.message });
+  }
+});
+
+// Validate event
+router.post('/validate', (req, res) => {
+  try {
+    eventSchema.validateSync(req.body, { abortEarly: false });
+    res.status(200).json({ message: 'Validation passed' });
+  } catch (error) {
+    res.status(400).json({ message: error.errors.join(', ') });
   }
 });
 

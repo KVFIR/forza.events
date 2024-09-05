@@ -1,5 +1,10 @@
 {
   "dependencies": {
     "react-error-boundary": "^4.0.13"
+  },
+  "browser": {
+    "fs": false,
+    "path": false,
+    "os": false
   }
 }

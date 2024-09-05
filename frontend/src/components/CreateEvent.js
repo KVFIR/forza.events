@@ -1,16 +1,9 @@
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useState, useCallback, useEffect } from 'react';
 import PropTypes from 'prop-types';
 import axios from 'axios';
 import { useNavigate } from 'react-router-dom';
 import { TextField, Button, Container, Typography, Box, Paper } from '@mui/material';
-import * as yup from 'yup';
-
-const eventSchema = yup.object().shape({
-  title: yup.string().min(3, 'Title must be at least 3 characters').max(100, 'Title must be at most 100 characters').required('Title is required'),
-  description: yup.string().min(10, 'Description must be at least 10 characters').max(1000, 'Description must be at most 1000 characters').required('Description is required'),
-  date: yup.date().required('Date is required'),
-  location: yup.string().min(3, 'Location must be at least 3 characters').max(100, 'Location must be at most 100 characters').required('Location is required'),
-});
+import { validateEvent } from '../utils/validation';
 
 axios.defaults.baseURL = 'http://localhost:5000';
 
@@ -20,7 +13,7 @@ function CreateEvent({ user }) {
   const [date, setDate] = useState('');
   const [location, setLocation] = useState('');
   const [errors, setErrors] = useState({});
-  const [generalError, setGeneralError] = useState(null);
+  const [generalError, setGeneralError] = useState('');
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -67,20 +60,16 @@ function CreateEvent({ user }) {
   const handleSubmit = useCallback(async (e) => {
     e.preventDefault();
     setErrors({});
+    setGeneralError('');
 
     if (!user) {
-      setErrors({ general: 'You must be logged in to create an event' });
+      setGeneralError('You must be logged in to create an event');
       return;
     }
 
-    try {
-      await eventSchema.validate({ title, description, date, location }, { abortEarly: false });
-    } catch (validationError) {
-      const newErrors = {};
-      validationError.inner.forEach((err) => {
-        newErrors[err.path] = err.message;
-      });
-      setErrors(newErrors);
+    const validationError = await validateEvent({ title, description, date, location });
+    if (validationError) {
+      setGeneralError(validationError);
       return;
     }
 
@@ -102,10 +91,15 @@ function CreateEvent({ user }) {
 
   return (
     <Container maxWidth="sm">
-      <Paper elevation={3} sx={{ p: 3, mt: 4 }}>
+      <Paper elevation={3} sx={{ p: 4, mt: 4 }}>
         <Typography variant="h4" component="h1" gutterBottom>
           Create New Event
         </Typography>
+        {generalError && (
+          <Typography color="error" sx={{ mb: 2 }}>
+            {generalError}
+          </Typography>
+        )}
         <Box component="form" onSubmit={handleSubmit} noValidate sx={{ mt: 1 }}>
           <TextField
             margin="normal"
@@ -114,7 +108,6 @@ function CreateEvent({ user }) {
             id="title"
             label="Title"
             name="title"
-            autoFocus
             value={title}
             onChange={(e) => setTitle(e.target.value)}
             error={!!errors.title}
@@ -176,14 +169,9 @@ function CreateEvent({ user }) {
             onClick={fillTestData}
             sx={{ mb: 2 }}
           >
-            Fill with Test Data
+            Fill Test Data
           </Button>
         </Box>
-        {generalError && (
-          <Typography color="error" sx={{ mt: 2 }}>
-            {generalError}
-          </Typography>
-        )}
       </Paper>
     </Container>
   );
@@ -192,7 +180,8 @@ function CreateEvent({ user }) {
 CreateEvent.propTypes = {
   user: PropTypes.shape({
     _id: PropTypes.string.isRequired,
-  }).isRequired,
+    // Добавьте другие необходимые поля пользователя
+  }),
 };
 
 export default CreateEvent;
