@@ -56,7 +56,7 @@ const UserProfile = React.memo(function UserProfile() {
             component="div"
             sx={{
               width: '100%',
-              height: '200px',
+              height: '260px',
               position: 'absolute',
               top: 0,
               left: 0,
@@ -73,14 +73,14 @@ const UserProfile = React.memo(function UserProfile() {
           <Avatar 
             src={`https://cdn.discordapp.com/avatars/${user.discordId}/${user.avatar}.png`} 
             alt="User Avatar" 
-            sx={{ width: 100, height: 100, mr: 2, border: '4px solid #7289da', borderRadius: '50%' }}
+            sx={{ 
+              width: 100, 
+              height: 100, 
+              mr: 2
+            }}
           />
-          <Box>
-            <Typography variant="h4">{user.username}#{user.discriminator}</Typography>
-            <Typography variant="body1">{user.email}</Typography>
-          </Box>
         </Box>
-        <Typography variant="h6">About me!</Typography>
+        <Typography variant="h4">{user.username}</Typography>
         <Typography variant="body1" sx={{ mt: 2 }}>
           I like video games! Lorem ipsum dolor sit amet. Et impedit quasi qui architecto optio et ipsum quia 33 earum accusamus. In debitis tempora quo facilis iusto ut sunt optio ea tenetur possimus aut omnis autem non corporis inventore.
         </Typography>

@@ -60,19 +60,38 @@ function App() {
     <ThemeProvider theme={theme}>
       <CssBaseline />
       <Router>
-        <AppBar position="static" color="default" elevation={0}>
+        <AppBar 
+          position="static" 
+          elevation={0} 
+          sx={{ 
+            backgroundColor: 'transparent',
+            boxShadow: 'none',
+            borderBottom: '0px solid #f7fefd',
+            '&::after': {
+              content: '""',
+              position: 'absolute',
+              bottom: 0,
+              left: 0,
+              right: 0,
+              height: '4px',
+              background: 'linear-gradient(90deg, #154c6e, #6ccfe0, #f7fefd, #6ccfe0, #154c6e)',
+              boxShadow: '0 0 20px #6ccfe0, 0 0 40px #6ccfe0, 0 0 60px #6ccfe0',
+              opacity: 0.9,
+            }
+          }}
+        >
           <Toolbar>
-            <Typography variant="h6" sx={{ flexGrow: 1 }}>
+            <Typography variant="h6" sx={{ flexGrow: 1, color: 'white' }}>
               FORZA.EVENTS
             </Typography>
             <Box>
-              <Button color="inherit" component={RouterLink} to="/">Home</Button>
-              <Button color="inherit" component={RouterLink} to="/events">Events</Button>
-              {user && <Button color="inherit" component={RouterLink} to={`/user/${user._id}`}>Profile</Button>}
+              <Button sx={{ color: 'white' }} component={RouterLink} to="/">Home</Button>
+              <Button sx={{ color: 'white' }} component={RouterLink} to="/events">Events</Button>
+              {user && <Button sx={{ color: 'white' }} component={RouterLink} to={`/user/${user._id}`}>Profile</Button>}
               {user ? (
-                <Button color="inherit" onClick={handleLogout}>Logout</Button>
+                <Button sx={{ color: 'white' }} onClick={handleLogout}>Logout</Button>
               ) : (
-                <Button color="inherit" onClick={() => window.location.href = 'http://localhost:5000/auth/discord'}>Login</Button>
+                <Button sx={{ color: 'white' }} onClick={() => window.location.href = 'http://localhost:5000/auth/discord'}>Login</Button>
               )}
             </Box>
           </Toolbar>
