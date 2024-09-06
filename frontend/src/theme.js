@@ -47,6 +47,33 @@ const theme = createTheme({
         },
       },
     },
+    MuiLink: {
+      styleOverrides: {
+        root: {
+          color: 'inherit',
+          textDecoration: 'none',
+          '&:hover': {
+            textDecoration: 'underline',
+          },
+        },
+      },
+    },
+    MuiListItem: {
+      styleOverrides: {
+        root: {
+          '&.MuiListItem-button': {
+            border: '1px solid transparent',
+            borderRadius: 4,
+            transition: 'all 0.3s',
+            '&:hover': {
+              backgroundColor: 'rgba(255, 255, 255, 0.08)',
+              borderColor: '#90caf9',
+              cursor: 'pointer',
+            },
+          },
+        },
+      },
+    },
   },
 });
 

@@ -2,6 +2,7 @@ import React from 'react';
 import PropTypes from 'prop-types';
 import { Container, Typography, Box, Avatar, List, ListItem, ListItemAvatar, ListItemText, Paper, Grid } from '@mui/material';
 import { FaYoutube, FaTwitch, FaXbox, FaSteam, FaSpotify, FaReddit, FaTwitter, FaFacebook, FaInstagram, FaCrown } from 'react-icons/fa';
+import { Link as RouterLink } from 'react-router-dom';
 
 function Profile({ user, events }) {
   if (!user) {
@@ -53,11 +54,25 @@ function Profile({ user, events }) {
         <List>
           {registeredEvents && registeredEvents.length > 0 ? (
             registeredEvents.map(event => (
-              <ListItem key={event._id}>
+              <ListItem 
+                key={event._id} 
+                component={RouterLink} 
+                to={`/events/${event._id}-${event.title.toLowerCase().replace(/\s+/g, '-')}`}
+                sx={{
+                  color: 'inherit',
+                  textDecoration: 'none',
+                  '&:hover': {
+                    textDecoration: 'underline',
+                  },
+                }}
+              >
                 <ListItemAvatar>
                   {event.organizer._id === user._id && <FaCrown style={{ color: '#FFD700' }} />}
                 </ListItemAvatar>
-                <ListItemText primary={event.title} secondary={new Date(event.date).toLocaleDateString()} />
+                <ListItemText 
+                  primary={event.title} 
+                  secondary={new Date(event.date).toLocaleDateString()} 
+                />
               </ListItem>
             ))
           ) : (

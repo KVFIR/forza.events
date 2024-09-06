@@ -1,8 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import { useParams, Link as RouterLink } from 'react-router-dom';
 import axios from 'axios';
-import { Container, Typography, Box, Avatar, Paper, CircularProgress, List, ListItem, ListItemAvatar, ListItemText } from '@mui/material';
-import { FaYoutube, FaTwitch, FaXbox, FaSteam, FaSpotify, FaReddit, FaTwitter, FaFacebook, FaInstagram } from 'react-icons/fa';
+import { Container, Typography, Avatar, Paper, CircularProgress, List, ListItem, ListItemAvatar, ListItemText, Grid, Box } from '@mui/material';
+import { FaTwitch, FaXbox } from 'react-icons/fa';
 
 const UserProfile = React.memo(function UserProfile() {
   const { id } = useParams();
@@ -50,79 +50,68 @@ const UserProfile = React.memo(function UserProfile() {
 
   return (
     <Container sx={{ mt: 4 }}>
-      <Paper elevation={3} sx={{ p: 3, mb: 4, position: 'relative' }}>
-        {user.banner && (
-          <Box
-            component="div"
-            sx={{
-              width: '100%',
-              height: '260px',
-              position: 'absolute',
-              top: 0,
-              left: 0,
-              zIndex: 1,
-              borderRadius: '4px 4px 0 0',
-              backgroundImage: `url(https://cdn.discordapp.com/banners/${user.discordId}/${user.banner}.png?size=1024), linear-gradient(to bottom, rgba(0,0,0,0) 80%, rgba(47,49,54,255))`,
-              backgroundSize: 'cover',
-              backgroundPosition: 'center',
-              backgroundBlendMode: 'overlay'
-            }}
-          />
-        )}
-        <Box sx={{ display: 'flex', alignItems: 'center', mb: 4, position: 'relative', zIndex: 2, mt: '118px' }}>
-          <Avatar 
-            src={`https://cdn.discordapp.com/avatars/${user.discordId}/${user.avatar}.png`} 
-            alt="User Avatar" 
-            sx={{ 
-              width: 100, 
-              height: 100, 
-              mr: 2
-            }}
-          />
-        </Box>
-        <Typography variant="h4">{user.username}</Typography>
-        <Typography variant="body1" sx={{ mt: 2 }}>
-          I like video games! Lorem ipsum dolor sit amet. Et impedit quasi qui architecto optio et ipsum quia 33 earum accusamus. In debitis tempora quo facilis iusto ut sunt optio ea tenetur possimus aut omnis autem non corporis inventore.
-        </Typography>
-        <Typography variant="h6" sx={{ mt: 4 }}>Connections</Typography>
-        <List>
-          {user.connections && user.connections.length > 0 ? (
-            user.connections.map(connection => (
-              <ListItem key={connection.id}>
-                <ListItemAvatar>
-                  {connection.type === 'youtube' && <FaYoutube />}
-                  {connection.type === 'twitch' && <FaTwitch />}
-                  {connection.type === 'xbox' && <FaXbox />}
-                  {connection.type === 'steam' && <FaSteam />}
-                  {connection.type === 'spotify' && <FaSpotify />}
-                  {connection.type === 'reddit' && <FaReddit />}
-                  {connection.type === 'twitter' && <FaTwitter />}
-                  {connection.type === 'facebook' && <FaFacebook />}
-                  {connection.type === 'instagram' && <FaInstagram />}
-                </ListItemAvatar>
-                <ListItemText primary={connection.name} />
-              </ListItem>
-            ))
-          ) : (
-            <Typography variant="body1">No connections available.</Typography>
-          )}
-        </List>
-        <Typography variant="h6" sx={{ mt: 4 }}>Events</Typography>
-        {events.length > 0 ? (
-          <List>
-            {events.map(event => (
-              <ListItem key={event._id} component={RouterLink} to={`/events/${event._id}-${event.title.toLowerCase().replace(/\s+/g, '-')}`} button>
-                <ListItemText 
-                  primary={event.title}
-                  secondary={`Date: ${new Date(event.date).toLocaleDateString()}, Location: ${event.location}`}
-                />
-              </ListItem>
-            ))}
-          </List>
-        ) : (
-          <Typography variant="body1">No events available.</Typography>
-        )}
-      </Paper>
+      <Grid container spacing={3}>
+        <Grid item xs={12} md={6}>
+          <Paper elevation={3} sx={{ p: 3 }}>
+            <Box sx={{ display: 'flex', alignItems: 'center', mb: 2 }}>
+              <Avatar 
+                src={`https://cdn.discordapp.com/avatars/${user.discordId}/${user.avatar}.png`} 
+                alt="User Avatar" 
+                sx={{ width: 100, height: 100, mr: 2 }}
+              />
+              <Typography variant="h4">{user.username}</Typography>
+            </Box>
+            <Typography variant="h6" sx={{ mb: 2 }}>Connections</Typography>
+            <List>
+              {user.connections && user.connections.length > 0 ? (
+                user.connections.map(connection => {
+                  if (connection.type === 'xbox' || connection.type === 'twitch') {
+                    const link = connection.type === 'xbox' 
+                      ? `https://www.xbox.com/lv-LV/play/user/${connection.name}`
+                      : `https://twitch.tv/${connection.name}`;
+                    return (
+                      <ListItem button key={connection.id} component="a" href={link} target="_blank" rel="noopener noreferrer">
+                        <ListItemAvatar>
+                          {connection.type === 'xbox' && <FaXbox />}
+                          {connection.type === 'twitch' && <FaTwitch />}
+                        </ListItemAvatar>
+                        <ListItemText primary={connection.name} />
+                      </ListItem>
+                    );
+                  }
+                  return null;
+                }).filter(Boolean)
+              ) : (
+                <Typography variant="body1">No Xbox or Twitch connections available.</Typography>
+              )}
+            </List>
+          </Paper>
+        </Grid>
+        <Grid item xs={12} md={6}>
+          <Paper elevation={3} sx={{ p: 3 }}>
+            <Typography variant="h6" sx={{ mb: 2 }}>Events</Typography>
+            {events.length > 0 ? (
+              <List>
+                {events.map(event => (
+                  <ListItem 
+                    button
+                    key={event._id} 
+                    component={RouterLink} 
+                    to={`/events/${event._id}-${event.title.toLowerCase().replace(/\s+/g, '-')}`}
+                  >
+                    <ListItemText 
+                      primary={event.title}
+                      secondary={`Date: ${new Date(event.date).toLocaleDateString()}, Location: ${event.location}`}
+                    />
+                  </ListItem>
+                ))}
+              </List>
+            ) : (
+              <Typography variant="body1">No events available.</Typography>
+            )}
+          </Paper>
+        </Grid>
+      </Grid>
     </Container>
   );
 });

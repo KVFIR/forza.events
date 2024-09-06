@@ -58,3 +58,8 @@ body, html {
 ::-webkit-scrollbar-thumb:hover {
   background: rgba(255, 255, 255, 0.5);
 }
+
+a {
+  color: inherit;
+  text-decoration: none;
+}
