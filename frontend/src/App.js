@@ -99,11 +99,12 @@ function App() {
         <Suspense fallback={<CircularProgress />}>
           <Routes>
             <Route path="/" element={<Home />} />
-            <Route path="/events" element={<EventList />} />
+            <Route path="/events" element={<EventList user={user} />} />
             <Route path="/create-event" element={<CreateEvent user={user} />} />
             <Route path="/profile" element={user ? <UserProfileContainer /> : <Navigate to="/" />} />
             <Route path="/events/:id" element={<EventDetails user={user} />} />
             <Route path="/user/:id" element={<UserProfile />} />
+            <Route path="/events/create" element={<CreateEvent user={user} />} />
           </Routes>
         </Suspense>
       </Router>

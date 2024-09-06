@@ -2,16 +2,26 @@ import React, { useState, useCallback, useEffect } from 'react';
 import PropTypes from 'prop-types';
 import axios from 'axios';
 import { useNavigate } from 'react-router-dom';
-import { TextField, Button, Container, Typography, Box, Paper } from '@mui/material';
+import { TextField, Button, Container, Typography, Box, Paper, Select, MenuItem, Chip, InputLabel, FormControl } from '@mui/material';
 import { validateEvent } from '../utils/validation';
 
 axios.defaults.baseURL = 'http://localhost:5000';
 
 function CreateEvent({ user }) {
-  const [title, setTitle] = useState('');
-  const [description, setDescription] = useState('');
-  const [date, setDate] = useState('');
-  const [location, setLocation] = useState('');
+  const [eventData, setEventData] = useState({
+    title: '',
+    description: '',
+    date: '',
+    startTime: '',
+    endTime: '',
+    location: '',
+    eventType: '',
+    carRestrictions: [],
+    raceRules: [],
+      weatherConditions: '',
+    rewardPoints: 0,
+    maxParticipants: 0
+  });
   const [errors, setErrors] = useState({});
   const [generalError, setGeneralError] = useState('');
   const navigate = useNavigate();
@@ -22,39 +32,20 @@ function CreateEvent({ user }) {
     }
   }, [user, navigate]);
 
-  const getRandomTitle = () => {
-    const adjectives = ['Exciting', 'Amazing', 'Thrilling', 'Epic', 'Awesome'];
-    const nouns = ['Race', 'Challenge', 'Tournament', 'Competition', 'Event'];
-    return `${adjectives[Math.floor(Math.random() * adjectives.length)]} Forza ${nouns[Math.floor(Math.random() * nouns.length)]}`;
+  const handleChange = (e) => {
+    const { name, value } = e.target;
+    setEventData(prevData => ({
+      ...prevData,
+      [name]: value
+    }));
   };
 
-  const getRandomDescription = () => {
-    const descriptions = [
-      'Join us for an unforgettable racing experience!',
-      'Test your skills against the best drivers in the community!',
-      'Compete for glory and amazing prizes!',
-      'Experience the thrill of high-speed racing action!',
-      'Show off your custom rides and racing prowess!'
-    ];
-    return descriptions[Math.floor(Math.random() * descriptions.length)];
-  };
-
-  const getRandomDate = () => {
-    const start = new Date();
-    const end = new Date(start.getTime() + 90 * 24 * 60 * 60 * 1000); // 90 days from now
-    return new Date(start.getTime() + Math.random() * (end.getTime() - start.getTime())).toISOString().split('T')[0];
-  };
-
-  const getRandomLocation = () => {
-    const locations = ['Horizon Festival', 'Goliath Circuit', 'Fortune Island', 'LEGO Valley', 'Needle Climb'];
-    return locations[Math.floor(Math.random() * locations.length)];
-  };
-
-  const fillTestData = () => {
-    setTitle(getRandomTitle());
-    setDescription(getRandomDescription());
-    setDate(getRandomDate());
-    setLocation(getRandomLocation());
+  const handleArrayChange = (e, field) => {
+    const { value } = e.target;
+    setEventData(prevData => ({
+      ...prevData,
+      [field]: value
+    }));
   };
 
   const handleSubmit = useCallback(async (e) => {
@@ -67,19 +58,14 @@ function CreateEvent({ user }) {
       return;
     }
 
-    const validationError = await validateEvent({ title, description, date, location });
+    const validationError = await validateEvent(eventData);
     if (validationError) {
       setGeneralError(validationError);
       return;
     }
 
     try {
-      const response = await axios.post('/api/events', {
-        title,
-        description,
-        date,
-        location
-      }, {
+      const response = await axios.post('/api/events', eventData, {
         withCredentials: true
       });
       navigate(`/events/${response.data._id}`);
@@ -87,7 +73,7 @@ function CreateEvent({ user }) {
       console.error('Error creating event:', error);
       setGeneralError('Failed to create event. Please try again later.');
     }
-  }, [user, title, description, date, location, navigate]);
+  }, [user, eventData, navigate]);
 
   return (
     <Container maxWidth="sm">
@@ -108,8 +94,8 @@ function CreateEvent({ user }) {
             id="title"
             label="Title"
             name="title"
-            value={title}
-            onChange={(e) => setTitle(e.target.value)}
+            value={eventData.title}
+            onChange={handleChange}
             error={!!errors.title}
             helperText={errors.title}
           />
@@ -122,8 +108,8 @@ function CreateEvent({ user }) {
             name="description"
             multiline
             rows={4}
-            value={description}
-            onChange={(e) => setDescription(e.target.value)}
+            value={eventData.description}
+            onChange={handleChange}
             error={!!errors.description}
             helperText={errors.description}
           />
@@ -138,10 +124,41 @@ function CreateEvent({ user }) {
             InputLabelProps={{
               shrink: true,
             }}
-            value={date}
-            onChange={(e) => setDate(e.target.value)}
+            value={eventData.date}
+            onChange={handleChange}
             error={!!errors.date}
             helperText={errors.date}
+          />
+          <TextField
+            margin="normal"
+            required
+            fullWidth
+            id="startTime"
+            label="Start Time"
+            name="startTime"
+            type="time"
+            InputLabelProps={{
+              shrink: true,
+            }}
+            value={eventData.startTime}
+            onChange={handleChange}
+            error={!!errors.startTime}
+            helperText={errors.startTime}
+          />
+          <TextField
+            margin="normal"
+            fullWidth
+            id="endTime"
+            label="End Time"
+            name="endTime"
+            type="time"
+            InputLabelProps={{
+              shrink: true,
+            }}
+            value={eventData.endTime}
+            onChange={handleChange}
+            error={!!errors.endTime}
+            helperText={errors.endTime}
           />
           <TextField
             margin="normal"
@@ -150,10 +167,98 @@ function CreateEvent({ user }) {
             id="location"
             label="Location"
             name="location"
-            value={location}
-            onChange={(e) => setLocation(e.target.value)}
+            value={eventData.location}
+            onChange={handleChange}
             error={!!errors.location}
             helperText={errors.location}
+          />
+          <FormControl fullWidth margin="normal">
+            <InputLabel id="eventType-label">Event Type</InputLabel>
+            <Select
+              labelId="eventType-label"
+              id="eventType"
+              name="eventType"
+              value={eventData.eventType}
+              onChange={handleChange}
+              label="Event Type"
+            >
+              <MenuItem value="Qualification">Qualification</MenuItem>
+              <MenuItem value="Race">Race</MenuItem>
+              <MenuItem value="Championship">Championship</MenuItem>
+            </Select>
+          </FormControl>
+          <FormControl fullWidth margin="normal">
+            <InputLabel id="carRestrictions-label">Car Restrictions</InputLabel>
+            <Select
+              labelId="carRestrictions-label"
+              id="carRestrictions"
+              name="carRestrictions"
+              multiple
+              value={eventData.carRestrictions}
+              onChange={(e) => handleArrayChange(e, 'carRestrictions')}
+              renderValue={(selected) => (
+                <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 0.5 }}>
+                  {selected.map((value) => (
+                    <Chip key={value} label={value} />
+                  ))}
+                </Box>
+              )}
+            >
+              <MenuItem value="GT3">GT3</MenuItem>
+              <MenuItem value="Tuning allowed">Tuning allowed</MenuItem>
+              <MenuItem value="Stock only">Stock only</MenuItem>
+            </Select>
+          </FormControl>
+          <FormControl fullWidth margin="normal">
+            <InputLabel id="raceRules-label">Race Rules</InputLabel>
+            <Select
+              labelId="raceRules-label"
+              id="raceRules"
+              name="raceRules"
+              multiple
+              value={eventData.raceRules}
+              onChange={(e) => handleArrayChange(e, 'raceRules')}
+              renderValue={(selected) => (
+                <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 0.5 }}>
+                  {selected.map((value) => (
+                    <Chip key={value} label={value} />
+                  ))}
+                </Box>
+              )}
+            >
+              <MenuItem value="Mandatory Pit Stops">Mandatory Pit Stops</MenuItem>
+              <MenuItem value="No Assists">No Assists</MenuItem>
+              <MenuItem value="Simulation Damage">Simulation Damage</MenuItem>
+            </Select>
+          </FormControl>
+          <TextField
+            margin="normal"
+            fullWidth
+            id="weatherConditions"
+            label="Weather Conditions"
+            name="weatherConditions"
+            value={eventData.weatherConditions}
+            onChange={handleChange}
+          />
+          <TextField
+            margin="normal"
+            fullWidth
+            id="rewardPoints"
+            label="Reward Points"
+            name="rewardPoints"
+            type="number"
+            value={eventData.rewardPoints}
+            onChange={handleChange}
+          />
+          <TextField
+            margin="normal"
+            fullWidth
+            id="maxParticipants"
+            label="Maximum Participants"
+            name="maxParticipants"
+            type="number"
+            value={eventData.maxParticipants}
+            onChange={handleChange}
           />
           <Button
             type="submit"
@@ -162,14 +267,6 @@ function CreateEvent({ user }) {
             sx={{ mt: 3, mb: 2 }}
           >
             Create Event
-          </Button>
-          <Button
-            fullWidth
-            variant="outlined"
-            onClick={fillTestData}
-            sx={{ mb: 2 }}
-          >
-            Fill Test Data
           </Button>
         </Box>
       </Paper>
@@ -180,7 +277,6 @@ function CreateEvent({ user }) {
 CreateEvent.propTypes = {
   user: PropTypes.shape({
     _id: PropTypes.string.isRequired,
-    // Добавьте другие необходимые поля пользователя
   }),
 };
 

@@ -61,7 +61,6 @@ const UserProfile = React.memo(function UserProfile() {
               />
               <Typography variant="h4">{user.username}</Typography>
             </Box>
-            <Typography variant="h6" sx={{ mb: 2 }}>Connections</Typography>
             <List>
               {user.connections && user.connections.length > 0 ? (
                 user.connections.map(connection => {
@@ -72,7 +71,7 @@ const UserProfile = React.memo(function UserProfile() {
                     return (
                       <ListItem button key={connection.id} component="a" href={link} target="_blank" rel="noopener noreferrer">
                         <ListItemAvatar>
-                          {connection.type === 'xbox' && <FaXbox />}
+                        {connection.type === 'xbox' && <FaXbox />}
                           {connection.type === 'twitch' && <FaTwitch />}
                         </ListItemAvatar>
                         <ListItemText primary={connection.name} />
