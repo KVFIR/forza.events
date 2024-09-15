@@ -8,7 +8,7 @@ FORZA.EVENTS - веб-приложение для организации и уч
 
 1. Установка:
    ```bash
-   git clone https://github.com/your-username/forza.events.git
+   git clone https://github.com/KVFIR/forza.events.git
    cd forza.events
    cd backend && npm install
    cd ../frontend && npm install
