@@ -22,7 +22,8 @@ FORZA.EVENTS - веб-приложение для организации и уч
    DISCORD_CLIENT_SECRET=your_discord_client_secret
    DISCORD_CALLBACK_URL=http://localhost:5000/auth/discord/callback
    SESSION_SECRET=your_session_secret
-   PORT=5000
+   CLIENT_URL=http://localhost:3000
+   NODE_ENV=development
    ```
 
 3. Запуск:
