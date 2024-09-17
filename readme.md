@@ -1,4 +1,3 @@
-
 # FORZA.EVENTS
 
 ## Обзор проекта
@@ -11,8 +10,8 @@ FORZA.EVENTS - веб-приложение для организации и уч
    ```bash
    git clone https://github.com/your-username/forza.events.git
    cd forza.events
-   cd backend && npm install
-   cd ../frontend && npm install
+   cd backend && yarn install
+   cd ../frontend && yarn install
    ```
 
 2. Настройка `.env` (в папке `backend`):
@@ -27,8 +26,8 @@ FORZA.EVENTS - веб-приложение для организации и уч
    ```
 
 3. Запуск:
-   - Бэкенд: `cd backend && npm run dev`
-   - Фронтенд: `cd frontend && npm start`
+   - Бэкенд: `cd backend && yarn dev`
+   - Фронтенд: `cd frontend && yarn start`
 
 ## Структура проекта
 
@@ -101,6 +100,7 @@ forza.events/
 - Улучшен дизайн профиля пользователя с добавлением баннера и неоновых эффектов
 - Добавлено отображение подключенных аккаунтов пользователя в профиле
 - Реализовано отображение событий, на которые зарегистрирован пользователь
+- Проект переведен на использование Yarn вместо npm
 
 ## Следующие шаги
 
@@ -119,10 +119,10 @@ forza.events/
 
 ## Полезные команды
 
-- `npm run dev`: Запуск бэкенда в режиме разработки
-- `npm start`: Запуск фронтенда
-- `npm test`: Запуск тестов
-- `npm run build`: Сборка фронтенда для продакшена
+- `yarn dev`: Запуск бэкенда в режиме разработки
+- `yarn start`: Запуск фронтенда
+- `yarn test`: Запуск тестов
+- `yarn build`: Сборка фронтенда для продакшена
 
 ## Заметки
 
@@ -131,6 +131,7 @@ forza.events/
 - Придерживаться соглашения о именовании веток: `feature/`, `bugfix/`, `refactor/`
 - Регулярно делать бэкапы базы данных
 - Проверять обновления зависимостей и обновлять их по мере необходимости
+- Использовать `yarn.lock` для управления зависимостями
 
 ## Ресурсы
 
@@ -139,3 +140,4 @@ forza.events/
 - [React Documentation](https://reactjs.org/docs/getting-started.html)
 - [Express.js Documentation](https://expressjs.com/)
 - [Material-UI Documentation](https://mui.com/material-ui/getting-started/overview/)
+- [Yarn Documentation](https://yarnpkg.com/getting-started)
