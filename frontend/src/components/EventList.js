@@ -5,6 +5,8 @@ import { Link as RouterLink } from 'react-router-dom';
 import EventCard from './EventCard';
 import PropTypes from 'prop-types';
 
+
+
 function EventList({ user }) {
   const [events, setEvents] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -13,11 +15,25 @@ function EventList({ user }) {
   useEffect(() => {
     const fetchEvents = async () => {
       try {
+        console.log('Fetching events...');
         const response = await axios.get('/api/events');
+        console.log('Events fetched successfully:', response.data);
         setEvents(response.data);
       } catch (error) {
         console.error('Error fetching events:', error);
-        setError('Failed to load events. Please try again later.');
+        if (error.response) {
+          // Ошибка от сервера
+          console.error('Server responded with:', error.response.status, error.response.data);
+          setError(`Failed to load events. Server error: ${error.response.status}`);
+        } else if (error.request) {
+          // Ошибка сети
+          console.error('Network error:', error.request);
+          setError('Failed to load events. Network error. Please check your connection.');
+        } else {
+          // Другие ошибки
+          console.error('Error:', error.message);
+          setError(`Failed to load events. Error: ${error.message}`);
+        }
       } finally {
         setLoading(false);
       }

@@ -17,6 +17,7 @@ import {
 } from '@mui/material';
 import { Event as EventIcon, LocationOn, Person } from '@mui/icons-material';
 import { ListItemAvatar, Avatar } from '@mui/material';
+import { eventSchema } from '../utils/validation';
 
 function EventDetails({ user }) {
   const [event, setEvent] = useState(null);
