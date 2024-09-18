@@ -1,0 +1,45 @@
+# Зависимости
+/node_modules
+/.pnp
+.pnp.js
+
+# Тестирование
+/coverage
+
+# Продакшн
+/build
+
+# Разное
+.DS_Store
+.env*
+!.env.example
+
+# Логи
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+*.log
+*.log.*
+
+# IDE
+.vscode
+.idea
+
+# Временные файлы
+*.tmp
+*.temp
+
+# Файлы базы данных
+*.sqlite
+
+# Кэш
+.cache
+
+# Специфичные для Windows
+Thumbs.db
+
+# Игнорировать package-lock.json
+package-lock.json
+
+# НЕ игнорировать yarn.lock
+!yarn.lock
