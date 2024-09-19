@@ -60,29 +60,23 @@
    yarn install
    ```
 
-### Конфигурация окружения
+### Настройка бэкенда
 
-1. **Настройка бэкенда**
+- Скопируйте пример переменных окружения:
+   ```bash
+   cp .env.example .env
+   ```
    
-   - Скопируйте пример переменных окружения:
-     ```bash
-     cp .env.example .env
-     ```
-   
-   - Обновите `.env` с вашими конкретными конфигурациями:
-     ```
-     MONGO_URI=mongodb://localhost:27017/forza_events
-     DISCORD_CLIENT_ID=your_discord_client_id
-     DISCORD_CLIENT_SECRET=your_discord_client_secret
-     DISCORD_CALLBACK_URL=http://localhost:5000/auth/discord/callback
-     SESSION_SECRET=your_session_secret
-     CLIENT_URL=http://localhost:3000
-     NODE_ENV=development
-     ```
-
-2. **Настройка фронтенда**
-   
-   - Если есть специфические переменные окружения для фронтенда, убедитесь, что они установлены соответствующим образом.
+- Обновите `backend/.env` с вашими конкретными конфигурациями:
+   ```
+   MONGO_URI=mongodb://localhost:27017/forza_events
+   DISCORD_CLIENT_ID=your_discord_client_id
+   DISCORD_CLIENT_SECRET=your_discord_client_secret
+   DISCORD_CALLBACK_URL=http://localhost:5000/auth/discord/callback
+   SESSION_SECRET=your_session_secret
+   CLIENT_URL=http://localhost:3000
+   NODE_ENV=development
+   ```
 
 ### Запуск приложения
 
@@ -102,7 +96,7 @@
 
 ## Структура проекта
 
-````
+```
 
 forza.events/
 ├── backend/
@@ -140,7 +134,7 @@ forza.events/
 ├── .gitignore
 ├── README.md
 └── yarn.lock
-````
+```
 
 ## API Эндпоинты
 
