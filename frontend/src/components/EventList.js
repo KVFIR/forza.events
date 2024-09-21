@@ -5,8 +5,6 @@ import { Link as RouterLink } from 'react-router-dom';
 import EventCard from './EventCard';
 import PropTypes from 'prop-types';
 
-
-
 function EventList({ user }) {
   const [events, setEvents] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -15,23 +13,12 @@ function EventList({ user }) {
   useEffect(() => {
     const fetchEvents = async () => {
       try {
-        console.log('Fetching events...');
         const response = await axios.get('/api/events');
-        console.log('Events fetched successfully:', response.data);
         setEvents(response.data);
       } catch (error) {
-        console.error('Error fetching events:', error);
         if (error.response) {
-          // Ошибка от сервера
-          console.error('Server responded with:', error.response.status, error.response.data);
-          setError(`Failed to load events. Server error: ${error.response.status}`);
-        } else if (error.request) {
-          // Ошибка сети
-          console.error('Network error:', error.request);
-          setError('Failed to load events. Network error. Please check your connection.');
+          setError(`Failed to load events. Error: ${error.response.data.message}`);
         } else {
-          // Другие ошибки
-          console.error('Error:', error.message);
           setError(`Failed to load events. Error: ${error.message}`);
         }
       } finally {
@@ -42,46 +29,33 @@ function EventList({ user }) {
     fetchEvents();
   }, []);
 
-  if (loading) {
-    return (
-      <Container sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '100vh' }}>
-        <CircularProgress />
-      </Container>
-    );
-  }
+  if (loading) return (
+    <Container sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '100vh' }}>
+      <CircularProgress />
+    </Container>
+  );
 
-  if (error) {
-    return (
-      <Container>
-        <Typography color="error" variant="h6">{error}</Typography>
-      </Container>
-    );
-  }
+  if (error) return (
+    <Container>
+      <Typography color="error" variant="h6">{error}</Typography>
+    </Container>
+  );
 
   return (
-    <Container maxWidth="lg" sx={{ mt: 4 }}>
+    <Container sx={{ mt: 4 }}>
       <Typography variant="h4" component="h1" gutterBottom>
         Events
       </Typography>
-      <Tooltip title={user ? "" : "Please log in to create an event"}>
-        <span>
-          <Button
-            variant="contained"
-            color="primary"
-            component={user ? RouterLink : "button"}
-            to={user ? "/events/create" : undefined}
-            onClick={user ? undefined : (e) => e.preventDefault()}
-            disabled={!user}
-            sx={{ mb: 3 }}
-          >
-            Create New Event
-          </Button>
-        </span>
-      </Tooltip>
-      <Grid container spacing={3}>
+      <Grid container spacing={4}>
         {events.map((event) => (
-          <Grid item xs={12} sm={6} md={4} key={event._id}>
-            <EventCard event={event} />
+          <Grid item key={event._id} xs={12} sm={6} md={4}>
+            <EventCard
+              title={event.title}
+              date={event.date}
+              eventType={event.eventType}
+              laps={event.laps}
+              imageUrl={event.imageUrl}
+            />
           </Grid>
         ))}
       </Grid>
