@@ -1,9 +1,10 @@
 import React, { useState, useEffect } from 'react';
+import PropTypes from 'prop-types';
 import axios from 'axios';
 import { Container, Typography, Grid, CircularProgress } from '@mui/material';
 import EventCard from './EventCard';
 
-function EventList({ user }) {
+function EventList() {
   const [events, setEvents] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
@@ -60,11 +61,5 @@ function EventList({ user }) {
     </Container>
   );
 }
-
-EventList.propTypes = {
-  user: PropTypes.shape({
-    _id: PropTypes.string.isRequired,
-  }),
-};
 
 export default EventList;
