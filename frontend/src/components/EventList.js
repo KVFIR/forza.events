@@ -1,9 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
-import { Container, Typography, Grid, CircularProgress, Button, Tooltip } from '@mui/material';
-import { Link as RouterLink } from 'react-router-dom';
+import { Container, Typography, Grid, CircularProgress } from '@mui/material';
 import EventCard from './EventCard';
-import PropTypes from 'prop-types';
 
 function EventList({ user }) {
   const [events, setEvents] = useState([]);
