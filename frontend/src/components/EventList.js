@@ -47,13 +47,7 @@ function EventList() {
       <Grid container spacing={4}>
         {events.map((event) => (
           <Grid item key={event._id} xs={12} sm={6} md={4}>
-            <EventCard
-              title={event.title}
-              date={event.date}
-              eventType={event.eventType}
-              laps={event.laps}
-              imageUrl={event.imageUrl}
-            />
+            <EventCard event={event} />
           </Grid>
         ))}
       </Grid>
