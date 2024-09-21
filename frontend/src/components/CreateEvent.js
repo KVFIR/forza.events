@@ -2,8 +2,9 @@ import React, { useState, useCallback, useEffect } from 'react';
 import PropTypes from 'prop-types';
 import axios from 'axios';
 import { useNavigate } from 'react-router-dom';
-import { TextField, Button, Container, Typography, Box, Paper, Select, MenuItem, Chip, InputLabel, FormControl } from '@mui/material';
+import { TextField, Button, Container, Typography, Box, Paper, Select, MenuItem, InputLabel, FormControl, Grid } from '@mui/material';
 import { validateEvent } from '../utils/validation';
+import EventCard from './EventCard';
 
 axios.defaults.baseURL = 'http://localhost:5000';
 
@@ -18,9 +19,11 @@ function CreateEvent({ user }) {
     eventType: '',
     carRestrictions: [],
     raceRules: [],
-      weatherConditions: '',
+    weatherConditions: '',
     rewardPoints: 0,
-    maxParticipants: 0
+    maxParticipants: 0,
+    laps: 0,
+    imageUrl: ''
   });
   const [errors, setErrors] = useState({});
   const [generalError, setGeneralError] = useState('');
@@ -37,14 +40,6 @@ function CreateEvent({ user }) {
     setEventData(prevData => ({
       ...prevData,
       [name]: value
-    }));
-  };
-
-  const handleArrayChange = (e, field) => {
-    const { value } = e.target;
-    setEventData(prevData => ({
-      ...prevData,
-      [field]: value
     }));
   };
 
@@ -76,200 +71,133 @@ function CreateEvent({ user }) {
   }, [user, eventData, navigate]);
 
   return (
-    <Container maxWidth="sm">
-      <Paper elevation={3} sx={{ p: 4, mt: 4 }}>
-        <Typography variant="h4" component="h1" gutterBottom>
-          Create New Event
-        </Typography>
-        {generalError && (
-          <Typography color="error" sx={{ mb: 2 }}>
-            {generalError}
-          </Typography>
-        )}
-        <Box component="form" onSubmit={handleSubmit} noValidate sx={{ mt: 1 }}>
-          <TextField
-            margin="normal"
-            required
-            fullWidth
-            id="title"
-            label="Title"
-            name="title"
-            value={eventData.title}
-            onChange={handleChange}
-            error={!!errors.title}
-            helperText={errors.title}
-          />
-          <TextField
-            margin="normal"
-            required
-            fullWidth
-            id="description"
-            label="Description"
-            name="description"
-            multiline
-            rows={4}
-            value={eventData.description}
-            onChange={handleChange}
-            error={!!errors.description}
-            helperText={errors.description}
-          />
-          <TextField
-            margin="normal"
-            required
-            fullWidth
-            id="date"
-            label="Date"
-            name="date"
-            type="date"
-            InputLabelProps={{
-              shrink: true,
-            }}
-            value={eventData.date}
-            onChange={handleChange}
-            error={!!errors.date}
-            helperText={errors.date}
-          />
-          <TextField
-            margin="normal"
-            required
-            fullWidth
-            id="startTime"
-            label="Start Time"
-            name="startTime"
-            type="time"
-            InputLabelProps={{
-              shrink: true,
-            }}
-            value={eventData.startTime}
-            onChange={handleChange}
-            error={!!errors.startTime}
-            helperText={errors.startTime}
-          />
-          <TextField
-            margin="normal"
-            fullWidth
-            id="endTime"
-            label="End Time"
-            name="endTime"
-            type="time"
-            InputLabelProps={{
-              shrink: true,
-            }}
-            value={eventData.endTime}
-            onChange={handleChange}
-            error={!!errors.endTime}
-            helperText={errors.endTime}
-          />
-          <TextField
-            margin="normal"
-            required
-            fullWidth
-            id="location"
-            label="Location"
-            name="location"
-            value={eventData.location}
-            onChange={handleChange}
-            error={!!errors.location}
-            helperText={errors.location}
-          />
-          <FormControl fullWidth margin="normal">
-            <InputLabel id="eventType-label">Event Type</InputLabel>
-            <Select
-              labelId="eventType-label"
-              id="eventType"
-              name="eventType"
-              value={eventData.eventType}
-              onChange={handleChange}
-              label="Event Type"
-            >
-              <MenuItem value="Qualification">Qualification</MenuItem>
-              <MenuItem value="Race">Race</MenuItem>
-              <MenuItem value="Championship">Championship</MenuItem>
-            </Select>
-          </FormControl>
-          <FormControl fullWidth margin="normal">
-            <InputLabel id="carRestrictions-label">Car Restrictions</InputLabel>
-            <Select
-              labelId="carRestrictions-label"
-              id="carRestrictions"
-              name="carRestrictions"
-              multiple
-              value={eventData.carRestrictions}
-              onChange={(e) => handleArrayChange(e, 'carRestrictions')}
-              renderValue={(selected) => (
-                <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 0.5 }}>
-                  {selected.map((value) => (
-                    <Chip key={value} label={value} />
-                  ))}
-                </Box>
-              )}
-            >
-              <MenuItem value="GT3">GT3</MenuItem>
-              <MenuItem value="Tuning allowed">Tuning allowed</MenuItem>
-              <MenuItem value="Stock only">Stock only</MenuItem>
-            </Select>
-          </FormControl>
-          <FormControl fullWidth margin="normal">
-            <InputLabel id="raceRules-label">Race Rules</InputLabel>
-            <Select
-              labelId="raceRules-label"
-              id="raceRules"
-              name="raceRules"
-              multiple
-              value={eventData.raceRules}
-              onChange={(e) => handleArrayChange(e, 'raceRules')}
-              renderValue={(selected) => (
-                <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 0.5 }}>
-                  {selected.map((value) => (
-                    <Chip key={value} label={value} />
-                  ))}
-                </Box>
-              )}
-            >
-              <MenuItem value="Mandatory Pit Stops">Mandatory Pit Stops</MenuItem>
-              <MenuItem value="No Assists">No Assists</MenuItem>
-              <MenuItem value="Simulation Damage">Simulation Damage</MenuItem>
-            </Select>
-          </FormControl>
-          <TextField
-            margin="normal"
-            fullWidth
-            id="weatherConditions"
-            label="Weather Conditions"
-            name="weatherConditions"
-            value={eventData.weatherConditions}
-            onChange={handleChange}
-          />
-          <TextField
-            margin="normal"
-            fullWidth
-            id="rewardPoints"
-            label="Reward Points"
-            name="rewardPoints"
-            type="number"
-            value={eventData.rewardPoints}
-            onChange={handleChange}
-          />
-          <TextField
-            margin="normal"
-            fullWidth
-            id="maxParticipants"
-            label="Maximum Participants"
-            name="maxParticipants"
-            type="number"
-            value={eventData.maxParticipants}
-            onChange={handleChange}
-          />
-          <Button
-            type="submit"
-            fullWidth
-            variant="contained"
-            sx={{ mt: 3, mb: 2 }}
-          >
-            Create Event
-          </Button>
-        </Box>
-      </Paper>
+    <Container maxWidth="lg">
+      <Grid container spacing={4}>
+        <Grid item xs={12} md={8}>
+          <Paper elevation={3} sx={{ p: 4, mt: 4 }}>
+            <Typography variant="h4" component="h1" gutterBottom>
+              Create New Event
+            </Typography>
+            {generalError && (
+              <Typography color="error" sx={{ mb: 2 }}>
+                {generalError}
+              </Typography>
+            )}
+            <Box component="form" onSubmit={handleSubmit} noValidate sx={{ mt: 1 }}>
+              <TextField
+                margin="normal"
+                required
+                fullWidth
+                id="title"
+                label="Title"
+                name="title"
+                value={eventData.title}
+                onChange={handleChange}
+                error={!!errors.title}
+                helperText={errors.title}
+              />
+              <TextField
+                margin="normal"
+                required
+                fullWidth
+                id="description"
+                label="Description"
+                name="description"
+                multiline
+                rows={4}
+                value={eventData.description}
+                onChange={handleChange}
+                error={!!errors.description}
+                helperText={errors.description}
+              />
+              <TextField
+                margin="normal"
+                required
+                fullWidth
+                id="date"
+                label="Date"
+                name="date"
+                type="date"
+                InputLabelProps={{
+                  shrink: true,
+                }}
+                value={eventData.date}
+                onChange={handleChange}
+                error={!!errors.date}
+                helperText={errors.date}
+              />
+              <TextField
+                margin="normal"
+                required
+                fullWidth
+                id="location"
+                label="Location"
+                name="location"
+                value={eventData.location}
+                onChange={handleChange}
+                error={!!errors.location}
+                helperText={errors.location}
+              />
+              <FormControl fullWidth margin="normal">
+                <InputLabel id="eventType-label">Event Type</InputLabel>
+                <Select
+                  labelId="eventType-label"
+                  id="eventType"
+                  name="eventType"
+                  value={eventData.eventType}
+                  onChange={handleChange}
+                  label="Event Type"
+                >
+                  <MenuItem value="Qualification">Qualification</MenuItem>
+                  <MenuItem value="Race">Race</MenuItem>
+                  <MenuItem value="Championship">Championship</MenuItem>
+                </Select>
+              </FormControl>
+              <TextField
+                margin="normal"
+                fullWidth
+                id="laps"
+                label="Laps"
+                name="laps"
+                type="number"
+                value={eventData.laps}
+                onChange={handleChange}
+              />
+              <TextField
+                margin="normal"
+                fullWidth
+                id="imageUrl"
+                label="Image URL"
+                name="imageUrl"
+                value={eventData.imageUrl}
+                onChange={handleChange}
+              />
+              <Button
+                type="submit"
+                fullWidth
+                variant="contained"
+                sx={{ mt: 3, mb: 2 }}
+              >
+                Create Event
+              </Button>
+            </Box>
+          </Paper>
+        </Grid>
+        <Grid item xs={12} md={4}>
+          <Box sx={{ position: 'sticky', top: '20px' }}>
+            <Typography variant="h5" component="h2" gutterBottom>
+              Event Preview
+            </Typography>
+            <EventCard
+              title={eventData.title}
+              date={eventData.date}
+              eventType={eventData.eventType}
+              laps={eventData.laps}
+              imageUrl={eventData.imageUrl}
+            />
+          </Box>
+        </Grid>
+      </Grid>
     </Container>
   );
 }
