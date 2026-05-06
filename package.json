@@ -1,31 +1,22 @@
 {
   "name": "forza.events",
-  "version": "1.0.0",
-  "description": "Discord Activity for Forza Racing Series",
-  "main": "dist/server/server.js",
+  "private": true,
+  "version": "0.0.0",
+  "type": "module",
   "scripts": {
-    "start": "node dist/server/server.js",
-    "dev": "concurrently \"npm run dev:client\" \"npm run dev:server\"",
-    "dev:client": "vite",
-    "dev:server": "nodemon src/server/server.ts",
-    "build": "tsc && vite build",
-    "register": "node scripts/register-commands.js"
+    "dev": "vite",
+    "build": "tsc -b && vite build",
+    "preview": "vite preview"
   },
-  "keywords": ["discord", "activity", "forza"],
-  "author": "",
-  "license": "ISC",
   "dependencies": {
-    "@discord/embedded-app-sdk": "^1.5.0",
-    "dotenv": "^16.4.5",
-    "express": "^4.21.1",
-    "firebase": "^10.14.1"
+    "react": "^18.3.1",
+    "react-dom": "^18.3.1"
   },
   "devDependencies": {
-    "@types/express": "^5.0.0",
-    "@types/node": "^22.7.5",
-    "typescript": "^5.6.3",
-    "vite": "^4.0.0",
-    "concurrently": "^7.0.0",
-    "nodemon": "^2.0.15"
+    "@types/react": "^18.3.18",
+    "@types/react-dom": "^18.3.5",
+    "@vitejs/plugin-react": "^4.3.4",
+    "typescript": "~5.6.3",
+    "vite": "^5.4.21"
   }
 }

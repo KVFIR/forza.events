@@ -1,47 +1,27 @@
-# Node.js dependencies
-node_modules/
+# Dependencies
+node_modules
 
-# TypeScript compiled output
-dist/
-
-# Environment variables
-.env
-
-# IDE and editor files
-.vscode/
-.idea/
-*.swp
-*.swo
+# Build
+dist
+dist-ssr
+*.local
 
 # Logs
-*.log
 npm-debug.log*
+pnpm-debug.log*
+yarn-debug.log*
+yarn-error.log*
 
-# Operating System files
+# Editor / OS
 .DS_Store
-Thumbs.db
+*.sw?
 
-# Firebase config and cache
-.firebaserc
-firebase-debug.log
-.firebase/
+# Env (keep example tracked)
+.env
+.env.*.local
 
-# Build artifacts
-build/
+# TypeScript
+*.tsbuildinfo
 
-# Temporary files
-*.tmp
-*.temp
-
-# Dependency lock files
-package-lock.json
-yarn.lock
-
-# Test coverage reports
-coverage/
-
-# Miscellaneous
-*.bak
-*.cache
-*.pid
-
+# Vite
+.vite
