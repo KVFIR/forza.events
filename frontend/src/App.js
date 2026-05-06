@@ -1,115 +1,102 @@
-import React, { useState, useEffect, lazy, Suspense } from 'react';
-import { BrowserRouter as Router, Route, Routes, Navigate } from 'react-router-dom';
-import axios from 'axios';
+/* eslint-disable react/prop-types */
+import React from 'react';
+import './index.css';
 
-const Home = lazy(() => import('./components/Home'));
-const EventList = lazy(() => import('./components/EventList'));
-const CreateEvent = lazy(() => import('./components/CreateEvent'));
-const UserProfileContainer = lazy(() => import('./components/UserProfileContainer'));
-const EventDetails = lazy(() => import('./components/EventDetails'));
-const UserProfile = lazy(() => import('./components/UserProfile'));
+const screenData = [
+  {
+    title: 'Discover',
+    heading: 'FORZA.EVENTS',
+    chips: ['Race', 'Tournament', 'Cruise'],
+    cards: [
+      { title: 'Night Street Cup', meta: 'Today, 20:00 · 24/32', cta: 'Join' },
+      { title: 'Sunset Cruise', meta: 'Today, 19:00 · 18/30', cta: 'Join' },
+      { title: 'Drift Session', meta: 'Tomorrow, 16:30 · 16/24', cta: 'Join' },
+    ],
+  },
+  {
+    title: 'Event Details',
+    heading: 'Night Street Cup',
+    chips: ['Race', 'A-Class (700)', 'BoostedRacer'],
+    cards: [
+      { title: 'Rules', meta: 'Clean racing only. Respect all drivers.', cta: 'Read' },
+      { title: 'Participants', meta: '24 / 32 racers', cta: 'View' },
+      { title: 'Discord voice required', meta: 'You will be asked to join channel.', cta: 'Open' },
+    ],
+  },
+  {
+    title: 'Discord Integration',
+    heading: 'Connected',
+    chips: ['ForzaFan#2567', 'Voice channel ready'],
+    cards: [
+      { title: '#event-night-street-cup', meta: 'Temporary event voice channel', cta: 'Join' },
+      { title: 'Reminders', meta: 'Notify 15 minutes before event starts.', cta: 'On' },
+      { title: 'What to expect', meta: 'Check-in and race briefing in voice.', cta: 'Info' },
+    ],
+  },
+  {
+    title: 'Create Event',
+    heading: 'Publish New Race',
+    chips: ['Race', 'Tournament', 'Cruise', 'Meet'],
+    cards: [
+      { title: 'Date & Time', meta: 'May 24, 2024 · 20:00', cta: 'Edit' },
+      { title: 'Max players', meta: '32', cta: '+/-' },
+      { title: 'Region', meta: 'Europe (EU)', cta: 'Select' },
+    ],
+  },
+  {
+    title: 'Profile',
+    heading: 'ForzaFan',
+    chips: ['Level 48', '12,340 / 18,000 XP'],
+    cards: [
+      { title: 'Attendance', meta: '92% last 30 days', cta: 'Stats' },
+      { title: 'Events joined', meta: '64 last 30 days', cta: 'Stats' },
+      { title: 'Host Reputation', meta: '4.8 ★★★★★', cta: 'Top 12%' },
+    ],
+  },
+];
 
-axios.defaults.baseURL = 'http://localhost:5000';
-axios.defaults.withCredentials = true;
-
-import { ThemeProvider } from '@mui/material/styles';
-import CssBaseline from '@mui/material/CssBaseline';
-import theme from './theme';
-
-import { AppBar, Toolbar, Typography, Button, Box, CircularProgress } from '@mui/material';
-import { Link as RouterLink } from 'react-router-dom';
-
-function App() {
-  const [user, setUser] = useState(null);
-  const [loading, setLoading] = useState(true);
-
-  useEffect(() => {
-    const fetchUser = async () => {
-      try {
-        const response = await axios.get('/api/user', { withCredentials: true });
-        setUser(response.data);
-      } catch (error) {
-        console.error('Error fetching user:', error);
-        if (error.response && error.response.status === 401) {
-          setUser(null);
-        }
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    fetchUser();
-  }, []);
-
-  const handleLogout = async () => {
-    try {
-      await axios.get('/auth/logout');
-      setUser(null);
-      // Redirect to home page after logout
-      window.location.href = '/';
-    } catch (error) {
-      console.error('Error logging out:', error);
-    }
-  };
-
-  if (loading) {
-    return <div>Loading...</div>;
-  }
-
+function PhoneScreen({ screen }) {
   return (
-    <ThemeProvider theme={theme}>
-      <CssBaseline />
-      <Router>
-        <AppBar 
-          position="static" 
-          elevation={0} 
-          sx={{ 
-            backgroundColor: 'transparent',
-            boxShadow: 'none',
-            borderBottom: '0px solid #f7fefd',
-            '&::after': {
-              content: '""',
-              position: 'absolute',
-              bottom: 0,
-              left: 0,
-              right: 0,
-              height: '4px',
-              background: 'linear-gradient(90deg, #154c6e, #6ccfe0, #f7fefd, #6ccfe0, #154c6e)',
-              boxShadow: '0 0 20px #6ccfe0, 0 0 40px #6ccfe0, 0 0 60px #6ccfe0',
-              opacity: 0.9,
-            }
-          }}
-        >
-          <Toolbar>
-            <Typography variant="h6" sx={{ flexGrow: 1, color: 'white' }}>
-              FORZA.EVENTS
-            </Typography>
-            <Box>
-              <Button sx={{ color: 'white' }} component={RouterLink} to="/">Home</Button>
-              <Button sx={{ color: 'white' }} component={RouterLink} to="/events">Events</Button>
-              {user && <Button sx={{ color: 'white' }} component={RouterLink} to={`/user/${user._id}`}>Profile</Button>}
-              {user ? (
-                <Button sx={{ color: 'white' }} onClick={handleLogout}>Logout</Button>
-              ) : (
-                <Button sx={{ color: 'white' }} onClick={() => window.location.href = 'http://localhost:5000/auth/discord'}>Login</Button>
-              )}
-            </Box>
-          </Toolbar>
-        </AppBar>
-        <Suspense fallback={<CircularProgress />}>
-          <Routes>
-            <Route path="/" element={<Home />} />
-            <Route path="/events" element={<EventList user={user} />} />
-            <Route path="/create-event" element={<CreateEvent user={user} />} />
-            <Route path="/profile" element={user ? <UserProfileContainer /> : <Navigate to="/" />} />
-            <Route path="/events/:id" element={<EventDetails user={user} />} />
-            <Route path="/user/:id" element={<UserProfile />} />
-            <Route path="/events/create" element={<CreateEvent user={user} />} />
-          </Routes>
-        </Suspense>
-      </Router>
-    </ThemeProvider>
+    <article className="phone">
+      <header>
+        <p className="time">9:41</p>
+        <h2>{screen.title}</h2>
+      </header>
+
+      <div className="hero">
+        <h3>{screen.heading}</h3>
+        <div className="chips">
+          {screen.chips.map((chip) => (
+            <span key={chip}>{chip}</span>
+          ))}
+        </div>
+      </div>
+
+      <div className="stack">
+        {screen.cards.map((card) => (
+          <section key={card.title} className="card">
+            <div>
+              <h4>{card.title}</h4>
+              <p>{card.meta}</p>
+            </div>
+            <button type="button">{card.cta}</button>
+          </section>
+        ))}
+      </div>
+
+      <button className="primary" type="button">
+        {screen.title === 'Create Event' ? 'Publish Event' : 'Continue'}
+      </button>
+    </article>
   );
 }
 
-export default App;
+export default function App() {
+  return (
+    <main className="app">
+      {screenData.map((screen) => (
+        <PhoneScreen key={screen.title} screen={screen} />
+      ))}
+    </main>
+  );
+}

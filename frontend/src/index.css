@@ -1,65 +1,99 @@
-/* Сброс стилей и базовые настройки */
+:root {
+  --bg: #040916;
+  --panel: #0b1328;
+  --panel-2: #101d37;
+  --text: #e8eeff;
+  --muted: #95a2c7;
+  --accent: linear-gradient(90deg, #ff4cab 0%, #6a5cff 100%);
+}
+
 * {
   box-sizing: border-box;
 }
 
-body, html {
-  height: 100%;
+body {
+  margin: 0;
+  font-family: Inter, system-ui, -apple-system, sans-serif;
+  background: radial-gradient(circle at 20% 20%, #102552 0%, #030712 45%, #02040a 100%);
+  color: var(--text);
 }
 
-/* Стили для контейнера */
-.container {
-  max-width: 1200px;
-  margin: 0 auto;
-  padding: 20px;
+.app {
+  min-height: 100vh;
+  display: grid;
+  grid-template-columns: repeat(5, minmax(220px, 1fr));
+  gap: 20px;
+  padding: 32px;
 }
 
-/* Стили для профиля, которые не покрываются Material-UI */
-.profile img {
-  border-radius: 50%;
-  margin-bottom: 20px;
+.phone {
+  background: linear-gradient(180deg, rgba(8, 14, 30, 0.96), rgba(4, 8, 20, 0.95));
+  border: 1px solid rgba(144, 157, 214, 0.25);
+  border-radius: 34px;
+  padding: 18px;
+  box-shadow: 0 24px 44px rgba(0, 0, 0, 0.55), inset 0 0 40px rgba(61, 114, 255, 0.08);
 }
 
-/* Дополнительные стили для текста в профиле */
-.profile h2 {
-  color: #7289da;
+.time {
+  margin: 0;
+  color: #ccd6ff;
+  font-size: 13px;
 }
 
-.profile strong {
-  color: #43b581;
+h2 { margin: 8px 0 14px; font-size: 30px; }
+h3 { margin: 0; font-size: 25px; }
+h4 { margin: 0 0 4px; font-size: 16px; }
+p { margin: 0; color: var(--muted); font-size: 14px; }
+
+.hero {
+  background: linear-gradient(145deg, rgba(36, 61, 114, 0.5), rgba(13, 19, 41, 0.9));
+  border: 1px solid rgba(118, 140, 212, 0.3);
+  border-radius: 20px;
+  padding: 16px;
 }
 
-/* Стили для списков в профиле */
-.profile ul {
-  list-style: none;
-  padding: 0;
+.chips { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 14px; }
+.chips span {
+  padding: 6px 10px;
+  border-radius: 999px;
+  background: rgba(106, 92, 255, 0.24);
+  border: 1px solid rgba(177, 167, 255, 0.45);
+  font-size: 12px;
 }
 
-.profile li {
+.stack { margin-top: 14px; display: grid; gap: 10px; }
+.card {
+  background: var(--panel);
+  border: 1px solid rgba(104, 132, 199, 0.28);
+  border-radius: 14px;
+  padding: 13px;
   display: flex;
+  justify-content: space-between;
   align-items: center;
-  margin-bottom: 10px;
+  gap: 10px;
 }
 
-/* Дополнительные глобальные стили */
-::-webkit-scrollbar {
-  width: 8px;
+button {
+  border: none;
+  border-radius: 11px;
+  color: white;
+  background: rgba(106, 92, 255, 0.85);
+  padding: 8px 12px;
+  font-weight: 600;
 }
 
-::-webkit-scrollbar-track {
-  background: rgba(0, 0, 0, 0.1);
+.primary {
+  margin-top: 14px;
+  width: 100%;
+  padding: 14px;
+  font-size: 16px;
+  background: var(--accent);
 }
 
-::-webkit-scrollbar-thumb {
-  background: rgba(255, 255, 255, 0.3);
-  border-radius: 4px;
+@media (max-width: 1400px) {
+  .app { grid-template-columns: repeat(3, minmax(220px, 1fr)); }
 }
 
-::-webkit-scrollbar-thumb:hover {
-  background: rgba(255, 255, 255, 0.5);
-}
-
-a {
-  color: inherit;
-  text-decoration: none;
+@media (max-width: 920px) {
+  .app { grid-template-columns: 1fr; }
 }
