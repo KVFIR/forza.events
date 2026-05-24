@@ -1,22 +1,101 @@
-:root {
-  font-family: system-ui, -apple-system, Segoe UI, sans-serif;
-  line-height: 1.5;
-  font-weight: 400;
-  color: #e8eaed;
-  background-color: #0f1115;
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  :root {
+    color-scheme: dark;
+  }
+
+  html {
+    scroll-behavior: smooth;
+  }
+
+  body {
+    @apply m-0 min-h-screen bg-base font-sans text-slate-100 antialiased;
+    background-image:
+      radial-gradient(ellipse 90% 45% at 50% -5%, rgba(139, 92, 246, 0.11) 0%, transparent 100%),
+      radial-gradient(ellipse 45% 35% at 95% 95%, rgba(34, 211, 238, 0.05) 0%, transparent 100%);
+  }
+
+  #root {
+    @apply min-h-screen;
+  }
+
+  * {
+    scrollbar-width: thin;
+    scrollbar-color: rgba(139, 92, 246, 0.28) transparent;
+  }
+
+  ::-webkit-scrollbar {
+    width: 4px;
+    height: 4px;
+  }
+
+  ::-webkit-scrollbar-track {
+    background: transparent;
+  }
+
+  ::-webkit-scrollbar-thumb {
+    background: rgba(139, 92, 246, 0.28);
+    border-radius: 100px;
+  }
+
+  ::-webkit-scrollbar-thumb:hover {
+    background: rgba(139, 92, 246, 0.5);
+  }
+
+  input:-webkit-autofill,
+  select:-webkit-autofill,
+  textarea:-webkit-autofill {
+    -webkit-box-shadow: 0 0 0 100px #0b0d1c inset;
+    -webkit-text-fill-color: #f1f5f9;
+  }
 }
 
-*,
-*::before,
-*::after {
-  box-sizing: border-box;
-}
+@layer utilities {
+  .glass {
+    backdrop-filter: blur(16px) saturate(160%);
+    -webkit-backdrop-filter: blur(16px) saturate(160%);
+  }
 
-body {
-  margin: 0;
-  min-height: 100vh;
-}
+  .glow-purple {
+    box-shadow: 0 0 22px rgba(139, 92, 246, 0.55), 0 0 50px rgba(139, 92, 246, 0.15);
+  }
 
-#root {
-  min-height: 100vh;
+  .glow-purple-sm {
+    box-shadow: 0 0 12px rgba(139, 92, 246, 0.4);
+  }
+
+  .glow-cyan-sm {
+    box-shadow: 0 0 12px rgba(34, 211, 238, 0.4);
+  }
+
+  .text-glow-purple {
+    text-shadow: 0 0 16px rgba(139, 92, 246, 0.8), 0 0 32px rgba(139, 92, 246, 0.4);
+  }
+
+  .bg-dots {
+    background-image: radial-gradient(rgba(255, 255, 255, 0.035) 1px, transparent 1px);
+    background-size: 22px 22px;
+  }
+
+  .no-scrollbar {
+    -ms-overflow-style: none;
+    scrollbar-width: none;
+  }
+
+  .no-scrollbar::-webkit-scrollbar {
+    display: none;
+  }
+
+  .card-glow-border {
+    border: 1px solid rgba(255, 255, 255, 0.07);
+    transition: border-color 0.25s ease, box-shadow 0.25s ease;
+  }
+
+  .card-glow-border:hover {
+    border-color: rgba(139, 92, 246, 0.28);
+    box-shadow: 0 6px 36px rgba(0, 0, 0, 0.65), 0 0 0 1px rgba(139, 92, 246, 0.18);
+  }
 }

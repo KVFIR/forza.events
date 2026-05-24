@@ -1,0 +1,114 @@
+import {exchangeToken, isApiConfigured} from './api';
+import {MOCK_USER} from './mockData';
+import type {AppUser} from './types';
+
+type DiscordSDKInstance = import('@discord/embedded-app-sdk').DiscordSDK;
+
+export type InitResult = {
+  user: AppUser;
+  ready: boolean;
+  accessToken: string | null;
+  guildId: string | null;
+  guildName: string | null;
+};
+
+let resolvedUser: AppUser = {...MOCK_USER};
+let discordAccessToken: string | null = null;
+let guildId: string | null = null;
+let guildName: string | null = null;
+
+let sdkInstance: DiscordSDKInstance | null = null;
+let initPromise: Promise<InitResult> | null = null;
+
+export function isStandaloneBrowser(): boolean {
+  if (typeof window === 'undefined') return true;
+  try {
+    return window.parent === window;
+  } catch {
+    return false;
+  }
+}
+
+export function getUser(): AppUser {
+  return resolvedUser;
+}
+
+export function getDiscordAccessToken(): string | null {
+  return discordAccessToken;
+}
+
+export function getGuildContext(): {guildId: string | null; guildName: string | null} {
+  return {guildId, guildName};
+}
+
+export function getDiscordSdk(): DiscordSDKInstance | null {
+  return sdkInstance;
+}
+
+export async function initDiscordActivity(): Promise<InitResult> {
+  if (initPromise) return initPromise;
+
+  initPromise = (async () => {
+    if (isStandaloneBrowser()) {
+      resolvedUser = {...MOCK_USER};
+      return {
+        user: resolvedUser,
+        ready: false,
+        accessToken: null,
+        guildId: null,
+        guildName: null,
+      };
+    }
+
+    const clientId = import.meta.env.VITE_DISCORD_CLIENT_ID as string | undefined;
+    if (!clientId) {
+      resolvedUser = {...MOCK_USER};
+      return {
+        user: resolvedUser,
+        ready: false,
+        accessToken: null,
+        guildId: null,
+        guildName: null,
+      };
+    }
+
+    const {DiscordSDK} = await import('@discord/embedded-app-sdk');
+    const sdk = new DiscordSDK(clientId);
+    sdkInstance = sdk;
+    await sdk.ready();
+
+    guildId = sdk.guildId ?? null;
+    guildName = guildId ? 'Server' : null;
+
+    const {code} = await sdk.commands.authorize({
+      client_id: clientId,
+      response_type: 'code',
+      state: '',
+      prompt: 'none',
+      scope: ['identify', 'guilds'],
+    });
+
+    if (isApiConfigured()) {
+      const result = await exchangeToken(code, guildId ?? undefined, guildName ?? undefined);
+      discordAccessToken = result.access_token;
+      resolvedUser = result.user;
+      await sdk.commands.authenticate({access_token: result.access_token});
+    } else {
+      resolvedUser = {...MOCK_USER, username: 'Discord'};
+    }
+
+    return {
+      user: resolvedUser,
+      ready: true,
+      accessToken: discordAccessToken,
+      guildId,
+      guildName,
+    };
+  })();
+
+  return initPromise;
+}
+
+export function setResolvedUser(user: AppUser) {
+  resolvedUser = user;
+}

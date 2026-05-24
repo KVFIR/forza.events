@@ -1,16 +1,1 @@
-.app {
-  max-width: 42rem;
-  margin: 0 auto;
-  padding: 3rem 1.25rem;
-}
-
-.lead {
-  margin-top: 0.5rem;
-  color: #9aa0a6;
-}
-
-h1 {
-  margin: 0;
-  font-size: 1.75rem;
-  font-weight: 600;
-}
+/* Styles live in Tailwind (see src/index.css). */
