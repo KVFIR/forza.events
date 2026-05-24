@@ -1,0 +1,12 @@
+[
+  {"make": "Ferrari", "model": "SF90 Stradale", "year": 2020, "class": "S2"},
+  {"make": "McLaren", "model": "Senna", "year": 2018, "class": "S2"},
+  {"make": "Rimac", "model": "Nevera", "year": 2021, "class": "X"},
+  {"make": "Hennessey", "model": "Venom GT", "year": 2012, "class": "X"},
+  {"make": "Toyota", "model": "GR Yaris", "year": 2020, "class": "B"},
+  {"make": "Ford", "model": "Focus RS", "year": 2016, "class": "B"},
+  {"make": "Mini", "model": "John Cooper Works GP", "year": 2020, "class": "B"},
+  {"make": "Volvo", "model": "850 R", "year": 1997, "class": "C"},
+  {"make": "BMW", "model": "2002 Turbo", "year": 1973, "class": "C"},
+  {"make": "Nissan", "model": "350Z", "year": 2003, "class": "B"}
+]
