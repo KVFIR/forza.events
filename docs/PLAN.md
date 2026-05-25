@@ -113,9 +113,9 @@ The MVP should be considered launch-ready only when all items below are complete
 
 ### Discord platform
 
-- [ ] Discord Application configured for Activities
-- [ ] Activity URL set to the deployed app
-- [ ] Interactions endpoint configured if needed for publish flows
+- [x] Discord Application configured for Activities
+- [x] Activity URL set to the deployed app
+- [x] Interactions endpoint configured if needed for publish flows
 - [ ] Bot/app permissions verified for publish targets and guild listing
 - [ ] Launch flow verified from embed back into the Activity
 

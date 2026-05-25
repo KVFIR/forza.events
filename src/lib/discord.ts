@@ -1,4 +1,5 @@
 import {exchangeToken, isApiConfigured} from './api';
+import {DISCORD_ACTIVITY_REDIRECT_URI} from './discordConstants';
 import {
   buildDiscordAuthorizeUrl,
   clearDiscordSession,
@@ -129,11 +130,21 @@ export async function initDiscordActivity(): Promise<InitResult> {
     });
 
     if (isApiConfigured()) {
-      const result = await exchangeToken(code, {guildId: guildId ?? undefined, guildName: guildName ?? undefined});
-      discordAccessToken = result.access_token;
-      resolvedUser = result.user;
-      saveDiscordSession({accessToken: result.access_token, user: result.user});
-      await sdk.commands.authenticate({access_token: result.access_token});
+      try {
+        const result = await exchangeToken(code, {
+          guildId: guildId ?? undefined,
+          guildName: guildName ?? undefined,
+          redirectUri: DISCORD_ACTIVITY_REDIRECT_URI,
+        });
+        discordAccessToken = result.access_token;
+        resolvedUser = result.user;
+        saveDiscordSession({accessToken: result.access_token, user: result.user});
+        await sdk.commands.authenticate({access_token: result.access_token});
+      } catch (err) {
+        console.error('Discord Activity auth failed', err);
+        resolvedUser = {...GUEST_USER, username: 'Discord'};
+        discordAccessToken = null;
+      }
     } else {
       resolvedUser = {...GUEST_USER, username: 'Discord'};
     }

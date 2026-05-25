@@ -237,7 +237,7 @@ See checklist in [`PLAN.md`](PLAN.md#launch-checklist). Additionally:
 | Symptom | Likely cause | Fix |
 |---------|----------------|-----|
 | Empty Browse, no errors in UI | Invalid `SUPABASE_ANON_KEY` | Copy anon key from Supabase Dashboard → API |
-| Empty Browse inside Discord only | Missing Activity URL mapping for Supabase | Portal → Activities → URL Mappings: `/.proxy/supabase` → `<ref>.supabase.co`; redeploy app with `patchUrlMappings` |
+| Empty Browse inside Discord only | Missing Activity URL mapping for Supabase | Portal → URL Mappings: `/supabase` → `<ref>.supabase.co` (not `/.proxy/...`); redeploy app with `patchUrlMappings` |
 | Empty Browse, console `fetchEventsWithRelations` | DB error / RLS | Check Supabase logs; ensure migrations applied |
 | My Events empty, Browse works | Normal — list is only hosted/joined | Open **Browse** for the global feed |
 | OAuth redirect fails | `DISCORD_REDIRECT_URI` mismatch | Match `.env` and Discord portal exactly |

@@ -1,7 +1,8 @@
 import {patchUrlMappings} from '@discord/embedded-app-sdk';
 import {isStandaloneBrowser} from './discord';
 
-const PROXY_PREFIX = '/.proxy/supabase';
+/** Portal + patchUrlMappings prefix (no `.proxy` — Discord removed that segment). */
+const PROXY_PREFIX = '/supabase';
 
 /** Rewrite Supabase REST/Realtime/Functions hosts through the Discord Activity proxy. */
 export function setupDiscordSupabaseProxy(): void {
