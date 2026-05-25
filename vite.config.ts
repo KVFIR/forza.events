@@ -12,6 +12,18 @@ function clientEnv(env: Record<string, string>) {
   };
 }
 
+function vendorChunk(id: string): string | undefined {
+  if (!id.includes('node_modules')) return undefined;
+  if (id.includes('@supabase')) return 'supabase';
+  if (id.includes('@discord')) return 'discord';
+  if (id.includes('react-router') || id.includes('react-dom') || id.includes('/react/')) {
+    return 'react-vendor';
+  }
+  if (id.includes('date-fns')) return 'date-fns';
+  if (id.includes('lucide-react')) return 'icons';
+  return undefined;
+}
+
 export default defineConfig(({mode}) => {
   const env = loadEnv(mode, process.cwd(), '');
   const client = clientEnv(env);
@@ -23,6 +35,19 @@ export default defineConfig(({mode}) => {
       'import.meta.env.VITE_SUPABASE_URL': JSON.stringify(client.VITE_SUPABASE_URL),
       'import.meta.env.VITE_SUPABASE_ANON_KEY': JSON.stringify(client.VITE_SUPABASE_ANON_KEY),
       'import.meta.env.VITE_API_BASE_URL': JSON.stringify(client.VITE_API_BASE_URL),
+    },
+    build: {
+      target: 'es2022',
+      sourcemap: false,
+      reportCompressedSize: false,
+      rollupOptions: {
+        output: {
+          manualChunks(id) {
+            if (id.includes('fh6cars.json')) return 'car-catalog';
+            return vendorChunk(id);
+          },
+        },
+      },
     },
     server: {
       port: 5180,
