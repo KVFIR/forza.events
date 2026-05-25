@@ -2,7 +2,13 @@ export type EventType = 'road' | 'dirt' | 'drift' | 'touge';
 
 export type VoicePolicy = 'required' | 'optional' | 'none';
 
+/** UI-facing registration state */
 export type EventStatus = 'open' | 'full' | 'live' | 'ended';
+
+/** Persisted lifecycle from the database */
+export type EventLifecycle = 'draft' | 'open' | 'live' | 'completed' | 'cancelled' | 'archived';
+
+export type CarRuleMode = 'anything_goes' | 'restricted_list';
 
 export interface EventAllowedCar {
   carId: string;
@@ -29,9 +35,16 @@ export interface ForzaEvent {
   title: string;
   type: EventType;
   status: EventStatus;
+  lifecycle: EventLifecycle;
   startsAt: string;
   endsAt?: string;
   createdAt?: string;
+  guildId?: string;
+  guildName?: string;
+  channelId?: string;
+  carRuleMode: CarRuleMode;
+  carClassCap?: string;
+  maxPi: number;
   allowedCars: EventAllowedCar[];
   voicePolicy: VoicePolicy;
   maxPlayers: number;
@@ -42,8 +55,8 @@ export interface ForzaEvent {
   rules: string;
   description?: string;
   coverImageUrl?: string;
-  /** Event share codes (000 000 000), one per track/round. */
-  trackList?: string[];
+  primaryTrackCode?: string;
+  extraTrackCodes?: string[];
   lobbyLeaderGamertag?: string;
   timezoneHint?: string;
   threadLabel?: string;
@@ -62,3 +75,9 @@ export interface AppUser {
   noShows: number;
   hostRatingAvg: number;
 }
+
+export type DiscordGuildOption = {
+  id: string;
+  name: string;
+  iconUrl?: string | null;
+};

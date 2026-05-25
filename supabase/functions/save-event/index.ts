@@ -1,25 +1,24 @@
 import {serve} from 'https://deno.land/std@0.224.0/http/server.ts';
+import {syncPublishedEmbed} from '../_shared/embedSync.ts';
+import {
+  assertTargetNotLocked,
+  buildEventRow,
+  canEditPublishedEvent,
+  type CarPayload,
+  type SaveEventBody,
+  validateDraft,
+  validatePublishReady,
+  isPublishedStatus,
+  eventHasStarted,
+} from '../_shared/eventSpec.ts';
 import {jsonResponse, optionsResponse} from '../_shared/cors.ts';
 import {verifyDiscordToken} from '../_shared/discord.ts';
 import {resolveCoverUrl} from '../_shared/eventCovers.ts';
 import {slugify} from '../_shared/events.ts';
 import {adminClient} from '../_shared/supabase.ts';
 
-const PLAYER_SLOTS = 11;
 const UUID_RE =
   /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
-
-type CarPayload = {
-  id: string;
-  make: string;
-  model: string;
-  year: number | null;
-  pi: number;
-  class: string;
-  max_pi: number;
-  tune_share_code?: string | null;
-  car_restrictions?: string[];
-};
 
 serve(async (req) => {
   if (req.method === 'OPTIONS') return optionsResponse();
@@ -32,69 +31,105 @@ serve(async (req) => {
   if (!discordUser) return jsonResponse({error: 'Unauthorized'}, 401);
 
   try {
-    const body = await req.json();
+    const body = (await req.json()) as SaveEventBody;
     const supabase = adminClient();
 
-    const guildId = body.guild_id as string;
-    if (!guildId) return jsonResponse({error: 'Missing guild_id'}, 400);
-
-    const cars: CarPayload[] = body.cars ?? [];
-    if (cars.length === 0) {
-      return jsonResponse({error: 'Add at least one car to the event'}, 400);
-    }
-
-    await supabase.from('discord_guilds').upsert(
-      {guild_id: guildId, guild_name: body.guild_name ?? 'Server'},
-      {onConflict: 'guild_id'},
-    );
-
-    const row = {
-      title: body.title,
-      type: body.type,
-      status: body.publish ? 'open' : 'draft',
-      host_discord_id: discordUser.id,
-      guild_id: guildId,
-      starts_at: body.starts_at,
-      timezone_hint: body.timezone_hint,
-      max_pi: Math.max(...cars.map((c) => c.max_pi ?? 999)),
-      car_setup_mode: 'general',
-      tuning_restrictions: [],
-      voice_policy: body.voice_policy ?? 'optional',
-      max_players: PLAYER_SLOTS,
-      cover_image_url: resolveCoverUrl(body.type, body.cover_image_url),
-      description: body.description,
-      track_codes: (body.track_list ?? []).map((c: string) => c.trim()).filter(Boolean),
-      event_share_code: null,
-      rules_allowed: [],
-      rules_forbidden: [],
-      lobby_leader_gamertag: body.lobby_leader_gamertag ?? 'TBD',
-      lobby_leader_is_host: body.lobby_leader_is_host ?? true,
-    };
-
-    let eventId = body.id as string | undefined;
-
-    if (eventId) {
+    if (body.cancel && body.id) {
       const {data: existing} = await supabase
         .from('events')
-        .select('host_discord_id')
-        .eq('id', eventId)
+        .select('host_discord_id, status, starts_at')
+        .eq('id', body.id)
         .single();
       if (!existing || existing.host_discord_id !== discordUser.id) {
         return jsonResponse({error: 'Forbidden'}, 403);
       }
+      if (!eventHasStarted(existing)) {
+        return jsonResponse({error: 'Event has not started yet'}, 400);
+      }
+      if (['completed', 'cancelled', 'archived'].includes(existing.status)) {
+        return jsonResponse({error: 'Event is already closed'}, 400);
+      }
+      const {error} = await supabase
+        .from('events')
+        .update({status: 'cancelled'})
+        .eq('id', body.id);
+      if (error) return jsonResponse({error: error.message}, 500);
+      return jsonResponse({id: body.id, cancelled: true});
+    }
+
+    const draftErr = validateDraft(body);
+    if (draftErr) return jsonResponse({error: draftErr}, 400);
+
+    await supabase.from('discord_guilds').upsert(
+      {guild_id: body.guild_id, guild_name: body.guild_name ?? 'Server'},
+      {onConflict: 'guild_id'},
+    );
+
+    let existing: {
+      id: string;
+      host_discord_id: string;
+      status: string;
+      guild_id: string;
+      channel_id: string | null;
+      discord_message_id: string | null;
+      starts_at: string;
+      cover_image_url: string | null;
+    } | null = null;
+
+    if (body.id) {
+      const {data} = await supabase
+        .from('events')
+        .select(
+          'id, host_discord_id, status, guild_id, channel_id, discord_message_id, starts_at, cover_image_url',
+        )
+        .eq('id', body.id)
+        .single();
+      existing = data;
+      if (!existing || existing.host_discord_id !== discordUser.id) {
+        return jsonResponse({error: 'Forbidden'}, 403);
+      }
+      if (!canEditPublishedEvent(existing)) {
+        return jsonResponse({error: 'Published events cannot be edited after start'}, 403);
+      }
+      const lockErr = await assertTargetNotLocked(supabase, existing, body);
+      if (lockErr) return jsonResponse({error: lockErr}, 400);
+    }
+
+    const hasCover = Boolean(
+      body.cover_image_url?.trim() ||
+        existing?.cover_image_url?.trim() ||
+        resolveCoverUrl(body.type ?? 'road', body.cover_image_url),
+    );
+
+    if (body.publish) {
+      const publishErr = validatePublishReady(body, hasCover);
+      if (publishErr) return jsonResponse({error: publishErr}, 400);
+    }
+
+    const cars: CarPayload[] =
+      body.car_rule_mode === 'restricted_list' ? body.cars ?? [] : [];
+
+    const coverUrl = resolveCoverUrl(body.type ?? 'road', body.cover_image_url);
+    const row = buildEventRow(body, discordUser.id, coverUrl);
+
+    let eventId = body.id;
+
+    if (eventId) {
       const {data, error} = await supabase
         .from('events')
         .update(row)
         .eq('id', eventId)
-        .select('id, slug')
+        .select('*')
         .single();
       if (error) return jsonResponse({error: error.message}, 500);
-      eventId = data.id;
-      await syncEventCars(supabase, eventId, cars);
+      await syncEventCars(supabase, eventId, cars, body.car_rule_mode ?? 'anything_goes');
+      if (isPublishedStatus(data.status)) {
+        await syncPublishedEmbed(data);
+      }
       return jsonResponse({id: eventId, slug: data.slug});
     }
 
-    let slug = slugify(body.title);
+    let slug = slugify(body.title ?? 'event');
     for (let i = 0; i < 5; i++) {
       const trySlug = i === 0 ? slug : `${slug}-${i + 1}`;
       const {data, error} = await supabase
@@ -103,7 +138,7 @@ serve(async (req) => {
         .select('id, slug')
         .single();
       if (!error && data) {
-        await syncEventCars(supabase, data.id, cars);
+        await syncEventCars(supabase, data.id, cars, body.car_rule_mode ?? 'anything_goes');
         return jsonResponse({id: data.id, slug: data.slug});
       }
       if (error?.code !== '23505') {
@@ -156,8 +191,10 @@ async function syncEventCars(
   supabase: ReturnType<typeof adminClient>,
   eventId: string,
   cars: CarPayload[],
+  mode: 'anything_goes' | 'restricted_list',
 ) {
   await supabase.from('event_cars').delete().eq('event_id', eventId);
+  if (mode !== 'restricted_list' || cars.length === 0) return;
 
   const rows = [];
   for (const c of cars) {

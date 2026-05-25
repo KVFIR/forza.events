@@ -4,71 +4,83 @@ import {digitsOnly, formatShareCode, isCompleteShareCode} from '../lib/shareCode
 import {cn} from '../lib/cn';
 
 type Props = {
-  codes: string[];
-  onChange: (codes: string[]) => void;
+  primaryCode: string;
+  extraCodes: string[];
+  onPrimaryChange: (code: string) => void;
+  onExtrasChange: (codes: string[]) => void;
   inputClass: string;
   labelClass: string;
 };
 
-export function EventShareCodeList({codes, onChange, inputClass, labelClass}: Props) {
+export function EventShareCodeList({
+  primaryCode,
+  extraCodes,
+  onPrimaryChange,
+  onExtrasChange,
+  inputClass,
+  labelClass,
+}: Props) {
   const [draft, setDraft] = useState('');
 
-  function updateCommitted(index: number, raw: string) {
+  function updateExtra(index: number, raw: string) {
     const formatted = formatShareCode(raw);
     if (!digitsOnly(formatted)) {
-      onChange(codes.filter((_, i) => i !== index));
+      onExtrasChange(extraCodes.filter((_, i) => i !== index));
       return;
     }
-    const next = [...codes];
+    const next = [...extraCodes];
     next[index] = formatted;
-    onChange(next);
+    onExtrasChange(next);
   }
 
   function onDraftChange(raw: string) {
     const formatted = formatShareCode(raw);
     setDraft(formatted);
     if (isCompleteShareCode(formatted)) {
-      onChange([...codes, formatted]);
+      onExtrasChange([...extraCodes, formatted]);
       setDraft('');
     }
   }
 
-  const isFirstRow = codes.length === 0;
-  const fadedTrailing = !isFirstRow && !draft;
-
   return (
-    <div>
-      <p className={labelClass}>Track list</p>
-      <ol className="mt-3 space-y-2">
-        {codes.map((code, i) => (
-          <li key={`${i}-${code}`} className="flex items-center gap-3">
-            <span className="w-5 shrink-0 text-right text-sm font-semibold tabular-nums text-muted">
-              {i + 1}.
+    <div className="space-y-5">
+      <div>
+        <p className={labelClass}>Primary track code</p>
+        <ShareCodeInput
+          value={primaryCode}
+          onChange={onPrimaryChange}
+          className={cn(inputClass, 'mt-2')}
+        />
+      </div>
+
+      <div>
+        <p className={labelClass}>Extra track codes (optional)</p>
+        <ol className="mt-3 space-y-2">
+          {extraCodes.map((code, i) => (
+            <li key={`${i}-${code}`} className="flex items-center gap-3">
+              <span className="w-5 shrink-0 text-right text-sm font-semibold tabular-nums text-muted">
+                {i + 1}.
+              </span>
+              <ShareCodeInput
+                value={code}
+                onChange={(v) => updateExtra(i, v)}
+                className={cn(inputClass, 'mt-0 flex-1')}
+              />
+            </li>
+          ))}
+          <li className="flex items-center gap-3">
+            <span className="w-5 shrink-0 text-right text-sm font-semibold tabular-nums text-muted/50">
+              {extraCodes.length + 1}.
             </span>
             <ShareCodeInput
-              value={code}
-              onChange={(v) => updateCommitted(i, v)}
-              className={cn(inputClass, 'mt-0 flex-1')}
+              value={draft}
+              onChange={onDraftChange}
+              className={cn(inputClass, 'mt-0 flex-1 opacity-50')}
+              semiTransparent
             />
           </li>
-        ))}
-        <li className="flex items-center gap-3">
-          <span
-            className={cn(
-              'w-5 shrink-0 text-right text-sm font-semibold tabular-nums',
-              fadedTrailing ? 'text-muted/50' : 'text-muted',
-            )}
-          >
-            {codes.length + 1}.
-          </span>
-          <ShareCodeInput
-            value={draft}
-            onChange={onDraftChange}
-            className={cn(inputClass, 'mt-0 flex-1', fadedTrailing && 'opacity-50')}
-            semiTransparent={fadedTrailing}
-          />
-        </li>
-      </ol>
+        </ol>
+      </div>
     </div>
   );
 }

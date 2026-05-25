@@ -1,4 +1,4 @@
--- FORZA.EVENTS — initial schema (see docs/SCHEMA.md)
+-- FORZA.EVENTS — initial schema; current MVP alignment is documented in docs/PLAN.md and docs/STATUS.md
 
 create extension if not exists "uuid-ossp";
 create extension if not exists "pgcrypto";

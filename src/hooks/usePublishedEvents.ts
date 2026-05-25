@@ -4,8 +4,9 @@ import {useJoinedEvents} from '../context/JoinedEventsContext';
 import {fetchPublishedEvents, type FetchEventsOptions} from '../lib/events';
 import type {ForzaEvent} from '../lib/types';
 
+/** Global public browse feed (frozen MVP spec). */
 export function usePublishedEvents(options: FetchEventsOptions = {}) {
-  const {guildId, loading: authLoading} = useAuth();
+  const {loading: authLoading} = useAuth();
   const {refreshKey} = useJoinedEvents();
   const includeCompleted = options.includeCompleted ?? false;
   const [events, setEvents] = useState<ForzaEvent[]>([]);
@@ -14,10 +15,10 @@ export function usePublishedEvents(options: FetchEventsOptions = {}) {
   useEffect(() => {
     if (authLoading) return;
     setLoading(true);
-    void fetchPublishedEvents(guildId ?? undefined, {includeCompleted})
+    void fetchPublishedEvents(undefined, {includeCompleted})
       .then(setEvents)
       .finally(() => setLoading(false));
-  }, [guildId, authLoading, refreshKey, includeCompleted]);
+  }, [authLoading, refreshKey, includeCompleted]);
 
   return {events, loading: authLoading || loading};
 }

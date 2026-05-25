@@ -1,4 +1,5 @@
 import {resolveCoverAbsolute} from './eventCovers.ts';
+import type {CarRuleMode} from './eventSpec.ts';
 
 type DbEvent = {
   id: string;
@@ -8,6 +9,10 @@ type DbEvent = {
   timezone_hint?: string | null;
   max_players: number;
   current_players: number;
+  max_pi?: number | null;
+  car_rule_mode?: CarRuleMode | null;
+  car_class_cap?: string | null;
+  event_share_code?: string | null;
   track_codes?: string[] | null;
   rules_allowed?: string[] | null;
   rules_forbidden?: string[] | null;
@@ -26,8 +31,25 @@ export function slugify(title: string): string {
   return `${base}-${date}`;
 }
 
+function formatTrackField(event: DbEvent): string {
+  const primary = event.event_share_code?.trim();
+  const extras = event.track_codes ?? [];
+  if (primary && extras.length) return `${primary} (+${extras.length} more)`;
+  if (primary) return primary;
+  if (extras.length) return extras.join(', ');
+  return 'TBA';
+}
+
+function formatCarRules(event: DbEvent): string {
+  if (event.car_rule_mode === 'anything_goes') {
+    const cap = event.car_class_cap ? `Class ${event.car_class_cap}` : 'Class cap';
+    const pi = event.max_pi ? ` · Max PI ${event.max_pi}` : '';
+    return `Anything goes · ${cap}${pi}`;
+  }
+  return 'Restricted car list';
+}
+
 export function buildEventEmbed(event: DbEvent) {
-  const tracks = event.track_codes?.length ? event.track_codes.join(', ') : 'TBA';
   const when = new Date(event.starts_at).toISOString();
   const tz = event.timezone_hint ?? 'UTC';
   const siteOrigin = Deno.env.get('APP_ORIGIN') ?? 'https://forza.events';
@@ -46,10 +68,11 @@ export function buildEventEmbed(event: DbEvent) {
         value: `${event.current_players}/${event.max_players}`,
         inline: true,
       },
-      {name: 'Track list', value: tracks, inline: false},
+      {name: 'Track', value: formatTrackField(event), inline: false},
+      {name: 'Car rules', value: formatCarRules(event), inline: false},
       {name: 'Convoy leader', value: event.lobby_leader_gamertag, inline: true},
     ],
-    footer: {text: 'FORZA.EVENTS · Open for car list & tuning'},
+    footer: {text: 'FORZA.EVENTS · Open in app for full car list'},
   };
 
   const components = [

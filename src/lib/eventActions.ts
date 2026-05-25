@@ -1,14 +1,16 @@
 import type {ButtonVariant} from '../components/ui/Button';
 
-/** Results = primary, Host = secondary, Join = Open, Leave = Road, Full = Full. */
+/** Results = primary, Host edit/cancel = secondary, Join = Open, Leave = Road, Full = Full. */
 export function participationButtonVariant(
   canEnterResults: boolean,
+  canCancel: boolean,
   isHost: boolean,
+  canEdit: boolean,
   isJoined: boolean,
   isFull: boolean,
 ): ButtonVariant {
-  if (canEnterResults) return 'primary';
-  if (isHost) return 'secondary';
+  if (canEnterResults || canCancel) return 'primary';
+  if (isHost && canEdit) return 'secondary';
   if (isFull && !isJoined) return 'full';
   if (isJoined) return 'road';
   return 'open';
@@ -16,14 +18,17 @@ export function participationButtonVariant(
 
 export function participationButtonLabel(
   canEnterResults: boolean,
+  canCancel: boolean,
   isHost: boolean,
+  canEdit: boolean,
   isJoined: boolean,
   isFull: boolean,
   joining?: boolean,
 ): string {
   if (joining) return '…';
   if (canEnterResults) return 'Results';
-  if (isHost) return 'Edit';
+  if (canCancel) return 'Cancel event';
+  if (isHost && canEdit) return 'Edit';
   if (isJoined) return 'Leave';
   if (isFull) return 'Full';
   return 'Join';

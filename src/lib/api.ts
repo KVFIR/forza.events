@@ -64,6 +64,14 @@ export async function fetchLaunchIntent(
   return data.event_id;
 }
 
+export async function listGuilds(discordToken: string) {
+  return invoke<{guilds: {id: string; name: string; icon_url?: string | null}[]}>(
+    'list-guilds',
+    {},
+    discordToken,
+  );
+}
+
 export async function listChannels(discordToken: string, guildId: string) {
   return invoke<{channels: {id: string; name: string; position: number}[]}>(
     'list-channels',
@@ -75,11 +83,13 @@ export async function listChannels(discordToken: string, guildId: string) {
 export async function publishEvent(
   discordToken: string,
   eventId: string,
+  guildId: string,
   channelId: string,
+  guildName?: string,
 ) {
   return invoke<{message_id: string}>(
     'publish-event',
-    {event_id: eventId, channel_id: channelId},
+    {event_id: eventId, guild_id: guildId, channel_id: channelId, guild_name: guildName},
     discordToken,
   );
 }
@@ -89,6 +99,14 @@ export async function saveEvent(
   payload: Record<string, unknown>,
 ) {
   return invoke<{id: string; slug: string}>('save-event', payload, discordToken);
+}
+
+export async function cancelEvent(discordToken: string, eventId: string) {
+  return invoke<{id: string; cancelled: boolean}>(
+    'save-event',
+    {id: eventId, cancel: true},
+    discordToken,
+  );
 }
 
 export async function joinEvent(
@@ -115,7 +133,7 @@ export type SubmitResultEntry = {
   discord_id: string;
   position: number;
   dnf?: boolean;
-  points?: number | null;
+  dns?: boolean;
 };
 
 export async function submitEventResults(

@@ -2,6 +2,7 @@ import {format} from 'date-fns';
 import {Link} from 'react-router-dom';
 import {Users} from 'lucide-react';
 import type {EventAllowedCar, EventType, ForzaEvent} from '../lib/types';
+import {CarRuleBadge} from './ui/Badge';
 import {cn} from '../lib/cn';
 import {formatLobbyCount} from '../lib/constants';
 import {piToClass} from '../lib/pi';
@@ -102,6 +103,9 @@ export function EventCard({event}: Props) {
                 )}
               </p>
               <p className="mt-0.5 text-xs text-muted">{when}</p>
+              <div className="mt-1.5">
+                <CarRuleBadge mode={event.carRuleMode} />
+              </div>
               <p className="mt-1.5 flex items-center gap-1 text-xs text-slate-400">
                 <Users className="h-3 w-3 shrink-0" />
                 {formatLobbyCount(event.currentPlayers)}

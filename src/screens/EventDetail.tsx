@@ -20,8 +20,9 @@ import {
 } from '../lib/events';
 import {EventResultsTable} from '../components/EventResultsTable';
 import {formatEventTime} from '../lib/datetime';
-import {updateProfile, isApiConfigured} from '../lib/api';
-import {Badge, StatusBadge} from '../components/ui/Badge';
+import {cancelEvent, isApiConfigured, updateProfile} from '../lib/api';
+import {canCancelEvent, canEditEvent} from '../lib/eventSpec';
+import {Badge, CarRuleBadge, StatusBadge} from '../components/ui/Badge';
 import {Button} from '../components/ui/Button';
 import {GamertagModal} from '../components/GamertagModal';
 import {useJoinedEvents} from '../context/JoinedEventsContext';
@@ -70,6 +71,7 @@ export function EventDetail() {
   const {user, refreshUser, getAccessToken, isMockMode} = useAuth();
   const [gamertagOpen, setGamertagOpen] = useState(false);
   const [joining, setJoining] = useState(false);
+  const [cancelling, setCancelling] = useState(false);
 
   useEffect(() => {
     if (!id) return;
@@ -99,6 +101,26 @@ export function EventDetail() {
       return;
     }
     await doJoin(user.xboxGamertag ?? 'MockGT');
+  }
+
+  async function handleCancelEvent() {
+    if (!event) return;
+    const ok = window.confirm(
+      'Cancel this event? The Discord announcement will be updated and registration will close.',
+    );
+    if (!ok) return;
+    setCancelling(true);
+    try {
+      const token = getAccessToken();
+      if (token && isApiConfigured()) {
+        await cancelEvent(token, event.id);
+      }
+      bumpRefresh();
+      const next = await fetchEventById(event.id);
+      setEvent(next);
+    } finally {
+      setCancelling(false);
+    }
   }
 
   async function doJoin(gamertag: string) {
@@ -135,6 +157,8 @@ export function EventDetail() {
 
   const isHost = event.hostDiscordId === user.discordId;
   const canEnterResults = canSubmitEventResults(event, user);
+  const canEdit = canEditEvent(event, user);
+  const canCancel = canCancelEvent(event, user);
   const joined = isJoined(event);
   const full = event.status === 'full' || event.currentPlayers >= event.maxPlayers;
   const {primary: when} = formatEventTime(event.startsAt, event.timezoneHint);
@@ -175,6 +199,7 @@ export function EventDetail() {
         <div className="min-w-0 flex-1">
           <div className="flex flex-wrap items-center gap-2">
             <Badge type={event.type} />
+            <CarRuleBadge mode={event.carRuleMode} />
             <StatusBadge status={event.status} />
           </div>
           <h1 className="mt-1.5 text-xl font-black tracking-tight text-white">{event.title}</h1>
@@ -184,16 +209,38 @@ export function EventDetail() {
           <p className="mt-1 text-xs text-muted">by {event.hostUsername}</p>
         </div>
         <Button
-          variant={participationButtonVariant(canEnterResults, isHost, joined, full)}
+          variant={participationButtonVariant(
+            canEnterResults,
+            canCancel,
+            isHost,
+            canEdit,
+            joined,
+            full,
+          )}
           className="shrink-0 whitespace-nowrap px-6 py-3 text-xs shadow-none"
-          disabled={!canEnterResults && !isHost && ((full && !joined) || joining)}
+          disabled={
+            !canEnterResults &&
+            !canCancel &&
+            !(isHost && canEdit) &&
+            !joined &&
+            ((full && !joined) || joining || cancelling)
+          }
           onClick={() => {
             if (canEnterResults) navigate(`/event/${event.id}/results`);
-            else if (isHost) navigate(`/create?edit=${event.id}`);
+            else if (canCancel) void handleCancelEvent();
+            else if (isHost && canEdit) navigate(`/create?edit=${event.id}`);
             else void handleJoinClick();
           }}
         >
-          {participationButtonLabel(canEnterResults, isHost, joined, full, joining)}
+          {participationButtonLabel(
+            canEnterResults,
+            canCancel,
+            isHost,
+            canEdit,
+            joined,
+            full,
+            joining || cancelling,
+          )}
         </Button>
       </div>
 
@@ -258,22 +305,28 @@ export function EventDetail() {
           </div>
         )}
 
-        {/* Track list */}
-        {(event.trackList?.length ?? 0) > 0 && (
+        {/* Tracks */}
+        {event.primaryTrackCode && (
           <div className="flex items-start gap-3 px-4 py-3">
             <div className="flex h-7 w-7 shrink-0 items-center justify-center rounded-lg border border-white/[0.07] bg-white/[0.04]">
               <RoadIcon className="text-muted-light" />
             </div>
             <div className="min-w-0">
-              <p className="text-[10px] font-bold uppercase tracking-widest text-muted">Track List</p>
-              <ol className="mt-1 space-y-0.5">
-                {event.trackList!.map((code, i) => (
-                  <li key={code} className="flex items-center gap-2 text-sm">
-                    <span className="text-muted/60 tabular-nums">{i + 1}.</span>
-                    <span className="font-mono tracking-wide text-slate-200">{code}</span>
-                  </li>
-                ))}
-              </ol>
+              <p className="text-[10px] font-bold uppercase tracking-widest text-muted">Tracks</p>
+              <p className="mt-1 text-sm">
+                <span className="text-muted">Primary · </span>
+                <span className="font-mono tracking-wide text-slate-200">{event.primaryTrackCode}</span>
+              </p>
+              {(event.extraTrackCodes?.length ?? 0) > 0 && (
+                <ol className="mt-1 space-y-0.5">
+                  {event.extraTrackCodes!.map((code, i) => (
+                    <li key={code} className="text-sm">
+                      <span className="text-muted">Extra {i + 1} · </span>
+                      <span className="font-mono tracking-wide text-slate-200">{code}</span>
+                    </li>
+                  ))}
+                </ol>
+              )}
             </div>
           </div>
         )}
@@ -284,41 +337,54 @@ export function EventDetail() {
             <Car className="h-3.5 w-3.5 text-muted-light" />
           </div>
           <div className="min-w-0 flex-1">
-            <p className="text-[10px] font-bold uppercase tracking-widest text-muted">Cars</p>
-            <ul className="mt-2 space-y-2">
-              {event.allowedCars.map((c) => {
-                const maxClass = piToClass(c.maxPi);
-                return (
-                  <li key={c.carId} className="rounded-lg border border-white/[0.06] bg-white/[0.02] px-3 py-2.5">
-                    <div className="flex items-center justify-between gap-2">
-                      <p className="text-sm font-semibold text-slate-100">
-                        {c.make} {c.model}
-                        {c.year ? <span className="ml-1 text-xs font-normal text-muted">{c.year}</span> : null}
-                      </p>
-                      <span className={cn('shrink-0 rounded px-1.5 py-0.5 text-[10px] font-bold uppercase', classColor[maxClass] ?? 'bg-white/10 text-muted')}>
-                        {maxClass} {c.maxPi}
-                      </span>
-                    </div>
-                    {(c.tuneShareCode || c.restrictions.length > 0) && (
-                      <div className="mt-1.5 flex flex-wrap gap-x-3 gap-y-0.5 text-xs text-muted">
-                        {c.tuneShareCode && (
-                          <span className="flex items-center gap-1">
-                            <Wrench className="h-3 w-3 shrink-0" />
-                            {c.tuneShareCode}
-                          </span>
-                        )}
-                        {c.restrictions.map((r) => (
-                          <span key={r} className="flex items-center gap-1">
-                            <Shield className="h-3 w-3 shrink-0" />
-                            {r}
-                          </span>
-                        ))}
+            <p className="text-[10px] font-bold uppercase tracking-widest text-muted">Car rules</p>
+            {event.carRuleMode === 'anything_goes' ? (
+              <p className="mt-1 text-sm text-slate-200">
+                Class {event.carClassCap ?? piToClass(event.maxPi)} cap · PI {event.maxPi} max
+              </p>
+            ) : event.allowedCars.length === 0 ? (
+              <p className="mt-1 text-sm text-muted">Restricted list (details coming soon)</p>
+            ) : (
+              <ul className="mt-2 space-y-2">
+                {event.allowedCars.map((c) => {
+                  const maxClass = piToClass(c.maxPi);
+                  return (
+                    <li key={c.carId} className="rounded-lg border border-white/[0.06] bg-white/[0.02] px-3 py-2.5">
+                      <div className="flex items-center justify-between gap-2">
+                        <p className="text-sm font-semibold text-slate-100">
+                          {c.make} {c.model}
+                          {c.year ? <span className="ml-1 text-xs font-normal text-muted">{c.year}</span> : null}
+                        </p>
+                        <span
+                          className={cn(
+                            'shrink-0 rounded px-1.5 py-0.5 text-[10px] font-bold uppercase',
+                            classColor[maxClass] ?? 'bg-white/10 text-muted',
+                          )}
+                        >
+                          {maxClass} {c.maxPi}
+                        </span>
                       </div>
-                    )}
-                  </li>
-                );
-              })}
-            </ul>
+                      {(c.tuneShareCode || c.restrictions.length > 0) && (
+                        <div className="mt-1.5 flex flex-wrap gap-x-3 gap-y-0.5 text-xs text-muted">
+                          {c.tuneShareCode && (
+                            <span className="flex items-center gap-1">
+                              <Wrench className="h-3 w-3 shrink-0" />
+                              {c.tuneShareCode}
+                            </span>
+                          )}
+                          {c.restrictions.map((r) => (
+                            <span key={r} className="flex items-center gap-1">
+                              <Shield className="h-3 w-3 shrink-0" />
+                              {r}
+                            </span>
+                          ))}
+                        </div>
+                      )}
+                    </li>
+                  );
+                })}
+              </ul>
+            )}
           </div>
         </div>
       </div>

@@ -1,6 +1,7 @@
 import {serve} from 'https://deno.land/std@0.224.0/http/server.ts';
 import {jsonResponse, optionsResponse} from '../_shared/cors.ts';
 import {verifyDiscordToken} from '../_shared/discord.ts';
+import {eventHasStarted} from '../_shared/eventSpec.ts';
 import {adminClient} from '../_shared/supabase.ts';
 
 serve(async (req) => {
@@ -38,12 +39,18 @@ serve(async (req) => {
 
       const {data: event} = await supabase
         .from('events')
-        .select('max_players, current_players, status')
+        .select('max_players, current_players, status, starts_at')
         .eq('id', event_id)
         .single();
 
       if (!event || event.status === 'draft') {
         return jsonResponse({error: 'Event not found'}, 404);
+      }
+      if (['completed', 'cancelled', 'archived'].includes(event.status)) {
+        return jsonResponse({error: 'Registration is closed'}, 400);
+      }
+      if (eventHasStarted(event)) {
+        return jsonResponse({error: 'Registration closed after event start'}, 400);
       }
       if (event.current_players >= event.max_players) {
         return jsonResponse({error: 'Event full'}, 409);

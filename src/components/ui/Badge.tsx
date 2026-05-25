@@ -1,4 +1,4 @@
-import type {EventType} from '../../lib/types';
+import type {CarRuleMode, EventType} from '../../lib/types';
 import {cn} from '../../lib/cn';
 
 const typeStyles: Record<EventType, {border: string; text: string; bg: string}> = {
@@ -33,6 +33,29 @@ export function Badge({type, className}: Props) {
       )}
     >
       {labels[type]}
+    </span>
+  );
+}
+
+export function CarRuleBadge({
+  mode,
+  className,
+}: {
+  mode: CarRuleMode;
+  className?: string;
+}) {
+  const restricted = mode === 'restricted_list';
+  return (
+    <span
+      className={cn(
+        'inline-flex items-center rounded-md border px-2 py-0.5 text-[10px] font-bold uppercase tracking-widest',
+        restricted
+          ? 'border-cyan-500/30 bg-cyan-500/10 text-cyan-200'
+          : 'border-emerald-500/30 bg-emerald-500/10 text-emerald-200',
+        className,
+      )}
+    >
+      {restricted ? 'Restricted car list' : 'Anything goes'}
     </span>
   );
 }

@@ -1,13 +1,14 @@
 import {serve} from 'https://deno.land/std@0.224.0/http/server.ts';
 import {jsonResponse, optionsResponse} from '../_shared/cors.ts';
 import {verifyDiscordToken} from '../_shared/discord.ts';
+import {eventHasStarted} from '../_shared/eventSpec.ts';
 import {adminClient} from '../_shared/supabase.ts';
 
 type ResultInput = {
   discord_id: string;
   position: number;
   dnf?: boolean;
-  points?: number | null;
+  dns?: boolean;
 };
 
 serve(async (req) => {
@@ -41,25 +42,30 @@ serve(async (req) => {
     if (event.host_discord_id !== discordUser.id) {
       return jsonResponse({error: 'Forbidden'}, 403);
     }
+    if (!eventHasStarted(event)) {
+      return jsonResponse({error: 'Event has not started yet'}, 400);
+    }
+    if (['completed', 'cancelled', 'archived'].includes(event.status)) {
+      return jsonResponse({error: 'Results are already final for this event'}, 409);
+    }
 
-    const started =
-      event.status === 'live' ||
-      event.status === 'checkin' ||
-      event.status === 'completed' ||
-      new Date(event.starts_at).getTime() <= Date.now();
+    const {count: existingCount} = await supabase
+      .from('event_results')
+      .select('id', {count: 'exact', head: true})
+      .eq('event_id', eventId);
 
-    if (!started) return jsonResponse({error: 'Event has not started yet'}, 400);
+    if ((existingCount ?? 0) > 0) {
+      return jsonResponse({error: 'Results cannot be changed after submission'}, 409);
+    }
 
     const rows = results.map((r) => ({
       event_id: eventId,
       discord_id: r.discord_id,
       position: r.position,
       dnf: r.dnf ?? false,
-      points: r.points ?? null,
+      dns: r.dns ?? false,
+      points: null,
     }));
-
-    const {error: delError} = await supabase.from('event_results').delete().eq('event_id', eventId);
-    if (delError) return jsonResponse({error: delError.message}, 500);
 
     const {error: insError} = await supabase.from('event_results').insert(rows);
     if (insError) return jsonResponse({error: insError.message}, 500);

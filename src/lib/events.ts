@@ -3,16 +3,31 @@ import {searchCarCatalog} from './carCatalog';
 import {EVENT_PLAYER_SLOTS} from './constants';
 import {resolveEventCoverUrl} from './eventCovers';
 import {MOCK_EVENTS} from './mockData';
+import type {CarClassLetter} from './pi';
+import type {
+  AppUser,
+  CarRuleMode,
+  EventLifecycle,
+  EventStatus,
+  EventType,
+  ForzaEvent,
+} from './types';
+
+export {
+  canCancelEvent,
+  canEditEvent,
+  canSubmitEventResults,
+  eventHasStarted,
+  isPublishedEvent,
+} from './eventSpec';
 
 const MOCK_EVENT_RESULTS: Record<string, EventResultRow[]> = {
   'evt-2': [
-    {discordId: '100000000000000001', position: 1, dnf: false},
-    {discordId: '200000000000000010', position: 2, dnf: false},
-    {discordId: '200000000000000011', position: 3, dnf: true},
+    {discordId: '100000000000000001', position: 1, dnf: false, dns: false},
+    {discordId: '200000000000000010', position: 2, dnf: false, dns: false},
+    {discordId: '200000000000000011', position: 3, dnf: true, dns: false},
   ],
 };
-import type {CarClassLetter} from './pi';
-import type {AppUser, EventStatus, EventType, ForzaEvent} from './types';
 
 type DbEventRow = {
   id: string;
@@ -23,16 +38,23 @@ type DbEventRow = {
   starts_at: string;
   ends_at?: string | null;
   created_at?: string | null;
+  guild_id?: string | null;
+  channel_id?: string | null;
   voice_policy: ForzaEvent['voicePolicy'];
   max_players: number;
   current_players: number;
+  max_pi?: number | null;
+  car_rule_mode?: CarRuleMode | null;
+  car_class_cap?: string | null;
   host_discord_id: string;
   description?: string | null;
   cover_image_url?: string | null;
+  event_share_code?: string | null;
   track_codes?: string[] | null;
   lobby_leader_gamertag?: string | null;
   timezone_hint?: string | null;
   users?: {username: string; avatar_url?: string | null} | null;
+  discord_guilds?: {guild_name: string} | null;
   event_participants?: {
     discord_id: string;
     gamertag_snapshot?: string | null;
@@ -43,6 +65,7 @@ export type EventResultRow = {
   discordId: string;
   position: number;
   dnf: boolean;
+  dns: boolean;
   points?: number | null;
 };
 
@@ -50,6 +73,7 @@ export type EventResultDisplay = {
   position: number;
   label: string;
   dnf: boolean;
+  dns: boolean;
   points?: number | null;
 };
 
@@ -70,6 +94,7 @@ export function resolveEventResultDisplay(
       position: r.position,
       label: labelById.get(r.discordId) ?? 'Driver',
       dnf: r.dnf,
+      dns: r.dns,
       points: r.points,
     }));
 }
@@ -81,12 +106,22 @@ function mapStatus(row: DbEventRow): EventStatus {
   return 'open';
 }
 
+function mapLifecycle(status: string): EventLifecycle {
+  if (status === 'draft') return 'draft';
+  if (status === 'live' || status === 'checkin') return 'live';
+  if (status === 'completed') return 'completed';
+  if (status === 'cancelled') return 'cancelled';
+  if (status === 'archived') return 'archived';
+  return 'open';
+}
+
 function rulesFromRow(row: DbEventRow): string {
   return row.description?.trim() || 'See event details for car and tuning requirements.';
 }
 
 export function mapDbEvent(row: DbEventRow): ForzaEvent {
   const host = row.users;
+  const guild = row.discord_guilds;
   const participants =
     row.event_participants?.map((p) => ({
       discordId: p.discord_id,
@@ -100,9 +135,16 @@ export function mapDbEvent(row: DbEventRow): ForzaEvent {
     title: row.title,
     type: row.type,
     status: mapStatus(row),
+    lifecycle: mapLifecycle(row.status),
     startsAt: row.starts_at,
     endsAt: row.ends_at ?? undefined,
     createdAt: row.created_at ?? undefined,
+    guildId: row.guild_id ?? undefined,
+    guildName: guild?.guild_name ?? undefined,
+    channelId: row.channel_id ?? undefined,
+    carRuleMode: row.car_rule_mode ?? 'anything_goes',
+    carClassCap: row.car_class_cap ?? undefined,
+    maxPi: row.max_pi ?? 999,
     allowedCars: [],
     voicePolicy: row.voice_policy,
     maxPlayers: row.max_players,
@@ -113,7 +155,8 @@ export function mapDbEvent(row: DbEventRow): ForzaEvent {
     rules: rulesFromRow(row),
     description: row.description ?? undefined,
     coverImageUrl: resolveEventCoverUrl(row.type, row.cover_image_url),
-    trackList: row.track_codes ?? [],
+    primaryTrackCode: row.event_share_code ?? undefined,
+    extraTrackCodes: row.track_codes ?? [],
     lobbyLeaderGamertag: row.lobby_leader_gamertag ?? undefined,
     timezoneHint: row.timezone_hint ?? undefined,
     participants,
@@ -124,10 +167,14 @@ async function hydrateEvents(rows: DbEventRow[]): Promise<ForzaEvent[]> {
   if (rows.length === 0) return [];
   const supabase = getSupabase()!;
   const hostIds = [...new Set(rows.map((r) => r.host_discord_id))];
+  const guildIds = [...new Set(rows.map((r) => r.guild_id).filter(Boolean))] as string[];
   const eventIds = rows.map((r) => r.id);
 
-  const [{data: hosts}, {data: parts}, {data: eventCars}] = await Promise.all([
+  const [{data: hosts}, {data: guilds}, {data: parts}, {data: eventCars}] = await Promise.all([
     supabase.from('users').select('discord_id, username, avatar_url').in('discord_id', hostIds),
+    guildIds.length
+      ? supabase.from('discord_guilds').select('guild_id, guild_name').in('guild_id', guildIds)
+      : Promise.resolve({data: [] as {guild_id: string; guild_name: string}[]}),
     supabase
       .from('event_participants')
       .select('event_id, discord_id, gamertag_snapshot')
@@ -141,6 +188,7 @@ async function hydrateEvents(rows: DbEventRow[]): Promise<ForzaEvent[]> {
   ]);
 
   const hostMap = new Map(hosts?.map((h) => [h.discord_id, h]) ?? []);
+  const guildMap = new Map(guilds?.map((g) => [g.guild_id, g]) ?? []);
   const partMap = new Map<string, NonNullable<typeof parts>>();
   for (const p of parts ?? []) {
     const list = partMap.get(p.event_id) ?? [];
@@ -157,9 +205,11 @@ async function hydrateEvents(rows: DbEventRow[]): Promise<ForzaEvent[]> {
 
   return rows.map((row) => {
     const host = hostMap.get(row.host_discord_id);
+    const guild = row.guild_id ? guildMap.get(row.guild_id) : null;
     const enriched: DbEventRow = {
       ...row,
       users: host ? {username: host.username, avatar_url: host.avatar_url} : null,
+      discord_guilds: guild ? {guild_name: guild.guild_name} : null,
       event_participants: (partMap.get(row.id) ?? []).map((p) => ({
         discord_id: p.discord_id,
         gamertag_snapshot: p.gamertag_snapshot,
@@ -202,7 +252,7 @@ export type FetchEventsOptions = {
 };
 
 export function isEventCompleted(event: ForzaEvent): boolean {
-  return event.status === 'ended';
+  return ['completed', 'cancelled', 'archived'].includes(event.lifecycle);
 }
 
 export function isBrowsableEvent(event: ForzaEvent): boolean {
@@ -210,7 +260,7 @@ export function isBrowsableEvent(event: ForzaEvent): boolean {
 }
 
 export async function fetchPublishedEvents(
-  guildId?: string,
+  _guildId?: string,
   options: FetchEventsOptions = {},
 ): Promise<ForzaEvent[]> {
   const {includeCompleted = false} = options;
@@ -221,13 +271,15 @@ export async function fetchPublishedEvents(
   }
 
   const supabase = getSupabase()!;
-  let query = supabase.from('events').select('*').neq('status', 'draft').order('starts_at', {ascending: true});
+  let query = supabase
+    .from('events')
+    .select('*')
+    .neq('status', 'draft')
+    .order('starts_at', {ascending: true});
 
   if (!includeCompleted) {
     query = query.in('status', ['open', 'checkin', 'live']);
   }
-
-  if (guildId) query = query.eq('guild_id', guildId);
 
   const {data, error} = await query;
   if (error) {
@@ -252,22 +304,13 @@ export async function fetchEventById(id: string): Promise<ForzaEvent | undefined
   return event;
 }
 
-export function eventHasStarted(event: ForzaEvent): boolean {
-  if (event.status === 'live' || event.status === 'ended') return true;
-  return new Date(event.startsAt).getTime() <= Date.now();
-}
-
-export function canSubmitEventResults(event: ForzaEvent, user: AppUser): boolean {
-  return event.hostDiscordId === user.discordId && eventHasStarted(event);
-}
-
 export async function fetchEventResults(eventId: string): Promise<EventResultRow[]> {
   if (!isSupabaseConfigured()) return MOCK_EVENT_RESULTS[eventId] ?? [];
 
   const supabase = getSupabase()!;
   const {data, error} = await supabase
     .from('event_results')
-    .select('discord_id, position, dnf, points')
+    .select('discord_id, position, dnf, dns, points')
     .eq('event_id', eventId)
     .order('position', {ascending: true});
 
@@ -280,6 +323,7 @@ export async function fetchEventResults(eventId: string): Promise<EventResultRow
     discordId: r.discord_id,
     position: r.position,
     dnf: r.dnf ?? false,
+    dns: r.dns ?? false,
     points: r.points,
   }));
 }

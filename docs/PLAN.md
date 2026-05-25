@@ -1,234 +1,143 @@
 # FORZA.EVENTS — MVP Plan
 
-> **Current implementation:** see [`STATUS.md`](STATUS.md) for what is built vs planned.
+> **Current implementation:** see [`STATUS.md`](STATUS.md) for what is already built and what is still needed to launch.
+
+## Frozen MVP spec (May 2026)
+
+This section is the product contract for the MVP.
+If any older note, prototype, or backlog item conflicts with this spec, the frozen spec wins.
+
+- **Product surface:** FORZA.EVENTS is an Activity-first Discord app with a global public browse feed.
+- **Visibility:** users can browse all published public events across all servers.
+- **Create flow:** event creation includes choosing the target Discord server and target channel before publish. After publication, the event's server and channel cannot be changed.
+- **Car rules:** each event must explicitly choose one mode: `Anything goes` or `Restricted car list`.
+- **Anything goes mode:** no per-car list is required; the event must still define a class and/or PI cap, and the UI should show an explicit `Anything goes` badge.
+- **Restricted mode:** at least one allowed car is required, with optional per-car restrictions.
+- **Publish requirements:** title, start time, host gamertag, cover image, target server, target channel, primary track code, and a valid car rule mode are required. In `Restricted car list`, at least one car is mandatory.
+- **Track code model:** one primary track code is required; extra track codes are optional.
+- **Editing policy:** drafts are freely editable. Published events are editable only until the event starts.
+- **Post-start policy:** after start, the only organizer actions allowed are `submit results` and `cancel event`.
+- **Discord sync:** published event embeds auto-sync all participant-facing fields, including cover image and description.
+- **Capacity policy:** full events block new joins; waitlists are out of MVP.
+- **Results model:** results support finishing positions, `DNF`, and `DNS`.
+- **DNS handling:** `DNS` is set explicitly by the host during results submission.
+- **Results immutability:** once results are submitted, they cannot be edited in MVP.
+- **Deferred from MVP:** reminders, event threads, participant roles, and an always-on bot process.
 
 ## Strategic decision
 
 **The MVP is a Discord Activity (Embedded App).**
 
-Not a standalone website. Not a bot-only UX. A full **React app inside Discord as an iframe** — in text channels, voice channels, or DMs, on desktop and mobile.
+Not a standalone website.
+Not a bot-only UX.
+The primary product surface is a full React app running inside Discord as an iframe.
 
-The user stays in Discord: App Launcher → FORZA.EVENTS → browse and create events inline.
+The user stays in Discord:
 
-The bot is a **companion**: DM reminders, roles, threads, channel embeds. The **primary UI is the Activity**.
+1. Open FORZA.EVENTS from the App Launcher, or
+2. Open a published event from the Discord embed button.
 
----
+## MVP user journey
 
-## Why Activity, not bot-only
+### Browse
 
-| Criterion | Bot (embed + buttons) | Activity (iframe) |
-|---|---|---|
-| UI | Discord components only | Full React UI |
-| State | Stateless per interaction | SPA with client state |
-| Lists / pagination | Embed limits | Filters, scroll, search |
-| Create event form | Modal (max ~5 fields) | Full form + validation |
-| Player profile | Static embed | Interactive card |
-| Feel | Bot-like | App-like inside Discord |
-| Launch | Slash / button | App Launcher or embed button |
-| Distribution | Per-server install | User install → works broadly |
+- User opens the Activity inside Discord.
+- User browses all published public events.
+- User can open event details from the global feed.
 
----
+### Join
 
-## Where it launches
+- User opens an event.
+- User joins or leaves the event.
+- Full events reject new joins.
+- Join requires a host-visible participant identity and gamertag where applicable.
 
-Since September 2024, Activities are **not voice-only**:
+### Create and publish
 
-- Text channel — App Launcher (button near chat input)
-- DM — App Launcher
-- Voice channel — bottom bar control
-- Bot embed — `[Open in FORZA.EVENTS]` → `LAUNCH_ACTIVITY`
+- Host creates a draft event.
+- Host fills all required fields from the frozen spec.
+- Host selects the target Discord server and target channel.
+- Host publishes the event.
+- The published embed includes an `Open in FORZA.EVENTS` path back into the Activity.
 
----
+### Manage after publish
 
-## Architecture
+- Drafts remain fully editable.
+- Published events are editable only before the start time.
+- After start, the organizer can only cancel the event or submit results.
 
-```
-┌─────────────────────────────────────────────────────────────┐
-│                       Discord Client                        │
-│                                                             │
-│  App Launcher → [FORZA.EVENTS]                              │
-│       or                                                    │
-│  Bot embed → [Open] → LAUNCH_ACTIVITY                       │
-│                          ↓                                  │
-│  ┌──────────────────────────────────────────────────────┐  │
-│  │         FORZA.EVENTS Activity (iframe)               │  │
-│  │   React SPA + @discord/embedded-app-sdk              │  │
-│  │   Screens: Browse, Detail, Create, Profile, Dashboard│  │
-│  └──────────────────────────────────────────────────────┘  │
-└─────────────────────────────────────────────────────────────┘
-                         │ Supabase JS / REST
-                         ▼
-              ┌──────────────────────┐
-              │    Supabase          │
-              │    PostgreSQL + RLS  │
-              └──────────────────────┘
-                         │
-              ┌──────────────────────┐
-              │   Discord Bot        │
-              │   DM, roles, threads │
-              │   embeds, scheduler  │
-              └──────────────────────┘
-```
+### Submit results
 
----
+- Host submits positions.
+- Host can mark `DNF` and `DNS`.
+- Submitted results are final for MVP.
 
-## OAuth / Authentication flow
+## What is explicitly out of MVP
 
-Discord Embedded Apps use a special flow (not a classic browser redirect):
+The following items are intentionally deferred and must not block launch:
 
-```
-1. Activity loads, SDK.ready()
-
-2. sdk.commands.authorize({
-     client_id, response_type: 'code', scope: ['identify', 'guilds']
-   })
-   → Discord OAuth modal
-
-3. code → POST /api/auth/token { code } on your backend
-
-4. Backend exchanges code for access_token (client_secret server-only)
-
-5. Activity receives access_token
-
-6. sdk.commands.authenticate({ access_token })
-
-7. User authenticated; discord_id available
-```
-
-Token exchange: Supabase Edge Function or a small Express API.
-
----
-
-## Tech stack
-
-| Layer | Technology | Role |
-|---|---|---|
-| Activity UI | React 18 + Vite + TypeScript | SPA in iframe |
-| Discord SDK | `@discord/embedded-app-sdk` | Client ↔ Discord |
-| Styles | Tailwind CSS | Dark theme, neon accents |
-| Routing | React Router | In-app screens |
-| Database | Supabase (PostgreSQL) | Data + RLS |
-| Auth | Discord OAuth via SDK | Identity |
-| Token exchange | Supabase Edge Function | `code` → token |
-| Bot | discord.js v14 + Node 20 | Background automation |
-| Scheduler | node-cron (in bot) | Reminders, archive |
-| Activity host | Vercel / Cloudflare Pages | HTTPS required |
-| Bot host | Railway / Fly.io | Always-on |
-
----
-
-## MVP — Activity screens
-
-### Browse Events (home)
-
-- Upcoming event cards
-- Filters: type, region, car class, platform
-- Join on card
-- Pagination / infinite scroll
-
-### Event Detail
-
-- Full event info, participant list
-- Join / Leave / Remind me
-- Deep links to server thread and voice
-
-### Create Event
-
-- Full form: name, type, time, class, platform, region, max players, rules, voice required
-- Client validation
-- On success: bot posts embed to configured channel
-
-### My Profile
-
-- Avatar, username, Xbox gamertag
-- Stats: joined, hosted, attendance, no-shows
-- Edit preferences
-
-### Host Dashboard
-
-- Hosted events (active / past)
-- Cancel, Open check-in, Submit results
-
----
-
-## Bot responsibilities (companion)
-
-| Task | Why not Activity |
-|---|---|
-| DM reminders | No DM access from Activity |
-| Threads / channels | Needs Manage Channels |
-| Participant roles | Needs Manage Roles |
-| Channel embed on create | Bot writes to channel |
-| Scheduled jobs | Activity has no background process |
-
-Bot consumes Supabase (poll or webhook).
-
----
-
-## Explicitly out of MVP
-
+- Reminders
+- Check-in
+- Event threads
+- Participant roles and role pings
+- Always-on bot scheduler
+- Dedicated Host Dashboard screen
+- Region/timezone preference editing
 - Tournament brackets
-- Automatic in-game results (no API)
-- Club / community pages
+- Automatic in-game results import
+- Club/community pages
 - Global leaderboards
 - Monetization / Discord IAP
 - Native mobile app
 - Livery / build database
 
----
+## Launch checklist
 
-## Milestones
+The MVP should be considered launch-ready only when all items below are complete.
 
-Progress markers below reflect the current repository state, including the Activity client, Supabase schema, and deployed Edge Function surface.
+### Product and code
 
-### Milestone 1 — SDK + Auth (week 1)
+- [x] Frozen MVP spec documented
+- [x] Activity UI aligned with frozen MVP
+- [x] Supabase schema aligned with frozen MVP
+- [x] Edge Functions aligned with frozen MVP
+- [x] Launch-intent / deep link flow implemented
 
-- [ ] Discord Application registered, Activities enabled
-- [x] Vite + React + `@discord/embedded-app-sdk` (local + standalone mock)
-- [x] OAuth: authorize → token exchange → authenticate
-- [ ] Supabase project linked and schema applied in the target environment
-- [x] User upserted in `users` on login
+### Infrastructure
 
-### Milestone 2 — Browse + Join (week 2)
+- [ ] Supabase project linked and migrations applied through `008`
+- [ ] Edge Functions deployed in the target environment
+- [ ] Production secrets configured
+- [ ] Vercel project connected and deployed
 
-- [x] Browse Events UI with cards
-- [~] Filters (type done; region/class/platform still pending if needed)
-- [x] Event Detail UI
-- [x] Browse reads real data from Supabase when configured
-- [x] Join / Leave persisted in `event_participants`
-- [x] Gamertag gate before join
+### Discord platform
 
-### Milestone 3 — Create Event + channel publish (week 3)
+- [ ] Discord Application configured for Activities
+- [ ] Activity URL set to the deployed app
+- [ ] Interactions endpoint configured if needed for publish flows
+- [ ] Bot/app permissions verified for publish targets and guild listing
+- [ ] Launch flow verified from embed back into the Activity
 
-- [x] Create Event flow implemented
-- [x] Validation + persist event
-- [x] Publish event to a Discord channel with `[Open in FORZA.EVENTS]`
-- [ ] Event thread under embed
+### End-to-end validation
 
-### Milestone 4 — Reminders + check-in (week 4)
+- [ ] Sign in inside Discord Activity
+- [ ] Browse published events from the global feed
+- [ ] Create draft event
+- [ ] Publish event to selected server/channel
+- [ ] Open event from Discord embed
+- [ ] Join event
+- [ ] Leave event
+- [ ] Edit published event before start
+- [ ] Verify post-start edit lock
+- [ ] Submit results with `position`, `DNF`, and `DNS`
+- [ ] Verify results are immutable after submission
+- [ ] Verify full event blocks new joins
 
-- [ ] Remind me UI in Event Detail
-- [ ] Always-on scheduler / DM reminders
-- [ ] Check-in flow and status transitions
-- [ ] No-show tracking automation
+### Pilot
 
-### Milestone 5 — Results + profile (week 5)
-
-- [ ] Dedicated Host Dashboard screen
-- [x] Submit results flow
-- [x] Profile screen
-- [x] Edit profile gamertag
-- [ ] Region/timezone preference editing
-
-### Milestone 6 — Pilot (week 6)
-
-- [ ] Activity deployed on Vercel (HTTPS)
-- [ ] Discord Developer Portal configured end-to-end
-- [ ] 3–5 Forza Discord servers tested
-- [ ] Discoverable in App Launcher
-- [ ] Production validation for launch-intent and publish flows
-
----
+- [ ] Test in 3–5 real Forza Discord servers
+- [ ] Validate publish permissions and channel targeting in real communities
+- [ ] Confirm people use the Activity instead of falling back to manual channel posts
 
 ## Environment variables
 
@@ -250,29 +159,16 @@ SUPABASE_URL=
 SUPABASE_SERVICE_ROLE_KEY=
 ```
 
-### Bot
+### Discord publish integration
 
 ```env
-DISCORD_TOKEN=
-DISCORD_CLIENT_ID=
-SUPABASE_URL=
-SUPABASE_SERVICE_ROLE_KEY=
-WEB_BASE_URL=https://forza.events
+DISCORD_BOT_TOKEN=
+DISCORD_PUBLIC_KEY=
+APP_ORIGIN=https://forza.events
 ```
 
-See [`.env.example`](../.env.example) for a copy-paste template.
+See [`.env.example`](../.env.example) for the local app template.
 
----
+## Validation question
 
-## Distribution and growth
-
-1. Users install FORZA.EVENTS on their account (not only per server).
-2. Rich Presence: *"KVFIR is using FORZA.EVENTS"*.
-3. Friends click → try Activity → install.
-4. After Developer Portal verification → App Directory discovery.
-
----
-
-## Validation question (after Milestone 6)
-
-> **Do Forza players use the Discord Activity to find and register for events — or do they return to manual channel posts?**
+> **Do Forza players use the Discord Activity to discover and join events, or do they still fall back to manual channel posts?**

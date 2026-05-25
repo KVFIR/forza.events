@@ -44,11 +44,16 @@ export function EventResultsTable({rows, pending}: Props) {
             >
               {row.position}
             </span>
-            <span className={cn('truncate text-sm font-medium', row.dnf ? 'text-muted line-through' : 'text-slate-200')}>
+            <span
+              className={cn(
+                'truncate text-sm font-medium',
+                row.dnf || row.dns ? 'text-muted line-through' : 'text-slate-200',
+              )}
+            >
               {row.label}
             </span>
             <span className="text-right text-[10px] font-bold uppercase tracking-widest text-muted">
-              {row.dnf ? 'DNF' : row.points != null ? `${row.points} pts` : 'Finish'}
+              {row.dns ? 'DNS' : row.dnf ? 'DNF' : row.points != null ? `${row.points} pts` : 'Finish'}
             </span>
           </li>
         ))}

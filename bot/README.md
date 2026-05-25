@@ -1,9 +1,10 @@
-# Companion bot (planned)
+# Companion bot / Discord integration
 
-The Discord bot is **not implemented yet**. It will handle background work the Activity cannot do: DM reminders, event threads, participant roles, channel embeds, and scheduled tasks.
+There is no standalone always-on bot in the MVP.
+Current Discord-side behavior is handled by the app configuration and deployed backend functions used for publish and launch flows.
 
-- Flows: [`docs/BOT_FLOWS.md`](../docs/BOT_FLOWS.md)
-- Stack (planned): discord.js v14, TypeScript, Node.js 20, Supabase service role
+Post-MVP, a dedicated companion bot may be added for deferred features such as reminders, threads, participant roles, and scheduled automation.
+
+- MVP scope and launch checklist: [`docs/PLAN.md`](../docs/PLAN.md)
+- Current implementation status: [`docs/STATUS.md`](../docs/STATUS.md)
 - Env vars: see [`docs/PLAN.md`](../docs/PLAN.md#environment-variables)
-
-When scaffolding, use a separate `package.json` in this folder and deploy as an always-on process (Railway / Fly.io).

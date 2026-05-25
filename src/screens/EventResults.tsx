@@ -18,6 +18,7 @@ type Placement = {
   discordId: string;
   label: string;
   dnf: boolean;
+  dns: boolean;
 };
 
 function participantLabel(p: EventParticipant): string {
@@ -29,21 +30,8 @@ function buildPlacements(participants: EventParticipant[]): Placement[] {
     discordId: p.discordId,
     label: participantLabel(p),
     dnf: false,
+    dns: false,
   }));
-}
-
-function applySavedOrder(participants: EventParticipant[], saved: {discordId: string; dnf: boolean}[]) {
-  const byId = new Map(participants.map((p) => [p.discordId, p]));
-  const ordered: Placement[] = [];
-  for (const s of saved) {
-    const p = byId.get(s.discordId);
-    if (p) ordered.push({discordId: p.discordId, label: participantLabel(p), dnf: s.dnf});
-    byId.delete(s.discordId);
-  }
-  for (const p of byId.values()) {
-    ordered.push({discordId: p.discordId, label: participantLabel(p), dnf: false});
-  }
-  return ordered;
 }
 
 export function EventResults() {
@@ -56,6 +44,7 @@ export function EventResults() {
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [title, setTitle] = useState('');
+  const [alreadySubmitted, setAlreadySubmitted] = useState(false);
 
   useEffect(() => {
     if (!id) return;
@@ -73,12 +62,22 @@ export function EventResults() {
           navigate(`/event/${id}`, {replace: true});
           return;
         }
-        const base = event.participants.length > 0 ? event.participants : [{discordId: user.discordId, username: user.username, gamertag: user.xboxGamertag}];
         if (saved.length > 0) {
-          setPlacements(applySavedOrder(base, saved));
-        } else {
-          setPlacements(buildPlacements(base));
+          setAlreadySubmitted(true);
+          navigate(`/event/${id}`, {replace: true});
+          return;
         }
+        const base =
+          event.participants.length > 0
+            ? event.participants
+            : [
+                {
+                  discordId: user.discordId,
+                  username: user.username,
+                  gamertag: user.xboxGamertag,
+                },
+              ];
+        setPlacements(buildPlacements(base));
       })
       .finally(() => {
         if (!cancelled) setLoading(false);
@@ -100,18 +99,29 @@ export function EventResults() {
 
   function toggleDnf(index: number) {
     setPlacements((list) =>
-      list.map((row, i) => (i === index ? {...row, dnf: !row.dnf} : row)),
+      list.map((row, i) =>
+        i === index ? {...row, dnf: !row.dnf, dns: false} : row,
+      ),
+    );
+  }
+
+  function toggleDns(index: number) {
+    setPlacements((list) =>
+      list.map((row, i) =>
+        i === index ? {...row, dns: !row.dns, dnf: false} : row,
+      ),
     );
   }
 
   async function handleSubmit() {
-    if (!id || placements.length === 0) return;
+    if (!id || placements.length === 0 || alreadySubmitted) return;
     setSaving(true);
     setError(null);
     const payload = placements.map((p, i) => ({
       discord_id: p.discordId,
       position: i + 1,
       dnf: p.dnf,
+      dns: p.dns,
     }));
 
     try {
@@ -143,7 +153,9 @@ export function EventResults() {
       </Link>
 
       <p className="text-sm font-semibold text-white">{title}</p>
-      <p className="mt-1 text-xs text-muted">Set finishing order. Mark DNF where needed.</p>
+      <p className="mt-1 text-xs text-muted">
+        Set finishing order. Mark DNF or DNS (host no-show) where needed. Results cannot be changed after submit.
+      </p>
 
       {error && (
         <p className="mt-4 rounded-lg border border-white/[0.1] bg-white/[0.04] px-3 py-2 text-xs text-slate-300">
@@ -160,7 +172,12 @@ export function EventResults() {
             <span className="w-6 shrink-0 text-center text-sm font-bold tabular-nums text-muted">
               {index + 1}
             </span>
-            <span className={cn('min-w-0 flex-1 truncate text-sm', row.dnf && 'text-muted line-through')}>
+            <span
+              className={cn(
+                'min-w-0 flex-1 truncate text-sm',
+                (row.dnf || row.dns) && 'text-muted line-through',
+              )}
+            >
               {row.label}
             </span>
             <label className="flex shrink-0 items-center gap-1.5 text-[10px] font-bold uppercase tracking-widest text-muted">
@@ -171,6 +188,15 @@ export function EventResults() {
                 className="rounded border-white/20 bg-white/[0.05]"
               />
               DNF
+            </label>
+            <label className="flex shrink-0 items-center gap-1.5 text-[10px] font-bold uppercase tracking-widest text-muted">
+              <input
+                type="checkbox"
+                checked={row.dns}
+                onChange={() => toggleDns(index)}
+                className="rounded border-white/20 bg-white/[0.05]"
+              />
+              DNS
             </label>
             <div className="flex shrink-0 flex-col">
               <button
@@ -203,7 +229,7 @@ export function EventResults() {
       <Button
         variant="primary"
         className="mt-8 w-full"
-        disabled={saving || placements.length === 0}
+        disabled={saving || placements.length === 0 || alreadySubmitted}
         onClick={() => void handleSubmit()}
       >
         {saving ? 'Saving…' : 'Submit results'}
