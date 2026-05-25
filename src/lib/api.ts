@@ -159,7 +159,7 @@ export async function uploadCoverImage(
   eventId: string,
   file: File,
 ): Promise<string> {
-  const supabase = getSupabase();
+  const supabase = await getSupabase();
   if (!supabase) throw new Error('Supabase not configured');
 
   const ext = file.name.split('.').pop() ?? 'jpg';

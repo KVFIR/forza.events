@@ -5,9 +5,9 @@ import {filterMyEvents, sortMyEventsList, type MyEventsScope} from '../lib/event
 import {usePublishedEvents} from './usePublishedEvents';
 
 export function useMyEventsCatalog(scope: MyEventsScope = 'all') {
-  const {user} = useAuth();
+  const {user, loading: authLoading} = useAuth();
   const {isJoined} = useJoinedEvents();
-  const {events, loading} = usePublishedEvents({includeCompleted: true});
+  const {events, loading: eventsLoading} = usePublishedEvents({includeCompleted: true});
 
   const allMine = useMemo(
     () => sortMyEventsList(filterMyEvents(events, user, 'all', isJoined)),
@@ -22,5 +22,5 @@ export function useMyEventsCatalog(scope: MyEventsScope = 'all') {
   const active = useMemo(() => allMine.filter((e) => e.status !== 'ended'), [allMine]);
   const completed = useMemo(() => allMine.filter((e) => e.status === 'ended'), [allMine]);
 
-  return {filtered, allMine, active, completed, loading};
+  return {filtered, allMine, active, completed, loading: authLoading || eventsLoading};
 }

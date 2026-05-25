@@ -59,7 +59,87 @@ type DbEventRow = {
     discord_id: string;
     gamertag_snapshot?: string | null;
   }[];
+  event_cars?: DbEventCarRow[];
 };
+
+type DbEventCarRow = {
+  max_pi?: number | null;
+  tune_share_code?: string | null;
+  car_restrictions?: string[] | null;
+  cars?:
+    | {
+        id: string;
+        make: string;
+        model: string;
+        year: number | null;
+        pi: number;
+      }
+    | {
+        id: string;
+        make: string;
+        model: string;
+        year: number | null;
+        pi: number;
+      }[]
+    | null;
+};
+
+const EVENT_LIST_SELECT = `
+  *,
+  users(username, avatar_url),
+  discord_guilds(guild_name),
+  event_participants(discord_id, gamertag_snapshot),
+  event_cars(max_pi, tune_share_code, car_restrictions, cars(id, make, model, year, pi))
+`;
+
+function mapAllowedCars(eventCars: DbEventCarRow[] | undefined): ForzaEvent['allowedCars'] {
+  return (eventCars ?? [])
+    .map((ec) => {
+      const raw = ec.cars;
+      const car = (Array.isArray(raw) ? raw[0] : raw) as {
+        id: string;
+        make: string;
+        model: string;
+        year: number | null;
+        pi: number;
+      } | null;
+      if (!car?.id) return null;
+      return {
+        carId: car.id,
+        make: car.make,
+        model: car.model,
+        year: car.year,
+        pi: car.pi,
+        maxPi: ec.max_pi ?? car.pi,
+        tuneShareCode: ec.tune_share_code ?? undefined,
+        restrictions: ec.car_restrictions ?? [],
+      };
+    })
+    .filter((c): c is NonNullable<typeof c> => c !== null);
+}
+
+function mapDbEventWithRelations(row: DbEventRow): ForzaEvent {
+  const event = mapDbEvent(row);
+  event.allowedCars = mapAllowedCars(row.event_cars);
+  return event;
+}
+
+async function fetchEventsWithRelations(
+  buildQuery: (
+    supabase: NonNullable<Awaited<ReturnType<typeof getSupabase>>>,
+  ) => PromiseLike<{data: DbEventRow[] | null; error: unknown}>,
+): Promise<ForzaEvent[] | null> {
+  const supabase = await getSupabase();
+  if (!supabase) return null;
+
+  const {data, error} = await buildQuery(supabase);
+  if (error) {
+    console.error('fetchEventsWithRelations', error);
+    return null;
+  }
+
+  return (data ?? []).map(mapDbEventWithRelations);
+}
 
 export type EventResultRow = {
   discordId: string;
@@ -115,6 +195,32 @@ function mapLifecycle(status: string): EventLifecycle {
   return 'open';
 }
 
+/** Apply a realtime `events` row patch (lobby count / status) without refetching relations. */
+export function patchEventLobby(
+  event: ForzaEvent,
+  row: Pick<DbEventRow, 'current_players' | 'max_players' | 'status'>,
+): ForzaEvent {
+  const merged: DbEventRow = {
+    id: event.id,
+    slug: event.slug,
+    title: event.title,
+    type: event.type,
+    status: row.status,
+    starts_at: event.startsAt,
+    max_players: row.max_players,
+    current_players: row.current_players,
+    host_discord_id: event.hostDiscordId,
+    voice_policy: event.voicePolicy,
+  };
+  return {
+    ...event,
+    currentPlayers: row.current_players,
+    maxPlayers: row.max_players,
+    status: mapStatus(merged),
+    lifecycle: mapLifecycle(row.status),
+  };
+}
+
 function rulesFromRow(row: DbEventRow): string {
   return row.description?.trim() || 'See event details for car and tuning requirements.';
 }
@@ -168,87 +274,6 @@ export function mapDbEvent(row: DbEventRow): ForzaEvent {
   };
 }
 
-async function hydrateEvents(rows: DbEventRow[]): Promise<ForzaEvent[]> {
-  if (rows.length === 0) return [];
-  const supabase = getSupabase()!;
-  const hostIds = [...new Set(rows.map((r) => r.host_discord_id))];
-  const guildIds = [...new Set(rows.map((r) => r.guild_id).filter(Boolean))] as string[];
-  const eventIds = rows.map((r) => r.id);
-
-  const [{data: hosts}, {data: guilds}, {data: parts}, {data: eventCars}] = await Promise.all([
-    supabase.from('users').select('discord_id, username, avatar_url').in('discord_id', hostIds),
-    guildIds.length
-      ? supabase.from('discord_guilds').select('guild_id, guild_name').in('guild_id', guildIds)
-      : Promise.resolve({data: [] as {guild_id: string; guild_name: string}[]}),
-    supabase
-      .from('event_participants')
-      .select('event_id, discord_id, gamertag_snapshot')
-      .in('event_id', eventIds),
-    supabase
-      .from('event_cars')
-      .select(
-        'event_id, car_id, max_pi, tune_share_code, car_restrictions, cars(id, make, model, year, pi)',
-      )
-      .in('event_id', eventIds),
-  ]);
-
-  const hostMap = new Map(hosts?.map((h) => [h.discord_id, h]) ?? []);
-  const guildMap = new Map(guilds?.map((g) => [g.guild_id, g]) ?? []);
-  const partMap = new Map<string, NonNullable<typeof parts>>();
-  for (const p of parts ?? []) {
-    const list = partMap.get(p.event_id) ?? [];
-    list.push(p);
-    partMap.set(p.event_id, list);
-  }
-
-  const carsMap = new Map<string, NonNullable<typeof eventCars>>();
-  for (const ec of eventCars ?? []) {
-    const list = carsMap.get(ec.event_id) ?? [];
-    list.push(ec);
-    carsMap.set(ec.event_id, list);
-  }
-
-  return rows.map((row) => {
-    const host = hostMap.get(row.host_discord_id);
-    const guild = row.guild_id ? guildMap.get(row.guild_id) : null;
-    const enriched: DbEventRow = {
-      ...row,
-      users: host ? {username: host.username, avatar_url: host.avatar_url} : null,
-      discord_guilds: guild ? {guild_name: guild.guild_name} : null,
-      event_participants: (partMap.get(row.id) ?? []).map((p) => ({
-        discord_id: p.discord_id,
-        gamertag_snapshot: p.gamertag_snapshot,
-      })),
-    };
-    const event = mapDbEvent(enriched);
-    const ecs = carsMap.get(row.id) ?? [];
-    event.allowedCars = ecs
-      .map((ec) => {
-        const raw = ec.cars;
-        const car = (Array.isArray(raw) ? raw[0] : raw) as {
-          id: string;
-          make: string;
-          model: string;
-          year: number | null;
-          pi: number;
-        } | null;
-        if (!car?.id) return null;
-        return {
-          carId: car.id,
-          make: car.make,
-          model: car.model,
-          year: car.year,
-          pi: car.pi,
-          maxPi: ec.max_pi ?? car.pi,
-          tuneShareCode: ec.tune_share_code ?? undefined,
-          restrictions: ec.car_restrictions ?? [],
-        };
-      })
-      .filter((c): c is NonNullable<typeof c> => c !== null);
-    return event;
-  });
-}
-
 export type FetchEventsOptions = {
   /** Include completed/cancelled/archived (for My Events & Profile). Default false for Browse. */
   includeCompleted?: boolean;
@@ -273,23 +298,25 @@ export async function fetchPublishedEvents(
     return includeCompleted ? list : list.filter(isBrowsableEvent);
   }
 
-  const supabase = getSupabase()!;
-  let query = supabase
-    .from('events')
-    .select('*')
-    .neq('status', 'draft')
-    .order('starts_at', {ascending: true});
+  const events = await fetchEventsWithRelations((supabase) => {
+    let query = supabase
+      .from('events')
+      .select(EVENT_LIST_SELECT)
+      .neq('status', 'draft')
+      .order('starts_at', {ascending: true});
 
-  if (!includeCompleted) {
-    query = query.in('status', ['open', 'checkin', 'live']);
-  }
+    if (!includeCompleted) {
+      query = query.in('status', ['open', 'checkin', 'live']);
+    }
 
-  const {data, error} = await query;
-  if (error) {
-    console.error('fetchPublishedEvents', error);
+    return query;
+  });
+
+  if (events === null) {
     return [...MOCK_EVENTS];
   }
-  return hydrateEvents((data ?? []) as DbEventRow[]);
+
+  return events;
 }
 
 export async function fetchEventById(id: string): Promise<ForzaEvent | undefined> {
@@ -297,20 +324,21 @@ export async function fetchEventById(id: string): Promise<ForzaEvent | undefined
     return MOCK_EVENTS.find((e) => e.id === id);
   }
 
-  const supabase = getSupabase()!;
-  const {data, error} = await supabase.from('events').select('*').eq('id', id).maybeSingle();
+  const events = await fetchEventsWithRelations((supabase) =>
+    supabase.from('events').select(EVENT_LIST_SELECT).eq('id', id),
+  );
 
-  if (error || !data) {
+  if (events === null) {
     return MOCK_EVENTS.find((e) => e.id === id);
   }
-  const [event] = await hydrateEvents([data as DbEventRow]);
-  return event;
+
+  return events[0];
 }
 
 export async function fetchEventResults(eventId: string): Promise<EventResultRow[]> {
   if (!isSupabaseConfigured()) return MOCK_EVENT_RESULTS[eventId] ?? [];
 
-  const supabase = getSupabase()!;
+  const supabase = (await getSupabase())!;
   const {data, error} = await supabase
     .from('event_results')
     .select('discord_id, position, dnf, dns, points')
@@ -344,10 +372,10 @@ export async function searchCars(query: string): Promise<CarSearchResult[]> {
   if (!q) return [];
 
   if (!isSupabaseConfigured()) {
-    return searchCarCatalog(q);
+    return await searchCarCatalog(q);
   }
 
-  const supabase = getSupabase()!;
+  const supabase = (await getSupabase())!;
   const {data, error} = await supabase
     .from('cars')
     .select('id, make, model, year, pi')
@@ -357,11 +385,11 @@ export async function searchCars(query: string): Promise<CarSearchResult[]> {
 
   if (error) {
     console.error('searchCars', error);
-    return searchCarCatalog(q);
+    return await searchCarCatalog(q);
   }
 
   if (!data?.length) {
-    return searchCarCatalog(q);
+    return await searchCarCatalog(q);
   }
 
   return data.map((c) => ({
