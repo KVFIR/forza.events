@@ -95,14 +95,8 @@ serve(async (req) => {
       if (lockErr) return jsonResponse({error: lockErr}, 400);
     }
 
-    const hasCover = Boolean(
-      body.cover_image_url?.trim() ||
-        existing?.cover_image_url?.trim() ||
-        resolveCoverUrl(body.type ?? 'road', body.cover_image_url),
-    );
-
     if (body.publish) {
-      const publishErr = validatePublishReady(body, hasCover);
+      const publishErr = validatePublishReady(body);
       if (publishErr) return jsonResponse({error: publishErr}, 400);
     }
 

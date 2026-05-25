@@ -23,8 +23,18 @@ export function piToClass(pi: number): CarClassLetter {
 
 export function formatMaxPi(maxPi: number): string {
   const p = clampPi(maxPi);
-  return `Max PI ${p} (up to Class ${piToClass(p)})`;
+  return `${piToClass(p)} ${p}`;
 }
+
+export const piClassColor: Record<CarClassLetter, string> = {
+  D: 'text-slate-400',
+  C: 'text-yellow-400/90',
+  B: 'text-orange-400/90',
+  A: 'text-red-400/90',
+  S1: 'text-violet-400/90',
+  S2: 'text-fuchsia-400/90',
+  R: 'text-amber-400/90',
+};
 
 export function clampPi(value: number): number {
   return Math.min(PI_MAX, Math.max(PI_MIN, Math.round(value)));

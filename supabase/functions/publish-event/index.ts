@@ -89,7 +89,7 @@ serve(async (req) => {
       }),
     };
 
-    const publishErr = validatePublishReady(body, Boolean(event.cover_image_url?.trim()));
+    const publishErr = validatePublishReady(body);
     if (publishErr) return jsonResponse({error: publishErr}, 400);
 
     const botInstalled = await isBotInGuild(guild_id);

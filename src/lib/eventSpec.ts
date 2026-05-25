@@ -21,7 +21,6 @@ export function validatePublishForm(input: {
   startsAtLocal: string;
   guildId: string | null;
   channelId: string | null;
-  coverReady: boolean;
   trackCodes: string[];
   carRuleMode: CarRuleMode;
   maxPi: number;
@@ -36,7 +35,6 @@ export function validatePublishForm(input: {
   if (draftErr) return draftErr;
   if (!input.channelId) return 'Choose a channel before publishing.';
   if (!input.lobbyLeaderGamertag.trim()) return 'Convoy leader gamertag is required.';
-  if (!input.coverReady) return 'Cover image is required before publishing.';
   if (normalizeTrackCodes(input.trackCodes).length === 0) return 'Add at least one track code.';
   if (input.carRuleMode === 'restricted_list' && input.carCount === 0) {
     return 'Add at least one car for a restricted car list.';

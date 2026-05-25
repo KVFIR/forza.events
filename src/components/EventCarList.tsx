@@ -1,6 +1,7 @@
 import {useEffect, useRef, useState} from 'react';
 import {Trash2} from 'lucide-react';
-import {clampPi, piToClass, PI_MAX, PI_MIN} from '../lib/pi';
+import {piToClass} from '../lib/pi';
+import {MaxPiInput} from './MaxPiInput';
 import {searchCars, type CarSearchResult} from '../lib/events';
 import {ShareCodeInput} from './ShareCodeInput';
 import {TuningRestrictionsInput} from './TuningRestrictionsInput';
@@ -162,13 +163,11 @@ export function EventCarList({cars, onChange, inputClass, labelClass}: Props) {
                   <label className="text-[10px] font-bold uppercase tracking-widest text-muted">
                     Max PI
                   </label>
-                  <input
-                    type="number"
-                    min={PI_MIN}
-                    max={PI_MAX}
-                    className={inputClass}
+                  <MaxPiInput
+                    className="mt-1.5"
+                    inputClass={inputClass}
                     value={c.maxPi}
-                    onChange={(e) => update(c.id, {maxPi: clampPi(Number(e.target.value))})}
+                    onChange={(maxPi) => update(c.id, {maxPi})}
                   />
                 </div>
                 <div>

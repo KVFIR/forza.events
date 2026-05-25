@@ -79,7 +79,7 @@ forza.events/
 │   ├── context/          # JoinedEventsContext (session mock)
 │   ├── lib/
 │   │   ├── discord.ts    # Embedded App SDK + standalone mock mode
-│   │   ├── mockData.ts   # Prototype events and user
+│   │   ├── discordAuth.ts # Browser OAuth for localhost
 │   │   └── types.ts
 │   └── main.tsx
 ├── bot/                  # Companion bot notes for post-MVP automation

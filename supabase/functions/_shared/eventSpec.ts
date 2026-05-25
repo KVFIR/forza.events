@@ -58,19 +58,12 @@ export function validateDraft(body: SaveEventBody): string | null {
   return null;
 }
 
-export function validatePublishReady(
-  body: SaveEventBody,
-  hasCover: boolean,
-): string | null {
+export function validatePublishReady(body: SaveEventBody): string | null {
   const draftErr = validateDraft(body);
   if (draftErr) return draftErr;
 
   const leader = body.lobby_leader_gamertag?.trim();
   if (!leader) return 'Convoy leader gamertag is required.';
-
-  if (!hasCover && !body.cover_image_url) {
-    return 'Cover image is required before publishing.';
-  }
 
   const trackCodes = normalizeTrackCodes(body.track_codes);
   if (trackCodes.length === 0) return 'Add at least one track code before publishing.';
