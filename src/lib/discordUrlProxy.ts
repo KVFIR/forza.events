@@ -1,18 +1,9 @@
 import {patchUrlMappings} from '@discord/embedded-app-sdk';
-import {DISCORD_SUPABASE_PROXY_PREFIX} from './supabaseEnv';
-
-function isDiscordActivityFrame(): boolean {
-  if (typeof window === 'undefined') return false;
-  try {
-    return window.parent !== window;
-  } catch {
-    return true;
-  }
-}
+import {DISCORD_SUPABASE_PROXY_PREFIX, isDiscordActivityFrame} from './supabaseEnv';
 
 /**
- * Fallback: rewrite any direct *.supabase.co requests (e.g. third-party code).
- * Primary path uses resolveSupabaseUrl() so the client talks to /supabase on discordsays.com.
+ * Rewrite *.supabase.co requests to {origin}/supabase (must match Developer Portal mapping).
+ * createClient keeps the real project URL so PostgREST accepts the anon JWT.
  */
 export function setupDiscordSupabaseProxy(): void {
   if (!isDiscordActivityFrame()) return;

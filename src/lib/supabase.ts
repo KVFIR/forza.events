@@ -1,5 +1,5 @@
 import type {SupabaseClient} from '@supabase/supabase-js';
-import {resolveSupabaseUrl} from './supabaseEnv';
+import {createSupabaseFetch, resolveSupabaseUrl} from './supabaseEnv';
 
 let client: SupabaseClient | null = null;
 let clientPromise: Promise<SupabaseClient | null> | null = null;
@@ -10,7 +10,7 @@ export function isSupabaseConfigured(): boolean {
   );
 }
 
-export {resolveSupabaseUrl} from './supabaseEnv';
+export {resolveSupabaseUrl, isDiscordActivityFrame} from './supabaseEnv';
 
 export async function getSupabase(): Promise<SupabaseClient | null> {
   if (!isSupabaseConfigured()) return null;
@@ -21,8 +21,9 @@ export async function getSupabase(): Promise<SupabaseClient | null> {
   if (client) return client;
   if (!clientPromise) {
     const anonKey = import.meta.env.VITE_SUPABASE_ANON_KEY as string;
+    const customFetch = createSupabaseFetch(anonKey);
     clientPromise = import('@supabase/supabase-js').then(({createClient}) => {
-      client = createClient(url, anonKey);
+      client = createClient(url, anonKey, customFetch ? {global: {fetch: customFetch}} : undefined);
       return client;
     });
   }
