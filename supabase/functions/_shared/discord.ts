@@ -70,3 +70,58 @@ export function botHeaders(): HeadersInit {
   if (!token) throw new Error('DISCORD_BOT_TOKEN not set');
   return {Authorization: `Bot ${token}`, 'Content-Type': 'application/json'};
 }
+
+export type DiscordGuildSummary = {
+  id: string;
+  name: string;
+  icon: string | null;
+};
+
+export async function fetchUserGuilds(
+  accessToken: string,
+): Promise<DiscordGuildSummary[]> {
+  const res = await fetch('https://discord.com/api/users/@me/guilds', {
+    headers: {Authorization: `Bearer ${accessToken}`},
+  });
+  if (!res.ok) {
+    throw new Error(`Failed to list user guilds: ${res.status}`);
+  }
+  return res.json();
+}
+
+/** Guild IDs where the bot user is a member (app installed with bot scope). */
+export async function fetchBotGuildIds(): Promise<Set<string>> {
+  const res = await fetch('https://discord.com/api/users/@me/guilds', {
+    headers: botHeaders(),
+  });
+  if (!res.ok) {
+    const text = await res.text();
+    console.error('Failed to list bot guilds', text);
+    throw new Error('Failed to list bot guilds');
+  }
+  const guilds = (await res.json()) as {id: string}[];
+  return new Set(guilds.map((g) => g.id));
+}
+
+export async function isBotInGuild(guildId: string): Promise<boolean> {
+  const ids = await fetchBotGuildIds();
+  return ids.has(guildId);
+}
+
+export function publishTargetHint(): string {
+  return 'Install FORZA.EVENTS in a Discord server to publish events there.';
+}
+
+export function mapDiscordPostError(status: number, body: string): string {
+  if (status === 403) {
+    return 'Bot cannot post in this channel. Check channel permissions and that FORZA.EVENTS is installed in the server.';
+  }
+  if (status === 404) {
+    return 'Channel not found. Choose another channel or reinstall FORZA.EVENTS in this server.';
+  }
+  if (status === 401) {
+    return 'Discord bot token is invalid. Check DISCORD_BOT_TOKEN in production secrets.';
+  }
+  console.error('Discord post failed', status, body);
+  return 'Failed to post event message to Discord.';
+}

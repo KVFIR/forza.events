@@ -175,7 +175,6 @@ async function resolveCarId(
       model: c.model,
       year: c.year,
       pi: c.pi,
-      class: c.class,
     })
     .select('id')
     .single();
@@ -196,7 +195,15 @@ async function syncEventCars(
   await supabase.from('event_cars').delete().eq('event_id', eventId);
   if (mode !== 'restricted_list' || cars.length === 0) return;
 
-  const rows = [];
+  type EventCarRow = {
+    event_id: string;
+    car_id: string;
+    max_pi: number;
+    tune_share_code: string | null;
+    car_restrictions: string[];
+  };
+
+  const rows: EventCarRow[] = [];
   for (const c of cars) {
     const carId = await resolveCarId(supabase, c);
     if (!carId) continue;

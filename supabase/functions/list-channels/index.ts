@@ -1,6 +1,6 @@
 import {serve} from 'https://deno.land/std@0.224.0/http/server.ts';
 import {jsonResponse, optionsResponse} from '../_shared/cors.ts';
-import {botHeaders, verifyDiscordToken} from '../_shared/discord.ts';
+import {botHeaders, isBotInGuild, verifyDiscordToken} from '../_shared/discord.ts';
 
 type DiscordChannel = {
   id: string;
@@ -23,6 +23,14 @@ serve(async (req) => {
   try {
     const {guild_id} = await req.json();
     if (!guild_id) return jsonResponse({error: 'Missing guild_id'}, 400);
+
+    const botInstalled = await isBotInGuild(guild_id);
+    if (!botInstalled) {
+      return jsonResponse(
+        {error: 'FORZA.EVENTS is not installed in this server. Add the app to the server first.'},
+        400,
+      );
+    }
 
     const res = await fetch(
       `https://discord.com/api/guilds/${guild_id}/channels`,

@@ -11,11 +11,11 @@ type DbEvent = {
   current_players: number;
   max_pi?: number | null;
   car_rule_mode?: CarRuleMode | null;
-  car_class_cap?: string | null;
   event_share_code?: string | null;
   track_codes?: string[] | null;
   rules_allowed?: string[] | null;
   rules_forbidden?: string[] | null;
+  additional_car_restrictions?: string | null;
   lobby_leader_gamertag: string;
   cover_image_url?: string | null;
   description?: string | null;
@@ -32,19 +32,22 @@ export function slugify(title: string): string {
 }
 
 function formatTrackField(event: DbEvent): string {
-  const primary = event.event_share_code?.trim();
-  const extras = event.track_codes ?? [];
-  if (primary && extras.length) return `${primary} (+${extras.length} more)`;
-  if (primary) return primary;
-  if (extras.length) return extras.join(', ');
-  return 'TBA';
+  const codes = [event.event_share_code, ...(event.track_codes ?? [])].filter(
+    (code): code is string => Boolean(code?.trim()),
+  );
+  if (codes.length === 0) return 'TBA';
+  if (codes.length === 1) return codes[0];
+  return `${codes[0]} (+${codes.length - 1} more)`;
 }
 
 function formatCarRules(event: DbEvent): string {
   if (event.car_rule_mode === 'anything_goes') {
-    const cap = event.car_class_cap ? `Class ${event.car_class_cap}` : 'Class cap';
-    const pi = event.max_pi ? ` · Max PI ${event.max_pi}` : '';
-    return `Anything goes · ${cap}${pi}`;
+    const pi = event.max_pi ? `Max PI ${event.max_pi}` : 'PI cap';
+    const extra =
+      event.additional_car_restrictions ??
+      (event.rules_allowed ?? []).find((rule) => rule.startsWith('additional:'))?.slice('additional:'.length);
+    const note = extra ? ` · ${extra}` : '';
+    return `Open build · ${pi}${note}`;
   }
   return 'Restricted car list';
 }
@@ -52,7 +55,10 @@ function formatCarRules(event: DbEvent): string {
 export function buildEventEmbed(event: DbEvent) {
   const when = new Date(event.starts_at).toISOString();
   const tz = event.timezone_hint ?? 'UTC';
-  const siteOrigin = Deno.env.get('APP_ORIGIN') ?? 'https://forza.events';
+  const siteOrigin =
+    (globalThis as {Deno?: {env: {get: (name: string) => string | undefined}}}).Deno?.env.get(
+      'APP_ORIGIN',
+    ) ?? 'https://forza.events';
   const coverUrl = resolveCoverAbsolute(event.type, event.cover_image_url, siteOrigin);
 
   const embed = {

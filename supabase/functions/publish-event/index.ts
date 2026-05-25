@@ -1,12 +1,8 @@
 import {serve} from 'https://deno.land/std@0.224.0/http/server.ts';
 import {jsonResponse, optionsResponse} from '../_shared/cors.ts';
-import {botHeaders, verifyDiscordToken} from '../_shared/discord.ts';
+import {botHeaders, isBotInGuild, mapDiscordPostError, verifyDiscordToken} from '../_shared/discord.ts';
 import {buildEventEmbed} from '../_shared/events.ts';
-import {
-  normalizeTrackCodes,
-  validatePublishReady,
-  type SaveEventBody,
-} from '../_shared/eventSpec.ts';
+import {validatePublishReady, type SaveEventBody} from '../_shared/eventSpec.ts';
 import {adminClient} from '../_shared/supabase.ts';
 
 serve(async (req) => {
@@ -50,7 +46,7 @@ serve(async (req) => {
 
     const {data: eventCars} = await supabase
       .from('event_cars')
-      .select('car_id, max_pi, tune_share_code, car_restrictions, cars(id, make, model, year, pi, class)')
+      .select('car_id, max_pi, tune_share_code, car_restrictions, cars(id, make, model, year, pi)')
       .eq('event_id', event_id);
 
     const body: SaveEventBody = {
@@ -64,10 +60,13 @@ serve(async (req) => {
       lobby_leader_is_host: event.lobby_leader_is_host,
       guild_id,
       car_rule_mode: event.car_rule_mode,
-      car_class_cap: event.car_class_cap,
       max_pi: event.max_pi,
-      primary_track_code: event.event_share_code,
-      extra_track_codes: event.track_codes ?? [],
+      track_codes: [event.event_share_code, ...(event.track_codes ?? [])].filter(Boolean),
+      additional_car_restrictions:
+        event.additional_car_restrictions ??
+        (Array.isArray(event.rules_allowed)
+          ? event.rules_allowed.find((rule: string) => rule.startsWith('additional:'))?.slice('additional:'.length) ?? null
+          : null),
       cars: (eventCars ?? []).map((ec) => {
         const raw = ec.cars;
         const car = (Array.isArray(raw) ? raw[0] : raw) as {
@@ -76,7 +75,6 @@ serve(async (req) => {
           model: string;
           year: number | null;
           pi: number;
-          class: string;
         };
         return {
           id: car.id,
@@ -84,7 +82,6 @@ serve(async (req) => {
           model: car.model,
           year: car.year,
           pi: car.pi,
-          class: car.class,
           max_pi: ec.max_pi,
           tune_share_code: ec.tune_share_code,
           car_restrictions: ec.car_restrictions ?? [],
@@ -95,8 +92,17 @@ serve(async (req) => {
     const publishErr = validatePublishReady(body, Boolean(event.cover_image_url?.trim()));
     if (publishErr) return jsonResponse({error: publishErr}, 400);
 
-    const {primary} = normalizeTrackCodes(event.event_share_code, event.track_codes ?? []);
-    if (!primary) return jsonResponse({error: 'Primary track code is required'}, 400);
+    const botInstalled = await isBotInGuild(guild_id);
+    if (!botInstalled) {
+      return jsonResponse(
+        {error: 'FORZA.EVENTS is not installed in this server. Add the app to the server first.'},
+        400,
+      );
+    }
+
+    if (!Array.isArray(body.track_codes) || body.track_codes.length === 0) {
+      return jsonResponse({error: 'Add at least one track code'}, 400);
+    }
 
     const payload = buildEventEmbed(event);
     const msgRes = await fetch(
@@ -110,8 +116,7 @@ serve(async (req) => {
 
     if (!msgRes.ok) {
       const text = await msgRes.text();
-      console.error('Discord post failed', text);
-      return jsonResponse({error: 'Failed to post message'}, 502);
+      return jsonResponse({error: mapDiscordPostError(msgRes.status, text)}, 502);
     }
 
     const message = await msgRes.json();
@@ -123,7 +128,6 @@ serve(async (req) => {
         channel_id,
         discord_message_id: message.id,
         status: 'open',
-        event_share_code: primary,
       })
       .eq('id', event_id);
 

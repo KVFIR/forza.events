@@ -8,7 +8,6 @@ export type CarPayload = {
   model: string;
   year: number | null;
   pi: number;
-  class: string;
   max_pi: number;
   tune_share_code?: string | null;
   car_restrictions?: string[];
@@ -28,10 +27,9 @@ export type SaveEventBody = {
   lobby_leader_is_host?: boolean;
   voice_policy?: string;
   car_rule_mode?: CarRuleMode;
-  car_class_cap?: string | null;
   max_pi?: number;
-  primary_track_code?: string;
-  extra_track_codes?: string[];
+  track_codes?: string[];
+  additional_car_restrictions?: string | null;
   cars?: CarPayload[];
   publish?: boolean;
   cancel?: boolean;
@@ -49,13 +47,8 @@ type DbEvent = {
 
 const PLAYER_SLOTS = 11;
 
-export function normalizeTrackCodes(primary?: string, extras?: string[]): {
-  primary: string;
-  extras: string[];
-} {
-  const p = String(primary ?? '').trim();
-  const list = (extras ?? []).map((c) => String(c).trim()).filter(Boolean);
-  return {primary: p, extras: list};
+export function normalizeTrackCodes(codes?: string[]): string[] {
+  return (codes ?? []).map((c) => String(c).trim()).filter(Boolean);
 }
 
 export function validateDraft(body: SaveEventBody): string | null {
@@ -79,16 +72,15 @@ export function validatePublishReady(
     return 'Cover image is required before publishing.';
   }
 
-  const {primary} = normalizeTrackCodes(body.primary_track_code, body.extra_track_codes);
-  if (!primary) return 'Primary track code is required before publishing.';
+  const trackCodes = normalizeTrackCodes(body.track_codes);
+  if (trackCodes.length === 0) return 'Add at least one track code before publishing.';
 
   const mode = body.car_rule_mode ?? 'anything_goes';
   if (mode === 'restricted_list') {
     if (!body.cars?.length) return 'Add at least one car for a restricted car list.';
   } else {
     const maxPi = Number(body.max_pi ?? 0);
-    if (maxPi < 100 || maxPi > 999) return 'Set a PI cap between 100 and 999 for Anything goes.';
-    if (!body.car_class_cap) return 'Choose a class cap for Anything goes.';
+    if (maxPi < 100 || maxPi > 999) return 'Set a PI cap between 100 and 999 for Open build.';
   }
 
   return null;
@@ -117,10 +109,7 @@ export function buildEventRow(
   hostDiscordId: string,
   coverUrl: string | null,
 ) {
-  const {primary, extras} = normalizeTrackCodes(
-    body.primary_track_code,
-    body.extra_track_codes,
-  );
+  const trackCodes = normalizeTrackCodes(body.track_codes);
   const cars = body.cars ?? [];
   const mode: CarRuleMode = body.car_rule_mode ?? 'anything_goes';
   const maxPi =
@@ -140,16 +129,20 @@ export function buildEventRow(
     timezone_hint: body.timezone_hint,
     max_pi: maxPi,
     car_rule_mode: mode,
-    car_class_cap: mode === 'anything_goes' ? body.car_class_cap ?? null : null,
     car_setup_mode: 'general' as const,
     tuning_restrictions: [] as string[],
     voice_policy: body.voice_policy ?? 'optional',
     max_players: PLAYER_SLOTS,
     cover_image_url: coverUrl,
     description: body.description ?? null,
-    event_share_code: primary || null,
-    track_codes: extras,
-    rules_allowed: [] as string[],
+    event_share_code: trackCodes[0] ?? null,
+    track_codes: trackCodes.slice(1),
+    rules_allowed:
+      mode === 'anything_goes' && body.additional_car_restrictions?.trim()
+        ? [`additional:${body.additional_car_restrictions.trim()}`]
+        : ([] as string[]),
+    additional_car_restrictions:
+      mode === 'anything_goes' ? body.additional_car_restrictions?.trim() || null : null,
     rules_forbidden: [] as string[],
     lobby_leader_gamertag: body.lobby_leader_gamertag?.trim() ?? 'TBD',
     lobby_leader_is_host: body.lobby_leader_is_host ?? true,
