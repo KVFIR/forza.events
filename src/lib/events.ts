@@ -2,7 +2,6 @@ import {getSupabase, isSupabaseConfigured} from './supabase';
 import {searchCarCatalog} from './carCatalog';
 import {EVENT_PLAYER_SLOTS} from './constants';
 import {resolveEventCoverUrl} from './eventCovers';
-import {MOCK_EVENTS} from './mockData';
 import type {
   AppUser,
   CarRuleMode,
@@ -19,14 +18,6 @@ export {
   eventHasStarted,
   isPublishedEvent,
 } from './eventSpec';
-
-const MOCK_EVENT_RESULTS: Record<string, EventResultRow[]> = {
-  'evt-2': [
-    {discordId: '100000000000000001', position: 1, dnf: false, dns: false},
-    {discordId: '200000000000000010', position: 2, dnf: false, dns: false},
-    {discordId: '200000000000000011', position: 3, dnf: true, dns: false},
-  ],
-};
 
 type DbEventRow = {
   id: string;
@@ -86,7 +77,7 @@ type DbEventCarRow = {
 
 const EVENT_LIST_SELECT = `
   *,
-  users(username, avatar_url),
+  users!events_host_discord_id_fkey(username, avatar_url),
   discord_guilds(guild_name),
   event_participants(discord_id, gamertag_snapshot),
   event_cars(max_pi, tune_share_code, car_restrictions, cars(id, make, model, year, pi))
@@ -294,8 +285,7 @@ export async function fetchPublishedEvents(
   const {includeCompleted = false} = options;
 
   if (!isSupabaseConfigured()) {
-    const list = [...MOCK_EVENTS];
-    return includeCompleted ? list : list.filter(isBrowsableEvent);
+    return [];
   }
 
   const events = await fetchEventsWithRelations((supabase) => {
@@ -313,7 +303,7 @@ export async function fetchPublishedEvents(
   });
 
   if (events === null) {
-    return [...MOCK_EVENTS];
+    return [];
   }
 
   return events;
@@ -321,7 +311,7 @@ export async function fetchPublishedEvents(
 
 export async function fetchEventById(id: string): Promise<ForzaEvent | undefined> {
   if (!isSupabaseConfigured()) {
-    return MOCK_EVENTS.find((e) => e.id === id);
+    return undefined;
   }
 
   const events = await fetchEventsWithRelations((supabase) =>
@@ -329,14 +319,14 @@ export async function fetchEventById(id: string): Promise<ForzaEvent | undefined
   );
 
   if (events === null) {
-    return MOCK_EVENTS.find((e) => e.id === id);
+    return undefined;
   }
 
   return events[0];
 }
 
 export async function fetchEventResults(eventId: string): Promise<EventResultRow[]> {
-  if (!isSupabaseConfigured()) return MOCK_EVENT_RESULTS[eventId] ?? [];
+  if (!isSupabaseConfigured()) return [];
 
   const supabase = (await getSupabase())!;
   const {data, error} = await supabase
