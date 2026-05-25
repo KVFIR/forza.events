@@ -73,7 +73,7 @@ Before pilot launch, confirm in the [Discord Developer Portal](https://discord.c
    |--------|--------|
    | `/supabase` | `<project-ref>.supabase.co` (no `https://`) |
 
-   Do **not** use `/.proxy/...` in the prefix — the Developer Portal rejects it ([changelog](https://discord.com/developers/change-log#remove-proxy-from-discord-activity-proxy-path)). The client keeps `https://<ref>.supabase.co`; `patchUrlMappings` rewrites requests to `{discordsays-origin}/supabase`. Pointing `createClient` at `discordsays.com` causes `Invalid API key` from PostgREST.
+   Do **not** use `/.proxy/...` in the prefix — the Developer Portal rejects it ([changelog](https://discord.com/developers/change-log#remove-proxy-from-discord-activity-proxy-path)). The client keeps `https://<ref>.supabase.co`; `patchUrlMappings` rewrites requests to `{discordsays-origin}/supabase`. Discord’s proxy often drops `apikey` on PostgREST (`/rest/v1`), which causes `Invalid API key` — Browse and event detail in the Activity use the **`browse-events`** Edge Function instead (same path as `token-exchange`; deploy with `npm run deploy:functions`).
 4. **Redirect URIs** (OAuth2 → Redirects) — register **every** URL your app uses:
    - `https://127.0.0.1` — embedded Activity (`token-exchange` with this `redirect_uri`)
    - `http://localhost:5180/auth/callback` — local `npm run dev` in a browser tab
