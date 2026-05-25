@@ -44,14 +44,19 @@ export function JoinedEventsProvider({children}: {children: ReactNode}) {
       const token = getAccessToken();
 
       if (!isMockMode && isApiConfigured() && token) {
-        if (currently) {
-          await leaveEvent(token, event.id);
-        } else {
-          const gt = gamertag ?? user.xboxGamertag;
-          if (!gt) throw new Error('Gamertag required');
-          await joinEvent(token, event.id, gt);
+        try {
+          if (currently) {
+            await leaveEvent(token, event.id);
+          } else {
+            const gt = gamertag ?? user.xboxGamertag;
+            if (!gt) throw new Error('Gamertag required');
+            await joinEvent(token, event.id, gt);
+          }
+          bumpRefresh();
+        } catch (err) {
+          bumpRefresh();
+          throw err;
         }
-        bumpRefresh();
         return;
       }
 

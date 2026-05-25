@@ -1,4 +1,4 @@
-import {useEffect, useState} from 'react';
+import {useCallback, useEffect, useState} from 'react';
 import {Link, useNavigate, useParams} from 'react-router-dom';
 import {
   ArrowLeft,
@@ -27,6 +27,7 @@ import {Button} from '../components/ui/Button';
 import {GamertagModal} from '../components/GamertagModal';
 import {useJoinedEvents} from '../context/JoinedEventsContext';
 import {useAuth} from '../context/AuthContext';
+import {useEventLiveUpdates} from '../hooks/useEventLiveUpdates';
 import {piToClass} from '../lib/pi';
 import {formatLobbyCount, LOBBY_TOTAL_PLAYERS} from '../lib/constants';
 import {participationButtonLabel, participationButtonVariant} from '../lib/eventActions';
@@ -74,7 +75,15 @@ export function EventDetail() {
   const {user, refreshUser, getAccessToken, isMockMode} = useAuth();
   const [gamertagOpen, setGamertagOpen] = useState(false);
   const [joining, setJoining] = useState(false);
+  const [joinError, setJoinError] = useState<string | null>(null);
   const [cancelling, setCancelling] = useState(false);
+
+  const reloadEvent = useCallback(() => {
+    if (!id) return;
+    void fetchEventById(id).then(setEvent);
+  }, [id]);
+
+  useEventLiveUpdates(id, reloadEvent);
 
   useEffect(() => {
     if (!id) return;
@@ -129,6 +138,7 @@ export function EventDetail() {
   async function doJoin(gamertag: string) {
     if (!event) return;
     setJoining(true);
+    setJoinError(null);
     try {
       const token = getAccessToken();
       if (token && isApiConfigured()) {
@@ -137,6 +147,10 @@ export function EventDetail() {
       }
       await toggleJoin(event, gamertag);
       bumpRefresh();
+      const next = await fetchEventById(event.id);
+      setEvent(next);
+    } catch (err) {
+      setJoinError(err instanceof Error ? err.message : 'Could not join event');
       const next = await fetchEventById(event.id);
       setEvent(next);
     } finally {
@@ -247,6 +261,8 @@ export function EventDetail() {
           )}
         </Button>
       </div>
+
+      {joinError ? <p className="mt-3 text-sm text-accent-red">{joinError}</p> : null}
 
       <GamertagModal
         open={gamertagOpen}

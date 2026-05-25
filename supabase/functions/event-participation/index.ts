@@ -70,7 +70,15 @@ serve(async (req) => {
         {onConflict: 'event_id,discord_id'},
       );
 
-      if (error) return jsonResponse({error: error.message}, 500);
+      if (error) {
+        if (error.message.includes('EVENT_FULL')) {
+          return jsonResponse({error: 'Event full'}, 409);
+        }
+        if (error.message.includes('EVENT_NOT_FOUND')) {
+          return jsonResponse({error: 'Event not found'}, 404);
+        }
+        return jsonResponse({error: error.message}, 500);
+      }
       return jsonResponse({joined: true});
     }
 
