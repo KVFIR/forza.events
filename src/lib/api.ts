@@ -41,6 +41,12 @@ async function invoke<T>(
   return data as T;
 }
 
+export async function invokeBrowseEvents(
+  body: {include_completed?: boolean; event_id?: string} = {},
+): Promise<{data: unknown[]}> {
+  return invoke<{data: unknown[]}>('browse-events', body, null);
+}
+
 export async function exchangeToken(
   code: string,
   options?: {guildId?: string; guildName?: string; redirectUri?: string},

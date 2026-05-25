@@ -5,6 +5,7 @@ ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 cd "$ROOT"
 
 FUNCTIONS=(
+  browse-events
   token-exchange
   list-guilds
   list-channels

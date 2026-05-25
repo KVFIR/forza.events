@@ -1,4 +1,6 @@
-import {getSupabase, isSupabaseConfigured, resolveSupabaseUrl} from './supabase';
+import {invokeBrowseEvents} from './api';
+import {getSupabase, isSupabaseConfigured} from './supabase';
+import {isDiscordActivityFrame} from './supabaseEnv';
 import {searchCarCatalog} from './carCatalog';
 import {EVENT_PLAYER_SLOTS} from './constants';
 import {resolveEventCoverUrl} from './eventCovers';
@@ -109,7 +111,7 @@ function mapAllowedCars(eventCars: DbEventCarRow[] | undefined): ForzaEvent['all
     .filter((c): c is NonNullable<typeof c> => c !== null);
 }
 
-function mapDbEventWithRelations(row: DbEventRow): ForzaEvent {
+export function mapDbEventWithRelations(row: DbEventRow): ForzaEvent {
   const event = mapDbEvent(row);
   event.allowedCars = mapAllowedCars(row.event_cars);
   return event;
@@ -125,7 +127,7 @@ async function fetchEventsWithRelations(
 
   const {data, error} = await buildQuery(supabase);
   if (error) {
-    console.error('fetchEventsWithRelations', error, {supabaseUrl: resolveSupabaseUrl()});
+    console.error('fetchEventsWithRelations', error);
     return null;
   }
 
@@ -292,6 +294,22 @@ export async function fetchPublishedEvents(
   return (await fetchPublishedEventsResult(undefined, options)).events;
 }
 
+async function fetchEventsViaEdge(options: {
+  includeCompleted?: boolean;
+  eventId?: string;
+}): Promise<ForzaEvent[] | null> {
+  try {
+    const {data} = await invokeBrowseEvents({
+      include_completed: options.includeCompleted,
+      event_id: options.eventId,
+    });
+    return (data ?? []).map((row) => mapDbEventWithRelations(row as DbEventRow));
+  } catch (err) {
+    console.error('browse-events', err);
+    return null;
+  }
+}
+
 export async function fetchPublishedEventsResult(
   _guildId?: string,
   options: FetchEventsOptions = {},
@@ -300,6 +318,14 @@ export async function fetchPublishedEventsResult(
 
   if (!isSupabaseConfigured()) {
     return {events: [], error: 'not_configured'};
+  }
+
+  if (isDiscordActivityFrame()) {
+    const events = await fetchEventsViaEdge({includeCompleted});
+    if (events === null) {
+      return {events: [], error: 'fetch_failed'};
+    }
+    return {events, error: null};
   }
 
   const events = await fetchEventsWithRelations((supabase) => {
@@ -326,6 +352,11 @@ export async function fetchPublishedEventsResult(
 export async function fetchEventById(id: string): Promise<ForzaEvent | undefined> {
   if (!isSupabaseConfigured()) {
     return undefined;
+  }
+
+  if (isDiscordActivityFrame()) {
+    const events = await fetchEventsViaEdge({includeCompleted: true, eventId: id});
+    return events?.[0];
   }
 
   const events = await fetchEventsWithRelations((supabase) =>
