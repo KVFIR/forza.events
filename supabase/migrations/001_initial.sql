@@ -1,6 +1,5 @@
 -- FORZA.EVENTS — initial schema; current MVP alignment is documented in docs/PLAN.md and docs/STATUS.md
 
-create extension if not exists "uuid-ossp";
 create extension if not exists "pgcrypto";
 
 create type event_type as enum (
@@ -34,7 +33,7 @@ create table discord_guilds (
 );
 
 create table users (
-  id                uuid primary key default uuid_generate_v4(),
+  id                uuid primary key default gen_random_uuid(),
   discord_id        text unique not null,
   username          text not null,
   discriminator     text,
@@ -55,7 +54,7 @@ create table users (
 create index users_discord_id_idx on users(discord_id);
 
 create table events (
-  id                 uuid primary key default uuid_generate_v4(),
+  id                 uuid primary key default gen_random_uuid(),
   slug               text unique not null,
   title              text not null,
   type               event_type not null,
@@ -68,7 +67,6 @@ create table events (
   discord_message_id text,
   starts_at          timestamptz not null,
   ends_at            timestamptz,
-  checkin_opens_at   timestamptz generated always as (starts_at - interval '30 minutes') stored,
   car_class          car_class,
   platform           platform_type default 'crossplay',
   region             region_type not null,
@@ -101,7 +99,7 @@ create index ep_event_id_idx on event_participants(event_id);
 create index ep_discord_id_idx on event_participants(discord_id);
 
 create table event_results (
-  id           uuid primary key default uuid_generate_v4(),
+  id           uuid primary key default gen_random_uuid(),
   event_id     uuid not null references events(id) on delete cascade,
   discord_id   text not null references users(discord_id),
   position     int not null,
@@ -113,7 +111,7 @@ create table event_results (
 );
 
 create table host_ratings (
-  id         uuid primary key default uuid_generate_v4(),
+  id         uuid primary key default gen_random_uuid(),
   event_id   uuid not null references events(id) on delete cascade,
   rater_id   text not null references users(discord_id),
   host_id    text not null references users(discord_id),
@@ -124,7 +122,7 @@ create table host_ratings (
 );
 
 create table reminder_log (
-  id          uuid primary key default uuid_generate_v4(),
+  id          uuid primary key default gen_random_uuid(),
   event_id    uuid not null references events(id) on delete cascade,
   discord_id  text not null references users(discord_id),
   offset_sent reminder_offset not null,

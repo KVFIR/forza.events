@@ -2,6 +2,7 @@
 -- Car restrictions: PI range + optional tune share code
 
 -- Migrate event_type enum (also used on users.preferred_types)
+ALTER TABLE users ALTER COLUMN preferred_types DROP DEFAULT;
 ALTER TABLE users ALTER COLUMN preferred_types TYPE text[] USING ARRAY[]::text[];
 ALTER TABLE events ALTER COLUMN type DROP DEFAULT;
 ALTER TABLE events ALTER COLUMN type TYPE text USING type::text;

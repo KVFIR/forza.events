@@ -36,7 +36,7 @@ alter table event_participants
 -- ─── cars catalog ───
 
 create table cars (
-  id          uuid primary key default uuid_generate_v4(),
+  id          uuid primary key default gen_random_uuid(),
   make        text not null,
   model       text not null,
   year        int,
@@ -60,7 +60,7 @@ create table event_cars (
 -- ─── launch intents (deep link from embed button) ───
 
 create table launch_intents (
-  id         uuid primary key default uuid_generate_v4(),
+  id         uuid primary key default gen_random_uuid(),
   discord_id text not null,
   guild_id   text not null,
   event_id   uuid not null references events(id) on delete cascade,
