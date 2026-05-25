@@ -6,7 +6,9 @@
   "scripts": {
     "dev": "vite",
     "build": "tsc -b && vite build",
-    "preview": "vite preview"
+    "preview": "vite preview",
+    "deploy:functions": "bash scripts/deploy-edge-functions.sh",
+    "sync:secrets": "node scripts/sync-secrets.mjs"
   },
   "dependencies": {
     "@discord/embedded-app-sdk": "^2.5.0",
