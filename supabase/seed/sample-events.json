@@ -1,0 +1,180 @@
+{
+  "host_discord_id": "000000000000000001",
+  "host_username": "FORZA.EVENTS",
+  "guild_id": "000000000000000001",
+  "guild_name": "FORZA.EVENTS Dev",
+  "events": [
+    {
+      "slug": "sample-90s-jdm-touge",
+      "title": "90s JDM Touge Night",
+      "type": "touge",
+      "car_rule_mode": "restricted_list",
+      "max_pi": 580,
+      "starts_in_hours": 30,
+      "current_players": 6,
+      "event_share_code": "842 193 405",
+      "track_codes": ["291 044 118"],
+      "description": "Class B Japanese icons from the same era — tight PI band, stock aero, no swaps.",
+      "cars": [
+        {"make": "Honda", "year": 1992, "model_like": "%NSX-R%", "max_pi": 580, "restrictions": ["No engine swap", "No Forza aero"]},
+        {"make": "Nissan", "year": 1992, "model_like": "%Skyline GT-R%", "max_pi": 560, "restrictions": ["No engine swap", "No Forza aero"]},
+        {"make": "Nissan", "year": 1997, "model_like": "%Skyline GT-R V-Spec%", "max_pi": 580, "restrictions": ["No engine swap", "No Forza aero"]},
+        {"make": "Toyota", "year": 1998, "model_like": "%Supra RZ%", "max_pi": 560, "restrictions": ["No engine swap", "No Forza aero"]},
+        {"make": "Mazda", "year": 1992, "model_like": "%RX-7 Type R%", "max_pi": 560, "restrictions": ["No engine swap", "No Forza aero"]}
+      ]
+    },
+    {
+      "slug": "sample-80s-group-b",
+      "title": "80s Group B Gravel",
+      "type": "dirt",
+      "car_rule_mode": "restricted_list",
+      "max_pi": 580,
+      "starts_in_hours": 54,
+      "current_players": 4,
+      "event_share_code": "118 402 991",
+      "track_codes": ["205 881 044"],
+      "description": "Homologation heroes from the same Group B generation — all Class B, similar PI.",
+      "cars": [
+        {"make": "Audi", "year": 1984, "model_like": "%Sport quattro%", "max_pi": 540, "restrictions": ["Rally tires", "No engine swap"]},
+        {"make": "Lancia", "year": 1986, "model_like": "%Delta S4%", "max_pi": 580, "restrictions": ["Rally tires", "No engine swap"]},
+        {"make": "Opel", "year": 1984, "model_like": "%Manta 400%", "max_pi": 580, "restrictions": ["Rally tires", "No engine swap"]}
+      ]
+    },
+    {
+      "slug": "sample-70s-muscle",
+      "title": "70s Muscle Fair Fight",
+      "type": "road",
+      "car_rule_mode": "restricted_list",
+      "max_pi": 510,
+      "starts_in_hours": 78,
+      "current_players": 8,
+      "event_share_code": "601 882 014",
+      "track_codes": ["442 019 880"],
+      "description": "American muscle from the early 1970s — Class C, close PI, period-correct builds.",
+      "cars": [
+        {"make": "Chevrolet", "year": 1970, "model_like": "%Camaro Z28%", "max_pi": 450, "restrictions": ["No engine swap"]},
+        {"make": "Chevrolet", "year": 1970, "model_like": "%Chevelle Super Sport 454%", "max_pi": 440, "restrictions": ["No engine swap"]},
+        {"make": "Dodge", "year": 1970, "model_like": "%Challenger R/T%", "max_pi": 460, "restrictions": ["No engine swap"]},
+        {"make": "Dodge", "year": 1969, "model_like": "%Charger R/T%", "max_pi": 430, "restrictions": ["No engine swap"]},
+        {"make": "Chevrolet", "year": 1970, "model_like": "%Corvette ZR-1%", "max_pi": 510, "restrictions": ["No engine swap"]}
+      ]
+    },
+    {
+      "slug": "sample-wrc-golden",
+      "title": "WRC Golden Era",
+      "type": "dirt",
+      "car_rule_mode": "restricted_list",
+      "max_pi": 580,
+      "starts_in_hours": 102,
+      "current_players": 5,
+      "event_share_code": "224 881 902",
+      "track_codes": ["901 224 118"],
+      "description": "1990s–2000s rally legends — Class B AWD, one decade of evolution, same tire rules.",
+      "cars": [
+        {"make": "Mitsubishi", "year": 1995, "model_like": "%Lancer Evolution III%", "max_pi": 530, "restrictions": ["Rally tires", "AWD"]},
+        {"make": "Subaru", "year": 1998, "model_like": "%Impreza 22B%", "max_pi": 580, "restrictions": ["Rally tires", "AWD"]},
+        {"make": "Mitsubishi", "year": 2004, "model_like": "%Lancer Evolution VIII%", "max_pi": 570, "restrictions": ["Rally tires", "AWD"]},
+        {"make": "Subaru", "year": 2004, "model_like": "%IMPREZA WRX STI%", "max_pi": 560, "restrictions": ["Rally tires", "AWD"]}
+      ]
+    },
+    {
+      "slug": "sample-hypercar-sprint",
+      "title": "Modern Hypercar Sprint",
+      "type": "road",
+      "car_rule_mode": "restricted_list",
+      "max_pi": 770,
+      "starts_in_hours": 126,
+      "current_players": 3,
+      "event_share_code": "331 902 118",
+      "track_codes": ["902 331 044"],
+      "description": "Late-2010s Class S1 supercars — similar PI window, race tires, no aero cheese.",
+      "cars": [
+        {"make": "BMW", "year": 2016, "model_like": "%M4 GTS%", "max_pi": 720, "restrictions": ["Race tires", "No Forza aero"]},
+        {"make": "Audi", "year": 2016, "model_like": "%R8 V10 plus%", "max_pi": 740, "restrictions": ["Race tires", "No Forza aero"]},
+        {"make": "Chevrolet", "year": 2015, "model_like": "%Corvette Z06%", "max_pi": 770, "restrictions": ["Race tires", "No Forza aero"]},
+        {"make": "Porsche", "year": 2019, "model_like": "%911 GT3 RS%", "max_pi": 760, "restrictions": ["Race tires", "No Forza aero"]}
+      ]
+    },
+    {
+      "slug": "sample-2000s-exotic-cup",
+      "title": "2000s Exotic Cup",
+      "type": "road",
+      "car_rule_mode": "restricted_list",
+      "max_pi": 690,
+      "starts_in_hours": 150,
+      "current_players": 7,
+      "event_share_code": "442 118 902",
+      "track_codes": ["118 442 331"],
+      "description": "Class A exotics from the 2000s — matched performance, sports tires.",
+      "cars": [
+        {"make": "Ford", "year": 2005, "model_like": "%Ford GT%", "max_pi": 690, "restrictions": ["Sports tires", "No engine swap"]},
+        {"make": "Porsche", "year": 2004, "model_like": "%911 GT3%", "max_pi": 680, "restrictions": ["Sports tires", "No engine swap"]},
+        {"make": "Chevrolet", "year": 2002, "model_like": "%Corvette Z06%", "max_pi": 620, "restrictions": ["Sports tires", "No engine swap"]},
+        {"make": "Alfa Romeo", "year": 2007, "model_like": "%8C Competizione%", "max_pi": 650, "restrictions": ["Sports tires", "No engine swap"]}
+      ]
+    },
+    {
+      "slug": "sample-drift-legends",
+      "title": "Drift Legends",
+      "type": "drift",
+      "car_rule_mode": "restricted_list",
+      "max_pi": 560,
+      "starts_in_hours": 174,
+      "current_players": 9,
+      "event_share_code": "991 224 442",
+      "track_codes": ["224 991 118"],
+      "description": "90s–2000s RWD drift platforms — Class B, similar power, drift tires required.",
+      "cars": [
+        {"make": "Mazda", "year": 1992, "model_like": "%RX-7 Type R%", "max_pi": 560, "restrictions": ["Drift tires", "RWD", "No engine swap"]},
+        {"make": "Nissan", "year": 2002, "model_like": "%Silvia Spec-R%", "max_pi": 560, "restrictions": ["Drift tires", "RWD", "No engine swap"]},
+        {"make": "Toyota", "year": 1998, "model_like": "%Supra RZ%", "max_pi": 540, "restrictions": ["Drift tires", "RWD", "No engine swap"]},
+        {"make": "Toyota", "year": 1997, "model_like": "%Chaser%", "max_pi": 520, "restrictions": ["Drift tires", "RWD", "No engine swap"]}
+      ]
+    },
+    {
+      "slug": "sample-lightweight-roadsters",
+      "title": "Lightweight Roadster Cup",
+      "type": "road",
+      "car_rule_mode": "restricted_list",
+      "max_pi": 510,
+      "starts_in_hours": 198,
+      "current_players": 2,
+      "event_share_code": "014 601 882",
+      "track_codes": ["882 014 601"],
+      "description": "2010s Class C RWD roadsters — same lightweight philosophy, close PI.",
+      "cars": [
+        {"make": "Mazda", "year": 2016, "model_like": "%MX-5%", "max_pi": 510, "restrictions": ["Sports tires", "No Forza aero"]},
+        {"make": "Subaru", "year": 2013, "model_like": "%BRZ%", "max_pi": 480, "restrictions": ["Sports tires", "No Forza aero"]},
+        {"make": "Toyota", "year": 2013, "model_like": "%86%", "max_pi": 480, "restrictions": ["Sports tires", "No Forza aero"]}
+      ]
+    },
+    {
+      "slug": "sample-60s-pony-open",
+      "title": "60s Pony Car Cruise",
+      "type": "road",
+      "car_rule_mode": "anything_goes",
+      "max_pi": 480,
+      "starts_in_hours": 222,
+      "current_players": 4,
+      "event_share_code": "880 442 019",
+      "track_codes": [],
+      "additional_car_restrictions": "1960s American pony cars and muscle — Class C or below",
+      "description": "Open build capped at 480 PI — period-correct 1960s American coupes.",
+      "cars": []
+    },
+    {
+      "slug": "sample-touge-open-90s-b",
+      "title": "90s Touge Open (Class B)",
+      "type": "touge",
+      "car_rule_mode": "anything_goes",
+      "max_pi": 570,
+      "starts_in_hours": 246,
+      "current_players": 1,
+      "event_share_code": "405 842 193",
+      "track_codes": ["193 405 842"],
+      "additional_car_restrictions": "1990s Japanese sports cars — Class B only",
+      "description": "Open PI build up to 570 — any 1990s JDM Class B machine.",
+      "cars": []
+    }
+  ]
+}
