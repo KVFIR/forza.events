@@ -1,12 +1,21 @@
 import {patchUrlMappings} from '@discord/embedded-app-sdk';
-import {isStandaloneBrowser} from './discord';
+import {DISCORD_SUPABASE_PROXY_PREFIX} from './supabaseEnv';
 
-/** Portal + patchUrlMappings prefix (no `.proxy` — Discord removed that segment). */
-const PROXY_PREFIX = '/supabase';
+function isDiscordActivityFrame(): boolean {
+  if (typeof window === 'undefined') return false;
+  try {
+    return window.parent !== window;
+  } catch {
+    return true;
+  }
+}
 
-/** Rewrite Supabase REST/Realtime/Functions hosts through the Discord Activity proxy. */
+/**
+ * Fallback: rewrite any direct *.supabase.co requests (e.g. third-party code).
+ * Primary path uses resolveSupabaseUrl() so the client talks to /supabase on discordsays.com.
+ */
 export function setupDiscordSupabaseProxy(): void {
-  if (isStandaloneBrowser()) return;
+  if (!isDiscordActivityFrame()) return;
 
   const raw = import.meta.env.VITE_SUPABASE_URL as string | undefined;
   if (!raw?.trim()) return;
@@ -18,7 +27,7 @@ export function setupDiscordSupabaseProxy(): void {
     return;
   }
 
-  patchUrlMappings([{prefix: PROXY_PREFIX, target: host}]);
+  patchUrlMappings([{prefix: DISCORD_SUPABASE_PROXY_PREFIX, target: host}]);
 }
 
-export const discordSupabaseProxyPrefix = PROXY_PREFIX;
+export const discordSupabaseProxyPrefix = DISCORD_SUPABASE_PROXY_PREFIX;

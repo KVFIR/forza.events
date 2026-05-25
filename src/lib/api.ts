@@ -1,10 +1,10 @@
-import {getSupabase, isSupabaseConfigured} from './supabase';
+import {getSupabase, isSupabaseConfigured, resolveSupabaseUrl} from './supabase';
 
 function apiBase(): string {
   const explicit = import.meta.env.VITE_API_BASE_URL as string | undefined;
   if (explicit) return explicit.replace(/\/$/, '');
-  const url = import.meta.env.VITE_SUPABASE_URL as string | undefined;
-  if (url) return `${url.replace(/\/$/, '')}/functions/v1`;
+  const url = resolveSupabaseUrl();
+  if (url) return `${url}/functions/v1`;
   return '';
 }
 

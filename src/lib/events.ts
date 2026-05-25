@@ -1,4 +1,4 @@
-import {getSupabase, isSupabaseConfigured} from './supabase';
+import {getSupabase, isSupabaseConfigured, resolveSupabaseUrl} from './supabase';
 import {searchCarCatalog} from './carCatalog';
 import {EVENT_PLAYER_SLOTS} from './constants';
 import {resolveEventCoverUrl} from './eventCovers';
@@ -125,7 +125,7 @@ async function fetchEventsWithRelations(
 
   const {data, error} = await buildQuery(supabase);
   if (error) {
-    console.error('fetchEventsWithRelations', error);
+    console.error('fetchEventsWithRelations', error, {supabaseUrl: resolveSupabaseUrl()});
     return null;
   }
 

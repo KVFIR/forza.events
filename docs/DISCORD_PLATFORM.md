@@ -73,7 +73,7 @@ Before pilot launch, confirm in the [Discord Developer Portal](https://discord.c
    |--------|--------|
    | `/supabase` | `<project-ref>.supabase.co` (no `https://`) |
 
-   Do **not** use `/.proxy/...` in the prefix — the Developer Portal rejects it ([changelog](https://discord.com/developers/change-log#remove-proxy-from-discord-activity-proxy-path)). The client calls `patchUrlMappings` with the same prefix at startup (`src/lib/discordUrlProxy.ts`). Without this mapping, Supabase requests are blocked by CSP and event lists stay empty.
+   Do **not** use `/.proxy/...` in the prefix — the Developer Portal rejects it ([changelog](https://discord.com/developers/change-log#remove-proxy-from-discord-activity-proxy-path)). Inside Discord, the app uses `{discordsays-origin}/supabase` as the Supabase base URL (`resolveSupabaseUrl` in `src/lib/supabaseEnv.ts`). Without this portal mapping, Browse cannot load events.
 4. **Redirect URIs** (OAuth2 → Redirects) — register **every** URL your app uses:
    - `https://127.0.0.1` — embedded Activity (`token-exchange` with this `redirect_uri`)
    - `http://localhost:5180/auth/callback` — local `npm run dev` in a browser tab

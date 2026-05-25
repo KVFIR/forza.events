@@ -1,4 +1,5 @@
 import type {SupabaseClient} from '@supabase/supabase-js';
+import {resolveSupabaseUrl} from './supabaseEnv';
 
 let client: SupabaseClient | null = null;
 let clientPromise: Promise<SupabaseClient | null> | null = null;
@@ -9,15 +10,19 @@ export function isSupabaseConfigured(): boolean {
   );
 }
 
+export {resolveSupabaseUrl} from './supabaseEnv';
+
 export async function getSupabase(): Promise<SupabaseClient | null> {
   if (!isSupabaseConfigured()) return null;
+
+  const url = resolveSupabaseUrl();
+  if (!url) return null;
+
   if (client) return client;
   if (!clientPromise) {
+    const anonKey = import.meta.env.VITE_SUPABASE_ANON_KEY as string;
     clientPromise = import('@supabase/supabase-js').then(({createClient}) => {
-      client = createClient(
-        import.meta.env.VITE_SUPABASE_URL as string,
-        import.meta.env.VITE_SUPABASE_ANON_KEY as string,
-      );
+      client = createClient(url, anonKey);
       return client;
     });
   }
