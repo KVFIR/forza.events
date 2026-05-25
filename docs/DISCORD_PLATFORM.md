@@ -67,12 +67,19 @@ Before pilot launch, confirm in the [Discord Developer Portal](https://discord.c
 
 1. **Activities enabled** — required for App Launcher and `LAUNCH_ACTIVITY`.
 2. **Activity URL Mapping** — point to the deployed production origin (for example `https://forza.events`).
-3. **Redirect URI** — add the OAuth redirect URI used by embedded Activity auth; set the same value as `DISCORD_REDIRECT_URI` in Supabase secrets.
-4. **Interactions Endpoint URL** — required for this repo because published event embeds use a button that responds with `LAUNCH_ACTIVITY`:
+3. **Supabase proxy mapping** (required for Browse / API inside Discord) — add a second mapping so the Activity can reach your project through Discord’s proxy:
+
+   | Prefix | Target |
+   |--------|--------|
+   | `/.proxy/supabase` | `<project-ref>.supabase.co` (no `https://`) |
+
+   The client calls `patchUrlMappings` with the same prefix at startup (`src/lib/discordUrlProxy.ts`). Without this mapping, Supabase requests are blocked by CSP and event lists stay empty.
+4. **Redirect URI** — add the OAuth redirect URI used by embedded Activity auth; set the same value as `DISCORD_REDIRECT_URI` in Supabase secrets.
+5. **Interactions Endpoint URL** — required for this repo because published event embeds use a button that responds with `LAUNCH_ACTIVITY`:
    `https://<project-ref>.supabase.co/functions/v1/interactions-endpoint`
-5. **Entry Point command** — verify the default Launch command opens the Activity from the App Launcher.
-6. **App install in pilot guilds** — the app/bot must be installed in every server where hosts will publish; `list-guilds` only returns servers where both the user and bot are present.
-7. **Channel permissions** — the bot must be able to send messages in the target publish channels.
+6. **Entry Point command** — verify the default Launch command opens the Activity from the App Launcher.
+7. **App install in pilot guilds** — the app/bot must be installed in every server where hosts will publish; `list-guilds` only returns servers where both the user and bot are present.
+8. **Channel permissions** — the bot must be able to send messages in the target publish channels.
 
 Then validate inside Discord:
 

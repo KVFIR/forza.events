@@ -21,16 +21,16 @@ Works in: text channels, voice channels, DMs, group DMs — on desktop and mobil
 
 ## Current status
 
-**Phase: frozen MVP implemented in code** — the remaining work is production deployment, Discord Activity configuration, and pilot validation in real servers.
+**Phase: frozen MVP implemented in code**, connected to Supabase. No mock-data fallback — localhost uses Discord OAuth and live DB reads.
 
 | Done | Not yet |
 |------|---------|
-| Browse, Event Detail, Create, My Events, Profile screens | Production Discord portal setup |
-| Tailwind dark UI, React Router, mock fallback | Production deploy and secrets |
-| Discord SDK authorize/authenticate flow | Pilot launch and cross-server validation |
-| Supabase schema, Edge Functions, event publish flow | Optional post-MVP automation |
+| Browse, Event Detail, Create wizard, My Events, Profile | Discord portal E2E + pilot (infra on Railway + Supabase) |
+| Discord Activity + browser OAuth (`/auth/callback`) | Pilot in 3–5 real servers |
+| Supabase migrations `001`–`015`, Edge Functions | Optional post-MVP bot automation |
+| Cover WebP assets, lazy `EventCover`, sample event seeds | i18n |
 
-See [`docs/STATUS.md`](docs/STATUS.md) for milestone progress and recommended next steps.
+See [`docs/STATUS.md`](docs/STATUS.md) for the full state matrix and [`docs/DEVELOPMENT.md`](docs/DEVELOPMENT.md) for local setup.
 
 ---
 
@@ -73,19 +73,18 @@ These ideas existed earlier in planning but are now explicitly deferred:
 
 ```
 forza.events/
-├── src/                  # Discord Activity — React SPA (implemented)
-│   ├── screens/          # BrowseEvents, EventDetail, CreateEvent, Profile
-│   ├── components/       # EventCard, Navbar, filters, UI primitives
-│   ├── context/          # JoinedEventsContext (session mock)
-│   ├── lib/
-│   │   ├── discord.ts    # Embedded App SDK + standalone mock mode
-│   │   ├── discordAuth.ts # Browser OAuth for localhost
-│   │   └── types.ts
+├── src/                  # Discord Activity — React SPA
+│   ├── screens/          # Browse, Detail, CreateEvent/, Profile, AuthCallback
+│   ├── components/       # EventCard, EventCover, Navbar, …
+│   ├── context/          # AuthContext, JoinedEventsContext
+│   ├── lib/              # discord, discordAuth, events, coverImage, …
 │   └── main.tsx
-├── bot/                  # Companion bot notes for post-MVP automation
-├── supabase/             # Schema, Edge Functions, seeds — see supabase/README.md
+├── scripts/              # seed-events, optimize-covers, deploy helpers
+├── bot/                  # Companion bot notes (post-MVP)
+├── supabase/             # Migrations, Edge Functions, seeds — supabase/README.md
 ├── docs/
-│   ├── STATUS.md         # Current implementation state and launch work
+│   ├── STATUS.md         # Current project state (start here)
+│   ├── DEVELOPMENT.md    # Local dev + OAuth + troubleshooting
 │   ├── PLAN.md           # Frozen MVP spec and launch checklist
 │   └── DISCORD_PLATFORM.md
 └── readme.md
@@ -110,36 +109,32 @@ forza.events/
 
 ## Documentation
 
-- [`docs/STATUS.md`](docs/STATUS.md) — current implementation state and launch work
+- [`docs/STATUS.md`](docs/STATUS.md) — **current project state** (features, migrations, gaps)
+- [`docs/DEVELOPMENT.md`](docs/DEVELOPMENT.md) — local dev, OAuth, seeds, troubleshooting
 - [`docs/PLAN.md`](docs/PLAN.md) — frozen MVP spec and launch checklist
 - [`docs/DISCORD_PLATFORM.md`](docs/DISCORD_PLATFORM.md) — Discord Activity platform notes
-- [`supabase/README.md`](supabase/README.md) — migrations, functions, secrets, and deployment notes
+- [`supabase/README.md`](supabase/README.md) — migrations, functions, secrets
 
 ---
 
 ## Scripts
 
 ```bash
-# Activity (web app)
 npm install
-npm run dev        # Vite — http://localhost:5180 (see vite.config.ts)
+npm run dev              # http://localhost:5180
 npm run build
+npm run typecheck
+npm run sync:secrets     # push Discord secrets to Supabase
+npm run deploy:functions
+npm run seed:events      # sample browse data (needs SERVICE_ROLE_KEY)
+npm run optimize:covers  # regenerate public/covers WebP
 ```
 
-### Local browser (UI prototype)
+### Local browser
 
-The Activity runs in **mock mode** when opened in a normal browser tab (`window.parent === window`). No Discord client or OAuth is required.
+Requires `.env` with Supabase + Discord keys and `DISCORD_REDIRECT_URI=http://localhost:5180/auth/callback`. Use **Sign in** in the navbar — not mock mode.
 
-```bash
-npm run dev
-# Open http://localhost:5180
-```
-
-Optional: set `VITE_DISCORD_CLIENT_ID`, `VITE_SUPABASE_URL`, and `VITE_SUPABASE_ANON_KEY` in `.env` when testing inside the Discord Activity iframe with the full auth and Edge Function flow.
-
-```bash
-# Bot (not scaffolded yet — see bot/README.md)
-```
+See [`docs/DEVELOPMENT.md`](docs/DEVELOPMENT.md).
 
 ---
 

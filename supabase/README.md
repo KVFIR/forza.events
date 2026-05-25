@@ -17,7 +17,7 @@ See [`docs/PLAN.md`](../docs/PLAN.md) for the frozen MVP contract and [`docs/STA
 
 ## Migrations
 
-Apply all migrations through the frozen MVP migration:
+Apply all migrations through `015`:
 
 ```bash
 supabase login
@@ -31,12 +31,17 @@ Migration list:
 - `002_engineering_plan.sql` — event metadata, launch intents, storage bucket, early catalog work
 - `003_storage_upload_policy.sql` — storage upload policy for event covers
 - `004_event_types_and_pi.sql` — event type and PI model updates
-- `005_fh6_cars_catalog.sql` — FH6 cars catalog refresh
-- `006_car_setup_model.sql` — event-level setup model and tune support
-- `007_per_car_setup.sql` — per-car PI caps and restrictions
-- `008_frozen_mvp_spec.sql` — frozen MVP alignment: car rule mode, class cap, DNS, primary track code
-- `009_event_track_list_and_open_build_notes.sql` — unified track list + open build additional restrictions
-- `010_drop_car_class_storage.sql` — drop persisted FH class letters; derive from PI in the app
+- `005_add_car_class_r.sql` — car class enum extension
+- `006_fh6_cars_catalog.sql` — FH6 cars catalog refresh
+- `007_car_setup_model.sql` — event-level setup model and tune support
+- `008_per_car_setup.sql` — per-car PI caps and restrictions
+- `009_frozen_mvp_spec.sql` — frozen MVP: car rule mode, DNS, primary track code
+- `010_event_track_list_and_open_build_notes.sql` — unified track list + open build notes
+- `011_drop_car_class_storage.sql` — drop persisted FH class letters; derive from PI in app
+- `012_realtime_and_join_concurrency.sql` — realtime + join concurrency
+- `013_events_replica_identity.sql` — replica identity for live lobby patches
+- `014_seed_sample_events.sql` — optional dev sample events (`sample-*` slugs)
+- `015_discord_guilds_public_read.sql` — RLS read for guild names on event cards
 
 ## Edge Functions
 
@@ -74,7 +79,9 @@ supabase secrets set DISCORD_PUBLIC_KEY=...
 supabase secrets set DISCORD_BOT_TOKEN=...
 ```
 
-Optional: `DISCORD_REDIRECT_URI` (only if token exchange requires it), `APP_ORIGIN` (defaults to `https://forza.events`).
+Required for localhost OAuth: `DISCORD_REDIRECT_URI=http://localhost:5180/auth/callback`.
+
+Optional: `APP_ORIGIN` (defaults to `https://forza.events` for embed cover URLs).
 
 `SUPABASE_URL` and `SUPABASE_SERVICE_ROLE_KEY` are auto-injected in deployed Edge Functions.
 
@@ -97,7 +104,7 @@ Source files:
 
 - `supabase/seed/fh6cars-source.md`
 - `supabase/seed/fh6cars.json`
-- `005_fh6_cars_catalog.sql`
+- `006_fh6_cars_catalog.sql`
 
 Refresh workflow after a catalog update:
 
@@ -107,6 +114,16 @@ supabase db push
 # or seed via API
 SUPABASE_URL=... SUPABASE_SERVICE_ROLE_KEY=... node scripts/seed-cars.mjs
 ```
+
+## Sample events (development)
+
+Curated browse fixtures with era-matched car lists:
+
+- `supabase/seed/sample-events.json` — source definitions
+- `014_seed_sample_events.sql` — SQL seed (idempotent)
+- `npm run seed:events` — same data via service role API
+
+Host user: `000000000000000001` / guild `000000000000000001`. Safe to re-run; deletes `slug LIKE 'sample-%'` first.
 
 ## Activity env
 
