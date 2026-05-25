@@ -13,32 +13,41 @@ import {
   getDiscordAccessToken,
   initDiscordActivity,
   isStandaloneBrowser,
+  setResolvedUser,
+  signInWithDiscord,
+  signOutDiscord,
 } from '../lib/discord';
-import {MOCK_USER} from '../lib/mockData';
+import {GUEST_USER} from '../lib/guestUser';
 import type {AppUser} from '../lib/types';
 
 type AuthState = {
   user: AppUser;
   loading: boolean;
   discordReady: boolean;
-  isMockMode: boolean;
+  isConfigured: boolean;
+  isSignedIn: boolean;
+  isStandalone: boolean;
   guildId: string | null;
   guildName: string | null;
   refreshUser: (next: AppUser) => void;
   getAccessToken: () => string | null;
+  signIn: () => void;
+  signOut: () => void;
 };
 
 const AuthContext = createContext<AuthState | null>(null);
 
 export function AuthProvider({children}: {children: ReactNode}) {
   const navigate = useNavigate();
-  const [user, setUser] = useState<AppUser>(MOCK_USER);
+  const [user, setUser] = useState<AppUser>(GUEST_USER);
   const [loading, setLoading] = useState(true);
   const [discordReady, setDiscordReady] = useState(false);
   const [guildId, setGuildId] = useState<string | null>(null);
   const [guildName, setGuildName] = useState<string | null>(null);
 
-  const isMockMode = isStandaloneBrowser() || !isApiConfigured();
+  const isConfigured = isApiConfigured();
+  const isStandalone = isStandaloneBrowser();
+  const isSignedIn = Boolean(user.discordId && getDiscordAccessToken());
 
   useEffect(() => {
     let cancelled = false;
@@ -53,7 +62,7 @@ export function AuthProvider({children}: {children: ReactNode}) {
         setGuildId(result.guildId);
         setGuildName(result.guildName);
 
-        if (result.ready && result.guildId && result.accessToken && isApiConfigured()) {
+        if (result.ready && result.guildId && result.accessToken && isConfigured) {
           void fetchLaunchIntent(result.accessToken, result.guildId).then((eventId) => {
             if (eventId && !cancelled) {
               navigate(`/event/${eventId}`, {replace: true});
@@ -68,10 +77,23 @@ export function AuthProvider({children}: {children: ReactNode}) {
     return () => {
       cancelled = true;
     };
-  }, [navigate]);
+  }, [navigate, isConfigured]);
 
   const refreshUser = useCallback((next: AppUser) => {
     setUser(next);
+    setResolvedUser(next);
+  }, []);
+
+  const signIn = useCallback(() => {
+    signInWithDiscord();
+  }, []);
+
+  const signOut = useCallback(() => {
+    signOutDiscord();
+    setUser(GUEST_USER);
+    setDiscordReady(false);
+    setGuildId(null);
+    setGuildName(null);
   }, []);
 
   const value = useMemo(
@@ -79,13 +101,17 @@ export function AuthProvider({children}: {children: ReactNode}) {
       user,
       loading,
       discordReady,
-      isMockMode,
+      isConfigured,
+      isSignedIn,
+      isStandalone,
       guildId,
       guildName,
       refreshUser,
       getAccessToken: getDiscordAccessToken,
+      signIn,
+      signOut,
     }),
-    [user, loading, discordReady, isMockMode, guildId, guildName, refreshUser],
+    [user, loading, discordReady, isConfigured, isSignedIn, isStandalone, guildId, guildName, refreshUser, signIn, signOut],
   );
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;

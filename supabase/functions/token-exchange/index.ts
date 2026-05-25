@@ -10,12 +10,12 @@ serve(async (req) => {
   }
 
   try {
-    const {code, guild_id, guild_name} = await req.json();
+    const {code, guild_id, guild_name, redirect_uri} = await req.json();
     if (!code) {
       return jsonResponse({error: 'Missing code'}, 400);
     }
 
-    const tokens = await exchangeCode(code);
+    const tokens = await exchangeCode(code, redirect_uri);
     const discordUser = await fetchDiscordUser(tokens.access_token);
     const displayName = discordUser.global_name ?? discordUser.username;
     const supabase = adminClient();

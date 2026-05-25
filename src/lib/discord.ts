@@ -1,5 +1,11 @@
 import {exchangeToken, isApiConfigured} from './api';
-import {MOCK_USER} from './mockData';
+import {
+  buildDiscordAuthorizeUrl,
+  clearDiscordSession,
+  loadDiscordSession,
+  saveDiscordSession,
+} from './discordAuth';
+import {GUEST_USER} from './guestUser';
 import type {AppUser} from './types';
 
 type DiscordSDKInstance = import('@discord/embedded-app-sdk').DiscordSDK;
@@ -12,7 +18,7 @@ export type InitResult = {
   guildName: string | null;
 };
 
-let resolvedUser: AppUser = {...MOCK_USER};
+let resolvedUser: AppUser = {...GUEST_USER};
 let discordAccessToken: string | null = null;
 let guildId: string | null = null;
 let guildName: string | null = null;
@@ -45,12 +51,46 @@ export function getDiscordSdk(): DiscordSDKInstance | null {
   return sdkInstance;
 }
 
+export function setDiscordSession(accessToken: string, user: AppUser): void {
+  discordAccessToken = accessToken;
+  resolvedUser = user;
+}
+
+export function signInWithDiscord(): void {
+  window.location.assign(buildDiscordAuthorizeUrl());
+}
+
+export function signOutDiscord(): void {
+  clearDiscordSession();
+  discordAccessToken = null;
+  resolvedUser = {...GUEST_USER};
+  guildId = null;
+  guildName = null;
+  initPromise = null;
+}
+
+function applyBrowserSession(): InitResult | null {
+  const session = loadDiscordSession();
+  if (!session) return null;
+  setDiscordSession(session.accessToken, session.user);
+  return {
+    user: session.user,
+    ready: true,
+    accessToken: session.accessToken,
+    guildId: null,
+    guildName: null,
+  };
+}
+
 export async function initDiscordActivity(): Promise<InitResult> {
   if (initPromise) return initPromise;
 
   initPromise = (async () => {
     if (isStandaloneBrowser()) {
-      resolvedUser = {...MOCK_USER};
+      const existing = applyBrowserSession();
+      if (existing) return existing;
+
+      resolvedUser = {...GUEST_USER};
       return {
         user: resolvedUser,
         ready: false,
@@ -62,7 +102,7 @@ export async function initDiscordActivity(): Promise<InitResult> {
 
     const clientId = import.meta.env.VITE_DISCORD_CLIENT_ID as string | undefined;
     if (!clientId) {
-      resolvedUser = {...MOCK_USER};
+      resolvedUser = {...GUEST_USER};
       return {
         user: resolvedUser,
         ready: false,
@@ -89,12 +129,13 @@ export async function initDiscordActivity(): Promise<InitResult> {
     });
 
     if (isApiConfigured()) {
-      const result = await exchangeToken(code, guildId ?? undefined, guildName ?? undefined);
+      const result = await exchangeToken(code, {guildId: guildId ?? undefined, guildName: guildName ?? undefined});
       discordAccessToken = result.access_token;
       resolvedUser = result.user;
+      saveDiscordSession({accessToken: result.access_token, user: result.user});
       await sdk.commands.authenticate({access_token: result.access_token});
     } else {
-      resolvedUser = {...MOCK_USER, username: 'Discord'};
+      resolvedUser = {...GUEST_USER, username: 'Discord'};
     }
 
     return {
@@ -111,4 +152,8 @@ export async function initDiscordActivity(): Promise<InitResult> {
 
 export function setResolvedUser(user: AppUser) {
   resolvedUser = user;
+  const token = discordAccessToken;
+  if (token) {
+    saveDiscordSession({accessToken: token, user});
+  }
 }

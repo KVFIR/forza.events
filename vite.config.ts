@@ -9,6 +9,8 @@ function clientEnv(env: Record<string, string>) {
     VITE_SUPABASE_URL: supabaseUrl,
     VITE_SUPABASE_ANON_KEY: env.VITE_SUPABASE_ANON_KEY || env.SUPABASE_ANON_KEY || '',
     VITE_API_BASE_URL: env.VITE_API_BASE_URL || '',
+    VITE_DISCORD_REDIRECT_URI:
+      env.VITE_DISCORD_REDIRECT_URI || env.DISCORD_REDIRECT_URI || '',
   };
 }
 
@@ -35,6 +37,9 @@ export default defineConfig(({mode}) => {
       'import.meta.env.VITE_SUPABASE_URL': JSON.stringify(client.VITE_SUPABASE_URL),
       'import.meta.env.VITE_SUPABASE_ANON_KEY': JSON.stringify(client.VITE_SUPABASE_ANON_KEY),
       'import.meta.env.VITE_API_BASE_URL': JSON.stringify(client.VITE_API_BASE_URL),
+      'import.meta.env.VITE_DISCORD_REDIRECT_URI': JSON.stringify(
+        client.VITE_DISCORD_REDIRECT_URI,
+      ),
     },
     build: {
       target: 'es2022',

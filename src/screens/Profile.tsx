@@ -18,7 +18,7 @@ function StatPill({label, value}: {label: string; value: string | number}) {
 }
 
 export function Profile() {
-  const {user, refreshUser, getAccessToken, isMockMode} = useAuth();
+  const {user, refreshUser, getAccessToken, isConfigured, isSignedIn, signIn} = useAuth();
   const {isJoined} = useJoinedEvents();
   const {allMine, active, completed, loading} = useMyEventsCatalog('all');
   const [editGamertag, setEditGamertag] = useState(false);
@@ -119,9 +119,21 @@ export function Profile() {
         </section>
       )}
 
-      {isMockMode && (
+      {!isConfigured && (
         <p className="mt-6 text-center text-[10px] text-muted">
-          Stats are computed from mock events until live Supabase data is connected.
+          Configure Supabase in <code>.env</code> to load profile stats from the database.
+        </p>
+      )}
+      {isConfigured && !isSignedIn && (
+        <p className="mt-6 text-center text-[10px] text-muted">
+          <button
+            type="button"
+            onClick={signIn}
+            className="font-semibold text-accent-purple-light hover:underline"
+          >
+            Sign in with Discord
+          </button>{' '}
+          to sync your profile.
         </p>
       )}
 

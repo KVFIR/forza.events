@@ -37,7 +37,7 @@ function buildPlacements(participants: EventParticipant[]): Placement[] {
 export function EventResults() {
   const {id} = useParams<{id: string}>();
   const navigate = useNavigate();
-  const {user, getAccessToken, isMockMode} = useAuth();
+  const {user, getAccessToken, isSignedIn} = useAuth();
   const {bumpRefresh} = useJoinedEvents();
   const [placements, setPlacements] = useState<Placement[]>([]);
   const [loading, setLoading] = useState(true);
@@ -126,7 +126,7 @@ export function EventResults() {
 
     try {
       const token = getAccessToken();
-      if (!isMockMode && isApiConfigured() && token) {
+      if (isSignedIn && isApiConfigured() && token) {
         await submitEventResults(token, id, payload);
       }
       bumpRefresh();

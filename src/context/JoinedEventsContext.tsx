@@ -23,7 +23,7 @@ type Ctx = {
 const JoinedEventsContext = createContext<Ctx | null>(null);
 
 export function JoinedEventsProvider({children}: {children: ReactNode}) {
-  const {user, getAccessToken, isMockMode} = useAuth();
+  const {user, getAccessToken, isSignedIn} = useAuth();
   const [overrides, setOverrides] = useState<Overrides>({});
   const [refreshKey, setRefreshKey] = useState(0);
 
@@ -43,7 +43,7 @@ export function JoinedEventsProvider({children}: {children: ReactNode}) {
       const currently = isJoined(event);
       const token = getAccessToken();
 
-      if (!isMockMode && isApiConfigured() && token) {
+      if (isSignedIn && isApiConfigured() && token) {
         try {
           if (currently) {
             await leaveEvent(token, event.id);
@@ -62,7 +62,7 @@ export function JoinedEventsProvider({children}: {children: ReactNode}) {
 
       setOverrides((prev) => ({...prev, [event.id]: !currently}));
     },
-    [isJoined, getAccessToken, isMockMode, user.xboxGamertag, bumpRefresh],
+    [isJoined, getAccessToken, isSignedIn, user.xboxGamertag, bumpRefresh],
   );
 
   const value = useMemo(

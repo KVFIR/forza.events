@@ -11,7 +11,10 @@ export function avatarUrl(user: DiscordUser): string | null {
   return `https://cdn.discordapp.com/avatars/${user.id}/${user.avatar}.png`;
 }
 
-export async function exchangeCode(code: string): Promise<{
+export async function exchangeCode(
+  code: string,
+  redirectUriOverride?: string | null,
+): Promise<{
   access_token: string;
   token_type: string;
   expires_in: number;
@@ -20,7 +23,7 @@ export async function exchangeCode(code: string): Promise<{
 }> {
   const clientId = Deno.env.get('DISCORD_CLIENT_ID')!;
   const clientSecret = Deno.env.get('DISCORD_CLIENT_SECRET')!;
-  const redirectUri = Deno.env.get('DISCORD_REDIRECT_URI') ?? '';
+  const redirectUri = redirectUriOverride?.trim() || Deno.env.get('DISCORD_REDIRECT_URI') || '';
 
   const body = new URLSearchParams({
     client_id: clientId,
@@ -28,9 +31,10 @@ export async function exchangeCode(code: string): Promise<{
     grant_type: 'authorization_code',
     code,
   });
-  if (redirectUri) {
-    body.set('redirect_uri', redirectUri);
+  if (!redirectUri) {
+    throw new Error('DISCORD_REDIRECT_URI is required for browser OAuth');
   }
+  body.set('redirect_uri', redirectUri);
 
   const res = await fetch('https://discord.com/api/oauth2/token', {
     method: 'POST',

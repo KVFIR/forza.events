@@ -19,6 +19,9 @@ const EventResults = lazy(() =>
   import('./screens/EventResults').then((m) => ({default: m.EventResults})),
 );
 const Profile = lazy(() => import('./screens/Profile').then((m) => ({default: m.Profile})));
+const AuthCallback = lazy(() =>
+  import('./screens/AuthCallback').then((m) => ({default: m.AuthCallback})),
+);
 
 function RouteFallback() {
   return (
@@ -45,6 +48,7 @@ export default function App() {
                     <Route path="/event/:id/results" element={<EventResults />} />
                     <Route path="/create" element={<CreateEvent />} />
                     <Route path="/profile" element={<Profile />} />
+                    <Route path="/auth/callback" element={<AuthCallback />} />
                     <Route path="*" element={<Navigate to="/" replace />} />
                   </Routes>
                 </Suspense>

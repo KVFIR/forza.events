@@ -43,13 +43,21 @@ async function invoke<T>(
 
 export async function exchangeToken(
   code: string,
-  guildId?: string,
-  guildName?: string,
+  options?: {guildId?: string; guildName?: string; redirectUri?: string},
 ) {
   return invoke<{
     access_token: string;
     user: import('./types').AppUser;
-  }>('token-exchange', {code, guild_id: guildId, guild_name: guildName}, null);
+  }>(
+    'token-exchange',
+    {
+      code,
+      guild_id: options?.guildId,
+      guild_name: options?.guildName,
+      redirect_uri: options?.redirectUri,
+    },
+    null,
+  );
 }
 
 export async function fetchLaunchIntent(
@@ -162,8 +170,9 @@ export async function uploadCoverImage(
   const supabase = await getSupabase();
   if (!supabase) throw new Error('Supabase not configured');
 
-  const ext = file.name.split('.').pop() ?? 'jpg';
-  const path = `${guildId}/${eventId}/cover.${ext}`;
+  const ext = (file.name.split('.').pop() ?? 'webp').toLowerCase();
+  const safeExt = ['webp', 'jpg', 'jpeg', 'png'].includes(ext) ? ext : 'webp';
+  const path = `${guildId}/${eventId}/cover.${safeExt}`;
 
   const {error} = await supabase.storage.from('event-covers').upload(path, file, {
     upsert: true,
