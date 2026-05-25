@@ -21,7 +21,7 @@ echo "Deploying ${#FUNCTIONS[@]} Supabase Edge Functions..."
 
 for fn in "${FUNCTIONS[@]}"; do
   echo "→ $fn"
-  npx supabase@latest functions deploy "$fn"
+  npx supabase@latest functions deploy "$fn" --no-verify-jwt
 done
 
 echo "Done."

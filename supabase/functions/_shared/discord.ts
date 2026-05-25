@@ -55,7 +55,7 @@ export async function fetchDiscordUser(accessToken: string): Promise<DiscordUser
 }
 
 export async function verifyDiscordToken(
-  accessToken: string | null,
+  accessToken: string | null | undefined,
 ): Promise<DiscordUser | null> {
   if (!accessToken) return null;
   try {

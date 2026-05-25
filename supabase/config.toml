@@ -18,3 +18,34 @@ port = 54323
 
 [storage]
 enabled = true
+
+# Edge Functions use custom Discord token auth (x-discord-access-token), not Supabase JWT.
+[functions.token-exchange]
+verify_jwt = false
+
+[functions.list-guilds]
+verify_jwt = false
+
+[functions.list-channels]
+verify_jwt = false
+
+[functions.publish-event]
+verify_jwt = false
+
+[functions.interactions-endpoint]
+verify_jwt = false
+
+[functions.save-event]
+verify_jwt = false
+
+[functions.event-participation]
+verify_jwt = false
+
+[functions.submit-results]
+verify_jwt = false
+
+[functions.user-profile]
+verify_jwt = false
+
+[functions.launch-intent]
+verify_jwt = false
