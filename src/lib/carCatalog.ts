@@ -25,7 +25,7 @@ async function loadCatalog(): Promise<CatalogCar[]> {
   return catalogCache;
 }
 
-/** Client-side search when Supabase is not configured (mock / local dev). */
+/** Client-side search when Supabase is not configured. */
 export async function searchCarCatalog(query: string, limit = 20): Promise<CatalogCar[]> {
   const q = query.trim().toLowerCase();
   if (!q) return [];
