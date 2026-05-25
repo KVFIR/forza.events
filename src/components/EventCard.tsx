@@ -4,8 +4,10 @@ import {Users} from 'lucide-react';
 import type {EventAllowedCar, EventType, ForzaEvent} from '../lib/types';
 import {cn} from '../lib/cn';
 import {formatLobbyCount} from '../lib/constants';
+import {defaultCoverPath} from '../lib/eventCovers';
 import {piToClass} from '../lib/pi';
 import {useAuth} from '../context/AuthContext';
+import {EventCover} from './EventCover';
 
 type Props = {
   event: ForzaEvent;
@@ -106,9 +108,11 @@ export function EventCard({event}: Props) {
               : 'hover:border-white/[0.12]',
           )}
         >
-          <div
-            className="absolute inset-0 bg-cover bg-center"
-            style={{backgroundImage: `url(${event.coverImageUrl})`}}
+          <EventCover
+            src={event.coverImageUrl ?? defaultCoverPath(event.type)}
+            variant="card"
+            className="absolute inset-0"
+            imgClassName="transition-transform duration-300 group-hover:scale-[1.02]"
           />
           <div className="absolute inset-0 bg-gradient-to-r from-base/80 via-base/70 to-base/60" />
           <div className="absolute inset-0 bg-black/25 transition-colors duration-200 group-hover:bg-black/20" />

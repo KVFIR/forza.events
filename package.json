@@ -9,7 +9,9 @@
     "typecheck": "tsc -b",
     "preview": "vite preview",
     "deploy:functions": "bash scripts/deploy-edge-functions.sh",
-    "sync:secrets": "node scripts/sync-secrets.mjs"
+    "sync:secrets": "node scripts/sync-secrets.mjs",
+    "optimize:covers": "node scripts/optimize-covers.mjs",
+    "seed:events": "node scripts/seed-events.mjs"
   },
   "dependencies": {
     "@discord/embedded-app-sdk": "^2.5.0",
@@ -30,6 +32,7 @@
     "autoprefixer": "^10.5.0",
     "postcss": "^8.5.14",
     "tailwindcss": "^3.4.19",
+    "sharp": "^0.34.5",
     "typescript": "~5.6.3",
     "vite": "^5.4.21"
   }

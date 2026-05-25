@@ -8,6 +8,7 @@ import {
   Shield,
   Wrench,
 } from 'lucide-react';
+import {EventCover} from '../components/EventCover';
 import {RoadIcon} from '../components/icons/RoadIcon';
 import type {EventType, ForzaEvent} from '../lib/types';
 import {
@@ -72,7 +73,7 @@ export function EventDetail() {
   const [resultRows, setResultRows] = useState<EventResultRow[]>([]);
   const [loading, setLoading] = useState(true);
   const {isJoined, toggleJoin, bumpRefresh, refreshKey} = useJoinedEvents();
-  const {user, refreshUser, getAccessToken, isMockMode} = useAuth();
+  const {user, refreshUser, getAccessToken, isSignedIn} = useAuth();
   const [gamertagOpen, setGamertagOpen] = useState(false);
   const [joining, setJoining] = useState(false);
   const [joinError, setJoinError] = useState<string | null>(null);
@@ -108,7 +109,7 @@ export function EventDetail() {
       setEvent(next);
       return;
     }
-    if (!user.xboxGamertag && !isMockMode) {
+    if (!user.xboxGamertag && isSignedIn) {
       setGamertagOpen(true);
       return;
     }
@@ -201,8 +202,15 @@ export function EventDetail() {
           'h-44 bg-gradient-to-b',
           vis.gradient,
         )}
-        style={event.coverImageUrl ? {backgroundImage: `url(${event.coverImageUrl})`, backgroundSize: 'cover', backgroundPosition: 'center'} : undefined}
       >
+        {event.coverImageUrl && (
+          <EventCover
+            src={event.coverImageUrl}
+            variant="hero"
+            priority
+            className="absolute inset-0"
+          />
+        )}
         <div className="absolute inset-0" style={{background: vis.glow}} />
         <div
           className="pointer-events-none absolute inset-x-0 bottom-0 h-16"

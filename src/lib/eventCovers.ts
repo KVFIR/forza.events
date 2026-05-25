@@ -1,11 +1,11 @@
 import type {EventType} from './types';
 
-/** Bundled default covers (public/covers). Road uses cover-road-2. */
+/** Bundled default covers (public/covers, WebP). Road uses cover-road-2. */
 export const DEFAULT_COVER_BY_TYPE: Record<EventType, string> = {
-  road: '/covers/cover-road-2.jpg',
-  dirt: '/covers/cover-dirt-1.jpg',
-  drift: '/covers/cover-drift-1.jpg',
-  touge: '/covers/cover-touge-1.jpg',
+  road: '/covers/cover-road-2.webp',
+  dirt: '/covers/cover-dirt-1.webp',
+  drift: '/covers/cover-drift-1.webp',
+  touge: '/covers/cover-touge-1.webp',
 };
 
 export function defaultCoverPath(type: EventType): string {
