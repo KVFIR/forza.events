@@ -10,7 +10,7 @@ const BrowseEvents = lazy(() =>
 );
 const MyEvents = lazy(() => import('./screens/MyEvents').then((m) => ({default: m.MyEvents})));
 const CreateEvent = lazy(() =>
-  import('./screens/CreateEvent').then((m) => ({default: m.CreateEvent})),
+  import('./screens/CreateEvent/index').then((m) => ({default: m.CreateEvent})),
 );
 const EventDetail = lazy(() =>
   import('./screens/EventDetail').then((m) => ({default: m.EventDetail})),
