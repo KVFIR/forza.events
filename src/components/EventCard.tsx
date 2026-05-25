@@ -2,7 +2,6 @@ import {format} from 'date-fns';
 import {Link} from 'react-router-dom';
 import {Users} from 'lucide-react';
 import type {EventAllowedCar, EventType, ForzaEvent} from '../lib/types';
-import {CarRuleBadge} from './ui/Badge';
 import {cn} from '../lib/cn';
 import {formatLobbyCount} from '../lib/constants';
 import {piToClass} from '../lib/pi';
@@ -37,14 +36,14 @@ function CarList({cars}: {cars: EventAllowedCar[]}) {
 
   return (
     <div className="shrink-0 text-left">
-      <ul className="flex flex-col gap-1">
+      <ul className="flex flex-col divide-y divide-white/[0.05]">
         {shown.map((car) => {
           const maxClass = piToClass(car.maxPi);
 
           return (
             <li
               key={car.carId}
-              className="grid grid-cols-[minmax(0,1fr)_2.75rem] items-center gap-x-2.5 text-[10px] leading-tight"
+              className="grid grid-cols-[minmax(0,1fr)_2.75rem] items-center gap-x-2.5 py-1 text-[10px] leading-tight first:pt-0 last:pb-0"
             >
               <span className="truncate font-medium text-slate-200">
                 {car.make} {car.model}
@@ -62,6 +61,29 @@ function CarList({cars}: {cars: EventAllowedCar[]}) {
         })}
       </ul>
       {extra > 0 && <p className="mt-1 text-[10px] text-muted">+{extra} more</p>}
+    </div>
+  );
+}
+
+function OpenBuildSummary({event}: {event: ForzaEvent}) {
+  const maxClass = piToClass(event.maxPi);
+  const label = event.additionalCarRestrictions?.trim() || 'Open build';
+
+  return (
+    <div className="shrink-0 text-left">
+      <ul className="flex flex-col gap-1">
+        <li className="grid grid-cols-[minmax(0,1fr)_2.75rem] items-center gap-x-2.5 text-[10px] leading-tight">
+          <span className="truncate font-medium text-slate-200">{label}</span>
+          <span
+            className={cn(
+              'text-right font-bold tabular-nums',
+              classColor[maxClass] ?? 'text-muted',
+            )}
+          >
+            {maxClass} {event.maxPi}
+          </span>
+        </li>
+      </ul>
     </div>
   );
 }
@@ -103,9 +125,6 @@ export function EventCard({event}: Props) {
                 )}
               </p>
               <p className="mt-0.5 text-xs text-muted">{when}</p>
-              <div className="mt-1.5">
-                <CarRuleBadge mode={event.carRuleMode} />
-              </div>
               <p className="mt-1.5 flex items-center gap-1 text-xs text-slate-400">
                 <Users className="h-3 w-3 shrink-0" />
                 {formatLobbyCount(event.currentPlayers)}
@@ -122,7 +141,8 @@ export function EventCard({event}: Props) {
               </p>
             </div>
 
-            {event.allowedCars.length > 0 && <CarList cars={event.allowedCars} />}
+            {event.carRuleMode === 'restricted_list' && event.allowedCars.length > 0 && <CarList cars={event.allowedCars} />}
+            {event.carRuleMode === 'anything_goes' && <OpenBuildSummary event={event} />}
           </div>
 
           {/* Type accent — bottom strip */}

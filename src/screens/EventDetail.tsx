@@ -22,7 +22,7 @@ import {EventResultsTable} from '../components/EventResultsTable';
 import {formatEventTime} from '../lib/datetime';
 import {cancelEvent, isApiConfigured, updateProfile} from '../lib/api';
 import {canCancelEvent, canEditEvent} from '../lib/eventSpec';
-import {Badge, CarRuleBadge, StatusBadge} from '../components/ui/Badge';
+import {Badge, StatusBadge} from '../components/ui/Badge';
 import {Button} from '../components/ui/Button';
 import {GamertagModal} from '../components/GamertagModal';
 import {useJoinedEvents} from '../context/JoinedEventsContext';
@@ -51,15 +51,18 @@ const typeVisual: Record<EventType, {gradient: string; glow: string}> = {
   },
 };
 
-const classColor: Record<string, string> = {
-  D: 'bg-slate-700 text-slate-200',
-  C: 'bg-yellow-900/60 text-yellow-200',
-  B: 'bg-orange-900/60 text-orange-200',
-  A: 'bg-red-900/60 text-red-200',
-  S1: 'bg-violet-900/60 text-violet-200',
-  S2: 'bg-fuchsia-900/60 text-fuchsia-200',
-  R: 'bg-amber-900/60 text-amber-200',
+const piClassColor: Record<string, string> = {
+  D: 'text-slate-400',
+  C: 'text-yellow-400/90',
+  B: 'text-orange-400/90',
+  A: 'text-red-400/90',
+  S1: 'text-violet-400/90',
+  S2: 'text-fuchsia-400/90',
+  R: 'text-amber-400/90',
 };
+
+const carRuleRowClass =
+  'grid grid-cols-[minmax(0,1fr)_3.5rem] items-center gap-x-3 text-sm leading-tight';
 
 export function EventDetail() {
   const navigate = useNavigate();
@@ -180,7 +183,7 @@ export function EventDetail() {
       {/* Hero */}
       <div
         className={cn(
-          'relative -mx-3 mb-6 overflow-hidden sm:-mx-5 md:-mx-8',
+          'relative -mx-3 mb-0 overflow-hidden sm:-mx-5 md:-mx-8',
           'h-44 bg-gradient-to-b',
           vis.gradient,
         )}
@@ -188,10 +191,12 @@ export function EventDetail() {
       >
         <div className="absolute inset-0" style={{background: vis.glow}} />
         <div
-          className="absolute inset-0 opacity-[0.05]"
-          style={{backgroundImage: 'repeating-linear-gradient(115deg, rgba(255,255,255,0.8) 0px, rgba(255,255,255,0.8) 1px, transparent 1px, transparent 20px)'}}
+          className="pointer-events-none absolute inset-x-0 bottom-0 h-16"
+          style={{
+            background:
+              'linear-gradient(to top, #06060e 0%, rgba(6, 6, 14, 0.82) 30%, rgba(6, 6, 14, 0.28) 60%, transparent 100%)',
+          }}
         />
-        <div className="absolute inset-x-0 bottom-0 h-16 bg-gradient-to-t from-base to-transparent" />
       </div>
 
       {/* Title + actions */}
@@ -199,7 +204,6 @@ export function EventDetail() {
         <div className="min-w-0 flex-1">
           <div className="flex flex-wrap items-center gap-2">
             <Badge type={event.type} />
-            <CarRuleBadge mode={event.carRuleMode} />
             <StatusBadge status={event.status} />
           </div>
           <h1 className="mt-1.5 text-xl font-black tracking-tight text-white">{event.title}</h1>
@@ -306,23 +310,25 @@ export function EventDetail() {
         )}
 
         {/* Tracks */}
-        {event.primaryTrackCode && (
+        {(event.trackCodes?.length ?? 0) > 0 && (
           <div className="flex items-start gap-3 px-4 py-3">
             <div className="flex h-7 w-7 shrink-0 items-center justify-center rounded-lg border border-white/[0.07] bg-white/[0.04]">
               <RoadIcon className="text-muted-light" />
             </div>
             <div className="min-w-0">
               <p className="text-[10px] font-bold uppercase tracking-widest text-muted">Tracks</p>
-              <p className="mt-1 text-sm">
-                <span className="text-muted">Primary · </span>
-                <span className="font-mono tracking-wide text-slate-200">{event.primaryTrackCode}</span>
-              </p>
-              {(event.extraTrackCodes?.length ?? 0) > 0 && (
+              {event.trackCodes!.length === 1 ? (
+                <p className="mt-1 font-mono text-sm tracking-wide text-slate-200">
+                  {event.trackCodes![0]}
+                </p>
+              ) : (
                 <ol className="mt-1 space-y-0.5">
-                  {event.extraTrackCodes!.map((code, i) => (
-                    <li key={code} className="text-sm">
-                      <span className="text-muted">Extra {i + 1} · </span>
-                      <span className="font-mono tracking-wide text-slate-200">{code}</span>
+                  {event.trackCodes!.map((code, i) => (
+                    <li key={`${code}-${i}`} className="flex items-center gap-2 text-sm text-slate-200">
+                      <span className="inline-flex h-5 min-w-5 items-center justify-center rounded-full border border-white/[0.08] bg-white/[0.03] px-1.5 text-[10px] font-bold text-muted">
+                        {i + 1}
+                      </span>
+                      <span className="font-mono tracking-wide">{code}</span>
                     </li>
                   ))}
                 </ol>
@@ -339,33 +345,47 @@ export function EventDetail() {
           <div className="min-w-0 flex-1">
             <p className="text-[10px] font-bold uppercase tracking-widest text-muted">Car rules</p>
             {event.carRuleMode === 'anything_goes' ? (
-              <p className="mt-1 text-sm text-slate-200">
-                Class {event.carClassCap ?? piToClass(event.maxPi)} cap · PI {event.maxPi} max
-              </p>
+              <ul className="mt-2 flex flex-col gap-1">
+                <li className={carRuleRowClass}>
+                  <span className="truncate font-medium text-slate-200">
+                    {event.additionalCarRestrictions?.trim() || 'Open build'}
+                  </span>
+                  <span
+                    className={cn(
+                      'text-right font-bold tabular-nums',
+                      piClassColor[piToClass(event.maxPi)] ?? 'text-muted',
+                    )}
+                  >
+                    {piToClass(event.maxPi)} {event.maxPi}
+                  </span>
+                </li>
+              </ul>
             ) : event.allowedCars.length === 0 ? (
               <p className="mt-1 text-sm text-muted">Restricted list (details coming soon)</p>
             ) : (
-              <ul className="mt-2 space-y-2">
+              <ul className="mt-2 divide-y divide-white/[0.05]">
                 {event.allowedCars.map((c) => {
                   const maxClass = piToClass(c.maxPi);
                   return (
-                    <li key={c.carId} className="rounded-lg border border-white/[0.06] bg-white/[0.02] px-3 py-2.5">
-                      <div className="flex items-center justify-between gap-2">
-                        <p className="text-sm font-semibold text-slate-100">
+                    <li key={c.carId} className="py-2.5 first:pt-0 last:pb-0">
+                      <div className={carRuleRowClass}>
+                        <span className="truncate font-medium text-slate-200">
                           {c.make} {c.model}
-                          {c.year ? <span className="ml-1 text-xs font-normal text-muted">{c.year}</span> : null}
-                        </p>
+                          {c.year ? (
+                            <span className="ml-1 text-xs font-normal text-muted">{c.year}</span>
+                          ) : null}
+                        </span>
                         <span
                           className={cn(
-                            'shrink-0 rounded px-1.5 py-0.5 text-[10px] font-bold uppercase',
-                            classColor[maxClass] ?? 'bg-white/10 text-muted',
+                            'text-right font-bold tabular-nums',
+                            piClassColor[maxClass] ?? 'text-muted',
                           )}
                         >
                           {maxClass} {c.maxPi}
                         </span>
                       </div>
                       {(c.tuneShareCode || c.restrictions.length > 0) && (
-                        <div className="mt-1.5 flex flex-wrap gap-x-3 gap-y-0.5 text-xs text-muted">
+                        <div className="mt-1 flex flex-wrap gap-x-3 gap-y-0.5 text-xs text-muted">
                           {c.tuneShareCode && (
                             <span className="flex items-center gap-1">
                               <Wrench className="h-3 w-3 shrink-0" />

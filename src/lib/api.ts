@@ -65,11 +65,10 @@ export async function fetchLaunchIntent(
 }
 
 export async function listGuilds(discordToken: string) {
-  return invoke<{guilds: {id: string; name: string; icon_url?: string | null}[]}>(
-    'list-guilds',
-    {},
-    discordToken,
-  );
+  return invoke<{
+    guilds: {id: string; name: string; icon_url?: string | null}[];
+    hint?: string | null;
+  }>('list-guilds', {}, discordToken);
 }
 
 export async function listChannels(discordToken: string, guildId: string) {

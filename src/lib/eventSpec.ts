@@ -1,17 +1,8 @@
-import type {CarClassLetter} from './pi';
 import type {CarRuleMode, ForzaEvent} from './types';
 import type {AppUser} from './types';
 
-export type TrackCodeInput = {
-  primaryTrackCode: string;
-  extraTrackCodes: string[];
-};
-
-export function normalizeTrackCodes(primary: string, extras: string[]): TrackCodeInput {
-  return {
-    primaryTrackCode: primary.trim(),
-    extraTrackCodes: extras.map((c) => c.trim()).filter(Boolean),
-  };
+export function normalizeTrackCodes(codes: string[]): string[] {
+  return codes.map((c) => c.trim()).filter(Boolean);
 }
 
 export function validateDraftForm(input: {
@@ -31,9 +22,8 @@ export function validatePublishForm(input: {
   guildId: string | null;
   channelId: string | null;
   coverReady: boolean;
-  primaryTrackCode: string;
+  trackCodes: string[];
   carRuleMode: CarRuleMode;
-  carClassCap: CarClassLetter | '';
   maxPi: number;
   carCount: number;
   lobbyLeaderGamertag: string;
@@ -47,13 +37,12 @@ export function validatePublishForm(input: {
   if (!input.channelId) return 'Choose a channel before publishing.';
   if (!input.lobbyLeaderGamertag.trim()) return 'Convoy leader gamertag is required.';
   if (!input.coverReady) return 'Cover image is required before publishing.';
-  if (!input.primaryTrackCode.trim()) return 'Primary track code is required.';
+  if (normalizeTrackCodes(input.trackCodes).length === 0) return 'Add at least one track code.';
   if (input.carRuleMode === 'restricted_list' && input.carCount === 0) {
     return 'Add at least one car for a restricted car list.';
   }
-  if (input.carRuleMode === 'anything_goes') {
-    if (!input.carClassCap) return 'Choose a class cap for Anything goes.';
-    if (input.maxPi < 100 || input.maxPi > 999) return 'Set a PI cap between 100 and 999.';
+  if (input.carRuleMode === 'anything_goes' && (input.maxPi < 100 || input.maxPi > 999)) {
+    return 'Set a PI cap between 100 and 999.';
   }
   return null;
 }

@@ -1,19 +1,17 @@
-import {useEffect, useState} from 'react';
+import {useEffect, useMemo, useState} from 'react';
 import {useNavigate, useSearchParams} from 'react-router-dom';
 import type {CarRuleMode, EventType} from '../lib/types';
 import {useAuth} from '../context/AuthContext';
 import {isApiConfigured, publishEvent, saveEvent, uploadCoverImage} from '../lib/api';
 import {fetchEventById} from '../lib/events';
 import {defaultTimezone, localInputToUtc, utcToLocalInput} from '../lib/datetime';
-import type {CarClassLetter} from '../lib/pi';
-import {FH6_CLASS_BANDS, clampPi, piToClass} from '../lib/pi';
+import {clampPi, formatMaxPi} from '../lib/pi';
 import {EVENT_PLAYER_SLOTS} from '../lib/constants';
 import {defaultCoverPath} from '../lib/eventCovers';
-import {validateDraftForm, validatePublishForm, isPublishedEvent} from '../lib/eventSpec';
+import {normalizeTrackCodes, validateDraftForm, validatePublishForm, isPublishedEvent} from '../lib/eventSpec';
 import {Button} from '../components/ui/Button';
-import {CarRuleBadge} from '../components/ui/Badge';
 import {EventCarList, type EventCarEntry} from '../components/EventCarList';
-import {EventShareCodeList} from '../components/EventShareCodeList';
+import {EventTrackCodeList} from '../components/EventTrackCodeList';
 import {PublishTargetModal, PublishTargetPicker} from '../components/PublishTargetPicker';
 import {cn} from '../lib/cn';
 
@@ -73,11 +71,10 @@ export function CreateEvent() {
   const [coverFile, setCoverFile] = useState<File | null>(null);
   const [coverPreview, setCoverPreview] = useState<string | null>(null);
   const [coverUrl, setCoverUrl] = useState<string | null>(null);
-  const [primaryTrackCode, setPrimaryTrackCode] = useState('');
-  const [extraTrackCodes, setExtraTrackCodes] = useState<string[]>([]);
+  const [trackCodes, setTrackCodes] = useState<string[]>([]);
   const [carRuleMode, setCarRuleMode] = useState<CarRuleMode>('anything_goes');
-  const [carClassCap, setCarClassCap] = useState<CarClassLetter>('A');
   const [maxPi, setMaxPi] = useState(800);
+  const [additionalCarRestrictions, setAdditionalCarRestrictions] = useState('');
   const [eventCars, setEventCars] = useState<EventCarEntry[]>([]);
   const [lobbyLeaderIsHost, setLobbyLeaderIsHost] = useState(true);
   const [lobbyLeaderGamertag, setLobbyLeaderGamertag] = useState(user.xboxGamertag ?? '');
@@ -87,6 +84,7 @@ export function CreateEvent() {
 
   const token = getAccessToken();
   const canPersist = isApiConfigured() && token && !isMockMode;
+  const normalizedTrackCodes = useMemo(() => normalizeTrackCodes(trackCodes), [trackCodes]);
 
   useEffect(() => {
     if (!editId) {
@@ -111,11 +109,10 @@ export function CreateEvent() {
       setType(ev.type);
       setStartsAtLocal(utcToLocalInput(ev.startsAt, tz));
       setDescription(ev.description ?? '');
-      setPrimaryTrackCode(ev.primaryTrackCode ?? '');
-      setExtraTrackCodes(ev.extraTrackCodes ?? []);
+      setTrackCodes(ev.trackCodes ?? []);
       setCarRuleMode(ev.carRuleMode);
-      setCarClassCap((ev.carClassCap as CarClassLetter) ?? piToClass(ev.maxPi));
       setMaxPi(ev.maxPi);
+      setAdditionalCarRestrictions(ev.additionalCarRestrictions ?? '');
       setEventCars(
         ev.allowedCars.map((c) => ({
           id: c.carId,
@@ -123,7 +120,6 @@ export function CreateEvent() {
           model: c.model,
           year: c.year ?? null,
           pi: c.pi,
-          class: c.class as CarClassLetter,
           maxPi: c.maxPi,
           tuneShareCode: c.tuneShareCode ?? '',
           restrictions: c.restrictions,
@@ -165,11 +161,11 @@ export function CreateEvent() {
       max_players: EVENT_PLAYER_SLOTS,
       description,
       cover_image_url: coverUrl,
-      primary_track_code: primaryTrackCode,
-      extra_track_codes: extraTrackCodes,
+      track_codes: normalizedTrackCodes,
       car_rule_mode: carRuleMode,
-      car_class_cap: carRuleMode === 'anything_goes' ? carClassCap : null,
       max_pi: carRuleMode === 'anything_goes' ? maxPi : undefined,
+      additional_car_restrictions:
+        carRuleMode === 'anything_goes' ? additionalCarRestrictions.trim() || null : null,
       lobby_leader_gamertag: lobbyLeaderIsHost
         ? (user.xboxGamertag ?? lobbyLeaderGamertag)
         : lobbyLeaderGamertag,
@@ -183,7 +179,6 @@ export function CreateEvent() {
               model: c.model,
               year: c.year,
               pi: c.pi,
-              class: c.class,
               max_pi: c.maxPi,
               tune_share_code: c.tuneShareCode.trim() || null,
               car_restrictions: c.restrictions,
@@ -239,9 +234,8 @@ export function CreateEvent() {
       guildId: targetGuildId,
       channelId: targetChannelId,
       coverReady: Boolean(coverFile || coverUrl || coverPreview),
-      primaryTrackCode,
+      trackCodes: normalizedTrackCodes,
       carRuleMode,
-      carClassCap,
       maxPi,
       carCount: eventCars.length,
       lobbyLeaderGamertag: lobbyLeaderIsHost ? (user.xboxGamertag ?? lobbyLeaderGamertag) : lobbyLeaderGamertag,
@@ -424,11 +418,9 @@ export function CreateEvent() {
 
       {step === 1 && (
         <div className="space-y-6">
-          <EventShareCodeList
-            primaryCode={primaryTrackCode}
-            extraCodes={extraTrackCodes}
-            onPrimaryChange={setPrimaryTrackCode}
-            onExtrasChange={setExtraTrackCodes}
+          <EventTrackCodeList
+            codes={trackCodes}
+            onChange={setTrackCodes}
             inputClass={input}
             labelClass={label}
           />
@@ -449,27 +441,17 @@ export function CreateEvent() {
                       : 'text-muted hover:text-slate-300',
                   )}
                 >
-                  {mode === 'anything_goes' ? 'Anything goes' : 'Restricted list'}
+                  {mode === 'anything_goes' ? 'Open build' : 'Restricted list'}
                 </button>
               ))}
             </div>
+            <p className="mt-2 text-xs text-muted">
+              Open build lets you set a PI cap and optional category notes instead of a fixed car list.
+            </p>
           </Field>
 
           {carRuleMode === 'anything_goes' ? (
-            <div className="grid grid-cols-2 gap-3">
-              <Field title="Class cap">
-                <select
-                  className={input}
-                  value={carClassCap}
-                  onChange={(e) => setCarClassCap(e.target.value as CarClassLetter)}
-                >
-                  {FH6_CLASS_BANDS.map((b) => (
-                    <option key={b.class} value={b.class}>
-                      Class {b.class}
-                    </option>
-                  ))}
-                </select>
-              </Field>
+            <div className="space-y-3">
               <Field title="Max PI">
                 <input
                   type="number"
@@ -478,6 +460,17 @@ export function CreateEvent() {
                   className={input}
                   value={maxPi}
                   onChange={(e) => setMaxPi(clampPi(Number(e.target.value)))}
+                />
+                <p className="mt-1.5 text-xs text-muted">{formatMaxPi(maxPi)}</p>
+              </Field>
+
+              <Field title="Additional restrictions">
+                <textarea
+                  rows={3}
+                  className={cn(input, 'resize-none')}
+                  value={additionalCarRestrictions}
+                  onChange={(e) => setAdditionalCarRestrictions(e.target.value)}
+                  placeholder="Optional, e.g. Super Saloons or Modern Muscle"
                 />
               </Field>
             </div>
@@ -522,9 +515,6 @@ export function CreateEvent() {
             />
             <div className="absolute inset-0 bg-gradient-to-t from-base/80 to-transparent" />
             <div className="absolute inset-x-0 bottom-0 px-4 pb-4">
-              <div className="mb-2 flex flex-wrap gap-2">
-                <CarRuleBadge mode={carRuleMode} />
-              </div>
               <h2 className="text-lg font-black text-white">
                 {title || <span className="text-white/40">Untitled event</span>}
               </h2>
@@ -541,8 +531,8 @@ export function CreateEvent() {
               <span>{targetChannelId ? `#${targetChannelId.slice(-4)}` : 'Choose on publish'}</span>
             </div>
             <div className="flex items-center justify-between gap-3 px-4 py-3 text-xs text-slate-400">
-              <span className="uppercase tracking-widest text-muted">Primary track</span>
-              <span className="font-mono">{primaryTrackCode || '—'}</span>
+              <span className="uppercase tracking-widest text-muted">Tracks</span>
+              <span className="font-mono">{normalizedTrackCodes[0] ? `${normalizedTrackCodes[0]}${normalizedTrackCodes.length > 1 ? ` +${normalizedTrackCodes.length - 1}` : ''}` : '—'}</span>
             </div>
           </div>
         </div>

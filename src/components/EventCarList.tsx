@@ -1,7 +1,6 @@
 import {useEffect, useRef, useState} from 'react';
 import {Trash2} from 'lucide-react';
-import type {CarClassLetter} from '../lib/pi';
-import {clampPi, PI_MAX, PI_MIN} from '../lib/pi';
+import {clampPi, piToClass, PI_MAX, PI_MIN} from '../lib/pi';
 import {searchCars, type CarSearchResult} from '../lib/events';
 import {ShareCodeInput} from './ShareCodeInput';
 import {TuningRestrictionsInput} from './TuningRestrictionsInput';
@@ -14,7 +13,6 @@ export type EventCarEntry = {
   model: string;
   year: number | null;
   pi: number;
-  class: CarClassLetter;
   maxPi: number;
   tuneShareCode: string;
   restrictions: string[];
@@ -34,7 +32,6 @@ function toEntry(c: CarSearchResult): EventCarEntry {
     model: c.model,
     year: c.year,
     pi: c.pi,
-    class: c.class,
     maxPi: c.pi,
     tuneShareCode: '',
     restrictions: [],
@@ -120,7 +117,7 @@ export function EventCarList({cars, onChange, inputClass, labelClass}: Props) {
                         {c.year ? ` · ${c.year}` : ''}
                       </span>
                       <span className="text-xs text-muted">
-                        {c.pi} {c.class}
+                        {c.pi} {piToClass(c.pi)}
                       </span>
                     </button>
                   </li>
@@ -146,7 +143,7 @@ export function EventCarList({cars, onChange, inputClass, labelClass}: Props) {
                 <div>
                   <p className="font-semibold text-white">{c.model}</p>
                   <p className="text-xs text-muted">
-                    Stock {c.pi} {c.class}
+                    Stock {c.pi} {piToClass(c.pi)}
                     {c.year ? ` · ${c.year}` : ''}
                   </p>
                 </div>

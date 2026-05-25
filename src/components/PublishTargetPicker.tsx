@@ -23,13 +23,17 @@ export function PublishTargetPicker({
 }: Props) {
   const [guilds, setGuilds] = useState<{id: string; name: string}[]>([]);
   const [channels, setChannels] = useState<{id: string; name: string}[]>([]);
+  const [guildHint, setGuildHint] = useState<string | null>(null);
   const [loadingGuilds, setLoadingGuilds] = useState(true);
   const [loadingChannels, setLoadingChannels] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
     void listGuilds(accessToken)
-      .then((r) => setGuilds(r.guilds))
+      .then((r) => {
+        setGuilds(r.guilds);
+        setGuildHint(r.hint ?? null);
+      })
       .catch((e) => setError(String(e)))
       .finally(() => setLoadingGuilds(false));
   }, [accessToken]);
@@ -54,6 +58,10 @@ export function PublishTargetPicker({
         </p>
         {loadingGuilds ? (
           <p className="text-sm text-muted">Loading servers…</p>
+        ) : guilds.length === 0 ? (
+          <p className="text-sm text-muted">
+            {guildHint ?? 'No servers available for publishing yet.'}
+          </p>
         ) : (
           <select
             className="w-full rounded-lg border border-white/[0.08] bg-white/[0.03] px-3.5 py-2.5 text-sm text-white"

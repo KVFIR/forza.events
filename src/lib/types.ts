@@ -16,7 +16,6 @@ export interface EventAllowedCar {
   model: string;
   year?: number | null;
   pi: number;
-  class: string;
   maxPi: number;
   tuneShareCode?: string;
   restrictions: string[];
@@ -43,7 +42,6 @@ export interface ForzaEvent {
   guildName?: string;
   channelId?: string;
   carRuleMode: CarRuleMode;
-  carClassCap?: string;
   maxPi: number;
   allowedCars: EventAllowedCar[];
   voicePolicy: VoicePolicy;
@@ -55,8 +53,8 @@ export interface ForzaEvent {
   rules: string;
   description?: string;
   coverImageUrl?: string;
-  primaryTrackCode?: string;
-  extraTrackCodes?: string[];
+  trackCodes?: string[];
+  additionalCarRestrictions?: string;
   lobbyLeaderGamertag?: string;
   timezoneHint?: string;
   threadLabel?: string;

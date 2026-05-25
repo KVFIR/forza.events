@@ -3,7 +3,6 @@ import {searchCarCatalog} from './carCatalog';
 import {EVENT_PLAYER_SLOTS} from './constants';
 import {resolveEventCoverUrl} from './eventCovers';
 import {MOCK_EVENTS} from './mockData';
-import type {CarClassLetter} from './pi';
 import type {
   AppUser,
   CarRuleMode,
@@ -45,12 +44,13 @@ type DbEventRow = {
   current_players: number;
   max_pi?: number | null;
   car_rule_mode?: CarRuleMode | null;
-  car_class_cap?: string | null;
   host_discord_id: string;
   description?: string | null;
   cover_image_url?: string | null;
   event_share_code?: string | null;
   track_codes?: string[] | null;
+  rules_allowed?: string[] | null;
+  additional_car_restrictions?: string | null;
   lobby_leader_gamertag?: string | null;
   timezone_hint?: string | null;
   users?: {username: string; avatar_url?: string | null} | null;
@@ -143,7 +143,6 @@ export function mapDbEvent(row: DbEventRow): ForzaEvent {
     guildName: guild?.guild_name ?? undefined,
     channelId: row.channel_id ?? undefined,
     carRuleMode: row.car_rule_mode ?? 'anything_goes',
-    carClassCap: row.car_class_cap ?? undefined,
     maxPi: row.max_pi ?? 999,
     allowedCars: [],
     voicePolicy: row.voice_policy,
@@ -155,8 +154,14 @@ export function mapDbEvent(row: DbEventRow): ForzaEvent {
     rules: rulesFromRow(row),
     description: row.description ?? undefined,
     coverImageUrl: resolveEventCoverUrl(row.type, row.cover_image_url),
-    primaryTrackCode: row.event_share_code ?? undefined,
-    extraTrackCodes: row.track_codes ?? [],
+    trackCodes: [row.event_share_code, ...(row.track_codes ?? [])].filter(
+      (code): code is string => Boolean(code?.trim()),
+    ),
+    additionalCarRestrictions:
+      row.additional_car_restrictions ??
+      (Array.isArray(row.rules_allowed)
+        ? row.rules_allowed.find((rule) => rule.startsWith('additional:'))?.slice('additional:'.length)
+        : undefined),
     lobbyLeaderGamertag: row.lobby_leader_gamertag ?? undefined,
     timezoneHint: row.timezone_hint ?? undefined,
     participants,
@@ -182,7 +187,7 @@ async function hydrateEvents(rows: DbEventRow[]): Promise<ForzaEvent[]> {
     supabase
       .from('event_cars')
       .select(
-        'event_id, car_id, max_pi, tune_share_code, car_restrictions, cars(id, make, model, year, pi, class)',
+        'event_id, car_id, max_pi, tune_share_code, car_restrictions, cars(id, make, model, year, pi)',
       )
       .in('event_id', eventIds),
   ]);
@@ -226,7 +231,6 @@ async function hydrateEvents(rows: DbEventRow[]): Promise<ForzaEvent[]> {
           model: string;
           year: number | null;
           pi: number;
-          class: string;
         } | null;
         if (!car?.id) return null;
         return {
@@ -235,7 +239,6 @@ async function hydrateEvents(rows: DbEventRow[]): Promise<ForzaEvent[]> {
           model: car.model,
           year: car.year,
           pi: car.pi,
-          class: car.class,
           maxPi: ec.max_pi ?? car.pi,
           tuneShareCode: ec.tune_share_code ?? undefined,
           restrictions: ec.car_restrictions ?? [],
@@ -334,7 +337,6 @@ export type CarSearchResult = {
   model: string;
   year: number | null;
   pi: number;
-  class: CarClassLetter;
 };
 
 export async function searchCars(query: string): Promise<CarSearchResult[]> {
@@ -348,7 +350,7 @@ export async function searchCars(query: string): Promise<CarSearchResult[]> {
   const supabase = getSupabase()!;
   const {data, error} = await supabase
     .from('cars')
-    .select('id, make, model, year, pi, class')
+    .select('id, make, model, year, pi')
     .eq('active', true)
     .ilike('search_text', `%${q}%`)
     .limit(20);
@@ -368,7 +370,6 @@ export async function searchCars(query: string): Promise<CarSearchResult[]> {
     model: c.model,
     year: c.year,
     pi: c.pi,
-    class: c.class as CarClassLetter,
   }));
 }
 
