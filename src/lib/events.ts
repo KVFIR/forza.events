@@ -278,14 +278,28 @@ export function isBrowsableEvent(event: ForzaEvent): boolean {
   return !isEventCompleted(event);
 }
 
+export type PublishedEventsLoadError = 'not_configured' | 'fetch_failed';
+
+export type PublishedEventsResult = {
+  events: ForzaEvent[];
+  error: PublishedEventsLoadError | null;
+};
+
 export async function fetchPublishedEvents(
   _guildId?: string,
   options: FetchEventsOptions = {},
 ): Promise<ForzaEvent[]> {
+  return (await fetchPublishedEventsResult(undefined, options)).events;
+}
+
+export async function fetchPublishedEventsResult(
+  _guildId?: string,
+  options: FetchEventsOptions = {},
+): Promise<PublishedEventsResult> {
   const {includeCompleted = false} = options;
 
   if (!isSupabaseConfigured()) {
-    return [];
+    return {events: [], error: 'not_configured'};
   }
 
   const events = await fetchEventsWithRelations((supabase) => {
@@ -303,10 +317,10 @@ export async function fetchPublishedEvents(
   });
 
   if (events === null) {
-    return [];
+    return {events: [], error: 'fetch_failed'};
   }
 
-  return events;
+  return {events, error: null};
 }
 
 export async function fetchEventById(id: string): Promise<ForzaEvent | undefined> {

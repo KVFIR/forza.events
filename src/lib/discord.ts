@@ -118,6 +118,9 @@ export async function initDiscordActivity(): Promise<InitResult> {
     sdkInstance = sdk;
     await sdk.ready();
 
+    const {setupDiscordSupabaseProxy} = await import('./discordUrlProxy');
+    setupDiscordSupabaseProxy();
+
     guildId = sdk.guildId ?? null;
     guildName = guildId ? 'Server' : null;
 

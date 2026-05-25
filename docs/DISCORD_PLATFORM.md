@@ -74,7 +74,12 @@ Before pilot launch, confirm in the [Discord Developer Portal](https://discord.c
    | `/supabase` | `<project-ref>.supabase.co` (no `https://`) |
 
    Do **not** use `/.proxy/...` in the prefix — the Developer Portal rejects it ([changelog](https://discord.com/developers/change-log#remove-proxy-from-discord-activity-proxy-path)). The client calls `patchUrlMappings` with the same prefix at startup (`src/lib/discordUrlProxy.ts`). Without this mapping, Supabase requests are blocked by CSP and event lists stay empty.
-4. **Redirect URIs** (OAuth2 → Redirects) — add **`https://127.0.0.1`** for embedded Activity auth (placeholder per Discord docs). Add `http://localhost:5180/auth/callback` for local browser dev. The Activity client sends `https://127.0.0.1` to `token-exchange`; browser OAuth uses `DISCORD_REDIRECT_URI` from env.
+4. **Redirect URIs** (OAuth2 → Redirects) — register **every** URL your app uses:
+   - `https://127.0.0.1` — embedded Activity (`token-exchange` with this `redirect_uri`)
+   - `http://localhost:5180/auth/callback` — local `npm run dev` in a browser tab
+   - `https://<your-production-host>/auth/callback` — e.g. Railway, if you open the SPA in a normal browser
+
+   Browser sign-in always uses `{current origin}/auth/callback`. If that exact URL is missing in the portal, Discord returns `invalid oauth2 redirect_uri`.
 5. **Interactions Endpoint URL** — required for this repo because published event embeds use a button that responds with `LAUNCH_ACTIVITY`:
    `https://<project-ref>.supabase.co/functions/v1/interactions-endpoint`
 6. **Entry Point command** — verify the default Launch command opens the Activity from the App Launcher.

@@ -5,13 +5,13 @@ const USER_KEY = 'forza_discord_user';
 
 const OAUTH_SCOPES = ['identify', 'guilds'];
 
+/** Browser OAuth redirect — must match the origin the user opened and Discord portal entries. */
 export function getDiscordRedirectUri(): string {
-  const explicit = import.meta.env.VITE_DISCORD_REDIRECT_URI as string | undefined;
-  if (explicit?.trim()) return explicit.trim();
   if (typeof window !== 'undefined') {
     return `${window.location.origin}/auth/callback`;
   }
-  return '';
+  const explicit = import.meta.env.VITE_DISCORD_REDIRECT_URI as string | undefined;
+  return explicit?.trim() ?? '';
 }
 
 export function buildDiscordAuthorizeUrl(state = ''): string {

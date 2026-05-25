@@ -1,7 +1,11 @@
 import {useCallback, useEffect, useState} from 'react';
 import {useJoinedEvents} from '../context/JoinedEventsContext';
-import {fetchPublishedEvents, patchEventLobby, type FetchEventsOptions} from '../lib/events';
-import {isSupabaseConfigured} from '../lib/supabase';
+import {
+  fetchPublishedEventsResult,
+  patchEventLobby,
+  type FetchEventsOptions,
+  type PublishedEventsLoadError,
+} from '../lib/events';
 import {usePublishedEventsLiveUpdates} from './useEventLiveUpdates';
 import type {ForzaEvent} from '../lib/types';
 
@@ -11,9 +15,13 @@ export function usePublishedEvents(options: FetchEventsOptions = {}) {
   const includeCompleted = options.includeCompleted ?? false;
   const [events, setEvents] = useState<ForzaEvent[]>([]);
   const [loading, setLoading] = useState(true);
+  const [loadError, setLoadError] = useState<PublishedEventsLoadError | null>(null);
 
   const silentRefetch = useCallback(() => {
-    void fetchPublishedEvents(undefined, {includeCompleted}).then(setEvents);
+    void fetchPublishedEventsResult(undefined, {includeCompleted}).then(({events: next, error}) => {
+      setEvents(next);
+      setLoadError(error);
+    });
   }, [includeCompleted]);
 
   const onLobbyPatch = useCallback(
@@ -36,20 +44,14 @@ export function usePublishedEvents(options: FetchEventsOptions = {}) {
   usePublishedEventsLiveUpdates(includeCompleted, onLobbyPatch, silentRefetch);
 
   useEffect(() => {
-    if (!isSupabaseConfigured()) {
-      void fetchPublishedEvents(undefined, {includeCompleted}).then((next) => {
-        setEvents(next);
-        setLoading(false);
-      });
-      return;
-    }
-
     let cancelled = false;
     setLoading(true);
 
-    void fetchPublishedEvents(undefined, {includeCompleted})
-      .then((next) => {
-        if (!cancelled) setEvents(next);
+    void fetchPublishedEventsResult(undefined, {includeCompleted})
+      .then(({events: next, error}) => {
+        if (cancelled) return;
+        setEvents(next);
+        setLoadError(error);
       })
       .finally(() => {
         if (!cancelled) setLoading(false);
@@ -60,5 +62,5 @@ export function usePublishedEvents(options: FetchEventsOptions = {}) {
     };
   }, [refreshKey, includeCompleted]);
 
-  return {events, loading};
+  return {events, loading, loadError};
 }
