@@ -23,7 +23,8 @@ The remaining work is launch preparation: deployment, Discord configuration, and
 | Edge Functions | Done | Auth, save/publish, join/leave, results, `list-guilds`, embed sync on edit |
 | Cars autocomplete | Done | FH6 catalog + `searchCars()` |
 | Deep link / launch intent | Done | `launch_intents` + `launch-intent` function |
-| Deploy config | Partial | `vercel.json` exists; production setup is still manual |
+| Deploy config | Partial | `vercel.json`, `npm run deploy:functions`; production setup is still manual |
+| Launch-readiness hardening | Done | Bot-accessible guild filter, publish error messages, deploy script |
 
 ## Frozen MVP alignment
 
@@ -86,7 +87,7 @@ Without `.env`, the app runs in **mock mode** with in-memory data.
 
 1. Create Supabase project.
 2. Run `supabase db push` through migration `008`.
-3. Deploy Edge Functions.
+3. Deploy Edge Functions: `npm run deploy:functions`
 4. Set secrets and `VITE_*` env vars.
 5. Configure Discord Developer Portal.
 6. Test inside Discord with a tunnel if needed.

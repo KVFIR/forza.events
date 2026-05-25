@@ -141,33 +141,20 @@ The MVP should be considered launch-ready only when all items below are complete
 
 ## Environment variables
 
-### Activity (repo root `.env`)
-
-```env
-VITE_DISCORD_CLIENT_ID=
-VITE_SUPABASE_URL=
-VITE_SUPABASE_ANON_KEY=
-VITE_API_BASE_URL=
-```
-
-### Backend / Edge Function
+Single root `.env` (see [`.env.example`](../.env.example)):
 
 ```env
 DISCORD_CLIENT_ID=
 DISCORD_CLIENT_SECRET=
-SUPABASE_URL=
-SUPABASE_SERVICE_ROLE_KEY=
-```
-
-### Discord publish integration
-
-```env
-DISCORD_BOT_TOKEN=
 DISCORD_PUBLIC_KEY=
-APP_ORIGIN=https://forza.events
+DISCORD_BOT_TOKEN=
+SUPABASE_URL=
+SUPABASE_ANON_KEY=
 ```
 
-See [`.env.example`](../.env.example) for the local app template.
+Vite maps `DISCORD_CLIENT_ID` and `SUPABASE_*` into the client bundle. Push server secrets with `npm run sync:secrets`.
+
+Optional: `DISCORD_REDIRECT_URI`, `APP_ORIGIN`, `SUPABASE_SERVICE_ROLE_KEY` (local only).
 
 ## Validation question
 

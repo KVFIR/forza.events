@@ -35,6 +35,8 @@ Migration list:
 - `006_car_setup_model.sql` — event-level setup model and tune support
 - `007_per_car_setup.sql` — per-car PI caps and restrictions
 - `008_frozen_mvp_spec.sql` — frozen MVP alignment: car rule mode, class cap, DNS, primary track code
+- `009_event_track_list_and_open_build_notes.sql` — unified track list + open build additional restrictions
+- `010_drop_car_class_storage.sql` — drop persisted FH class letters; derive from PI in the app
 
 ## Edge Functions
 
@@ -55,12 +57,32 @@ supabase functions deploy launch-intent
 
 ## Required secrets
 
+Set once in root `.env`, then push to Supabase:
+
+```bash
+cp .env.example .env
+# fill DISCORD_* and SUPABASE_* values
+npm run sync:secrets
+```
+
+Or set individually:
+
 ```bash
 supabase secrets set DISCORD_CLIENT_ID=...
 supabase secrets set DISCORD_CLIENT_SECRET=...
 supabase secrets set DISCORD_PUBLIC_KEY=...
 supabase secrets set DISCORD_BOT_TOKEN=...
-supabase secrets set APP_ORIGIN=https://forza.events
+```
+
+Optional: `DISCORD_REDIRECT_URI` (only if token exchange requires it), `APP_ORIGIN` (defaults to `https://forza.events`).
+
+`SUPABASE_URL` and `SUPABASE_SERVICE_ROLE_KEY` are auto-injected in deployed Edge Functions.
+
+Deploy all functions in one step:
+
+```bash
+npm run deploy:functions
+# or: bash scripts/deploy-edge-functions.sh
 ```
 
 If `interactions-endpoint` is used for Discord interaction callbacks, point the Discord Interactions Endpoint to:

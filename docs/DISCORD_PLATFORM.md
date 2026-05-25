@@ -63,13 +63,22 @@ The following are explicitly not required for MVP launch:
 
 ## Operational checklist
 
-Before pilot launch, confirm:
+Before pilot launch, confirm in the [Discord Developer Portal](https://discord.com/developers/applications):
 
-- the Discord application has Activities enabled
-- the deployed Activity URL is configured in the Developer Portal
-- embedded auth works inside Discord
-- publish flows can target the intended server and channel
-- the embed button opens the correct Activity destination
+1. **Activities enabled** — required for App Launcher and `LAUNCH_ACTIVITY`.
+2. **Activity URL Mapping** — point to the deployed production origin (for example `https://forza.events`).
+3. **Redirect URI** — add the OAuth redirect URI used by embedded Activity auth; set the same value as `DISCORD_REDIRECT_URI` in Supabase secrets.
+4. **Interactions Endpoint URL** — required for this repo because published event embeds use a button that responds with `LAUNCH_ACTIVITY`:
+   `https://<project-ref>.supabase.co/functions/v1/interactions-endpoint`
+5. **Entry Point command** — verify the default Launch command opens the Activity from the App Launcher.
+6. **App install in pilot guilds** — the app/bot must be installed in every server where hosts will publish; `list-guilds` only returns servers where both the user and bot are present.
+7. **Channel permissions** — the bot must be able to send messages in the target publish channels.
+
+Then validate inside Discord:
+
+- embedded auth completes (`authorize` → token exchange → `authenticate`)
+- browse/create/publish works against a real server/channel
+- clicking `Open in FORZA.EVENTS` on a published embed launches the Activity on the correct event
 
 ## Links
 
