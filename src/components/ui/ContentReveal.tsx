@@ -6,7 +6,11 @@ type Props = {
   className?: string;
 };
 
-/** Smooth fade/slide when content replaces loading or mounts. */
+/** Fade in when content replaces loading — no vertical motion (EventCard keeps its own cover fade). */
 export function ContentReveal({children, className}: Props) {
-  return <div className={cn('animate-content-in', className)}>{children}</div>;
+  return (
+    <div className={cn('animate-content-reveal motion-reduce:animate-none', className)}>
+      {children}
+    </div>
+  );
 }

@@ -56,7 +56,7 @@ export function Logo({size = 'nav', className}: Props) {
         className={cn(
           'inline-block font-black tracking-tight text-white select-none',
           config.textClass,
-          config.skew && 'origin-left -skew-x-[8deg]',
+          config.skew && 'origin-left -skew-x-[10deg]',
         )}
         aria-label="FORZA.EVENTS"
       >

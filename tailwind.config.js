@@ -29,7 +29,7 @@ export default {
         'glow-pulse': 'glowPulse 2.5s ease-in-out infinite alternate',
         'slide-up': 'slideUp 0.3s ease-out both',
         'fade-in': 'fadeIn 0.22s ease-out both',
-        'content-in': 'contentIn 0.38s cubic-bezier(0.22, 1, 0.36, 1) both',
+        'content-reveal': 'contentReveal 0.12s ease-out both',
         'dot-ping': 'dotPing 2s cubic-bezier(0, 0, 0.2, 1) infinite',
       },
       keyframes: {
@@ -45,9 +45,9 @@ export default {
           from: { opacity: '0' },
           to: { opacity: '1' },
         },
-        contentIn: {
-          from: {opacity: '0', transform: 'translateY(12px)'},
-          to: {opacity: '1', transform: 'translateY(0)'},
+        contentReveal: {
+          from: {opacity: '0'},
+          to: {opacity: '1'},
         },
         dotPing: {
           '75%, 100%': { transform: 'scale(2)', opacity: '0' },

@@ -5,6 +5,11 @@ import {Logo} from './ui/Logo';
 import {navShellBorderClass} from './ui/formStyles';
 import {cn} from '../lib/cn';
 
+const navBrandBarClass = cn(
+  'glass border-b bg-base/85',
+  navShellBorderClass,
+);
+
 const NAV_ITEMS: {to: string; end: boolean; icon: LucideIcon; label: string}[] = [
   {to: '/', end: true, icon: Compass, label: 'Browse'},
   {to: '/my-events', end: true, icon: CalendarDays, label: 'My Events'},
@@ -69,8 +74,8 @@ function NavbarTop() {
     <header className="sticky top-0 z-20 lg:hidden">
       <div
         className={cn(
-          'glass flex items-center justify-between gap-3 border-b bg-base/85 px-4 py-3',
-          navShellBorderClass,
+          navBrandBarClass,
+          'flex items-center justify-between gap-3 px-4 py-3',
         )}
       >
         <Logo size="nav" />
@@ -94,7 +99,7 @@ function NavbarSide() {
         navShellBorderClass,
       )}
     >
-      <div className={cn('border-b px-4 py-5', navShellBorderClass)}>
+      <div className={cn(navBrandBarClass, 'px-4 py-5')}>
         <Logo size="nav" />
       </div>
 

@@ -120,7 +120,7 @@ export function EventCard({event}: Props) {
           className={cn(
             'relative min-h-[7.5rem] overflow-hidden rounded-xl border transition-all duration-200',
             draft
-              ? 'border-dashed border-sky-500/25 bg-sky-950/20 hover:border-sky-500/40'
+              ? 'border border-dashed border-b-0 border-sky-500/25 bg-sky-950/20 hover:border-sky-500/40'
               : ended
                 ? 'border-white/[0.05] grayscale opacity-70 hover:opacity-80'
                 : 'border-white/[0.08] hover:border-white/[0.12]',
