@@ -18,7 +18,11 @@ import {
   setResolvedUser,
   type InitResult,
 } from '../lib/discord';
-import {hasLaunchRedirectHint, resolveLaunchEventTarget} from '../lib/launchRedirect';
+import {
+  hasEmbedLaunchEventId,
+  resolveLaunchEventTarget,
+  shouldResolveLaunchRedirect,
+} from '../lib/launchRedirect';
 import {loadDiscordSession} from '../lib/discordAuth';
 import {GUEST_USER} from '../lib/guestUser';
 import type {AppUser} from '../lib/types';
@@ -46,7 +50,7 @@ async function navigateToLaunchTarget(
   navigate: (path: string, options: {replace: boolean}) => void,
   cancelled: () => boolean,
 ): Promise<void> {
-  if (!isConfigured || !hasLaunchRedirectHint(result)) return;
+  if (!isConfigured || !shouldResolveLaunchRedirect(result)) return;
 
   const target = await resolveLaunchEventTarget(result, fetchLaunchIntent);
   if (target && !cancelled()) {
@@ -86,7 +90,7 @@ export function AuthProvider({children}: {children: ReactNode}) {
         setGuildId(result.guildId);
         setGuildName(result.guildName);
 
-        if (!cancelled && hasLaunchRedirectHint(result)) {
+        if (!cancelled && hasEmbedLaunchEventId(result)) {
           setBootMessage('Opening your event');
         }
 
@@ -128,9 +132,7 @@ export function AuthProvider({children}: {children: ReactNode}) {
       setGuildName(result.guildName);
 
       if (result.accessToken) {
-        setBootMessage(
-          hasLaunchRedirectHint(result) ? 'Opening your event' : 'Connecting',
-        );
+        setBootMessage(hasEmbedLaunchEventId(result) ? 'Opening your event' : 'Connecting');
         await navigateToLaunchTarget(result, isConfigured, navigate, () => false);
       }
     } finally {
