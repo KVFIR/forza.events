@@ -143,6 +143,14 @@ export async function cancelEvent(discordToken: string, eventId: string) {
   );
 }
 
+export async function deleteDraftEvent(discordToken: string, eventId: string) {
+  return invoke<{id: string; deleted: boolean}>(
+    'save-event',
+    {id: eventId, delete: true},
+    discordToken,
+  );
+}
+
 export async function joinEvent(
   discordToken: string,
   eventId: string,

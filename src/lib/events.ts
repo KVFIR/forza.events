@@ -16,10 +16,13 @@ import type {
 
 export {
   canCancelEvent,
+  canDeleteDraft,
   canEditEvent,
   canSubmitEventResults,
   eventHasStarted,
+  isEventFinalized,
   isPublishedEvent,
+  isRegistrationOpen,
 } from './eventSpec';
 
 type DbEventRow = {

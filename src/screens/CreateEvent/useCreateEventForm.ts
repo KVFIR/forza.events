@@ -3,14 +3,14 @@ import {useNavigate, useSearchParams} from 'react-router-dom';
 import type {CarRuleMode, EventType} from '../../lib/types';
 import {useAuth} from '../../context/AuthContext';
 import {useJoinedEvents} from '../../context/JoinedEventsContext';
-import {isApiConfigured, publishEvent, saveEvent, uploadCoverImage} from '../../lib/api';
+import {deleteDraftEvent, isApiConfigured, publishEvent, saveEvent, uploadCoverImage} from '../../lib/api';
 import {compressCoverForUpload} from '../../lib/coverImage';
 import {defaultCoverPath, isBundledDefaultCover} from '../../lib/eventCovers';
 import {fetchEventById} from '../../lib/events';
 import {defaultTimezone, localInputToUtc, utcToLocalInput} from '../../lib/datetime';
 import {clampPi} from '../../lib/pi';
 import {EVENT_PLAYER_SLOTS} from '../../lib/constants';
-import {normalizeTrackCodes, isPublishedEvent} from '../../lib/eventSpec';
+import {canEditEvent, isPublishedEvent, normalizeTrackCodes} from '../../lib/eventSpec';
 import type {EventCarEntry} from '../../components/EventCarList';
 import type {CreateEventStepIndex} from './constants';
 import type {CreateEventFormValues, FieldErrors} from './types';
@@ -133,6 +133,10 @@ export function useCreateEventForm() {
           navigate(`/event/${editId}`, {replace: true});
           return;
         }
+        if (!canEditEvent(ev, user)) {
+          navigate(`/event/${editId}`, {replace: true});
+          return;
+        }
         const tz = ev.timezoneHint ?? defaultTimezone();
         setEventId(ev.id);
         setIsPublished(isPublishedEvent(ev));
@@ -247,6 +251,25 @@ export function useCreateEventForm() {
     }
   }
 
+  async function deleteDraft(): Promise<boolean> {
+    if (!eventId || !token || !canPersist) return false;
+    const ok = window.confirm('Delete this draft permanently? This cannot be undone.');
+    if (!ok) return false;
+    setSaving(true);
+    setGlobalError(null);
+    try {
+      await deleteDraftEvent(token, eventId);
+      bumpRefresh();
+      navigate('/my-events', {replace: true});
+      return true;
+    } catch (e) {
+      setGlobalError(String(e));
+      return false;
+    } finally {
+      setSaving(false);
+    }
+  }
+
   async function persistDraft(): Promise<string | null> {
     const err = validateDraftSave(values);
     if (err) {
@@ -340,6 +363,7 @@ export function useCreateEventForm() {
     tryContinue,
     onCoverChange,
     persistDraft,
+    deleteDraft,
     confirmPublish,
     validatePublish: () =>
       validatePublish(values, user.xboxGamertag ?? lobbyLeaderGamertag, {

@@ -2,6 +2,7 @@ import {serve} from 'https://deno.land/std@0.224.0/http/server.ts';
 import {syncPublishedEmbed} from '../_shared/embedSync.ts';
 import {
   assertTargetNotLocked,
+  buildEventFields,
   buildEventRow,
   canEditPublishedEvent,
   type CarPayload,
@@ -34,10 +35,27 @@ serve(async (req) => {
     const body = (await req.json()) as SaveEventBody;
     const supabase = adminClient();
 
+    if (body.delete && body.id) {
+      const {data: existing} = await supabase
+        .from('events')
+        .select('host_discord_id, status')
+        .eq('id', body.id)
+        .single();
+      if (!existing || existing.host_discord_id !== discordUser.id) {
+        return jsonResponse({error: 'Forbidden'}, 403);
+      }
+      if (existing.status !== 'draft') {
+        return jsonResponse({error: 'Only draft events can be deleted'}, 400);
+      }
+      const {error} = await supabase.from('events').delete().eq('id', body.id);
+      if (error) return jsonResponse({error: error.message}, 500);
+      return jsonResponse({id: body.id, deleted: true});
+    }
+
     if (body.cancel && body.id) {
       const {data: existing} = await supabase
         .from('events')
-        .select('host_discord_id, status, starts_at')
+        .select('*')
         .eq('id', body.id)
         .single();
       if (!existing || existing.host_discord_id !== discordUser.id) {
@@ -49,11 +67,16 @@ serve(async (req) => {
       if (['completed', 'cancelled', 'archived'].includes(existing.status)) {
         return jsonResponse({error: 'Event is already closed'}, 400);
       }
-      const {error} = await supabase
+      const {data: updated, error} = await supabase
         .from('events')
         .update({status: 'cancelled'})
-        .eq('id', body.id);
+        .eq('id', body.id)
+        .select('*')
+        .single();
       if (error) return jsonResponse({error: error.message}, 500);
+      if (updated?.channel_id && updated.discord_message_id) {
+        await syncPublishedEmbed(updated);
+      }
       return jsonResponse({id: body.id, cancelled: true});
     }
 
@@ -104,14 +127,14 @@ serve(async (req) => {
       body.car_rule_mode === 'restricted_list' ? body.cars ?? [] : [];
 
     const coverUrl = resolveCoverUrl(body.type ?? 'road', body.cover_image_url);
-    const row = buildEventRow(body, discordUser.id, coverUrl);
+    const fields = buildEventFields(body, discordUser.id, coverUrl);
 
     let eventId = body.id;
 
     if (eventId) {
       const {data, error} = await supabase
         .from('events')
-        .update(row)
+        .update(fields)
         .eq('id', eventId)
         .select('*')
         .single();

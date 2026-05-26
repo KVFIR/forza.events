@@ -1,33 +1,30 @@
 import type {ButtonVariant} from '../components/ui/Button';
 
-/** Results = primary, Host edit/cancel = secondary, Join = Open, Leave = Road, Full = Full. */
+/** Join / leave / closed — not used for host post-start actions (Results / Cancel). */
 export function participationButtonVariant(
-  canEnterResults: boolean,
-  canCancel: boolean,
   isHost: boolean,
   canEdit: boolean,
-  isJoined: boolean,
+  joined: boolean,
+  registrationOpen: boolean,
   isFull: boolean,
 ): ButtonVariant {
-  if (canEnterResults || canCancel) return 'primary';
   if (isHost && canEdit) return 'secondary';
-  if (isFull && !isJoined) return 'full';
-  if (isJoined) return 'road';
-  return 'open';
+  if (isFull && registrationOpen && !joined) return 'full';
+  if (joined) return 'road';
+  if (registrationOpen) return 'open';
+  return 'secondary';
 }
 
 export function participationButtonLabel(
-  canEnterResults: boolean,
-  canCancel: boolean,
   isHost: boolean,
   canEdit: boolean,
-  isJoined: boolean,
+  joined: boolean,
+  registrationOpen: boolean,
   isFull: boolean,
 ): string {
-  if (canEnterResults) return 'Results';
-  if (canCancel) return 'Cancel event';
   if (isHost && canEdit) return 'Edit';
-  if (isJoined) return 'Leave';
+  if (joined) return 'Leave';
+  if (!registrationOpen) return 'Closed';
   if (isFull) return 'Full';
   return 'Join';
 }

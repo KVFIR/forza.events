@@ -49,8 +49,27 @@ export function validatePublishForm(input: {
 }
 
 export function eventHasStarted(event: ForzaEvent): boolean {
+  if (event.lifecycle === 'live') return true;
   if (event.status === 'live' || event.status === 'ended') return true;
   return new Date(event.startsAt).getTime() <= Date.now();
+}
+
+export function isEventFinalized(event: ForzaEvent): boolean {
+  return (
+    event.lifecycle === 'cancelled' ||
+    event.lifecycle === 'completed' ||
+    event.lifecycle === 'archived'
+  );
+}
+
+export function isRegistrationOpen(event: ForzaEvent): boolean {
+  if (event.lifecycle === 'draft') return false;
+  if (isEventFinalized(event)) return false;
+  return !eventHasStarted(event);
+}
+
+export function canDeleteDraft(event: ForzaEvent, user: AppUser): boolean {
+  return event.lifecycle === 'draft' && event.hostDiscordId === user.discordId;
 }
 
 export function isPublishedEvent(event: ForzaEvent): boolean {

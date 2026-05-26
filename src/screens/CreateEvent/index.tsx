@@ -36,6 +36,7 @@ export function CreateEvent() {
     tryContinue,
     onCoverChange,
     persistDraft,
+    deleteDraft,
     confirmPublish,
     validatePublish,
     navigate,
@@ -236,6 +237,16 @@ export function CreateEvent() {
             onClick={() => void handlePublishClick()}
           >
             {saving ? 'Publishing…' : 'Publish event'}
+          </Button>
+        )}
+        {step === 3 && editId && !isPublished && (
+          <Button
+            variant="danger"
+            className="w-full"
+            disabled={saving}
+            onClick={() => void deleteDraft()}
+          >
+            Delete draft
           </Button>
         )}
       </div>

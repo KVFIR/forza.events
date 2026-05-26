@@ -25,8 +25,17 @@ import {ContentReveal} from '../components/ui/ContentReveal';
 import {PageLoading} from '../components/ui/PageLoading';
 import {useLoadingUI} from '../hooks/useLoadingUI';
 import {formatEventTime} from '../lib/datetime';
-import {cancelEvent, isApiConfigured, updateProfile} from '../lib/api';
-import {canCancelEvent, canEditEvent, isPublishedEvent} from '../lib/eventSpec';
+import {cancelEvent, deleteDraftEvent, isApiConfigured, updateProfile} from '../lib/api';
+import {
+  canCancelEvent,
+  canDeleteDraft,
+  canEditEvent,
+  eventHasStarted,
+  isEventFinalized,
+  isPublishedEvent,
+  isRegistrationOpen,
+} from '../lib/eventSpec';
+import {EventStatusBanner} from '../components/EventStatusBanner';
 import {Badge, DraftBadge, StatusBadge} from '../components/ui/Badge';
 import {Button} from '../components/ui/Button';
 import {GamertagModal} from '../components/GamertagModal';
@@ -66,6 +75,8 @@ export function EventDetail() {
   const [joining, setJoining] = useState(false);
   const [joinError, setJoinError] = useState<string | null>(null);
   const [cancelling, setCancelling] = useState(false);
+  const [deleting, setDeleting] = useState(false);
+  const [actionError, setActionError] = useState<string | null>(null);
 
   const reloadEvent = useCallback(() => {
     if (!id) return;
@@ -127,6 +138,7 @@ export function EventDetail() {
     );
     if (!ok) return;
     setCancelling(true);
+    setActionError(null);
     try {
       const token = getAccessToken();
       if (token && isApiConfigured()) {
@@ -135,8 +147,32 @@ export function EventDetail() {
       bumpRefresh();
       const next = await fetchEventById(event.id, {discordToken});
       setEvent(next);
+    } catch (err) {
+      setActionError(err instanceof Error ? err.message : 'Could not cancel event');
     } finally {
       setCancelling(false);
+    }
+  }
+
+  async function handleDeleteDraft() {
+    if (!event) return;
+    const ok = window.confirm(
+      'Delete this draft permanently? This cannot be undone.',
+    );
+    if (!ok) return;
+    setDeleting(true);
+    setActionError(null);
+    try {
+      const token = getAccessToken();
+      if (token && isApiConfigured()) {
+        await deleteDraftEvent(token, event.id);
+      }
+      bumpRefresh();
+      navigate('/my-events', {replace: true});
+    } catch (err) {
+      setActionError(err instanceof Error ? err.message : 'Could not delete draft');
+    } finally {
+      setDeleting(false);
     }
   }
 
@@ -189,13 +225,23 @@ export function EventDetail() {
   const canEnterResults = canSubmitEventResults(event, user);
   const canEdit = canEditEvent(event, user);
   const canCancel = canCancelEvent(event, user);
+  const canDelete = canDeleteDraft(event, user);
   const joined = isJoined(event);
+  const registrationOpen = isRegistrationOpen(event);
+  const started = eventHasStarted(event);
   const full = event.status === 'full' || event.currentPlayers >= event.maxPlayers;
   const showDraftActions = isDraft && isHost;
+  const showHostPostStartActions = isHost && (canEnterResults || canCancel);
   const {primary: when} = formatEventTime(event.startsAt, event.timezoneHint);
   const fillPct = Math.round(((1 + event.currentPlayers) / LOBBY_TOTAL_PLAYERS) * 100);
   const completed = isEventCompleted(event);
+  const finalized = isEventFinalized(event);
   const resultDisplay = resolveEventResultDisplay(event, resultRows);
+  const showResultsSection = completed || (started && !finalized);
+  const participationDisabled =
+    !(isHost && canEdit) &&
+    !joined &&
+    (!registrationOpen || full || joining || cancelling);
 
   return (
     <ContentReveal className="pb-10 pt-4">
@@ -238,57 +284,77 @@ export function EventDetail() {
           <p className="mt-1 text-xs text-muted">by {event.hostUsername}</p>
         </div>
         {showDraftActions ? (
-          <Button
-            variant="primary"
-            className="shrink-0 whitespace-nowrap px-6 py-3 text-xs shadow-none"
-            onClick={() => navigate(`/create?edit=${event.id}`)}
-          >
-            Continue editing
-          </Button>
+          <div className="flex shrink-0 flex-col gap-2">
+            <Button
+              variant="primary"
+              className="whitespace-nowrap px-6 py-3 text-xs shadow-none"
+              onClick={() => navigate(`/create?edit=${event.id}`)}
+            >
+              Continue editing
+            </Button>
+            {canDelete ? (
+              <Button
+                variant="danger"
+                className="whitespace-nowrap px-6 py-2.5 text-xs shadow-none"
+                disabled={deleting}
+                onClick={() => void handleDeleteDraft()}
+              >
+                {deleting ? 'Deleting…' : 'Delete draft'}
+              </Button>
+            ) : null}
+          </div>
+        ) : showHostPostStartActions ? (
+          <div className="flex shrink-0 flex-col gap-2">
+            {canEnterResults ? (
+              <Button
+                variant="primary"
+                className="whitespace-nowrap px-6 py-3 text-xs shadow-none"
+                onClick={() => navigate(`/event/${event.id}/results`)}
+              >
+                Submit results
+              </Button>
+            ) : null}
+            {canCancel ? (
+              <Button
+                variant="danger"
+                className="whitespace-nowrap px-6 py-2.5 text-xs shadow-none"
+                disabled={cancelling}
+                onClick={() => void handleCancelEvent()}
+              >
+                {cancelling ? 'Cancelling…' : 'Cancel event'}
+              </Button>
+            ) : null}
+          </div>
         ) : (
           <Button
             variant={participationButtonVariant(
-              canEnterResults,
-              canCancel,
               isHost,
               canEdit,
               joined,
+              registrationOpen,
               full,
             )}
             className="shrink-0 whitespace-nowrap px-6 py-3 text-xs shadow-none"
-            disabled={
-              !canEnterResults &&
-              !canCancel &&
-              !(isHost && canEdit) &&
-              !joined &&
-              ((full && !joined) || joining || cancelling)
-            }
+            disabled={participationDisabled}
             onClick={() => {
-              if (canEnterResults) navigate(`/event/${event.id}/results`);
-              else if (canCancel) void handleCancelEvent();
-              else if (isHost && canEdit) navigate(`/create?edit=${event.id}`);
+              if (isHost && canEdit) navigate(`/create?edit=${event.id}`);
               else void handleJoinClick();
             }}
           >
-            {participationButtonLabel(
-              canEnterResults,
-              canCancel,
-              isHost,
-              canEdit,
-              joined,
-              full,
-            )}
+            {participationButtonLabel(isHost, canEdit, joined, registrationOpen, full)}
           </Button>
         )}
       </div>
 
-      {isDraft && isHost ? (
-        <p className="mt-3 text-sm text-slate-400">
-          This event is not published yet. Only you can see it until you publish.
-        </p>
+      {isDraft && isHost ? <EventStatusBanner variant="draft" /> : null}
+      {showHostPostStartActions ? <EventStatusBanner variant="host-in-progress" /> : null}
+      {!isHost && started && !finalized ? (
+        <EventStatusBanner variant="registration-closed" />
       ) : null}
+      {event.lifecycle === 'cancelled' ? <EventStatusBanner variant="cancelled" /> : null}
 
       {joinError ? <p className="mt-3 text-sm text-accent-red">{joinError}</p> : null}
+      {actionError ? <p className="mt-3 text-sm text-accent-red">{actionError}</p> : null}
 
       <GamertagModal
         open={gamertagOpen}
@@ -298,10 +364,14 @@ export function EventDetail() {
         onClose={() => setGamertagOpen(false)}
       />
 
-      {completed ? (
+      {showResultsSection ? (
         <div className="mt-4">
           <p className="mb-2 text-[10px] font-bold uppercase tracking-widest text-muted">Results</p>
-          <EventResultsTable rows={resultDisplay} pending={resultDisplay.length === 0} />
+          <EventResultsTable
+            rows={resultDisplay}
+            pending={resultDisplay.length === 0}
+            cancelled={event.lifecycle === 'cancelled'}
+          />
         </div>
       ) : (
         <div className="mt-4">

@@ -119,6 +119,10 @@ export function EventResults() {
 
   async function handleSubmit() {
     if (!id || placements.length === 0 || alreadySubmitted) return;
+    const ok = window.confirm(
+      'Submit these results? They cannot be changed after submission.',
+    );
+    if (!ok) return;
     setSaving(true);
     setError(null);
     const payload = placements.map((p, i) => ({

@@ -34,6 +34,7 @@ export type SaveEventBody = {
   cars?: CarPayload[];
   publish?: boolean;
   cancel?: boolean;
+  delete?: boolean;
 };
 
 type DbEvent = {
@@ -96,7 +97,8 @@ export function canEditPublishedEvent(event: Pick<DbEvent, 'status' | 'starts_at
   return !eventHasStarted(event);
 }
 
-export function buildEventRow(
+/** Event fields from save payload — never includes `status` (set only on insert). */
+export function buildEventFields(
   body: SaveEventBody,
   hostDiscordId: string,
   coverUrl: string | null,
@@ -114,7 +116,6 @@ export function buildEventRow(
   return {
     title: body.title?.trim(),
     type: body.type,
-    status: 'draft' as const,
     host_discord_id: hostDiscordId,
     guild_id: body.guild_id,
     starts_at: body.starts_at,
@@ -138,6 +139,17 @@ export function buildEventRow(
     rules_forbidden: [] as string[],
     lobby_leader_gamertag: body.lobby_leader_gamertag?.trim() ?? 'TBD',
     lobby_leader_is_host: body.lobby_leader_is_host ?? true,
+  };
+}
+
+export function buildEventRow(
+  body: SaveEventBody,
+  hostDiscordId: string,
+  coverUrl: string | null,
+) {
+  return {
+    ...buildEventFields(body, hostDiscordId, coverUrl),
+    status: 'draft' as const,
   };
 }
 
