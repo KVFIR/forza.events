@@ -1,4 +1,5 @@
 import {Button} from '../../components/ui/Button';
+import {BUSY_LABEL} from '../../components/ui/buttonStyles';
 import {ConfirmDialog} from '../../components/ui/ConfirmDialog';
 import {PublishTargetModal} from '../../components/PublishTargetPicker';
 import {FormAlerts, StepIndicator} from './components/StepIndicator';
@@ -229,14 +230,14 @@ export function CreateEvent() {
 
       <div className="mt-8 flex flex-col gap-2">
         {step < 3 && (
-          <Button variant="primary" className="w-full" onClick={() => tryContinue()}>
+          <Button variant="primary" fullWidth onClick={() => tryContinue()}>
             Continue
           </Button>
         )}
         {step > 0 && (
           <Button
             variant="secondary"
-            className="w-full"
+            fullWidth
             onClick={() => setStep((step - 1) as CreateEventStepIndex)}
           >
             Back
@@ -247,26 +248,26 @@ export function CreateEvent() {
           <>
             <Button
               variant="primary"
-              className="w-full"
+              fullWidth
               disabled={saving || !canPersist}
               onClick={() => void handlePublishClick()}
             >
-              {saving ? 'Working…' : 'Publish event'}
+              {saving ? BUSY_LABEL.working : 'Publish event'}
             </Button>
             <Button
               variant="secondary"
-              className="w-full"
+              fullWidth
               disabled={saving || !canPersist}
               onClick={() =>
                 void (hasDraftId ? handleSaveChanges() : handleSaveDraft())
               }
             >
-              {saving ? 'Saving…' : hasDraftId ? 'Save changes' : 'Save as draft'}
+              {saving ? BUSY_LABEL.saving : hasDraftId ? 'Save changes' : 'Save as draft'}
             </Button>
             {hasDraftId && (
               <Button
                 variant="danger"
-                className="w-full"
+                fullWidth
                 disabled={saving || !canPersist}
                 onClick={requestDeleteDraft}
               >
@@ -280,16 +281,16 @@ export function CreateEvent() {
           <>
             <Button
               variant="primary"
-              className="w-full"
+              fullWidth
               disabled={saving || !canPersist}
               onClick={() => void handleSaveChanges()}
             >
-              {saving ? 'Saving…' : 'Save changes'}
+              {saving ? BUSY_LABEL.saving : 'Save changes'}
             </Button>
             {canCancelPublished ? (
               <Button
                 variant="danger"
-                className="w-full"
+                fullWidth
                 disabled={saving || !canPersist}
                 onClick={requestCancelPublished}
               >

@@ -1,7 +1,11 @@
 import {useEffect, useState} from 'react';
 import {gamertagError} from '../lib/gamertag';
 import {Button} from './ui/Button';
-import {cn} from '../lib/cn';
+import {BUSY_LABEL, modalPanelClass} from './ui/buttonStyles';
+import {FieldLabel} from './ui/FieldLabel';
+import {Input} from './ui/Input';
+import {fieldErrorClass} from './ui/formStyles';
+import {ModalBackdrop} from './ui/ModalShell';
 
 type Props = {
   open: boolean;
@@ -10,12 +14,6 @@ type Props = {
   onSave: (gamertag: string) => void | Promise<void>;
   onClose?: () => void;
 };
-
-const inputClass = [
-  'mt-2 w-full rounded-xl border border-white/[0.08] bg-surface px-4 py-3',
-  'text-sm text-white placeholder:text-muted',
-  'focus:border-accent-purple/50 focus:outline-none focus:ring-1 focus:ring-accent-purple/40',
-].join(' ');
 
 export function GamertagModal({open, initialValue = '', saving, onSave, onClose}: Props) {
   const [value, setValue] = useState(initialValue);
@@ -42,21 +40,23 @@ export function GamertagModal({open, initialValue = '', saving, onSave, onClose}
   }
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 p-4 backdrop-blur-sm">
+    <ModalBackdrop onBackdropClick={onClose}>
       <form
         onSubmit={handleSubmit}
-        className="w-full max-w-sm rounded-2xl border border-white/[0.1] bg-card p-5 shadow-xl"
+        className={modalPanelClass}
+        onClick={(e) => e.stopPropagation()}
       >
         <h2 className="text-lg font-bold text-white">Xbox gamertag required</h2>
         <p className="mt-1 text-sm text-muted">
           Enter your Xbox gamertag to join events. It is shown to the host and other players.
         </p>
-        <label htmlFor="gamertag" className="mt-4 block text-[10px] font-bold uppercase tracking-widest text-muted">
+        <FieldLabel htmlFor="gamertag" className="mt-4 block">
           Gamertag
-        </label>
-        <input
+        </FieldLabel>
+        <Input
           id="gamertag"
-          className={cn(inputClass, error && 'border-accent-red/50')}
+          className="mt-2"
+          invalid={Boolean(error)}
           value={value}
           onChange={(e) => {
             setValue(e.target.value);
@@ -66,7 +66,7 @@ export function GamertagModal({open, initialValue = '', saving, onSave, onClose}
           maxLength={15}
           autoFocus
         />
-        {error && <p className="mt-2 text-xs text-accent-red">{error}</p>}
+        {error && <p className={fieldErrorClass}>{error}</p>}
         <div className="mt-5 flex gap-2">
           {onClose && (
             <Button type="button" variant="secondary" className="flex-1" onClick={onClose}>
@@ -74,10 +74,10 @@ export function GamertagModal({open, initialValue = '', saving, onSave, onClose}
             </Button>
           )}
           <Button type="submit" variant="primary" className="flex-1" disabled={saving}>
-            {saving ? 'Saving…' : 'Save & join'}
+            {saving ? BUSY_LABEL.saving : 'Save & join'}
           </Button>
         </div>
       </form>
-    </div>
+    </ModalBackdrop>
   );
 }

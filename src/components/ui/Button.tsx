@@ -1,5 +1,6 @@
 import type {ButtonHTMLAttributes, ReactNode} from 'react';
 import {cn} from '../../lib/cn';
+import {buttonBaseClass, buttonSizeClass, type ButtonSize} from './buttonStyles';
 
 export type ButtonVariant =
   | 'primary'
@@ -8,7 +9,7 @@ export type ButtonVariant =
   | 'danger'
   | 'success'
   | 'open'
-  | 'road'
+  | 'leave'
   | 'full';
 
 const variants: Record<ButtonVariant, string> = {
@@ -48,45 +49,52 @@ const variants: Record<ButtonVariant, string> = {
     'disabled:opacity-40 disabled:pointer-events-none disabled:shadow-none',
   ].join(' '),
   open: [
-    'rounded-md border border-accent-green/30 bg-accent-green/10',
-    'text-[10px] font-bold uppercase tracking-widest text-accent-green',
+    'border border-accent-green/30 bg-accent-green/10 text-accent-green',
     'hover:bg-accent-green/15 hover:border-accent-green/40',
     'active:scale-[0.97]',
     'disabled:opacity-40 disabled:pointer-events-none',
   ].join(' '),
-  road: [
-    'rounded-md border border-rose-500/30 bg-rose-500/10',
-    'text-[10px] font-bold uppercase tracking-widest text-rose-300',
+  leave: [
+    'border border-rose-500/30 bg-rose-500/10 text-rose-300',
     'hover:bg-rose-500/15 hover:border-rose-500/45',
     'active:scale-[0.97]',
     'disabled:opacity-40 disabled:pointer-events-none',
   ].join(' '),
   full: [
-    'rounded-md border border-amber-500/30 bg-amber-500/10',
-    'text-[10px] font-bold uppercase tracking-widest text-amber-300',
+    'border border-amber-500/30 bg-amber-500/10 text-amber-300',
     'active:scale-[0.97]',
     'disabled:opacity-40 disabled:pointer-events-none',
   ].join(' '),
 };
 
+const CHIP_VARIANTS = new Set<ButtonVariant>(['open', 'leave', 'full']);
+
 type Props = ButtonHTMLAttributes<HTMLButtonElement> & {
   variant?: ButtonVariant;
+  size?: ButtonSize;
+  fullWidth?: boolean;
   children: ReactNode;
 };
 
 export function Button({
   variant = 'primary',
+  size,
+  fullWidth = false,
   className,
   children,
   type = 'button',
   ...props
 }: Props) {
+  const resolvedSize = size ?? (CHIP_VARIANTS.has(variant) ? 'chip' : 'default');
+
   return (
     <button
       type={type}
       className={cn(
-        'inline-flex items-center justify-center gap-2 rounded-lg px-4 py-2.5 text-sm transition-all duration-200',
+        buttonBaseClass,
+        buttonSizeClass[resolvedSize],
         variants[variant],
+        fullWidth && 'w-full',
         className,
       )}
       {...props}

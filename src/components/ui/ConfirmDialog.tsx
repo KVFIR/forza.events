@@ -1,4 +1,6 @@
 import {Button} from './Button';
+import {BUSY_LABEL} from './buttonStyles';
+import {ModalBackdrop, ModalPanel} from './ModalShell';
 
 type ConfirmDialogProps = {
   open: boolean;
@@ -26,18 +28,12 @@ export function ConfirmDialog({
   if (!open) return null;
 
   return (
-    <div
-      className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 p-4 backdrop-blur-sm"
-      role="presentation"
-      onClick={onCancel}
-    >
-      <div
+    <ModalBackdrop onBackdropClick={onCancel}>
+      <ModalPanel
         role="alertdialog"
         aria-modal="true"
         aria-labelledby="confirm-dialog-title"
         aria-describedby="confirm-dialog-desc"
-        className="w-full max-w-sm rounded-2xl border border-white/[0.1] bg-card p-5 shadow-xl"
-        onClick={(e) => e.stopPropagation()}
       >
         <h2 id="confirm-dialog-title" className="text-lg font-bold text-white">
           {title}
@@ -62,10 +58,10 @@ export function ConfirmDialog({
             disabled={busy}
             onClick={onConfirm}
           >
-            {busy ? 'Working…' : confirmLabel}
+            {busy ? BUSY_LABEL.working : confirmLabel}
           </Button>
         </div>
-      </div>
-    </div>
+      </ModalPanel>
+    </ModalBackdrop>
   );
 }

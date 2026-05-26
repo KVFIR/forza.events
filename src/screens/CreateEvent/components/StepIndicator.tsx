@@ -1,4 +1,11 @@
 import {cn} from '../../../lib/cn';
+import {
+  segmentContainerClass,
+  segmentItemBaseClass,
+  segmentItemIdleClass,
+  segmentItemSelectedClass,
+} from '../../../components/ui/buttonStyles';
+import {Alert} from '../../../components/ui/Alert';
 import {STEPS, type CreateEventStepIndex} from '../constants';
 
 type StepIndicatorProps = {
@@ -10,7 +17,7 @@ type StepIndicatorProps = {
 
 export function StepIndicator({step, freeNavigation, onStepClick}: StepIndicatorProps) {
   return (
-    <nav className="mb-6 flex gap-1">
+    <nav className={cn('mb-6 flex gap-1', segmentContainerClass)}>
       {STEPS.map((label, i) => {
         const idx = i as CreateEventStepIndex;
         const done = idx < step;
@@ -25,10 +32,11 @@ export function StepIndicator({step, freeNavigation, onStepClick}: StepIndicator
             disabled={!clickable}
             onClick={() => clickable && onStepClick?.(idx)}
             className={cn(
-              'flex-1 rounded-md py-1.5 text-center text-[10px] font-bold uppercase tracking-widest transition-colors',
-              active && 'bg-white/[0.1] text-white',
+              segmentItemBaseClass,
+              'flex-1 py-1.5 text-center text-[10px] uppercase tracking-widest',
+              active && segmentItemSelectedClass,
               clickable && !active && 'text-slate-400 hover:text-slate-200',
-              !active && !clickable && 'text-muted',
+              !active && !clickable && segmentItemIdleClass,
               !clickable && 'cursor-default',
             )}
           >
@@ -52,24 +60,21 @@ export function FormAlerts({
   return (
     <>
       {!isConfigured && (
-        <p className="mb-4 rounded-lg border border-amber-500/25 bg-amber-950/20 px-3 py-2 text-xs text-amber-100/90">
+        <Alert variant="sky" className="mb-4">
           Add <code className="text-amber-50">SUPABASE_URL</code> and{' '}
           <code className="text-amber-50">SUPABASE_ANON_KEY</code> to <code>.env</code>, then restart{' '}
           <code>npm run dev</code>.
-        </p>
+        </Alert>
       )}
       {isConfigured && !isSignedIn && (
-        <p className="mb-4 rounded-lg border border-white/[0.08] bg-white/[0.03] px-3 py-2 text-xs text-muted">
+        <Alert variant="neutral" className="mb-4">
           Open this app in Discord to save drafts, join events, and publish.
-        </p>
+        </Alert>
       )}
       {globalError && (
-        <p
-          role="alert"
-          className="mb-4 rounded-lg border border-red-500/25 bg-red-950/30 px-3 py-2 text-xs text-red-200"
-        >
+        <Alert variant="error" className="mb-4">
           {globalError}
-        </p>
+        </Alert>
       )}
     </>
   );

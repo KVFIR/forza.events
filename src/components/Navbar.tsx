@@ -1,6 +1,8 @@
 import {NavLink} from 'react-router-dom';
 import {CalendarDays, Compass, PlusCircle, User2, type LucideIcon} from 'lucide-react';
 import {AuthStatusIndicator} from './AuthStatusIndicator';
+import {Logo} from './ui/Logo';
+import {navShellBorderClass} from './ui/formStyles';
 import {cn} from '../lib/cn';
 
 const NAV_ITEMS: {to: string; end: boolean; icon: LucideIcon; label: string}[] = [
@@ -9,33 +11,6 @@ const NAV_ITEMS: {to: string; end: boolean; icon: LucideIcon; label: string}[] =
   {to: '/create', end: false, icon: PlusCircle, label: 'Create'},
   {to: '/profile', end: false, icon: User2, label: 'Profile'},
 ];
-
-function BrandMark() {
-  return (
-    <div className="flex items-center gap-2">
-      <picture>
-        <source srcSet="/logo/logo.webp 1x, /logo/logo@2x.webp 2x" type="image/webp" />
-        <img
-          src="/logo/logo.png"
-          alt=""
-          width={24}
-          height={24}
-          className="h-6 w-6 shrink-0 translate-y-px object-contain"
-          decoding="async"
-        />
-      </picture>
-      <span
-        className="inline-block origin-left -skew-x-[8deg] select-none text-[13px] font-black tracking-tight text-white"
-        aria-label="FORZA.EVENTS"
-      >
-        FORZA
-        <span className="bg-gradient-to-r from-accent-purple to-accent-purple-light bg-clip-text text-transparent">
-          .EVENTS
-        </span>
-      </span>
-    </div>
-  );
-}
 
 function NavItem({
   to,
@@ -92,12 +67,17 @@ function NavItem({
 function NavbarTop() {
   return (
     <header className="sticky top-0 z-20 lg:hidden">
-      <div className="glass flex items-center justify-between gap-3 border-b border-white/[0.07] bg-base/85 px-4 py-3">
-        <BrandMark />
+      <div
+        className={cn(
+          'glass flex items-center justify-between gap-3 border-b bg-base/85 px-4 py-3',
+          navShellBorderClass,
+        )}
+      >
+        <Logo size="nav" />
         <AuthStatusIndicator />
       </div>
 
-      <nav className="glass flex border-b border-white/[0.07] bg-surface/75">
+      <nav className={cn('glass flex border-b bg-surface/75', navShellBorderClass)}>
         {NAV_ITEMS.map((item) => (
           <NavItem key={item.to} {...item} layout="top" />
         ))}
@@ -108,9 +88,14 @@ function NavbarTop() {
 
 function NavbarSide() {
   return (
-    <aside className="glass fixed inset-y-0 left-0 z-30 hidden w-[var(--app-sidebar-width)] flex-col border-r border-white/[0.07] bg-surface/80 lg:flex">
-      <div className="border-b border-white/[0.07] px-4 py-5">
-        <BrandMark />
+    <aside
+      className={cn(
+        'glass fixed inset-y-0 left-0 z-30 hidden w-[var(--app-sidebar-width)] flex-col border-r bg-surface/80 lg:flex',
+        navShellBorderClass,
+      )}
+    >
+      <div className={cn('border-b px-4 py-5', navShellBorderClass)}>
+        <Logo size="nav" />
       </div>
 
       <nav className="flex flex-1 flex-col gap-0.5 p-3">
@@ -119,7 +104,7 @@ function NavbarSide() {
         ))}
       </nav>
 
-      <div className="border-t border-white/[0.07] px-4 py-4">
+      <div className={cn('border-t px-4 py-4', navShellBorderClass)}>
         <AuthStatusIndicator />
       </div>
     </aside>

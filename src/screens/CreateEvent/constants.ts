@@ -8,14 +8,23 @@ export const TITLE_MAX_LENGTH = 100;
 export const COVER_MAX_BYTES = 2 * 1024 * 1024;
 export const COVER_ACCEPT = 'image/jpeg,image/png,image/webp';
 
-export const formInput =
-  'w-full rounded-lg border border-white/[0.08] bg-white/[0.03] px-3.5 py-2.5 text-sm text-white placeholder:text-muted focus:border-white/20 focus:outline-none transition-colors duration-150';
+import {
+  controlInvalidClass,
+  fieldErrorClass,
+  fieldHintClass,
+  fieldLabelClass,
+  inputClass,
+} from '../../components/ui/formStyles';
 
-export const formInputError =
-  'border-red-500/50 focus:border-red-400/60';
+/** @deprecated Use `inputClass` from `components/ui/formStyles` or `<Input />`. */
+export const formInput = inputClass;
 
-export const formLabel = 'block text-[10px] font-bold uppercase tracking-[0.14em] text-muted mb-1.5';
+/** @deprecated Use `controlInvalidClass` from `components/ui/formStyles`. */
+export const formInputError = controlInvalidClass;
 
-export const formHint = 'mt-1.5 text-xs text-muted';
+/** @deprecated Use `fieldLabelClass` from `components/ui/formStyles` or `<FieldLabel />`. */
+export const formLabel = `${fieldLabelClass} mb-1.5`;
 
-export const formFieldError = 'mt-1.5 text-xs text-red-300/90';
+export const formHint = fieldHintClass;
+
+export const formFieldError = fieldErrorClass;

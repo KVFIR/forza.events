@@ -7,7 +7,7 @@ export function participationButtonVariant(
   isFull: boolean,
 ): ButtonVariant {
   if (isFull && registrationOpen && !joined) return 'full';
-  if (joined) return 'road';
+  if (joined) return 'leave';
   if (registrationOpen) return 'open';
   return 'secondary';
 }

@@ -4,6 +4,7 @@ import {exchangeToken, isApiConfigured} from '../lib/api';
 import {getDiscordRedirectUri, saveDiscordSession} from '../lib/discordAuth';
 import {setDiscordSession} from '../lib/discord';
 import {useAuth} from '../context/AuthContext';
+import {TextButton} from '../components/ui/TextButton';
 
 export function AuthCallback() {
   const navigate = useNavigate();
@@ -55,13 +56,9 @@ export function AuthCallback() {
       {error ? (
         <>
           <p className="text-sm text-red-300/90">{error}</p>
-          <button
-            type="button"
-            className="text-xs font-semibold uppercase tracking-widest text-accent-purple-light hover:underline"
-            onClick={() => navigate('/', {replace: true})}
-          >
+          <TextButton type="button" tone="nav" onClick={() => navigate('/', {replace: true})}>
             Back to browse
-          </button>
+          </TextButton>
         </>
       ) : (
         <p className="text-sm text-muted">Completing authorization…</p>

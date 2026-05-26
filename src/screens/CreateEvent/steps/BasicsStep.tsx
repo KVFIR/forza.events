@@ -1,6 +1,10 @@
-import {cn} from '../../../lib/cn';
-import {TITLE_MAX_LENGTH, EVENT_TYPES, formInput, COVER_ACCEPT} from '../constants';
-import {Divider, Field, fieldInputClass} from '../components/Field';
+import {Alert} from '../../../components/ui/Alert';
+import {Input} from '../../../components/ui/Input';
+import {SegmentGroup} from '../../../components/ui/SegmentGroup';
+import {Textarea} from '../../../components/ui/Textarea';
+import {fileUploadLabelClass, toggleRowClass} from '../../../components/ui/formStyles';
+import {TITLE_MAX_LENGTH, EVENT_TYPES, COVER_ACCEPT} from '../constants';
+import {Divider, Field} from '../components/Field';
 import {EventCover} from '../../../components/EventCover';
 import type {CreateEventFormValues, FieldErrors} from '../types';
 import {hasGamertag} from '../../../lib/gamertag';
@@ -38,9 +42,9 @@ export function BasicsStep({
   return (
     <div className="space-y-5">
       <Field title="Event name" htmlFor="create-title" error={fieldErrors.title}>
-        <input
+        <Input
           id="create-title"
-          className={cn(formInput, fieldInputClass(Boolean(fieldErrors.title)))}
+          invalid={Boolean(fieldErrors.title)}
           value={values.title}
           onChange={(e) => onTitle(e.target.value)}
           placeholder="Name your event"
@@ -54,29 +58,20 @@ export function BasicsStep({
       </Field>
 
       <Field title="Type" error={fieldErrors.type}>
-        <div
-          className="grid grid-cols-2 gap-1 rounded-lg border border-white/[0.08] bg-white/[0.03] p-0.5 sm:grid-cols-3"
-          role="group"
-          aria-label="Event type"
-          aria-invalid={Boolean(fieldErrors.type)}
-        >
-          {EVENT_TYPES.map((t) => (
-            <button
-              key={t.value}
-              type="button"
-              onClick={() => onType(t.value)}
-              aria-pressed={values.type === t.value}
-              className={cn(
-                'rounded-md px-2 py-2 text-[11px] font-semibold leading-tight transition-colors duration-150',
-                values.type === t.value
-                  ? t.typeButtonSelected
-                  : 'text-muted hover:text-slate-300',
-              )}
-            >
-              {t.label}
-            </button>
-          ))}
-        </div>
+        <SegmentGroup
+          value={values.type}
+          onChange={onType}
+          ariaLabel="Event type"
+          invalid={Boolean(fieldErrors.type)}
+          layout="grid"
+          containerClassName="grid-cols-2 sm:grid-cols-3"
+          itemClassName="px-2 py-2 text-[11px] leading-tight"
+          options={EVENT_TYPES.map((t) => ({
+            value: t.value,
+            label: t.label,
+            selectedClassName: t.typeButtonSelected,
+          }))}
+        />
       </Field>
 
       <Field
@@ -85,14 +80,11 @@ export function BasicsStep({
         error={fieldErrors.startsAtLocal}
         hint="Shown in your local timezone."
       >
-        <input
+        <Input
           id="create-startsAtLocal"
           type="datetime-local"
-          className={cn(
-            formInput,
-            '[color-scheme:dark]',
-            fieldInputClass(Boolean(fieldErrors.startsAtLocal)),
-          )}
+          invalid={Boolean(fieldErrors.startsAtLocal)}
+          className="[color-scheme:dark]"
           value={values.startsAtLocal}
           onChange={(e) => onStartsAtLocal(e.target.value)}
           aria-invalid={Boolean(fieldErrors.startsAtLocal)}
@@ -103,10 +95,9 @@ export function BasicsStep({
       </Field>
 
       <Field title="Description" htmlFor="create-description">
-        <textarea
+        <Textarea
           id="create-description"
           rows={3}
-          className={cn(formInput, 'resize-none')}
           value={values.description}
           onChange={(e) => onDescription(e.target.value)}
           placeholder="Optional — rules, meetup spot, voice channel notes"
@@ -114,7 +105,7 @@ export function BasicsStep({
       </Field>
 
       <Field title="Cover image" error={fieldErrors.cover}>
-        <label className="flex cursor-pointer items-center gap-3 rounded-lg border border-dashed border-white/[0.1] px-4 py-3 text-sm text-muted transition-colors hover:border-white/20 hover:text-slate-300">
+        <label className={fileUploadLabelClass}>
           <span>{values.coverFile ? values.coverFile.name : 'Choose file (max 2 MB)'}</span>
           <input
             type="file"
@@ -139,7 +130,7 @@ export function BasicsStep({
       <Divider />
 
       <Field title="Convoy leader">
-        <label className="flex cursor-pointer items-center justify-between rounded-lg border border-white/[0.08] bg-white/[0.03] px-3.5 py-2.5">
+        <label className={toggleRowClass}>
           <span className="text-sm text-slate-300">I am the convoy leader</span>
           <input
             type="checkbox"
@@ -149,18 +140,15 @@ export function BasicsStep({
           />
         </label>
         {lobbyLeaderIsHost && !hasGamertag(hostGamertag) && (
-          <p className="mt-2 rounded-lg border border-amber-500/25 bg-amber-500/10 px-3 py-2 text-xs text-amber-200/90">
+          <Alert variant="warning" className="mt-2">
             Add your Xbox gamertag in Profile before publishing, or enter another convoy leader below.
-          </p>
+          </Alert>
         )}
         {!lobbyLeaderIsHost && (
-          <input
+          <Input
             id="create-lobbyLeaderGamertag"
-            className={cn(
-              formInput,
-              'mt-2',
-              fieldInputClass(Boolean(fieldErrors.lobbyLeaderGamertag)),
-            )}
+            className="mt-2"
+            invalid={Boolean(fieldErrors.lobbyLeaderGamertag)}
             placeholder="Gamertag"
             value={values.lobbyLeaderGamertag}
             onChange={(e) => onLobbyLeaderGamertag(e.target.value)}

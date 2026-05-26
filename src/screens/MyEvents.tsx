@@ -1,5 +1,6 @@
 import {useState} from 'react';
 import {useNavigate} from 'react-router-dom';
+import {Alert} from '../components/ui/Alert';
 import {EventList} from '../components/EventList';
 import {EventListMetaSelect} from '../components/EventListMetaSelect';
 import {useAuth} from '../context/AuthContext';
@@ -47,9 +48,9 @@ export function MyEvents() {
   return (
     <div className="pb-8 pt-5">
       {draftsHint ? (
-        <p className="mb-3 rounded-lg border border-amber-500/25 bg-amber-500/10 px-3 py-2 text-xs text-amber-200/90">
+        <Alert variant="warning" className="mb-3">
           {draftsHint}
-        </p>
+        </Alert>
       ) : null}
       <EventList
         events={filtered}

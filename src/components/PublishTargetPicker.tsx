@@ -8,7 +8,12 @@ import {
 } from '../lib/discordInstall';
 import {isPlaceholderGuildName} from '../lib/guildDisplay';
 import {Button} from './ui/Button';
+import {FieldLabel} from './ui/FieldLabel';
+import {Select} from './ui/Select';
+import {BUSY_LABEL} from './ui/buttonStyles';
 import {InlineLoading} from './ui/InlineLoading';
+import {ModalBackdrop, ModalPanel} from './ui/ModalShell';
+import {TextButton} from './ui/TextButton';
 
 type Props = {
   accessToken: string;
@@ -184,7 +189,7 @@ export function PublishTargetPicker({
         <Button
           type="button"
           variant={guilds.length === 0 ? 'primary' : 'secondary'}
-          className="h-9 px-3 text-xs"
+          size="toolbar"
           onClick={handleAddBot}
         >
           {guilds.length === 0 ? 'Add to server' : 'Add to another server'}
@@ -192,7 +197,7 @@ export function PublishTargetPicker({
         <Button
           type="button"
           variant="ghost"
-          className="h-9 px-3 text-xs"
+          size="toolbar"
           onClick={loadGuilds}
           disabled={loadingGuilds}
         >
@@ -204,9 +209,7 @@ export function PublishTargetPicker({
   return (
     <div className="space-y-4">
       <div>
-        <p className="mb-1.5 block text-[10px] font-bold uppercase tracking-[0.14em] text-muted">
-          Discord server
-        </p>
+        <FieldLabel className="mb-1.5 block">Discord server</FieldLabel>
         {loadingGuilds ? (
           <InlineLoading label="Loading servers" />
         ) : guilds.length === 0 ? (
@@ -226,8 +229,7 @@ export function PublishTargetPicker({
           </div>
         ) : (
           <>
-            <select
-              className="w-full rounded-lg border border-white/[0.08] bg-white/[0.03] px-3.5 py-2.5 text-sm text-white"
+            <Select
               value={guildId}
               disabled={lockGuild}
               onChange={(e) => {
@@ -245,7 +247,7 @@ export function PublishTargetPicker({
                   {g.name}
                 </option>
               ))}
-            </select>
+            </Select>
             {botInstallActions}
             {!lockGuild && (
               <p className="mt-1.5 text-[10px] leading-relaxed text-muted">
@@ -263,18 +265,16 @@ export function PublishTargetPicker({
       </div>
 
       <div>
-        <p className="mb-1.5 block text-[10px] font-bold uppercase tracking-[0.14em] text-muted">
-          Channel
-        </p>
+        <FieldLabel className="mb-1.5 block">Channel</FieldLabel>
         {!guildId ? (
           <p className="text-sm text-muted">Choose a server first.</p>
         ) : (
           <>
-            <select
+            <Select
               key={guildId}
-              className="w-full rounded-lg border border-white/[0.08] bg-white/[0.03] px-3.5 py-2.5 text-sm text-white disabled:opacity-60"
               value={channelId}
               disabled={lockChannel || !guildId || loadingChannels || validatingChannel}
+              className="disabled:opacity-60"
               onChange={(e) => {
                 void validateChannelSelection(e.target.value, guildId);
               }}
@@ -285,7 +285,7 @@ export function PublishTargetPicker({
                   {c.name === 'selected-channel' ? 'Selected channel' : `#${c.name}`}
                 </option>
               ))}
-            </select>
+            </Select>
             {loadingChannels && (
               <p className="mt-1.5 text-[10px] text-muted">Refreshing channel list…</p>
             )}
@@ -310,17 +310,15 @@ export function PublishTargetPicker({
       {error && (
         <div className="space-y-2">
           <p className="text-xs text-accent-red">{error}</p>
-          <Button
+          <TextButton
             type="button"
-            variant="ghost"
-            className="h-auto px-0 py-0 text-xs font-semibold text-accent-purple"
             onClick={() => {
               if (loadingGuilds || guilds.length === 0) loadGuilds();
               else loadChannels();
             }}
           >
             Try again
-          </Button>
+          </TextButton>
         </div>
       )}
     </div>
@@ -343,8 +341,8 @@ export function PublishTargetModal({
   confirming?: boolean;
 }) {
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 p-4">
-      <div className="w-full max-w-sm rounded-2xl border border-white/[0.1] bg-card p-5">
+    <ModalBackdrop>
+      <ModalPanel>
         <h2 className="text-lg font-bold text-white">Choose publish target</h2>
         <p className="mt-1 text-sm text-muted">
           Pick the server and channel. These cannot be changed after publish.
@@ -370,10 +368,10 @@ export function PublishTargetModal({
             disabled={!guildId || !channelId || confirming}
             onClick={onConfirm}
           >
-            {confirming ? 'Publishing…' : 'Publish'}
+            {confirming ? BUSY_LABEL.publishing : 'Publish'}
           </Button>
         </div>
-      </div>
-    </div>
+      </ModalPanel>
+    </ModalBackdrop>
   );
 }

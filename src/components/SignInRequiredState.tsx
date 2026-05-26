@@ -1,4 +1,5 @@
 import {EmptyState} from './ui/EmptyState';
+import {BUSY_LABEL} from './ui/buttonStyles';
 
 type Props = {
   description?: string;
@@ -18,7 +19,7 @@ export function SignInRequiredState({
       icon="🔐"
       title="Sign in required"
       description={description}
-      action={{label: busy ? 'Signing in…' : 'Try again', onClick: onRetry}}
+      action={{label: busy ? BUSY_LABEL.signingIn : 'Try again', onClick: onRetry}}
       className={className ?? 'min-h-[40vh] py-20'}
     />
   );

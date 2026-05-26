@@ -1,7 +1,9 @@
 import {useCallback, useEffect, useState} from 'react';
 import {listChannels} from '../lib/api';
 import {Button} from './ui/Button';
+import {Select} from './ui/Select';
 import {InlineLoading} from './ui/InlineLoading';
+import {ModalBackdrop, ModalPanel} from './ui/ModalShell';
 
 type Props = {
   guildId: string;
@@ -30,8 +32,8 @@ export function ChannelPicker({guildId, accessToken, onSelect, onCancel}: Props)
   }, [loadChannels]);
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 p-4">
-      <div className="w-full max-w-sm rounded-2xl border border-white/[0.1] bg-card p-5">
+    <ModalBackdrop>
+      <ModalPanel>
         <h2 className="text-lg font-bold text-white">Publish to channel</h2>
         <p className="mt-1 text-sm text-muted">Choose where the event embed will be posted.</p>
 
@@ -47,18 +49,14 @@ export function ChannelPicker({guildId, accessToken, onSelect, onCancel}: Props)
         )}
 
         {!loading && !error && (
-          <select
-            className="mt-4 w-full rounded-xl border border-white/[0.08] bg-surface px-3 py-3 text-sm text-white"
-            value={selected}
-            onChange={(e) => setSelected(e.target.value)}
-          >
+          <Select className="mt-4" value={selected} onChange={(e) => setSelected(e.target.value)}>
             <option value="">Select a channel</option>
             {channels.map((c) => (
               <option key={c.id} value={c.id}>
                 #{c.name}
               </option>
             ))}
-          </select>
+          </Select>
         )}
 
         <div className="mt-5 flex gap-2">
@@ -75,7 +73,7 @@ export function ChannelPicker({guildId, accessToken, onSelect, onCancel}: Props)
             Publish
           </Button>
         </div>
-      </div>
-    </div>
+      </ModalPanel>
+    </ModalBackdrop>
   );
 }

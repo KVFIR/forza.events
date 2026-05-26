@@ -1,6 +1,8 @@
 import type {ReactNode} from 'react';
 import {cn} from '../../lib/cn';
 import {Button} from './Button';
+import {TextButton} from './TextButton';
+import {emptyIconClass} from './formStyles';
 
 type Action = {
   label: string;
@@ -31,9 +33,7 @@ export function EmptyState({
         className ?? 'mt-16',
       )}
     >
-      <div className="flex h-14 w-14 items-center justify-center rounded-2xl border border-white/[0.07] bg-card text-2xl">
-        {icon}
-      </div>
+      <div className={emptyIconClass}>{icon}</div>
       <div className="max-w-sm space-y-1">
         <p className="text-sm font-medium text-slate-200">{title}</p>
         {description ? <p className="text-xs leading-relaxed text-muted">{description}</p> : null}
@@ -46,13 +46,9 @@ export function EmptyState({
             </Button>
           ) : null}
           {secondaryAction ? (
-            <button
-              type="button"
-              onClick={secondaryAction.onClick}
-              className="text-xs font-semibold text-accent-purple transition-colors hover:text-accent-purple-light"
-            >
+            <TextButton type="button" onClick={secondaryAction.onClick}>
               {secondaryAction.label}
-            </button>
+            </TextButton>
           ) : null}
         </div>
       )}

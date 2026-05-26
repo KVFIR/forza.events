@@ -1,4 +1,7 @@
 import {cn} from '../../../lib/cn';
+import {SegmentGroup} from '../../../components/ui/SegmentGroup';
+import {Textarea} from '../../../components/ui/Textarea';
+import {fieldErrorClass} from '../../../components/ui/formStyles';
 import {MaxPiInput} from '../../../components/MaxPiInput';
 import type {CarRuleMode} from '../../../lib/types';
 import {EventCarList, type EventCarEntry} from '../../../components/EventCarList';
@@ -47,28 +50,16 @@ export function DetailsStep({
       <Divider />
 
       <Field title="Car rules">
-        <div
-          className="flex rounded-lg border border-white/[0.08] bg-white/[0.03] p-0.5"
-          role="group"
-          aria-label="Car rules"
-        >
-          {(['anything_goes', 'restricted_list'] as CarRuleMode[]).map((mode) => (
-            <button
-              key={mode}
-              type="button"
-              onClick={() => onCarRuleMode(mode)}
-              aria-pressed={carRuleMode === mode}
-              className={cn(
-                'flex-1 rounded-md py-1.5 text-xs font-semibold transition-colors duration-150',
-                carRuleMode === mode
-                  ? 'bg-white/[0.1] text-white'
-                  : 'text-muted hover:text-slate-300',
-              )}
-            >
-              {mode === 'anything_goes' ? 'Open build' : 'Restricted list'}
-            </button>
-          ))}
-        </div>
+        <SegmentGroup
+          value={carRuleMode}
+          onChange={onCarRuleMode}
+          ariaLabel="Car rules"
+          itemClassName="py-1.5 text-xs"
+          options={[
+            {value: 'anything_goes', label: 'Open build'},
+            {value: 'restricted_list', label: 'Restricted list'},
+          ]}
+        />
         <p className="mt-2 text-xs text-muted">
           Open build lets you set a PI cap and optional category notes instead of a fixed car list.
         </p>
@@ -87,10 +78,9 @@ export function DetailsStep({
           </Field>
 
           <Field title="Additional restrictions" htmlFor="create-additionalCarRestrictions">
-            <textarea
+            <Textarea
               id="create-additionalCarRestrictions"
               rows={3}
-              className={cn(formInput, 'resize-none')}
               value={additionalCarRestrictions}
               onChange={(e) => onAdditionalCarRestrictions(e.target.value)}
               placeholder="Optional, e.g. Super Saloons or Modern Muscle"
@@ -100,7 +90,7 @@ export function DetailsStep({
       ) : (
         <div>
           {fieldErrors.eventCars && (
-            <p role="alert" className="mb-2 text-xs text-red-300/90">
+            <p role="alert" className={cn(fieldErrorClass, 'mb-2')}>
               {fieldErrors.eventCars}
             </p>
           )}

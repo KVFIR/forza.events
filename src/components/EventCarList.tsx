@@ -7,6 +7,11 @@ import {ShareCodeInput} from './ShareCodeInput';
 import {TuningRestrictionsInput} from './TuningRestrictionsInput';
 import {formatShareCode} from '../lib/shareCode';
 import {cn} from '../lib/cn';
+import {Button} from './ui/Button';
+import {DropdownItem, DropdownList} from './ui/DropdownList';
+import {EmptyPlaceholder} from './ui/EmptyPlaceholder';
+import {FieldLabel} from './ui/FieldLabel';
+import {Panel} from './ui/Panel';
 
 export type EventCarEntry = {
   id: string;
@@ -102,44 +107,34 @@ export function EventCarList({cars, onChange, inputClass, labelClass}: Props) {
             />
           </div>
           {open && query.trim() && (
-            <ul className="absolute z-20 mt-1 max-h-52 w-full overflow-auto rounded-xl border border-white/[0.12] bg-card py-1 shadow-xl">
+            <DropdownList>
               {results.length === 0 ? (
                 <li className="px-3 py-3 text-sm text-muted">No matches</li>
               ) : (
                 results.map((c) => (
-                  <li key={c.id}>
-                    <button
-                      type="button"
-                      className="flex w-full items-center justify-between px-3 py-2.5 text-left text-sm text-slate-200 hover:bg-white/[0.06]"
-                      onClick={() => addCar(c)}
-                    >
-                      <span>
-                        {c.model}
-                        {c.year ? ` · ${c.year}` : ''}
-                      </span>
-                      <span className="text-xs text-muted">
-                        {c.pi} {piToClass(c.pi)}
-                      </span>
-                    </button>
-                  </li>
+                  <DropdownItem key={c.id} onClick={() => addCar(c)}>
+                    <span>
+                      {c.model}
+                      {c.year ? ` · ${c.year}` : ''}
+                    </span>
+                    <span className="text-xs text-muted">
+                      {c.pi} {piToClass(c.pi)}
+                    </span>
+                  </DropdownItem>
                 ))
               )}
-            </ul>
+            </DropdownList>
           )}
         </div>
       </div>
 
       {cars.length === 0 ? (
-        <p className="rounded-xl border border-dashed border-white/[0.1] py-8 text-center text-sm text-muted">
-          No cars yet. Search above to add one.
-        </p>
+        <EmptyPlaceholder>No cars yet. Search above to add one.</EmptyPlaceholder>
       ) : (
         <ul className="space-y-3">
           {cars.map((c) => (
-            <li
-              key={c.id}
-              className="rounded-xl border border-white/[0.08] bg-card p-4 space-y-3"
-            >
+            <li key={c.id}>
+              <Panel variant="soft" className="space-y-3 p-4">
               <div className="flex items-start justify-between gap-2">
                 <div>
                   <p className="font-semibold text-white">{c.model}</p>
@@ -148,21 +143,21 @@ export function EventCarList({cars, onChange, inputClass, labelClass}: Props) {
                     {c.year ? ` · ${c.year}` : ''}
                   </p>
                 </div>
-                <button
+                <Button
                   type="button"
+                  variant="ghost"
+                  size="icon"
+                  className="text-muted hover:text-accent-red"
                   onClick={() => remove(c.id)}
-                  className="rounded-lg p-2 text-muted hover:bg-white/[0.06] hover:text-accent-red"
                   aria-label="Remove car"
                 >
                   <Trash2 className="h-4 w-4" />
-                </button>
+                </Button>
               </div>
 
               <div className="grid grid-cols-2 gap-3">
                 <div>
-                  <label className="text-[10px] font-bold uppercase tracking-widest text-muted">
-                    Max PI
-                  </label>
+                  <FieldLabel className="block">Max PI</FieldLabel>
                   <MaxPiInput
                     className="mt-1.5"
                     inputClass={inputClass}
@@ -171,9 +166,7 @@ export function EventCarList({cars, onChange, inputClass, labelClass}: Props) {
                   />
                 </div>
                 <div>
-                  <label className="text-[10px] font-bold uppercase tracking-widest text-muted">
-                    Tune share code
-                  </label>
+                  <FieldLabel className="block">Tune share code</FieldLabel>
                   <ShareCodeInput
                     className={inputClass}
                     value={c.tuneShareCode}
@@ -186,6 +179,7 @@ export function EventCarList({cars, onChange, inputClass, labelClass}: Props) {
                 items={c.restrictions}
                 onChange={(items) => update(c.id, {restrictions: items})}
               />
+              </Panel>
             </li>
           ))}
         </ul>

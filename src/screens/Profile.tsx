@@ -1,5 +1,5 @@
 import {useState} from 'react';
-import {Link} from 'react-router-dom';
+import {TextButton, TextLink} from '../components/ui/TextButton';
 import {useAuth} from '../context/AuthContext';
 import {useJoinedEvents} from '../context/JoinedEventsContext';
 import {isApiConfigured, updateProfile} from '../lib/api';
@@ -13,16 +13,9 @@ import {ContentReveal} from '../components/ui/ContentReveal';
 import {EmptyState} from '../components/ui/EmptyState';
 import {PageLoading} from '../components/ui/PageLoading';
 import {useLoadingUI} from '../hooks/useLoadingUI';
+import {Alert} from '../components/ui/Alert';
+import {StatCard} from '../components/ui/StatCard';
 import {cn} from '../lib/cn';
-
-function StatPill({label, value}: {label: string; value: string | number}) {
-  return (
-    <div className="flex flex-1 flex-col gap-0.5 rounded-xl border border-white/[0.07] bg-card px-3 py-2.5 text-center">
-      <span className="text-lg font-black tabular-nums text-white">{value}</span>
-      <span className="text-[10px] font-bold uppercase tracking-[0.12em] text-muted">{label}</span>
-    </div>
-  );
-}
 
 export function Profile() {
   const {user, refreshUser, getAccessToken, isConfigured, isSignedIn, isStandalone, authRetrying, retryDiscordAuth} =
@@ -108,39 +101,32 @@ export function Profile() {
                 {user.xboxGamertag ?? 'Not set'}
               </span>
             </p>
-            <button
-              type="button"
-              onClick={() => setEditGamertag(true)}
-              className="mt-2 text-xs font-semibold text-accent-purple hover:text-accent-purple-light"
-            >
+            <TextButton type="button" className="mt-2" onClick={() => setEditGamertag(true)}>
               {user.xboxGamertag ? 'Edit gamertag' : 'Add gamertag'}
-            </button>
+            </TextButton>
           </div>
         </div>
       </div>
 
       {needsGamertag && (
-        <p className="mt-3 rounded-lg border border-amber-500/25 bg-amber-500/10 px-3 py-2 text-xs text-amber-200/90">
+        <Alert variant="warning" className="mt-3">
           Add your Xbox gamertag before joining events on Browse.
-        </p>
+        </Alert>
       )}
 
       <div className="mt-4 flex gap-2">
-        <StatPill label="Hosted" value={hostedCount} />
-        <StatPill label="Participated" value={participatedCount} />
-        <StatPill label="Rating" value="TBD" />
+        <StatCard label="Hosted" value={hostedCount} />
+        <StatCard label="Participated" value={participatedCount} />
+        <StatCard label="Rating" value="TBD" />
       </div>
 
       {recentCompleted.length > 0 && (
         <section className="mt-6">
           <div className="mb-3 flex items-center justify-between gap-2">
             <p className="text-[11px] font-medium text-muted">Recent results</p>
-            <Link
-              to="/my-events"
-              className="text-[11px] font-semibold text-accent-purple hover:text-accent-purple-light"
-            >
+            <TextLink to="/my-events" className="text-[11px]">
               All in My Events
-            </Link>
+            </TextLink>
           </div>
           <ul className="flex list-none flex-col gap-2">
             {recentCompleted.map((event) => (

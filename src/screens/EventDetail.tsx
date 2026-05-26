@@ -1,5 +1,5 @@
 import {useCallback, useEffect, useRef, useState} from 'react';
-import {Link, useNavigate, useParams} from 'react-router-dom';
+import {useNavigate, useParams} from 'react-router-dom';
 import {
   ArrowLeft,
   Calendar,
@@ -38,6 +38,10 @@ import {
 import {EventStatusBanner} from '../components/EventStatusBanner';
 import {Badge, DraftBadge, StatusBadge} from '../components/ui/Badge';
 import {Button} from '../components/ui/Button';
+import {BUSY_LABEL} from '../components/ui/buttonStyles';
+import {iconTileClass, sectionLabelClass} from '../components/ui/formStyles';
+import {Panel} from '../components/ui/Panel';
+import {TextLink} from '../components/ui/TextButton';
 import {ConfirmDialog} from '../components/ui/ConfirmDialog';
 import {GamertagModal} from '../components/GamertagModal';
 import {useJoinedEvents} from '../context/JoinedEventsContext';
@@ -234,9 +238,9 @@ export function EventDetail() {
       <div className="flex flex-col items-center gap-4 py-20 text-center">
         <p className="text-sm font-medium text-slate-200">Event not found</p>
         <p className="max-w-xs text-xs text-muted">It may have been removed or the link is incorrect.</p>
-        <Link to="/" className="text-sm font-semibold text-accent-purple hover:text-accent-purple-light transition-colors">
+        <TextLink to="/" tone="emphasis">
           Back to events
-        </Link>
+        </TextLink>
       </div>
     );
   }
@@ -268,13 +272,14 @@ export function EventDetail() {
 
   return (
     <ContentReveal className="pb-10 pt-4">
-      <Link
+      <TextLink
         to={isDraft && isHost ? '/my-events' : '/'}
-        className="mb-5 inline-flex items-center gap-1.5 text-xs font-semibold uppercase tracking-widest text-muted hover:text-accent-purple-light transition-colors duration-200"
+        tone="nav"
+        className="mb-5 inline-flex items-center gap-1.5"
       >
         <ArrowLeft className="h-3.5 w-3.5" />
         Back
-      </Link>
+      </TextLink>
 
       {/* Hero */}
       <div className="relative -mx-3 mb-0 h-44 overflow-hidden bg-base sm:-mx-5 md:-mx-8">
@@ -310,7 +315,8 @@ export function EventDetail() {
           <div className="flex shrink-0 flex-col gap-2">
             <Button
               variant="primary"
-              className="whitespace-nowrap px-6 py-3 text-xs shadow-none"
+              size="compact"
+              className="whitespace-nowrap"
               onClick={() => navigate(`/create?edit=${event.id}`)}
             >
               Continue editing
@@ -318,11 +324,12 @@ export function EventDetail() {
             {canDelete ? (
               <Button
                 variant="danger"
-                className="whitespace-nowrap px-6 py-2.5 text-xs shadow-none"
+                size="compact"
+                className="whitespace-nowrap"
                 disabled={deleting}
                 onClick={() => setConfirmAction('delete')}
               >
-                {deleting ? 'Deleting…' : 'Delete draft'}
+                {deleting ? BUSY_LABEL.deleting : 'Delete draft'}
               </Button>
             ) : null}
           </div>
@@ -331,7 +338,8 @@ export function EventDetail() {
             {canEnterResults ? (
               <Button
                 variant="primary"
-                className="whitespace-nowrap px-6 py-3 text-xs shadow-none"
+                size="compact"
+                className="whitespace-nowrap"
                 onClick={() => navigate(`/event/${event.id}/results`)}
               >
                 Submit results
@@ -340,11 +348,12 @@ export function EventDetail() {
             {canCancel ? (
               <Button
                 variant="danger"
-                className="whitespace-nowrap px-6 py-2.5 text-xs shadow-none"
+                size="compact"
+                className="whitespace-nowrap"
                 disabled={cancelling}
                 onClick={() => setConfirmAction('cancel')}
               >
-                {cancelling ? 'Cancelling…' : 'Cancel event'}
+                {cancelling ? BUSY_LABEL.cancelling : 'Cancel event'}
               </Button>
             ) : null}
           </div>
@@ -352,7 +361,8 @@ export function EventDetail() {
           canEdit ? (
             <Button
               variant="secondary"
-              className="shrink-0 whitespace-nowrap px-6 py-3 text-xs shadow-none"
+              size="compact"
+              className="shrink-0 whitespace-nowrap"
               onClick={() => navigate(`/create?edit=${event.id}`)}
             >
               Edit
@@ -365,13 +375,14 @@ export function EventDetail() {
                 ? 'secondary'
                 : participationButtonVariant(joined, registrationOpen, full)
             }
-            className="shrink-0 whitespace-nowrap px-6 py-3 text-xs shadow-none"
+            size={needsSignInToParticipate ? 'compact' : undefined}
+            className="shrink-0 whitespace-nowrap"
             disabled={needsSignInToParticipate ? authRetrying : participationDisabled}
             onClick={() => void handleJoinClick()}
           >
             {needsSignInToParticipate
               ? authRetrying
-                ? 'Signing in…'
+                ? BUSY_LABEL.signingIn
                 : 'Sign in to join'
               : participationButtonLabel(joined, registrationOpen, full)}
           </Button>
@@ -424,7 +435,7 @@ export function EventDetail() {
       />
       {showResultsSection ? (
         <div className="mt-4">
-          <p className="mb-2 text-[10px] font-bold uppercase tracking-widest text-muted">Results</p>
+          <p className={cn(sectionLabelClass, 'mb-2')}>Results</p>
           <EventResultsTable rows={resultDisplay} pending={resultDisplay.length === 0} />
         </div>
       ) : (
@@ -449,15 +460,15 @@ export function EventDetail() {
       )}
 
       {/* Info grid */}
-      <div className="mt-5 divide-y divide-white/[0.05] rounded-xl border border-white/[0.07] bg-card overflow-hidden">
+      <Panel divided className="mt-5 overflow-hidden">
 
         {/* Date */}
         <div className="flex items-center gap-3 px-4 py-3">
-          <div className="flex h-7 w-7 shrink-0 items-center justify-center rounded-lg border border-white/[0.07] bg-white/[0.04]">
+          <div className={iconTileClass}>
             <Calendar className="h-3.5 w-3.5 text-accent-purple-light" />
           </div>
           <div>
-            <p className="text-[10px] font-bold uppercase tracking-widest text-muted">Date & Time</p>
+            <p className={sectionLabelClass}>Date & Time</p>
             <p className="mt-0.5 text-sm text-slate-200">{when}</p>
           </div>
         </div>
@@ -465,11 +476,11 @@ export function EventDetail() {
         {/* Lobby leader */}
         {event.lobbyLeaderGamertag && (
           <div className="flex items-center gap-3 px-4 py-3">
-            <div className="flex h-7 w-7 shrink-0 items-center justify-center rounded-lg border border-white/[0.07] bg-white/[0.04]">
+            <div className={iconTileClass}>
               <Users className="h-3.5 w-3.5 text-accent-green" />
             </div>
             <div>
-              <p className="text-[10px] font-bold uppercase tracking-widest text-muted">Convoy Leader</p>
+              <p className={sectionLabelClass}>Convoy Leader</p>
               <p className="mt-0.5 text-sm font-medium text-slate-200">{event.lobbyLeaderGamertag}</p>
             </div>
           </div>
@@ -478,11 +489,11 @@ export function EventDetail() {
         {/* Tracks */}
         {(event.trackCodes?.length ?? 0) > 0 && (
           <div className="flex items-start gap-3 px-4 py-3">
-            <div className="flex h-7 w-7 shrink-0 items-center justify-center rounded-lg border border-white/[0.07] bg-white/[0.04]">
+            <div className={iconTileClass}>
               <RoadIcon className="text-muted-light" />
             </div>
             <div className="min-w-0">
-              <p className="text-[10px] font-bold uppercase tracking-widest text-muted">Tracks</p>
+              <p className={sectionLabelClass}>Tracks</p>
               {event.trackCodes!.length === 1 ? (
                 <p className="mt-1 font-mono text-sm tracking-wide text-slate-200">
                   {event.trackCodes![0]}
@@ -505,11 +516,11 @@ export function EventDetail() {
 
         {/* Cars */}
         <div className="flex items-start gap-3 px-4 py-3">
-          <div className="flex h-7 w-7 shrink-0 items-center justify-center rounded-lg border border-white/[0.07] bg-white/[0.04]">
+          <div className={iconTileClass}>
             <Car className="h-3.5 w-3.5 text-muted-light" />
           </div>
           <div className="min-w-0 flex-1">
-            <p className="text-[10px] font-bold uppercase tracking-widest text-muted">Car rules</p>
+            <p className={sectionLabelClass}>Car rules</p>
             {event.carRuleMode === 'anything_goes' ? (
               <ul className="mt-2 flex flex-col gap-1">
                 <li className={carRuleRowClass}>
@@ -573,7 +584,7 @@ export function EventDetail() {
             )}
           </div>
         </div>
-      </div>
+      </Panel>
 
       {/* Participants */}
       <div className="mt-6">

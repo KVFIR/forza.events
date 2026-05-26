@@ -1,6 +1,10 @@
 import {useState} from 'react';
 import {Plus, X} from 'lucide-react';
 import {Button} from './ui/Button';
+import {templateChipClass} from './ui/buttonStyles';
+import {Input} from './ui/Input';
+import {FieldLabel} from './ui/FieldLabel';
+import {listItemClass} from './ui/formStyles';
 
 const DEFAULT_TEMPLATES = [
   'Clean racing only',
@@ -30,21 +34,16 @@ export function RuleListInput({label, items, onChange, templates = DEFAULT_TEMPL
 
   return (
     <div>
-      <p className="mb-2 text-[10px] font-bold uppercase tracking-widest text-muted">{label}</p>
+      <FieldLabel className="mb-2 block">{label}</FieldLabel>
       <div className="mb-2 flex flex-wrap gap-1.5">
         {templates.map((t) => (
-          <button
-            key={t}
-            type="button"
-            onClick={() => addItem(t)}
-            className="rounded-md border border-white/[0.08] bg-white/[0.03] px-2 py-1 text-[10px] text-muted hover:border-accent-purple/30 hover:text-slate-300"
-          >
+          <button key={t} type="button" onClick={() => addItem(t)} className={templateChipClass}>
             + {t}
           </button>
         ))}
       </div>
       <div className="flex gap-2">
-        <input
+        <Input
           value={draft}
           onChange={(e) => setDraft(e.target.value)}
           onKeyDown={(e) => {
@@ -54,7 +53,7 @@ export function RuleListInput({label, items, onChange, templates = DEFAULT_TEMPL
             }
           }}
           placeholder="Custom rule…"
-          className="flex-1 rounded-xl border border-white/[0.08] bg-surface px-3 py-2 text-sm text-white"
+          className="flex-1"
         />
         <Button type="button" variant="secondary" onClick={() => addItem(draft)}>
           <Plus className="h-4 w-4" />
@@ -64,12 +63,19 @@ export function RuleListInput({label, items, onChange, templates = DEFAULT_TEMPL
         {items.map((item) => (
           <li
             key={item}
-            className="flex items-center justify-between rounded-lg border border-white/[0.06] bg-white/[0.02] px-3 py-2 text-sm text-slate-300"
+            className={listItemClass}
           >
             {item}
-            <button type="button" onClick={() => onChange(items.filter((i) => i !== item))}>
-              <X className="h-3.5 w-3.5 text-muted hover:text-white" />
-            </button>
+            <Button
+              type="button"
+              variant="ghost"
+              size="icon"
+              className="text-muted hover:text-white"
+              aria-label={`Remove ${item}`}
+              onClick={() => onChange(items.filter((i) => i !== item))}
+            >
+              <X className="h-3.5 w-3.5" />
+            </Button>
           </li>
         ))}
       </ul>

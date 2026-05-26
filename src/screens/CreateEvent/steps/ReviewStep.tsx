@@ -1,3 +1,5 @@
+import {Alert} from '../../../components/ui/Alert';
+import {Panel} from '../../../components/ui/Panel';
 import {EventCover} from '../../../components/EventCover';
 import {defaultCoverPath} from '../../../lib/eventCovers';
 import {defaultTimezone, formatEventTime, localInputToUtc} from '../../../lib/datetime';
@@ -71,20 +73,16 @@ export function ReviewStep({
       </div>
 
       {missingForPublish.length > 0 && (
-        <div
-          role="status"
-          className="rounded-lg border border-amber-500/25 bg-amber-950/25 px-3 py-2 text-xs text-amber-100/90"
-        >
-          <p className="font-semibold text-amber-200/90">Before you publish</p>
-          <ul className="mt-1 list-inside list-disc space-y-0.5">
+        <Alert variant="sky" title="Before you publish" className="py-2">
+          <ul className="list-inside list-disc space-y-0.5">
             {missingForPublish.map((item) => (
               <li key={item}>{item}</li>
             ))}
           </ul>
-        </div>
+        </Alert>
       )}
 
-      <div className="divide-y divide-white/[0.05] overflow-hidden rounded-xl border border-white/[0.08]">
+      <Panel variant="soft" divided className="overflow-hidden">
         <ReviewRow label="When" value={when?.primary ?? '—'} />
         {when?.secondary && (
           <ReviewRow label="Your time" value={when.secondary.replace(/^Your time: /, '')} />
@@ -104,7 +102,7 @@ export function ReviewStep({
           }
         />
         <ReviewRow label="Cars" value={carRules} />
-      </div>
+      </Panel>
     </div>
   );
 }

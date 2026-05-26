@@ -1,6 +1,12 @@
 import type {ReactNode} from 'react';
 import {cn} from '../../../lib/cn';
-import {formFieldError, formLabel} from '../constants';
+import {
+  controlInvalidClass,
+  dividerClass,
+  fieldErrorClass,
+  fieldHintClass,
+  fieldLabelClass,
+} from '../../../components/ui/formStyles';
 
 export function Field({
   title,
@@ -20,13 +26,13 @@ export function Field({
   const errorId = error && htmlFor ? `${htmlFor}-error` : undefined;
   return (
     <div className={className}>
-      <label htmlFor={htmlFor} className={formLabel}>
+      <label htmlFor={htmlFor} className={cn(fieldLabelClass, 'mb-1.5')}>
         {title}
       </label>
       {children}
-      {hint && !error && <p className="mt-1.5 text-xs text-muted">{hint}</p>}
+      {hint && !error && <p className={fieldHintClass}>{hint}</p>}
       {error && (
-        <p id={errorId} role="alert" className={formFieldError}>
+        <p id={errorId} role="alert" className={fieldErrorClass}>
           {error}
         </p>
       )}
@@ -35,9 +41,9 @@ export function Field({
 }
 
 export function Divider() {
-  return <div className="h-px bg-white/[0.05]" />;
+  return <div className={dividerClass} />;
 }
 
 export function fieldInputClass(hasError: boolean) {
-  return cn(hasError && 'border-red-500/50 focus:border-red-400/60');
+  return cn(hasError && controlInvalidClass);
 }

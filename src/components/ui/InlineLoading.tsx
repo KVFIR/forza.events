@@ -11,7 +11,7 @@ export function InlineLoading({label, className}: Props) {
   return (
     <div
       className={cn(
-        'flex min-h-[2.625rem] animate-fade-in items-center gap-2 rounded-lg border border-white/[0.06] bg-white/[0.02] px-3.5 py-2.5 opacity-50',
+        'flex min-h-[2.625rem] animate-fade-in items-center gap-2 rounded-lg border border-white/[0.08] bg-white/[0.03] px-3.5 py-2.5 opacity-50',
         className,
       )}
       aria-busy="true"

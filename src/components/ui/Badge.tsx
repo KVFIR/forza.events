@@ -1,6 +1,7 @@
 import type {CarRuleMode, EventType} from '../../lib/types';
 import {eventTypeMeta} from '../../lib/eventTypes';
 import {cn} from '../../lib/cn';
+import {badgeBaseClass} from './formStyles';
 
 type Props = {
   type: EventType;
@@ -12,7 +13,7 @@ export function Badge({type, className}: Props) {
   return (
     <span
       className={cn(
-        'inline-flex items-center rounded-md border px-2 py-0.5 text-[10px] font-bold uppercase tracking-widest',
+        badgeBaseClass,
         badge.bg,
         badge.border,
         badge.text,
@@ -35,7 +36,7 @@ export function CarRuleBadge({
   return (
     <span
       className={cn(
-        'inline-flex items-center rounded-md border px-2 py-0.5 text-[10px] font-bold uppercase tracking-widest',
+        badgeBaseClass,
         restricted
           ? 'border-cyan-500/30 bg-cyan-500/10 text-cyan-200'
           : 'border-emerald-500/30 bg-emerald-500/10 text-emerald-200',
@@ -91,7 +92,8 @@ export function DraftBadge({className}: {className?: string}) {
   return (
     <span
       className={cn(
-        'inline-flex items-center rounded-md border border-sky-500/35 bg-sky-500/10 px-2 py-0.5 text-[10px] font-bold uppercase tracking-widest text-sky-200',
+        badgeBaseClass,
+        'border-sky-500/35 bg-sky-500/10 text-sky-200',
         className,
       )}
     >
@@ -105,7 +107,8 @@ export function StatusBadge({status, className}: StatusProps) {
   return (
     <span
       className={cn(
-        'inline-flex items-center gap-1.5 rounded-md border px-2 py-0.5 text-[10px] font-bold uppercase tracking-widest',
+        badgeBaseClass,
+        'gap-1.5',
         s.bg,
         s.border,
         s.text,
