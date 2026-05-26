@@ -1,4 +1,5 @@
 import {useState} from 'react';
+import {useNavigate} from 'react-router-dom';
 import {EventList} from '../components/EventList';
 import {EventListMetaSelect} from '../components/EventListMetaSelect';
 import {useAuth} from '../context/AuthContext';
@@ -12,6 +13,7 @@ const scopeOptions: {value: MyEventsScope; label: string}[] = [
 ];
 
 export function MyEvents() {
+  const navigate = useNavigate();
   const [scope, setScope] = useState<MyEventsScope>('all');
   const {isSignedIn, loading: authLoading} = useAuth();
   const {filtered, isLoading, isRefreshing, loadError, refetch} = useMyEventsCatalog(scope);
@@ -19,9 +21,11 @@ export function MyEvents() {
   const emptyTitle =
     !authLoading && !isSignedIn
       ? 'Sign in to see events you host or join'
-      : loadError
+        : loadError
         ? 'Could not load your events'
-        : 'No events in this list yet';
+        : scope === 'joined'
+          ? 'No joined events yet'
+          : 'No events in this list yet';
 
   const emptyDescription =
     loadError && !isSignedIn
@@ -30,7 +34,9 @@ export function MyEvents() {
         ? 'Use Discord sign-in to sync hosted and joined events.'
         : loadError
           ? 'Check your connection and try again.'
-          : undefined;
+          : scope !== 'joined' && isSignedIn
+            ? 'Saved drafts and published events you host appear here.'
+            : undefined;
 
   return (
     <div className="pb-8 pt-5">
@@ -43,9 +49,13 @@ export function MyEvents() {
         emptyTitle={emptyTitle}
         emptyDescription={emptyDescription}
         emptyAction={
-          scope !== 'all'
-            ? {label: 'Clear filters', onClick: () => setScope('all')}
-            : undefined
+          scope === 'joined'
+            ? undefined
+            : scope !== 'all'
+              ? {label: 'Clear filters', onClick: () => setScope('all')}
+              : !loadError && isSignedIn
+                ? {label: 'Create event', onClick: () => navigate('/create')}
+                : undefined
         }
         metaRight={
           <EventListMetaSelect

@@ -25,8 +25,8 @@ import {PageLoading} from '../components/ui/PageLoading';
 import {useLoadingUI} from '../hooks/useLoadingUI';
 import {formatEventTime} from '../lib/datetime';
 import {cancelEvent, isApiConfigured, updateProfile} from '../lib/api';
-import {canCancelEvent, canEditEvent} from '../lib/eventSpec';
-import {Badge, StatusBadge} from '../components/ui/Badge';
+import {canCancelEvent, canEditEvent, isPublishedEvent} from '../lib/eventSpec';
+import {Badge, DraftBadge, StatusBadge} from '../components/ui/Badge';
 import {Button} from '../components/ui/Button';
 import {GamertagModal} from '../components/GamertagModal';
 import {useJoinedEvents} from '../context/JoinedEventsContext';
@@ -79,6 +79,7 @@ export function EventDetail() {
   const showLoadingUI = useLoadingUI(loading && !event);
   const {isJoined, toggleJoin, bumpRefresh, refreshKey} = useJoinedEvents();
   const {user, refreshUser, getAccessToken, isSignedIn} = useAuth();
+  const discordToken = getAccessToken();
   const [gamertagOpen, setGamertagOpen] = useState(false);
   const [joining, setJoining] = useState(false);
   const [joinError, setJoinError] = useState<string | null>(null);
@@ -86,8 +87,8 @@ export function EventDetail() {
 
   const reloadEvent = useCallback(() => {
     if (!id) return;
-    void fetchEventById(id).then(setEvent);
-  }, [id]);
+    void fetchEventById(id, {discordToken}).then(setEvent);
+  }, [id, discordToken]);
 
   useEventLiveUpdates(id, reloadEvent);
 
@@ -103,7 +104,7 @@ export function EventDetail() {
       setResultRows([]);
     }
 
-    void fetchEventById(id)
+    void fetchEventById(id, {discordToken})
       .then(async (ev) => {
         if (cancelled) return;
         setEvent(ev);
@@ -120,13 +121,13 @@ export function EventDetail() {
     return () => {
       cancelled = true;
     };
-  }, [id, refreshKey]);
+  }, [id, refreshKey, discordToken]);
 
   async function handleJoinClick() {
     if (!event) return;
     if (isJoined(event)) {
       await toggleJoin(event);
-      const next = await fetchEventById(event.id);
+      const next = await fetchEventById(event.id, {discordToken});
       setEvent(next);
       return;
     }
@@ -150,7 +151,7 @@ export function EventDetail() {
         await cancelEvent(token, event.id);
       }
       bumpRefresh();
-      const next = await fetchEventById(event.id);
+      const next = await fetchEventById(event.id, {discordToken});
       setEvent(next);
     } finally {
       setCancelling(false);
@@ -169,11 +170,11 @@ export function EventDetail() {
       }
       await toggleJoin(event, gamertag);
       bumpRefresh();
-      const next = await fetchEventById(event.id);
+      const next = await fetchEventById(event.id, {discordToken});
       setEvent(next);
     } catch (err) {
       setJoinError(err instanceof Error ? err.message : 'Could not join event');
-      const next = await fetchEventById(event.id);
+      const next = await fetchEventById(event.id, {discordToken});
       setEvent(next);
     } finally {
       setJoining(false);
@@ -202,11 +203,13 @@ export function EventDetail() {
   }
 
   const isHost = event.hostDiscordId === user.discordId;
+  const isDraft = !isPublishedEvent(event);
   const canEnterResults = canSubmitEventResults(event, user);
   const canEdit = canEditEvent(event, user);
   const canCancel = canCancelEvent(event, user);
   const joined = isJoined(event);
   const full = event.status === 'full' || event.currentPlayers >= event.maxPlayers;
+  const showDraftActions = isDraft && isHost;
   const {primary: when} = formatEventTime(event.startsAt, event.timezoneHint);
   const vis = typeVisual[event.type];
   const fillPct = Math.round(((1 + event.currentPlayers) / LOBBY_TOTAL_PLAYERS) * 100);
@@ -216,7 +219,7 @@ export function EventDetail() {
   return (
     <ContentReveal className="pb-10 pt-4">
       <Link
-        to="/"
+        to={isDraft && isHost ? '/my-events' : '/'}
         className="mb-5 inline-flex items-center gap-1.5 text-xs font-semibold uppercase tracking-widest text-muted hover:text-accent-purple-light transition-colors duration-200"
       >
         <ArrowLeft className="h-3.5 w-3.5" />
@@ -254,7 +257,7 @@ export function EventDetail() {
         <div className="min-w-0 flex-1">
           <div className="flex flex-wrap items-center gap-2">
             <Badge type={event.type} />
-            <StatusBadge status={event.status} />
+            {isDraft ? <DraftBadge /> : <StatusBadge status={event.status} />}
           </div>
           <h1 className="mt-1.5 text-xl font-black tracking-tight text-white">{event.title}</h1>
           {event.description && (
@@ -262,41 +265,56 @@ export function EventDetail() {
           )}
           <p className="mt-1 text-xs text-muted">by {event.hostUsername}</p>
         </div>
-        <Button
-          variant={participationButtonVariant(
-            canEnterResults,
-            canCancel,
-            isHost,
-            canEdit,
-            joined,
-            full,
-          )}
-          className="shrink-0 whitespace-nowrap px-6 py-3 text-xs shadow-none"
-          disabled={
-            !canEnterResults &&
-            !canCancel &&
-            !(isHost && canEdit) &&
-            !joined &&
-            ((full && !joined) || joining || cancelling)
-          }
-          onClick={() => {
-            if (canEnterResults) navigate(`/event/${event.id}/results`);
-            else if (canCancel) void handleCancelEvent();
-            else if (isHost && canEdit) navigate(`/create?edit=${event.id}`);
-            else void handleJoinClick();
-          }}
-        >
-          {participationButtonLabel(
-            canEnterResults,
-            canCancel,
-            isHost,
-            canEdit,
-            joined,
-            full,
-            joining || cancelling,
-          )}
-        </Button>
+        {showDraftActions ? (
+          <Button
+            variant="primary"
+            className="shrink-0 whitespace-nowrap px-6 py-3 text-xs shadow-none"
+            onClick={() => navigate(`/create?edit=${event.id}`)}
+          >
+            Continue editing
+          </Button>
+        ) : (
+          <Button
+            variant={participationButtonVariant(
+              canEnterResults,
+              canCancel,
+              isHost,
+              canEdit,
+              joined,
+              full,
+            )}
+            className="shrink-0 whitespace-nowrap px-6 py-3 text-xs shadow-none"
+            disabled={
+              !canEnterResults &&
+              !canCancel &&
+              !(isHost && canEdit) &&
+              !joined &&
+              ((full && !joined) || joining || cancelling)
+            }
+            onClick={() => {
+              if (canEnterResults) navigate(`/event/${event.id}/results`);
+              else if (canCancel) void handleCancelEvent();
+              else if (isHost && canEdit) navigate(`/create?edit=${event.id}`);
+              else void handleJoinClick();
+            }}
+          >
+            {participationButtonLabel(
+              canEnterResults,
+              canCancel,
+              isHost,
+              canEdit,
+              joined,
+              full,
+            )}
+          </Button>
+        )}
       </div>
+
+      {isDraft && isHost ? (
+        <p className="mt-3 text-sm text-slate-400">
+          This event is not published yet. Only you can see it until you publish.
+        </p>
+      ) : null}
 
       {joinError ? <p className="mt-3 text-sm text-accent-red">{joinError}</p> : null}
 

@@ -294,20 +294,41 @@ export async function fetchPublishedEvents(
   return (await fetchPublishedEventsResult(undefined, options)).events;
 }
 
+export type FetchEventByIdOptions = {
+  /** Required to load draft events (RLS hides drafts from anon reads). */
+  discordToken?: string | null;
+};
+
 async function fetchEventsViaEdge(options: {
   includeCompleted?: boolean;
   eventId?: string;
+  hostDrafts?: boolean;
+  discordToken?: string | null;
 }): Promise<ForzaEvent[] | null> {
   try {
-    const {data} = await invokeBrowseEvents({
-      include_completed: options.includeCompleted,
-      event_id: options.eventId,
-    });
+    const {data} = await invokeBrowseEvents(
+      {
+        include_completed: options.includeCompleted,
+        event_id: options.eventId,
+        host_drafts: options.hostDrafts,
+      },
+      options.discordToken ?? null,
+    );
     return (data ?? []).map((row) => mapDbEventWithRelations(row as DbEventRow));
   } catch (err) {
     console.error('browse-events', err);
     return null;
   }
+}
+
+/** Draft events for the signed-in host (not shown on public browse). */
+export async function fetchHostDraftEvents(
+  discordToken: string,
+): Promise<ForzaEvent[]> {
+  if (!isSupabaseConfigured()) return [];
+
+  const events = await fetchEventsViaEdge({hostDrafts: true, discordToken});
+  return events ?? [];
 }
 
 export async function fetchPublishedEventsResult(
@@ -349,18 +370,28 @@ export async function fetchPublishedEventsResult(
   return {events, error: null};
 }
 
-export async function fetchEventById(id: string): Promise<ForzaEvent | undefined> {
+export async function fetchEventById(
+  id: string,
+  options: FetchEventByIdOptions = {},
+): Promise<ForzaEvent | undefined> {
   if (!isSupabaseConfigured()) {
     return undefined;
   }
 
-  if (isDiscordActivityFrame()) {
-    const events = await fetchEventsViaEdge({includeCompleted: true, eventId: id});
-    return events?.[0];
+  const {discordToken} = options;
+
+  if (discordToken || isDiscordActivityFrame()) {
+    const events = await fetchEventsViaEdge({
+      includeCompleted: true,
+      eventId: id,
+      discordToken,
+    });
+    if (events?.length) return events[0];
+    if (discordToken || isDiscordActivityFrame()) return undefined;
   }
 
   const events = await fetchEventsWithRelations((supabase) =>
-    supabase.from('events').select(EVENT_LIST_SELECT).eq('id', id),
+    supabase.from('events').select(EVENT_LIST_SELECT).eq('id', id).neq('status', 'draft'),
   );
 
   if (events === null) {

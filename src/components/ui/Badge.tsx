@@ -100,6 +100,19 @@ const statusLabels: Record<StatusProps['status'], string> = {
   ended: 'Ended',
 };
 
+export function DraftBadge({className}: {className?: string}) {
+  return (
+    <span
+      className={cn(
+        'inline-flex items-center rounded-md border border-sky-500/35 bg-sky-500/10 px-2 py-0.5 text-[10px] font-bold uppercase tracking-widest text-sky-200',
+        className,
+      )}
+    >
+      Draft
+    </span>
+  );
+}
+
 export function StatusBadge({status, className}: StatusProps) {
   const s = statusStyles[status];
   return (

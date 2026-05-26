@@ -23,9 +23,7 @@ export function participationButtonLabel(
   canEdit: boolean,
   isJoined: boolean,
   isFull: boolean,
-  joining?: boolean,
 ): string {
-  if (joining) return '…';
   if (canEnterResults) return 'Results';
   if (canCancel) return 'Cancel event';
   if (isHost && canEdit) return 'Edit';

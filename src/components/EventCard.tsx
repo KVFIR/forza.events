@@ -4,6 +4,7 @@ import {Link} from 'react-router-dom';
 import {Users} from 'lucide-react';
 import type {EventAllowedCar, EventType, ForzaEvent} from '../lib/types';
 import {cn} from '../lib/cn';
+import {isDraftEvent} from '../lib/eventList';
 import {formatLobbyCount} from '../lib/constants';
 import {defaultCoverPath} from '../lib/eventCovers';
 import {piToClass} from '../lib/pi';
@@ -93,12 +94,15 @@ function OpenBuildSummary({event}: {event: ForzaEvent}) {
 
 export function EventCard({event}: Props) {
   const when = format(new Date(event.startsAt), 'EEE d MMM · HH:mm');
-  const ended = event.status === 'ended';
-  const full = !ended && (event.status === 'full' || event.currentPlayers >= event.maxPlayers);
+  const draft = isDraftEvent(event);
+  const ended = !draft && event.status === 'ended';
+  const full =
+    !draft && !ended && (event.status === 'full' || event.currentPlayers >= event.maxPlayers);
   const {user} = useAuth();
   const isHost = event.hostDiscordId === user.discordId;
   const coverSrc = event.coverImageUrl ?? defaultCoverPath(event.type);
   const [coverReady, setCoverReady] = useState(false);
+  const cardTo = draft && isHost ? `/create?edit=${event.id}` : `/event/${event.id}`;
 
   useEffect(() => {
     setCoverReady(false);
@@ -111,13 +115,15 @@ export function EventCard({event}: Props) {
         coverReady ? 'pointer-events-auto opacity-100' : 'pointer-events-none opacity-0',
       )}
     >
-      <Link to={`/event/${event.id}`} className="block" tabIndex={coverReady ? undefined : -1}>
+      <Link to={cardTo} className="block" tabIndex={coverReady ? undefined : -1}>
         <div
           className={cn(
-            'relative overflow-hidden rounded-xl border border-white/[0.08] transition-all duration-200',
-            ended
-              ? 'border-white/[0.05] grayscale opacity-70 hover:opacity-80'
-              : 'hover:border-white/[0.12]',
+            'relative min-h-[7.5rem] overflow-hidden rounded-xl border transition-all duration-200',
+            draft
+              ? 'border-dashed border-sky-500/25 bg-sky-950/20 hover:border-sky-500/40'
+              : ended
+                ? 'border-white/[0.05] grayscale opacity-70 hover:opacity-80'
+                : 'border-white/[0.08] hover:border-white/[0.12]',
           )}
         >
           <EventCover
@@ -130,9 +136,11 @@ export function EventCard({event}: Props) {
           <div className="absolute inset-0 bg-gradient-to-r from-base/80 via-base/70 to-base/60" />
           <div className="absolute inset-0 bg-black/25 transition-colors duration-200 group-hover:bg-black/20" />
 
-          <div className="relative flex items-center gap-3 px-4 py-3 pb-3.5">
+          <div className="relative flex items-center gap-3 px-4 py-3.5 pb-4">
             <div className="min-w-0 flex-1 text-left">
-              <h2 className="truncate text-sm font-semibold text-white">{event.title}</h2>
+              <h2 className="truncate text-lg font-semibold leading-tight text-white">
+                {event.title}
+              </h2>
               <p className="mt-0.5 truncate text-xs text-slate-400">
                 {event.hostUsername}
                 {isHost && (
@@ -142,20 +150,26 @@ export function EventCard({event}: Props) {
                 )}
               </p>
               <p className="mt-0.5 text-xs text-muted">{when}</p>
-              <p className="mt-1.5 flex items-center gap-1 text-xs text-slate-400">
-                <Users className="h-3 w-3 shrink-0" />
-                {formatLobbyCount(event.currentPlayers)}
-                {ended && (
-                  <span className="ml-1 text-[9px] font-bold uppercase tracking-widest text-muted">
-                    · Ended
-                  </span>
-                )}
-                {full && (
-                  <span className="ml-1 text-[9px] font-bold uppercase tracking-widest text-amber-300/90">
-                    · Full
-                  </span>
-                )}
-              </p>
+              {draft ? (
+                <p className="mt-1.5 text-[10px] font-bold uppercase tracking-widest text-sky-300/90">
+                  Draft · not published
+                </p>
+              ) : (
+                <p className="mt-1.5 flex items-center gap-1 text-xs text-slate-400">
+                  <Users className="h-3 w-3 shrink-0" />
+                  {formatLobbyCount(event.currentPlayers)}
+                  {ended && (
+                    <span className="ml-1 text-[9px] font-bold uppercase tracking-widest text-muted">
+                      · Ended
+                    </span>
+                  )}
+                  {full && (
+                    <span className="ml-1 text-[9px] font-bold uppercase tracking-widest text-amber-300/90">
+                      · Full
+                    </span>
+                  )}
+                </p>
+              )}
             </div>
 
             {event.carRuleMode === 'restricted_list' && event.allowedCars.length > 0 && (

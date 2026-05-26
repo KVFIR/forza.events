@@ -42,9 +42,14 @@ async function invoke<T>(
 }
 
 export async function invokeBrowseEvents(
-  body: {include_completed?: boolean; event_id?: string} = {},
+  body: {
+    include_completed?: boolean;
+    event_id?: string;
+    host_drafts?: boolean;
+  } = {},
+  discordAccessToken: string | null = null,
 ): Promise<{data: unknown[]}> {
-  return invoke<{data: unknown[]}>('browse-events', body, null);
+  return invoke<{data: unknown[]}>('browse-events', body, discordAccessToken);
 }
 
 export async function exchangeToken(

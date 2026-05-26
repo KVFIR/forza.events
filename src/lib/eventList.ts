@@ -33,6 +33,28 @@ export function filterByEventType(events: ForzaEvent[], type: EventType | 'all')
   return events.filter((e) => e.type === type);
 }
 
+export function isDraftEvent(event: ForzaEvent): boolean {
+  return event.lifecycle === 'draft';
+}
+
+/** Newest draft first (by created or scheduled start). */
+export function sortHostDrafts(events: ForzaEvent[]): ForzaEvent[] {
+  return [...events].sort(
+    (a, b) =>
+      new Date(b.createdAt ?? b.startsAt).getTime() -
+      new Date(a.createdAt ?? a.startsAt).getTime(),
+  );
+}
+
+/** Drafts at the top; published list must not duplicate draft ids. */
+export function mergeHostDraftsFirst(
+  drafts: ForzaEvent[],
+  published: ForzaEvent[],
+): ForzaEvent[] {
+  const draftIds = new Set(drafts.map((e) => e.id));
+  return [...drafts, ...published.filter((e) => !draftIds.has(e.id))];
+}
+
 /** Active events first, then completed (newest start date first within each group). */
 export function sortMyEventsList(events: ForzaEvent[]): ForzaEvent[] {
   const active = events.filter((e) => e.status !== 'ended');

@@ -2,6 +2,7 @@ import {useCallback, useEffect, useMemo, useState} from 'react';
 import {useNavigate, useSearchParams} from 'react-router-dom';
 import type {CarRuleMode, EventType} from '../../lib/types';
 import {useAuth} from '../../context/AuthContext';
+import {useJoinedEvents} from '../../context/JoinedEventsContext';
 import {isApiConfigured, publishEvent, saveEvent, uploadCoverImage} from '../../lib/api';
 import {compressCoverForUpload} from '../../lib/coverImage';
 import {fetchEventById} from '../../lib/events';
@@ -23,6 +24,7 @@ export function useCreateEventForm() {
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
   const editId = searchParams.get('edit');
+  const {bumpRefresh} = useJoinedEvents();
   const {
     user,
     guildId: contextGuildId,
@@ -124,7 +126,7 @@ export function useCreateEventForm() {
     }
     let cancelled = false;
     setLoadingEdit(true);
-    void fetchEventById(editId)
+    void fetchEventById(editId, {discordToken: token})
       .then((ev) => {
         if (cancelled || !ev) return;
         if (ev.hostDiscordId !== user.discordId) {
@@ -178,6 +180,7 @@ export function useCreateEventForm() {
     };
   }, [
     editId,
+    token,
     user.discordId,
     user.xboxGamertag,
     navigate,
@@ -231,6 +234,7 @@ export function useCreateEventForm() {
     setGlobalError(null);
     try {
       await publishEvent(token, id, targetGuildId, targetChannelId, targetGuildName);
+      bumpRefresh();
       setShowPublishModal(false);
       navigate(`/event/${id}`);
     } catch (e) {
@@ -262,6 +266,7 @@ export function useCreateEventForm() {
         await saveEvent(token, {...buildPayload(), id, cover_image_url: url});
       }
       setEventId(id);
+      bumpRefresh();
       return id;
     } catch (e) {
       setGlobalError(String(e));

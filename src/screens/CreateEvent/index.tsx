@@ -69,12 +69,13 @@ export function CreateEvent() {
 
   async function handleSaveDraft() {
     const id = await persistDraft();
-    if (id) navigate(editId ? `/event/${id}` : '/');
+    if (id) navigate('/my-events');
   }
 
   async function handleSaveChanges() {
     const id = await persistDraft();
-    if (id) navigate(`/event/${id}`);
+    if (!id) return;
+    navigate(isPublished ? `/event/${id}` : '/my-events');
   }
 
   async function handlePublishClick() {
