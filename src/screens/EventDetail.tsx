@@ -1,4 +1,6 @@
 import {useCallback, useEffect, useRef, useState} from 'react';
+import {useTranslation} from 'react-i18next';
+import {busyLabel} from '../i18n/busyLabels';
 import {useNavigate, useParams} from 'react-router-dom';
 import {
   ArrowLeft,
@@ -37,7 +39,6 @@ import {
 import {EventStatusBanner} from '../components/EventStatusBanner';
 import {Badge, DraftBadge, StatusBadge} from '../components/ui/Badge';
 import {Button} from '../components/ui/Button';
-import {BUSY_LABEL} from '../components/ui/buttonStyles';
 import {iconTileClass, sectionLabelClass} from '../components/ui/formStyles';
 import {Panel} from '../components/ui/Panel';
 import {TextLink} from '../components/ui/TextButton';
@@ -68,6 +69,7 @@ const carRuleRowClass =
   'grid grid-cols-[minmax(0,1fr)_3.5rem] items-center gap-x-3 text-sm leading-tight';
 
 export function EventDetail() {
+  const {t} = useTranslation();
   const navigate = useNavigate();
   const {id} = useParams<{id: string}>();
   const [event, setEvent] = useState<ForzaEvent | undefined>();
@@ -152,7 +154,7 @@ export function EventDetail() {
     if (!event) return;
     const token = getAccessToken();
     if (!isSignedIn || !token) {
-      setActionError('Sign in with Discord to cancel this event.');
+      setActionError(t('auth.signInDiscordCancel'));
       return;
     }
     setCancelling(true);
@@ -165,7 +167,7 @@ export function EventDetail() {
       const next = await fetchEventById(event.id, {discordToken});
       setEvent(next);
     } catch (err) {
-      setActionError(err instanceof Error ? err.message : 'Could not cancel event');
+      setActionError(err instanceof Error ? err.message : t('eventDetail.cancelFailed'));
     } finally {
       setCancelling(false);
     }
@@ -175,7 +177,7 @@ export function EventDetail() {
     if (!event) return;
     const token = getAccessToken();
     if (!isSignedIn || !token) {
-      setActionError('Sign in with Discord to delete this draft.');
+      setActionError(t('auth.signInDiscordDelete'));
       return;
     }
     setDeleting(true);
@@ -187,7 +189,7 @@ export function EventDetail() {
       bumpRefresh();
       navigate('/my-events', {replace: true});
     } catch (err) {
-      setActionError(err instanceof Error ? err.message : 'Could not delete draft');
+      setActionError(err instanceof Error ? err.message : t('eventDetail.deleteFailed'));
     } finally {
       setDeleting(false);
     }
@@ -197,7 +199,7 @@ export function EventDetail() {
     if (!event) return;
     const token = getAccessToken();
     if (!isSignedIn || !token) {
-      setJoinError('Sign in with Discord to join this event.');
+      setJoinError(t('auth.signInDiscordJoin'));
       return;
     }
     const trimmed = gamertag.trim();
@@ -219,7 +221,7 @@ export function EventDetail() {
       const next = await fetchEventById(event.id, {discordToken});
       setEvent(next);
     } catch (err) {
-      setJoinError(err instanceof Error ? err.message : 'Could not join event');
+      setJoinError(err instanceof Error ? err.message : t('eventDetail.joinFailed'));
       const next = await fetchEventById(event.id, {discordToken});
       setEvent(next);
     } finally {
@@ -230,15 +232,15 @@ export function EventDetail() {
 
   if (!event) {
     if (loading) {
-      return <PageLoading label="Loading event" className="pb-10 pt-4" />;
+      return <PageLoading label={t('loading.event')} className="pb-10 pt-4" />;
     }
 
     return (
       <div className="flex flex-col items-center gap-4 py-20 text-center">
-        <p className="text-sm font-medium text-slate-200">Event not found</p>
-        <p className="max-w-xs text-xs text-muted">It may have been removed or the link is incorrect.</p>
+        <p className="text-sm font-medium text-slate-200">{t('eventDetail.notFound')}</p>
+        <p className="max-w-xs text-xs text-muted">{t('eventDetail.notFoundDesc')}</p>
         <TextLink to="/" tone="emphasis">
-          Back to events
+          {t('eventDetail.backToEvents')}
         </TextLink>
       </div>
     );
@@ -278,7 +280,7 @@ export function EventDetail() {
         className="mb-5 inline-flex items-center gap-1.5"
       >
         <ArrowLeft className="h-3.5 w-3.5" />
-        Back
+        {t('common.back')}
       </TextLink>
 
       {/* Hero */}
@@ -309,7 +311,9 @@ export function EventDetail() {
           {event.description && (
             <p className="mt-1.5 text-sm leading-relaxed text-slate-400">{event.description}</p>
           )}
-          <p className="mt-1 text-xs text-muted">by {resolveOrganiserLabel(event)}</p>
+          <p className="mt-1 text-xs text-muted">
+            {t('common.by')} {resolveOrganiserLabel(event)}
+          </p>
         </div>
         {showDraftActions ? (
           <div className="flex shrink-0 flex-col gap-2">
@@ -319,7 +323,7 @@ export function EventDetail() {
               className="whitespace-nowrap"
               onClick={() => navigate(`/create?edit=${event.id}`)}
             >
-              Continue editing
+              {t('eventDetail.continueEditing')}
             </Button>
             {canDelete ? (
               <Button
@@ -329,7 +333,7 @@ export function EventDetail() {
                 disabled={deleting}
                 onClick={() => setConfirmAction('delete')}
               >
-                {deleting ? BUSY_LABEL.deleting : 'Delete draft'}
+                {deleting ? busyLabel('deleting') : t('eventDetail.deleteDraft')}
               </Button>
             ) : null}
           </div>
@@ -342,7 +346,7 @@ export function EventDetail() {
                 className="whitespace-nowrap"
                 onClick={() => navigate(`/event/${event.id}/results`)}
               >
-                Submit results
+                {t('eventDetail.submitResults')}
               </Button>
             ) : null}
             {canCancel ? (
@@ -353,7 +357,7 @@ export function EventDetail() {
                 disabled={cancelling}
                 onClick={() => setConfirmAction('cancel')}
               >
-                {cancelling ? BUSY_LABEL.cancelling : 'Cancel event'}
+                {cancelling ? busyLabel('cancelling') : t('eventDetail.cancelEvent')}
               </Button>
             ) : null}
           </div>
@@ -365,7 +369,7 @@ export function EventDetail() {
               className="shrink-0 whitespace-nowrap"
               onClick={() => navigate(`/create?edit=${event.id}`)}
             >
-              Edit
+              {t('eventDetail.edit')}
             </Button>
           ) : null
         ) : showParticipantActions ? (
@@ -382,8 +386,8 @@ export function EventDetail() {
           >
             {needsSignInToParticipate
               ? authRetrying
-                ? BUSY_LABEL.signingIn
-                : 'Sign in to join'
+                ? busyLabel('signingIn')
+                : t('auth.signInToJoin')
               : participationButtonLabel(joined, registrationOpen, full)}
           </Button>
         ) : null}
@@ -409,9 +413,9 @@ export function EventDetail() {
 
       <ConfirmDialog
         open={confirmAction === 'delete'}
-        title="Delete draft?"
-        description="Delete this draft permanently? This cannot be undone."
-        confirmLabel="Delete"
+        title={t('eventDetail.deleteDraftTitle')}
+        description={t('eventDetail.deleteDraftDesc')}
+        confirmLabel={t('common.delete')}
         variant="danger"
         busy={deleting}
         onCancel={() => setConfirmAction(null)}
@@ -422,9 +426,9 @@ export function EventDetail() {
       />
       <ConfirmDialog
         open={confirmAction === 'cancel'}
-        title="Cancel event?"
-        description="The Discord announcement will be updated and registration will close."
-        confirmLabel="Cancel event"
+        title={t('eventDetail.cancelEventTitle')}
+        description={t('eventDetail.cancelEventDesc')}
+        confirmLabel={t('eventDetail.cancelEvent')}
         variant="danger"
         busy={cancelling}
         onCancel={() => setConfirmAction(null)}
@@ -435,7 +439,7 @@ export function EventDetail() {
       />
       {showResultsSection ? (
         <div className="mt-4">
-          <p className={cn(sectionLabelClass, 'mb-2')}>Results</p>
+          <p className={cn(sectionLabelClass, 'mb-2')}>{t('eventDetail.results')}</p>
           <EventResultsTable rows={resultDisplay} pending={resultDisplay.length === 0} />
         </div>
       ) : (
@@ -468,7 +472,7 @@ export function EventDetail() {
             <Calendar className="h-3.5 w-3.5 text-accent-purple-light" />
           </div>
           <div>
-            <p className={sectionLabelClass}>Date & Time</p>
+            <p className={sectionLabelClass}>{t('eventDetail.dateTime')}</p>
             <p className="mt-0.5 text-sm text-slate-200">{when}</p>
           </div>
         </div>
@@ -480,7 +484,7 @@ export function EventDetail() {
               <Users className="h-3.5 w-3.5 text-accent-green" />
             </div>
             <div>
-              <p className={sectionLabelClass}>Convoy Leader</p>
+              <p className={sectionLabelClass}>{t('eventDetail.convoyLeader')}</p>
               <p className="mt-0.5 text-sm font-medium text-slate-200">{event.lobbyLeaderGamertag}</p>
             </div>
           </div>
@@ -493,7 +497,7 @@ export function EventDetail() {
               <RoadIcon className="text-muted-light" />
             </div>
             <div className="min-w-0">
-              <p className={sectionLabelClass}>Tracks</p>
+              <p className={sectionLabelClass}>{t('eventDetail.tracks')}</p>
               {event.trackCodes!.length === 1 ? (
                 <p className="mt-1 font-mono text-sm tracking-wide text-slate-200">
                   {event.trackCodes![0]}
@@ -520,12 +524,12 @@ export function EventDetail() {
             <Car className="h-3.5 w-3.5 text-muted-light" />
           </div>
           <div className="min-w-0 flex-1">
-            <p className={sectionLabelClass}>Car rules</p>
+            <p className={sectionLabelClass}>{t('eventDetail.carRules')}</p>
             {event.carRuleMode === 'anything_goes' ? (
               <ul className="mt-2 flex flex-col gap-1">
                 <li className={carRuleRowClass}>
                   <span className="truncate font-medium text-slate-200">
-                    {event.additionalCarRestrictions?.trim() || 'Open build'}
+                    {event.additionalCarRestrictions?.trim() || t('common.openBuild')}
                   </span>
                   <span
                     className={cn(
@@ -538,7 +542,7 @@ export function EventDetail() {
                 </li>
               </ul>
             ) : event.allowedCars.length === 0 ? (
-              <p className="mt-1 text-sm text-muted">Restricted list (details coming soon)</p>
+              <p className="mt-1 text-sm text-muted">{t('eventDetail.restrictedSoon')}</p>
             ) : (
               <ul className="mt-2 divide-y divide-white/[0.05]">
                 {event.allowedCars.map((c) => {
@@ -589,7 +593,7 @@ export function EventDetail() {
       {/* Participants */}
       <div className="mt-6">
         <div className="mb-3 flex items-center justify-between">
-          <p className="text-sm font-semibold text-white">Participants</p>
+          <p className="text-sm font-semibold text-white">{t('eventDetail.participants')}</p>
           <span className="text-xs tabular-nums text-muted">
             {formatLobbyCount(event.currentPlayers)}
           </span>
@@ -610,16 +614,16 @@ export function EventDetail() {
               <div className="min-w-0">
                 <p className="truncate text-xs font-medium text-slate-200">{convoyLeader.gamertag}</p>
                 <p className="text-[9px] font-bold uppercase tracking-widest text-accent-green/90">
-                  Convoy leader
-                  {convoyLeader.isYou ? ' · You' : ''}
-                  {convoyLeader.discordId === event.hostDiscordId ? ' · Host' : ''}
+                  {t('eventDetail.convoyLeaderBadge')}
+                  {convoyLeader.isYou ? t('eventDetail.youSuffix') : ''}
+                  {convoyLeader.discordId === event.hostDiscordId ? t('eventDetail.hostSuffix') : ''}
                 </p>
               </div>
             </div>
           ) : null}
           {registeredDrivers.length === 0 ? (
             <p className="text-sm text-muted">
-              {convoyLeader ? 'No drivers joined yet.' : 'No participants yet.'}
+              {convoyLeader ? t('eventDetail.noDriversYet') : t('eventDetail.noParticipantsYet')}
             </p>
           ) : (
             <div className="grid grid-cols-2 gap-2">
@@ -642,7 +646,7 @@ export function EventDetail() {
                     </p>
                     {p.discordId === user.discordId && (
                       <p className="text-[9px] font-bold uppercase tracking-widest text-accent-purple-light">
-                        You
+                        {t('common.you')}
                       </p>
                     )}
                   </div>

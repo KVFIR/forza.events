@@ -1,5 +1,6 @@
 import './App.css';
 import {lazy, Suspense} from 'react';
+import {useTranslation} from 'react-i18next';
 import {BrowserRouter, Navigate, Route, Routes} from 'react-router-dom';
 import {AppBootGate} from './components/AppBootGate';
 import {DiscordOnlyGate} from './components/DiscordOnlyGate';
@@ -31,7 +32,8 @@ const BotInstalled = lazy(() =>
 );
 
 function RouteFallback() {
-  return <PageLoading label="Loading page" className="pb-8 pt-5" />;
+  const {t} = useTranslation();
+  return <PageLoading label={t('loading.page')} className="pb-8 pt-5" />;
 }
 
 export default function App() {

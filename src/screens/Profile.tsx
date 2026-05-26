@@ -1,4 +1,6 @@
 import {useState} from 'react';
+import {useTranslation} from 'react-i18next';
+import {LanguageToggle} from '../components/LanguageToggle';
 import {TextButton, TextLink} from '../components/ui/TextButton';
 import {useAuth} from '../context/AuthContext';
 import {useJoinedEvents} from '../context/JoinedEventsContext';
@@ -17,6 +19,7 @@ import {StatCard} from '../components/ui/StatCard';
 import {cn} from '../lib/cn';
 
 export function Profile() {
+  const {t} = useTranslation();
   const {
     user,
     refreshUser,
@@ -46,7 +49,7 @@ export function Profile() {
   if (isConfigured && !isStandalone && !isSignedIn && !authInitializing) {
     return (
       <SignInRequiredState
-        description="Connect your Discord account to view your profile and stats."
+        description={t('auth.signInProfile')}
         busy={authRetrying}
         onRetry={() => void retryDiscordAuth()}
         className="pb-10 pt-5"
@@ -55,7 +58,7 @@ export function Profile() {
   }
 
   if (isLoading) {
-    return <PageLoading label="Loading profile" className="pb-10 pt-5" />;
+    return <PageLoading label={t('loading.profile')} className="pb-10 pt-5" />;
   }
 
   if (loadError) {
@@ -63,9 +66,9 @@ export function Profile() {
       <ContentReveal>
         <EmptyState
           icon="⚠️"
-          title="Could not load profile data"
-          description="Check your connection and try again."
-          action={{label: 'Try again', onClick: refetch}}
+          title={t('profile.loadErrorTitle')}
+          description={t('profile.loadErrorDesc')}
+          action={{label: t('common.tryAgain'), onClick: refetch}}
           className="min-h-[40vh] py-20"
         />
       </ContentReveal>
@@ -92,20 +95,21 @@ export function Profile() {
     <ContentReveal className="pb-10 pt-5">
       <div className="relative overflow-hidden rounded-2xl border border-white/[0.08] bg-card">
         <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_80%_20%,rgba(139,92,246,0.12)_0%,transparent_70%)]" />
-        <div className="relative flex items-center gap-4 p-5">
+        <LanguageToggle className="absolute right-3 top-3 z-10" />
+        <div className="relative flex items-center gap-4 p-5 pr-20">
           <div className="flex h-14 w-14 shrink-0 items-center justify-center rounded-2xl bg-gradient-to-br from-accent-purple-dark to-accent-purple-light text-xl font-black text-white shadow-glow-purple-sm">
             {initial}
           </div>
           <div className="min-w-0 flex-1">
             <p className="truncate text-lg font-black tracking-tight text-white">{user.username}</p>
             <p className="mt-0.5 text-xs text-muted-light">
-              Xbox GT:{' '}
+              {t('profile.xboxGt')}{' '}
               <span className={cn('font-semibold', needsGamertag ? 'text-amber-300' : 'text-slate-300')}>
-                {user.xboxGamertag ?? 'Not set'}
+                {user.xboxGamertag ?? t('common.notSet')}
               </span>
             </p>
             <TextButton type="button" className="mt-2" onClick={() => setEditGamertag(true)}>
-              {user.xboxGamertag ? 'Edit gamertag' : 'Add gamertag'}
+              {user.xboxGamertag ? t('profile.editGamertag') : t('profile.addGamertag')}
             </TextButton>
           </div>
         </div>
@@ -113,22 +117,22 @@ export function Profile() {
 
       {needsGamertag && (
         <Alert variant="warning" className="mt-3">
-          Add your Xbox gamertag before joining events on Browse.
+          {t('profile.gamertagWarning')}
         </Alert>
       )}
 
       <div className="mt-4 flex gap-2">
-        <StatCard label="Hosted" value={hostedCount} />
-        <StatCard label="Participated" value={participatedCount} />
-        <StatCard label="Rating" value="TBD" />
+        <StatCard label={t('profile.hosted')} value={hostedCount} />
+        <StatCard label={t('profile.participated')} value={participatedCount} />
+        <StatCard label={t('profile.rating')} value={t('profile.ratingTbd')} />
       </div>
 
       {recentCompleted.length > 0 && (
         <section className="mt-6">
           <div className="mb-3 flex items-center justify-between gap-2">
-            <p className="text-[11px] font-medium text-muted">Recent results</p>
+            <p className="text-[11px] font-medium text-muted">{t('profile.recentResults')}</p>
             <TextLink to="/my-events" className="text-[11px]">
-              All in My Events
+              {t('profile.allInMyEvents')}
             </TextLink>
           </div>
           <ul className="flex list-none flex-col gap-2">
@@ -143,7 +147,7 @@ export function Profile() {
 
       {active.length > 0 && (
         <section className="mt-6">
-          <p className="mb-3 text-[11px] font-medium text-muted">Upcoming for you</p>
+          <p className="mb-3 text-[11px] font-medium text-muted">{t('profile.upcoming')}</p>
           <ul className="flex list-none flex-col gap-2">
             {active.slice(0, 2).map((event) => (
               <li key={event.id}>
@@ -155,9 +159,7 @@ export function Profile() {
       )}
 
       {!isConfigured && (
-        <p className="mt-6 text-center text-[10px] text-muted">
-          Configure Supabase in <code>.env</code> to load profile stats from the database.
-        </p>
+        <p className="mt-6 text-center text-[10px] text-muted">{t('profile.supabaseHint')}</p>
       )}
       <GamertagModal
         open={editGamertag}

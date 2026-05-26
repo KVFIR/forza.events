@@ -4,6 +4,7 @@ import {ContentReveal} from './ui/ContentReveal';
 import {EmptyState} from './ui/EmptyState';
 import {PageLoading} from './ui/PageLoading';
 import {Spinner} from './ui/Spinner';
+import {useTranslation} from 'react-i18next';
 import type {ForzaEvent} from '../lib/types';
 import type {HostDraftsLoadError, PublishedEventsLoadError} from '../lib/events';
 
@@ -30,10 +31,11 @@ export function EventList({
   emptyAction,
   metaRight,
 }: Props) {
+  const {t} = useTranslation();
   const hasFetchError = !!loadError && events.length === 0 && !isLoading;
 
   if (isLoading && events.length === 0) {
-    return <PageLoading label="Loading events" />;
+    return <PageLoading label={t('loading.events')} />;
   }
 
   if (hasFetchError) {
@@ -43,7 +45,7 @@ export function EventList({
           icon="⚠️"
           title={emptyTitle}
           description={emptyDescription}
-          action={onRetry ? {label: 'Try again', onClick: onRetry} : undefined}
+          action={onRetry ? {label: t('common.tryAgain'), onClick: onRetry} : undefined}
           secondaryAction={emptyAction}
         />
       </ContentReveal>
@@ -52,8 +54,8 @@ export function EventList({
 
   const countLabel =
     events.length === 0
-      ? 'No events'
-      : `${events.length} event${events.length !== 1 ? 's' : ''} found`;
+      ? t('eventList.none')
+      : t('eventList.found', {count: events.length});
 
   return (
     <ContentReveal>
@@ -61,7 +63,7 @@ export function EventList({
         <div className="flex min-w-0 items-center gap-2">
           <p className="shrink-0 text-[11px] font-medium text-muted">{countLabel}</p>
           {isRefreshing ? (
-            <Spinner size="sm" label="Refreshing" className="shrink-0" muted />
+            <Spinner size="sm" label={t('loading.refreshing')} className="shrink-0" muted />
           ) : null}
         </div>
         {metaRight ? (

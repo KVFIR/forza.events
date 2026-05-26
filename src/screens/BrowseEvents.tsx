@@ -1,6 +1,7 @@
 import {useMemo, useState} from 'react';
+import {useTranslation} from 'react-i18next';
 import type {EventType} from '../lib/types';
-import {EVENT_TYPES} from '../lib/eventTypes';
+import {EVENT_TYPES, eventTypeLabel} from '../lib/eventTypes';
 import {EventList} from '../components/EventList';
 import {EventListMetaSelect} from '../components/EventListMetaSelect';
 import {useAuth} from '../context/AuthContext';
@@ -10,19 +11,20 @@ import {filterByEventType, sortEvents, type EventSortKey} from '../lib/eventList
 
 type TypeFilter = EventType | 'all';
 
-const typeOptions: {value: TypeFilter; label: string}[] = [
-  {value: 'all', label: 'All types'},
-  ...EVENT_TYPES.map((t) => ({value: t.value, label: t.label})),
-];
-
-const sortOptions: {value: EventSortKey; label: string}[] = [
-  {value: 'event_date', label: 'Event date'},
-  {value: 'created', label: 'Created'},
-  {value: 'fill', label: 'Fill'},
-];
-
 export function BrowseEvents() {
+  const {t} = useTranslation();
   const {isStandalone} = useAuth();
+
+  const typeOptions: {value: TypeFilter; label: string}[] = [
+    {value: 'all', label: t('browse.allTypes')},
+    ...EVENT_TYPES.map((et) => ({value: et.value, label: eventTypeLabel(et.value)})),
+  ];
+
+  const sortOptions: {value: EventSortKey; label: string}[] = [
+    {value: 'event_date', label: t('browse.sortEventDate')},
+    {value: 'created', label: t('browse.sortCreated')},
+    {value: 'fill', label: t('browse.sortFill')},
+  ];
   const {events, isLoading, isRefreshing, loadError, refetch} = usePublishedEvents();
   const [typeFilter, setTypeFilter] = useState<TypeFilter>('all');
   const [sort, setSort] = useState<EventSortKey>('event_date');
@@ -36,19 +38,19 @@ export function BrowseEvents() {
 
   const errorTitle =
     loadError === 'not_configured'
-      ? 'App is missing Supabase configuration'
+      ? t('browse.errorNotConfiguredTitle')
       : isStandalone
-        ? 'Could not load events from the database'
-        : 'Could not reach the database';
+        ? t('browse.errorStandaloneTitle')
+        : t('browse.errorDiscordTitle');
 
   const errorDescription =
     loadError === 'not_configured'
-      ? 'Add Supabase URL and anon key to your environment, then reload.'
+      ? t('browse.errorNotConfiguredDesc')
       : isStandalone
-        ? 'Check your connection and try again.'
-        : `In Discord Developer Portal add URL mapping ${DISCORD_SUPABASE_PROXY_PREFIX} → your-project.supabase.co`;
+        ? t('browse.errorStandaloneDesc')
+        : t('browse.errorDiscordDesc', {prefix: DISCORD_SUPABASE_PROXY_PREFIX});
 
-  const emptyTitle = 'No events match these filters';
+  const emptyTitle = t('browse.noMatch');
 
   return (
     <div className="pb-8 pt-5">
@@ -62,7 +64,7 @@ export function BrowseEvents() {
         emptyDescription={loadError ? errorDescription : undefined}
         emptyAction={
           !loadError && hasActiveFilters
-            ? {label: 'Clear filters', onClick: () => setTypeFilter('all')}
+            ? {label: t('common.clearFilters'), onClick: () => setTypeFilter('all')}
             : undefined
         }
         metaRight={
@@ -71,17 +73,17 @@ export function BrowseEvents() {
               value={typeFilter}
               onChange={setTypeFilter}
               options={typeOptions}
-              aria-label="Filter by event type"
+              aria-label={t('browse.filterByType')}
             />
             <span className="text-[11px] text-muted/35" aria-hidden>
               ·
             </span>
-            <span className="shrink-0 text-[11px] font-medium text-muted">sort by</span>
+            <span className="shrink-0 text-[11px] font-medium text-muted">{t('common.sortBy')}</span>
             <EventListMetaSelect
               value={sort}
               onChange={setSort}
               options={sortOptions}
-              aria-label="Sort events"
+              aria-label={t('browse.sortEvents')}
             />
           </>
         }

@@ -1,3 +1,5 @@
+import i18n from '../i18n';
+
 /** Xbox Live gamertag: 1–15 chars, alphanumeric and spaces */
 export const GAMERTAG_RE = /^[a-zA-Z0-9 ]{1,15}$/;
 
@@ -11,9 +13,9 @@ export function isValidGamertag(value: string): boolean {
 
 export function gamertagError(value: string): string | null {
   const t = value.trim();
-  if (!t) return 'Gamertag is required';
+  if (!t) return i18n.t('gamertag.required');
   if (!isValidGamertag(t)) {
-    return 'Use 1–15 letters, numbers, or spaces (Xbox Live rules)';
+    return i18n.t('gamertag.invalid');
   }
   return null;
 }

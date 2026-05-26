@@ -1,3 +1,4 @@
+import {useTranslation} from 'react-i18next';
 import {PublishTargetPicker} from '../../../components/PublishTargetPicker';
 import type {FieldErrors} from '../types';
 
@@ -26,10 +27,10 @@ export function TargetStep({
   onGuildChange,
   onChannelChange,
 }: Props) {
+  const {t} = useTranslation();
+
   if (!token) {
-    return (
-      <p className="text-sm text-muted">Open this app in Discord to choose a server and channel.</p>
-    );
+    return <p className="text-sm text-muted">{t('auth.openInDiscordTarget')}</p>;
   }
 
   return (
@@ -50,10 +51,7 @@ export function TargetStep({
         onChannelChange={onChannelChange}
       />
       {!lockGuild && (
-        <p className="text-xs text-muted">
-          Pick where the event will be announced. You can choose the channel on the final publish
-          step if it is not set yet.
-        </p>
+        <p className="text-xs text-muted">{t('create.targetHint')}</p>
       )}
     </div>
   );

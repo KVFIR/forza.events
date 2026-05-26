@@ -6,6 +6,13 @@ import {formatMaxPi} from './pi.ts';
 
 const LOBBY_TOTAL_PLAYERS = 12;
 const EMBED_FIELD_VALUE_MAX = 1024;
+const EMBED_FIELD_NAME_MAX = 256;
+const EMBED_TITLE_MAX = 256;
+const EMBED_TOTAL_CHAR_MAX = 6000;
+const EMBED_FIELDS_MAX = 25;
+const EMBED_DESCRIPTION_MAX = 300;
+
+const OPEN_IN_APP_HINT = 'open in FORZA.EVENTS for the full list';
 
 export type EmbedAllowedCar = {
   make: string;
@@ -89,14 +96,59 @@ function formatLobbyCount(currentPlayers: number): string {
   return `${filled}/${LOBBY_TOTAL_PLAYERS}`;
 }
 
-function formatTrackCodes(event: EmbedEventInput): string {
-  const codes = [event.event_share_code, ...(event.track_codes ?? [])].filter(
-    (code): code is string => Boolean(code?.trim()),
+function truncateFieldValue(value: string, max = EMBED_FIELD_VALUE_MAX): string {
+  if (value.length <= max) return value;
+  return `${value.slice(0, max - 1)}…`;
+}
+
+function embedFieldName(label: string, part?: string): string {
+  const name = part ? `${label} (${part})` : label;
+  return name.length <= EMBED_FIELD_NAME_MAX ? name : name.slice(0, EMBED_FIELD_NAME_MAX);
+}
+
+function measureEmbedChars(parts: {
+  title: string;
+  description?: string;
+  footerText: string;
+  fields: {name: string; value: string}[];
+}): number {
+  let n = parts.title.length + parts.footerText.length;
+  if (parts.description) n += parts.description.length;
+  for (const f of parts.fields) {
+    n += f.name.length + f.value.length;
+  }
+  return n;
+}
+
+function omittedSuffix(count: number, noun: string): string {
+  return `\n_+${count} more ${noun}(s) — ${OPEN_IN_APP_HINT}._`;
+}
+
+/** Discord inline code (`…`) for share codes, PI, tunes, and rule tags. */
+function inlineCode(text: string): string {
+  const flat = text.trim().replace(/\s+/g, ' ');
+  if (!flat) return '';
+  return `\`${flat.replace(/`/g, "'")}\``;
+}
+
+function listTrackCodes(event: EmbedEventInput): string[] {
+  return [event.event_share_code, ...(event.track_codes ?? [])].filter((code): code is string =>
+    Boolean(code?.trim()),
   );
-  if (codes.length === 0) return 'TBA';
-  return codes
-    .map((code, i) => `${i + 1}. \`${code.trim()}\``)
-    .join('\n');
+}
+
+function formatTrackCodes(codes: string[]): string {
+  let result = '';
+  for (let i = 0; i < codes.length; i++) {
+    const line = `${i + 1}. ${inlineCode(codes[i])}`;
+    const next = result ? `${result}\n${line}` : line;
+    const remaining = codes.length - i - 1;
+    if (remaining > 0 && next.length + omittedSuffix(remaining, 'track').length > EMBED_FIELD_VALUE_MAX) {
+      return truncateFieldValue(`${result}${omittedSuffix(remaining, 'track')}`);
+    }
+    result = next;
+  }
+  return truncateFieldValue(result);
 }
 
 function resolveOpenBuildNotes(event: EmbedEventInput): string | null {
@@ -108,71 +160,114 @@ function resolveOpenBuildNotes(event: EmbedEventInput): string | null {
   return text?.trim() || null;
 }
 
-function formatCarLabel(car: EmbedAllowedCar): string {
-  const name = [car.year, car.make, car.model].filter(Boolean).join(' ');
-  return `${name} · ${formatMaxPi(car.max_pi)}`;
+function formatCarName(car: EmbedAllowedCar): string {
+  return [car.year, car.make, car.model].filter(Boolean).join(' ');
 }
 
 function formatRestrictedCarBlock(car: EmbedAllowedCar): string {
-  const lines = [formatCarLabel(car)];
-  const extras: string[] = [];
+  const parts = [formatCarName(car), inlineCode(formatMaxPi(car.max_pi))];
   if (car.tune_share_code?.trim()) {
-    extras.push(`\`${car.tune_share_code.trim()}\``);
+    parts.push(inlineCode(car.tune_share_code));
   }
-  const restrictions = (car.car_restrictions ?? []).filter(Boolean);
-  if (restrictions.length > 0) {
-    extras.push(restrictions.join(', '));
+  for (const rule of (car.car_restrictions ?? []).filter(Boolean)) {
+    parts.push(inlineCode(rule));
   }
-  if (extras.length > 0) {
-    lines.push(extras.join(' · '));
+  return parts.join(' ');
+}
+
+function splitOversizedBlock(block: string, max = EMBED_FIELD_VALUE_MAX): string[] {
+  if (block.length <= max) return [block];
+  const parts: string[] = [];
+  let rest = block;
+  while (rest.length > max) {
+    parts.push(`${rest.slice(0, max - 1)}…`);
+    rest = rest.slice(max - 1);
   }
-  return lines.join('\n');
+  if (rest) parts.push(rest);
+  return parts;
 }
 
 function chunkEmbedFieldValues(blocks: string[], max = EMBED_FIELD_VALUE_MAX): string[] {
+  const normalized = blocks.flatMap((block) => splitOversizedBlock(block, max));
   const chunks: string[] = [];
   let current = '';
-  for (const block of blocks) {
-    const piece = chunks.length > 0 || current ? `\n\n${block}` : block;
+  for (const block of normalized) {
+    const piece = chunks.length > 0 || current ? `\n${block}` : block;
     if (current.length + piece.length > max && current) {
-      chunks.push(current);
+      chunks.push(truncateFieldValue(current, max));
       current = block;
     } else {
       current += piece;
     }
   }
-  if (current) chunks.push(current);
+  if (current) chunks.push(truncateFieldValue(current, max));
   return chunks.length > 0 ? chunks : ['Restricted car list (no cars configured)'];
 }
 
-function restrictedCarFields(cars: EmbedAllowedCar[]): {name: string; value: string; inline: false}[] {
+type EmbedField = {name: string; value: string; inline: false};
+
+function fitRestrictedCarFields(
+  cars: EmbedAllowedCar[],
+  limits: {maxChars: number; maxFields: number},
+): {fields: EmbedField[]; shown: number} {
   if (cars.length === 0) {
-    return [{name: '🚗 Car', value: 'Restricted car list (no cars configured)', inline: false}];
+    return {
+      fields: [{name: embedFieldName('🚗 Car'), value: 'Restricted car list (no cars configured)', inline: false}],
+      shown: 0,
+    };
   }
-  const blocks = cars.map(formatRestrictedCarBlock);
-  const values = chunkEmbedFieldValues(blocks);
-  return values.map((value, i) => ({
-    name: i === 0 ? '🚗 Car' : `🚗 Car (${i + 1}/${values.length})`,
-    value,
-    inline: false as const,
-  }));
+
+  for (let count = cars.length; count >= 1; count--) {
+    const omitted = cars.length - count;
+    const blocks = cars.slice(0, count).map(formatRestrictedCarBlock);
+    let values = chunkEmbedFieldValues(blocks);
+
+    if (omitted > 0) {
+      const suffix = omittedSuffix(omitted, 'car');
+      const last = values.length - 1;
+      const withSuffix = `${values[last]}${suffix}`;
+      if (withSuffix.length > EMBED_FIELD_VALUE_MAX) continue;
+      values[last] = withSuffix;
+    }
+
+    const fields: EmbedField[] = values.map((value, i) => ({
+      name: embedFieldName('🚗 Car', values.length > 1 ? `${i + 1}/${values.length}` : undefined),
+      value,
+      inline: false,
+    }));
+
+    const usedChars = fields.reduce((sum, f) => sum + f.name.length + f.value.length, 0);
+    if (fields.length <= limits.maxFields && usedChars <= limits.maxChars) {
+      return {fields, shown: count};
+    }
+  }
+
+  return {
+    fields: [
+      {
+        name: embedFieldName('🚗 Car'),
+        value: truncateFieldValue(
+          `${cars.length} cars on the restricted list — ${OPEN_IN_APP_HINT}.`,
+        ),
+        inline: false,
+      },
+    ],
+    shown: 0,
+  };
 }
 
 function formatOpenBuildCarField(event: EmbedEventInput): string {
   const pi = event.max_pi ? formatMaxPi(event.max_pi) : 'PI cap';
-  return `Open build · ${pi}`;
+  return `Open build ${inlineCode(pi)}`;
 }
 
 function formatOpenBuildRestrictionsField(event: EmbedEventInput): string | null {
   return resolveOpenBuildNotes(event);
 }
 
-function embedFooter(guildName?: string | null): {text: string} {
+function embedFooter(guildName?: string | null): {text: string} | undefined {
   const server = guildName?.trim();
-  if (server) {
-    return {text: `${server} · FORZA.EVENTS`};
-  }
-  return {text: 'FORZA.EVENTS'};
+  return server ? {text: server} : undefined;
 }
 
 export function buildEventEmbed(event: EmbedEventInput) {
@@ -184,37 +279,97 @@ export function buildEventEmbed(event: EmbedEventInput) {
   const isOpenBuild = event.car_rule_mode !== 'restricted_list';
   const lobbyCount = formatLobbyCount(event.current_players);
 
-  const fields: {name: string; value: string; inline?: boolean}[] = [
-    {name: '📅 Date', value: discordTimestamp(event.starts_at), inline: false},
-    {name: '🛣️ Track', value: formatTrackCodes(event), inline: false},
+  const title = event.title.slice(0, EMBED_TITLE_MAX);
+  const description = event.description?.trim()
+    ? event.description.slice(0, EMBED_DESCRIPTION_MAX)
+    : undefined;
+  const footer = embedFooter(event.guild_name);
+
+  const participantsField: EmbedField = {
+    name: embedFieldName(`👤 Participants (${lobbyCount})`),
+    value: truncateFieldValue(`Convoy leader: ${event.lobby_leader_gamertag.trim() || 'TBD'}`),
+    inline: false,
+  };
+
+  const trackCodes = listTrackCodes(event);
+  const trackField: EmbedField | null =
+    trackCodes.length > 0
+      ? {name: embedFieldName('🛣️ Track'), value: formatTrackCodes(trackCodes), inline: false}
+      : null;
+
+  const fixedFields: EmbedField[] = [
+    {name: embedFieldName('📅 Date'), value: discordTimestamp(event.starts_at), inline: false},
+    ...(trackField ? [trackField] : []),
   ];
 
-  if (isOpenBuild) {
-    fields.push({name: '🚗 Car', value: formatOpenBuildCarField(event), inline: false});
-  } else {
-    fields.push(...restrictedCarFields(event.allowed_cars ?? []));
+  const restrictionsText = isOpenBuild ? formatOpenBuildRestrictionsField(event) : null;
+  const restrictionsField: EmbedField | null = restrictionsText
+    ? {
+        name: embedFieldName('🔧 Restrictions'),
+        value: truncateFieldValue(inlineCode(restrictionsText)),
+        inline: false,
+      }
+    : null;
+
+  const skeletonFields = [
+    ...fixedFields,
+    ...(restrictionsField ? [restrictionsField] : []),
+    participantsField,
+  ];
+  const skeletonChars = measureEmbedChars({
+    title,
+    description,
+    footerText: footer?.text ?? '',
+    fields: skeletonFields,
+  });
+  const skeletonFieldCount = skeletonFields.length + (isOpenBuild ? 1 : 0);
+
+  const carBudget = {
+    maxChars: Math.max(0, EMBED_TOTAL_CHAR_MAX - skeletonChars),
+    maxFields: Math.max(1, EMBED_FIELDS_MAX - skeletonFieldCount),
+  };
+
+  const allCars = event.allowed_cars ?? [];
+  let carFit = isOpenBuild
+    ? null
+    : fitRestrictedCarFields(allCars, carBudget);
+
+  function assembleFields(carFields: EmbedField[]): EmbedField[] {
+    const list: EmbedField[] = [...fixedFields];
+    if (isOpenBuild) {
+      list.push({
+        name: embedFieldName('🚗 Car'),
+        value: truncateFieldValue(formatOpenBuildCarField(event)),
+        inline: false,
+      });
+      if (restrictionsField) list.push(restrictionsField);
+    } else {
+      list.push(...carFields);
+    }
+    list.push(participantsField);
+    return list.slice(0, EMBED_FIELDS_MAX);
   }
 
-  if (isOpenBuild) {
-    const restrictions = formatOpenBuildRestrictionsField(event);
-    if (restrictions) {
-      fields.push({name: '🔧 Restrictions', value: restrictions, inline: false});
+  let finalFields = assembleFields(carFit?.fields ?? []);
+
+  if (!isOpenBuild && carFit) {
+    while (
+      measureEmbedChars({title, description, footerText: footer?.text ?? '', fields: finalFields}) >
+        EMBED_TOTAL_CHAR_MAX &&
+      carFit.shown > 1
+    ) {
+      carFit = fitRestrictedCarFields(allCars.slice(0, carFit.shown - 1), carBudget);
+      finalFields = assembleFields(carFit.fields);
     }
   }
 
-  fields.push({
-    name: `👤 Participants (${lobbyCount})`,
-    value: `Convoy leader: ${event.lobby_leader_gamertag.trim() || 'TBD'}`,
-    inline: false,
-  });
-
   const embed = {
-    title: event.title,
-    description: event.description?.slice(0, 300) ?? undefined,
+    title,
+    description,
     color: eventTypeEmbedColor(event.type),
     image: {url: coverUrl},
-    fields,
-    footer: embedFooter(event.guild_name),
+    fields: finalFields,
+    ...(footer ? {footer} : {}),
   };
 
   const components = [

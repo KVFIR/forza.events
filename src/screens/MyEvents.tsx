@@ -1,4 +1,5 @@
 import {useState} from 'react';
+import {useTranslation} from 'react-i18next';
 import {useNavigate} from 'react-router-dom';
 import {Alert} from '../components/ui/Alert';
 import {EventList} from '../components/EventList';
@@ -7,14 +8,15 @@ import {useAuth} from '../context/AuthContext';
 import {useMyEventsCatalog} from '../hooks/useMyEventsCatalog';
 import type {MyEventsScope} from '../lib/eventList';
 
-const scopeOptions: {value: MyEventsScope; label: string}[] = [
-  {value: 'all', label: 'All'},
-  {value: 'hosted', label: 'Hosted'},
-  {value: 'joined', label: 'Joined'},
-];
-
 export function MyEvents() {
+  const {t} = useTranslation();
   const navigate = useNavigate();
+
+  const scopeOptions: {value: MyEventsScope; label: string}[] = [
+    {value: 'all', label: t('myEvents.scopeAll')},
+    {value: 'hosted', label: t('myEvents.scopeHosted')},
+    {value: 'joined', label: t('myEvents.scopeJoined')},
+  ];
   const [scope, setScope] = useState<MyEventsScope>('all');
   const {isSignedIn, loading: authLoading} = useAuth();
   const {filtered, isLoading, isRefreshing, loadError, draftsLoadError, refetch} =
@@ -22,27 +24,27 @@ export function MyEvents() {
 
   const emptyTitle =
     !authLoading && !isSignedIn
-      ? 'Unable to load your events'
+      ? t('myEvents.unableToLoad')
       : loadError
-        ? 'Could not load your events'
+        ? t('myEvents.loadError')
         : scope === 'joined'
-          ? 'No joined events yet'
-          : 'No events in this list yet';
+          ? t('myEvents.noJoined')
+          : t('myEvents.emptyList');
 
   const emptyDescription =
     !authLoading && !isSignedIn
-      ? 'Open this app in Discord to see events you host or join.'
+      ? t('auth.openInDiscordMyEvents')
       : loadError
-        ? 'Check your connection and try again.'
+        ? t('myEvents.loadErrorDesc')
         : scope !== 'joined' && isSignedIn
-          ? 'Saved drafts and published events you host appear here.'
+          ? t('myEvents.emptyHostedDesc')
           : undefined;
 
   const draftsHint =
     !loadError && draftsLoadError === 'unauthorized'
-      ? 'Could not refresh drafts — open the app in Discord again.'
+      ? t('myEvents.draftsUnauthorized')
       : !loadError && draftsLoadError === 'fetch_failed'
-        ? 'Could not load drafts. Published events are shown below.'
+        ? t('myEvents.draftsFailed')
         : null;
 
   return (
@@ -64,9 +66,9 @@ export function MyEvents() {
           scope === 'joined'
             ? undefined
             : scope !== 'all'
-              ? {label: 'Clear filters', onClick: () => setScope('all')}
+              ? {label: t('common.clearFilters'), onClick: () => setScope('all')}
               : !loadError && isSignedIn
-                ? {label: 'Create event', onClick: () => navigate('/create')}
+                ? {label: t('myEvents.createEvent'), onClick: () => navigate('/create')}
                 : undefined
         }
         metaRight={
@@ -74,7 +76,7 @@ export function MyEvents() {
             value={scope}
             onChange={setScope}
             options={scopeOptions}
-            aria-label="Filter my events"
+            aria-label={t('myEvents.filterAria')}
           />
         }
       />

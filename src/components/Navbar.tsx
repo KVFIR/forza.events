@@ -1,4 +1,5 @@
 import {NavLink} from 'react-router-dom';
+import {useTranslation} from 'react-i18next';
 import {CalendarDays, Compass, PlusCircle, User2, type LucideIcon} from 'lucide-react';
 import {AuthStatusIndicator} from './AuthStatusIndicator';
 import {Logo} from './ui/Logo';
@@ -10,20 +11,21 @@ const navBrandBarClass = cn(
   navShellBorderClass,
 );
 
-const NAV_ITEMS: {to: string; end: boolean; icon: LucideIcon; label: string}[] = [
-  {to: '/', end: true, icon: Compass, label: 'Browse'},
-  {to: '/my-events', end: true, icon: CalendarDays, label: 'My Events'},
-  {to: '/create', end: false, icon: PlusCircle, label: 'Create'},
-  {to: '/profile', end: false, icon: User2, label: 'Profile'},
+const NAV_ITEMS: {to: string; end: boolean; icon: LucideIcon; labelKey: string}[] = [
+  {to: '/', end: true, icon: Compass, labelKey: 'nav.browse'},
+  {to: '/my-events', end: true, icon: CalendarDays, labelKey: 'nav.myEvents'},
+  {to: '/create', end: false, icon: PlusCircle, labelKey: 'nav.create'},
+  {to: '/profile', end: false, icon: User2, labelKey: 'nav.profile'},
 ];
 
 function NavItem({
   to,
   end,
   icon: Icon,
-  label,
+  labelKey,
   layout,
 }: (typeof NAV_ITEMS)[number] & {layout: 'top' | 'side'}) {
+  const {t} = useTranslation();
   const isSide = layout === 'side';
 
   return (
@@ -62,7 +64,7 @@ function NavItem({
               isActive && '[filter:drop-shadow(0_0_8px_rgba(139,92,246,0.9))]',
             )}
           />
-          <span className={isActive ? 'text-glow-purple' : ''}>{label}</span>
+          <span className={isActive ? 'text-glow-purple' : ''}>{t(labelKey)}</span>
         </>
       )}
     </NavLink>

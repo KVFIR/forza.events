@@ -1,5 +1,6 @@
+import {useTranslation} from 'react-i18next';
+import {busyLabel} from '../../i18n/busyLabels';
 import {Button} from './Button';
-import {BUSY_LABEL} from './buttonStyles';
 import {ModalBackdrop, ModalPanel} from './ModalShell';
 
 type ConfirmDialogProps = {
@@ -18,13 +19,17 @@ export function ConfirmDialog({
   open,
   title,
   description,
-  confirmLabel = 'Confirm',
-  cancelLabel = 'Cancel',
+  confirmLabel,
+  cancelLabel,
   variant = 'primary',
   busy = false,
   onConfirm,
   onCancel,
 }: ConfirmDialogProps) {
+  const {t} = useTranslation();
+  const resolvedConfirm = confirmLabel ?? t('confirm.defaultConfirm');
+  const resolvedCancel = cancelLabel ?? t('common.cancel');
+
   if (!open) return null;
 
   return (
@@ -49,7 +54,7 @@ export function ConfirmDialog({
             disabled={busy}
             onClick={onCancel}
           >
-            {cancelLabel}
+            {resolvedCancel}
           </Button>
           <Button
             type="button"
@@ -58,7 +63,7 @@ export function ConfirmDialog({
             disabled={busy}
             onClick={onConfirm}
           >
-            {busy ? BUSY_LABEL.working : confirmLabel}
+            {busy ? busyLabel('working') : resolvedConfirm}
           </Button>
         </div>
       </ModalPanel>

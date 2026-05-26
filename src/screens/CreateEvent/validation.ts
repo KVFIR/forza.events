@@ -1,3 +1,4 @@
+import i18n from '../../i18n';
 import {gamertagError} from '../../lib/gamertag';
 import {defaultTimezone, localInputToUtc} from '../../lib/datetime';
 import {isEventType} from '../../lib/eventTypes';
@@ -19,7 +20,7 @@ function validateStartsInFuture(startsAtLocal: string): string | null {
   if (!startsAtLocal) return null;
   const utc = localInputToUtc(startsAtLocal, defaultTimezone());
   if (new Date(utc).getTime() <= Date.now()) {
-    return 'Choose a date and time in the future.';
+    return i18n.t('validation.futureDate');
   }
   return null;
 }
@@ -27,10 +28,10 @@ function validateStartsInFuture(startsAtLocal: string): string | null {
 export function validateCoverFile(file: File | null): string | null {
   if (!file) return null;
   if (!COVER_ACCEPT.split(',').includes(file.type)) {
-    return 'Use JPEG, PNG, or WebP.';
+    return i18n.t('validation.coverFormat');
   }
   if (file.size > COVER_MAX_BYTES) {
-    return 'Cover image must be 2 MB or smaller.';
+    return i18n.t('validation.coverSize');
   }
   return null;
 }
@@ -41,12 +42,12 @@ export function validateBasicsStep(
 ): FieldErrors {
   const errors: FieldErrors = {};
   const title = values.title.trim();
-  if (!title) errors.title = 'Event name is required.';
-  if (!isEventType(values.type)) errors.type = 'Event type is required.';
+  if (!title) errors.title = i18n.t('validation.titleRequired');
+  if (!isEventType(values.type)) errors.type = i18n.t('validation.typeRequired');
   else if (title.length > TITLE_MAX_LENGTH) {
-    errors.title = `Keep the name under ${TITLE_MAX_LENGTH} characters.`;
+    errors.title = i18n.t('validation.titleMax', {max: TITLE_MAX_LENGTH});
   }
-  if (!values.startsAtLocal) errors.startsAtLocal = 'Date and time are required.';
+  if (!values.startsAtLocal) errors.startsAtLocal = i18n.t('validation.dateRequired');
   else if (!options?.allowPastStart) {
     const futureErr = validateStartsInFuture(values.startsAtLocal);
     if (futureErr) errors.startsAtLocal = futureErr;
@@ -72,19 +73,18 @@ export function validateDetailsStep(
   if (values.lobbyLeaderIsHost) {
     const tagErr = gamertagError(options?.hostGamertag ?? '');
     if (tagErr) {
-      errors.lobbyLeaderGamertag =
-        'Add your Xbox gamertag in Profile, or uncheck “I am the convoy leader” and enter another player.';
+      errors.lobbyLeaderGamertag = i18n.t('validation.convoyLeaderProfile');
     }
   } else {
     const tagErr = gamertagError(values.lobbyLeaderGamertag);
     if (tagErr) errors.lobbyLeaderGamertag = tagErr;
   }
   if (values.carRuleMode === 'restricted_list' && values.eventCars.length === 0) {
-    errors.eventCars = 'Add at least one car for a restricted list.';
+    errors.eventCars = i18n.t('validation.carsRequired');
   }
   if (values.carRuleMode === 'anything_goes') {
     if (values.maxPi < 100 || values.maxPi > 999) {
-      errors.maxPi = 'Set a PI cap between 100 and 999.';
+      errors.maxPi = i18n.t('validation.piRange');
     }
   }
   return errors;
@@ -95,9 +95,9 @@ export function validateTargetStep(values: Pick<
   'targetGuildId' | 'targetChannelId'
 >, options?: {requireChannel?: boolean}): FieldErrors {
   const errors: FieldErrors = {};
-  if (!values.targetGuildId) errors.targetGuildId = 'Choose a Discord server for this event.';
+  if (!values.targetGuildId) errors.targetGuildId = i18n.t('validation.guildRequired');
   if (options?.requireChannel && !values.targetChannelId) {
-    errors.targetChannelId = 'Choose a channel before publishing.';
+    errors.targetChannelId = i18n.t('validation.channelRequired');
   }
   return errors;
 }

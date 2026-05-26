@@ -1,5 +1,6 @@
+import {useTranslation} from 'react-i18next';
+import {busyLabel} from '../../i18n/busyLabels';
 import {Button} from '../../components/ui/Button';
-import {BUSY_LABEL} from '../../components/ui/buttonStyles';
 import {ConfirmDialog} from '../../components/ui/ConfirmDialog';
 import {PublishTargetModal} from '../../components/PublishTargetPicker';
 import {FormAlerts, StepIndicator} from './components/StepIndicator';
@@ -17,6 +18,7 @@ import {useAuth} from '../../context/AuthContext';
 import {useLoadingUI} from '../../hooks/useLoadingUI';
 
 export function CreateEvent() {
+  const {t} = useTranslation();
   const [publishConfirmOpen, setPublishConfirmOpen] = useState(false);
   const {isStandalone, loading: authInitializing, authRetrying, retryDiscordAuth} = useAuth();
   const form = useCreateEventForm();
@@ -71,8 +73,8 @@ export function CreateEvent() {
   } = form;
 
   const lobbyLeaderLabel = values.lobbyLeaderIsHost
-    ? (user.xboxGamertag?.trim() || 'You (host)')
-    : values.lobbyLeaderGamertag.trim() || '—';
+    ? (user.xboxGamertag?.trim() || t('create.youHost'))
+    : values.lobbyLeaderGamertag.trim() || t('common.dash');
 
   const missingForPublish = collectPublishGaps({
     channelId: values.targetChannelId,
@@ -132,17 +134,17 @@ export function CreateEvent() {
   }
 
   if (showLoadingUI) {
-    return <PageLoading label="Loading event" className="pb-10 pt-5" />;
+    return <PageLoading label={t('loading.event')} className="pb-10 pt-5" />;
   }
 
   if (form.loadingEdit) {
-    return <PageLoading label="Loading event" className="pb-10 pt-5" />;
+    return <PageLoading label={t('loading.event')} className="pb-10 pt-5" />;
   }
 
   if (isConfigured && !isStandalone && !isSignedIn && !authInitializing) {
     return (
       <SignInRequiredState
-        description="Connect your Discord account to create, save, and publish events."
+        description={t('auth.signInCreate')}
         busy={authRetrying}
         onRetry={() => void retryDiscordAuth()}
         className="pb-10 pt-5"
@@ -237,7 +239,7 @@ export function CreateEvent() {
       <div className="mt-8 flex flex-col gap-2">
         {step < PREVIEW_STEP_INDEX && (
           <Button variant="primary" fullWidth onClick={() => tryContinue()}>
-            Continue
+            {t('common.continue')}
           </Button>
         )}
         {step > 0 && (
@@ -246,7 +248,7 @@ export function CreateEvent() {
             fullWidth
             onClick={() => setStep((step - 1) as CreateEventStepIndex)}
           >
-            Back
+            {t('common.back')}
           </Button>
         )}
 
@@ -258,7 +260,7 @@ export function CreateEvent() {
               disabled={saving || !canPersist}
               onClick={() => void handlePublishClick()}
             >
-              {saving ? BUSY_LABEL.working : 'Publish event'}
+              {saving ? busyLabel('working') : t('create.publishEvent')}
             </Button>
             <Button
               variant="secondary"
@@ -268,7 +270,11 @@ export function CreateEvent() {
                 void (hasDraftId ? handleSaveChanges() : handleSaveDraft())
               }
             >
-              {saving ? BUSY_LABEL.saving : hasDraftId ? 'Save changes' : 'Save as draft'}
+              {saving
+                ? busyLabel('saving')
+                : hasDraftId
+                  ? t('create.saveChanges')
+                  : t('create.saveAsDraft')}
             </Button>
             {hasDraftId && (
               <Button
@@ -277,7 +283,7 @@ export function CreateEvent() {
                 disabled={saving || !canPersist}
                 onClick={requestDeleteDraft}
               >
-                Delete draft
+                {t('eventDetail.deleteDraft')}
               </Button>
             )}
           </>
@@ -291,7 +297,7 @@ export function CreateEvent() {
               disabled={saving || !canPersist}
               onClick={() => void handleSaveChanges()}
             >
-              {saving ? BUSY_LABEL.saving : 'Save changes'}
+              {saving ? busyLabel('saving') : t('create.saveChanges')}
             </Button>
             {canCancelPublished ? (
               <Button
@@ -300,7 +306,7 @@ export function CreateEvent() {
                 disabled={saving || !canPersist}
                 onClick={requestCancelPublished}
               >
-                Cancel event
+                {t('eventDetail.cancelEvent')}
               </Button>
             ) : null}
           </>
@@ -309,9 +315,9 @@ export function CreateEvent() {
 
       <ConfirmDialog
         open={deleteConfirmOpen}
-        title="Delete draft?"
-        description="Delete this draft permanently? This cannot be undone."
-        confirmLabel="Delete"
+        title={t('eventDetail.deleteDraftTitle')}
+        description={t('eventDetail.deleteDraftDesc')}
+        confirmLabel={t('common.delete')}
         variant="danger"
         busy={saving}
         onCancel={() => setDeleteConfirmOpen(false)}
@@ -320,9 +326,9 @@ export function CreateEvent() {
 
       <ConfirmDialog
         open={cancelConfirmOpen}
-        title="Cancel event?"
-        description="The Discord announcement will be updated and registration will close."
-        confirmLabel="Cancel event"
+        title={t('eventDetail.cancelEventTitle')}
+        description={t('eventDetail.cancelEventDesc')}
+        confirmLabel={t('eventDetail.cancelEvent')}
         variant="danger"
         busy={saving}
         onCancel={() => setCancelConfirmOpen(false)}
@@ -331,9 +337,9 @@ export function CreateEvent() {
 
       <ConfirmDialog
         open={publishConfirmOpen}
-        title="Publish event?"
-        description="This posts an announcement in Discord. Server and channel cannot be changed afterward."
-        confirmLabel="Publish"
+        title={t('create.publishEventTitle')}
+        description={t('create.publishEventDesc')}
+        confirmLabel={t('create.publish')}
         busy={saving}
         onCancel={() => setPublishConfirmOpen(false)}
         onConfirm={() => {

@@ -1,4 +1,6 @@
 import {useEffect, useState} from 'react';
+import {useTranslation} from 'react-i18next';
+import {busyLabel} from '../i18n/busyLabels';
 import {useNavigate, useParams} from 'react-router-dom';
 import {ArrowLeft, ChevronDown, ChevronUp} from 'lucide-react';
 import {useAuth} from '../context/AuthContext';
@@ -13,7 +15,6 @@ import {
 import type {EventParticipant} from '../lib/types';
 import {Alert} from '../components/ui/Alert';
 import {Button} from '../components/ui/Button';
-import {BUSY_LABEL} from '../components/ui/buttonStyles';
 import {CheckboxField} from '../components/ui/CheckboxField';
 import {Panel} from '../components/ui/Panel';
 import {TextLink} from '../components/ui/TextButton';
@@ -44,6 +45,7 @@ function buildPlacements(participants: EventParticipant[]): Placement[] {
 }
 
 export function EventResults() {
+  const {t} = useTranslation();
   const {id} = useParams<{id: string}>();
   const navigate = useNavigate();
   const {user, getAccessToken, isSignedIn} = useAuth();
@@ -154,7 +156,7 @@ export function EventResults() {
   }
 
   if (showLoadingUI) {
-    return <PageLoading label="Loading results" className="pb-10 pt-5" />;
+    return <PageLoading label={t('loading.results')} className="pb-10 pt-5" />;
   }
 
   if (loading) {
@@ -169,7 +171,7 @@ export function EventResults() {
         className="mb-5 inline-flex items-center gap-1.5"
       >
         <ArrowLeft className="h-3.5 w-3.5" />
-        Back
+        {t('common.back')}
       </TextLink>
 
       <p className="text-sm font-semibold text-white">{title}</p>
@@ -199,12 +201,12 @@ export function EventResults() {
               {row.label}
             </span>
             <CheckboxField
-              label="DNF"
+              label={t('results.dnf')}
               checked={row.dnf}
               onChange={() => toggleDnf(index)}
             />
             <CheckboxField
-              label="DNS"
+              label={t('results.dns')}
               checked={row.dns}
               onChange={() => toggleDns(index)}
             />
@@ -216,7 +218,7 @@ export function EventResults() {
                 className="p-0.5 text-muted hover:text-white disabled:opacity-30"
                 disabled={index === 0}
                 onClick={() => move(index, -1)}
-                aria-label="Move up"
+                aria-label={t('results.moveUp')}
               >
                 <ChevronUp className="h-4 w-4" />
               </Button>
@@ -227,7 +229,7 @@ export function EventResults() {
                 className="p-0.5 text-muted hover:text-white disabled:opacity-30"
                 disabled={index === placements.length - 1}
                 onClick={() => move(index, 1)}
-                aria-label="Move down"
+                aria-label={t('results.moveDown')}
               >
                 <ChevronDown className="h-4 w-4" />
               </Button>
@@ -248,14 +250,14 @@ export function EventResults() {
         disabled={saving || placements.length === 0 || alreadySubmitted}
         onClick={() => setSubmitConfirmOpen(true)}
       >
-        {saving ? BUSY_LABEL.saving : 'Submit results'}
+        {saving ? busyLabel('saving') : t('eventDetail.submitResults')}
       </Button>
 
       <ConfirmDialog
         open={submitConfirmOpen}
-        title="Submit results?"
-        description="Submit these results? They cannot be changed after submission."
-        confirmLabel="Submit"
+        title={t('results.submitTitle')}
+        description={t('results.submitDesc')}
+        confirmLabel={t('eventDetail.submitResults')}
         busy={saving}
         onCancel={() => setSubmitConfirmOpen(false)}
         onConfirm={() => {

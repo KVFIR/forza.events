@@ -17,7 +17,7 @@ Lessons from implementation work (keep in sync when behavior changes).
 - **Save published edits:** `save-event` update uses `buildEventFields` only — never overwrites `status` (avoids reverting `open` → `draft`).
 - **Post-start host:** Event Detail shows separate **Submit results** + **Cancel event** buttons; cancel syncs Discord embed via `syncPublishedEmbed`.
   - After publish, server and channel are **locked** in the form (`lockGuild` / `lockChannel`).
-  - **Publish embed:** `publish-event` posts a Discord message embed + **Open in FORZA.EVENTS** button (`custom_id` `open_event:{event_id}` via `buildEventEmbed` in `supabase/functions/_shared/events.ts`). Fields: date (Discord `<t:…:F>`), numbered track share codes, cars (full restricted list with per-car restrictions/tunes, or open build + optional **Restrictions**), participants `1+current/12` + convoy leader gamertag; footer includes organizer server name. Button click → `interactions-endpoint` returns `LAUNCH_ACTIVITY` + stores `launch_intents` fallback → after OAuth, `AuthContext` navigates to `/event/{id}` from `sdk.customId` (primary) or `launch-intent` Edge Function. Browse loads immediately and does not wait on auth.
+  - **Publish embed:** `publish-event` posts a Discord message embed + **Open in FORZA.EVENTS** button (`custom_id` `open_event:{event_id}` via `buildEventEmbed` in `supabase/functions/_shared/events.ts`). Fields: date (Discord `<t:…:F>`), numbered track share codes, cars (restricted list with per-car restrictions/tunes, truncated with `_+N more cars — open in FORZA.EVENTS…_` when embed/field limits apply, or open build + optional **Restrictions**), participants `1+current/12` + convoy leader gamertag; footer is organizer server name when known. Track field omitted when no share codes. Button click → `interactions-endpoint` returns `LAUNCH_ACTIVITY` + stores `launch_intents` fallback → after OAuth, `AuthContext` navigates to `/event/{id}` from `sdk.customId` (primary) or `launch-intent` Edge Function. Browse loads immediately and does not wait on auth.
   - Browse/join/create/publish all depend on Edge Functions + Discord token headers; test in Discord after API/proxy changes, not only localhost. Interactions Endpoint URL must be set in Discord Developer Portal.
 
 ## Product / data model
@@ -83,6 +83,14 @@ Lessons from implementation work (keep in sync when behavior changes).
 1. `npm run deploy:functions` or deploy `browse-events` + `host-drafts` with **`--no-verify-jwt`**
 2. Ship frontend (Railway) after any `api.ts` / proxy fetch changes
 3. Hard refresh in Discord Activity
+
+## Internationalization (i18n)
+
+- **Stack:** `i18next` + `react-i18next`; locale files `src/i18n/locales/en.json` and `ru.json`.
+- **Default language:** English. First visit (no `forza.language` in `localStorage`) uses `detectBrowserLanguage()` from `navigator.languages`. Explicit choice is stored in `localStorage` and toggled via **EN | RU** on the profile card.
+- **UI copy:** use `useTranslation()` / `t('key')` in React; non-React helpers use `i18n.t` from `src/i18n` (e.g. validation, `eventTypeLabel`, `participationButtonLabel`).
+- **Dates:** pass `dateFnsLocale()` from `src/i18n/dateLocale.ts` into `date-fns` `format` / `formatInTimeZone`.
+- New user-facing strings: add keys to **both** `en.json` and `ru.json`.
 
 ## References
 

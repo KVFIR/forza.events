@@ -1,7 +1,9 @@
+import {useTranslation} from 'react-i18next';
 import {Input} from '../../../components/ui/Input';
 import {SegmentGroup} from '../../../components/ui/SegmentGroup';
 import {Textarea} from '../../../components/ui/Textarea';
 import {fileUploadLabelClass} from '../../../components/ui/formStyles';
+import {eventTypeLabel} from '../../../lib/eventTypes';
 import {TITLE_MAX_LENGTH, EVENT_TYPES, COVER_ACCEPT} from '../constants';
 import {Field} from '../components/Field';
 import {EventCover} from '../../../components/EventCover';
@@ -27,17 +29,18 @@ export function BasicsStep({
   onDescription,
   onCoverChange,
 }: Props) {
+  const {t} = useTranslation();
   const titleLen = values.title.length;
 
   return (
     <div className="space-y-5">
-      <Field title="Event name" htmlFor="create-title" error={fieldErrors.title}>
+      <Field title={t('create.eventName')} htmlFor="create-title" error={fieldErrors.title}>
         <Input
           id="create-title"
           invalid={Boolean(fieldErrors.title)}
           value={values.title}
           onChange={(e) => onTitle(e.target.value)}
-          placeholder="Name your event"
+          placeholder={t('create.eventNamePlaceholder')}
           maxLength={TITLE_MAX_LENGTH}
           aria-invalid={Boolean(fieldErrors.title)}
           aria-describedby={fieldErrors.title ? 'create-title-error' : undefined}
@@ -47,25 +50,25 @@ export function BasicsStep({
         </p>
       </Field>
 
-      <Field title="Type" error={fieldErrors.type}>
+      <Field title={t('create.type')} error={fieldErrors.type}>
         <SegmentGroup
           value={values.type}
           onChange={onType}
-          ariaLabel="Event type"
+          ariaLabel={t('create.type')}
           invalid={Boolean(fieldErrors.type)}
           layout="grid"
           containerClassName="grid-cols-2 sm:grid-cols-3"
           itemClassName="px-2 py-2 text-[11px] leading-tight"
-          options={EVENT_TYPES.map((t) => ({
-            value: t.value,
-            label: t.label,
-            selectedClassName: t.typeButtonSelected,
+          options={EVENT_TYPES.map((et) => ({
+            value: et.value,
+            label: eventTypeLabel(et.value),
+            selectedClassName: et.typeButtonSelected,
           }))}
         />
       </Field>
 
       <Field
-        title="Date & time"
+        title={t('create.dateTime')}
         htmlFor="create-startsAtLocal"
         error={fieldErrors.startsAtLocal}
         hint="Shown in your local timezone."
@@ -85,20 +88,19 @@ export function BasicsStep({
       </Field>
 
       <Field
-        title="Description"
+        title={t('create.description')}
         htmlFor="create-description"
-        hint="General info for players — not cars, tracks, PI, or convoy leader (those are on Details)."
       >
         <Textarea
           id="create-description"
           rows={3}
           value={values.description}
           onChange={(e) => onDescription(e.target.value)}
-          placeholder="Optional — e.g. meetup plan, Discord voice channel, what to expect"
+          placeholder={t('create.descriptionPlaceholder')}
         />
       </Field>
 
-      <Field title="Cover image" error={fieldErrors.cover}>
+      <Field title={t('create.coverImage')} error={fieldErrors.cover}>
         <label className={fileUploadLabelClass}>
           <span>{values.coverFile ? values.coverFile.name : 'Choose file (max 2 MB)'}</span>
           <input

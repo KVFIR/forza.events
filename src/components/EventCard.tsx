@@ -1,4 +1,5 @@
 import {format} from 'date-fns';
+import {dateFnsLocale} from '../i18n/dateLocale';
 import {useEffect, useState} from 'react';
 import {Link} from 'react-router-dom';
 import {Users} from 'lucide-react';
@@ -92,7 +93,7 @@ function OpenBuildSummary({event}: {event: ForzaEvent}) {
 }
 
 export function EventCard({event}: Props) {
-  const when = format(new Date(event.startsAt), 'EEE d MMM · HH:mm');
+  const when = format(new Date(event.startsAt), 'EEE d MMM · HH:mm', {locale: dateFnsLocale()});
   const draft = isDraftEvent(event);
   const ended = !draft && event.status === 'ended';
   const full =

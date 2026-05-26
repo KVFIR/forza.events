@@ -1,3 +1,4 @@
+import {useTranslation} from 'react-i18next';
 import {cn} from '../../../lib/cn';
 import {Alert} from '../../../components/ui/Alert';
 import {Input} from '../../../components/ui/Input';
@@ -50,16 +51,18 @@ export function DetailsStep({
   onEventCars,
   fieldErrors,
 }: Props) {
+  const {t} = useTranslation();
+
   return (
     <div className="space-y-6">
       <Field
-        title="Convoy leader"
+        title={t('create.convoyLeader')}
         htmlFor={lobbyLeaderIsHost ? undefined : 'create-lobbyLeaderGamertag'}
         error={fieldErrors.lobbyLeaderGamertag}
-        hint="In-game Forza lobby leader — can differ from the Discord host."
+        hint={t('create.convoyLeaderHint')}
       >
         <label className={toggleRowClass}>
-          <span className="text-sm text-slate-300">I am the convoy leader</span>
+          <span className="text-sm text-slate-300">{t('create.iAmConvoyLeader')}</span>
           <input
             type="checkbox"
             checked={lobbyLeaderIsHost}
@@ -69,7 +72,7 @@ export function DetailsStep({
         </label>
         {lobbyLeaderIsHost && !hasGamertag(hostGamertag) && (
           <Alert variant="warning" className="mt-2">
-            Add your Xbox gamertag in Profile before publishing, or enter another convoy leader below.
+            {t('create.convoyLeaderProfileWarning')}
           </Alert>
         )}
         {!lobbyLeaderIsHost && (
@@ -77,7 +80,7 @@ export function DetailsStep({
             id="create-lobbyLeaderGamertag"
             className="mt-2"
             invalid={Boolean(fieldErrors.lobbyLeaderGamertag)}
-            placeholder="Xbox gamertag"
+            placeholder={t('create.xboxGamertag')}
             value={lobbyLeaderGamertag}
             onChange={(e) => onLobbyLeaderGamertag(e.target.value)}
             maxLength={15}
@@ -97,29 +100,27 @@ export function DetailsStep({
         inputClass={formInput}
         labelClass={formLabel}
       />
-      <p className="-mt-4 text-xs text-muted">Optional — add track share codes for the route list.</p>
+      <p className="-mt-4 text-xs text-muted">{t('create.tracksOptionalHint')}</p>
 
       <Divider />
 
-      <Field title="Car rules">
+      <Field title={t('create.carRules')}>
         <SegmentGroup
           value={carRuleMode}
           onChange={onCarRuleMode}
-          ariaLabel="Car rules"
+          ariaLabel={t('create.carRules')}
           itemClassName="py-1.5 text-xs"
           options={[
-            {value: 'anything_goes', label: 'Open build'},
-            {value: 'restricted_list', label: 'Restricted list'},
+            {value: 'anything_goes', label: t('create.openBuildOption')},
+            {value: 'restricted_list', label: t('create.restrictedListOption')},
           ]}
         />
-        <p className="mt-2 text-xs text-muted">
-          Open build lets you set a PI cap and optional category notes instead of a fixed car list.
-        </p>
+        <p className="mt-2 text-xs text-muted">{t('create.openBuildHint')}</p>
       </Field>
 
       {carRuleMode === 'anything_goes' ? (
         <div className="space-y-3">
-          <Field title="Max PI" htmlFor="create-maxPi" error={fieldErrors.maxPi}>
+          <Field title={t('create.maxPi')} htmlFor="create-maxPi" error={fieldErrors.maxPi}>
             <MaxPiInput
               id="create-maxPi"
               value={maxPi}
@@ -129,13 +130,13 @@ export function DetailsStep({
             />
           </Field>
 
-          <Field title="Additional restrictions" htmlFor="create-additionalCarRestrictions">
+          <Field title={t('create.additionalRestrictions')} htmlFor="create-additionalCarRestrictions">
             <Textarea
               id="create-additionalCarRestrictions"
               rows={3}
               value={additionalCarRestrictions}
               onChange={(e) => onAdditionalCarRestrictions(e.target.value)}
-              placeholder="Optional, e.g. Super Saloons or Modern Muscle"
+              placeholder={t('create.additionalRestrictionsPlaceholder')}
             />
           </Field>
         </div>

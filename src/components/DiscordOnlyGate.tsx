@@ -1,3 +1,4 @@
+import {useTranslation} from 'react-i18next';
 import {Logo} from './ui/Logo';
 
 /**
@@ -5,15 +6,14 @@ import {Logo} from './ui/Logo';
  * MVP is Discord Activity–only; browser web needs a separate Discord app (deferred).
  */
 export function DiscordOnlyGate() {
+  const {t} = useTranslation();
+
   return (
     <div className="flex min-h-screen flex-col items-center justify-center px-6 text-center">
       <div className="max-w-md space-y-4">
         <Logo size="wordmark" className="justify-center" />
-        <h1 className="text-lg font-semibold text-white">Open in Discord</h1>
-        <p className="text-sm leading-relaxed text-muted">
-          This build is a Discord Activity. Launch it from the App Launcher or a server voice
-          channel — not from a regular browser tab.
-        </p>
+        <h1 className="text-lg font-semibold text-white">{t('discordGate.title')}</h1>
+        <p className="text-sm leading-relaxed text-muted">{t('discordGate.body')}</p>
       </div>
     </div>
   );

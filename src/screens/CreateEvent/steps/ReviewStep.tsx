@@ -1,4 +1,5 @@
 import type {ReactNode} from 'react';
+import {useTranslation} from 'react-i18next';
 import {Calendar, Hash, MapPin, Users} from 'lucide-react';
 import {Alert} from '../../../components/ui/Alert';
 import {Badge, CarRuleBadge} from '../../../components/ui/Badge';
@@ -10,7 +11,7 @@ import {defaultTimezone, formatEventTime, localInputToUtc} from '../../../lib/da
 import type {CarRuleMode, EventType} from '../../../lib/types';
 import {formatMaxPi} from '../../../lib/pi';
 import {sectionLabelClass} from '../../../components/ui/formStyles';
-import {STEPS, type CreateEventStepIndex} from '../constants';
+import type {CreateEventStepIndex} from '../constants';
 
 export type PublishGap = {
   message: string;
@@ -90,14 +91,15 @@ export function ReviewStep({
   isEditMode = false,
   onJumpToStep,
 }: Props) {
+  const {t} = useTranslation();
   const when =
     startsAtLocal
       ? formatEventTime(localInputToUtc(startsAtLocal, defaultTimezone()), defaultTimezone())
       : null;
   const carRules =
     carRuleMode === 'anything_goes'
-      ? `Open build · up to ${formatMaxPi(maxPi)}`
-      : `${carCount} allowed car${carCount === 1 ? '' : 's'}`;
+      ? t('carRules.openBuildUpTo', {pi: formatMaxPi(maxPi)})
+      : t('carRules.allowedCars', {count: carCount});
   const trimmedDescription = description.trim();
   const displayTitle = title.trim() || 'Untitled event';
 
@@ -146,14 +148,14 @@ export function ReviewStep({
       ) : null}
 
       {missingForPublish.length > 0 && (
-        <Alert variant="sky" title="Before you publish" className="py-2.5">
+        <Alert variant="sky" title={t('create.beforePublish')} className="py-2.5">
           <ul className="space-y-2">
             {missingForPublish.map((gap) => (
               <li key={gap.message} className="flex flex-wrap items-center justify-between gap-2">
                 <span>{gap.message}</span>
                 {onJumpToStep ? (
                   <TextButton type="button" onClick={() => onJumpToStep(gap.step)}>
-                    Edit {STEPS[gap.step]}
+                    {t('create.editStep', {step: t(`create.steps.${['basics', 'details', 'target', 'preview'][gap.step]}`)})}
                   </TextButton>
                 ) : null}
               </li>
@@ -163,16 +165,16 @@ export function ReviewStep({
       )}
 
       <Panel variant="soft" divided className="overflow-hidden">
-        <ReviewSection title="Publish target">
+        <ReviewSection title={t('create.publishTarget')}>
           <ReviewFact
             icon={MapPin}
-            label="Server"
-            value={targetGuildName || 'Not set'}
+            label={t('create.server')}
+            value={targetGuildName || t('common.notSet')}
             hint={isPublished ? 'Locked after publish' : undefined}
           />
           <ReviewFact
             icon={Hash}
-            label="Channel"
+            label={t('create.channel')}
             value={channelValue}
             hint={
               !targetChannelId && !isPublished
@@ -184,14 +186,14 @@ export function ReviewStep({
           />
         </ReviewSection>
 
-        <ReviewSection title="Convoy">
-          <ReviewFact icon={Users} label="Leader" value={lobbyLeaderLabel || '—'} />
+        <ReviewSection title={t('create.convoy')}>
+          <ReviewFact icon={Users} label={t('create.leader')} value={lobbyLeaderLabel || t('common.dash')} />
         </ReviewSection>
 
-        <ReviewSection title="Route & cars">
+        <ReviewSection title={t('create.routeAndCars')}>
           {normalizedTrackCodes.length > 0 ? (
             <div>
-              <p className="text-[10px] font-bold uppercase tracking-widest text-muted">Tracks</p>
+              <p className="text-[10px] font-bold uppercase tracking-widest text-muted">{t('eventDetail.tracks')}</p>
               <ol className="mt-1.5 space-y-1">
                 {normalizedTrackCodes.map((code, i) => (
                   <li
@@ -205,9 +207,9 @@ export function ReviewStep({
               </ol>
             </div>
           ) : (
-            <ReviewFact label="Tracks" value="—" hint="Optional route list" />
+            <ReviewFact label={t('eventDetail.tracks')} value={t('common.dash')} hint={t('create.tracksOptional')} />
           )}
-          <ReviewFact label="Car rules" value={carRules} />
+          <ReviewFact label={t('eventDetail.carRules')} value={carRules} />
         </ReviewSection>
       </Panel>
     </div>

@@ -1,3 +1,4 @@
+import {useTranslation} from 'react-i18next';
 import type {CarRuleMode, EventType} from '../../lib/types';
 import {eventTypeMeta} from '../../lib/eventTypes';
 import {cn} from '../../lib/cn';
@@ -9,6 +10,7 @@ type Props = {
 };
 
 export function Badge({type, className}: Props) {
+  useTranslation();
   const {badge, label} = eventTypeMeta(type);
   return (
     <span
@@ -32,6 +34,7 @@ export function CarRuleBadge({
   mode: CarRuleMode;
   className?: string;
 }) {
+  const {t} = useTranslation();
   const restricted = mode === 'restricted_list';
   return (
     <span
@@ -43,7 +46,7 @@ export function CarRuleBadge({
         className,
       )}
     >
-      {restricted ? 'Restricted car list' : 'Anything goes'}
+      {restricted ? t('eventStatus.restrictedList') : t('eventStatus.anythingGoes')}
     </span>
   );
 }
@@ -81,14 +84,8 @@ const statusStyles: Record<
   },
 };
 
-const statusLabels: Record<StatusProps['status'], string> = {
-  open: 'Open',
-  full: 'Full',
-  live: 'Live',
-  ended: 'Ended',
-};
-
 export function DraftBadge({className}: {className?: string}) {
+  const {t} = useTranslation();
   return (
     <span
       className={cn(
@@ -97,12 +94,13 @@ export function DraftBadge({className}: {className?: string}) {
         className,
       )}
     >
-      Draft
+      {t('eventStatus.draft')}
     </span>
   );
 }
 
 export function StatusBadge({status, className}: StatusProps) {
+  const {t} = useTranslation();
   const s = statusStyles[status];
   return (
     <span
@@ -116,7 +114,7 @@ export function StatusBadge({status, className}: StatusProps) {
       )}
     >
       {s.dot && <span className={cn('h-1.5 w-1.5 rounded-full', s.dot)} />}
-      {statusLabels[status]}
+      {t(`eventStatus.${status}`)}
     </span>
   );
 }

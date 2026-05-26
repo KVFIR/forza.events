@@ -1,4 +1,5 @@
 import {useCallback, useEffect, useState} from 'react';
+import {useTranslation} from 'react-i18next';
 import {listChannels} from '../lib/api';
 import {Button} from './ui/Button';
 import {Select} from './ui/Select';
@@ -13,6 +14,7 @@ type Props = {
 };
 
 export function ChannelPicker({guildId, accessToken, onSelect, onCancel}: Props) {
+  const {t} = useTranslation();
   const [channels, setChannels] = useState<{id: string; name: string}[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -37,7 +39,7 @@ export function ChannelPicker({guildId, accessToken, onSelect, onCancel}: Props)
         <h2 className="text-lg font-bold text-white">Publish to channel</h2>
         <p className="mt-1 text-sm text-muted">Choose where the event embed will be posted.</p>
 
-        {loading && <InlineLoading label="Loading channels" className="mt-4" />}
+        {loading && <InlineLoading label={t('loading.channels')} className="mt-4" />}
 
         {!loading && error && (
           <div className="mt-4 space-y-3">

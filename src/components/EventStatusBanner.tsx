@@ -1,29 +1,27 @@
+import {useTranslation} from 'react-i18next';
 import {cn} from '../lib/cn';
 import {Alert, type AlertVariant} from './ui/Alert';
 
 type Variant = 'draft' | 'host-in-progress' | 'registration-closed' | 'cancelled';
 
-const copy: Record<Variant, {title: string; body: string; alert: AlertVariant}> = {
-  draft: {
-    title: 'Draft',
-    body: 'Only you can see this event until you publish it.',
-    alert: 'draft',
-  },
+const alertByVariant: Record<Variant, AlertVariant> = {
+  draft: 'draft',
+  'host-in-progress': 'warning',
+  'registration-closed': 'info',
+  cancelled: 'info',
+};
+
+const copyKeys: Record<Variant, {title: string; body: string}> = {
+  draft: {title: 'statusBanner.draftTitle', body: 'statusBanner.draftBody'},
   'host-in-progress': {
-    title: 'Event in progress',
-    body: 'Editing is locked. Submit results when the event is finished, or cancel if it will not run.',
-    alert: 'warning',
+    title: 'statusBanner.inProgressTitle',
+    body: 'statusBanner.inProgressBody',
   },
   'registration-closed': {
-    title: 'Registration closed',
-    body: 'This event has started. New players cannot join.',
-    alert: 'info',
+    title: 'statusBanner.registrationClosedTitle',
+    body: 'statusBanner.registrationClosedBody',
   },
-  cancelled: {
-    title: 'Event cancelled',
-    body: 'This event was cancelled by the host.',
-    alert: 'info',
-  },
+  cancelled: {title: 'statusBanner.cancelledTitle', body: 'statusBanner.cancelledBody'},
 };
 
 type Props = {
@@ -32,10 +30,15 @@ type Props = {
 };
 
 export function EventStatusBanner({variant, className}: Props) {
-  const {title, body, alert} = copy[variant];
+  const {t} = useTranslation();
+  const keys = copyKeys[variant];
   return (
-    <Alert variant={alert} title={title} className={cn('mt-3 py-2.5 text-sm', className)}>
-      {body}
+    <Alert
+      variant={alertByVariant[variant]}
+      title={t(keys.title)}
+      className={cn('mt-3 py-2.5 text-sm', className)}
+    >
+      {t(keys.body)}
     </Alert>
   );
 }

@@ -1,4 +1,6 @@
 import {useCallback, useEffect, useMemo, useRef, useState} from 'react';
+import {useTranslation} from 'react-i18next';
+import {busyLabel} from '../i18n/busyLabels';
 import {listChannels, listGuilds, validatePublishChannel} from '../lib/api';
 import {getGuildContext} from '../lib/discord';
 import {
@@ -10,7 +12,6 @@ import {isPlaceholderGuildName} from '../lib/guildDisplay';
 import {Button} from './ui/Button';
 import {FieldLabel} from './ui/FieldLabel';
 import {Select} from './ui/Select';
-import {BUSY_LABEL} from './ui/buttonStyles';
 import {InlineLoading} from './ui/InlineLoading';
 import {ModalBackdrop, ModalPanel} from './ui/ModalShell';
 import {TextButton} from './ui/TextButton';
@@ -36,6 +37,7 @@ export function PublishTargetPicker({
   onGuildChange,
   onChannelChange,
 }: Props) {
+  const {t} = useTranslation();
   const [guilds, setGuilds] = useState<{id: string; name: string}[]>([]);
   const [channels, setChannels] = useState<{id: string; name: string}[]>([]);
   const [guildHint, setGuildHint] = useState<string | null>(null);
@@ -209,9 +211,9 @@ export function PublishTargetPicker({
   return (
     <div className="space-y-4">
       <div>
-        <FieldLabel className="mb-1.5 block">Discord server</FieldLabel>
+        <FieldLabel className="mb-1.5 block">{t('publish.discordServer')}</FieldLabel>
         {loadingGuilds ? (
-          <InlineLoading label="Loading servers" />
+          <InlineLoading label={t('loading.servers')} />
         ) : guilds.length === 0 ? (
           <div className="space-y-3">
             <p className="text-sm text-muted">
@@ -241,7 +243,7 @@ export function PublishTargetPicker({
                 onGuildChange(e.target.value, next?.name ?? '');
               }}
             >
-              <option value="">Select a server</option>
+              <option value="">{t('publish.selectServer')}</option>
               {guildOptions.map((g) => (
                 <option key={g.id} value={g.id}>
                   {g.name}
@@ -265,7 +267,7 @@ export function PublishTargetPicker({
       </div>
 
       <div>
-        <FieldLabel className="mb-1.5 block">Channel</FieldLabel>
+        <FieldLabel className="mb-1.5 block">{t('publish.announcementChannel')}</FieldLabel>
         {!guildId ? (
           <p className="text-sm text-muted">Choose a server first.</p>
         ) : (
@@ -279,7 +281,7 @@ export function PublishTargetPicker({
                 void validateChannelSelection(e.target.value, guildId);
               }}
             >
-              <option value="">Select a channel</option>
+              <option value="">{t('publish.selectChannel')}</option>
               {channelOptions.map((c) => (
                 <option key={c.id} value={c.id}>
                   {c.name === 'selected-channel' ? 'Selected channel' : `#${c.name}`}
@@ -317,7 +319,7 @@ export function PublishTargetPicker({
               else loadChannels();
             }}
           >
-            Try again
+            {t('common.tryAgain')}
           </TextButton>
         </div>
       )}
@@ -340,10 +342,12 @@ export function PublishTargetModal({
   onCancel: () => void;
   confirming?: boolean;
 }) {
+  const {t} = useTranslation();
+
   return (
     <ModalBackdrop>
       <ModalPanel>
-        <h2 className="text-lg font-bold text-white">Choose publish target</h2>
+        <h2 className="text-lg font-bold text-white">{t('publish.choosePublishTarget')}</h2>
         <p className="mt-1 text-sm text-muted">
           Pick the server and channel. These cannot be changed after publish.
         </p>
@@ -359,7 +363,7 @@ export function PublishTargetModal({
         </div>
         <div className="mt-5 flex gap-2">
           <Button type="button" variant="secondary" className="flex-1" onClick={onCancel}>
-            Cancel
+            {t('common.cancel')}
           </Button>
           <Button
             type="button"
@@ -368,7 +372,7 @@ export function PublishTargetModal({
             disabled={!guildId || !channelId || confirming}
             onClick={onConfirm}
           >
-            {confirming ? BUSY_LABEL.publishing : 'Publish'}
+            {confirming ? busyLabel('publishing') : t('create.publish')}
           </Button>
         </div>
       </ModalPanel>

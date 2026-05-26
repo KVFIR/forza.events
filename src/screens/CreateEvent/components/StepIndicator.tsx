@@ -1,3 +1,5 @@
+import {useTranslation} from 'react-i18next';
+import {Trans} from 'react-i18next';
 import {cn} from '../../../lib/cn';
 import {
   segmentContainerClass,
@@ -6,7 +8,14 @@ import {
   segmentItemSelectedClass,
 } from '../../../components/ui/buttonStyles';
 import {Alert} from '../../../components/ui/Alert';
-import {STEPS, type CreateEventStepIndex} from '../constants';
+import type {CreateEventStepIndex} from '../constants';
+
+const STEP_KEYS = [
+  'create.steps.basics',
+  'create.steps.details',
+  'create.steps.target',
+  'create.steps.preview',
+] as const;
 
 type StepIndicatorProps = {
   step: CreateEventStepIndex;
@@ -16,9 +25,11 @@ type StepIndicatorProps = {
 };
 
 export function StepIndicator({step, freeNavigation, onStepClick}: StepIndicatorProps) {
+  const {t} = useTranslation();
+
   return (
     <nav className={cn('mb-6 flex gap-1', segmentContainerClass)}>
-      {STEPS.map((label, i) => {
+      {STEP_KEYS.map((labelKey, i) => {
         const idx = i as CreateEventStepIndex;
         const done = idx < step;
         const active = idx === step;
@@ -27,7 +38,7 @@ export function StepIndicator({step, freeNavigation, onStepClick}: StepIndicator
 
         return (
           <button
-            key={label}
+            key={labelKey}
             type="button"
             disabled={!clickable}
             onClick={() => clickable && onStepClick?.(idx)}
@@ -40,7 +51,7 @@ export function StepIndicator({step, freeNavigation, onStepClick}: StepIndicator
               !clickable && 'cursor-default',
             )}
           >
-            {label}
+            {t(labelKey)}
           </button>
         );
       })}
@@ -59,18 +70,18 @@ export function FormAlerts({
   authInitializing: boolean;
   globalError: string | null;
 }) {
+  const {t} = useTranslation();
+
   return (
     <>
       {!isConfigured && (
         <Alert variant="sky" className="mb-4">
-          Add <code className="text-amber-50">SUPABASE_URL</code> and{' '}
-          <code className="text-amber-50">SUPABASE_ANON_KEY</code> to <code>.env</code>, then restart{' '}
-          <code>npm run dev</code>.
+          <Trans i18nKey="create.supabaseEnvAlert" components={{1: <code className="text-amber-50" />, 3: <code className="text-amber-50" />, 5: <code />, 7: <code />}} />
         </Alert>
       )}
       {isConfigured && !isSignedIn && !authInitializing && (
         <Alert variant="neutral" className="mb-4">
-          Open this app in Discord to save drafts, join events, and publish.
+          {t('auth.openInDiscordSave')}
         </Alert>
       )}
       {globalError && (

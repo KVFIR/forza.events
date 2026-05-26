@@ -1,5 +1,6 @@
+import {useTranslation} from 'react-i18next';
+import {busyLabel} from '../i18n/busyLabels';
 import {EmptyState} from './ui/EmptyState';
-import {BUSY_LABEL} from './ui/buttonStyles';
 
 type Props = {
   description?: string;
@@ -9,17 +10,19 @@ type Props = {
 };
 
 export function SignInRequiredState({
-  description = 'Connect your Discord account to use this feature.',
+  description,
   busy = false,
   onRetry,
   className,
 }: Props) {
+  const {t} = useTranslation();
+
   return (
     <EmptyState
       icon="🔐"
-      title="Sign in required"
-      description={description}
-      action={{label: busy ? BUSY_LABEL.signingIn : 'Try again', onClick: onRetry}}
+      title={t('auth.signInRequired')}
+      description={description ?? t('auth.signInDefault')}
+      action={{label: busy ? busyLabel('signingIn') : t('common.tryAgain'), onClick: onRetry}}
       className={className ?? 'min-h-[40vh] py-20'}
     />
   );

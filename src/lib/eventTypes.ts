@@ -1,3 +1,4 @@
+import i18n from '../i18n';
 import type {EventType} from './types';
 
 export const EVENT_TYPE_VALUES = [
@@ -19,7 +20,6 @@ export function normalizeEventType(value: string | undefined | null): EventType 
 
 export type EventTypeOption = {
   value: EventType;
-  label: string;
   accentBar: string;
   badge: {border: string; text: string; bg: string};
   detailVisual: {gradient: string; glow: string};
@@ -30,7 +30,6 @@ export type EventTypeOption = {
 export const EVENT_TYPES: EventTypeOption[] = [
   {
     value: 'road',
-    label: 'Road racing',
     accentBar: 'bg-blue-500/25',
     badge: {
       border: 'border-blue-500/30',
@@ -45,7 +44,6 @@ export const EVENT_TYPES: EventTypeOption[] = [
   },
   {
     value: 'dirt',
-    label: 'Dirt racing',
     accentBar: 'bg-orange-500/25',
     badge: {
       border: 'border-orange-500/30',
@@ -60,7 +58,6 @@ export const EVENT_TYPES: EventTypeOption[] = [
   },
   {
     value: 'touge',
-    label: 'Touge',
     accentBar: 'bg-violet-500/25',
     badge: {
       border: 'border-violet-500/30',
@@ -75,7 +72,6 @@ export const EVENT_TYPES: EventTypeOption[] = [
   },
   {
     value: 'drift',
-    label: 'Car meet',
     accentBar: 'bg-red-500/25',
     badge: {
       border: 'border-red-500/30',
@@ -90,7 +86,6 @@ export const EVENT_TYPES: EventTypeOption[] = [
   },
   {
     value: 'cruise',
-    label: 'Cruise',
     accentBar: 'bg-emerald-500/25',
     badge: {
       border: 'border-emerald-500/30',
@@ -106,9 +101,10 @@ export const EVENT_TYPES: EventTypeOption[] = [
 ];
 
 export function eventTypeLabel(type: EventType): string {
-  return EVENT_TYPES.find((t) => t.value === type)?.label ?? type;
+  return i18n.t(`eventTypes.${type}`);
 }
 
-export function eventTypeMeta(type: EventType): EventTypeOption {
-  return EVENT_TYPES.find((t) => t.value === type) ?? EVENT_TYPES[0];
+export function eventTypeMeta(type: EventType): EventTypeOption & {label: string} {
+  const meta = EVENT_TYPES.find((t) => t.value === type) ?? EVENT_TYPES[0];
+  return {...meta, label: eventTypeLabel(type)};
 }
