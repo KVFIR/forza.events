@@ -40,7 +40,7 @@ export function validateBasicsStep(
     CreateEventFormValues,
     'title' | 'type' | 'startsAtLocal' | 'coverFile' | 'lobbyLeaderIsHost' | 'lobbyLeaderGamertag'
   >,
-  options?: {allowPastStart?: boolean},
+  options?: {allowPastStart?: boolean; hostGamertag?: string},
 ): FieldErrors {
   const errors: FieldErrors = {};
   const title = values.title.trim();
@@ -56,7 +56,13 @@ export function validateBasicsStep(
   }
   const coverErr = validateCoverFile(values.coverFile);
   if (coverErr) errors.cover = coverErr;
-  if (!values.lobbyLeaderIsHost) {
+  if (values.lobbyLeaderIsHost) {
+    const tagErr = gamertagError(options?.hostGamertag ?? '');
+    if (tagErr) {
+      errors.lobbyLeaderGamertag =
+        'Add your Xbox gamertag in Profile, or uncheck “I am the convoy leader” and enter another player.';
+    }
+  } else {
     const tagErr = gamertagError(values.lobbyLeaderGamertag);
     if (tagErr) errors.lobbyLeaderGamertag = tagErr;
   }
@@ -94,11 +100,14 @@ export function validateTargetStep(values: Pick<
 export function validateStep(
   step: number,
   values: CreateEventFormValues,
-  options?: {requireChannel?: boolean; allowPastStart?: boolean},
+  options?: {requireChannel?: boolean; allowPastStart?: boolean; hostGamertag?: string},
 ): FieldErrors {
   switch (step) {
     case 0:
-      return validateBasicsStep(values, {allowPastStart: options?.allowPastStart});
+      return validateBasicsStep(values, {
+        allowPastStart: options?.allowPastStart,
+        hostGamertag: options?.hostGamertag,
+      });
     case 1:
       return validateDetailsStep(values);
     case 2:
@@ -108,8 +117,11 @@ export function validateStep(
   }
 }
 
-export function validateDraftSave(values: CreateEventFormValues): string | null {
-  const stepErr = firstFieldError(validateBasicsStep(values));
+export function validateDraftSave(
+  values: CreateEventFormValues,
+  hostGamertag?: string,
+): string | null {
+  const stepErr = firstFieldError(validateBasicsStep(values, {hostGamertag}));
   if (stepErr) return stepErr;
   const targetErr = firstFieldError(validateTargetStep(values));
   if (targetErr) return targetErr;
@@ -126,7 +138,10 @@ export function validatePublish(
   hostGamertag: string,
   options?: {allowPastStart?: boolean},
 ): string | null {
-  const basics = validateBasicsStep(values, {allowPastStart: options?.allowPastStart});
+  const basics = validateBasicsStep(values, {
+    allowPastStart: options?.allowPastStart,
+    hostGamertag,
+  });
   if (hasFieldErrors(basics)) return firstFieldError(basics);
   const details = validateDetailsStep(values);
   if (hasFieldErrors(details)) return firstFieldError(details);

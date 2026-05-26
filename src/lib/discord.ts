@@ -69,6 +69,75 @@ function applyBrowserSession(): InitResult | null {
   };
 }
 
+async function authenticateDiscordActivity(
+  sdk: DiscordSDKInstance,
+  clientId: string,
+): Promise<{user: AppUser; accessToken: string | null}> {
+  guildId = sdk.guildId ?? null;
+  guildName = null;
+
+  const {code} = await sdk.commands.authorize({
+    client_id: clientId,
+    response_type: 'code',
+    state: '',
+    prompt: 'none',
+    scope: ['identify', 'guilds'],
+  });
+
+  if (!isApiConfigured()) {
+    const user = {...GUEST_USER, username: 'Discord'};
+    resolvedUser = user;
+    discordAccessToken = null;
+    return {user, accessToken: null};
+  }
+
+  try {
+    const result = await exchangeToken(code, {
+      guildId: guildId ?? undefined,
+      guildName: guildName ?? undefined,
+      redirectUri: DISCORD_ACTIVITY_REDIRECT_URI,
+    });
+    discordAccessToken = result.access_token;
+    resolvedUser = result.user;
+    saveDiscordSession({accessToken: result.access_token, user: result.user});
+    await sdk.commands.authenticate({access_token: result.access_token});
+    return {user: result.user, accessToken: result.access_token};
+  } catch (err) {
+    console.error('Discord Activity auth failed', err);
+    const user = {...GUEST_USER, username: 'Discord'};
+    resolvedUser = user;
+    discordAccessToken = null;
+    return {user, accessToken: null};
+  }
+}
+
+export function canRetryDiscordActivityAuth(): boolean {
+  return (
+    !isStandaloneBrowser() &&
+    Boolean(sdkInstance) &&
+    Boolean(import.meta.env.VITE_DISCORD_CLIENT_ID as string | undefined)
+  );
+}
+
+/** Re-run authorize + token exchange after a failed Activity sign-in. */
+export async function retryDiscordActivityAuth(): Promise<InitResult | null> {
+  const sdk = sdkInstance;
+  const clientId = import.meta.env.VITE_DISCORD_CLIENT_ID as string | undefined;
+  if (!sdk || !clientId || isStandaloneBrowser()) return null;
+
+  const launchEventId = eventIdFromOpenEventCustomId(sdk.customId);
+  const {user, accessToken} = await authenticateDiscordActivity(sdk, clientId);
+
+  return {
+    user,
+    ready: true,
+    accessToken,
+    guildId,
+    guildName,
+    launchEventId,
+  };
+}
+
 export async function initDiscordActivity(): Promise<InitResult> {
   if (initPromise) return initPromise;
 
@@ -109,42 +178,13 @@ export async function initDiscordActivity(): Promise<InitResult> {
     const {setupDiscordSupabaseProxy} = await import('./discordUrlProxy');
     setupDiscordSupabaseProxy();
 
-    guildId = sdk.guildId ?? null;
-    guildName = null;
     const launchEventId = eventIdFromOpenEventCustomId(sdk.customId);
-
-    const {code} = await sdk.commands.authorize({
-      client_id: clientId,
-      response_type: 'code',
-      state: '',
-      prompt: 'none',
-      scope: ['identify', 'guilds'],
-    });
-
-    if (isApiConfigured()) {
-      try {
-        const result = await exchangeToken(code, {
-          guildId: guildId ?? undefined,
-          guildName: guildName ?? undefined,
-          redirectUri: DISCORD_ACTIVITY_REDIRECT_URI,
-        });
-        discordAccessToken = result.access_token;
-        resolvedUser = result.user;
-        saveDiscordSession({accessToken: result.access_token, user: result.user});
-        await sdk.commands.authenticate({access_token: result.access_token});
-      } catch (err) {
-        console.error('Discord Activity auth failed', err);
-        resolvedUser = {...GUEST_USER, username: 'Discord'};
-        discordAccessToken = null;
-      }
-    } else {
-      resolvedUser = {...GUEST_USER, username: 'Discord'};
-    }
+    const {user, accessToken} = await authenticateDiscordActivity(sdk, clientId);
 
     return {
-      user: resolvedUser,
+      user,
       ready: true,
-      accessToken: discordAccessToken,
+      accessToken,
       guildId,
       guildName,
       launchEventId,

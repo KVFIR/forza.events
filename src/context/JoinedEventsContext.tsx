@@ -8,6 +8,8 @@ import {
 } from 'react';
 import {joinEvent, leaveEvent, isApiConfigured} from '../lib/api';
 import {userIsJoined} from '../lib/events';
+import {isStandaloneBrowser} from '../lib/discord';
+import {hasGamertag} from '../lib/gamertag';
 import {useAuth} from './AuthContext';
 import type {ForzaEvent} from '../lib/types';
 
@@ -48,9 +50,9 @@ export function JoinedEventsProvider({children}: {children: ReactNode}) {
           if (currently) {
             await leaveEvent(token, event.id);
           } else {
-            const gt = gamertag ?? user.xboxGamertag;
-            if (!gt) throw new Error('Gamertag required');
-            await joinEvent(token, event.id, gt);
+            const gt = (gamertag ?? user.xboxGamertag)?.trim();
+            if (!hasGamertag(gt)) throw new Error('Xbox gamertag is required to join events.');
+            await joinEvent(token, event.id, gt!);
           }
           bumpRefresh();
         } catch (err) {
@@ -58,6 +60,10 @@ export function JoinedEventsProvider({children}: {children: ReactNode}) {
           throw err;
         }
         return;
+      }
+
+      if (!isStandaloneBrowser()) {
+        throw new Error('Sign in with Discord to join or leave events.');
       }
 
       setOverrides((prev) => ({...prev, [event.id]: !currently}));

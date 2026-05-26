@@ -1,6 +1,6 @@
 import {NavLink} from 'react-router-dom';
 import {CalendarDays, Compass, PlusCircle, User2, type LucideIcon} from 'lucide-react';
-import {useAuth} from '../context/AuthContext';
+import {AuthStatusIndicator} from './AuthStatusIndicator';
 import {cn} from '../lib/cn';
 
 const NAV_ITEMS: {to: string; end: boolean; icon: LucideIcon; label: string}[] = [
@@ -33,53 +33,6 @@ function BrandMark() {
           .EVENTS
         </span>
       </span>
-    </div>
-  );
-}
-
-function UserStatus({compact = false}: {compact?: boolean}) {
-  const {user, isConfigured, isSignedIn, isStandalone, loading} = useAuth();
-  const initial = user.username.charAt(0).toUpperCase() || '?';
-
-  const statusLabel = !isConfigured
-    ? 'SETUP'
-    : loading
-      ? '…'
-      : isSignedIn
-        ? isStandalone
-          ? 'LOCAL'
-          : 'DISCORD'
-        : 'OFFLINE';
-
-  return (
-    <div className="flex items-center gap-2.5">
-      <div className="flex items-center gap-1.5 rounded-full border border-white/10 bg-white/[0.04] px-2.5 py-1">
-        <span className="relative flex h-1.5 w-1.5">
-          <span
-            className={cn(
-              'relative inline-flex h-1.5 w-1.5 rounded-full',
-              isSignedIn
-                ? 'bg-accent-green shadow-[0_0_6px_rgba(16,185,129,0.9)]'
-                : 'bg-amber-400/90',
-            )}
-          />
-        </span>
-        <span
-          className={cn(
-            'text-[10px] font-medium tracking-wide text-muted-light',
-            compact ? 'hidden sm:block' : 'block',
-          )}
-        >
-          {statusLabel}
-        </span>
-      </div>
-
-      <div
-        className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-gradient-to-br from-accent-purple-dark to-accent-purple-light text-[11px] font-bold text-white"
-        style={{boxShadow: '0 0 0 2px rgba(139,92,246,0.25)'}}
-      >
-        {initial}
-      </div>
     </div>
   );
 }
@@ -141,7 +94,7 @@ function NavbarTop() {
     <header className="sticky top-0 z-20 lg:hidden">
       <div className="glass flex items-center justify-between gap-3 border-b border-white/[0.07] bg-base/85 px-4 py-3">
         <BrandMark />
-        <UserStatus compact />
+        <AuthStatusIndicator />
       </div>
 
       <nav className="glass flex border-b border-white/[0.07] bg-surface/75">
@@ -156,9 +109,8 @@ function NavbarTop() {
 function NavbarSide() {
   return (
     <aside className="glass fixed inset-y-0 left-0 z-30 hidden w-[var(--app-sidebar-width)] flex-col border-r border-white/[0.07] bg-surface/80 lg:flex">
-      <div className="flex flex-col gap-4 border-b border-white/[0.07] px-4 py-5">
+      <div className="border-b border-white/[0.07] px-4 py-5">
         <BrandMark />
-        <UserStatus />
       </div>
 
       <nav className="flex flex-1 flex-col gap-0.5 p-3">
@@ -166,6 +118,10 @@ function NavbarSide() {
           <NavItem key={item.to} {...item} layout="side" />
         ))}
       </nav>
+
+      <div className="border-t border-white/[0.07] px-4 py-4">
+        <AuthStatusIndicator />
+      </div>
     </aside>
   );
 }

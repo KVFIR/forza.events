@@ -7,6 +7,8 @@ import {GamertagModal} from '../components/GamertagModal';
 import {EventCard} from '../components/EventCard';
 import {useMyEventsCatalog} from '../hooks/useMyEventsCatalog';
 import {isEventSuccessfullyCompleted} from '../lib/eventSpec';
+import {hasGamertag} from '../lib/gamertag';
+import {SignInRequiredState} from '../components/SignInRequiredState';
 import {ContentReveal} from '../components/ui/ContentReveal';
 import {EmptyState} from '../components/ui/EmptyState';
 import {PageLoading} from '../components/ui/PageLoading';
@@ -23,7 +25,8 @@ function StatPill({label, value}: {label: string; value: string | number}) {
 }
 
 export function Profile() {
-  const {user, refreshUser, getAccessToken, isConfigured} = useAuth();
+  const {user, refreshUser, getAccessToken, isConfigured, isSignedIn, isStandalone, authRetrying, retryDiscordAuth} =
+    useAuth();
   const {isJoined} = useJoinedEvents();
   const {allMine, active, completed, isLoading, loadError, refetch} = useMyEventsCatalog('all');
   const showLoadingUI = useLoadingUI(isLoading);
@@ -31,7 +34,7 @@ export function Profile() {
   const [saving, setSaving] = useState(false);
   const initial = user.username.charAt(0).toUpperCase();
   const token = getAccessToken();
-  const needsGamertag = !user.xboxGamertag?.trim();
+  const needsGamertag = !hasGamertag(user.xboxGamertag);
   const recentCompleted = completed.slice(0, 3);
   const hostedCount = allMine.filter(
     (e) => e.hostDiscordId === user.discordId && isEventSuccessfullyCompleted(e),
@@ -39,6 +42,17 @@ export function Profile() {
   const participatedCount = allMine.filter(
     (e) => isJoined(e) && isEventSuccessfullyCompleted(e),
   ).length;
+
+  if (isConfigured && !isStandalone && !isSignedIn) {
+    return (
+      <SignInRequiredState
+        description="Connect your Discord account to view your profile and stats."
+        busy={authRetrying}
+        onRetry={() => void retryDiscordAuth()}
+        className="pb-10 pt-5"
+      />
+    );
+  }
 
   if (showLoadingUI) {
     return <PageLoading label="Loading profile" className="pb-10 pt-5" />;

@@ -132,9 +132,13 @@ export function EventResults() {
 
     try {
       const token = getAccessToken();
-      if (isSignedIn && isApiConfigured() && token) {
-        await submitEventResults(token, id, payload);
+      if (!isSignedIn || !token) {
+        throw new Error('Sign in with Discord to submit results.');
       }
+      if (!isApiConfigured()) {
+        throw new Error('App is not configured for saving results.');
+      }
+      await submitEventResults(token, id, payload);
       bumpRefresh();
       navigate(`/event/${id}`);
     } catch (e) {

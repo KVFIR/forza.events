@@ -1,6 +1,10 @@
 /** Xbox Live gamertag: 1–15 chars, alphanumeric and spaces */
 export const GAMERTAG_RE = /^[a-zA-Z0-9 ]{1,15}$/;
 
+export function hasGamertag(value: string | null | undefined): boolean {
+  return Boolean(value?.trim());
+}
+
 export function isValidGamertag(value: string): boolean {
   return GAMERTAG_RE.test(value.trim());
 }

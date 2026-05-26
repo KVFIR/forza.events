@@ -48,6 +48,7 @@ import {formatLobbyCount, LOBBY_TOTAL_PLAYERS} from '../lib/constants';
 import {resolveOrganiserLabel} from '../lib/organiser';
 import {resolveConvoyLeader, resolveRegisteredDrivers} from '../lib/eventRoster';
 import {participationButtonLabel, participationButtonVariant} from '../lib/eventActions';
+import {gamertagError, hasGamertag} from '../lib/gamertag';
 import {cn} from '../lib/cn';
 
 const piClassColor: Record<string, string> = {
@@ -72,7 +73,8 @@ export function EventDetail() {
   const loadedForIdRef = useRef<string | null>(null);
   const showLoadingUI = useLoadingUI(loading && !event);
   const {isJoined, toggleJoin, bumpRefresh, refreshKey} = useJoinedEvents();
-  const {user, refreshUser, getAccessToken, isSignedIn} = useAuth();
+  const {user, refreshUser, getAccessToken, isSignedIn, isStandalone, authRetrying, retryDiscordAuth} =
+    useAuth();
   const discordToken = getAccessToken();
   const [gamertagOpen, setGamertagOpen] = useState(false);
   const [joining, setJoining] = useState(false);
@@ -122,26 +124,34 @@ export function EventDetail() {
 
   async function handleJoinClick() {
     if (!event) return;
+    if (!isSignedIn) {
+      if (!isStandalone) void retryDiscordAuth();
+      return;
+    }
     if (isJoined(event)) {
       await toggleJoin(event);
       const next = await fetchEventById(event.id, {discordToken});
       setEvent(next);
       return;
     }
-    if (!user.xboxGamertag && isSignedIn) {
+    if (!hasGamertag(user.xboxGamertag)) {
       setGamertagOpen(true);
       return;
     }
-    await doJoin(user.xboxGamertag ?? 'MockGT');
+    await doJoin(user.xboxGamertag!.trim());
   }
 
   async function handleCancelEvent() {
     if (!event) return;
+    const token = getAccessToken();
+    if (!isSignedIn || !token) {
+      setActionError('Sign in with Discord to cancel this event.');
+      return;
+    }
     setCancelling(true);
     setActionError(null);
     try {
-      const token = getAccessToken();
-      if (token && isApiConfigured()) {
+      if (isApiConfigured()) {
         await cancelEvent(token, event.id);
       }
       bumpRefresh();
@@ -156,11 +166,15 @@ export function EventDetail() {
 
   async function handleDeleteDraft() {
     if (!event) return;
+    const token = getAccessToken();
+    if (!isSignedIn || !token) {
+      setActionError('Sign in with Discord to delete this draft.');
+      return;
+    }
     setDeleting(true);
     setActionError(null);
     try {
-      const token = getAccessToken();
-      if (token && isApiConfigured()) {
+      if (isApiConfigured()) {
         await deleteDraftEvent(token, event.id);
       }
       bumpRefresh();
@@ -174,15 +188,26 @@ export function EventDetail() {
 
   async function doJoin(gamertag: string) {
     if (!event) return;
+    const token = getAccessToken();
+    if (!isSignedIn || !token) {
+      setJoinError('Sign in with Discord to join this event.');
+      return;
+    }
+    const trimmed = gamertag.trim();
+    const tagErr = gamertagError(trimmed);
+    if (tagErr) {
+      setJoinError(tagErr);
+      setGamertagOpen(true);
+      return;
+    }
     setJoining(true);
     setJoinError(null);
     try {
-      const token = getAccessToken();
-      if (token && isApiConfigured()) {
-        await updateProfile(token, {xbox_gamertag: gamertag});
-        refreshUser({...user, xboxGamertag: gamertag});
+      if (isApiConfigured()) {
+        await updateProfile(token, {xbox_gamertag: trimmed});
+        refreshUser({...user, xboxGamertag: trimmed});
       }
-      await toggleJoin(event, gamertag);
+      await toggleJoin(event, trimmed);
       bumpRefresh();
       const next = await fetchEventById(event.id, {discordToken});
       setEvent(next);
@@ -235,8 +260,11 @@ export function EventDetail() {
   const convoyLeader = resolveConvoyLeader(event, user.discordId, user.xboxGamertag);
   const registeredDrivers = resolveRegisteredDrivers(event, convoyLeader);
   const showResultsSection = shouldShowEventResults(event);
+  const showParticipantActions = !isHost && !isDraft;
+  const needsSignInToParticipate = showParticipantActions && !isSignedIn && !isStandalone;
   const participationDisabled =
-    !joined && (!registrationOpen || full || joining || cancelling);
+    !isSignedIn ||
+    (!joined && (!registrationOpen || full || joining || cancelling));
 
   return (
     <ContentReveal className="pb-10 pt-4">
@@ -330,16 +358,24 @@ export function EventDetail() {
               Edit
             </Button>
           ) : null
-        ) : (
+        ) : showParticipantActions ? (
           <Button
-            variant={participationButtonVariant(joined, registrationOpen, full)}
+            variant={
+              needsSignInToParticipate
+                ? 'secondary'
+                : participationButtonVariant(joined, registrationOpen, full)
+            }
             className="shrink-0 whitespace-nowrap px-6 py-3 text-xs shadow-none"
-            disabled={participationDisabled}
+            disabled={needsSignInToParticipate ? authRetrying : participationDisabled}
             onClick={() => void handleJoinClick()}
           >
-            {participationButtonLabel(joined, registrationOpen, full)}
+            {needsSignInToParticipate
+              ? authRetrying
+                ? 'Signing in…'
+                : 'Sign in to join'
+              : participationButtonLabel(joined, registrationOpen, full)}
           </Button>
-        )}
+        ) : null}
       </div>
 
       {isDraft && isHost ? <EventStatusBanner variant="draft" /> : null}

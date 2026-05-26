@@ -1,4 +1,4 @@
-import {useState} from 'react';
+import {useEffect, useState} from 'react';
 import {gamertagError} from '../lib/gamertag';
 import {Button} from './ui/Button';
 import {cn} from '../lib/cn';
@@ -21,6 +21,13 @@ export function GamertagModal({open, initialValue = '', saving, onSave, onClose}
   const [value, setValue] = useState(initialValue);
   const [error, setError] = useState<string | null>(null);
 
+  useEffect(() => {
+    if (open) {
+      setValue(initialValue);
+      setError(null);
+    }
+  }, [open, initialValue]);
+
   if (!open) return null;
 
   async function handleSubmit(e: React.FormEvent) {
@@ -40,9 +47,9 @@ export function GamertagModal({open, initialValue = '', saving, onSave, onClose}
         onSubmit={handleSubmit}
         className="w-full max-w-sm rounded-2xl border border-white/[0.1] bg-card p-5 shadow-xl"
       >
-        <h2 className="text-lg font-bold text-white">Xbox Gamertag required</h2>
+        <h2 className="text-lg font-bold text-white">Xbox gamertag required</h2>
         <p className="mt-1 text-sm text-muted">
-          Enter your Xbox Gamertag to join events. It is shown to the host and other players.
+          Enter your Xbox gamertag to join events. It is shown to the host and other players.
         </p>
         <label htmlFor="gamertag" className="mt-4 block text-[10px] font-bold uppercase tracking-widest text-muted">
           Gamertag
@@ -67,7 +74,7 @@ export function GamertagModal({open, initialValue = '', saving, onSave, onClose}
             </Button>
           )}
           <Button type="submit" variant="primary" className="flex-1" disabled={saving}>
-            {saving ? 'Saving…' : 'Save & continue'}
+            {saving ? 'Saving…' : 'Save & join'}
           </Button>
         </div>
       </form>

@@ -1,6 +1,7 @@
 import './App.css';
 import {lazy, Suspense} from 'react';
 import {BrowserRouter, Navigate, Route, Routes} from 'react-router-dom';
+import {AppBootGate} from './components/AppBootGate';
 import {DiscordOnlyGate} from './components/DiscordOnlyGate';
 import {Navbar} from './components/Navbar';
 import {AuthProvider} from './context/AuthContext';
@@ -48,8 +49,9 @@ export default function App() {
             <Navbar />
             <div className="app-main-column flex min-h-screen flex-col px-3 sm:px-5 md:px-8 lg:px-10">
               <main className="min-w-0 flex-1 pb-8">
-                <Suspense fallback={<RouteFallback />}>
-                  <Routes>
+                <AppBootGate>
+                  <Suspense fallback={<RouteFallback />}>
+                    <Routes>
                     <Route path="/" element={<BrowseEvents />} />
                     <Route path="/my-events" element={<MyEvents />} />
                     <Route path="/event/:id" element={<EventDetail />} />
@@ -59,8 +61,9 @@ export default function App() {
                     <Route path="/auth/callback" element={<AuthCallback />} />
                     <Route path="/bot-installed" element={<BotInstalled />} />
                     <Route path="*" element={<Navigate to="/" replace />} />
-                  </Routes>
-                </Suspense>
+                    </Routes>
+                  </Suspense>
+                </AppBootGate>
               </main>
             </div>
           </div>

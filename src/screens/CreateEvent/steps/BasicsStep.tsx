@@ -3,10 +3,12 @@ import {TITLE_MAX_LENGTH, EVENT_TYPES, formInput, COVER_ACCEPT} from '../constan
 import {Divider, Field, fieldInputClass} from '../components/Field';
 import {EventCover} from '../../../components/EventCover';
 import type {CreateEventFormValues, FieldErrors} from '../types';
+import {hasGamertag} from '../../../lib/gamertag';
 import type {EventType} from '../../../lib/types';
 
 type Props = {
   values: CreateEventFormValues;
+  hostGamertag?: string;
   fieldErrors: FieldErrors;
   onTitle: (v: string) => void;
   onType: (v: EventType) => void;
@@ -20,6 +22,7 @@ type Props = {
 
 export function BasicsStep({
   values,
+  hostGamertag,
   fieldErrors,
   onTitle,
   onType,
@@ -145,6 +148,11 @@ export function BasicsStep({
             className="h-4 w-4 accent-white"
           />
         </label>
+        {lobbyLeaderIsHost && !hasGamertag(hostGamertag) && (
+          <p className="mt-2 rounded-lg border border-amber-500/25 bg-amber-500/10 px-3 py-2 text-xs text-amber-200/90">
+            Add your Xbox gamertag in Profile before publishing, or enter another convoy leader below.
+          </p>
+        )}
         {!lobbyLeaderIsHost && (
           <input
             id="create-lobbyLeaderGamertag"

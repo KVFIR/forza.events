@@ -233,8 +233,8 @@ export function useCreateEventForm() {
       additional_car_restrictions:
         carRuleMode === 'anything_goes' ? additionalCarRestrictions.trim() || null : null,
       lobby_leader_gamertag: lobbyLeaderIsHost
-        ? (user.xboxGamertag ?? lobbyLeaderGamertag)
-        : lobbyLeaderGamertag,
+        ? (user.xboxGamertag?.trim() || lobbyLeaderGamertag.trim())
+        : lobbyLeaderGamertag.trim(),
       lobby_leader_is_host: lobbyLeaderIsHost,
       voice_policy: 'optional' as const,
       cars:
@@ -332,7 +332,7 @@ export function useCreateEventForm() {
   }
 
   async function persistDraft(): Promise<string | null> {
-    const err = validateDraftSave(values);
+    const err = validateDraftSave(values, user.xboxGamertag);
     if (err) {
       setGlobalError(err);
       return null;
@@ -371,7 +371,10 @@ export function useCreateEventForm() {
   }
 
   function tryContinue(): boolean {
-    const errors = validateStep(step, values, {allowPastStart: Boolean(editId)});
+    const errors = validateStep(step, values, {
+      allowPastStart: Boolean(editId),
+      hostGamertag: user.xboxGamertag,
+    });
     if (Object.keys(errors).length > 0) {
       setFieldErrors(errors);
       setGlobalError(null);

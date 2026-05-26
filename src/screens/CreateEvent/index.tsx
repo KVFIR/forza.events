@@ -9,12 +9,15 @@ import {BasicsStep} from './steps/BasicsStep';
 import {DetailsStep} from './steps/DetailsStep';
 import {TargetStep} from './steps/TargetStep';
 import {ReviewStep, collectPublishGaps} from './steps/ReviewStep';
+import {SignInRequiredState} from '../../components/SignInRequiredState';
 import {ContentReveal} from '../../components/ui/ContentReveal';
 import {PageLoading} from '../../components/ui/PageLoading';
+import {useAuth} from '../../context/AuthContext';
 import {useLoadingUI} from '../../hooks/useLoadingUI';
 
 export function CreateEvent() {
   const [publishConfirmOpen, setPublishConfirmOpen] = useState(false);
+  const {isStandalone, authRetrying, retryDiscordAuth} = useAuth();
   const form = useCreateEventForm();
   const showLoadingUI = useLoadingUI(form.loadingEdit);
   const {
@@ -135,6 +138,17 @@ export function CreateEvent() {
     return null;
   }
 
+  if (isConfigured && !isStandalone && !isSignedIn) {
+    return (
+      <SignInRequiredState
+        description="Connect your Discord account to create, save, and publish events."
+        busy={authRetrying}
+        onRetry={() => void retryDiscordAuth()}
+        className="pb-10 pt-5"
+      />
+    );
+  }
+
   return (
     <ContentReveal className="pb-10 pt-5">
       <StepIndicator
@@ -152,6 +166,7 @@ export function CreateEvent() {
       {step === 0 && (
         <BasicsStep
           values={values}
+          hostGamertag={user.xboxGamertag}
           fieldErrors={fieldErrors}
           onTitle={setTitle}
           onType={setType}
