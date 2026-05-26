@@ -236,6 +236,7 @@
     "selectChannel": "Select a channel",
     "addBot": "Add bot to server",
     "refreshList": "Refresh list",
+    "refreshChannels": "Refresh channels",
     "noServers": "No servers with the bot yet",
     "noServersHint": "Add the bot to a server you manage, then refresh the list.",
     "choosePublishTarget": "Choose publish target",

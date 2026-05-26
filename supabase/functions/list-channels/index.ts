@@ -1,14 +1,14 @@
 import {serve} from 'https://deno.land/std@0.224.0/http/server.ts';
 import {
   botCanPostInChannel,
+  fetchGuildChannels,
   fetchGuildMember,
   fetchGuildRoles,
   getBotUserId,
-  type DiscordTextChannel,
 } from '../_shared/channelPermissions.ts';
 import {jsonResponse, optionsResponse} from '../_shared/cors.ts';
-import {botHeaders, isBotInGuild, verifyDiscordToken} from '../_shared/discord.ts';
-import {userIsGuildMember, userCanManageGuildById} from '../_shared/guildAccess.ts';
+import {botIsInGuild, verifyDiscordToken} from '../_shared/discord.ts';
+import {requireManageGuildAccess} from '../_shared/guildAccess.ts';
 import {rateLimitAuth} from '../_shared/rateLimitPresets.ts';
 
 serve(async (req) => {
@@ -28,19 +28,15 @@ serve(async (req) => {
     const {guild_id} = await req.json();
     if (!guild_id) return jsonResponse({error: 'Missing guild_id'}, 400, req);
 
-    if (!(await userIsGuildMember(token!, guild_id))) {
-      return jsonResponse({error: 'Forbidden'}, 403, req);
-    }
-    if (!(await userCanManageGuildById(token!, guild_id))) {
-      return jsonResponse(
-        {error: 'You need Manage Server permission to choose publish channels.'},
-        403,
-        req,
-      );
+    try {
+      await requireManageGuildAccess(token!, guild_id);
+    } catch (e) {
+      const msg = e instanceof Error ? e.message : String(e);
+      if (msg === 'Forbidden') return jsonResponse({error: 'Forbidden'}, 403, req);
+      return jsonResponse({error: msg}, 403, req);
     }
 
-    const botInstalled = await isBotInGuild(guild_id);
-    if (!botInstalled) {
+    if (!(await botIsInGuild(guild_id))) {
       return jsonResponse(
         {error: 'FORZA.EVENTS is not installed in this server. Add the app to the server first.'},
         400,
@@ -48,14 +44,8 @@ serve(async (req) => {
       );
     }
 
-    const res = await fetch(`https://discord.com/api/v10/guilds/${guild_id}/channels`, {
-      headers: botHeaders(),
-    });
-    if (!res.ok) {
-      return jsonResponse({error: 'Failed to list channels'}, 502, req);
-    }
-
-    const channels = (await res.json()) as DiscordTextChannel[];
+    const channels = await fetchGuildChannels(guild_id);
+    const channelsById = new Map(channels.map((c) => [c.id, c]));
     const text = channels
       .filter((c) => c.type === 0)
       .sort((a, b) => a.position - b.position);
@@ -70,7 +60,7 @@ serve(async (req) => {
       return jsonResponse({error: 'Bot is not a member of this server.'}, 400, req);
     }
 
-    const context = {roles, member};
+    const context = {roles, member, channelsById};
     const postable: {id: string; name: string; position: number}[] = [];
     for (const channel of text) {
       const canPost = await botCanPostInChannel(guild_id, channel, context);
@@ -86,6 +76,8 @@ serve(async (req) => {
     }, 200, req);
   } catch (e) {
     console.error(e);
-    return jsonResponse({error: String(e)}, 500, req);
+    const msg = e instanceof Error ? e.message : String(e);
+    const status = msg.includes('rate limit') ? 429 : 500;
+    return jsonResponse({error: msg}, status, req);
   }
 });

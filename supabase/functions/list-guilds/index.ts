@@ -44,6 +44,8 @@ serve(async (req) => {
     }, 200, req);
   } catch (e) {
     console.error(e);
-    return jsonResponse({error: String(e)}, 500, req);
+    const msg = e instanceof Error ? e.message : String(e);
+    const status = msg.includes('rate limit') ? 429 : 500;
+    return jsonResponse({error: msg}, status, req);
   }
 });

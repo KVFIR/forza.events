@@ -1,7 +1,7 @@
 import {serve} from 'https://deno.land/std@0.224.0/http/server.ts';
 import {jsonResponse, optionsResponse} from '../_shared/cors.ts';
 import {botHeaders, mapDiscordPostError, verifyDiscordToken} from '../_shared/discord.ts';
-import {resolveGuildNameForUser, userCanManageGuildById, userIsGuildMember} from '../_shared/guildAccess.ts';
+import {requireManageGuildAccess, resolveGuildNameForUser} from '../_shared/guildAccess.ts';
 import {validatePublishChannelTarget} from '../_shared/publishTarget.ts';
 import {buildEventEmbed, mapEventCarsForEmbed} from '../_shared/events.ts';
 import {validatePublishReady, type SaveEventBody} from '../_shared/eventSpec.ts';
@@ -28,11 +28,12 @@ serve(async (req) => {
       return jsonResponse({error: 'Missing event_id, guild_id, or channel_id'}, 400, req);
     }
 
-    if (!(await userIsGuildMember(token!, guild_id))) {
-      return jsonResponse({error: 'Forbidden'}, 403, req);
-    }
-    if (!(await userCanManageGuildById(token!, guild_id))) {
-      return jsonResponse({error: 'You need Manage Server permission to publish here.'}, 403, req);
+    try {
+      await requireManageGuildAccess(token!, guild_id);
+    } catch (e) {
+      const msg = e instanceof Error ? e.message : String(e);
+      if (msg === 'Forbidden') return jsonResponse({error: 'Forbidden'}, 403, req);
+      return jsonResponse({error: msg}, 403, req);
     }
 
     const channelCheck = await validatePublishChannelTarget(guild_id, channel_id);

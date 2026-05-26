@@ -63,6 +63,7 @@ Lessons from implementation work (keep in sync when behavior changes).
 
 - URL mapping: prefix `/supabase` → `{project-ref}.supabase.co`. Client keeps real `VITE_SUPABASE_URL`; `patchUrlMappings` rewrites fetches.
 - **Cover images in Activity:** Discord CSP `img-src` allows `'self'` and Discord CDNs only — not `*.supabase.co`. `coverDisplayUrl()` rewrites Storage/render URLs to `/supabase/...` for `<img>` (fetch proxy does not apply to `img src`).
+- **Publish target lists:** `list-guilds` intersects user guilds with **one** cached `GET /users/@me/guilds` (bot token), not N× `GET /guilds/{id}`. `list-channels` fetches user guilds once; channel permissions include **category** overwrites. Load channels only after guild list finishes (client).
 - Discord’s proxy often **drops `apikey` and `Authorization`** on forwarded requests (documented for PostgREST; applies to `/functions/v1` too).
 - **Fix:** In the Activity iframe, route Edge `fetch` through **`createSupabaseFetch(anonKey)`** (`src/lib/supabaseEnv.ts`) so headers are re-applied on every request — same pattern as the Supabase JS client.
 - Plain `fetch()` to `functions/v1/*` from `api.ts` **without** that wrapper will 401 in Discord even if localhost works.

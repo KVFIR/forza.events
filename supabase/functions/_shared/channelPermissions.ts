@@ -1,4 +1,4 @@
-import {botHeaders} from './discord.ts';
+import {botHeaders, discordApiFetch, discordRateLimitMessage} from './discord.ts';
 
 const ADMINISTRATOR = 0x8n;
 const VIEW_CHANNEL = 0x400n;
@@ -31,8 +31,32 @@ export type DiscordTextChannel = {
   type: number;
   position: number;
   guild_id?: string;
+  parent_id?: string | null;
   permission_overwrites?: PermissionOverwrite[];
 };
+
+/** Category + channel overwrites (Discord inheritance, root → leaf). */
+export function mergedChannelOverwrites(
+  channel: DiscordTextChannel,
+  channelsById: Map<string, DiscordTextChannel>,
+): PermissionOverwrite[] {
+  const parents: DiscordTextChannel[] = [];
+  let parentId = channel.parent_id ?? null;
+  while (parentId) {
+    const parent = channelsById.get(parentId);
+    if (!parent) break;
+    parents.unshift(parent);
+    parentId = parent.parent_id ?? null;
+  }
+  const merged: PermissionOverwrite[] = [];
+  for (const p of parents) {
+    if (p.permission_overwrites?.length) merged.push(...p.permission_overwrites);
+  }
+  if (channel.permission_overwrites?.length) {
+    merged.push(...channel.permission_overwrites);
+  }
+  return merged;
+}
 
 export const BOT_CANNOT_POST_MESSAGE =
   'FORZA.EVENTS cannot post in this channel. Allow View Channel, Send Messages, and Embed Links for the bot (or its role) in channel settings.';
@@ -88,18 +112,38 @@ export function hasPostPermissions(perms: bigint): boolean {
 
 export async function getBotUserId(): Promise<string> {
   if (cachedBotUserId) return cachedBotUserId;
-  const res = await fetch('https://discord.com/api/v10/users/@me', {headers: botHeaders()});
-  if (!res.ok) throw new Error('Failed to resolve bot user');
+  const res = await discordApiFetch('https://discord.com/api/v10/users/@me', {
+    headers: botHeaders(),
+  });
+  if (!res.ok) {
+    throw new Error(discordRateLimitMessage(res.status) ?? 'Failed to resolve bot user');
+  }
   const user = (await res.json()) as {id: string};
   cachedBotUserId = user.id;
   return cachedBotUserId;
 }
 
-export async function fetchGuildRoles(guildId: string): Promise<DiscordRole[]> {
-  const res = await fetch(`https://discord.com/api/v10/guilds/${guildId}/roles`, {
+export async function fetchGuildChannels(guildId: string): Promise<DiscordTextChannel[]> {
+  const res = await discordApiFetch(`https://discord.com/api/v10/guilds/${guildId}/channels`, {
     headers: botHeaders(),
   });
-  if (!res.ok) throw new Error(`Failed to list guild roles: ${res.status}`);
+  if (!res.ok) {
+    throw new Error(
+      discordRateLimitMessage(res.status) ?? `Failed to list guild channels: ${res.status}`,
+    );
+  }
+  return (await res.json()) as DiscordTextChannel[];
+}
+
+export async function fetchGuildRoles(guildId: string): Promise<DiscordRole[]> {
+  const res = await discordApiFetch(`https://discord.com/api/v10/guilds/${guildId}/roles`, {
+    headers: botHeaders(),
+  });
+  if (!res.ok) {
+    throw new Error(
+      discordRateLimitMessage(res.status) ?? `Failed to list guild roles: ${res.status}`,
+    );
+  }
   return (await res.json()) as DiscordRole[];
 }
 
@@ -107,29 +151,36 @@ export async function fetchGuildMember(
   guildId: string,
   userId: string,
 ): Promise<DiscordMember | null> {
-  const res = await fetch(`https://discord.com/api/v10/guilds/${guildId}/members/${userId}`, {
-    headers: botHeaders(),
-  });
+  const res = await discordApiFetch(
+    `https://discord.com/api/v10/guilds/${guildId}/members/${userId}`,
+    {headers: botHeaders()},
+  );
   if (res.status === 404) return null;
-  if (!res.ok) throw new Error(`Failed to fetch guild member: ${res.status}`);
+  if (!res.ok) {
+    throw new Error(
+      discordRateLimitMessage(res.status) ?? `Failed to fetch guild member: ${res.status}`,
+    );
+  }
   return (await res.json()) as DiscordMember;
 }
 
 export async function botCanPostInChannel(
   guildId: string,
-  channel: Pick<DiscordTextChannel, 'permission_overwrites'>,
-  context?: {roles: DiscordRole[]; member: DiscordMember},
+  channel: Pick<DiscordTextChannel, 'permission_overwrites' | 'parent_id' | 'id'>,
+  context?: {
+    roles: DiscordRole[];
+    member: DiscordMember;
+    channelsById?: Map<string, DiscordTextChannel>;
+  },
 ): Promise<boolean> {
   const roles = context?.roles ?? (await fetchGuildRoles(guildId));
   const member =
     context?.member ??
     (await fetchGuildMember(guildId, await getBotUserId()));
   if (!member) return false;
-  const perms = computeMemberChannelPermissions(
-    guildId,
-    member,
-    roles,
-    channel.permission_overwrites ?? [],
-  );
+  const overwrites = context?.channelsById
+    ? mergedChannelOverwrites(channel as DiscordTextChannel, context.channelsById)
+    : (channel.permission_overwrites ?? []);
+  const perms = computeMemberChannelPermissions(guildId, member, roles, overwrites);
   return hasPostPermissions(perms);
 }

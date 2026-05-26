@@ -45,7 +45,8 @@ export function PublishTargetPicker({
   const [loadingChannels, setLoadingChannels] = useState(false);
   const [validatingChannel, setValidatingChannel] = useState(false);
   const [channelHint, setChannelHint] = useState<string | null>(null);
-  const [error, setError] = useState<string | null>(null);
+  const [guildError, setGuildError] = useState<string | null>(null);
+  const [channelsError, setChannelsError] = useState<string | null>(null);
   const [channelError, setChannelError] = useState<string | null>(null);
   const guildRequestRef = useRef(0);
   const channelRequestRef = useRef(0);
@@ -72,7 +73,7 @@ export function PublishTargetPicker({
   const loadGuilds = useCallback(() => {
     const requestId = ++guildRequestRef.current;
     setLoadingGuilds(true);
-    setError(null);
+    setGuildError(null);
     void listGuilds(accessToken)
       .then((r) => {
         if (requestId !== guildRequestRef.current) return;
@@ -81,7 +82,7 @@ export function PublishTargetPicker({
       })
       .catch((e) => {
         if (requestId !== guildRequestRef.current) return;
-        setError(e instanceof Error ? e.message : String(e));
+        setGuildError(e instanceof Error ? e.message : String(e));
       })
       .finally(() => {
         if (requestId === guildRequestRef.current) setLoadingGuilds(false);
@@ -100,8 +101,8 @@ export function PublishTargetPicker({
     setChannels([]);
     setChannelHint(null);
     setChannelError(null);
+    setChannelsError(null);
     setLoadingChannels(true);
-    setError(null);
     void listChannels(accessToken, requestGuildId)
       .then((r) => {
         if (requestId !== channelRequestRef.current) return;
@@ -110,7 +111,7 @@ export function PublishTargetPicker({
       })
       .catch((e) => {
         if (requestId !== channelRequestRef.current) return;
-        setError(e instanceof Error ? e.message : String(e));
+        setChannelsError(e instanceof Error ? e.message : String(e));
       })
       .finally(() => {
         if (requestId === channelRequestRef.current) setLoadingChannels(false);
@@ -131,8 +132,9 @@ export function PublishTargetPicker({
   }, [guildId, guildName, guilds, lockGuild, onGuildChange]);
 
   useEffect(() => {
+    if (!guildId || loadingGuilds) return;
     loadChannels();
-  }, [loadChannels]);
+  }, [guildId, loadingGuilds, loadChannels]);
 
   const validateChannelSelection = useCallback(
     async (nextChannelId: string, requestGuildId: string) => {
@@ -294,7 +296,17 @@ export function PublishTargetPicker({
             {validatingChannel && (
               <p className="mt-1.5 text-[10px] text-muted">Checking bot permissions…</p>
             )}
-            {channelHint && !channelError && (
+            {channelsError && (
+              <div className="mt-2 space-y-2">
+                <p role="alert" className="text-xs text-accent-red">
+                  {channelsError}
+                </p>
+                <TextButton type="button" onClick={loadChannels} disabled={loadingChannels}>
+                  {t('common.tryAgain')}
+                </TextButton>
+              </div>
+            )}
+            {channelHint && !channelError && !channelsError && (
               <p className="mt-1.5 text-[10px] text-amber-200/90">{channelHint}</p>
             )}
             {channelError && (
@@ -302,6 +314,13 @@ export function PublishTargetPicker({
                 {channelError}
               </p>
             )}
+            {!channelsError &&
+              !loadingChannels &&
+              channels.length > 0 && (
+                <TextButton type="button" className="mt-1.5" onClick={loadChannels}>
+                  {t('publish.refreshChannels')}
+                </TextButton>
+              )}
           </>
         )}
         {lockChannel && (
@@ -309,16 +328,10 @@ export function PublishTargetPicker({
         )}
       </div>
 
-      {error && (
+      {guildError && (
         <div className="space-y-2">
-          <p className="text-xs text-accent-red">{error}</p>
-          <TextButton
-            type="button"
-            onClick={() => {
-              if (loadingGuilds || guilds.length === 0) loadGuilds();
-              else loadChannels();
-            }}
-          >
+          <p className="text-xs text-accent-red">{guildError}</p>
+          <TextButton type="button" onClick={loadGuilds} disabled={loadingGuilds}>
             {t('common.tryAgain')}
           </TextButton>
         </div>

@@ -1,4 +1,24 @@
-import {fetchUserGuilds, userCanManageGuild} from './discord.ts';
+import {
+  type DiscordGuildSummary,
+  fetchUserGuilds,
+  userCanManageGuild,
+} from './discord.ts';
+
+/** Single Discord guild list fetch for membership + Manage Server checks. */
+export async function requireManageGuildAccess(
+  accessToken: string,
+  guildId: string,
+): Promise<DiscordGuildSummary> {
+  const guilds = await fetchUserGuilds(accessToken);
+  const guild = guilds.find((g) => g.id === guildId);
+  if (!guild) {
+    throw new Error('Forbidden');
+  }
+  if (!userCanManageGuild(guild.permissions)) {
+    throw new Error('You need Manage Server permission to choose publish channels.');
+  }
+  return guild;
+}
 
 /** User OAuth guild list — member of guild. */
 export async function userIsGuildMember(

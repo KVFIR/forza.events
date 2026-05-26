@@ -1,9 +1,13 @@
 import {
   BOT_CANNOT_POST_MESSAGE,
   botCanPostInChannel,
+  fetchGuildChannels,
+  fetchGuildMember,
+  fetchGuildRoles,
+  getBotUserId,
   type DiscordTextChannel,
 } from './channelPermissions.ts';
-import {botHeaders, isBotInGuild} from './discord.ts';
+import {botIsInGuild} from './discord.ts';
 
 export type PublishTargetValidation =
   | {ok: true; channel: DiscordTextChannel}
@@ -14,7 +18,7 @@ export async function validatePublishChannelTarget(
   guildId: string,
   channelId: string,
 ): Promise<PublishTargetValidation> {
-  const botInstalled = await isBotInGuild(guildId);
+  const botInstalled = await botIsInGuild(guildId);
   if (!botInstalled) {
     return {
       ok: false,
@@ -23,17 +27,15 @@ export async function validatePublishChannelTarget(
     };
   }
 
-  const channelRes = await fetch(`https://discord.com/api/v10/channels/${channelId}`, {
-    headers: botHeaders(),
-  });
-  if (!channelRes.ok) {
+  const channels = await fetchGuildChannels(guildId);
+  const channelsById = new Map(channels.map((c) => [c.id, c]));
+  const channel = channelsById.get(channelId);
+  if (!channel) {
     return {
       ok: false,
       error: 'Channel not found. Choose another channel or refresh the list.',
     };
   }
-
-  const channel = (await channelRes.json()) as DiscordTextChannel;
   if (channel.type !== 0) {
     return {ok: false, error: 'Only text channels can be used for announcements.'};
   }
@@ -41,7 +43,20 @@ export async function validatePublishChannelTarget(
     return {ok: false, error: 'Channel does not belong to the selected server.'};
   }
 
-  const canPost = await botCanPostInChannel(guildId, channel);
+  const botId = await getBotUserId();
+  const [roles, member] = await Promise.all([
+    fetchGuildRoles(guildId),
+    fetchGuildMember(guildId, botId),
+  ]);
+  if (!member) {
+    return {ok: false, error: 'Bot is not a member of this server.'};
+  }
+
+  const canPost = await botCanPostInChannel(guildId, channel, {
+    roles,
+    member,
+    channelsById,
+  });
   if (!canPost) {
     return {ok: false, error: BOT_CANNOT_POST_MESSAGE};
   }

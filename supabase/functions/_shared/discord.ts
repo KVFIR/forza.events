@@ -92,40 +92,90 @@ export function userCanManageGuild(permissions: string | undefined): boolean {
   return (p & ADMINISTRATOR) === ADMINISTRATOR || (p & MANAGE_GUILD) === MANAGE_GUILD;
 }
 
+/** Fetch with one retry on Discord rate limit (429). */
+export async function discordApiFetch(
+  url: string,
+  init?: RequestInit,
+  retries = 1,
+): Promise<Response> {
+  const res = await fetch(url, init);
+  if (res.status !== 429 || retries <= 0) return res;
+  const retryAfterSec = Math.min(
+    5,
+    Math.max(1, Number.parseInt(res.headers.get('Retry-After') ?? '2', 10) || 2),
+  );
+  await new Promise((r) => setTimeout(r, retryAfterSec * 1000));
+  return discordApiFetch(url, init, retries - 1);
+}
+
+export function discordRateLimitMessage(status: number): string | null {
+  if (status === 429) {
+    return 'Discord rate limit — wait a few seconds and try again.';
+  }
+  return null;
+}
+
 export async function fetchUserGuilds(
   accessToken: string,
 ): Promise<DiscordGuildSummary[]> {
-  const res = await fetch('https://discord.com/api/users/@me/guilds', {
+  const res = await discordApiFetch('https://discord.com/api/v10/users/@me/guilds', {
     headers: {Authorization: `Bearer ${accessToken}`},
   });
   if (!res.ok) {
-    throw new Error(`Failed to list user guilds: ${res.status}`);
+    const rateLimited = discordRateLimitMessage(res.status);
+    throw new Error(rateLimited ?? `Failed to list user guilds: ${res.status}`);
   }
   return res.json();
 }
 
-/** Whether the bot can access a guild (installed with bot scope). Uses GET /guilds/{id}. */
-export async function isBotInGuild(guildId: string): Promise<boolean> {
-  const res = await fetch(`https://discord.com/api/v10/guilds/${guildId}`, {
-    headers: botHeaders(),
-  });
-  if (res.status === 404) return false;
-  if (!res.ok) {
-    const text = await res.text();
-    console.error('isBotInGuild', guildId, res.status, text);
-    return false;
+const BOT_GUILDS_TTL_MS = 60_000;
+let botGuildIdsCache: {ids: Set<string>; expiresAt: number} | null = null;
+
+/** Guild IDs where the bot is installed (one paginated list call, cached). */
+export async function fetchBotGuildIds(): Promise<Set<string>> {
+  const now = Date.now();
+  if (botGuildIdsCache && now < botGuildIdsCache.expiresAt) {
+    return botGuildIdsCache.ids;
   }
-  return true;
+
+  const ids = new Set<string>();
+  let before: string | undefined;
+  for (;;) {
+    const url = new URL('https://discord.com/api/v10/users/@me/guilds');
+    url.searchParams.set('limit', '200');
+    if (before) url.searchParams.set('before', before);
+    const res = await discordApiFetch(url.toString(), {headers: botHeaders()});
+    if (!res.ok) {
+      const rateLimited = discordRateLimitMessage(res.status);
+      throw new Error(rateLimited ?? `Failed to list bot guilds: ${res.status}`);
+    }
+    const page = (await res.json()) as {id: string}[];
+    if (page.length === 0) break;
+    for (const g of page) ids.add(g.id);
+    if (page.length < 200) break;
+    before = page[page.length - 1]!.id;
+  }
+
+  botGuildIdsCache = {ids, expiresAt: now + BOT_GUILDS_TTL_MS};
+  return ids;
+}
+
+export async function botIsInGuild(guildId: string): Promise<boolean> {
+  const ids = await fetchBotGuildIds();
+  return ids.has(guildId);
+}
+
+/** @deprecated Prefer botIsInGuild — avoids N parallel GET /guilds/{id} calls. */
+export async function isBotInGuild(guildId: string): Promise<boolean> {
+  return botIsInGuild(guildId);
 }
 
 /** Intersect user guilds with servers where the bot is installed. */
 export async function filterGuildsWithBot(
   guilds: DiscordGuildSummary[],
 ): Promise<DiscordGuildSummary[]> {
-  const results = await Promise.all(
-    guilds.map(async (g) => ((await isBotInGuild(g.id)) ? g : null)),
-  );
-  return results.filter((g): g is DiscordGuildSummary => g !== null);
+  const botIds = await fetchBotGuildIds();
+  return guilds.filter((g) => botIds.has(g.id));
 }
 
 export function publishTargetHint(): string {
