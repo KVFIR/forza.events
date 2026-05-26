@@ -79,7 +79,18 @@ export type DiscordGuildSummary = {
   id: string;
   name: string;
   icon: string | null;
+  /** Present on GET /users/@me/guilds (user OAuth token). */
+  permissions?: string;
 };
+
+const MANAGE_GUILD = 0x20n;
+const ADMINISTRATOR = 0x8n;
+
+export function userCanManageGuild(permissions: string | undefined): boolean {
+  if (!permissions) return true;
+  const p = BigInt(permissions);
+  return (p & ADMINISTRATOR) === ADMINISTRATOR || (p & MANAGE_GUILD) === MANAGE_GUILD;
+}
 
 export async function fetchUserGuilds(
   accessToken: string,
@@ -93,23 +104,28 @@ export async function fetchUserGuilds(
   return res.json();
 }
 
-/** Guild IDs where the bot user is a member (app installed with bot scope). */
-export async function fetchBotGuildIds(): Promise<Set<string>> {
-  const res = await fetch('https://discord.com/api/users/@me/guilds', {
+/** Whether the bot can access a guild (installed with bot scope). Uses GET /guilds/{id}. */
+export async function isBotInGuild(guildId: string): Promise<boolean> {
+  const res = await fetch(`https://discord.com/api/v10/guilds/${guildId}`, {
     headers: botHeaders(),
   });
+  if (res.status === 404) return false;
   if (!res.ok) {
     const text = await res.text();
-    console.error('Failed to list bot guilds', text);
-    throw new Error('Failed to list bot guilds');
+    console.error('isBotInGuild', guildId, res.status, text);
+    return false;
   }
-  const guilds = (await res.json()) as {id: string}[];
-  return new Set(guilds.map((g) => g.id));
+  return true;
 }
 
-export async function isBotInGuild(guildId: string): Promise<boolean> {
-  const ids = await fetchBotGuildIds();
-  return ids.has(guildId);
+/** Intersect user guilds with servers where the bot is installed. */
+export async function filterGuildsWithBot(
+  guilds: DiscordGuildSummary[],
+): Promise<DiscordGuildSummary[]> {
+  const results = await Promise.all(
+    guilds.map(async (g) => ((await isBotInGuild(g.id)) ? g : null)),
+  );
+  return results.filter((g): g is DiscordGuildSummary => g !== null);
 }
 
 export function publishTargetHint(): string {

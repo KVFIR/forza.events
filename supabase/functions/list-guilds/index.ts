@@ -1,9 +1,10 @@
 import {serve} from 'https://deno.land/std@0.224.0/http/server.ts';
 import {jsonResponse, optionsResponse} from '../_shared/cors.ts';
 import {
-  fetchBotGuildIds,
   fetchUserGuilds,
+  filterGuildsWithBot,
   publishTargetHint,
+  userCanManageGuild,
   verifyDiscordToken,
 } from '../_shared/discord.ts';
 
@@ -18,13 +19,12 @@ serve(async (req) => {
   if (!user) return jsonResponse({error: 'Unauthorized'}, 401);
 
   try {
-    const [guilds, botGuildIds] = await Promise.all([
-      fetchUserGuilds(token!),
-      fetchBotGuildIds(),
-    ]);
+    const userGuilds = await fetchUserGuilds(token!);
+    const manageable = userGuilds.filter((g) => userCanManageGuild(g.permissions));
+    const candidates = manageable.length > 0 ? manageable : userGuilds;
+    const withBot = await filterGuildsWithBot(candidates);
 
-    const list = guilds
-      .filter((g) => botGuildIds.has(g.id))
+    const list = withBot
       .map((g) => ({
         id: g.id,
         name: g.name,

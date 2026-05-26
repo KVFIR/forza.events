@@ -42,7 +42,7 @@ export function PublishTargetPicker({
         setGuilds(r.guilds);
         setGuildHint(r.hint ?? null);
       })
-      .catch((e) => setError(String(e)))
+      .catch((e) => setError(e instanceof Error ? e.message : String(e)))
       .finally(() => setLoadingGuilds(false));
   }, [accessToken]);
 
@@ -55,7 +55,7 @@ export function PublishTargetPicker({
     setError(null);
     void listChannels(accessToken, guildId)
       .then((r) => setChannels(r.channels))
-      .catch((e) => setError(String(e)))
+      .catch((e) => setError(e instanceof Error ? e.message : String(e)))
       .finally(() => setLoadingChannels(false));
   }, [accessToken, guildId]);
 
@@ -66,6 +66,35 @@ export function PublishTargetPicker({
   useEffect(() => {
     loadChannels();
   }, [loadChannels]);
+
+  function handleAddBot() {
+    const prefillCurrentServer =
+      guilds.length === 0 && activityGuildId ? {guildId: activityGuildId} : undefined;
+    void openBotInstallUrl(prefillCurrentServer);
+  }
+
+  const botInstallActions =
+    canAddBot && !lockGuild ? (
+      <div className="mt-2 flex flex-wrap gap-2">
+        <Button
+          type="button"
+          variant={guilds.length === 0 ? 'primary' : 'secondary'}
+          className="h-9 px-3 text-xs"
+          onClick={handleAddBot}
+        >
+          {guilds.length === 0 ? 'Add to server' : 'Add to another server'}
+        </Button>
+        <Button
+          type="button"
+          variant="ghost"
+          className="h-9 px-3 text-xs"
+          onClick={loadGuilds}
+          disabled={loadingGuilds}
+        >
+          Refresh list
+        </Button>
+      </div>
+    ) : null;
 
   return (
     <div className="space-y-4">
@@ -81,31 +110,7 @@ export function PublishTargetPicker({
               {guildHint ??
                 'Add FORZA.EVENTS to a Discord server you manage, then refresh the list.'}
             </p>
-            {canAddBot && (
-              <div className="flex flex-wrap gap-2">
-                <Button
-                  type="button"
-                  variant="primary"
-                  className="h-9 px-3 text-xs"
-                  onClick={() => {
-                    void openBotInstallUrl(
-                      activityGuildId ? {guildId: activityGuildId} : undefined,
-                    );
-                  }}
-                >
-                  Add to server
-                </Button>
-                <Button
-                  type="button"
-                  variant="secondary"
-                  className="h-9 px-3 text-xs"
-                  onClick={loadGuilds}
-                  disabled={loadingGuilds}
-                >
-                  Refresh list
-                </Button>
-              </div>
-            )}
+            {botInstallActions}
             <p className="text-[10px] leading-relaxed text-muted">
               One install adds the bot so events can be announced in a channel. Launching from App
               Launcher alone is not enough. After approving in Discord, return here and tap Refresh
@@ -120,23 +125,30 @@ export function PublishTargetPicker({
             )}
           </div>
         ) : (
-          <select
-            className="w-full rounded-lg border border-white/[0.08] bg-white/[0.03] px-3.5 py-2.5 text-sm text-white"
-            value={guildId}
-            disabled={lockGuild}
-            onChange={(e) => {
-              const next = guilds.find((g) => g.id === e.target.value);
-              onGuildChange(e.target.value, next?.name ?? 'Server');
-              onChannelChange('');
-            }}
-          >
-            <option value="">Select a server</option>
-            {guilds.map((g) => (
-              <option key={g.id} value={g.id}>
-                {g.name}
-              </option>
-            ))}
-          </select>
+          <>
+            <select
+              className="w-full rounded-lg border border-white/[0.08] bg-white/[0.03] px-3.5 py-2.5 text-sm text-white"
+              value={guildId}
+              disabled={lockGuild}
+              onChange={(e) => {
+                const next = guilds.find((g) => g.id === e.target.value);
+                onGuildChange(e.target.value, next?.name ?? 'Server');
+                onChannelChange('');
+              }}
+            >
+              <option value="">Select a server</option>
+              {guilds.map((g) => (
+                <option key={g.id} value={g.id}>
+                  {g.name}
+                </option>
+              ))}
+            </select>
+            {botInstallActions}
+            <p className="mt-1.5 text-[10px] leading-relaxed text-muted">
+              Only servers where you manage the server and FORZA.EVENTS is installed are listed.
+              Use Add to another server to install the bot elsewhere, then refresh.
+            </p>
+          </>
         )}
         {lockGuild && (
           <p className="mt-1 text-[10px] text-muted">Server is locked after publish.</p>

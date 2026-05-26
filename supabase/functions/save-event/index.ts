@@ -38,14 +38,19 @@ serve(async (req) => {
     if (body.delete && body.id) {
       const {data: existing} = await supabase
         .from('events')
-        .select('host_discord_id, status')
+        .select('host_discord_id, status, discord_message_id')
         .eq('id', body.id)
         .single();
       if (!existing || existing.host_discord_id !== discordUser.id) {
         return jsonResponse({error: 'Forbidden'}, 403);
       }
-      if (existing.status !== 'draft') {
-        return jsonResponse({error: 'Only draft events can be deleted'}, 400);
+      const published = Boolean(existing.discord_message_id);
+      const closed = ['completed', 'cancelled', 'archived'].includes(existing.status);
+      if (published || closed) {
+        return jsonResponse(
+          {error: 'Only unpublished drafts can be deleted'},
+          400,
+        );
       }
       const {error} = await supabase.from('events').delete().eq('id', body.id);
       if (error) return jsonResponse({error: error.message}, 500);

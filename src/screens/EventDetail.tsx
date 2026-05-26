@@ -32,7 +32,7 @@ import {
   canEditEvent,
   eventHasStarted,
   isEventFinalized,
-  isPublishedEvent,
+  isPublishedToDiscord,
   isRegistrationOpen,
 } from '../lib/eventSpec';
 import {EventStatusBanner} from '../components/EventStatusBanner';
@@ -221,7 +221,7 @@ export function EventDetail() {
   }
 
   const isHost = event.hostDiscordId === user.discordId;
-  const isDraft = !isPublishedEvent(event);
+  const isDraft = !isPublishedToDiscord(event);
   const canEnterResults = canSubmitEventResults(event, user);
   const canEdit = canEditEvent(event, user);
   const canCancel = canCancelEvent(event, user);

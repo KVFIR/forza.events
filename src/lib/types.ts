@@ -41,6 +41,8 @@ export interface ForzaEvent {
   guildId?: string;
   guildName?: string;
   channelId?: string;
+  /** Set after publish-event posts the Discord embed. */
+  discordMessageId?: string;
   carRuleMode: CarRuleMode;
   maxPi: number;
   allowedCars: EventAllowedCar[];

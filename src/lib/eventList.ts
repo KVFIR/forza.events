@@ -1,3 +1,4 @@
+import {isPublishedToDiscord} from './eventSpec';
 import type {AppUser, EventType, ForzaEvent} from './types';
 
 export type EventSortKey = 'event_date' | 'created' | 'fill';
@@ -34,7 +35,7 @@ export function filterByEventType(events: ForzaEvent[], type: EventType | 'all')
 }
 
 export function isDraftEvent(event: ForzaEvent): boolean {
-  return event.lifecycle === 'draft';
+  return !isPublishedToDiscord(event);
 }
 
 /** Newest draft first (by created or scheduled start). */

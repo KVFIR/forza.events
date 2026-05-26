@@ -124,9 +124,8 @@ export function CreateEvent() {
     <ContentReveal className="pb-10 pt-5">
       <StepIndicator
         step={step}
-        onStepClick={(i) => {
-          if (i < step) setStep(i);
-        }}
+        freeNavigation={hasDraftId}
+        onStepClick={setStep}
       />
 
       <FormAlerts

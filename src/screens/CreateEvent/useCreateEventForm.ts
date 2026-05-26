@@ -10,7 +10,11 @@ import {fetchEventById} from '../../lib/events';
 import {defaultTimezone, localInputToUtc, utcToLocalInput} from '../../lib/datetime';
 import {clampPi} from '../../lib/pi';
 import {EVENT_PLAYER_SLOTS} from '../../lib/constants';
-import {canEditEvent, isPublishedEvent, normalizeTrackCodes} from '../../lib/eventSpec';
+import {
+  canEditEvent,
+  isPublishedToDiscord,
+  normalizeTrackCodes,
+} from '../../lib/eventSpec';
 import type {EventCarEntry} from '../../components/EventCarList';
 import type {CreateEventStepIndex} from './constants';
 import type {CreateEventFormValues, FieldErrors} from './types';
@@ -139,7 +143,7 @@ export function useCreateEventForm() {
         }
         const tz = ev.timezoneHint ?? defaultTimezone();
         setEventId(ev.id);
-        setIsPublished(isPublishedEvent(ev));
+        setIsPublished(isPublishedToDiscord(ev));
         setTitle(ev.title);
         setType(ev.type);
         setStartsAtLocal(utcToLocalInput(ev.startsAt, tz));
@@ -252,13 +256,21 @@ export function useCreateEventForm() {
   }
 
   async function deleteDraft(): Promise<boolean> {
-    if (!eventId || !token || !canPersist) return false;
+    const id = eventId ?? editId;
+    if (!id) {
+      setGlobalError('Nothing to delete yet. Save as draft first.');
+      return false;
+    }
+    if (!token || !canPersist) {
+      setGlobalError('Open this app in Discord to delete drafts.');
+      return false;
+    }
     const ok = window.confirm('Delete this draft permanently? This cannot be undone.');
     if (!ok) return false;
     setSaving(true);
     setGlobalError(null);
     try {
-      await deleteDraftEvent(token, eventId);
+      await deleteDraftEvent(token, id);
       bumpRefresh();
       navigate('/my-events', {replace: true});
       return true;

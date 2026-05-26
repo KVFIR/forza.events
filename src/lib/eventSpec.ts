@@ -68,12 +68,17 @@ export function isRegistrationOpen(event: ForzaEvent): boolean {
   return !eventHasStarted(event);
 }
 
+/** True once publish-event has posted the Discord announcement embed. */
+export function isPublishedToDiscord(event: ForzaEvent): boolean {
+  return Boolean(event.discordMessageId?.trim());
+}
+
 export function canDeleteDraft(event: ForzaEvent, user: AppUser): boolean {
-  return event.lifecycle === 'draft' && event.hostDiscordId === user.discordId;
+  return event.hostDiscordId === user.discordId && !isPublishedToDiscord(event);
 }
 
 export function isPublishedEvent(event: ForzaEvent): boolean {
-  return event.lifecycle !== 'draft';
+  return isPublishedToDiscord(event);
 }
 
 export function canEditEvent(event: ForzaEvent, user: AppUser): boolean {

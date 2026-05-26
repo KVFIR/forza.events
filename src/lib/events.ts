@@ -22,6 +22,7 @@ export {
   eventHasStarted,
   isEventFinalized,
   isPublishedEvent,
+  isPublishedToDiscord,
   isRegistrationOpen,
 } from './eventSpec';
 
@@ -36,6 +37,7 @@ type DbEventRow = {
   created_at?: string | null;
   guild_id?: string | null;
   channel_id?: string | null;
+  discord_message_id?: string | null;
   voice_policy: ForzaEvent['voicePolicy'];
   max_players: number;
   current_players: number;
@@ -245,6 +247,7 @@ export function mapDbEvent(row: DbEventRow): ForzaEvent {
     guildId: row.guild_id ?? undefined,
     guildName: guild?.guild_name ?? undefined,
     channelId: row.channel_id ?? undefined,
+    discordMessageId: row.discord_message_id ?? undefined,
     carRuleMode: row.car_rule_mode ?? 'anything_goes',
     maxPi: row.max_pi ?? 999,
     allowedCars: [],
@@ -343,8 +346,8 @@ export async function fetchHostDraftEvents(
   try {
     const {data} = await invokeHostDrafts(discordToken);
     const events = (data ?? []).map((row) => mapDbEventWithRelations(row as DbEventRow));
-    const onlyDrafts = events.filter((e) => e.lifecycle === 'draft');
-    return {events: onlyDrafts, error: null};
+    const unpublished = events.filter((e) => !e.discordMessageId);
+    return {events: unpublished, error: null};
   } catch (err) {
     const message = err instanceof Error ? err.message : String(err);
     console.error('host-drafts', err);
@@ -356,7 +359,7 @@ export async function fetchHostDraftEvents(
     try {
       const fallback = await fetchEventsViaEdge({hostDrafts: true, discordToken});
       if (fallback === null) return {events: [], error: 'fetch_failed'};
-      const events = fallback.filter((e) => e.lifecycle === 'draft');
+      const events = fallback.filter((e) => !e.discordMessageId);
       return {events, error: null};
     } catch (fallbackErr) {
       console.error('browse-events host_drafts', fallbackErr);

@@ -3,29 +3,32 @@ import {STEPS, type CreateEventStepIndex} from '../constants';
 
 type StepIndicatorProps = {
   step: CreateEventStepIndex;
+  /** When true (e.g. editing an existing event), every step except the current one is clickable. */
+  freeNavigation?: boolean;
   onStepClick?: (index: CreateEventStepIndex) => void;
 };
 
-export function StepIndicator({step, onStepClick}: StepIndicatorProps) {
+export function StepIndicator({step, freeNavigation, onStepClick}: StepIndicatorProps) {
   return (
     <nav className="mb-6 flex gap-1">
       {STEPS.map((label, i) => {
         const idx = i as CreateEventStepIndex;
         const done = idx < step;
         const active = idx === step;
-        const clickable = done && onStepClick;
+        const clickable =
+          Boolean(onStepClick) && (freeNavigation ? !active : done);
 
         return (
           <button
             key={label}
             type="button"
             disabled={!clickable}
-            onClick={() => clickable && onStepClick(idx)}
+            onClick={() => clickable && onStepClick?.(idx)}
             className={cn(
               'flex-1 rounded-md py-1.5 text-center text-[10px] font-bold uppercase tracking-widest transition-colors',
               active && 'bg-white/[0.1] text-white',
-              done && 'text-slate-400 hover:text-slate-200',
-              !active && !done && 'text-muted',
+              clickable && !active && 'text-slate-400 hover:text-slate-200',
+              !active && !clickable && 'text-muted',
               !clickable && 'cursor-default',
             )}
           >

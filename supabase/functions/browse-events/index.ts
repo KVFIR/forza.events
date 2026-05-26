@@ -29,8 +29,9 @@ serve(async (req) => {
       const {data, error} = await supabase
         .from('events')
         .select(EVENT_LIST_SELECT)
-        .eq('status', 'draft')
         .eq('host_discord_id', discordUser.id)
+        .is('discord_message_id', null)
+        .not('status', 'in', '("completed","cancelled","archived")')
         .order('updated_at', {ascending: false});
 
       if (error) {
