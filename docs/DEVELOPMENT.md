@@ -116,8 +116,8 @@ Do not recreate `src/screens/CreateEvent.tsx` beside the folder — TypeScript a
 
 Steps:
 
-1. Basics — title, type, time, cover, convoy leader  
-2. Details — tracks, car rules, PI / car list  
+1. Basics — title, event type (required), time, cover, convoy leader  
+2. Details — tracks (optional), car rules, PI / car list  
 3. Target — Discord server + channel  
 4. Review — summary + publish  
 

@@ -5,6 +5,7 @@ import {useAuth} from '../../context/AuthContext';
 import {useJoinedEvents} from '../../context/JoinedEventsContext';
 import {isApiConfigured, publishEvent, saveEvent, uploadCoverImage} from '../../lib/api';
 import {compressCoverForUpload} from '../../lib/coverImage';
+import {defaultCoverPath, isBundledDefaultCover} from '../../lib/eventCovers';
 import {fetchEventById} from '../../lib/events';
 import {defaultTimezone, localInputToUtc, utcToLocalInput} from '../../lib/datetime';
 import {clampPi} from '../../lib/pi';
@@ -166,9 +167,12 @@ export function useCreateEventForm() {
           setLobbyLeaderIsHost(true);
           setLobbyLeaderGamertag(user.xboxGamertag ?? leader ?? '');
         }
-        if (ev.coverImageUrl) {
+        if (ev.coverImageUrl && !isBundledDefaultCover(ev.coverImageUrl)) {
           setCoverPreview(ev.coverImageUrl);
           setCoverUrl(ev.coverImageUrl);
+        } else {
+          setCoverPreview(defaultCoverPath(ev.type));
+          setCoverUrl(null);
         }
       })
       .finally(() => {
@@ -348,7 +352,13 @@ export function useCreateEventForm() {
       clearFieldError('title');
       setTitle(v);
     },
-    setType,
+    setType: (nextType: EventType) => {
+      setType(nextType);
+      if (coverFile) return;
+      if (coverUrl !== null && !isBundledDefaultCover(coverUrl)) return;
+      setCoverUrl(null);
+      setCoverPreview(defaultCoverPath(nextType));
+    },
     setStartsAtLocal: (v: string) => {
       clearFieldError('startsAtLocal');
       setStartsAtLocal(v);

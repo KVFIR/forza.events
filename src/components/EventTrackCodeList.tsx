@@ -40,7 +40,7 @@ export function EventTrackCodeList({codes, onChange, inputClass, labelClass}: Pr
       <div>
         <p className={labelClass}>Tracks</p>
         <p className="mt-1 text-xs text-muted">
-          Add one or more track share codes. They will be shown as a single ordered track list.
+          Optional — add one or more track share codes for an ordered route list.
         </p>
       </div>
 

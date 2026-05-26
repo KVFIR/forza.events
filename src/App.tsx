@@ -42,8 +42,8 @@ export default function App() {
       <AuthProvider>
         <JoinedEventsProvider>
           <div className="min-h-screen">
-            <div className="mx-auto flex min-h-screen w-full max-w-full flex-col px-3 sm:px-5 md:px-8 lg:max-w-2xl lg:px-10">
-              <Navbar />
+            <Navbar />
+            <div className="app-main-column flex min-h-screen flex-col px-3 sm:px-5 md:px-8 lg:px-10">
               <main className="min-w-0 flex-1 pb-8">
                 <Suspense fallback={<RouteFallback />}>
                   <Routes>

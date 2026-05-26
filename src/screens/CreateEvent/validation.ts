@@ -1,6 +1,7 @@
 import {gamertagError} from '../../lib/gamertag';
 import {defaultTimezone, localInputToUtc} from '../../lib/datetime';
-import {normalizeTrackCodes, validateDraftForm, validatePublishForm} from '../../lib/eventSpec';
+import {isEventType} from '../../lib/eventTypes';
+import {validateDraftForm, validatePublishForm} from '../../lib/eventSpec';
 import type {CarRuleMode} from '../../lib/types';
 import {COVER_ACCEPT, COVER_MAX_BYTES, TITLE_MAX_LENGTH} from './constants';
 import type {CreateEventFormValues, FieldErrors} from './types';
@@ -37,13 +38,14 @@ export function validateCoverFile(file: File | null): string | null {
 export function validateBasicsStep(
   values: Pick<
     CreateEventFormValues,
-    'title' | 'startsAtLocal' | 'coverFile' | 'lobbyLeaderIsHost' | 'lobbyLeaderGamertag'
+    'title' | 'type' | 'startsAtLocal' | 'coverFile' | 'lobbyLeaderIsHost' | 'lobbyLeaderGamertag'
   >,
   options?: {allowPastStart?: boolean},
 ): FieldErrors {
   const errors: FieldErrors = {};
   const title = values.title.trim();
   if (!title) errors.title = 'Event name is required.';
+  if (!isEventType(values.type)) errors.type = 'Event type is required.';
   else if (title.length > TITLE_MAX_LENGTH) {
     errors.title = `Keep the name under ${TITLE_MAX_LENGTH} characters.`;
   }
@@ -113,6 +115,7 @@ export function validateDraftSave(values: CreateEventFormValues): string | null 
   if (targetErr) return targetErr;
   return validateDraftForm({
     title: values.title,
+    type: values.type,
     startsAtLocal: values.startsAtLocal,
     guildId: values.targetGuildId,
   });
@@ -136,10 +139,10 @@ export function validatePublish(
 
   return validatePublishForm({
     title: values.title,
+    type: values.type,
     startsAtLocal: values.startsAtLocal,
     guildId: values.targetGuildId,
     channelId: values.targetChannelId,
-    trackCodes: normalizeTrackCodes(values.trackCodes),
     carRuleMode: values.carRuleMode as CarRuleMode,
     maxPi: values.maxPi,
     carCount: values.eventCars.length,

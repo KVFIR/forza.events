@@ -1,4 +1,5 @@
 import type {adminClient} from './supabase.ts';
+import {isValidEventType} from './eventTypes.ts';
 
 export type CarRuleMode = 'anything_goes' | 'restricted_list';
 
@@ -53,6 +54,7 @@ export function normalizeTrackCodes(codes?: string[]): string[] {
 
 export function validateDraft(body: SaveEventBody): string | null {
   if (!body.title?.trim()) return 'Event name is required.';
+  if (!isValidEventType(body.type)) return 'Event type is required.';
   if (!body.starts_at) return 'Start time is required.';
   if (!body.guild_id) return 'Choose a Discord server for this event.';
   return null;
@@ -64,9 +66,6 @@ export function validatePublishReady(body: SaveEventBody): string | null {
 
   const leader = body.lobby_leader_gamertag?.trim();
   if (!leader) return 'Convoy leader gamertag is required.';
-
-  const trackCodes = normalizeTrackCodes(body.track_codes);
-  if (trackCodes.length === 0) return 'Add at least one track code before publishing.';
 
   const mode = body.car_rule_mode ?? 'anything_goes';
   if (mode === 'restricted_list') {

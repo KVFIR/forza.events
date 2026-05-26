@@ -2,8 +2,8 @@ import {EventCover} from '../../../components/EventCover';
 import {defaultCoverPath} from '../../../lib/eventCovers';
 import {defaultTimezone, formatEventTime, localInputToUtc} from '../../../lib/datetime';
 import type {CarRuleMode, EventType} from '../../../lib/types';
+import {eventTypeLabel} from '../../../lib/eventTypes';
 import {formatMaxPi} from '../../../lib/pi';
-import {EVENT_TYPES} from '../constants';
 
 type Props = {
   title: string;
@@ -43,7 +43,7 @@ export function ReviewStep({
   lobbyLeaderLabel,
   missingForPublish,
 }: Props) {
-  const typeLabel = EVENT_TYPES.find((t) => t.value === type)?.label ?? type;
+  const typeLabel = eventTypeLabel(type);
   const when =
     startsAtLocal
       ? formatEventTime(localInputToUtc(startsAtLocal, defaultTimezone()), defaultTimezone())
@@ -110,13 +110,11 @@ export function ReviewStep({
 }
 
 export function collectPublishGaps(input: {
-  trackCount: number;
   channelId: string;
   carRuleMode: CarRuleMode;
   carCount: number;
 }): string[] {
   const gaps: string[] = [];
-  if (input.trackCount === 0) gaps.push('Add at least one track code on Details.');
   if (!input.channelId) gaps.push('Select an announcement channel on Target.');
   if (input.carRuleMode === 'restricted_list' && input.carCount === 0) {
     gaps.push('Add cars for a restricted list on Details.');

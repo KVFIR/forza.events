@@ -4,6 +4,7 @@ import {isDiscordActivityFrame} from './supabaseEnv';
 import {searchCarCatalog} from './carCatalog';
 import {EVENT_PLAYER_SLOTS} from './constants';
 import {resolveEventCoverUrl} from './eventCovers';
+import {normalizeEventType} from './eventTypes';
 import type {
   AppUser,
   CarRuleMode,
@@ -232,7 +233,7 @@ export function mapDbEvent(row: DbEventRow): ForzaEvent {
     id: row.id,
     slug: row.slug,
     title: row.title,
-    type: row.type,
+    type: normalizeEventType(row.type),
     status: mapStatus(row),
     lifecycle: mapLifecycle(row.status),
     startsAt: row.starts_at,
@@ -252,7 +253,7 @@ export function mapDbEvent(row: DbEventRow): ForzaEvent {
     hostAvatarUrl: host?.avatar_url ?? undefined,
     rules: rulesFromRow(row),
     description: row.description ?? undefined,
-    coverImageUrl: resolveEventCoverUrl(row.type, row.cover_image_url),
+    coverImageUrl: resolveEventCoverUrl(normalizeEventType(row.type), row.cover_image_url),
     trackCodes: [row.event_share_code, ...(row.track_codes ?? [])].filter(
       (code): code is string => Boolean(code?.trim()),
     ),

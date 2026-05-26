@@ -1,5 +1,6 @@
 import {exchangeToken, isApiConfigured} from './api';
 import {DISCORD_ACTIVITY_REDIRECT_URI} from './discordConstants';
+import {eventIdFromOpenEventCustomId} from './eventLaunch';
 import {loadDiscordSession, saveDiscordSession} from './discordAuth';
 import {GUEST_USER} from './guestUser';
 import type {AppUser} from './types';
@@ -12,6 +13,8 @@ export type InitResult = {
   accessToken: string | null;
   guildId: string | null;
   guildName: string | null;
+  /** Set when Activity was opened from a published embed button (`open_event:{id}`). */
+  launchEventId: string | null;
 };
 
 let resolvedUser: AppUser = {...GUEST_USER};
@@ -62,6 +65,7 @@ function applyBrowserSession(): InitResult | null {
     accessToken: session.accessToken,
     guildId: null,
     guildName: null,
+    launchEventId: null,
   };
 }
 
@@ -80,6 +84,7 @@ export async function initDiscordActivity(): Promise<InitResult> {
         accessToken: null,
         guildId: null,
         guildName: null,
+        launchEventId: null,
       };
     }
 
@@ -92,6 +97,7 @@ export async function initDiscordActivity(): Promise<InitResult> {
         accessToken: null,
         guildId: null,
         guildName: null,
+        launchEventId: null,
       };
     }
 
@@ -105,6 +111,7 @@ export async function initDiscordActivity(): Promise<InitResult> {
 
     guildId = sdk.guildId ?? null;
     guildName = guildId ? 'Server' : null;
+    const launchEventId = eventIdFromOpenEventCustomId(sdk.customId);
 
     const {code} = await sdk.commands.authorize({
       client_id: clientId,
@@ -140,6 +147,7 @@ export async function initDiscordActivity(): Promise<InitResult> {
       accessToken: discordAccessToken,
       guildId,
       guildName,
+      launchEventId,
     };
   })();
 

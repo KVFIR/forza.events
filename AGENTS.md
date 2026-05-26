@@ -1,0 +1,81 @@
+# Agent notes — FORZA.EVENTS
+
+Lessons from implementation work (keep in sync when behavior changes).
+
+## Discord-only runtime (MVP)
+
+- **Production:** the SPA is a **Discord Activity only**. Opening the deploy URL in a normal browser tab shows **`DiscordOnlyGate`** (`Open in Discord`) — see `shouldShowDiscordOnlyGate()` in `src/lib/runtime.ts` and `src/components/DiscordOnlyGate.tsx`.
+- **Not supported in prod:** standalone web sign-in on Railway/production origin; browser OAuth there is intentionally blocked (`invalid_grant` / redirect mismatch). A future standalone web product needs a **separate Discord application** — see [`docs/PLAN.md`](docs/PLAN.md).
+- **Local dev exception:** `localhost` / `127.0.0.1` skip the gate so engineers can use `npm run dev` + optional `/auth/callback` OAuth in a tab (`docs/DEVELOPMENT.md`).
+- **Auth in Activity:** `initDiscordActivity()` → SDK `authorize` (scopes `identify`, `guilds`) → `token-exchange` → `authenticate`. Guild context: `sdk.guildId` pre-fills create-event **target server** when the Activity was launched on a server.
+- **Implications for UI/UX** (design and copy should assume Activity, not a generic website):
+  - Users always have a Discord access token when using the real product path; avoid dead-end copy like “open in Discord” on screens that only render inside Activity (e.g. Create **Target** step — `TargetStep` still shows that message when `token` is null; treat as dev/edge only).
+  - **Publish target** (server + channel) is Discord-native: `list-guilds` = user guilds ∩ servers where the **bot is installed**; `list-channels` = text channels only. Empty server list → **Add to server** CTA (`buildBotInstallUrl` / `openBotInstallUrl` in `src/lib/discordInstall.ts`) — OAuth `scope=bot` guild install (**one step**; adds the app’s bot user, not a separate “app only” + “bot” flow). User-install in App Launcher does **not** add a publish target.
+  - **Draft** requires `guild_id`; **publish** requires `guild_id` + `channel_id`. Channel can be chosen on Target or in the publish modal on Review — both are valid because publish always happens in Discord context.
+  - After publish, server and channel are **locked** in the form (`lockGuild` / `lockChannel`).
+  - **Publish embed:** `publish-event` posts a Discord message embed + **Open event** button (`custom_id` `open_event:{event_id}` via `buildEventEmbed` in `supabase/functions/_shared/events.ts`). Button click → `interactions-endpoint` returns `LAUNCH_ACTIVITY` + stores `launch_intents` fallback → Activity opens `/event/{id}` from `sdk.customId` (primary) or `launch-intent` Edge Function.
+  - Browse/join/create/publish all depend on Edge Functions + Discord token headers; test in Discord after API/proxy changes, not only localhost. Interactions Endpoint URL must be set in Discord Developer Portal.
+
+## Product / data model
+
+- **Event types:** `road` (Road racing), `dirt`, `touge`, `drift` (Car/Drift Meet), `cruise`. Labels/colors live in `src/lib/eventTypes.ts` and `supabase/functions/_shared/eventTypes.ts`. Type is required on save/publish; track share codes are optional.
+- **Draft events** (`status: draft`) are **not** in the public browse feed. RLS policy `status != 'draft'` blocks anon PostgREST reads.
+- Hosts see drafts only via **authenticated Edge paths** (`host-drafts` or `browse-events` with `host_drafts: true` + `x-discord-access-token`).
+- **My Events** merges host drafts **on top** for scopes `all` and `hosted`; **Joined** has no drafts.
+- Draft cards link to `/create?edit={id}`, not `/event/{id}`. After first save, navigate to `/my-events`.
+- Do not treat `draftsLoadError` as `loadError` for the whole list — published events can load while drafts fail.
+
+## Supabase Edge Functions
+
+### JWT verification (`verify_jwt`)
+
+- New functions default to **`verify_jwt = true`** unless configured otherwise.
+- Activity-first functions (`token-exchange`, `save-event`, `browse-events`, `host-drafts`, etc.) use **`verify_jwt = false`** because auth is **`x-discord-access-token`** + `verifyDiscordToken()`, not Supabase user JWT.
+- **Always deploy** public/browse/draft functions with:
+  ```bash
+  npx supabase functions deploy browse-events host-drafts --no-verify-jwt
+  ```
+  or `npm run deploy:functions` (script uses `--no-verify-jwt` for every function).
+- `supabase/config.toml` must list `[functions.browse-events]` and `[functions.host-drafts]` with `verify_jwt = false`. Config alone is not enough if a one-off deploy omitted `--no-verify-jwt`.
+
+### Gateway 401 vs app 401
+
+| Symptom | Likely cause |
+|--------|----------------|
+| `UNAUTHORIZED_NO_AUTH_HEADER` / missing authorization | Gateway: no `Authorization` and/or `verify_jwt` still true |
+| `{"error":"Unauthorized"}` from function body | App: invalid/expired Discord token on `host-drafts` / `host_drafts` |
+
+- With `verify_jwt = false`, gateway accepts **`apikey`** alone (verified via curl).
+- With `verify_jwt = true`, gateway expects **`Authorization: Bearer <SUPABASE_ANON_KEY>`** (anon key is a valid JWT).
+
+## Discord Activity proxy
+
+- URL mapping: prefix `/supabase` → `{project-ref}.supabase.co`. Client keeps real `VITE_SUPABASE_URL`; `patchUrlMappings` rewrites fetches.
+- Discord’s proxy often **drops `apikey` and `Authorization`** on forwarded requests (documented for PostgREST; applies to `/functions/v1` too).
+- **Fix:** In the Activity iframe, route Edge `fetch` through **`createSupabaseFetch(anonKey)`** (`src/lib/supabaseEnv.ts`) so headers are re-applied on every request — same pattern as the Supabase JS client.
+- Plain `fetch()` to `functions/v1/*` from `api.ts` **without** that wrapper will 401 in Discord even if localhost works.
+
+## Client API (`src/lib/api.ts`)
+
+- All `invoke()` calls should set **`apikey`** and **`Authorization: Bearer <anon>`**.
+- When `isDiscordActivityFrame()`, use **`createSupabaseFetch(anonKey)`** as the fetch implementation for `invoke()`.
+- Pass Discord user token only in **`x-discord-access-token`**, never replace the Supabase Bearer with the Discord token.
+
+## Auth / session
+
+- `isSignedIn` = `user.discordId` **and** `getDiscordAccessToken()`.
+- Saving drafts can work (token in module) while **My Events** stays empty if React `user` is still `GUEST_USER` — e.g. OAuth callback called `setDiscordSession` but not **`refreshUser`**.
+- `AuthCallback` should `refreshUser(result.user)` after token exchange.
+- Optional: sync `loadDiscordSession()` into context on mount if session exists but state is stale.
+
+## Deploy checklist (when touching events browse/drafts)
+
+1. `npm run deploy:functions` or deploy `browse-events` + `host-drafts` with **`--no-verify-jwt`**
+2. Ship frontend (Railway) after any `api.ts` / proxy fetch changes
+3. Hard refresh in Discord Activity
+
+## References
+
+- [`docs/DISCORD_PLATFORM.md`](docs/DISCORD_PLATFORM.md) — proxy mapping, browse via Edge
+- [`docs/DEVELOPMENT.md`](docs/DEVELOPMENT.md) — local OAuth, testing checklist
+- [`scripts/deploy-edge-functions.sh`](scripts/deploy-edge-functions.sh) — canonical function list

@@ -5,6 +5,8 @@
 @layer base {
   :root {
     color-scheme: dark;
+    --app-sidebar-width: 13.5rem;
+    --app-content-max-width: 42rem;
   }
 
   html {
@@ -103,5 +105,21 @@
   .card-glow-border:hover {
     border-color: rgba(139, 92, 246, 0.28);
     box-shadow: 0 6px 36px rgba(0, 0, 0, 0.65), 0 0 0 1px rgba(139, 92, 246, 0.18);
+  }
+
+  /* Viewport-centered main column; on lg+ clears fixed left sidebar when needed */
+  .app-main-column {
+    @apply mx-auto w-full max-w-2xl;
+  }
+
+  @media (min-width: 1024px) {
+    .app-main-column {
+      max-width: var(--app-content-max-width);
+      margin-left: max(
+        var(--app-sidebar-width),
+        calc(50vw - var(--app-content-max-width) / 2)
+      );
+      margin-right: auto;
+    }
   }
 }

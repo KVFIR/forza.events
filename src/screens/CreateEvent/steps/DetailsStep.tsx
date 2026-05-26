@@ -42,7 +42,7 @@ export function DetailsStep({
         inputClass={formInput}
         labelClass={formLabel}
       />
-      <p className="-mt-4 text-xs text-muted">At least one track code is required to publish.</p>
+      <p className="-mt-4 text-xs text-muted">Optional — add track share codes for the route list.</p>
 
       <Divider />
 

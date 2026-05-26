@@ -1,5 +1,6 @@
 import {serve} from 'https://deno.land/std@0.224.0/http/server.ts';
 import nacl from 'https://esm.sh/tweetnacl@1.0.3';
+import {OPEN_EVENT_BUTTON_PREFIX} from '../_shared/eventLaunch.ts';
 import {adminClient} from '../_shared/supabase.ts';
 
 const INTERACTION_PING = 1;
@@ -45,8 +46,8 @@ serve(async (req) => {
 
   if (interaction.type === INTERACTION_COMPONENT) {
     const customId = interaction.data?.custom_id as string | undefined;
-    if (customId?.startsWith('open_event:')) {
-      const eventId = customId.replace('open_event:', '');
+    if (customId?.startsWith(OPEN_EVENT_BUTTON_PREFIX)) {
+      const eventId = customId.slice(OPEN_EVENT_BUTTON_PREFIX.length);
       const discordId = interaction.member?.user?.id ?? interaction.user?.id;
       const guildId = interaction.guild_id;
 

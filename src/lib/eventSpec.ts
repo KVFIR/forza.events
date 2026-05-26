@@ -1,5 +1,6 @@
 import type {CarRuleMode, ForzaEvent} from './types';
 import type {AppUser} from './types';
+import {isEventType} from './eventTypes';
 
 export function normalizeTrackCodes(codes: string[]): string[] {
   return codes.map((c) => c.trim()).filter(Boolean);
@@ -7,10 +8,12 @@ export function normalizeTrackCodes(codes: string[]): string[] {
 
 export function validateDraftForm(input: {
   title: string;
+  type: string;
   startsAtLocal: string;
   guildId: string | null;
 }): string | null {
   if (!input.title.trim()) return 'Event name is required.';
+  if (!isEventType(input.type)) return 'Event type is required.';
   if (!input.startsAtLocal) return 'Date and time are required.';
   if (!input.guildId) return 'Choose a Discord server for this event.';
   return null;
@@ -18,10 +21,10 @@ export function validateDraftForm(input: {
 
 export function validatePublishForm(input: {
   title: string;
+  type: string;
   startsAtLocal: string;
   guildId: string | null;
   channelId: string | null;
-  trackCodes: string[];
   carRuleMode: CarRuleMode;
   maxPi: number;
   carCount: number;
@@ -29,13 +32,13 @@ export function validatePublishForm(input: {
 }): string | null {
   const draftErr = validateDraftForm({
     title: input.title,
+    type: input.type,
     startsAtLocal: input.startsAtLocal,
     guildId: input.guildId,
   });
   if (draftErr) return draftErr;
   if (!input.channelId) return 'Choose a channel before publishing.';
   if (!input.lobbyLeaderGamertag.trim()) return 'Convoy leader gamertag is required.';
-  if (normalizeTrackCodes(input.trackCodes).length === 0) return 'Add at least one track code.';
   if (input.carRuleMode === 'restricted_list' && input.carCount === 0) {
     return 'Add at least one car for a restricted car list.';
   }

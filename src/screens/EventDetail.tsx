@@ -10,7 +10,7 @@ import {
 } from 'lucide-react';
 import {EventCover} from '../components/EventCover';
 import {RoadIcon} from '../components/icons/RoadIcon';
-import type {EventType, ForzaEvent} from '../lib/types';
+import type {ForzaEvent} from '../lib/types';
 import {
   canSubmitEventResults,
   fetchEventById,
@@ -36,25 +36,6 @@ import {piToClass} from '../lib/pi';
 import {formatLobbyCount, LOBBY_TOTAL_PLAYERS} from '../lib/constants';
 import {participationButtonLabel, participationButtonVariant} from '../lib/eventActions';
 import {cn} from '../lib/cn';
-
-const typeVisual: Record<EventType, {gradient: string; glow: string}> = {
-  road: {
-    gradient: 'from-rose-950 via-red-900/50 to-base',
-    glow: 'radial-gradient(ellipse at 50% 100%, rgba(225,29,72,0.25) 0%, transparent 70%)',
-  },
-  dirt: {
-    gradient: 'from-amber-950 via-orange-900/50 to-base',
-    glow: 'radial-gradient(ellipse at 50% 100%, rgba(217,119,6,0.25) 0%, transparent 70%)',
-  },
-  drift: {
-    gradient: 'from-fuchsia-950 via-purple-900/50 to-base',
-    glow: 'radial-gradient(ellipse at 50% 100%, rgba(217,70,239,0.25) 0%, transparent 70%)',
-  },
-  touge: {
-    gradient: 'from-violet-950 via-indigo-900/50 to-base',
-    glow: 'radial-gradient(ellipse at 50% 100%, rgba(139,92,246,0.3) 0%, transparent 70%)',
-  },
-};
 
 const piClassColor: Record<string, string> = {
   D: 'text-slate-400',
@@ -211,7 +192,6 @@ export function EventDetail() {
   const full = event.status === 'full' || event.currentPlayers >= event.maxPlayers;
   const showDraftActions = isDraft && isHost;
   const {primary: when} = formatEventTime(event.startsAt, event.timezoneHint);
-  const vis = typeVisual[event.type];
   const fillPct = Math.round(((1 + event.currentPlayers) / LOBBY_TOTAL_PLAYERS) * 100);
   const completed = isEventCompleted(event);
   const resultDisplay = resolveEventResultDisplay(event, resultRows);
@@ -227,22 +207,13 @@ export function EventDetail() {
       </Link>
 
       {/* Hero */}
-      <div
-        className={cn(
-          'relative -mx-3 mb-0 overflow-hidden sm:-mx-5 md:-mx-8',
-          'h-44 bg-gradient-to-b',
-          vis.gradient,
-        )}
-      >
-        {event.coverImageUrl && (
-          <EventCover
-            src={event.coverImageUrl}
-            variant="hero"
-            priority
-            className="absolute inset-0"
-          />
-        )}
-        <div className="absolute inset-0" style={{background: vis.glow}} />
+      <div className="relative -mx-3 mb-0 h-44 overflow-hidden bg-base sm:-mx-5 md:-mx-8">
+        <EventCover
+          src={event.coverImageUrl}
+          variant="hero"
+          priority
+          className="absolute inset-0"
+        />
         <div
           className="pointer-events-none absolute inset-x-0 bottom-0 h-16"
           style={{

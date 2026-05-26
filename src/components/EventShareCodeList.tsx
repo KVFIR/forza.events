@@ -12,6 +12,7 @@ type Props = {
   labelClass: string;
 };
 
+/** Legacy primary + extras layout; prefer {@link EventTrackCodeList} for new UI. */
 export function EventShareCodeList({
   primaryCode,
   extraCodes,
@@ -45,7 +46,10 @@ export function EventShareCodeList({
   return (
     <div className="space-y-5">
       <div>
-        <p className={labelClass}>Primary track code</p>
+        <p className={labelClass}>Tracks</p>
+        <p className="mt-1 text-xs text-muted">
+          Optional — add track share codes for the route list.
+        </p>
         <ShareCodeInput
           value={primaryCode}
           onChange={onPrimaryChange}
@@ -54,7 +58,7 @@ export function EventShareCodeList({
       </div>
 
       <div>
-        <p className={labelClass}>Extra track codes (optional)</p>
+        <p className={labelClass}>Additional tracks (optional)</p>
         <ol className="mt-3 space-y-2">
           {extraCodes.map((code, i) => (
             <li key={`${i}-${code}`} className="flex items-center gap-3">

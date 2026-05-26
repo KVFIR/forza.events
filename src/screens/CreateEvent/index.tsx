@@ -60,7 +60,6 @@ export function CreateEvent() {
     : values.lobbyLeaderGamertag.trim() || '—';
 
   const missingForPublish = collectPublishGaps({
-    trackCount: normalizedTrackCodes.length,
     channelId: values.targetChannelId,
     carRuleMode: values.carRuleMode,
     carCount: values.eventCars.length,
@@ -83,7 +82,7 @@ export function CreateEvent() {
       setGlobalError(publishErr);
       return;
     }
-    const id = eventId ?? (await persistDraft());
+    const id = await persistDraft();
     if (!id || !token) return;
     setEventId(id);
     if (!values.targetChannelId) {
@@ -94,7 +93,10 @@ export function CreateEvent() {
   }
 
   function onPublishModalConfirm() {
-    if (eventId) void confirmPublish(eventId);
+    void (async () => {
+      const id = await persistDraft();
+      if (id) await confirmPublish(id);
+    })();
   }
 
   if (showLoadingUI) {

@@ -1,15 +1,8 @@
-import type {EventType} from '../../lib/types';
+export {EVENT_TYPES} from '../../lib/eventTypes';
 
 export const STEPS = ['Basics', 'Details', 'Target', 'Review'] as const;
 export type CreateEventStep = (typeof STEPS)[number];
 export type CreateEventStepIndex = 0 | 1 | 2 | 3;
-
-export const EVENT_TYPES: {value: EventType; label: string}[] = [
-  {value: 'road', label: 'Road'},
-  {value: 'dirt', label: 'Dirt'},
-  {value: 'drift', label: 'Drift'},
-  {value: 'touge', label: 'Touge'},
-];
 
 export const TITLE_MAX_LENGTH = 100;
 export const COVER_MAX_BYTES = 2 * 1024 * 1024;

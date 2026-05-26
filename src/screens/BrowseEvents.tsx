@@ -1,5 +1,6 @@
 import {useMemo, useState} from 'react';
 import type {EventType} from '../lib/types';
+import {EVENT_TYPES} from '../lib/eventTypes';
 import {EventList} from '../components/EventList';
 import {EventListMetaSelect} from '../components/EventListMetaSelect';
 import {useAuth} from '../context/AuthContext';
@@ -11,10 +12,7 @@ type TypeFilter = EventType | 'all';
 
 const typeOptions: {value: TypeFilter; label: string}[] = [
   {value: 'all', label: 'All types'},
-  {value: 'road', label: 'Road'},
-  {value: 'dirt', label: 'Dirt'},
-  {value: 'drift', label: 'Drift'},
-  {value: 'touge', label: 'Touge'},
+  ...EVENT_TYPES.map((t) => ({value: t.value, label: t.label})),
 ];
 
 const sortOptions: {value: EventSortKey; label: string}[] = [

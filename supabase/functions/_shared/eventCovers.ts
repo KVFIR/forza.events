@@ -3,15 +3,29 @@ const DEFAULT_COVER_BY_TYPE: Record<string, string> = {
   dirt: '/covers/cover-dirt-1.webp',
   drift: '/covers/cover-drift-1.webp',
   touge: '/covers/cover-touge-1.webp',
+  cruise: '/covers/cover-cruise-1.webp',
 };
+
+const BUNDLED_DEFAULT_COVER_PATHS = new Set(Object.values(DEFAULT_COVER_BY_TYPE));
 
 export function defaultCoverPath(type: string): string {
   return DEFAULT_COVER_BY_TYPE[type] ?? DEFAULT_COVER_BY_TYPE.road;
 }
 
+function isBundledDefaultCover(url: string): boolean {
+  const trimmed = url.trim();
+  if (BUNDLED_DEFAULT_COVER_PATHS.has(trimmed)) return true;
+  try {
+    const pathname = trimmed.startsWith('http') ? new URL(trimmed).pathname : trimmed;
+    return BUNDLED_DEFAULT_COVER_PATHS.has(pathname);
+  } catch {
+    return false;
+  }
+}
+
 export function resolveCoverUrl(type: string, coverImageUrl?: string | null): string {
   const custom = coverImageUrl?.trim();
-  if (custom) return custom;
+  if (custom && !isBundledDefaultCover(custom)) return custom;
   return defaultCoverPath(type);
 }
 

@@ -2,7 +2,8 @@ import {format} from 'date-fns';
 import {useEffect, useState} from 'react';
 import {Link} from 'react-router-dom';
 import {Users} from 'lucide-react';
-import type {EventAllowedCar, EventType, ForzaEvent} from '../lib/types';
+import type {EventAllowedCar, ForzaEvent} from '../lib/types';
+import {eventTypeMeta} from '../lib/eventTypes';
 import {cn} from '../lib/cn';
 import {isDraftEvent} from '../lib/eventList';
 import {formatLobbyCount} from '../lib/constants';
@@ -13,13 +14,6 @@ import {EventCover} from './EventCover';
 
 type Props = {
   event: ForzaEvent;
-};
-
-const typeAccentBar: Record<EventType, string> = {
-  road: 'bg-rose-500/25',
-  dirt: 'bg-amber-500/25',
-  drift: 'bg-fuchsia-500/25',
-  touge: 'bg-violet-500/25',
 };
 
 const classColor: Record<string, string> = {
@@ -39,7 +33,7 @@ function CarList({cars}: {cars: EventAllowedCar[]}) {
   const extra = cars.length - shown.length;
 
   return (
-    <div className="shrink-0 text-left">
+    <div className="relative hidden min-[500px]:block shrink-0 text-left">
       <ul className="flex flex-col divide-y divide-white/[0.05]">
         {shown.map((car) => {
           const maxClass = piToClass(car.maxPi);
@@ -64,7 +58,11 @@ function CarList({cars}: {cars: EventAllowedCar[]}) {
           );
         })}
       </ul>
-      {extra > 0 && <p className="mt-1 text-[10px] text-muted">+{extra} more</p>}
+      {extra > 0 && (
+        <span className="pointer-events-none absolute left-0 top-full mt-1 text-[10px] leading-none text-muted">
+          +{extra} more
+        </span>
+      )}
     </div>
   );
 }
@@ -74,7 +72,7 @@ function OpenBuildSummary({event}: {event: ForzaEvent}) {
   const label = event.additionalCarRestrictions?.trim() || 'Open build';
 
   return (
-    <div className="shrink-0 text-left">
+    <div className="hidden min-[500px]:block shrink-0 text-left">
       <ul className="flex flex-col gap-1">
         <li className="grid grid-cols-[minmax(0,1fr)_2.75rem] items-center gap-x-2.5 text-[10px] leading-tight">
           <span className="truncate font-medium text-slate-200">{label}</span>
@@ -136,7 +134,7 @@ export function EventCard({event}: Props) {
           <div className="absolute inset-0 bg-gradient-to-r from-base/80 via-base/70 to-base/60" />
           <div className="absolute inset-0 bg-black/25 transition-colors duration-200 group-hover:bg-black/20" />
 
-          <div className="relative flex items-center gap-3 px-4 py-3.5 pb-4">
+          <div className="relative flex items-center gap-3 px-4 pt-3 pb-4">
             <div className="min-w-0 flex-1 text-left">
               <h2 className="truncate text-lg font-semibold leading-tight text-white">
                 {event.title}
@@ -178,7 +176,12 @@ export function EventCard({event}: Props) {
             {event.carRuleMode === 'anything_goes' && <OpenBuildSummary event={event} />}
           </div>
 
-          <div className={cn('absolute inset-x-0 bottom-0 h-[2px]', typeAccentBar[event.type])} />
+          <div
+            className={cn(
+              'absolute inset-x-0 bottom-0 h-[2px]',
+              eventTypeMeta(event.type).accentBar,
+            )}
+          />
         </div>
       </Link>
     </article>

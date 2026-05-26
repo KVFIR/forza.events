@@ -61,12 +61,16 @@ export function AuthProvider({children}: {children: ReactNode}) {
         setGuildId(result.guildId);
         setGuildName(result.guildName);
 
-        if (result.ready && result.guildId && result.accessToken && isConfigured) {
-          void fetchLaunchIntent(result.accessToken, result.guildId).then((eventId) => {
-            if (eventId && !cancelled) {
-              navigate(`/event/${eventId}`, {replace: true});
-            }
-          });
+        if (result.ready && result.accessToken && isConfigured) {
+          if (result.launchEventId && !cancelled) {
+            navigate(`/event/${result.launchEventId}`, {replace: true});
+          } else if (result.guildId) {
+            void fetchLaunchIntent(result.accessToken, result.guildId).then((eventId) => {
+              if (eventId && !cancelled) {
+                navigate(`/event/${eventId}`, {replace: true});
+              }
+            });
+          }
         }
       } finally {
         if (!cancelled) setLoading(false);

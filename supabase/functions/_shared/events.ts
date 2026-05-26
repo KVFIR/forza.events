@@ -1,4 +1,6 @@
 import {resolveCoverAbsolute} from './eventCovers.ts';
+import {openEventCustomId} from './eventLaunch.ts';
+import {eventTypeEmbedColor, eventTypeLabel} from './eventTypes.ts';
 import type {CarRuleMode} from './eventSpec.ts';
 
 type DbEvent = {
@@ -40,6 +42,22 @@ function formatTrackField(event: DbEvent): string {
   return `${codes[0]} (+${codes.length - 1} more)`;
 }
 
+function formatEmbedStart(iso: string, timezoneHint: string): string {
+  try {
+    return new Intl.DateTimeFormat('en-US', {
+      weekday: 'short',
+      month: 'short',
+      day: 'numeric',
+      hour: '2-digit',
+      minute: '2-digit',
+      timeZone: timezoneHint,
+      timeZoneName: 'short',
+    }).format(new Date(iso));
+  } catch {
+    return new Date(iso).toISOString();
+  }
+}
+
 function formatCarRules(event: DbEvent): string {
   if (event.car_rule_mode === 'anything_goes') {
     const pi = event.max_pi ? `Max PI ${event.max_pi}` : 'PI cap';
@@ -53,8 +71,8 @@ function formatCarRules(event: DbEvent): string {
 }
 
 export function buildEventEmbed(event: DbEvent) {
-  const when = new Date(event.starts_at).toISOString();
   const tz = event.timezone_hint ?? 'UTC';
+  const whenLabel = formatEmbedStart(event.starts_at, tz);
   const siteOrigin =
     (globalThis as {Deno?: {env: {get: (name: string) => string | undefined}}}).Deno?.env.get(
       'APP_ORIGIN',
@@ -64,11 +82,11 @@ export function buildEventEmbed(event: DbEvent) {
   const embed = {
     title: event.title,
     description: event.description?.slice(0, 300) ?? undefined,
-    color: 0x8b5cf6,
-    thumbnail: {url: coverUrl},
+    color: eventTypeEmbedColor(event.type),
+    image: {url: coverUrl},
     fields: [
-      {name: 'Type', value: event.type, inline: true},
-      {name: 'Starts', value: `${when}\n(${tz})`, inline: true},
+      {name: 'Type', value: eventTypeLabel(event.type), inline: true},
+      {name: 'Starts', value: whenLabel, inline: true},
       {
         name: 'Spots',
         value: `${event.current_players}/${event.max_players}`,
@@ -78,7 +96,7 @@ export function buildEventEmbed(event: DbEvent) {
       {name: 'Car rules', value: formatCarRules(event), inline: false},
       {name: 'Convoy leader', value: event.lobby_leader_gamertag, inline: true},
     ],
-    footer: {text: 'FORZA.EVENTS · Open in app for full car list'},
+    footer: {text: 'FORZA.EVENTS · Tap the button to open this event'},
   };
 
   const components = [
@@ -88,8 +106,8 @@ export function buildEventEmbed(event: DbEvent) {
         {
           type: 2,
           style: 1,
-          label: 'Open in FORZA.EVENTS',
-          custom_id: `open_event:${event.id}`,
+          label: 'Open event',
+          custom_id: openEventCustomId(event.id),
         },
       ],
     },

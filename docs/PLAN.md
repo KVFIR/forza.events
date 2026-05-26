@@ -13,8 +13,9 @@ If any older note, prototype, or backlog item conflicts with this spec, the froz
 - **Car rules:** each event must explicitly choose one mode: `Anything goes` or `Restricted car list`.
 - **Anything goes mode:** no per-car list is required; the event must still define a class and/or PI cap, and the UI should show an explicit `Anything goes` badge.
 - **Restricted mode:** at least one allowed car is required, with optional per-car restrictions.
-- **Publish requirements:** title, start time, host gamertag, cover image, target server, target channel, primary track code, and a valid car rule mode are required. In `Restricted car list`, at least one car is mandatory.
-- **Track code model:** one primary track code is required; extra track codes are optional.
+- **Publish requirements:** title, **event type**, start time, host gamertag, cover image (or type default), target server, target channel, and a valid car rule mode are required. In `Restricted car list`, at least one car is mandatory.
+- **Track code model:** track share codes are **optional** (ordered list when provided).
+- **Event types:** `Road racing` (blue), `Dirt racing` (orange), `Touge` (purple), `Car/Drift Meet` (red), `Cruise` (green).
 - **Editing policy:** drafts are freely editable. Published events are editable only until the event starts.
 - **Post-start policy:** after start, the only organizer actions allowed are `submit results` and `cancel event`.
 - **Discord sync:** published event embeds auto-sync all participant-facing fields, including cover image and description.

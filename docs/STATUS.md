@@ -87,7 +87,7 @@ Host for samples: `FORZA.EVENTS` (`discord_id` `000000000000000001`). Visible on
 Confirmed in code and schema:
 
 - Publish requires server + channel; locked after publish
-- Primary track code required; extra codes optional
+- Event type required (`road`, `dirt`, `touge`, `drift`, `cruise`); track share codes optional
 - Car rules: `anything_goes` or `restricted_list`
 - Restricted mode requires ≥1 allowed car with per-car PI/restrictions
 - Published events editable only before start

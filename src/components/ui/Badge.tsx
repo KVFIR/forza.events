@@ -1,19 +1,6 @@
 import type {CarRuleMode, EventType} from '../../lib/types';
+import {eventTypeMeta} from '../../lib/eventTypes';
 import {cn} from '../../lib/cn';
-
-const typeStyles: Record<EventType, {border: string; text: string; bg: string}> = {
-  road: {border: 'border-rose-500/30', text: 'text-rose-300', bg: 'bg-rose-500/10'},
-  dirt: {border: 'border-amber-600/30', text: 'text-amber-300', bg: 'bg-amber-600/10'},
-  drift: {border: 'border-fuchsia-500/30', text: 'text-fuchsia-300', bg: 'bg-fuchsia-500/10'},
-  touge: {border: 'border-violet-500/30', text: 'text-violet-300', bg: 'bg-violet-500/10'},
-};
-
-const labels: Record<EventType, string> = {
-  road: 'Road',
-  dirt: 'Dirt',
-  drift: 'Drift',
-  touge: 'Touge',
-};
 
 type Props = {
   type: EventType;
@@ -21,18 +8,18 @@ type Props = {
 };
 
 export function Badge({type, className}: Props) {
-  const s = typeStyles[type];
+  const {badge, label} = eventTypeMeta(type);
   return (
     <span
       className={cn(
         'inline-flex items-center rounded-md border px-2 py-0.5 text-[10px] font-bold uppercase tracking-widest',
-        s.bg,
-        s.border,
-        s.text,
+        badge.bg,
+        badge.border,
+        badge.text,
         className,
       )}
     >
-      {labels[type]}
+      {label}
     </span>
   );
 }

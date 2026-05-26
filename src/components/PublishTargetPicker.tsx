@@ -1,5 +1,7 @@
 import {useCallback, useEffect, useState} from 'react';
 import {listChannels, listGuilds} from '../lib/api';
+import {getGuildContext} from '../lib/discord';
+import {buildBotInstallUrl, openBotInstallUrl} from '../lib/discordInstall';
 import {Button} from './ui/Button';
 import {InlineLoading} from './ui/InlineLoading';
 
@@ -28,6 +30,8 @@ export function PublishTargetPicker({
   const [loadingGuilds, setLoadingGuilds] = useState(true);
   const [loadingChannels, setLoadingChannels] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const canAddBot = Boolean(buildBotInstallUrl());
+  const activityGuildId = getGuildContext().guildId;
 
   const loadGuilds = useCallback(() => {
     setLoadingGuilds(true);
@@ -71,9 +75,41 @@ export function PublishTargetPicker({
         {loadingGuilds ? (
           <InlineLoading label="Loading servers" />
         ) : guilds.length === 0 ? (
-          <p className="text-sm text-muted">
-            {guildHint ?? 'No servers available for publishing yet.'}
-          </p>
+          <div className="space-y-3">
+            <p className="text-sm text-muted">
+              {guildHint ??
+                'Add FORZA.EVENTS to a Discord server you manage, then refresh the list.'}
+            </p>
+            {canAddBot && (
+              <div className="flex flex-wrap gap-2">
+                <Button
+                  type="button"
+                  variant="primary"
+                  className="h-9 px-3 text-xs"
+                  onClick={() => {
+                    void openBotInstallUrl(
+                      activityGuildId ? {guildId: activityGuildId} : undefined,
+                    );
+                  }}
+                >
+                  Add to server
+                </Button>
+                <Button
+                  type="button"
+                  variant="secondary"
+                  className="h-9 px-3 text-xs"
+                  onClick={loadGuilds}
+                  disabled={loadingGuilds}
+                >
+                  Refresh list
+                </Button>
+              </div>
+            )}
+            <p className="text-[10px] leading-relaxed text-muted">
+              One install adds the bot so events can be announced in a channel. Launching from App
+              Launcher alone is not enough.
+            </p>
+          </div>
         ) : (
           <select
             className="w-full rounded-lg border border-white/[0.08] bg-white/[0.03] px-3.5 py-2.5 text-sm text-white"

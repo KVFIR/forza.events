@@ -100,10 +100,6 @@ serve(async (req) => {
       );
     }
 
-    if (!Array.isArray(body.track_codes) || body.track_codes.length === 0) {
-      return jsonResponse({error: 'Add at least one track code'}, 400);
-    }
-
     const payload = buildEventEmbed(event);
     const msgRes = await fetch(
       `https://discord.com/api/channels/${channel_id}/messages`,

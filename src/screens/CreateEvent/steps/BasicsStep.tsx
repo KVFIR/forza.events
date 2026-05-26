@@ -50,11 +50,12 @@ export function BasicsStep({
         </p>
       </Field>
 
-      <Field title="Type">
+      <Field title="Type" error={fieldErrors.type}>
         <div
-          className="flex rounded-lg border border-white/[0.08] bg-white/[0.03] p-0.5"
+          className="grid grid-cols-2 gap-1 rounded-lg border border-white/[0.08] bg-white/[0.03] p-0.5 sm:grid-cols-3"
           role="group"
           aria-label="Event type"
+          aria-invalid={Boolean(fieldErrors.type)}
         >
           {EVENT_TYPES.map((t) => (
             <button
@@ -63,9 +64,9 @@ export function BasicsStep({
               onClick={() => onType(t.value)}
               aria-pressed={values.type === t.value}
               className={cn(
-                'flex-1 rounded-md py-1.5 text-xs font-semibold transition-colors duration-150',
+                'rounded-md px-2 py-2 text-[11px] font-semibold leading-tight transition-colors duration-150',
                 values.type === t.value
-                  ? 'bg-white/[0.1] text-white'
+                  ? t.typeButtonSelected
                   : 'text-muted hover:text-slate-300',
               )}
             >
