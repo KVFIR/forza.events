@@ -14,8 +14,6 @@ import {
   initDiscordActivity,
   isStandaloneBrowser,
   setResolvedUser,
-  signInWithDiscord,
-  signOutDiscord,
 } from '../lib/discord';
 import {GUEST_USER} from '../lib/guestUser';
 import type {AppUser} from '../lib/types';
@@ -31,8 +29,6 @@ type AuthState = {
   guildName: string | null;
   refreshUser: (next: AppUser) => void;
   getAccessToken: () => string | null;
-  signIn: () => void;
-  signOut: () => void;
 };
 
 const AuthContext = createContext<AuthState | null>(null);
@@ -84,18 +80,6 @@ export function AuthProvider({children}: {children: ReactNode}) {
     setResolvedUser(next);
   }, []);
 
-  const signIn = useCallback(() => {
-    signInWithDiscord();
-  }, []);
-
-  const signOut = useCallback(() => {
-    signOutDiscord();
-    setUser(GUEST_USER);
-    setDiscordReady(false);
-    setGuildId(null);
-    setGuildName(null);
-  }, []);
-
   const value = useMemo(
     () => ({
       user,
@@ -108,10 +92,8 @@ export function AuthProvider({children}: {children: ReactNode}) {
       guildName,
       refreshUser,
       getAccessToken: getDiscordAccessToken,
-      signIn,
-      signOut,
     }),
-    [user, loading, discordReady, isConfigured, isSignedIn, isStandalone, guildId, guildName, refreshUser, signIn, signOut],
+    [user, loading, discordReady, isConfigured, isSignedIn, isStandalone, guildId, guildName, refreshUser],
   );
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;

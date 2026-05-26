@@ -40,12 +40,10 @@ export function StepIndicator({step, onStepClick}: StepIndicatorProps) {
 export function FormAlerts({
   isConfigured,
   isSignedIn,
-  onSignIn,
   globalError,
 }: {
   isConfigured: boolean;
   isSignedIn: boolean;
-  onSignIn: () => void;
   globalError: string | null;
 }) {
   return (
@@ -59,14 +57,7 @@ export function FormAlerts({
       )}
       {isConfigured && !isSignedIn && (
         <p className="mb-4 rounded-lg border border-white/[0.08] bg-white/[0.03] px-3 py-2 text-xs text-muted">
-          <button
-            type="button"
-            onClick={onSignIn}
-            className="font-semibold text-accent-purple-light hover:text-white transition-colors"
-          >
-            Sign in with Discord
-          </button>{' '}
-          to save drafts, join events, and publish.
+          Open this app in Discord to save drafts, join events, and publish.
         </p>
       )}
       {globalError && (

@@ -61,7 +61,7 @@ export function AuthCallback() {
           </button>
         </>
       ) : (
-        <p className="text-sm text-muted">Signing in with Discord…</p>
+        <p className="text-sm text-muted">Completing authorization…</p>
       )}
     </div>
   );

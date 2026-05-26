@@ -4,16 +4,18 @@ import {useAuth} from '../context/AuthContext';
 import {cn} from '../lib/cn';
 
 export function Navbar() {
-  const {user, isConfigured, isSignedIn, isStandalone, signIn, signOut, loading} = useAuth();
+  const {user, isConfigured, isSignedIn, isStandalone, loading} = useAuth();
   const initial = user.username.charAt(0).toUpperCase() || '?';
 
   const statusLabel = !isConfigured
     ? 'SETUP'
-    : isSignedIn
-      ? isStandalone
-        ? 'LOCAL'
-        : 'DISCORD'
-      : 'SIGN IN';
+    : loading
+      ? '…'
+      : isSignedIn
+        ? isStandalone
+          ? 'LOCAL'
+          : 'DISCORD'
+        : 'OFFLINE';
 
   return (
     <header className="sticky top-0 z-20 -mx-3 sm:-mx-5 md:-mx-8 lg:-mx-10">
@@ -60,16 +62,6 @@ export function Navbar() {
               {statusLabel}
             </span>
           </div>
-
-          {isStandalone && isConfigured && !loading && (
-            <button
-              type="button"
-              onClick={isSignedIn ? signOut : signIn}
-              className="text-[10px] font-semibold uppercase tracking-widest text-accent-purple-light hover:text-white transition-colors"
-            >
-              {isSignedIn ? 'Sign out' : 'Sign in'}
-            </button>
-          )}
 
           <div
             className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-gradient-to-br from-accent-purple-dark to-accent-purple-light text-[11px] font-bold text-white"

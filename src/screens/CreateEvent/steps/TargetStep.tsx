@@ -26,7 +26,7 @@ export function TargetStep({
 }: Props) {
   if (!token) {
     return (
-      <p className="text-sm text-muted">Sign in with Discord to choose a server and channel.</p>
+      <p className="text-sm text-muted">Open this app in Discord to choose a server and channel.</p>
     );
   }
 

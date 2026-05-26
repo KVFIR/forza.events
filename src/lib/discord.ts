@@ -1,11 +1,6 @@
 import {exchangeToken, isApiConfigured} from './api';
 import {DISCORD_ACTIVITY_REDIRECT_URI} from './discordConstants';
-import {
-  buildDiscordAuthorizeUrl,
-  clearDiscordSession,
-  loadDiscordSession,
-  saveDiscordSession,
-} from './discordAuth';
+import {loadDiscordSession, saveDiscordSession} from './discordAuth';
 import {GUEST_USER} from './guestUser';
 import type {AppUser} from './types';
 
@@ -55,19 +50,6 @@ export function getDiscordSdk(): DiscordSDKInstance | null {
 export function setDiscordSession(accessToken: string, user: AppUser): void {
   discordAccessToken = accessToken;
   resolvedUser = user;
-}
-
-export function signInWithDiscord(): void {
-  window.location.assign(buildDiscordAuthorizeUrl());
-}
-
-export function signOutDiscord(): void {
-  clearDiscordSession();
-  discordAccessToken = null;
-  resolvedUser = {...GUEST_USER};
-  guildId = null;
-  guildName = null;
-  initPromise = null;
 }
 
 function applyBrowserSession(): InitResult | null {

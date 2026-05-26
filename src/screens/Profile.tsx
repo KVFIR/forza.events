@@ -22,7 +22,7 @@ function StatPill({label, value}: {label: string; value: string | number}) {
 }
 
 export function Profile() {
-  const {user, refreshUser, getAccessToken, isConfigured, isSignedIn, signIn} = useAuth();
+  const {user, refreshUser, getAccessToken, isConfigured} = useAuth();
   const {isJoined} = useJoinedEvents();
   const {allMine, active, completed, isLoading, loadError, refetch} = useMyEventsCatalog('all');
   const showLoadingUI = useLoadingUI(isLoading);
@@ -151,19 +151,6 @@ export function Profile() {
           Configure Supabase in <code>.env</code> to load profile stats from the database.
         </p>
       )}
-      {isConfigured && !isSignedIn && (
-        <p className="mt-6 text-center text-[10px] text-muted">
-          <button
-            type="button"
-            onClick={signIn}
-            className="font-semibold text-accent-purple-light hover:underline"
-          >
-            Sign in with Discord
-          </button>{' '}
-          to sync your profile.
-        </p>
-      )}
-
       <GamertagModal
         open={editGamertag}
         initialValue={user.xboxGamertag ?? ''}

@@ -20,7 +20,6 @@ export function CreateEvent() {
     token,
     isConfigured,
     isSignedIn,
-    signIn,
     canPersist,
     step,
     setStep,
@@ -118,7 +117,6 @@ export function CreateEvent() {
       <FormAlerts
         isConfigured={isConfigured}
         isSignedIn={isSignedIn}
-        onSignIn={signIn}
         globalError={globalError}
       />
 

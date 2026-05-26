@@ -20,23 +20,21 @@ export function MyEvents() {
 
   const emptyTitle =
     !authLoading && !isSignedIn
-      ? 'Sign in to see events you host or join'
-        : loadError
+      ? 'Unable to load your events'
+      : loadError
         ? 'Could not load your events'
         : scope === 'joined'
           ? 'No joined events yet'
           : 'No events in this list yet';
 
   const emptyDescription =
-    loadError && !isSignedIn
-      ? 'Check your connection and try again.'
-      : !authLoading && !isSignedIn
-        ? 'Use Discord sign-in to sync hosted and joined events.'
-        : loadError
-          ? 'Check your connection and try again.'
-          : scope !== 'joined' && isSignedIn
-            ? 'Saved drafts and published events you host appear here.'
-            : undefined;
+    !authLoading && !isSignedIn
+      ? 'Open this app in Discord to see events you host or join.'
+      : loadError
+        ? 'Check your connection and try again.'
+        : scope !== 'joined' && isSignedIn
+          ? 'Saved drafts and published events you host appear here.'
+          : undefined;
 
   return (
     <div className="pb-8 pt-5">

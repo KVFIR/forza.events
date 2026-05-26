@@ -32,7 +32,6 @@ export function useCreateEventForm() {
     getAccessToken,
     isSignedIn,
     isConfigured,
-    signIn,
   } = useAuth();
 
   const [step, setStep] = useState<CreateEventStepIndex>(0);
@@ -318,7 +317,6 @@ export function useCreateEventForm() {
     token,
     isConfigured,
     isSignedIn,
-    signIn,
     canPersist,
     step,
     setStep: goToStep,
