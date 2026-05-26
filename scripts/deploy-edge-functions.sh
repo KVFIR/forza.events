@@ -6,6 +6,7 @@ cd "$ROOT"
 
 FUNCTIONS=(
   browse-events
+  host-drafts
   token-exchange
   list-guilds
   list-channels

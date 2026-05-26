@@ -1,4 +1,5 @@
 import {getSupabase, isSupabaseConfigured, resolveSupabaseUrl} from './supabase';
+import {createSupabaseFetch, isDiscordActivityFrame} from './supabaseEnv';
 
 function apiBase(): string {
   const explicit = import.meta.env.VITE_API_BASE_URL as string | undefined;
@@ -21,25 +22,31 @@ async function invoke<T>(
   if (!base) throw new Error('API not configured');
 
   const anonKey = (import.meta.env.VITE_SUPABASE_ANON_KEY as string) ?? '';
-  const headers: Record<string, string> = {
+  const headers = new Headers({
     'Content-Type': 'application/json',
     apikey: anonKey,
-    // Supabase Edge gateway requires Authorization (apikey alone is not enough).
     Authorization: `Bearer ${anonKey}`,
-  };
+  });
   if (discordAccessToken) {
-    headers['x-discord-access-token'] = discordAccessToken;
+    headers.set('x-discord-access-token', discordAccessToken);
   }
 
-  const res = await fetch(`${base}/${name}`, {
+  // Discord Activity proxy often strips auth headers; createSupabaseFetch re-applies them.
+  const doFetch = isDiscordActivityFrame()
+    ? (createSupabaseFetch(anonKey) ?? fetch)
+    : fetch;
+
+  const res = await doFetch(`${base}/${name}`, {
     method: 'POST',
     headers,
     body: JSON.stringify(body),
   });
 
-  const data = await res.json();
+  const data = (await res.json()) as {error?: string; message?: string; code?: string};
   if (!res.ok) {
-    throw new Error(data.error ?? `Request failed: ${res.status}`);
+    throw new Error(
+      data.error ?? data.message ?? data.code ?? `Request failed: ${res.status}`,
+    );
   }
   return data as T;
 }

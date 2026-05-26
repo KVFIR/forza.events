@@ -49,3 +49,9 @@ verify_jwt = false
 
 [functions.launch-intent]
 verify_jwt = false
+
+[functions.browse-events]
+verify_jwt = false
+
+[functions.host-drafts]
+verify_jwt = false
