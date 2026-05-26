@@ -1,7 +1,7 @@
 import {serve} from 'https://deno.land/std@0.224.0/http/server.ts';
 import {jsonResponse, optionsResponse} from '../_shared/cors.ts';
 import {botHeaders, isBotInGuild, mapDiscordPostError, verifyDiscordToken} from '../_shared/discord.ts';
-import {buildEventEmbed} from '../_shared/events.ts';
+import {buildEventEmbed, mapEventCarsForEmbed} from '../_shared/events.ts';
 import {validatePublishReady, type SaveEventBody} from '../_shared/eventSpec.ts';
 import {normalizeGuildName} from '../_shared/guildDisplay.ts';
 import {adminClient} from '../_shared/supabase.ts';
@@ -105,7 +105,11 @@ serve(async (req) => {
       );
     }
 
-    const payload = buildEventEmbed(event);
+    const payload = buildEventEmbed({
+      ...event,
+      guild_name: resolvedGuildName,
+      allowed_cars: mapEventCarsForEmbed(eventCars ?? []),
+    });
     const msgRes = await fetch(
       `https://discord.com/api/channels/${channel_id}/messages`,
       {

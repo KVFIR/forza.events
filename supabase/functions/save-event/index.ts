@@ -81,7 +81,7 @@ serve(async (req) => {
         .single();
       if (error) return jsonResponse({error: error.message}, 500);
       if (updated?.channel_id && updated.discord_message_id) {
-        await syncPublishedEmbed(updated);
+        await syncPublishedEmbed(supabase, updated);
       }
       return jsonResponse({id: body.id, cancelled: true});
     }
@@ -165,7 +165,7 @@ serve(async (req) => {
       if (error) return jsonResponse({error: error.message}, 500);
       await syncEventCars(supabase, eventId, cars, body.car_rule_mode ?? 'anything_goes');
       if (isPublishedStatus(data.status)) {
-        await syncPublishedEmbed(data);
+        await syncPublishedEmbed(supabase, data);
       }
       return jsonResponse({id: eventId, slug: data.slug});
     }
