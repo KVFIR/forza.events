@@ -20,9 +20,12 @@ async function invoke<T>(
   const base = apiBase();
   if (!base) throw new Error('API not configured');
 
+  const anonKey = (import.meta.env.VITE_SUPABASE_ANON_KEY as string) ?? '';
   const headers: Record<string, string> = {
     'Content-Type': 'application/json',
-    apikey: (import.meta.env.VITE_SUPABASE_ANON_KEY as string) ?? '',
+    apikey: anonKey,
+    // Supabase Edge gateway requires Authorization (apikey alone is not enough).
+    Authorization: `Bearer ${anonKey}`,
   };
   if (discordAccessToken) {
     headers['x-discord-access-token'] = discordAccessToken;
