@@ -38,6 +38,7 @@ import {
 import {EventStatusBanner} from '../components/EventStatusBanner';
 import {Badge, DraftBadge, StatusBadge} from '../components/ui/Badge';
 import {Button} from '../components/ui/Button';
+import {ConfirmDialog} from '../components/ui/ConfirmDialog';
 import {GamertagModal} from '../components/GamertagModal';
 import {useJoinedEvents} from '../context/JoinedEventsContext';
 import {useAuth} from '../context/AuthContext';
@@ -75,6 +76,7 @@ export function EventDetail() {
   const [joining, setJoining] = useState(false);
   const [joinError, setJoinError] = useState<string | null>(null);
   const [cancelling, setCancelling] = useState(false);
+  const [confirmAction, setConfirmAction] = useState<'delete' | 'cancel' | null>(null);
   const [deleting, setDeleting] = useState(false);
   const [actionError, setActionError] = useState<string | null>(null);
 
@@ -133,10 +135,6 @@ export function EventDetail() {
 
   async function handleCancelEvent() {
     if (!event) return;
-    const ok = window.confirm(
-      'Cancel this event? The Discord announcement will be updated and registration will close.',
-    );
-    if (!ok) return;
     setCancelling(true);
     setActionError(null);
     try {
@@ -156,10 +154,6 @@ export function EventDetail() {
 
   async function handleDeleteDraft() {
     if (!event) return;
-    const ok = window.confirm(
-      'Delete this draft permanently? This cannot be undone.',
-    );
-    if (!ok) return;
     setDeleting(true);
     setActionError(null);
     try {
@@ -297,7 +291,7 @@ export function EventDetail() {
                 variant="danger"
                 className="whitespace-nowrap px-6 py-2.5 text-xs shadow-none"
                 disabled={deleting}
-                onClick={() => void handleDeleteDraft()}
+                onClick={() => setConfirmAction('delete')}
               >
                 {deleting ? 'Deleting…' : 'Delete draft'}
               </Button>
@@ -319,7 +313,7 @@ export function EventDetail() {
                 variant="danger"
                 className="whitespace-nowrap px-6 py-2.5 text-xs shadow-none"
                 disabled={cancelling}
-                onClick={() => void handleCancelEvent()}
+                onClick={() => setConfirmAction('cancel')}
               >
                 {cancelling ? 'Cancelling…' : 'Cancel event'}
               </Button>
@@ -362,6 +356,33 @@ export function EventDetail() {
         saving={joining}
         onSave={(gt) => void doJoin(gt)}
         onClose={() => setGamertagOpen(false)}
+      />
+
+      <ConfirmDialog
+        open={confirmAction === 'delete'}
+        title="Delete draft?"
+        description="Delete this draft permanently? This cannot be undone."
+        confirmLabel="Delete"
+        variant="danger"
+        busy={deleting}
+        onCancel={() => setConfirmAction(null)}
+        onConfirm={() => {
+          setConfirmAction(null);
+          void handleDeleteDraft();
+        }}
+      />
+      <ConfirmDialog
+        open={confirmAction === 'cancel'}
+        title="Cancel event?"
+        description="The Discord announcement will be updated and registration will close."
+        confirmLabel="Cancel event"
+        variant="danger"
+        busy={cancelling}
+        onCancel={() => setConfirmAction(null)}
+        onConfirm={() => {
+          setConfirmAction(null);
+          void handleCancelEvent();
+        }}
       />
 
       {showResultsSection ? (

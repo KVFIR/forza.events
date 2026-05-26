@@ -1,4 +1,5 @@
 import {Button} from '../../components/ui/Button';
+import {ConfirmDialog} from '../../components/ui/ConfirmDialog';
 import {PublishTargetModal} from '../../components/PublishTargetPicker';
 import {FormAlerts, StepIndicator} from './components/StepIndicator';
 import type {CreateEventStepIndex} from './constants';
@@ -36,7 +37,10 @@ export function CreateEvent() {
     tryContinue,
     onCoverChange,
     persistDraft,
-    deleteDraft,
+    deleteConfirmOpen,
+    setDeleteConfirmOpen,
+    requestDeleteDraft,
+    confirmDeleteDraft,
     confirmPublish,
     validatePublish,
     navigate,
@@ -237,7 +241,7 @@ export function CreateEvent() {
                 variant="danger"
                 className="w-full"
                 disabled={saving || !canPersist}
-                onClick={() => void deleteDraft()}
+                onClick={requestDeleteDraft}
               >
                 Delete draft
               </Button>
@@ -256,6 +260,17 @@ export function CreateEvent() {
           </Button>
         )}
       </div>
+
+      <ConfirmDialog
+        open={deleteConfirmOpen}
+        title="Delete draft?"
+        description="Delete this draft permanently? This cannot be undone."
+        confirmLabel="Delete"
+        variant="danger"
+        busy={saving}
+        onCancel={() => setDeleteConfirmOpen(false)}
+        onConfirm={() => void confirmDeleteDraft()}
+      />
 
       {showPublishModal && token && (
         <PublishTargetModal

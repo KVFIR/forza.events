@@ -12,6 +12,7 @@ import {
 } from '../lib/events';
 import type {EventParticipant} from '../lib/types';
 import {Button} from '../components/ui/Button';
+import {ConfirmDialog} from '../components/ui/ConfirmDialog';
 import {ContentReveal} from '../components/ui/ContentReveal';
 import {PageLoading} from '../components/ui/PageLoading';
 import {useLoadingUI} from '../hooks/useLoadingUI';
@@ -49,6 +50,7 @@ export function EventResults() {
   const [error, setError] = useState<string | null>(null);
   const [title, setTitle] = useState('');
   const [alreadySubmitted, setAlreadySubmitted] = useState(false);
+  const [submitConfirmOpen, setSubmitConfirmOpen] = useState(false);
 
   useEffect(() => {
     if (!id) return;
@@ -119,10 +121,6 @@ export function EventResults() {
 
   async function handleSubmit() {
     if (!id || placements.length === 0 || alreadySubmitted) return;
-    const ok = window.confirm(
-      'Submit these results? They cannot be changed after submission.',
-    );
-    if (!ok) return;
     setSaving(true);
     setError(null);
     const payload = placements.map((p, i) => ({
@@ -242,10 +240,23 @@ export function EventResults() {
         variant="primary"
         className="mt-8 w-full"
         disabled={saving || placements.length === 0 || alreadySubmitted}
-        onClick={() => void handleSubmit()}
+        onClick={() => setSubmitConfirmOpen(true)}
       >
         {saving ? 'Saving…' : 'Submit results'}
       </Button>
+
+      <ConfirmDialog
+        open={submitConfirmOpen}
+        title="Submit results?"
+        description="Submit these results? They cannot be changed after submission."
+        confirmLabel="Submit"
+        busy={saving}
+        onCancel={() => setSubmitConfirmOpen(false)}
+        onConfirm={() => {
+          setSubmitConfirmOpen(false);
+          void handleSubmit();
+        }}
+      />
     </ContentReveal>
   );
 }

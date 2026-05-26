@@ -46,6 +46,7 @@ export function useCreateEventForm() {
   const [loadingEdit, setLoadingEdit] = useState(!!editId);
   const [eventId, setEventId] = useState<string | null>(editId);
   const [showPublishModal, setShowPublishModal] = useState(false);
+  const [deleteConfirmOpen, setDeleteConfirmOpen] = useState(false);
   const [isPublished, setIsPublished] = useState(false);
 
   const [title, setTitle] = useState('');
@@ -255,22 +256,27 @@ export function useCreateEventForm() {
     }
   }
 
-  async function deleteDraft(): Promise<boolean> {
+  function requestDeleteDraft(): void {
     const id = eventId ?? editId;
     if (!id) {
       setGlobalError('Nothing to delete yet. Save as draft first.');
-      return false;
+      return;
     }
     if (!token || !canPersist) {
       setGlobalError('Open this app in Discord to delete drafts.');
-      return false;
+      return;
     }
-    const ok = window.confirm('Delete this draft permanently? This cannot be undone.');
-    if (!ok) return false;
+    setDeleteConfirmOpen(true);
+  }
+
+  async function confirmDeleteDraft(): Promise<boolean> {
+    const id = eventId ?? editId;
+    if (!id || !token || !canPersist) return false;
     setSaving(true);
     setGlobalError(null);
     try {
       await deleteDraftEvent(token, id);
+      setDeleteConfirmOpen(false);
       bumpRefresh();
       navigate('/my-events', {replace: true});
       return true;
@@ -375,7 +381,10 @@ export function useCreateEventForm() {
     tryContinue,
     onCoverChange,
     persistDraft,
-    deleteDraft,
+    deleteConfirmOpen,
+    setDeleteConfirmOpen,
+    requestDeleteDraft,
+    confirmDeleteDraft,
     confirmPublish,
     validatePublish: () =>
       validatePublish(values, user.xboxGamertag ?? lobbyLeaderGamertag, {
