@@ -23,7 +23,6 @@ import {
 import {EventResultsTable} from '../components/EventResultsTable';
 import {ContentReveal} from '../components/ui/ContentReveal';
 import {PageLoading} from '../components/ui/PageLoading';
-import {useLoadingUI} from '../hooks/useLoadingUI';
 import {formatEventTime} from '../lib/datetime';
 import {cancelEvent, deleteDraftEvent, isApiConfigured, updateProfile} from '../lib/api';
 import {
@@ -75,7 +74,7 @@ export function EventDetail() {
   const [resultRows, setResultRows] = useState<EventResultRow[]>([]);
   const [loading, setLoading] = useState(true);
   const loadedForIdRef = useRef<string | null>(null);
-  const showLoadingUI = useLoadingUI(loading && !event);
+  const fetchSeqRef = useRef(0);
   const {isJoined, toggleJoin, bumpRefresh, refreshKey} = useJoinedEvents();
   const {
     user,
@@ -105,19 +104,19 @@ export function EventDetail() {
 
   useEffect(() => {
     if (!id) return;
-    let cancelled = false;
-    const isInitial = loadedForIdRef.current !== id;
+    const seq = ++fetchSeqRef.current;
+    const idChanged = loadedForIdRef.current !== id;
 
-    if (isInitial) {
+    if (idChanged) {
       loadedForIdRef.current = id;
-      setLoading(true);
       setEvent(undefined);
       setResultRows([]);
     }
+    setLoading(true);
 
     void fetchEventById(id, {discordToken})
       .then(async (ev) => {
-        if (cancelled) return;
+        if (fetchSeqRef.current !== seq) return;
         setEvent(ev);
         if (ev && shouldShowEventResults(ev)) {
           setResultRows(await fetchEventResults(id));
@@ -126,12 +125,8 @@ export function EventDetail() {
         }
       })
       .finally(() => {
-        if (!cancelled) setLoading(false);
+        if (fetchSeqRef.current === seq) setLoading(false);
       });
-
-    return () => {
-      cancelled = true;
-    };
   }, [id, refreshKey, discordToken]);
 
   async function handleJoinClick() {
@@ -233,15 +228,11 @@ export function EventDetail() {
     }
   }
 
-  if (showLoadingUI) {
-    return <PageLoading label="Loading event" className="pb-10 pt-4" />;
-  }
-
-  if (!event && loading) {
-    return null;
-  }
-
   if (!event) {
+    if (loading) {
+      return <PageLoading label="Loading event" className="pb-10 pt-4" />;
+    }
+
     return (
       <div className="flex flex-col items-center gap-4 py-20 text-center">
         <p className="text-sm font-medium text-slate-200">Event not found</p>

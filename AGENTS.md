@@ -17,7 +17,7 @@ Lessons from implementation work (keep in sync when behavior changes).
 - **Save published edits:** `save-event` update uses `buildEventFields` only — never overwrites `status` (avoids reverting `open` → `draft`).
 - **Post-start host:** Event Detail shows separate **Submit results** + **Cancel event** buttons; cancel syncs Discord embed via `syncPublishedEmbed`.
   - After publish, server and channel are **locked** in the form (`lockGuild` / `lockChannel`).
-  - **Publish embed:** `publish-event` posts a Discord message embed + **Open event** button (`custom_id` `open_event:{event_id}` via `buildEventEmbed` in `supabase/functions/_shared/events.ts`). Button click → `interactions-endpoint` returns `LAUNCH_ACTIVITY` + stores `launch_intents` fallback → Activity opens `/event/{id}` from `sdk.customId` (primary) or `launch-intent` Edge Function.
+  - **Publish embed:** `publish-event` posts a Discord message embed + **Open event** button (`custom_id` `open_event:{event_id}` via `buildEventEmbed` in `supabase/functions/_shared/events.ts`). Button click → `interactions-endpoint` returns `LAUNCH_ACTIVITY` + stores `launch_intents` fallback. **`LaunchRedirector`** reads `custom_id` from the iframe URL synchronously and routes to `/event/{id}` before browse loads; **`shouldDeferBrowseFeed()`** skips `browse-events` on that path. App Launcher / other entry → browse loads immediately; no redirect on `guildId` alone. Optional **`launch-intent`** redirect runs in the background only when `custom_id` was missing.
   - Browse/join/create/publish all depend on Edge Functions + Discord token headers; test in Discord after API/proxy changes, not only localhost. Interactions Endpoint URL must be set in Discord Developer Portal.
 
 ## Product / data model

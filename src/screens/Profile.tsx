@@ -12,7 +12,6 @@ import {SignInRequiredState} from '../components/SignInRequiredState';
 import {ContentReveal} from '../components/ui/ContentReveal';
 import {EmptyState} from '../components/ui/EmptyState';
 import {PageLoading} from '../components/ui/PageLoading';
-import {useLoadingUI} from '../hooks/useLoadingUI';
 import {Alert} from '../components/ui/Alert';
 import {StatCard} from '../components/ui/StatCard';
 import {cn} from '../lib/cn';
@@ -31,7 +30,6 @@ export function Profile() {
   } = useAuth();
   const {isJoined} = useJoinedEvents();
   const {allMine, active, completed, isLoading, loadError, refetch} = useMyEventsCatalog('all');
-  const showLoadingUI = useLoadingUI(isLoading);
   const [editGamertag, setEditGamertag] = useState(false);
   const [saving, setSaving] = useState(false);
   const initial = user.username.charAt(0).toUpperCase();
@@ -56,12 +54,8 @@ export function Profile() {
     );
   }
 
-  if (showLoadingUI) {
-    return <PageLoading label="Loading profile" className="pb-10 pt-5" />;
-  }
-
   if (isLoading) {
-    return null;
+    return <PageLoading label="Loading profile" className="pb-10 pt-5" />;
   }
 
   if (loadError) {

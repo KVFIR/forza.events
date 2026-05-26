@@ -136,7 +136,7 @@ export function CreateEvent() {
   }
 
   if (form.loadingEdit) {
-    return null;
+    return <PageLoading label="Loading event" className="pb-10 pt-5" />;
   }
 
   if (isConfigured && !isStandalone && !isSignedIn && !authInitializing) {

@@ -4,7 +4,6 @@ import {ContentReveal} from './ui/ContentReveal';
 import {EmptyState} from './ui/EmptyState';
 import {PageLoading} from './ui/PageLoading';
 import {Spinner} from './ui/Spinner';
-import {useLoadingUI} from '../hooks/useLoadingUI';
 import type {ForzaEvent} from '../lib/types';
 import type {HostDraftsLoadError, PublishedEventsLoadError} from '../lib/events';
 
@@ -31,15 +30,10 @@ export function EventList({
   emptyAction,
   metaRight,
 }: Props) {
-  const showLoadingUI = useLoadingUI(isLoading && events.length === 0);
   const hasFetchError = !!loadError && events.length === 0 && !isLoading;
 
-  if (showLoadingUI) {
-    return <PageLoading label="Loading events" />;
-  }
-
   if (isLoading && events.length === 0) {
-    return null;
+    return <PageLoading label="Loading events" />;
   }
 
   if (hasFetchError) {

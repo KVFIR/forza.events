@@ -18,7 +18,8 @@ import {
   setResolvedUser,
   type InitResult,
 } from '../lib/discord';
-import {resolveLaunchEventTarget, shouldResolveLaunchRedirect} from '../lib/launchRedirect';
+import {endDeferBrowseFeed} from '../lib/activityLaunch';
+import {resolveLaunchIntentTarget, shouldResolveLaunchRedirect} from '../lib/launchRedirect';
 import {loadDiscordSession} from '../lib/discordAuth';
 import {GUEST_USER} from '../lib/guestUser';
 import type {AppUser} from '../lib/types';
@@ -39,18 +40,28 @@ type AuthState = {
   retryDiscordAuth: () => Promise<void>;
 };
 
-async function navigateToLaunchTarget(
+function applyEmbedLaunchRedirect(
+  result: InitResult,
+  navigate: (path: string, options: {replace: boolean}) => void,
+): void {
+  if (!result.launchEventId) return;
+  endDeferBrowseFeed();
+  navigate(`/event/${result.launchEventId}`, {replace: true});
+}
+
+function tryLaunchIntentRedirect(
   result: InitResult,
   isConfigured: boolean,
   navigate: (path: string, options: {replace: boolean}) => void,
   cancelled: () => boolean,
-): Promise<void> {
-  if (!isConfigured || !shouldResolveLaunchRedirect(result)) return;
+): void {
+  if (!isConfigured || cancelled()) return;
 
-  const target = await resolveLaunchEventTarget(result, fetchLaunchIntent);
-  if (target && !cancelled()) {
+  void resolveLaunchIntentTarget(result, fetchLaunchIntent).then((target) => {
+    if (!target || cancelled()) return;
+    if (typeof window !== 'undefined' && window.location.pathname !== '/') return;
     navigate(`/event/${target}`, {replace: true});
-  }
+  });
 }
 
 const AuthContext = createContext<AuthState | null>(null);
@@ -82,7 +93,11 @@ export function AuthProvider({children}: {children: ReactNode}) {
         setGuildId(result.guildId);
         setGuildName(result.guildName);
 
-        await navigateToLaunchTarget(result, isConfigured, navigate, () => cancelled);
+        if (shouldResolveLaunchRedirect(result)) {
+          applyEmbedLaunchRedirect(result, navigate);
+        } else {
+          tryLaunchIntentRedirect(result, isConfigured, navigate, () => cancelled);
+        }
       } finally {
         if (!cancelled) setLoading(false);
       }
@@ -120,7 +135,11 @@ export function AuthProvider({children}: {children: ReactNode}) {
       setGuildName(result.guildName);
 
       if (result.accessToken) {
-        await navigateToLaunchTarget(result, isConfigured, navigate, () => false);
+        if (shouldResolveLaunchRedirect(result)) {
+          applyEmbedLaunchRedirect(result, navigate);
+        } else {
+          tryLaunchIntentRedirect(result, isConfigured, navigate, () => false);
+        }
       }
     } finally {
       setAuthRetrying(false);
