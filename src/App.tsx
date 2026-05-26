@@ -2,7 +2,6 @@ import './App.css';
 import {lazy, Suspense} from 'react';
 import {BrowserRouter, Navigate, Route, Routes} from 'react-router-dom';
 import {AppBootGate} from './components/AppBootGate';
-import {LaunchRedirector} from './components/LaunchRedirector';
 import {DiscordOnlyGate} from './components/DiscordOnlyGate';
 import {Navbar} from './components/Navbar';
 import {AuthProvider} from './context/AuthContext';
@@ -49,7 +48,6 @@ export default function App() {
             <div className="app-main-column flex min-h-screen flex-col px-3 sm:px-5 md:px-8 lg:px-10">
               <main className="min-w-0 flex-1 pb-8">
                 <AppBootGate>
-                  <LaunchRedirector />
                   <Suspense fallback={<RouteFallback />}>
                     <Routes>
                     <Route path="/" element={<BrowseEvents />} />

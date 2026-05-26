@@ -6,7 +6,6 @@ import {
   type FetchEventsOptions,
   type PublishedEventsLoadError,
 } from '../lib/events';
-import {shouldDeferBrowseFeed} from '../lib/activityLaunch';
 import {applyDevLoadingDelay} from '../lib/devLoadingDelay';
 import {usePublishedEventsLiveUpdates} from './useEventLiveUpdates';
 import type {ForzaEvent} from '../lib/types';
@@ -28,12 +27,6 @@ export function usePublishedEvents(options: FetchEventsOptions = {}) {
 
   const runFetch = useCallback(
     (silent: boolean) => {
-      if (shouldDeferBrowseFeed()) {
-        setIsLoading(false);
-        setIsRefreshing(false);
-        return Promise.resolve();
-      }
-
       if (silent) {
         setIsRefreshing(true);
       } else {
@@ -81,12 +74,6 @@ export function usePublishedEvents(options: FetchEventsOptions = {}) {
   usePublishedEventsLiveUpdates(includeCompleted, onLobbyPatch, silentRefetch);
 
   useEffect(() => {
-    if (shouldDeferBrowseFeed()) {
-      setIsLoading(false);
-      setIsRefreshing(false);
-      return;
-    }
-
     let cancelled = false;
     const silent = loadedOnceRef.current;
 

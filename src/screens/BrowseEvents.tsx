@@ -5,8 +5,6 @@ import {EventList} from '../components/EventList';
 import {EventListMetaSelect} from '../components/EventListMetaSelect';
 import {useAuth} from '../context/AuthContext';
 import {DISCORD_SUPABASE_PROXY_PREFIX} from '../lib/supabaseEnv';
-import {shouldDeferBrowseFeed} from '../lib/activityLaunch';
-import {PageLoading} from '../components/ui/PageLoading';
 import {usePublishedEvents} from '../hooks/usePublishedEvents';
 import {filterByEventType, sortEvents, type EventSortKey} from '../lib/eventList';
 
@@ -51,10 +49,6 @@ export function BrowseEvents() {
         : `In Discord Developer Portal add URL mapping ${DISCORD_SUPABASE_PROXY_PREFIX} → your-project.supabase.co`;
 
   const emptyTitle = 'No events match these filters';
-
-  if (shouldDeferBrowseFeed()) {
-    return <PageLoading label="Loading" className="pb-8 pt-5" />;
-  }
 
   return (
     <div className="pb-8 pt-5">
