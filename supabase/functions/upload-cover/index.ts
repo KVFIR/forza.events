@@ -1,4 +1,4 @@
-import {decode} from 'https://deno.land/std@0.224.0/encoding/base64.ts';
+import {decodeBase64} from 'https://deno.land/std@0.224.0/encoding/base64.ts';
 import {serve} from 'https://deno.land/std@0.224.0/http/server.ts';
 import {jsonResponse, optionsResponse} from '../_shared/cors.ts';
 import {verifyDiscordToken} from '../_shared/discord.ts';
@@ -40,7 +40,7 @@ serve(async (req) => {
       return jsonResponse({error: 'Unsupported image type'}, 400, req);
     }
 
-    const bytes = decode(contentBase64);
+    const bytes = decodeBase64(contentBase64);
     if (bytes.byteLength > MAX_BYTES) {
       return jsonResponse({error: 'Image exceeds 2 MB limit'}, 400, req);
     }

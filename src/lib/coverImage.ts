@@ -1,3 +1,9 @@
+import {
+  DISCORD_SUPABASE_PROXY_PREFIX,
+  isDiscordActivityFrame,
+  resolveSupabaseUrl,
+} from './supabaseEnv';
+
 /** Max width for uploaded covers (16:9-ish cards and Discord embeds). */
 export const COVER_UPLOAD_MAX_WIDTH = 1280;
 export const COVER_UPLOAD_MAX_HEIGHT = 720;
@@ -14,6 +20,30 @@ const DISPLAY_WIDTH: Record<CoverDisplayVariant, number> = {
 const SUPABASE_OBJECT = '/storage/v1/object/public/';
 const SUPABASE_RENDER = '/storage/v1/render/image/public/';
 
+/**
+ * Discord Activity CSP allows img-src 'self' and Discord CDNs only — not *.supabase.co.
+ * Route Storage through the Activity URL mapping prefix (same as API proxy).
+ */
+function discordProxiedStorageUrl(url: string): string {
+  if (!isDiscordActivityFrame()) return url;
+  const projectBase = resolveSupabaseUrl();
+  if (!projectBase) return url;
+  let parsed: URL;
+  try {
+    parsed = new URL(url);
+  } catch {
+    return url;
+  }
+  let projectHost: string;
+  try {
+    projectHost = new URL(projectBase).host;
+  } catch {
+    return url;
+  }
+  if (parsed.host !== projectHost) return url;
+  return `${DISCORD_SUPABASE_PROXY_PREFIX}${parsed.pathname}${parsed.search}`;
+}
+
 /** Resize Supabase Storage URLs via the image renderer; pass through other URLs unchanged. */
 export function coverDisplayUrl(src: string, variant: CoverDisplayVariant = 'card'): string {
   const trimmed = src.trim();
@@ -21,16 +51,19 @@ export function coverDisplayUrl(src: string, variant: CoverDisplayVariant = 'car
 
   const width = DISPLAY_WIDTH[variant];
   const idx = trimmed.indexOf(SUPABASE_OBJECT);
-  if (idx === -1) return trimmed;
+  let display = trimmed;
+  if (idx !== -1) {
+    const renderBase =
+      trimmed.slice(0, idx) + SUPABASE_RENDER + trimmed.slice(idx + SUPABASE_OBJECT.length);
+    const params = new URLSearchParams({
+      width: String(width),
+      quality: variant === 'hero' ? '85' : '80',
+      resize: 'cover',
+    });
+    display = `${renderBase}?${params}`;
+  }
 
-  const renderBase =
-    trimmed.slice(0, idx) + SUPABASE_RENDER + trimmed.slice(idx + SUPABASE_OBJECT.length);
-  const params = new URLSearchParams({
-    width: String(width),
-    quality: variant === 'hero' ? '85' : '80',
-    resize: 'cover',
-  });
-  return `${renderBase}?${params}`;
+  return discordProxiedStorageUrl(display);
 }
 
 function loadImageElement(file: File): Promise<HTMLImageElement> {

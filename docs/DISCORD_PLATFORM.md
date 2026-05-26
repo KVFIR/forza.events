@@ -36,6 +36,7 @@ Activities are served through Discord’s proxy (`*.discordsays.com`).
 | URL mapping | Prefix `/supabase` → `<project-ref>.supabase.co` (no `https://`, no `/.proxy/` in prefix) |
 | Client rewrite | `patchUrlMappings` in `src/lib/discordUrlProxy.ts` |
 | Dropped headers | `createSupabaseFetch(anonKey)` re-applies `apikey` and `Authorization` on every request |
+| Cover images in UI | Discord CSP `img-src` blocks `*.supabase.co`; `coverDisplayUrl()` rewrites Storage URLs to `/supabase/...` (same-origin) |
 | Browse in iframe | Prefer **`browse-events`** Edge Function over raw PostgREST |
 
 Edge Function **CORS** allows origins: `APP_ORIGIN`, `*.discordsays.com`, `*.discord.com`, localhost dev ports, optional `ALLOWED_CORS_ORIGINS`. Requests without a matching `Origin` do not get `Access-Control-Allow-Origin` (intentional).
