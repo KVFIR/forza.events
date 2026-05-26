@@ -49,8 +49,8 @@ Add the same URL in Discord → OAuth2 → Redirects.
 | Variable | Use |
 |----------|-----|
 | `SUPABASE_SERVICE_ROLE_KEY` | `npm run seed:events`, `scripts/seed-cars.mjs` |
-| `APP_ORIGIN` | Production site origin (Railway URL without trailing slash). Required for **Add to server** in Create → Target and for embed cover URLs. |
-| `BOT_INSTALL_REDIRECT_URI` | Optional; defaults to `{APP_ORIGIN}/bot-installed`. Must match Discord OAuth2 → Redirects. |
+| `APP_ORIGIN` | Production site origin (Railway URL without trailing slash). Used for embed cover URLs. |
+| — | Bot install: disable **Requires OAuth2 Code Grant** under Discord → Bot (callback-less `scope=bot` from Activity). |
 | `VITE_API_BASE_URL` | Override Edge Functions base URL |
 
 ### Railway (production Activity)
@@ -61,16 +61,9 @@ In the Railway service **Variables** tab, set at least (same names as `.env` —
 APP_ORIGIN=https://forzaevents-production.up.railway.app
 ```
 
-Optional explicit bot-install callback (recommended if you use a custom domain later):
+In [Discord Developer Portal](https://discord.com/developers/applications) → **Bot**, disable **Requires OAuth2 Code Grant** (required for **Add to server** from the Activity).
 
-```env
-BOT_INSTALL_REDIRECT_URI=https://forzaevents-production.up.railway.app/bot-installed
-```
-
-Also register in [Discord Developer Portal](https://discord.com/developers/applications) → OAuth2 → **Redirects**:
-
-- `https://forzaevents-production.up.railway.app/bot-installed`
-- `https://127.0.0.1` (Activity auth — already required)
+OAuth2 → **Redirects** must include `https://127.0.0.1` (Activity user auth). Bot install does not use a redirect URL.
 
 After adding or changing `APP_ORIGIN`, trigger a **new deploy** (Railway rebuilds the frontend bundle).
 
@@ -78,7 +71,6 @@ From your machine (after `railway login` and `railway link` in this repo):
 
 ```bash
 railway variable set APP_ORIGIN=https://forzaevents-production.up.railway.app
-railway variable set BOT_INSTALL_REDIRECT_URI=https://forzaevents-production.up.railway.app/bot-installed
 ```
 
 ---

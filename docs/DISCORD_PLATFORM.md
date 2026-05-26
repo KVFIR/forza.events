@@ -83,8 +83,8 @@ Before pilot launch, confirm in the [Discord Developer Portal](https://discord.c
    `https://<project-ref>.supabase.co/functions/v1/interactions-endpoint`
 6. **Entry Point command** — verify the default Launch command opens the Activity from the App Launcher.
 7. **App install in pilot guilds** — the app/bot must be installed in every server where hosts will publish; `list-guilds` only returns servers where both the user and bot are present.
-   - **Add to server** uses OAuth2 with `response_type=code` and redirect `{APP_ORIGIN}/bot-installed` (or `BOT_INSTALL_REDIRECT_URI`). Register that URL under **OAuth2 → Redirects** (e.g. `https://forzaevents-production.up.railway.app/bot-installed` and `http://localhost:5180/bot-installed` for local dev).
-   - If Discord shows **Integration requires code grant**, either add the redirect above or disable **Bot → Requires OAuth2 Code Grant** (only if your Activity auth still works).
+   - **Add to server** uses callback-less bot OAuth (`scope=bot`, no `redirect_uri`). In the Activity, `openExternalLink` opens the system browser; the user approves there, returns to Discord, and taps **Refresh list**. Disable **Bot → Requires OAuth2 Code Grant** in the Developer Portal (Activity user auth uses the embedded `authorize` flow, not this URL).
+   - Optional legacy page `/bot-installed` only confirms install in a browser tab; it does not exchange OAuth codes.
 8. **Channel permissions** — the bot must be able to send messages in the target publish channels.
 
 Then validate inside Discord:

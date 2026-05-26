@@ -1,7 +1,11 @@
 import {useCallback, useEffect, useState} from 'react';
 import {listChannels, listGuilds} from '../lib/api';
 import {getGuildContext} from '../lib/discord';
-import {buildBotInstallUrl, getBotInstallRedirectUri, openBotInstallUrl} from '../lib/discordInstall';
+import {
+  botInstallOpensExternally,
+  buildBotInstallUrl,
+  openBotInstallUrl,
+} from '../lib/discordInstall';
 import {Button} from './ui/Button';
 import {InlineLoading} from './ui/InlineLoading';
 
@@ -30,8 +34,8 @@ export function PublishTargetPicker({
   const [loadingGuilds, setLoadingGuilds] = useState(true);
   const [loadingChannels, setLoadingChannels] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const botInstallRedirect = getBotInstallRedirectUri();
   const canAddBot = Boolean(buildBotInstallUrl());
+  const installInBrowser = botInstallOpensExternally();
   const activityGuildId = getGuildContext().guildId;
 
   const loadGuilds = useCallback(() => {
@@ -113,16 +117,11 @@ export function PublishTargetPicker({
             {botInstallActions}
             <p className="text-[10px] leading-relaxed text-muted">
               One install adds the bot so events can be announced in a channel. Launching from App
-              Launcher alone is not enough. After approving in Discord, return here and tap Refresh
-              list.
+              Launcher alone is not enough.
+              {installInBrowser
+                ? ' Discord will open your browser to approve — finish there, then return to this Activity and tap Refresh list.'
+                : ' After approving, tap Refresh list.'}
             </p>
-            {!botInstallRedirect && (
-              <p className="text-[10px] leading-relaxed text-amber-200/90">
-                Set <code className="text-amber-50">APP_ORIGIN</code> (or{' '}
-                <code className="text-amber-50">BOT_INSTALL_REDIRECT_URI</code>) in env and add that
-                URL under OAuth2 → Redirects in the Discord Developer Portal.
-              </p>
-            )}
           </div>
         ) : (
           <>
@@ -147,6 +146,8 @@ export function PublishTargetPicker({
             <p className="mt-1.5 text-[10px] leading-relaxed text-muted">
               Only servers where you manage the server and FORZA.EVENTS is installed are listed.
               Use Add to another server to install the bot elsewhere, then refresh.
+              {installInBrowser &&
+                ' Install opens in your browser; return to the Activity when done.'}
             </p>
           </>
         )}

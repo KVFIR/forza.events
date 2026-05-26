@@ -1,5 +1,5 @@
 import {getDiscordSdk, isStandaloneBrowser} from './discord';
-import {isLocalDevHost} from './runtime';
+import {isDiscordActivityFrame} from './supabaseEnv';
 
 /**
  * Bot permissions for guild install (publish embeds + read channels).
@@ -8,52 +8,21 @@ import {isLocalDevHost} from './runtime';
 export const BOT_INSTALL_PERMISSIONS = 346112;
 
 /**
- * Redirect after guild bot OAuth (required when "Requires OAuth2 Code Grant" is on).
- * Must be listed under Discord → OAuth2 → Redirects.
- */
-export function getBotInstallRedirectUri(): string {
-  const explicit = import.meta.env.VITE_BOT_INSTALL_REDIRECT_URI as string | undefined;
-  if (explicit?.trim()) return explicit.trim();
-
-  const appOrigin = import.meta.env.VITE_APP_ORIGIN as string | undefined;
-  if (appOrigin?.trim()) {
-    return `${appOrigin.trim().replace(/\/$/, '')}/bot-installed`;
-  }
-
-  const authRedirect = import.meta.env.VITE_DISCORD_REDIRECT_URI as string | undefined;
-  if (authRedirect?.trim()) {
-    try {
-      const u = new URL(authRedirect.trim());
-      return `${u.origin}/bot-installed`;
-    } catch {
-      // ignore invalid URL
-    }
-  }
-
-  if (typeof window !== 'undefined' && isLocalDevHost()) {
-    return `${window.location.origin}/bot-installed`;
-  }
-
-  return '';
-}
-
-/**
  * OAuth2 guild install — adds the app's bot user to a server (one step).
- * User-install in App Launcher does not satisfy list-guilds / publish.
+ * Uses the callback-less bot flow (no `response_type` / `redirect_uri`) so install
+ * completes in the browser Discord opens from the Activity. Our app never exchanges
+ * that code on `/bot-installed`.
+ *
+ * In Discord Developer Portal → Bot, keep **Requires OAuth2 Code Grant** disabled.
  */
 export function buildBotInstallUrl(options?: {guildId?: string}): string | null {
   const clientId = import.meta.env.VITE_DISCORD_CLIENT_ID as string | undefined;
   if (!clientId?.trim()) return null;
 
-  const redirectUri = getBotInstallRedirectUri();
-  if (!redirectUri) return null;
-
   const params = new URLSearchParams({
     client_id: clientId.trim(),
     permissions: String(BOT_INSTALL_PERMISSIONS),
     scope: 'bot',
-    response_type: 'code',
-    redirect_uri: redirectUri,
   });
 
   if (options?.guildId) {
@@ -80,4 +49,9 @@ export async function openBotInstallUrl(options?: {guildId?: string}): Promise<b
 
   window.open(url, '_blank', 'noopener,noreferrer');
   return true;
+}
+
+/** True when the host should show copy about completing install in an external browser. */
+export function botInstallOpensExternally(): boolean {
+  return isDiscordActivityFrame();
 }
