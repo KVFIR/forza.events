@@ -67,8 +67,8 @@ serve(async (req) => {
       if (!existing || existing.host_discord_id !== discordUser.id) {
         return jsonResponse({error: 'Forbidden'}, 403);
       }
-      if (!eventHasStarted(existing)) {
-        return jsonResponse({error: 'Event has not started yet'}, 400);
+      if (!existing.discord_message_id) {
+        return jsonResponse({error: 'Only published events can be cancelled'}, 400);
       }
       if (['completed', 'cancelled', 'archived'].includes(existing.status)) {
         return jsonResponse({error: 'Event is already closed'}, 400);

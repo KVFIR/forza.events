@@ -3,7 +3,14 @@ import {useNavigate, useSearchParams} from 'react-router-dom';
 import type {CarRuleMode, EventType} from '../../lib/types';
 import {useAuth} from '../../context/AuthContext';
 import {useJoinedEvents} from '../../context/JoinedEventsContext';
-import {deleteDraftEvent, isApiConfigured, publishEvent, saveEvent, uploadCoverImage} from '../../lib/api';
+import {
+  cancelEvent,
+  deleteDraftEvent,
+  isApiConfigured,
+  publishEvent,
+  saveEvent,
+  uploadCoverImage,
+} from '../../lib/api';
 import {compressCoverForUpload} from '../../lib/coverImage';
 import {defaultCoverPath, isBundledDefaultCover} from '../../lib/eventCovers';
 import {fetchEventById} from '../../lib/events';
@@ -11,6 +18,7 @@ import {defaultTimezone, localInputToUtc, utcToLocalInput} from '../../lib/datet
 import {clampPi} from '../../lib/pi';
 import {EVENT_PLAYER_SLOTS} from '../../lib/constants';
 import {
+  canCancelEvent,
   canEditEvent,
   isPublishedToDiscord,
   normalizeTrackCodes,
@@ -47,7 +55,9 @@ export function useCreateEventForm() {
   const [eventId, setEventId] = useState<string | null>(editId);
   const [showPublishModal, setShowPublishModal] = useState(false);
   const [deleteConfirmOpen, setDeleteConfirmOpen] = useState(false);
+  const [cancelConfirmOpen, setCancelConfirmOpen] = useState(false);
   const [isPublished, setIsPublished] = useState(false);
+  const [canCancelPublished, setCanCancelPublished] = useState(false);
 
   const [title, setTitle] = useState('');
   const [type, setType] = useState<EventType>('road');
@@ -123,6 +133,8 @@ export function useCreateEventForm() {
 
   useEffect(() => {
     if (!editId) {
+      setCanCancelPublished(false);
+      setIsPublished(false);
       if (contextGuildId && !targetGuildId) {
         setTargetGuildId(contextGuildId);
         setTargetGuildName(contextGuildName ?? '');
@@ -145,6 +157,7 @@ export function useCreateEventForm() {
         const tz = ev.timezoneHint ?? defaultTimezone();
         setEventId(ev.id);
         setIsPublished(isPublishedToDiscord(ev));
+        setCanCancelPublished(canCancelEvent(ev, user));
         setTitle(ev.title);
         setType(ev.type);
         setStartsAtLocal(utcToLocalInput(ev.startsAt, tz));
@@ -288,6 +301,36 @@ export function useCreateEventForm() {
     }
   }
 
+  function requestCancelPublished(): void {
+    const id = eventId ?? editId;
+    if (!id) return;
+    if (!canCancelPublished) return;
+    if (!token || !canPersist) {
+      setGlobalError('Open this app in Discord to cancel events.');
+      return;
+    }
+    setCancelConfirmOpen(true);
+  }
+
+  async function confirmCancelPublished(): Promise<boolean> {
+    const id = eventId ?? editId;
+    if (!id || !token || !canPersist || !canCancelPublished) return false;
+    setSaving(true);
+    setGlobalError(null);
+    try {
+      await cancelEvent(token, id);
+      setCancelConfirmOpen(false);
+      bumpRefresh();
+      navigate(`/event/${id}`, {replace: true});
+      return true;
+    } catch (e) {
+      setGlobalError(String(e));
+      return false;
+    } finally {
+      setSaving(false);
+    }
+  }
+
   async function persistDraft(): Promise<string | null> {
     const err = validateDraftSave(values);
     if (err) {
@@ -385,6 +428,11 @@ export function useCreateEventForm() {
     setDeleteConfirmOpen,
     requestDeleteDraft,
     confirmDeleteDraft,
+    cancelConfirmOpen,
+    setCancelConfirmOpen,
+    canCancelPublished,
+    requestCancelPublished,
+    confirmCancelPublished,
     confirmPublish,
     validatePublish: () =>
       validatePublish(values, user.xboxGamertag ?? lobbyLeaderGamertag, {

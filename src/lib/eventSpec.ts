@@ -88,13 +88,12 @@ export function canEditEvent(event: ForzaEvent, user: AppUser): boolean {
   return !eventHasStarted(event);
 }
 
+/** Host may cancel a published announcement (before or after start). */
 export function canCancelEvent(event: ForzaEvent, user: AppUser): boolean {
   return (
     event.hostDiscordId === user.discordId &&
-    event.lifecycle !== 'draft' &&
-    event.lifecycle !== 'cancelled' &&
-    event.lifecycle !== 'completed' &&
-    eventHasStarted(event)
+    isPublishedToDiscord(event) &&
+    !isEventFinalized(event)
   );
 }
 

@@ -43,6 +43,11 @@ export function CreateEvent() {
     setDeleteConfirmOpen,
     requestDeleteDraft,
     confirmDeleteDraft,
+    cancelConfirmOpen,
+    setCancelConfirmOpen,
+    canCancelPublished,
+    requestCancelPublished,
+    confirmCancelPublished,
     confirmPublish,
     validatePublish,
     navigate,
@@ -257,14 +262,26 @@ export function CreateEvent() {
         )}
 
         {step === 3 && isPublished && (
-          <Button
-            variant="primary"
-            className="w-full"
-            disabled={saving || !canPersist}
-            onClick={() => void handleSaveChanges()}
-          >
-            {saving ? 'Saving…' : 'Save changes'}
-          </Button>
+          <>
+            <Button
+              variant="primary"
+              className="w-full"
+              disabled={saving || !canPersist}
+              onClick={() => void handleSaveChanges()}
+            >
+              {saving ? 'Saving…' : 'Save changes'}
+            </Button>
+            {canCancelPublished ? (
+              <Button
+                variant="danger"
+                className="w-full"
+                disabled={saving || !canPersist}
+                onClick={requestCancelPublished}
+              >
+                Cancel event
+              </Button>
+            ) : null}
+          </>
         )}
       </div>
 
@@ -277,6 +294,17 @@ export function CreateEvent() {
         busy={saving}
         onCancel={() => setDeleteConfirmOpen(false)}
         onConfirm={() => void confirmDeleteDraft()}
+      />
+
+      <ConfirmDialog
+        open={cancelConfirmOpen}
+        title="Cancel event?"
+        description="The Discord announcement will be updated and registration will close."
+        confirmLabel="Cancel event"
+        variant="danger"
+        busy={saving}
+        onCancel={() => setCancelConfirmOpen(false)}
+        onConfirm={() => void confirmCancelPublished()}
       />
 
       <ConfirmDialog
