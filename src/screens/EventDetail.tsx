@@ -9,6 +9,7 @@ import {
   Wrench,
 } from 'lucide-react';
 import {EventCover} from '../components/EventCover';
+import {defaultCoverPath} from '../lib/eventCovers';
 import {RoadIcon} from '../components/icons/RoadIcon';
 import type {ForzaEvent} from '../lib/types';
 import {
@@ -209,7 +210,7 @@ export function EventDetail() {
       {/* Hero */}
       <div className="relative -mx-3 mb-0 h-44 overflow-hidden bg-base sm:-mx-5 md:-mx-8">
         <EventCover
-          src={event.coverImageUrl}
+          src={event.coverImageUrl ?? defaultCoverPath(event.type)}
           variant="hero"
           priority
           className="absolute inset-0"

@@ -27,7 +27,6 @@ export function CreateEvent() {
     globalError,
     setGlobalError,
     saving,
-    eventId,
     setEventId,
     showPublishModal,
     setShowPublishModal,
