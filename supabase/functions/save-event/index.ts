@@ -133,6 +133,7 @@ serve(async (req) => {
 
     const coverUrl = resolveCoverUrl(body.type ?? 'road', body.cover_image_url);
     const fields = buildEventFields(body, discordUser.id, coverUrl);
+    const insertRow = buildEventRow(body, discordUser.id, coverUrl);
 
     let eventId = body.id;
 
@@ -156,7 +157,7 @@ serve(async (req) => {
       const trySlug = i === 0 ? slug : `${slug}-${i + 1}`;
       const {data, error} = await supabase
         .from('events')
-        .insert({...row, slug: trySlug})
+        .insert({...insertRow, slug: trySlug})
         .select('id, slug')
         .single();
       if (!error && data) {
