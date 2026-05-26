@@ -1,8 +1,8 @@
 # Local development guide
 
-English only in the UI. This document describes how to run and test FORZA.EVENTS against a real Supabase backend on your machine.
+English UI with optional Russian (`EN | RU` on Profile). This document describes how to run and test FORZA.EVENTS against a real Supabase backend.
 
-See also: [`STATUS.md`](STATUS.md) (current state), [`PLAN.md`](PLAN.md) (MVP spec), [`.env.example`](../.env.example).
+See also: [`STATUS.md`](STATUS.md), [`PLAN.md`](PLAN.md), [`DISCORD_PLATFORM.md`](DISCORD_PLATFORM.md), [`.env.example`](../.env.example), [`AGENTS.md`](../AGENTS.md).
 
 ---
 
@@ -15,7 +15,7 @@ npm install
 npm run dev
 ```
 
-Open http://localhost:5180 → **Sign in** (navbar) → browse events.
+Open http://localhost:5180 → **Sign in** (navbar) for create/join/profile → browse events.
 
 ---
 
@@ -32,42 +32,45 @@ Open http://localhost:5180 → **Sign in** (navbar) → browse events.
 | `SUPABASE_URL` | Supabase → Project Settings → API |
 | `SUPABASE_ANON_KEY` | Same page → `anon` / publishable key |
 
-Vite injects `DISCORD_CLIENT_ID`, `SUPABASE_URL`, and `SUPABASE_ANON_KEY` at build time from these names (no duplicate `VITE_*` in `.env` required).
+Vite maps `DISCORD_CLIENT_ID`, `SUPABASE_URL`, and `SUPABASE_ANON_KEY` at build time (see `vite.config.ts`).
 
-### Required for localhost OAuth
+### Localhost browser OAuth
 
 | Variable | Value |
 |----------|--------|
 | `DISCORD_REDIRECT_URI` | `http://localhost:5180/auth/callback` |
 
-Add the same URL in Discord → OAuth2 → Redirects.
+Add the same URL under Discord → OAuth2 → Redirects.
 
-`token-exchange` only accepts `redirect_uri` values on an allowlist (`DISCORD_REDIRECT_URI`, Activity `https://127.0.0.1`, localhost callbacks, optional `DISCORD_REDIRECT_URI_ALLOWLIST`). Redeploy Edge Functions after auth changes.
+`token-exchange` only accepts allowlisted `redirect_uri` values (`oauthRedirect.ts`):
+
+- `DISCORD_REDIRECT_URI`
+- `https://127.0.0.1` (Discord Activity)
+- `http://localhost:5180/auth/callback`, `http://127.0.0.1:5180/auth/callback`
+- Optional: `DISCORD_REDIRECT_URI_ALLOWLIST` (comma-separated, Supabase secret)
 
 ### Optional
 
 | Variable | Use |
 |----------|-----|
 | `SUPABASE_SERVICE_ROLE_KEY` | `npm run seed:events`, `scripts/seed-cars.mjs` |
-| `APP_ORIGIN` | Production site origin (Railway URL without trailing slash). Used for embed cover URLs. |
-| — | Bot install: disable **Requires OAuth2 Code Grant** under Discord → Bot (callback-less `scope=bot` from Activity). |
+| `APP_ORIGIN` | Embed cover URLs; Edge Function CORS allowlist (no trailing slash) |
+| `ALLOWED_CORS_ORIGINS` | Extra origins for Edge CORS (Supabase secret; comma-separated) |
 | `VITE_API_BASE_URL` | Override Edge Functions base URL |
+| `VITE_DEV_LOADING_DELAY_MS` | Artificial loading delay for UI testing |
 
 ### Railway (production Activity)
 
-In the Railway service **Variables** tab, set at least (same names as `.env` — Vite reads them at **build** time):
+Set at **build time** (redeploy after changes):
 
 ```env
+DISCORD_CLIENT_ID=...
+SUPABASE_URL=...
+SUPABASE_ANON_KEY=...
 APP_ORIGIN=https://forzaevents-production.up.railway.app
 ```
 
-In [Discord Developer Portal](https://discord.com/developers/applications) → **Bot**, disable **Requires OAuth2 Code Grant** (required for **Add to server** from the Activity).
-
-OAuth2 → **Redirects** must include `https://127.0.0.1` (Activity user auth). Bot install does not use a redirect URL.
-
-After adding or changing `APP_ORIGIN`, trigger a **new deploy** (Railway rebuilds the frontend bundle).
-
-From your machine (after `railway login` and `railway link` in this repo):
+Discord OAuth for Activity uses `https://127.0.0.1` — not the Railway origin. Production browser tabs show **Open in Discord** (`DiscordOnlyGate`).
 
 ```bash
 railway variable set APP_ORIGIN=https://forzaevents-production.up.railway.app
@@ -75,42 +78,54 @@ railway variable set APP_ORIGIN=https://forzaevents-production.up.railway.app
 
 ---
 
+## Database migrations
+
+Target project: `uoysqfczahqmctbrrizn` (or your linked ref).
+
+```bash
+supabase link --project-ref <ref>
+supabase db push
+```
+
+Apply through **`021`** (see [`supabase/README.md`](../supabase/README.md)). If `db push` reports remote-only migration versions, repair history then push — e.g. mark `014`–`016` applied and revert orphan timestamp versions before pushing `017`–`021`.
+
+After schema changes that affect security (`018`, `021`), redeploy Edge Functions.
+
+---
+
 ## Auth flows
 
 ### Browser (localhost)
 
-1. User clicks **Sign in** → Discord OAuth consent
-2. Redirect to `/auth/callback` with `code`
-3. `token-exchange` Edge Function → access token + user row
-4. Token and user JSON stored in `sessionStorage`
-5. **Sign out** clears session and resets UI
+1. **Sign in** → Discord OAuth
+2. `/auth/callback` with `code`
+3. `token-exchange` → access token + `users` row
+4. `sessionStorage` until Sign out
 
-Without sign-in, Browse still loads **public** published events. Join, Create, and Profile mutations require sign-in.
-
-On **localhost**, Browse reads the database directly (PostgREST, no Edge deploy required) and lists **all non-draft** events—including `cancelled` and `completed`—so you can open and test cards that are no longer `open`. Production Discord Activity still shows only active registrations (`open` / `live`) unless you opt into completed events.
+Browse can use PostgREST directly (all non-draft events, including completed/cancelled). Join/create/publish use Edge Functions + Discord token.
 
 ### Discord Activity (iframe)
 
-1. `initDiscordActivity()` runs Embedded App SDK `authorize`
-2. Same `token-exchange` path; session saved for refresh
-3. Guild context from SDK when available
+1. `initDiscordActivity()` → SDK `authorize` (`identify`, `guilds`)
+2. `token-exchange` with `redirect_uri: https://127.0.0.1`
+3. `authenticate(access_token)`
+4. API calls use `createSupabaseFetch(anonKey)` so `apikey` / `Authorization` survive Discord’s proxy
 
 ---
 
-## Sample events
+## Edge Functions (local testing)
 
-For an empty database or demo browse feed:
+All 14 functions are invoked from `src/lib/api.ts` with:
+
+- `apikey` + `Authorization: Bearer <anon>`
+- `x-discord-access-token` when signed in
+
+Deploy after changes:
 
 ```bash
-# In .env:
-# SUPABASE_SERVICE_ROLE_KEY=...
-
-npm run seed:events
+npm run sync:secrets      # DISCORD_* → Supabase
+npm run deploy:functions  # --no-verify-jwt on each
 ```
-
-This removes and recreates events whose `slug` starts with `sample-`. Definitions live in [`supabase/seed/sample-events.json`](../supabase/seed/sample-events.json).
-
-Alternatively apply migration `014_seed_sample_events.sql` via `supabase db push`.
 
 ---
 
@@ -118,61 +133,73 @@ Alternatively apply migration `014_seed_sample_events.sql` via `supabase db push
 
 | Asset | Location |
 |-------|----------|
-| Default covers (WebP) | `public/covers/*.webp` |
-| Uploaded covers | Supabase Storage bucket `event-covers` via **`upload-cover`** Edge Function (host-only; apply migration `018_security_hardening.sql` to revoke anon writes) |
+| Default covers | `public/covers/*.webp` |
+| Custom uploads | `event-covers` bucket via **`upload-cover`** only |
 
-Regenerate bundled assets after replacing source images:
+Migration **`018_security_hardening.sql`** must be applied (revokes anonymous Storage writes).
+
+Flow:
+
+1. Save draft (`save-event`) → get `event_id`
+2. `compressCoverForUpload` (client)
+3. `uploadCoverImage(discordToken, guildId, eventId, file)` → Edge Function
+4. Save again with `cover_image_url`
 
 ```bash
-npm run optimize:covers
+npm run optimize:covers   # regenerate bundled WebP
 ```
-
-Uploads are resized client-side (max 1280×720, WebP when supported) before `uploadCoverImage`.
 
 ---
 
 ## Create Event wizard
 
-Implementation path: **`src/screens/CreateEvent/index.tsx`**.
+Implementation: **`src/screens/CreateEvent/index.tsx`** only — do not add `CreateEvent.tsx` beside the folder.
 
-Do not recreate `src/screens/CreateEvent.tsx` beside the folder — TypeScript and Vite may resolve the wrong module.
-
-Steps:
-
-1. Basics — title, event type (required), time, cover, convoy leader  
-2. Details — tracks (optional), car rules, PI / car list  
-3. Target — Discord server + channel  
-4. Review — summary + publish  
-
-Validation: `src/screens/CreateEvent/validation.ts` and `src/lib/eventSpec.ts`.
+Steps: Basics → Details → Target → Review  
+Validation: `validation.ts`, `src/lib/eventSpec.ts`
 
 ---
 
 ## Commands
 
 ```bash
-npm run dev              # dev server, port 5180
-npm run typecheck        # tsc -b
-npm run build            # production bundle
-npm run sync:secrets     # .env → Supabase secrets
-npm run deploy:functions # all Edge Functions
-npm run seed:events      # sample events (service role)
-npm run optimize:covers  # WebP defaults
+npm run dev              # port 5180
+npm run typecheck
+npm run build
+npm run sync:secrets
+npm run deploy:functions
+npm run seed:events      # SERVICE_ROLE_KEY
+npm run optimize:covers
 ```
 
 ---
 
-## Testing checklist (local)
+## Testing checklist
 
-- [ ] Browse lists events (including `sample-*` if seeded)
-- [ ] Open event detail — cover, cars, tracks render
-- [ ] Sign in — navbar shows Sign out / LOCAL
-- [ ] Join / leave updates participant state (after sign-in)
-- [ ] Create draft → save → appears in My Events (host)
-- [ ] Publish to a server where the bot is installed (needs real Discord + channel)
+### Local (browser)
+
+- [ ] Browse lists events (seed or real data)
+- [ ] Sign in → Sign out
+- [ ] Create draft → My Events
+- [ ] Upload cover → image on card/detail
+- [ ] Join / leave (signed in, non-host event)
+
+### Discord Activity
+
+- [ ] Auth completes without console CORS errors
+- [ ] Browse and event detail load
+- [ ] Create → publish (bot in server, Manage Server, valid channel)
+- [ ] Embed button opens correct event
+- [ ] Join/leave updates embed participant count
+
+### After deploy
+
+- [ ] `supabase db push` current on project
+- [ ] `npm run deploy:functions` succeeded
+- [ ] Railway rebuild if `APP_ORIGIN` / client env changed
 
 ---
 
 ## Common issues
 
-See the troubleshooting table in [`STATUS.md`](STATUS.md#troubleshooting).
+See [`STATUS.md`](STATUS.md#troubleshooting).

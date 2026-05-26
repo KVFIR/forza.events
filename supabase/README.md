@@ -1,23 +1,21 @@
 # Supabase backend
 
-This folder contains the database schema, Edge Functions, and seed data used by the frozen MVP.
+Database schema, Edge Functions, and seeds for the FORZA.EVENTS frozen MVP.
 
-## MVP role
+## Role
 
-Supabase is the backend for:
+- Events, participants, results, users
+- Discord OAuth (`token-exchange`)
+- Publish/join/leave/results flows
+- Cover images (Storage + `upload-cover`)
+- Launch intents from embed buttons
+- FH6 cars catalog (read-only from client; lookup in `save-event`)
 
-- event and participant data
-- draft save and publish flows
-- Discord OAuth token exchange
-- results submission
-- launch-intent and Discord publish integration
-- FH6 cars catalog lookup
-
-See [`docs/PLAN.md`](../docs/PLAN.md) for the frozen MVP contract and [`docs/STATUS.md`](../docs/STATUS.md) for current implementation status.
+See [`docs/PLAN.md`](../docs/PLAN.md), [`docs/STATUS.md`](../docs/STATUS.md), [`AGENTS.md`](../AGENTS.md).
 
 ## Migrations
 
-Apply all migrations through `015`:
+Apply through **`021`**:
 
 ```bash
 supabase login
@@ -25,110 +23,91 @@ supabase link --project-ref <your-project-ref>
 supabase db push
 ```
 
-Migration list:
-
-- `001_initial.sql` — initial schema foundation
-- `002_engineering_plan.sql` — event metadata, launch intents, storage bucket, early catalog work
-- `003_storage_upload_policy.sql` — storage upload policy for event covers
-- `004_event_types_and_pi.sql` — event type and PI model updates
-- `005_add_car_class_r.sql` — car class enum extension
-- `006_fh6_cars_catalog.sql` — FH6 cars catalog refresh
-- `007_car_setup_model.sql` — event-level setup model and tune support
-- `008_per_car_setup.sql` — per-car PI caps and restrictions
-- `009_frozen_mvp_spec.sql` — frozen MVP: car rule mode, DNS, primary track code
-- `010_event_track_list_and_open_build_notes.sql` — unified track list + open build notes
-- `011_drop_car_class_storage.sql` — drop persisted FH class letters; derive from PI in app
-- `012_realtime_and_join_concurrency.sql` — realtime + join concurrency
-- `013_events_replica_identity.sql` — replica identity for live lobby patches
-- `014_seed_sample_events.sql` — optional dev sample events (`sample-*` slugs)
-- `015_discord_guilds_public_read.sql` — RLS read for guild names on event cards
+| Migration | Purpose |
+|-----------|---------|
+| `001_initial.sql` | Core schema |
+| `002_engineering_plan.sql` | Launch intents, storage bucket, cars |
+| `003_storage_upload_policy.sql` | *(superseded)* anon upload — revoked in `018` |
+| `004`–`008` | Event types, PI, catalog, per-car setup |
+| `009_frozen_mvp_spec.sql` | Car rule mode, DNS, track model |
+| `010`–`011` | Track list, open-build notes |
+| `012_realtime_and_join_concurrency.sql` | Realtime + join capacity trigger |
+| `013_events_replica_identity.sql` | Replica identity for live updates |
+| `014_seed_sample_events.sql` | Dev sample events |
+| `015_discord_guilds_public_read.sql` | Guild names on cards |
+| `016_event_type_cruise.sql` | `cruise` enum value |
+| `017_sample_cruise_type.sql` | Sample data fix |
+| `018_security_hardening.sql` | **Drop anon Storage write** on `event-covers` |
+| `019_launch_intents_nullable_guild.sql` | DM / no-guild launch intents |
+| `020_user_event_join_stats.sql` | `events_joined` trigger |
+| `021_api_hardening.sql` | Scoped RLS reads + `check_api_rate_limit` |
 
 ## Edge Functions
 
-Deploy the required functions for the MVP backend:
-
-```bash
-supabase functions deploy token-exchange
-supabase functions deploy list-guilds
-supabase functions deploy list-channels
-supabase functions deploy publish-event
-supabase functions deploy interactions-endpoint
-supabase functions deploy save-event
-supabase functions deploy event-participation
-supabase functions deploy submit-results
-supabase functions deploy user-profile
-supabase functions deploy launch-intent
-```
-
-## Required secrets
-
-Set once in root `.env`, then push to Supabase:
-
-```bash
-cp .env.example .env
-# fill DISCORD_* and SUPABASE_* values
-npm run sync:secrets
-```
-
-Or set individually:
-
-```bash
-supabase secrets set DISCORD_CLIENT_ID=...
-supabase secrets set DISCORD_CLIENT_SECRET=...
-supabase secrets set DISCORD_PUBLIC_KEY=...
-supabase secrets set DISCORD_BOT_TOKEN=...
-```
-
-Required for localhost OAuth: `DISCORD_REDIRECT_URI=http://localhost:5180/auth/callback`.
-
-Optional: `APP_ORIGIN` (defaults to `https://forza.events` for embed cover URLs).
-
-`SUPABASE_URL` and `SUPABASE_SERVICE_ROLE_KEY` are auto-injected in deployed Edge Functions.
-
-Deploy all functions in one step:
+**14 functions** — deploy all:
 
 ```bash
 npm run deploy:functions
-# or: bash scripts/deploy-edge-functions.sh
 ```
 
-If `interactions-endpoint` is used for Discord interaction callbacks, point the Discord Interactions Endpoint to:
+| Function | Auth | Purpose |
+|----------|------|---------|
+| `browse-events` | Optional Discord token | Feed, event by id, host drafts |
+| `host-drafts` | Discord token | Draft list for host |
+| `token-exchange` | OAuth code | Activity / localhost OAuth |
+| `list-guilds` | Discord token | Publish target servers |
+| `list-channels` | Discord token | Postable channels |
+| `validate-channel` | Discord token | Channel validation |
+| `publish-event` | Discord token | Post Discord embed |
+| `save-event` | Discord token | CRUD draft / edit / cancel |
+| `event-participation` | Discord token | Join / leave |
+| `submit-results` | Discord token | Results + complete |
+| `user-profile` | Discord token | Profile updates |
+| `launch-intent` | Discord token | Embed deep-link fallback |
+| `upload-cover` | Discord token | Cover image upload |
+| `interactions-endpoint` | Ed25519 signature | `LAUNCH_ACTIVITY` button |
 
-`https://<project-ref>.supabase.co/functions/v1/interactions-endpoint`
+All Activity-facing functions use **`verify_jwt = false`** in `config.toml` and **`--no-verify-jwt`** on deploy. Gateway auth is **`apikey`** + **`Authorization: Bearer <anon>`**; user auth is **`x-discord-access-token`**.
+
+Shared modules: `_shared/cors.ts`, `guildAccess.ts`, `publishTarget.ts`, `oauthRedirect.ts`, `rateLimit.ts`, `embedSync.ts`, …
+
+## Secrets
+
+Root `.env` → Supabase:
+
+```bash
+npm run sync:secrets
+```
+
+Required: `DISCORD_CLIENT_ID`, `DISCORD_CLIENT_SECRET`, `DISCORD_PUBLIC_KEY`, `DISCORD_BOT_TOKEN`.
+
+Recommended on hosted project: `APP_ORIGIN` (Railway URL), `DISCORD_REDIRECT_URI` for localhost dev.
+
+Optional Edge secrets: `DISCORD_REDIRECT_URI_ALLOWLIST`, `ALLOWED_CORS_ORIGINS` (comma-separated origins for CORS).
+
+## Discord Interactions URL
+
+```
+https://<project-ref>.supabase.co/functions/v1/interactions-endpoint
+```
+
+Uses `DISCORD_PUBLIC_KEY` for request verification (not user OAuth).
+
+## Storage: event covers
+
+- Bucket: `event-covers` (public read)
+- **Writes:** only via `upload-cover` (service role)
+- Client: `uploadCoverImage(token, guildId, eventId, file)` in `src/lib/api.ts`
+
+## Sample events
+
+```bash
+npm run seed:events   # needs SUPABASE_SERVICE_ROLE_KEY
+```
+
+Or migration `014`. Host: `000000000000000001`, guild `000000000000000001`.
 
 ## Cars catalog
 
-The FH6 cars catalog powers autocomplete and validation for restricted-car events.
-
-Source files:
-
-- `supabase/seed/fh6cars-source.md`
-- `supabase/seed/fh6cars.json`
-- `006_fh6_cars_catalog.sql`
-
-Refresh workflow after a catalog update:
-
-```bash
-node scripts/parse-fh6cars.mjs
-supabase db push
-# or seed via API
-SUPABASE_URL=... SUPABASE_SERVICE_ROLE_KEY=... node scripts/seed-cars.mjs
-```
-
-## Sample events (development)
-
-Curated browse fixtures with era-matched car lists:
-
-- `supabase/seed/sample-events.json` — source definitions
-- `014_seed_sample_events.sql` — SQL seed (idempotent)
-- `npm run seed:events` — same data via service role API
-
-Host user: `000000000000000001` / guild `000000000000000001`. Safe to re-run; deletes `slug LIKE 'sample-%'` first.
-
-## Activity env
-
-Client-side Supabase variables live in the root `.env` file.
-See `.env.example` for:
-
-- `VITE_SUPABASE_URL`
-- `VITE_SUPABASE_ANON_KEY`
+- `supabase/seed/fh6cars.json`, migration `006`
+- `save-event` resolves cars by id/lookup only (no arbitrary catalog inserts)

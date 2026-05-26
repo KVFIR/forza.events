@@ -2,70 +2,45 @@
 
 > **Find clean races, cruises and tournaments — without hunting through Discord channels.**
 
-A community event platform for **Forza Horizon 6**, built as a **Discord Activity (Embedded App)**.  
-The app opens directly inside Discord — no browser, no separate window, no leaving the community.
+Community events for **Forza Horizon 6**, shipped as a **Discord Activity** (embedded React app). Players open it from the **App Launcher** or from a button on a published event embed.
 
 ---
 
 ## What it is
 
-FORZA.EVENTS is a Discord Activity: a React web app that runs as an iframe inside Discord.  
-Players find it in the **App Launcher** (the button next to the chat bar) or via a button on a bot embed.
+- **Discord Activity** — SPA in an iframe (`@discord/embedded-app-sdk`)
+- **Supabase** — Postgres, RLS, Storage, Edge Functions
+- **Discord bot** — publish embeds, channel posts, interactions (not a separate website product in production)
 
-Works in: text channels, voice channels, DMs, group DMs — on desktop and mobile.
-
-**FORZA.EVENTS handles:** event discovery, registration, event publishing, profiles, and results inside Discord.  
-**Discord handles:** voice, text, and community coordination — exactly as before.
+Works in server channels, voice, DMs, and App Launcher (desktop and mobile).
 
 ---
 
 ## Current status
 
-**Phase: frozen MVP implemented in code**, connected to Supabase. No mock-data fallback — localhost uses Discord OAuth and live DB reads.
+**Frozen MVP is implemented** and connected to production Supabase + Railway hosting.
 
-| Done | Not yet |
-|------|---------|
-| Browse, Event Detail, Create wizard, My Events, Profile | Discord portal E2E + pilot (infra on Railway + Supabase) |
-| Discord Activity + browser OAuth (`/auth/callback`) | Pilot in 3–5 real servers |
-| Supabase migrations `001`–`015`, Edge Functions | Optional post-MVP bot automation |
-| Cover WebP assets, lazy `EventCover`, sample event seeds | i18n |
+| Done | Still open |
+|------|------------|
+| Browse, Detail, Create, My Events, Profile | Pilot validation in real Discord servers |
+| Discord Activity auth + localhost dev OAuth | Optional custom domain DNS |
+| Migrations `001`–`021`, 14 Edge Functions | — |
+| Security: scoped RLS, CORS, rate limits, host-only covers | — |
+| i18n (English + Russian) | Post-MVP bot automation |
 
-See [`docs/STATUS.md`](docs/STATUS.md) for the full state matrix and [`docs/DEVELOPMENT.md`](docs/DEVELOPMENT.md) for local setup.
-
----
-
-## MVP scope
-
-See [`docs/PLAN.md`](docs/PLAN.md) for full detail, including the frozen MVP spec.
-
-### Activity screens (inside Discord iframe)
-
-| Screen | What it does |
-|---|---|
-| Browse Events | List of published public events from the global feed |
-| Event Detail | Full info, participants, Join / Leave, host actions |
-| Create Event | Full form including server/channel target and frozen car rules |
-| My Profile | Stats and gamertag editing |
-| My Events | Hosted and joined event catalog |
-
-### Not part of the MVP
-
-These ideas existed earlier in planning but are now explicitly deferred:
-
-- DM reminders
-- Check-in
-- Event threads
-- Participant roles and role pings
-- Always-on bot scheduler
-- Dedicated Host Dashboard screen
+**Start here:** [`docs/STATUS.md`](docs/STATUS.md)  
+**Local setup:** [`docs/DEVELOPMENT.md`](docs/DEVELOPMENT.md)  
+**Discord portal:** [`docs/DISCORD_PLATFORM.md`](docs/DISCORD_PLATFORM.md)
 
 ---
 
-## How players access it
+## Production vs local dev
 
-1. **App Launcher** — click the shapes button next to the chat bar → find FORZA.EVENTS → Launch
-2. **Bot embed** — bot posts an event card in `#forza-events` → button `[Open in FORZA.EVENTS]` → Activity opens inline
-3. **User-installed** — player installs the app on their account → appears in App Launcher everywhere, including servers where the bot isn't added
+| Context | Access |
+|---------|--------|
+| **Discord Activity** | Primary product — OAuth via `https://127.0.0.1` |
+| **Production URL in a browser tab** | `DiscordOnlyGate` — open in Discord |
+| **localhost:5180** | Full dev UI + optional browser Sign in |
 
 ---
 
@@ -73,78 +48,66 @@ These ideas existed earlier in planning but are now explicitly deferred:
 
 ```
 forza.events/
-├── src/                  # Discord Activity — React SPA
-│   ├── screens/          # Browse, Detail, CreateEvent/, Profile, AuthCallback
-│   ├── components/       # EventCard, EventCover, Navbar, …
-│   ├── context/          # AuthContext, JoinedEventsContext
-│   ├── lib/              # discord, discordAuth, events, coverImage, …
-│   └── main.tsx
-├── scripts/              # seed-events, optimize-covers, deploy helpers
-├── bot/                  # Companion bot notes (post-MVP)
-├── supabase/             # Migrations, Edge Functions, seeds — supabase/README.md
+├── src/                 # React Activity (Vite)
+├── supabase/
+│   ├── migrations/      # 001–021
+│   └── functions/       # 14 Edge Functions
+├── scripts/             # deploy, seed, optimize-covers
 ├── docs/
-│   ├── STATUS.md         # Current project state (start here)
-│   ├── DEVELOPMENT.md    # Local dev + OAuth + troubleshooting
-│   ├── PLAN.md           # Frozen MVP spec and launch checklist
+│   ├── STATUS.md
+│   ├── DEVELOPMENT.md
+│   ├── PLAN.md
 │   └── DISCORD_PLATFORM.md
-└── readme.md
+├── AGENTS.md            # Agent / implementation notes
+└── railway.toml         # Railway deploy (Railpack)
 ```
 
 ---
 
 ## Tech stack
 
-| Layer | Choice | Why |
-|---|---|---|
-| Activity UI | React 18 + Vite + TypeScript | SPA required for iframe |
-| Discord SDK | `@discord/embedded-app-sdk` v2.4.x | Official SDK for Activity ↔ Discord communication |
-| Styles | Tailwind CSS | Dark theme, neon accents |
-| Database | Supabase (PostgreSQL) | Auth, RLS, hosted |
-| Token exchange | Supabase Edge Function | Discord `code → access_token` (client_secret on server only) |
-| Bot | discord.js v14 + Node.js 20 | Background automation |
-| Activity hosting | Vercel / Cloudflare Pages | HTTPS required for iframe |
-| Bot hosting | Railway / Fly.io | Always-on process |
+| Layer | Choice |
+|-------|--------|
+| UI | React 18, Vite, TypeScript, Tailwind |
+| Discord | `@discord/embedded-app-sdk` |
+| Backend | Supabase (Postgres, Edge Functions, Storage) |
+| i18n | i18next (`en`, `ru`) |
+| Hosting | Railway (Activity SPA) |
+
+---
+
+## Quick start (local)
+
+```bash
+cp .env.example .env
+# Fill DISCORD_* and SUPABASE_* (see DEVELOPMENT.md)
+npm install
+npm run dev
+```
+
+Open http://localhost:5180 → **Sign in** for mutations; Browse works with anon key alone.
+
+```bash
+npm run deploy:functions   # after Edge Function changes
+supabase db push           # after new migrations
+```
 
 ---
 
 ## Documentation
 
-- [`docs/STATUS.md`](docs/STATUS.md) — **current project state** (features, migrations, gaps)
-- [`docs/DEVELOPMENT.md`](docs/DEVELOPMENT.md) — local dev, OAuth, seeds, troubleshooting
-- [`docs/PLAN.md`](docs/PLAN.md) — frozen MVP spec and launch checklist
-- [`docs/DISCORD_PLATFORM.md`](docs/DISCORD_PLATFORM.md) — Discord Activity platform notes
-- [`supabase/README.md`](supabase/README.md) — migrations, functions, secrets
-
----
-
-## Scripts
-
-```bash
-npm install
-npm run dev              # http://localhost:5180
-npm run build
-npm run typecheck
-npm run sync:secrets     # push Discord secrets to Supabase
-npm run deploy:functions
-npm run seed:events      # sample browse data (needs SERVICE_ROLE_KEY)
-npm run optimize:covers  # regenerate public/covers WebP
-```
-
-### Local browser
-
-Requires `.env` with Supabase + Discord keys and `DISCORD_REDIRECT_URI=http://localhost:5180/auth/callback`. Use **Sign in** in the navbar — not mock mode.
-
-See [`docs/DEVELOPMENT.md`](docs/DEVELOPMENT.md).
-
----
-
-## Environment variables
-
-Copy `.env.example` to `.env`. See [`docs/PLAN.md`](docs/PLAN.md#environment-variables) for descriptions.
+| Doc | Contents |
+|-----|----------|
+| [`docs/STATUS.md`](docs/STATUS.md) | Feature matrix, migrations, infra, gaps |
+| [`docs/DEVELOPMENT.md`](docs/DEVELOPMENT.md) | Env, auth, covers, testing checklist |
+| [`docs/PLAN.md`](docs/PLAN.md) | Frozen MVP contract |
+| [`docs/DISCORD_PLATFORM.md`](docs/DISCORD_PLATFORM.md) | Portal checklist, proxy, OAuth |
+| [`supabase/README.md`](supabase/README.md) | Migrations + functions reference |
+| [`AGENTS.md`](AGENTS.md) | Runtime rules for agents |
 
 ---
 
 ## Brand
 
 **Tagline:** *Race together. Not randomly.*  
-**UI:** Dark, neon accents (cyan + orange), fast CTAs, card-based layout. Feels like an app, not a Discord bot.
+Dark UI, neon accents, card-based layout.

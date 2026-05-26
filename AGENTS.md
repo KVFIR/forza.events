@@ -16,7 +16,7 @@ Lessons from implementation work (keep in sync when behavior changes).
 - **Delete draft:** `save-event` with `{ delete: true }` (draft + host only). UI: Event Detail + Create Review step.
 - **Save published edits:** `save-event` update uses `buildEventFields` only — never overwrites `status` (avoids reverting `open` → `draft`).
 - **Post-start host:** Event Detail shows separate **Submit results** + **Cancel event** buttons; cancel syncs Discord embed via `syncPublishedEmbed`.
-- **Join/leave:** `event-participation` validates gamertag server-side, ensures `users` row exists, DB trigger `enforce_event_participant_capacity` prevents over-capacity races; **leave locked after event start** (`canLeaveEvent` / `canLeaveRegistration`). Join/leave/cancel/results sync published embed via `syncPublishedEmbedByEventId`. Profile `events_joined` synced via migration `018` trigger.
+- **Join/leave:** `event-participation` validates gamertag server-side, ensures `users` row exists, DB trigger `enforce_event_participant_capacity` prevents over-capacity races; **leave locked after event start** (`canLeaveEvent` / `canLeaveRegistration`). Join/leave/cancel/results sync published embed via `syncPublishedEmbedByEventId`. Profile `events_joined` synced via migration `020_user_event_join_stats.sql` trigger.
   - After publish, server and channel are **locked** in the form (`lockGuild` / `lockChannel`).
   - **Publish embed:** `buildEventEmbed` — date, track codes (deduped), cars, participants `1+current/12`, optional restrictions (plain text). **Status on embed:** `cancelled` / `completed` / `archived` show a Status field, title prefix, grey/green color, and disabled or relabelled button. Sync on join/leave, save/cancel, submit-results. Failed PATCH logs structured JSON (`embedSync` returns `{ok:false}`). Button `open_event:{id}` → `interactions-endpoint` stores `launch_intents` (nullable `guild_id` for DMs, migration `019`) → navigate from `sdk.customId` or `launch-intent` fallback. Browse loads immediately and does not wait on auth.
   - Browse/join/create/publish all depend on Edge Functions + Discord token headers; test in Discord after API/proxy changes, not only localhost. Interactions Endpoint URL must be set in Discord Developer Portal.
@@ -106,10 +106,13 @@ Lessons from implementation work (keep in sync when behavior changes).
 - **CORS:** Edge Functions use `corsHeadersFor(req)` — reflect allowlisted origins (`APP_ORIGIN`, localhost dev ports, `*.discordsays.com`, `*.discord.com`, optional `ALLOWED_CORS_ORIGINS`); no `Access-Control-Allow-Origin: *`.
 - **Rate limits:** `check_api_rate_limit` RPC (Postgres, global) via `enforceRateLimit` / `rateLimitPresets.ts` on browse + auth + mutations; in-memory fallback if RPC fails.
 - **SPA:** CSP + `frame-ancestors` for Discord embed in `index.html`; `npm overrides` pins `esbuild` ≥ 0.25.
-- Deploy **`upload-cover`** with other functions (`npm run deploy:functions`). Apply migrations `018` + `021` on Supabase.
+- Deploy **`upload-cover`** with other functions (`npm run deploy:functions`). Apply migrations `018`–`021` on Supabase.
+- **Docs:** keep [`docs/STATUS.md`](docs/STATUS.md), [`docs/DEVELOPMENT.md`](docs/DEVELOPMENT.md), [`supabase/README.md`](supabase/README.md) in sync when migrations or function list changes.
 
 ## References
 
-- [`docs/DISCORD_PLATFORM.md`](docs/DISCORD_PLATFORM.md) — proxy mapping, browse via Edge
+- [`docs/STATUS.md`](docs/STATUS.md) — current feature matrix and migrations
+- [`docs/DISCORD_PLATFORM.md`](docs/DISCORD_PLATFORM.md) — proxy mapping, portal checklist
 - [`docs/DEVELOPMENT.md`](docs/DEVELOPMENT.md) — local OAuth, testing checklist
-- [`scripts/deploy-edge-functions.sh`](scripts/deploy-edge-functions.sh) — canonical function list
+- [`supabase/README.md`](supabase/README.md) — migrations `001`–`021`, Edge Functions
+- [`scripts/deploy-edge-functions.sh`](scripts/deploy-edge-functions.sh) — canonical function list (14)

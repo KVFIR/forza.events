@@ -1,61 +1,55 @@
 # Implementation status
 
-Last updated: 2026-05-26
+Last updated: 2026-05-27
 
 ## Summary
 
-The frozen MVP is **implemented in code** and wired to a **live Supabase project**. The Activity reads and writes real data when `.env` is configured. There is **no mock-data fallback** anymore.
+The frozen MVP is **implemented in code** and wired to a **live Supabase project** (`uoysqfczahqmctbrrizn`). The Activity reads and writes real data when `.env` is configured. There is **no mock-data fallback**.
 
-Remaining work is mostly **production deployment**, **Discord portal configuration**, and **pilot validation** in real servers.
+Remaining work is mostly **Discord portal validation in real guilds**, **Railway frontend redeploy after doc/code changes**, and **pilot feedback** — not greenfield implementation.
 
 | Layer | State |
 |-------|--------|
-| React Activity (UI) | Done — Browse, Detail, Create (wizard), My Events, Profile |
-| Supabase schema | Done — migrations `001`–`015` |
-| Edge Functions | Done — auth, save/publish, join/leave, results, guild/channel list |
+| React Activity (UI) | Done — Browse, Detail, Create (wizard), My Events, Profile, i18n (EN + RU) |
+| Supabase schema | Done — migrations `001`–`021` |
+| Edge Functions | Done — 14 functions (see below) |
+| Security hardening | Done — storage, RLS scope, CORS, rate limits, publish validation |
 | Local browser dev | Done — Discord OAuth + Supabase (not mock mode) |
-| Sample content | Done — 10 `sample-*` events in DB (optional seed) |
-| Production infra | Done — Supabase `uoysqfczahqmctbrrizn`, Railway deploy |
-| Production launch | Partial — Discord portal + E2E + pilot still open |
+| Sample content | Done — optional `sample-*` seed |
+| Production infra | Done — Supabase + Railway (`forzaevents-production.up.railway.app`) |
+| Production launch | Partial — Discord E2E in pilot guilds still open |
 
-Product contract: [`PLAN.md`](PLAN.md). Discord setup: [`DISCORD_PLATFORM.md`](DISCORD_PLATFORM.md).
+Product contract: [`PLAN.md`](PLAN.md). Discord setup: [`DISCORD_PLATFORM.md`](DISCORD_PLATFORM.md). Agent/runtime notes: [`AGENTS.md`](../AGENTS.md).
 
 ---
 
 ## What changed recently (May 2026)
 
-### Data and auth
+### Security and API (2026-05-27)
 
-- **Removed** `src/lib/mockData.ts` and all in-memory event/user fallbacks.
-- **Localhost:** sign in with Discord via `/auth/callback` (`DISCORD_REDIRECT_URI=http://localhost:5180/auth/callback`).
-- Session stored in `sessionStorage` until Sign out.
-- **Inside Discord Activity:** unchanged Embedded App SDK flow (`authorize` → `token-exchange`).
+- **Cover uploads:** client → `upload-cover` Edge Function (host-only); migration `018` revokes anon Storage writes on `event-covers`.
+- **RLS:** migration `021` — scoped public reads on `users`, `event_participants`, `event_results` (non-draft events only).
+- **CORS:** Edge Functions reflect allowlisted origins (`APP_ORIGIN`, `*.discordsays.com`, `*.discord.com`, localhost); no wildcard `*`.
+- **Rate limits:** Postgres `check_api_rate_limit` + presets on browse, OAuth, and mutations.
+- **Publish target:** server-side channel validation; guild member + Manage Server checks (`guildAccess.ts`, `publishTarget.ts`).
+- **OAuth:** `token-exchange` allowlists `redirect_uri` (`oauthRedirect.ts`).
+- **SPA:** CSP + `frame-ancestors` in `index.html` for Discord embed.
 
-### Browse feed fix
+### Discord embed and participation
 
-- Event list query uses explicit host embed: `users!events_host_discord_id_fkey`.
-- RLS policy added for `discord_guilds` so guild names resolve on cards (`015_discord_guilds_public_read.sql`).
+- Embed sync on join/leave, save, cancel, submit-results (`embedSync.ts`).
+- Cancelled/completed/archived status reflected on Discord embed (title, color, button).
+- Leave registration locked after event start; gamertag validated server-side.
+- `launch_intents.guild_id` nullable for DMs (migration `019`).
+- `users.events_joined` synced via trigger (migration `020`).
 
-### Covers
+### Earlier (May 2026)
 
-- Default covers in `public/covers/*.webp` (optimized from large PNG/JPEG sources).
-- `EventCover` component: lazy loading, Supabase image transforms for uploaded covers.
-- Client-side resize/WebP before upload (`compressCoverForUpload`).
-- Script: `npm run optimize:covers` (requires `sharp`).
-
-### Create Event
-
-- Monolithic `src/screens/CreateEvent.tsx` **removed**.
-- Wizard lives under `src/screens/CreateEvent/` (`index.tsx`, steps, `useCreateEventForm`, validation).
-- App lazy-imports `./screens/CreateEvent/index` explicitly.
-
-### Sample events (dev/demo)
-
-- Definition: `supabase/seed/sample-events.json`
-- SQL migration: `014_seed_sample_events.sql` (idempotent: deletes `sample-%` then re-inserts)
-- Script: `npm run seed:events` (needs `SUPABASE_SERVICE_ROLE_KEY`)
-
-Host for samples: `FORZA.EVENTS` (`discord_id` `000000000000000001`). Visible on Browse for everyone; not “your” events until you sign in with your Discord account.
+- Removed mock data; localhost uses live Supabase + OAuth.
+- Browse via `browse-events` in Activity (proxy-safe headers via `createSupabaseFetch`).
+- Create Event wizard under `src/screens/CreateEvent/` only.
+- Default covers WebP + client compression before upload.
+- i18n: `en` + `ru` (`src/i18n/`).
 
 ---
 
@@ -63,171 +57,126 @@ Host for samples: `FORZA.EVENTS` (`discord_id` `000000000000000001`). Visible on
 
 | Area | Status | Notes |
 |------|--------|-------|
-| Browse Events | Done | Global feed; requires valid `SUPABASE_ANON_KEY` |
-| Event Detail | Done | Join/leave, car list, host actions, `EventCover` hero |
-| Create Event | Done | 4 steps: Basics → Details → Target → Review |
-| My Events | Done | Hosted/joined for signed-in user |
-| Profile | Done | Stats + gamertag via `user-profile` |
-| Discord Activity auth | Done | SDK + `token-exchange` |
-| Browser localhost auth | Done | OAuth redirect + `AuthCallback` |
-| Supabase schema | Done | Through migration `015` |
-| Edge Functions | Done | See [`supabase/README.md`](../supabase/README.md) |
-| Realtime lobby updates | Done | `012`, `013` |
-| FH6 cars catalog | Done | ~618 cars; `searchCars()` + autocomplete |
-| Cover storage | Done | `event-covers` bucket; client compression |
-| Sample seed data | Done | Optional; for empty-project bootstrap |
-| i18n | Deferred | UI copy is English only (i18n-ready structure not started) |
+| Browse Events | Done | Edge `browse-events` in Activity; PostgREST on localhost |
+| Event Detail | Done | Join/leave, host actions, results, live updates |
+| Create Event | Done | 4 steps; cover via `upload-cover` |
+| My Events | Done | Hosted/joined + host drafts merge |
+| Profile | Done | Gamertag via `user-profile` |
+| Discord Activity auth | Done | SDK → `token-exchange` → `authenticate` |
+| Browser localhost auth | Done | `/auth/callback` + `sessionStorage` |
+| Production browser tab | Done | `DiscordOnlyGate` — Activity-only |
+| Supabase schema | Done | Through migration `021` |
+| Edge Functions | Done | 14 deployed (`npm run deploy:functions`) |
+| Realtime lobby | Done | `012`, `013` |
+| FH6 cars catalog | Done | Autocomplete; no client inserts into `cars` |
+| Cover storage | Done | Host-only upload; public read |
+| Security (RLS/CORS/rate) | Done | `018`, `021`, `_shared/cors.ts`, `rateLimit*.ts` |
+| Sample seed | Done | `npm run seed:events` or migration `014` |
+| i18n | Done | EN default; RU toggle on profile |
 | Bot process | Deferred | `bot/` notes only |
-| Production deploy | Done | https://forzaevents-production.up.railway.app (Railpack/Caddy) |
 
 ---
 
-## Frozen MVP alignment (unchanged)
+## Edge Functions (canonical list)
+
+Deployed with `npm run deploy:functions` (`scripts/deploy-edge-functions.sh`), all with **`--no-verify-jwt`** and Discord token auth in function body:
+
+| Function | Role |
+|----------|------|
+| `browse-events` | Public feed, single event, host drafts |
+| `host-drafts` | Host draft list |
+| `token-exchange` | OAuth code → access token |
+| `list-guilds` | User guilds ∩ bot installed |
+| `list-channels` | Postable text channels |
+| `validate-channel` | Re-check channel before publish |
+| `publish-event` | Post embed + set `open` |
+| `save-event` | Draft save/update/delete/cancel |
+| `event-participation` | Join/leave |
+| `submit-results` | Final results + complete event |
+| `user-profile` | Gamertag / profile fields |
+| `launch-intent` | Embed button deep-link fallback |
+| `upload-cover` | Host cover upload (service role) |
+| `interactions-endpoint` | Discord Interactions (Ed25519); not CORS-facing |
+
+---
+
+## Frozen MVP alignment
 
 Confirmed in code and schema:
 
-- Publish requires server + channel; locked after publish
-- Event type required (`road`, `dirt`, `touge`, `drift`, `cruise`); track share codes optional
+- Publish requires server + channel; locked after publish (client + `assertTargetNotLocked`)
+- Event types: `road`, `dirt`, `touge`, `drift`, `cruise`; track codes optional
 - Car rules: `anything_goes` or `restricted_list`
-- Restricted mode requires ≥1 allowed car with per-car PI/restrictions
 - Published events editable only before start
 - After start: submit results or cancel only
-- Results: position, DNF, DNS; immutable after submit
-- Full events block new joins (no waitlist)
-
----
-
-## Local development
-
-### Prerequisites
-
-1. Copy [`.env.example`](../.env.example) → `.env`
-2. Fill from Discord Developer Portal + Supabase Dashboard → API:
-   - `DISCORD_CLIENT_ID`, `DISCORD_CLIENT_SECRET`, `DISCORD_PUBLIC_KEY`, `DISCORD_BOT_TOKEN`
-   - `SUPABASE_URL`, `SUPABASE_ANON_KEY` (must match the project — invalid key → empty Browse)
-3. Set `DISCORD_REDIRECT_URI=http://localhost:5180/auth/callback` and add the same URL under Discord → OAuth2 → Redirects
-
-### Run
-
-```bash
-npm install
-npm run dev          # http://localhost:5180 (port in vite.config.ts)
-```
-
-### Modes
-
-| Context | Auth | Data |
-|---------|------|------|
-| Browser tab on localhost | **Sign in** button → Discord OAuth | Live Supabase |
-| Discord Activity iframe | SDK authorize | Live Supabase |
-| Missing/invalid Supabase keys | Sign in may work | Browse shows **no events** (empty list, not mocks) |
-
-### Useful scripts
-
-```bash
-npm run typecheck
-npm run build
-npm run sync:secrets      # push DISCORD_* from .env to Supabase
-npm run deploy:functions  # deploy all Edge Functions
-npm run optimize:covers   # regenerate public/covers WebP assets
-npm run seed:events       # re-seed sample-* events (SERVICE_ROLE_KEY required)
-```
-
-### Supabase local (optional)
-
-Default workflow targets the **hosted** Supabase project linked via `supabase link`. For a fully local stack, point `SUPABASE_URL` at `http://127.0.0.1:54321` and run `supabase start` — not the primary documented path today.
-
----
-
-## Repository layout (frontend)
-
-```
-src/
-├── screens/
-│   ├── BrowseEvents.tsx
-│   ├── EventDetail.tsx
-│   ├── EventResults.tsx
-│   ├── MyEvents.tsx
-│   ├── Profile.tsx
-│   ├── AuthCallback.tsx          # localhost OAuth return
-│   └── CreateEvent/               # wizard (do not add CreateEvent.tsx at parent level)
-│       ├── index.tsx
-│       ├── useCreateEventForm.ts
-│       ├── validation.ts
-│       └── steps/
-├── components/
-│   ├── EventCard.tsx
-│   ├── EventCover.tsx            # optimized cover rendering
-│   └── ...
-├── context/
-│   ├── AuthContext.tsx           # isConfigured, isSignedIn, signIn, signOut
-│   └── JoinedEventsContext.tsx
-└── lib/
-    ├── discord.ts                # Activity SDK init
-    ├── discordAuth.ts            # browser OAuth helpers
-    ├── events.ts                 # Supabase reads + EVENT_LIST_SELECT
-    ├── coverImage.ts             # upload compression + display URLs
-    └── eventSpec.ts              # client validation rules
-```
+- Results immutable after submit; participants only in results payload
+- Full events block joins (DB trigger + API)
+- Production: Discord Activity only (no standalone web OAuth on Railway origin)
 
 ---
 
 ## Database migrations
 
-Apply through `015` on the target project:
+Apply through **`021`** on the target project:
 
 ```bash
-supabase link --project-ref <ref>
+supabase link --project-ref uoysqfczahqmctbrrizn
 supabase db push
 ```
+
+If remote history diverges (timestamp versions vs `014`/`015`), use `supabase migration repair` — see [`DEVELOPMENT.md`](DEVELOPMENT.md).
 
 | Migration | Purpose |
 |-----------|---------|
 | `001`–`008` | Core schema, cars, per-car setup |
 | `009` | Frozen MVP: car_rule_mode, DNS, primary track |
-| `010`–`011` | Track list, open-build notes, drop stored car class |
-| `012`–`013` | Realtime + replica identity for events |
+| `010`–`011` | Track list, open-build notes |
+| `012`–`013` | Realtime + replica identity |
 | `014` | Sample events seed (dev) |
 | `015` | Public read on `discord_guilds` |
+| `016` | `cruise` event type enum |
+| `017` | Sample cruise event type fix |
+| `018` | Revoke anon Storage writes on covers |
+| `019` | Nullable `launch_intents.guild_id` (DMs) |
+| `020` | Sync `users.events_joined` on join/leave |
+| `021` | Scoped RLS reads + API rate limit table/RPC |
 
 ---
 
-## Infrastructure (verified 2026-05-26)
+## Infrastructure (verified 2026-05-27)
 
 | Check | Result |
 |-------|--------|
 | Supabase project | `uoysqfczahqmctbrrizn` (FORZA.EVENTS) |
-| Migrations | `001`–`013` + `seed_sample_events` + `discord_guilds_public_read` (≈ repo `014`/`015`) |
-| Edge Functions | 10 deployed, `ACTIVE`: `token-exchange`, `list-guilds`, `list-channels`, `publish-event`, `interactions-endpoint`, `save-event`, `event-participation`, `submit-results`, `user-profile`, `launch-intent` |
-| REST + anon key | `events` feed returns data (e.g. 10 `sample-*` rows) |
-| Activity hosting | Railway `https://forzaevents-production.up.railway.app` — HTML/JS 200, `/auth/callback` 200 |
-| Secrets | `.env` sets `APP_ORIGIN` + `DISCORD_REDIRECT_URI` to Railway origin; synced via `npm run sync:secrets` |
+| Migrations | `001`–`021` on remote |
+| Edge Functions | 14 deployed via `deploy:functions` |
+| Activity hosting | Railway `https://forzaevents-production.up.railway.app` |
+| Discord Activity OAuth | `https://127.0.0.1` redirect + `token-exchange` allowlist |
 
-Custom domain `forza.events` is **not** resolving yet (DNS); production uses the Railway URL above.
+Set **`APP_ORIGIN`** on Railway to the deploy URL (embed cover URLs + Edge CORS). Redeploy frontend after changing env at build time.
 
 ---
 
-## Remaining work before MVP launch
+## Remaining work before pilot sign-off
 
 ### Discord platform
 
-- [ ] Activities URL mapping → production origin
-- [ ] OAuth redirect URIs → production + localhost for dev
-- [ ] Interactions endpoint → `interactions-endpoint` function URL
-- [ ] Install app in pilot servers; verify publish channel permissions
+- [ ] URL mapping: production origin + `/supabase` → `<ref>.supabase.co`
+- [ ] OAuth redirects: `https://127.0.0.1` + localhost dev callback
+- [ ] Interactions endpoint URL configured
+- [ ] App installed in pilot guilds; publish channels verified
 
-### End-to-end validation
+### End-to-end in Discord
 
-See checklist in [`PLAN.md`](PLAN.md#launch-checklist). Additionally:
-
-- [x] Browse shows events with production anon key (REST verified 2026-05-26)
-- [ ] Localhost Sign in → create draft → publish (or save sample edit flow)
-- [ ] Cover upload produces WebP in Storage and displays on cards
+- [ ] Auth → browse → detail → join/leave (embed updates)
+- [ ] Create draft → upload cover → publish
+- [ ] Embed button → correct event in Activity
+- [ ] Submit results / cancel after start
 
 ### Pilot
 
 - [ ] 3–5 real Forza Discord servers
-- [ ] Hosts publish without manual channel workaround
+- [ ] Hosts publish without manual workarounds
 - [ ] Players discover via Activity, not only embed links
 
 ---
@@ -236,16 +185,14 @@ See checklist in [`PLAN.md`](PLAN.md#launch-checklist). Additionally:
 
 | Symptom | Likely cause | Fix |
 |---------|----------------|-----|
-| Empty Browse, no errors in UI | Invalid `SUPABASE_ANON_KEY` | Copy anon key from Supabase Dashboard → API |
-| Empty Browse inside Discord only | Missing Activity URL mapping for Supabase | Portal → URL Mappings: `/supabase` → `<ref>.supabase.co` (not `/.proxy/...`); redeploy app with `patchUrlMappings` |
-| Empty Browse, console `fetchEventsWithRelations` | DB error / RLS | Check Supabase logs; ensure migrations applied |
-| My Events empty, Browse works | Normal — list is only hosted/joined | Open **Browse** for the global feed |
-| OAuth redirect fails | `DISCORD_REDIRECT_URI` mismatch | Match `.env` and Discord portal exactly |
-| `invalid_grant` on production URL in browser | Activity app uses `127.0.0.1` OAuth, not web redirect | Open in Discord; localhost for dev; deferred: separate web Discord app |
-| Production URL in browser tab | By design — Activity-only MVP | Shows `DiscordOnlyGate`; use Discord App Launcher |
-| `seed:events` exits immediately | Missing `SUPABASE_SERVICE_ROLE_KEY` | Add to `.env` (never commit) |
-| TypeScript errors on `CreateEvent.tsx` | Stale editor tab | Close unsaved `screens/CreateEvent.tsx`; use `CreateEvent/` folder only |
-| Covers huge/slow | Old JPG assets | Run `npm run optimize:covers`, rebuild |
+| Empty Browse (Discord only) | Missing URL mapping or dropped `apikey` | `/supabase` mapping; `createSupabaseFetch`; deploy functions |
+| CORS / preflight failed | Origin not allowlisted | Set `APP_ORIGIN`; add `ALLOWED_CORS_ORIGINS` if needed; redeploy functions |
+| Cover upload 403 | Anon storage writes revoked | Use `upload-cover`; apply migration `018` |
+| `invalid_grant` on Railway in browser | Activity OAuth ≠ web redirect | Use Discord Activity; localhost for dev |
+| Production tab shows gate | By design | Open via App Launcher or embed |
+| OAuth redirect fails | URI mismatch | Match `.env` and Discord portal |
+| `Too many requests` | Rate limit | Wait 1 min; adjust limits only if needed |
+| `seed:events` fails | No service role | `SUPABASE_SERVICE_ROLE_KEY` in `.env` |
 
 ---
 
@@ -254,7 +201,6 @@ See checklist in [`PLAN.md`](PLAN.md#launch-checklist). Additionally:
 - Reminders, check-in, event threads
 - Participant roles / role pings
 - Always-on bot automation
-- Dedicated Host Dashboard screen
-- Region/timezone preference editing
-- i18n (non-English UI)
+- Dedicated Host Dashboard
+- Standalone web app (separate Discord application)
 - Tournament brackets, leaderboards, monetization

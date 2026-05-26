@@ -108,8 +108,8 @@ The MVP should be considered launch-ready only when all items below are complete
 
 ### Infrastructure
 
-- [x] Supabase schema through migration `015` (in repo)
-- [x] Supabase project linked and migrations applied through `015` in target env (`uoysqfczahqmctbrrizn`, verified 2026-05-26)
+- [x] Supabase schema through migration `021` (in repo)
+- [x] Supabase project linked and migrations applied through `021` in target env (`uoysqfczahqmctbrrizn`, verified 2026-05-27)
 - [x] Edge Functions deployed — 10 functions `ACTIVE` (v8–v9)
 - [x] Production secrets configured (`DISCORD_*`, `APP_ORIGIN`, `DISCORD_REDIRECT_URI` in Edge secrets)
 - [x] Activity deployed on Railway — https://forzaevents-production.up.railway.app (`SUPABASE_*` at build time; SPA returns 200)
@@ -160,9 +160,14 @@ Vite maps `DISCORD_CLIENT_ID` and `SUPABASE_*` into the client bundle. Push serv
 
 Required for localhost browser testing: `DISCORD_REDIRECT_URI=http://localhost:5180/auth/callback` (same URL in Discord OAuth2 redirects).
 
-Optional: `APP_ORIGIN`, `SUPABASE_SERVICE_ROLE_KEY` (for `npm run seed:events` and car catalog seed scripts).
+Optional:
 
-See [`DEVELOPMENT.md`](DEVELOPMENT.md) for the full local workflow. Mock mode has been removed; Browse requires a valid anon key.
+- `APP_ORIGIN` — embed cover URLs and Edge CORS (Railway deploy URL)
+- `DISCORD_REDIRECT_URI` — localhost browser OAuth (`http://localhost:5180/auth/callback`)
+- `DISCORD_REDIRECT_URI_ALLOWLIST` / `ALLOWED_CORS_ORIGINS` — extra Supabase Edge secrets
+- `SUPABASE_SERVICE_ROLE_KEY` — `npm run seed:events`, car catalog scripts
+
+See [`DEVELOPMENT.md`](DEVELOPMENT.md) for the full local workflow. Mock mode has been removed; Browse requires a valid anon key. Security model: [`STATUS.md`](STATUS.md) and [`AGENTS.md`](../AGENTS.md).
 
 ## Validation question
 
