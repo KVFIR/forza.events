@@ -107,9 +107,20 @@ export async function listGuilds(discordToken: string) {
 }
 
 export async function listChannels(discordToken: string, guildId: string) {
-  return invoke<{channels: {id: string; name: string; position: number}[]}>(
-    'list-channels',
-    {guild_id: guildId},
+  return invoke<{
+    channels: {id: string; name: string; position: number}[];
+    hint?: string | null;
+  }>('list-channels', {guild_id: guildId}, discordToken);
+}
+
+export async function validatePublishChannel(
+  discordToken: string,
+  guildId: string,
+  channelId: string,
+) {
+  return invoke<{ok: boolean; error?: string}>(
+    'validate-channel',
+    {guild_id: guildId, channel_id: channelId},
     discordToken,
   );
 }

@@ -1,5 +1,5 @@
 import {useCallback, useEffect, useMemo, useRef, useState} from 'react';
-import {listChannels, listGuilds} from '../lib/api';
+import {listChannels, listGuilds, validatePublishChannel} from '../lib/api';
 import {getGuildContext} from '../lib/discord';
 import {
   botInstallOpensExternally,
@@ -35,9 +35,14 @@ export function PublishTargetPicker({
   const [guildHint, setGuildHint] = useState<string | null>(null);
   const [loadingGuilds, setLoadingGuilds] = useState(true);
   const [loadingChannels, setLoadingChannels] = useState(false);
+  const [validatingChannel, setValidatingChannel] = useState(false);
+  const [channelHint, setChannelHint] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
+  const [channelError, setChannelError] = useState<string | null>(null);
   const guildRequestRef = useRef(0);
   const channelRequestRef = useRef(0);
+  const channelValidateRef = useRef(0);
+  const validatedChannelKeyRef = useRef('');
   const canAddBot = Boolean(buildBotInstallUrl());
   const installInBrowser = botInstallOpensExternally();
   const activityGuildId = getGuildContext().guildId;
@@ -85,12 +90,15 @@ export function PublishTargetPicker({
     const requestGuildId = guildId;
     const requestId = ++channelRequestRef.current;
     setChannels([]);
+    setChannelHint(null);
+    setChannelError(null);
     setLoadingChannels(true);
     setError(null);
     void listChannels(accessToken, requestGuildId)
       .then((r) => {
         if (requestId !== channelRequestRef.current) return;
         setChannels(r.channels);
+        setChannelHint(r.hint ?? null);
       })
       .catch((e) => {
         if (requestId !== channelRequestRef.current) return;
@@ -108,6 +116,51 @@ export function PublishTargetPicker({
   useEffect(() => {
     loadChannels();
   }, [loadChannels]);
+
+  const validateChannelSelection = useCallback(
+    async (nextChannelId: string, requestGuildId: string) => {
+      if (!nextChannelId) {
+        validatedChannelKeyRef.current = '';
+        setChannelError(null);
+        onChannelChange('');
+        return;
+      }
+      const requestId = ++channelValidateRef.current;
+      setValidatingChannel(true);
+      setChannelError(null);
+      try {
+        const result = await validatePublishChannel(
+          accessToken,
+          requestGuildId,
+          nextChannelId,
+        );
+        if (requestId !== channelValidateRef.current) return;
+        if (!result.ok) {
+          validatedChannelKeyRef.current = '';
+          setChannelError(result.error ?? 'FORZA.EVENTS cannot post in this channel.');
+          onChannelChange('');
+          return;
+        }
+        validatedChannelKeyRef.current = `${requestGuildId}:${nextChannelId}`;
+        onChannelChange(nextChannelId);
+      } catch (e) {
+        if (requestId !== channelValidateRef.current) return;
+        validatedChannelKeyRef.current = '';
+        setChannelError(e instanceof Error ? e.message : String(e));
+        onChannelChange('');
+      } finally {
+        if (requestId === channelValidateRef.current) setValidatingChannel(false);
+      }
+    },
+    [accessToken, onChannelChange],
+  );
+
+  useEffect(() => {
+    if (!guildId || !channelId || lockChannel || loadingChannels) return;
+    const key = `${guildId}:${channelId}`;
+    if (validatedChannelKeyRef.current === key) return;
+    void validateChannelSelection(channelId, guildId);
+  }, [guildId, channelId, lockChannel, loadingChannels, validateChannelSelection]);
 
   function handleAddBot() {
     const prefillCurrentServer =
@@ -168,6 +221,10 @@ export function PublishTargetPicker({
               value={guildId}
               disabled={lockGuild}
               onChange={(e) => {
+                channelValidateRef.current += 1;
+                validatedChannelKeyRef.current = '';
+                setChannelError(null);
+                setChannelHint(null);
                 const next = guildOptions.find((g) => g.id === e.target.value);
                 onGuildChange(e.target.value, next?.name ?? 'Server');
               }}
@@ -180,12 +237,14 @@ export function PublishTargetPicker({
               ))}
             </select>
             {botInstallActions}
-            <p className="mt-1.5 text-[10px] leading-relaxed text-muted">
-              Only servers where you manage the server and FORZA.EVENTS is installed are listed.
-              Use Add to another server to install the bot elsewhere, then refresh.
-              {installInBrowser &&
-                ' Install opens in your browser; return to the Activity when done.'}
-            </p>
+            {!lockGuild && (
+              <p className="mt-1.5 text-[10px] leading-relaxed text-muted">
+                Only servers where you manage the server and FORZA.EVENTS is installed are listed.
+                Use Add to another server to install the bot elsewhere, then refresh.
+                {installInBrowser &&
+                  ' Install opens in your browser; return to the Activity when done.'}
+              </p>
+            )}
           </>
         )}
         {lockGuild && (
@@ -205,8 +264,10 @@ export function PublishTargetPicker({
               key={guildId}
               className="w-full rounded-lg border border-white/[0.08] bg-white/[0.03] px-3.5 py-2.5 text-sm text-white disabled:opacity-60"
               value={channelId}
-              disabled={lockChannel || !guildId || loadingChannels}
-              onChange={(e) => onChannelChange(e.target.value)}
+              disabled={lockChannel || !guildId || loadingChannels || validatingChannel}
+              onChange={(e) => {
+                void validateChannelSelection(e.target.value, guildId);
+              }}
             >
               <option value="">Select a channel</option>
               {channelOptions.map((c) => (
@@ -217,6 +278,17 @@ export function PublishTargetPicker({
             </select>
             {loadingChannels && (
               <p className="mt-1.5 text-[10px] text-muted">Refreshing channel list…</p>
+            )}
+            {validatingChannel && (
+              <p className="mt-1.5 text-[10px] text-muted">Checking bot permissions…</p>
+            )}
+            {channelHint && !channelError && (
+              <p className="mt-1.5 text-[10px] text-amber-200/90">{channelHint}</p>
+            )}
+            {channelError && (
+              <p role="alert" className="mt-1.5 text-xs text-red-300/90">
+                {channelError}
+              </p>
             )}
           </>
         )}

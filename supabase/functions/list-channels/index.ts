@@ -1,14 +1,13 @@
 import {serve} from 'https://deno.land/std@0.224.0/http/server.ts';
+import {
+  botCanPostInChannel,
+  fetchGuildMember,
+  fetchGuildRoles,
+  getBotUserId,
+  type DiscordTextChannel,
+} from '../_shared/channelPermissions.ts';
 import {jsonResponse, optionsResponse} from '../_shared/cors.ts';
 import {botHeaders, isBotInGuild, verifyDiscordToken} from '../_shared/discord.ts';
-
-type DiscordChannel = {
-  id: string;
-  name: string;
-  type: number;
-  position: number;
-  parent_id?: string;
-};
 
 serve(async (req) => {
   if (req.method === 'OPTIONS') return optionsResponse();
@@ -32,21 +31,42 @@ serve(async (req) => {
       );
     }
 
-    const res = await fetch(
-      `https://discord.com/api/guilds/${guild_id}/channels`,
-      {headers: botHeaders()},
-    );
+    const res = await fetch(`https://discord.com/api/v10/guilds/${guild_id}/channels`, {
+      headers: botHeaders(),
+    });
     if (!res.ok) {
       return jsonResponse({error: 'Failed to list channels'}, 502);
     }
 
-    const channels = (await res.json()) as DiscordChannel[];
+    const channels = (await res.json()) as DiscordTextChannel[];
     const text = channels
       .filter((c) => c.type === 0)
-      .sort((a, b) => a.position - b.position)
-      .map((c) => ({id: c.id, name: c.name, position: c.position}));
+      .sort((a, b) => a.position - b.position);
 
-    return jsonResponse({channels: text});
+    const botId = await getBotUserId();
+    const [roles, member] = await Promise.all([
+      fetchGuildRoles(guild_id),
+      fetchGuildMember(guild_id, botId),
+    ]);
+
+    if (!member) {
+      return jsonResponse({error: 'Bot is not a member of this server.'}, 400);
+    }
+
+    const context = {roles, member};
+    const postable: {id: string; name: string; position: number}[] = [];
+    for (const channel of text) {
+      const canPost = await botCanPostInChannel(guild_id, channel, context);
+      if (canPost) postable.push({id: channel.id, name: channel.name, position: channel.position});
+    }
+
+    return jsonResponse({
+      channels: postable,
+      hint:
+        postable.length === 0
+          ? 'No text channels where FORZA.EVENTS can post. Check channel permissions for the bot role.'
+          : null,
+    });
   } catch (e) {
     console.error(e);
     return jsonResponse({error: String(e)}, 500);

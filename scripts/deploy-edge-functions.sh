@@ -10,6 +10,7 @@ FUNCTIONS=(
   token-exchange
   list-guilds
   list-channels
+  validate-channel
   publish-event
   interactions-endpoint
   save-event

@@ -49,10 +49,12 @@ export function TargetStep({
         onGuildChange={onGuildChange}
         onChannelChange={onChannelChange}
       />
-      <p className="text-xs text-muted">
-        Pick where the event will be announced. You can choose the channel on the final publish step
-        if it is not set yet.
-      </p>
+      {!lockGuild && (
+        <p className="text-xs text-muted">
+          Pick where the event will be announced. You can choose the channel on the final publish
+          step if it is not set yet.
+        </p>
+      )}
     </div>
   );
 }

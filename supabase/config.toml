@@ -29,6 +29,9 @@ verify_jwt = false
 [functions.list-channels]
 verify_jwt = false
 
+[functions.validate-channel]
+verify_jwt = false
+
 [functions.publish-event]
 verify_jwt = false
 
