@@ -1,9 +1,11 @@
 import './App.css';
 import {lazy, Suspense} from 'react';
 import {BrowserRouter, Navigate, Route, Routes} from 'react-router-dom';
+import {DiscordOnlyGate} from './components/DiscordOnlyGate';
 import {Navbar} from './components/Navbar';
 import {AuthProvider} from './context/AuthContext';
 import {JoinedEventsProvider} from './context/JoinedEventsContext';
+import {shouldShowDiscordOnlyGate} from './lib/runtime';
 
 const BrowseEvents = lazy(() =>
   import('./screens/BrowseEvents').then((m) => ({default: m.BrowseEvents})),
@@ -32,6 +34,10 @@ function RouteFallback() {
 }
 
 export default function App() {
+  if (shouldShowDiscordOnlyGate()) {
+    return <DiscordOnlyGate />;
+  }
+
   return (
     <BrowserRouter>
       <AuthProvider>

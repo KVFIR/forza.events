@@ -90,6 +90,7 @@ The following items are intentionally deferred and must not block launch:
 - Monetization / Discord IAP
 - Native mobile app
 - Livery / build database
+- **Standalone browser web app** — separate Discord application (or OAuth client) with its own redirect URIs (`https://<web-host>/auth/callback`). The current app uses Activity OAuth (`https://127.0.0.1`) and blocks the production deploy URL in a normal browser tab (`shouldShowDiscordOnlyGate` in `src/lib/runtime.ts`). Localhost (`npm run dev`) remains available for engineering.
 
 ## Launch checklist
 

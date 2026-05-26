@@ -241,6 +241,8 @@ See checklist in [`PLAN.md`](PLAN.md#launch-checklist). Additionally:
 | Empty Browse, console `fetchEventsWithRelations` | DB error / RLS | Check Supabase logs; ensure migrations applied |
 | My Events empty, Browse works | Normal — list is only hosted/joined | Open **Browse** for the global feed |
 | OAuth redirect fails | `DISCORD_REDIRECT_URI` mismatch | Match `.env` and Discord portal exactly |
+| `invalid_grant` on production URL in browser | Activity app uses `127.0.0.1` OAuth, not web redirect | Open in Discord; localhost for dev; deferred: separate web Discord app |
+| Production URL in browser tab | By design — Activity-only MVP | Shows `DiscordOnlyGate`; use Discord App Launcher |
 | `seed:events` exits immediately | Missing `SUPABASE_SERVICE_ROLE_KEY` | Add to `.env` (never commit) |
 | TypeScript errors on `CreateEvent.tsx` | Stale editor tab | Close unsaved `screens/CreateEvent.tsx`; use `CreateEvent/` folder only |
 | Covers huge/slow | Old JPG assets | Run `npm run optimize:covers`, rebuild |

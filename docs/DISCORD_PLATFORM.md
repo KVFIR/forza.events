@@ -74,12 +74,11 @@ Before pilot launch, confirm in the [Discord Developer Portal](https://discord.c
    | `/supabase` | `<project-ref>.supabase.co` (no `https://`) |
 
    Do **not** use `/.proxy/...` in the prefix — the Developer Portal rejects it ([changelog](https://discord.com/developers/change-log#remove-proxy-from-discord-activity-proxy-path)). The client keeps `https://<ref>.supabase.co`; `patchUrlMappings` rewrites requests to `{discordsays-origin}/supabase`. Discord’s proxy often drops `apikey` on PostgREST (`/rest/v1`), which causes `Invalid API key` — Browse and event detail in the Activity use the **`browse-events`** Edge Function instead (same path as `token-exchange`; deploy with `npm run deploy:functions`).
-4. **Redirect URIs** (OAuth2 → Redirects) — register **every** URL your app uses:
+4. **Redirect URIs** (OAuth2 → Redirects) — for this Activity app, register:
    - `https://127.0.0.1` — embedded Activity (`token-exchange` with this `redirect_uri`)
-   - `http://localhost:5180/auth/callback` — local `npm run dev` in a browser tab
-   - `https://<your-production-host>/auth/callback` — e.g. Railway, if you open the SPA in a normal browser
+   - `http://localhost:5180/auth/callback` — optional, for `npm run dev` in a browser tab only
 
-   Browser sign-in always uses `{current origin}/auth/callback`. If that exact URL is missing in the portal, Discord returns `invalid oauth2 redirect_uri`.
+   Do **not** rely on signing in on the production deploy URL in a normal browser. Activity OAuth uses `127.0.0.1`; browser sign-in with `{origin}/auth/callback` on Railway returns `invalid_grant` / `invalid redirect_uri`. Production shows **Open in Discord** instead (`DiscordOnlyGate`). A future **standalone web** product should use a **separate Discord application** with its own redirect URIs — see deferred item in [`PLAN.md`](PLAN.md).
 5. **Interactions Endpoint URL** — required for this repo because published event embeds use a button that responds with `LAUNCH_ACTIVITY`:
    `https://<project-ref>.supabase.co/functions/v1/interactions-endpoint`
 6. **Entry Point command** — verify the default Launch command opens the Activity from the App Launcher.
