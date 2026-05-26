@@ -1,4 +1,4 @@
-import {useCallback, useEffect, useState} from 'react';
+import {useCallback, useEffect, useMemo, useRef, useState} from 'react';
 import {listChannels, listGuilds} from '../lib/api';
 import {getGuildContext} from '../lib/discord';
 import {
@@ -12,6 +12,7 @@ import {InlineLoading} from './ui/InlineLoading';
 type Props = {
   accessToken: string;
   guildId: string;
+  guildName?: string;
   channelId: string;
   lockGuild?: boolean;
   lockChannel?: boolean;
@@ -22,6 +23,7 @@ type Props = {
 export function PublishTargetPicker({
   accessToken,
   guildId,
+  guildName,
   channelId,
   lockGuild = false,
   lockChannel = false,
@@ -34,33 +36,69 @@ export function PublishTargetPicker({
   const [loadingGuilds, setLoadingGuilds] = useState(true);
   const [loadingChannels, setLoadingChannels] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const guildRequestRef = useRef(0);
+  const channelRequestRef = useRef(0);
   const canAddBot = Boolean(buildBotInstallUrl());
   const installInBrowser = botInstallOpensExternally();
   const activityGuildId = getGuildContext().guildId;
 
+  const guildOptions = useMemo(() => {
+    if (guildId && guildName && !guilds.some((g) => g.id === guildId)) {
+      return [{id: guildId, name: guildName}, ...guilds];
+    }
+    return guilds;
+  }, [guilds, guildId, guildName]);
+
+  const channelOptions = useMemo(() => {
+    if (channelId && !channels.some((c) => c.id === channelId)) {
+      return [{id: channelId, name: 'selected-channel'}, ...channels];
+    }
+    return channels;
+  }, [channels, channelId]);
+
   const loadGuilds = useCallback(() => {
+    const requestId = ++guildRequestRef.current;
     setLoadingGuilds(true);
     setError(null);
     void listGuilds(accessToken)
       .then((r) => {
+        if (requestId !== guildRequestRef.current) return;
         setGuilds(r.guilds);
         setGuildHint(r.hint ?? null);
       })
-      .catch((e) => setError(e instanceof Error ? e.message : String(e)))
-      .finally(() => setLoadingGuilds(false));
+      .catch((e) => {
+        if (requestId !== guildRequestRef.current) return;
+        setError(e instanceof Error ? e.message : String(e));
+      })
+      .finally(() => {
+        if (requestId === guildRequestRef.current) setLoadingGuilds(false);
+      });
   }, [accessToken]);
 
   const loadChannels = useCallback(() => {
     if (!guildId) {
+      channelRequestRef.current += 1;
       setChannels([]);
+      setLoadingChannels(false);
       return;
     }
+    const requestGuildId = guildId;
+    const requestId = ++channelRequestRef.current;
+    setChannels([]);
     setLoadingChannels(true);
     setError(null);
-    void listChannels(accessToken, guildId)
-      .then((r) => setChannels(r.channels))
-      .catch((e) => setError(e instanceof Error ? e.message : String(e)))
-      .finally(() => setLoadingChannels(false));
+    void listChannels(accessToken, requestGuildId)
+      .then((r) => {
+        if (requestId !== channelRequestRef.current) return;
+        setChannels(r.channels);
+      })
+      .catch((e) => {
+        if (requestId !== channelRequestRef.current) return;
+        setError(e instanceof Error ? e.message : String(e));
+      })
+      .finally(() => {
+        if (requestId === channelRequestRef.current) setLoadingChannels(false);
+      });
   }, [accessToken, guildId]);
 
   useEffect(() => {
@@ -130,13 +168,12 @@ export function PublishTargetPicker({
               value={guildId}
               disabled={lockGuild}
               onChange={(e) => {
-                const next = guilds.find((g) => g.id === e.target.value);
+                const next = guildOptions.find((g) => g.id === e.target.value);
                 onGuildChange(e.target.value, next?.name ?? 'Server');
-                onChannelChange('');
               }}
             >
               <option value="">Select a server</option>
-              {guilds.map((g) => (
+              {guildOptions.map((g) => (
                 <option key={g.id} value={g.id}>
                   {g.name}
                 </option>
@@ -162,22 +199,26 @@ export function PublishTargetPicker({
         </p>
         {!guildId ? (
           <p className="text-sm text-muted">Choose a server first.</p>
-        ) : loadingChannels ? (
-          <InlineLoading label="Loading channels" />
         ) : (
-          <select
-            className="w-full rounded-lg border border-white/[0.08] bg-white/[0.03] px-3.5 py-2.5 text-sm text-white"
-            value={channelId}
-            disabled={lockChannel || !guildId}
-            onChange={(e) => onChannelChange(e.target.value)}
-          >
-            <option value="">Select a channel</option>
-            {channels.map((c) => (
-              <option key={c.id} value={c.id}>
-                #{c.name}
-              </option>
-            ))}
-          </select>
+          <>
+            <select
+              key={guildId}
+              className="w-full rounded-lg border border-white/[0.08] bg-white/[0.03] px-3.5 py-2.5 text-sm text-white disabled:opacity-60"
+              value={channelId}
+              disabled={lockChannel || !guildId || loadingChannels}
+              onChange={(e) => onChannelChange(e.target.value)}
+            >
+              <option value="">Select a channel</option>
+              {channelOptions.map((c) => (
+                <option key={c.id} value={c.id}>
+                  {c.name === 'selected-channel' ? 'Selected channel' : `#${c.name}`}
+                </option>
+              ))}
+            </select>
+            {loadingChannels && (
+              <p className="mt-1.5 text-[10px] text-muted">Refreshing channel list…</p>
+            )}
+          </>
         )}
         {lockChannel && (
           <p className="mt-1 text-[10px] text-muted">Channel is locked after publish.</p>
@@ -207,6 +248,7 @@ export function PublishTargetPicker({
 export function PublishTargetModal({
   accessToken,
   guildId,
+  guildName,
   channelId,
   onGuildChange,
   onChannelChange,
@@ -229,6 +271,7 @@ export function PublishTargetModal({
           <PublishTargetPicker
             accessToken={accessToken}
             guildId={guildId}
+            guildName={guildName}
             channelId={channelId}
             onGuildChange={onGuildChange}
             onChannelChange={onChannelChange}

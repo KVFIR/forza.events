@@ -18,6 +18,7 @@ export type SaveEventBody = {
   id?: string;
   guild_id?: string;
   guild_name?: string;
+  channel_id?: string | null;
   title?: string;
   type?: string;
   starts_at?: string;
@@ -118,6 +119,7 @@ export function buildEventFields(
     type: body.type,
     host_discord_id: hostDiscordId,
     guild_id: body.guild_id,
+    channel_id: body.channel_id?.trim() || null,
     starts_at: body.starts_at,
     timezone_hint: body.timezone_hint,
     max_pi: maxPi,

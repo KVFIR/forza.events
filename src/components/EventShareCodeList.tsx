@@ -47,9 +47,6 @@ export function EventShareCodeList({
     <div className="space-y-5">
       <div>
         <p className={labelClass}>Tracks</p>
-        <p className="mt-1 text-xs text-muted">
-          Optional — add track share codes for the route list.
-        </p>
         <ShareCodeInput
           value={primaryCode}
           onChange={onPrimaryChange}

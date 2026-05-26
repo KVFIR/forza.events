@@ -384,7 +384,6 @@ export function EventDetail() {
           void handleCancelEvent();
         }}
       />
-
       {showResultsSection ? (
         <div className="mt-4">
           <p className="mb-2 text-[10px] font-bold uppercase tracking-widest text-muted">Results</p>

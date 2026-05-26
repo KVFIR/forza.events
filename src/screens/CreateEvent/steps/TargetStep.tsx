@@ -5,6 +5,7 @@ type Props = {
   token: string | null;
   accessToken: string;
   guildId: string;
+  guildName: string;
   channelId: string;
   lockGuild: boolean;
   lockChannel: boolean;
@@ -17,6 +18,7 @@ export function TargetStep({
   token,
   accessToken,
   guildId,
+  guildName,
   channelId,
   lockGuild,
   lockChannel,
@@ -40,6 +42,7 @@ export function TargetStep({
       <PublishTargetPicker
         accessToken={accessToken}
         guildId={guildId}
+        guildName={guildName}
         channelId={channelId}
         lockGuild={lockGuild}
         lockChannel={lockChannel}

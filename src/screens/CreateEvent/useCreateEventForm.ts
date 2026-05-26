@@ -198,7 +198,6 @@ export function useCreateEventForm() {
     navigate,
     contextGuildId,
     contextGuildName,
-    targetGuildId,
   ]);
 
   function buildPayload() {
@@ -207,6 +206,7 @@ export function useCreateEventForm() {
       id: eventId ?? undefined,
       guild_id: targetGuildId,
       guild_name: targetGuildName,
+      channel_id: targetChannelId || null,
       title,
       type,
       starts_at: localInputToUtc(startsAtLocal, tz),

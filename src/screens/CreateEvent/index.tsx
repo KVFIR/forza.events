@@ -3,6 +3,7 @@ import {ConfirmDialog} from '../../components/ui/ConfirmDialog';
 import {PublishTargetModal} from '../../components/PublishTargetPicker';
 import {FormAlerts, StepIndicator} from './components/StepIndicator';
 import type {CreateEventStepIndex} from './constants';
+import {useState} from 'react';
 import {useCreateEventForm} from './useCreateEventForm';
 import {BasicsStep} from './steps/BasicsStep';
 import {DetailsStep} from './steps/DetailsStep';
@@ -13,6 +14,7 @@ import {PageLoading} from '../../components/ui/PageLoading';
 import {useLoadingUI} from '../../hooks/useLoadingUI';
 
 export function CreateEvent() {
+  const [publishConfirmOpen, setPublishConfirmOpen] = useState(false);
   const form = useCreateEventForm();
   const showLoadingUI = useLoadingUI(form.loadingEdit);
   const {
@@ -90,13 +92,17 @@ export function CreateEvent() {
       window.scrollTo({top: 0, behavior: 'smooth'});
       return;
     }
-    const id = await persistDraft();
-    if (!id || !token) return;
-    setEventId(id);
     if (!values.targetChannelId) {
       setShowPublishModal(true);
       return;
     }
+    setPublishConfirmOpen(true);
+  }
+
+  async function executePublish() {
+    const id = await persistDraft();
+    if (!id || !token) return;
+    setEventId(id);
     await confirmPublish(id);
   }
 
@@ -174,6 +180,7 @@ export function CreateEvent() {
           token={token}
           accessToken={token ?? ''}
           guildId={values.targetGuildId}
+          guildName={values.targetGuildName}
           channelId={values.targetChannelId}
           lockGuild={isPublished}
           lockChannel={isPublished}
@@ -272,10 +279,24 @@ export function CreateEvent() {
         onConfirm={() => void confirmDeleteDraft()}
       />
 
+      <ConfirmDialog
+        open={publishConfirmOpen}
+        title="Publish event?"
+        description="This posts an announcement in Discord. Server and channel cannot be changed afterward."
+        confirmLabel="Publish"
+        busy={saving}
+        onCancel={() => setPublishConfirmOpen(false)}
+        onConfirm={() => {
+          setPublishConfirmOpen(false);
+          void executePublish();
+        }}
+      />
+
       {showPublishModal && token && (
         <PublishTargetModal
           accessToken={token}
           guildId={values.targetGuildId}
+          guildName={values.targetGuildName}
           channelId={values.targetChannelId}
           onGuildChange={onGuildChange}
           onChannelChange={setTargetChannelId}
