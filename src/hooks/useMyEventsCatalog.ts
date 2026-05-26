@@ -8,6 +8,7 @@ import {
   sortMyEventsList,
   type MyEventsScope,
 } from '../lib/eventList';
+import {isEventSuccessfullyCompleted} from '../lib/eventSpec';
 import {useHostDrafts} from './useHostDrafts';
 import {usePublishedEvents} from './usePublishedEvents';
 
@@ -47,7 +48,10 @@ export function useMyEventsCatalog(scope: MyEventsScope = 'all') {
   }, [scope, sortedDrafts, publishedFiltered]);
 
   const active = useMemo(() => allMine.filter((e) => e.status !== 'ended'), [allMine]);
-  const completed = useMemo(() => allMine.filter((e) => e.status === 'ended'), [allMine]);
+  const completed = useMemo(
+    () => allMine.filter((e) => isEventSuccessfullyCompleted(e)),
+    [allMine],
+  );
 
   const refetchAll = () => {
     refetch();

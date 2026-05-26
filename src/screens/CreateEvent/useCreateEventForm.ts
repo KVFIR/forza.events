@@ -18,7 +18,7 @@ import {defaultTimezone, localInputToUtc, utcToLocalInput} from '../../lib/datet
 import {clampPi} from '../../lib/pi';
 import {EVENT_PLAYER_SLOTS} from '../../lib/constants';
 import {
-  canCancelEvent,
+  canCancelPublishedEvent,
   canEditEvent,
   isPublishedToDiscord,
   normalizeTrackCodes,
@@ -157,7 +157,7 @@ export function useCreateEventForm() {
         const tz = ev.timezoneHint ?? defaultTimezone();
         setEventId(ev.id);
         setIsPublished(isPublishedToDiscord(ev));
-        setCanCancelPublished(canCancelEvent(ev, user));
+        setCanCancelPublished(canCancelPublishedEvent(ev, user));
         setTitle(ev.title);
         setType(ev.type);
         setStartsAtLocal(utcToLocalInput(ev.startsAt, tz));

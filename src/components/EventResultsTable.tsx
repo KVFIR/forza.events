@@ -4,16 +4,13 @@ import {cn} from '../lib/cn';
 type Props = {
   rows: EventResultDisplay[];
   pending?: boolean;
-  cancelled?: boolean;
 };
 
-export function EventResultsTable({rows, pending, cancelled}: Props) {
+export function EventResultsTable({rows, pending}: Props) {
   if (pending) {
     return (
       <p className="rounded-xl border border-white/[0.07] bg-card px-4 py-3 text-sm text-muted">
-        {cancelled
-          ? 'This event was cancelled — no results were recorded.'
-          : 'Results have not been posted yet.'}
+        Results have not been posted yet.
       </p>
     );
   }

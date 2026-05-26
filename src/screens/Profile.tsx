@@ -6,6 +6,7 @@ import {isApiConfigured, updateProfile} from '../lib/api';
 import {GamertagModal} from '../components/GamertagModal';
 import {EventCard} from '../components/EventCard';
 import {useMyEventsCatalog} from '../hooks/useMyEventsCatalog';
+import {isEventSuccessfullyCompleted} from '../lib/eventSpec';
 import {ContentReveal} from '../components/ui/ContentReveal';
 import {EmptyState} from '../components/ui/EmptyState';
 import {PageLoading} from '../components/ui/PageLoading';
@@ -32,8 +33,12 @@ export function Profile() {
   const token = getAccessToken();
   const needsGamertag = !user.xboxGamertag?.trim();
   const recentCompleted = completed.slice(0, 3);
-  const hostedCount = allMine.filter((e) => e.hostDiscordId === user.discordId).length;
-  const participatedCount = allMine.filter((e) => isJoined(e)).length;
+  const hostedCount = allMine.filter(
+    (e) => e.hostDiscordId === user.discordId && isEventSuccessfullyCompleted(e),
+  ).length;
+  const participatedCount = allMine.filter(
+    (e) => isJoined(e) && isEventSuccessfullyCompleted(e),
+  ).length;
 
   if (showLoadingUI) {
     return <PageLoading label="Loading profile" className="pb-10 pt-5" />;

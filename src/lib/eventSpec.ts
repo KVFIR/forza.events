@@ -62,6 +62,17 @@ export function isEventFinalized(event: ForzaEvent): boolean {
   );
 }
 
+/** Host submitted results — excludes cancelled/archived. */
+export function isEventSuccessfullyCompleted(event: ForzaEvent): boolean {
+  return event.lifecycle === 'completed';
+}
+
+export function shouldShowEventResults(event: ForzaEvent): boolean {
+  if (event.lifecycle === 'cancelled') return false;
+  if (event.lifecycle === 'completed') return true;
+  return eventHasStarted(event) && !isEventFinalized(event);
+}
+
 export function isRegistrationOpen(event: ForzaEvent): boolean {
   if (event.lifecycle === 'draft') return false;
   if (isEventFinalized(event)) return false;
@@ -89,12 +100,17 @@ export function canEditEvent(event: ForzaEvent, user: AppUser): boolean {
 }
 
 /** Host may cancel a published announcement (before or after start). */
-export function canCancelEvent(event: ForzaEvent, user: AppUser): boolean {
+export function canCancelPublishedEvent(event: ForzaEvent, user: AppUser): boolean {
   return (
     event.hostDiscordId === user.discordId &&
     isPublishedToDiscord(event) &&
     !isEventFinalized(event)
   );
+}
+
+/** Post-start cancel on event detail (and legacy checks). */
+export function canCancelEvent(event: ForzaEvent, user: AppUser): boolean {
+  return canCancelPublishedEvent(event, user) && eventHasStarted(event);
 }
 
 export function canSubmitEventResults(event: ForzaEvent, user: AppUser): boolean {

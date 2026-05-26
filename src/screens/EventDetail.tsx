@@ -16,8 +16,8 @@ import {
   canSubmitEventResults,
   fetchEventById,
   fetchEventResults,
-  isEventCompleted,
   resolveEventResultDisplay,
+  shouldShowEventResults,
   type EventResultRow,
 } from '../lib/events';
 import {EventResultsTable} from '../components/EventResultsTable';
@@ -105,7 +105,7 @@ export function EventDetail() {
       .then(async (ev) => {
         if (cancelled) return;
         setEvent(ev);
-        if (ev && isEventCompleted(ev)) {
+        if (ev && shouldShowEventResults(ev)) {
           setResultRows(await fetchEventResults(id));
         } else {
           setResultRows([]);
@@ -227,15 +227,14 @@ export function EventDetail() {
   const started = eventHasStarted(event);
   const full = event.status === 'full' || event.currentPlayers >= event.maxPlayers;
   const showDraftActions = isDraft && isHost;
-  const showHostPostStartActions = isHost && (canEnterResults || canCancel);
+  const showHostPostStartActions = isHost && started && (canEnterResults || canCancel);
   const {primary: when} = formatEventTime(event.startsAt, event.timezoneHint);
   const fillPct = Math.round(((1 + event.currentPlayers) / LOBBY_TOTAL_PLAYERS) * 100);
-  const completed = isEventCompleted(event);
   const finalized = isEventFinalized(event);
   const resultDisplay = resolveEventResultDisplay(event, resultRows);
   const convoyLeader = resolveConvoyLeader(event, user.discordId, user.xboxGamertag);
   const registeredDrivers = resolveRegisteredDrivers(event, convoyLeader);
-  const showResultsSection = completed || (started && !finalized);
+  const showResultsSection = shouldShowEventResults(event);
   const participationDisabled =
     !joined && (!registrationOpen || full || joining || cancelling);
 
@@ -390,11 +389,7 @@ export function EventDetail() {
       {showResultsSection ? (
         <div className="mt-4">
           <p className="mb-2 text-[10px] font-bold uppercase tracking-widest text-muted">Results</p>
-          <EventResultsTable
-            rows={resultDisplay}
-            pending={resultDisplay.length === 0}
-            cancelled={event.lifecycle === 'cancelled'}
-          />
+          <EventResultsTable rows={resultDisplay} pending={resultDisplay.length === 0} />
         </div>
       ) : (
         <div className="mt-4">
