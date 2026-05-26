@@ -1,7 +1,7 @@
 import {exchangeToken, isApiConfigured} from './api';
 import {DISCORD_ACTIVITY_REDIRECT_URI} from './discordConstants';
-import {applyEmbedLaunchRoute, finishEmbedSdkProbe} from './activityLaunch';
-import {eventIdFromOpenEventCustomId} from './eventLaunch';
+import {completeActivityLaunchResolution} from './activityLaunch';
+import {resolveActivityLaunchAfterAuth} from './resolveActivityLaunch';
 import {loadDiscordSession, saveDiscordSession} from './discordAuth';
 import {GUEST_USER} from './guestUser';
 import type {AppUser} from './types';
@@ -126,12 +126,13 @@ export async function retryDiscordActivityAuth(): Promise<InitResult | null> {
   const clientId = import.meta.env.VITE_DISCORD_CLIENT_ID as string | undefined;
   if (!sdk || !clientId || isStandaloneBrowser()) return null;
 
-  const launchEventId = eventIdFromOpenEventCustomId(sdk.customId);
-  if (launchEventId) {
-    applyEmbedLaunchRoute(launchEventId);
-  }
-
   const {user, accessToken} = await authenticateDiscordActivity(sdk, clientId);
+
+  const launchEventId = await resolveActivityLaunchAfterAuth({
+    sdkCustomId: sdk.customId,
+    accessToken,
+    guildId,
+  });
 
   return {
     user,
@@ -148,6 +149,7 @@ export async function initDiscordActivity(): Promise<InitResult> {
 
   initPromise = (async () => {
     if (isStandaloneBrowser()) {
+      completeActivityLaunchResolution(false);
       const existing = applyBrowserSession();
       if (existing) return existing;
 
@@ -180,14 +182,13 @@ export async function initDiscordActivity(): Promise<InitResult> {
     sdkInstance = sdk;
     await sdk.ready();
 
-    const launchEventId = eventIdFromOpenEventCustomId(sdk.customId);
-    if (launchEventId) {
-      applyEmbedLaunchRoute(launchEventId);
-    } else {
-      finishEmbedSdkProbe();
-    }
-
     const {user, accessToken} = await authenticateDiscordActivity(sdk, clientId);
+
+    const launchEventId = await resolveActivityLaunchAfterAuth({
+      sdkCustomId: sdk.customId,
+      accessToken,
+      guildId,
+    });
 
     return {
       user,

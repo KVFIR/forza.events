@@ -6,6 +6,7 @@ import {EventListMetaSelect} from '../components/EventListMetaSelect';
 import {useAuth} from '../context/AuthContext';
 import {DISCORD_SUPABASE_PROXY_PREFIX} from '../lib/supabaseEnv';
 import {shouldDeferBrowseFeed} from '../lib/activityLaunch';
+import {PageLoading} from '../components/ui/PageLoading';
 import {usePublishedEvents} from '../hooks/usePublishedEvents';
 import {filterByEventType, sortEvents, type EventSortKey} from '../lib/eventList';
 
@@ -24,13 +25,7 @@ const sortOptions: {value: EventSortKey; label: string}[] = [
 
 export function BrowseEvents() {
   const {isStandalone} = useAuth();
-  const deferBrowse = shouldDeferBrowseFeed();
   const {events, isLoading, isRefreshing, loadError, refetch} = usePublishedEvents();
-
-  if (deferBrowse) {
-    return null;
-  }
-
   const [typeFilter, setTypeFilter] = useState<TypeFilter>('all');
   const [sort, setSort] = useState<EventSortKey>('event_date');
 
@@ -56,6 +51,10 @@ export function BrowseEvents() {
         : `In Discord Developer Portal add URL mapping ${DISCORD_SUPABASE_PROXY_PREFIX} → your-project.supabase.co`;
 
   const emptyTitle = 'No events match these filters';
+
+  if (shouldDeferBrowseFeed()) {
+    return <PageLoading label="Loading" className="pb-8 pt-5" />;
+  }
 
   return (
     <div className="pb-8 pt-5">

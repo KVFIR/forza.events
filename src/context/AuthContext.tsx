@@ -7,8 +7,7 @@ import {
   useState,
   type ReactNode,
 } from 'react';
-import {useNavigate} from 'react-router-dom';
-import {fetchLaunchIntent, isApiConfigured} from '../lib/api';
+import {isApiConfigured} from '../lib/api';
 import {
   getDiscordAccessToken,
   initDiscordActivity,
@@ -16,10 +15,7 @@ import {
   retryDiscordActivityAuth,
   setDiscordSession,
   setResolvedUser,
-  type InitResult,
 } from '../lib/discord';
-import {applyEmbedLaunchRoute, endDeferBrowseFeed} from '../lib/activityLaunch';
-import {resolveLaunchIntentTarget, shouldResolveLaunchRedirect} from '../lib/launchRedirect';
 import {loadDiscordSession} from '../lib/discordAuth';
 import {GUEST_USER} from '../lib/guestUser';
 import type {AppUser} from '../lib/types';
@@ -40,37 +36,9 @@ type AuthState = {
   retryDiscordAuth: () => Promise<void>;
 };
 
-function applyEmbedLaunchRedirect(
-  result: InitResult,
-  navigate: (path: string, options: {replace: boolean}) => void,
-): void {
-  if (!result.launchEventId) return;
-  applyEmbedLaunchRoute(result.launchEventId);
-  if (window.location.pathname !== `/event/${result.launchEventId}`) {
-    navigate(`/event/${result.launchEventId}`, {replace: true});
-  }
-  endDeferBrowseFeed();
-}
-
-function tryLaunchIntentRedirect(
-  result: InitResult,
-  isConfigured: boolean,
-  navigate: (path: string, options: {replace: boolean}) => void,
-  cancelled: () => boolean,
-): void {
-  if (!isConfigured || cancelled()) return;
-
-  void resolveLaunchIntentTarget(result, fetchLaunchIntent).then((target) => {
-    if (!target || cancelled()) return;
-    if (typeof window !== 'undefined' && window.location.pathname !== '/') return;
-    navigate(`/event/${target}`, {replace: true});
-  });
-}
-
 const AuthContext = createContext<AuthState | null>(null);
 
 export function AuthProvider({children}: {children: ReactNode}) {
-  const navigate = useNavigate();
   const [user, setUser] = useState<AppUser>(GUEST_USER);
   const [loading, setLoading] = useState(true);
   const [discordReady, setDiscordReady] = useState(false);
@@ -95,12 +63,6 @@ export function AuthProvider({children}: {children: ReactNode}) {
         setDiscordReady(result.ready);
         setGuildId(result.guildId);
         setGuildName(result.guildName);
-
-        if (shouldResolveLaunchRedirect(result)) {
-          applyEmbedLaunchRedirect(result, navigate);
-        } else {
-          tryLaunchIntentRedirect(result, isConfigured, navigate, () => cancelled);
-        }
       } finally {
         if (!cancelled) setLoading(false);
       }
@@ -109,7 +71,7 @@ export function AuthProvider({children}: {children: ReactNode}) {
     return () => {
       cancelled = true;
     };
-  }, [navigate, isConfigured]);
+  }, [isConfigured]);
 
   useEffect(() => {
     const session = loadDiscordSession();
@@ -137,17 +99,10 @@ export function AuthProvider({children}: {children: ReactNode}) {
       setGuildId(result.guildId);
       setGuildName(result.guildName);
 
-      if (result.accessToken) {
-        if (shouldResolveLaunchRedirect(result)) {
-          applyEmbedLaunchRedirect(result, navigate);
-        } else {
-          tryLaunchIntentRedirect(result, isConfigured, navigate, () => false);
-        }
-      }
     } finally {
       setAuthRetrying(false);
     }
-  }, [authRetrying, isConfigured, navigate]);
+  }, [authRetrying]);
 
   const value = useMemo(
     () => ({

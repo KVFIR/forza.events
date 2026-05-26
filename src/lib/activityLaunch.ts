@@ -33,8 +33,8 @@ function readEmbedLaunchEventIdFromLocation(): string | null {
 }
 
 let deferBrowseFeed = false;
-/** True until `sdk.ready()` confirms there is no embed `customId` (avoids browse flash when URL omits it). */
-let pendingEmbedSdkProbe = false;
+/** Blocks browse until Discord auth + embed/intent resolution finish (Activity only). */
+let launchResolutionPending = false;
 
 function syncHistoryToEventRoute(eventId: string): void {
   const target = `/event/${eventId}`;
@@ -48,41 +48,43 @@ function syncHistoryToEventRoute(eventId: string): void {
 export function bootstrapActivityLaunch(): void {
   if (typeof window === 'undefined' || !isDiscordActivityFrame()) return;
 
+  launchResolutionPending = true;
+
   const fromUrl = readEmbedLaunchEventIdFromSearch(window.location.search);
   if (fromUrl) {
     deferBrowseFeed = true;
     syncHistoryToEventRoute(fromUrl);
-    return;
   }
-
-  pendingEmbedSdkProbe = true;
 }
 
-/** After `sdk.ready()` when `sdk.customId` is `open_event:{id}`. */
+/** Route to event page; keeps browse deferred until `endDeferBrowseFeed()`. */
 export function applyEmbedLaunchRoute(eventId: string): void {
   if (isStandaloneBrowser()) return;
 
   deferBrowseFeed = true;
-  pendingEmbedSdkProbe = false;
   syncHistoryToEventRoute(eventId);
   window.dispatchEvent(new CustomEvent(EMBED_LAUNCH_ROUTE_EVENT, {detail: {eventId}}));
 }
 
-/** No embed `customId` after `sdk.ready()` while probe was pending — allow browse to load. */
-export function finishEmbedSdkProbe(): void {
-  if (!pendingEmbedSdkProbe) return;
-  pendingEmbedSdkProbe = false;
-  deferBrowseFeed = false;
+/**
+ * Called after Activity auth (and optional launch_intent lookup).
+ * @param embedLaunch — true when user should land on a single event, not browse.
+ */
+export function completeActivityLaunchResolution(embedLaunch: boolean): void {
+  launchResolutionPending = false;
+  if (!embedLaunch) {
+    deferBrowseFeed = false;
+  }
 }
 
-/** Skip the public browse feed on embed launch (URL or SDK). */
+/** Skip browse feed during embed launch or while Activity auth/launch is resolving. */
 export function shouldDeferBrowseFeed(): boolean {
-  return deferBrowseFeed || pendingEmbedSdkProbe;
+  return deferBrowseFeed || launchResolutionPending;
 }
 
 export function endDeferBrowseFeed(): void {
   deferBrowseFeed = false;
-  pendingEmbedSdkProbe = false;
+  launchResolutionPending = false;
 }
 
 export function getEmbedLaunchEventIdFromLocation(): string | null {
