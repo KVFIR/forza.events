@@ -24,7 +24,8 @@ Lessons from implementation work (keep in sync when behavior changes).
 
 - **Roles (do not conflate):**
   - **Organiser (display only):** `resolveOrganiserLabel()` in `src/lib/organiser.ts` — `guildName` when set, else `hostUsername`. Used on event cards and detail (`by …`). Not a DB column.
-  - **Host (`host_discord_id`):** Discord user who created the event; all edit/publish/delete/cancel/results permissions stay on the host.
+  - **Host (`host_discord_id`):** Discord user who created the event; all edit/publish/delete/cancel/results permissions stay on the host. Hosts never use Join/Leave (`event-participation` rejects host join).
+  - **Guild display names:** placeholder `Server` is not shown as organiser (`guildDisplay.ts`); `PublishTargetPicker` syncs the real name from `list-guilds` after load.
   - **Convoy leader (`lobby_leader_*`):** in-game Forza lobby leader (Xbox gamertag); may differ from the host.
   - **Publish target:** `guild_id` + `channel_id` (Discord server + announcement channel). MVP still requires `guild_id` on draft; optional guild for personal events is deferred.
 - **Event types:** `road` (Road racing), `dirt`, `touge`, `drift` (Car/Drift Meet), `cruise`. Labels/colors live in `src/lib/eventTypes.ts` and `supabase/functions/_shared/eventTypes.ts`. Type is required on save/publish; track share codes are optional.

@@ -58,6 +58,8 @@ export interface ForzaEvent {
   trackCodes?: string[];
   additionalCarRestrictions?: string;
   lobbyLeaderGamertag?: string;
+  /** When true (default), convoy leader is the host; shown in roster, not only via Join. */
+  lobbyLeaderIsHost?: boolean;
   timezoneHint?: string;
   threadLabel?: string;
   voiceLabel?: string;

@@ -110,7 +110,7 @@ export async function initDiscordActivity(): Promise<InitResult> {
     setupDiscordSupabaseProxy();
 
     guildId = sdk.guildId ?? null;
-    guildName = guildId ? 'Server' : null;
+    guildName = null;
     const launchEventId = eventIdFromOpenEventCustomId(sdk.customId);
 
     const {code} = await sdk.commands.authorize({

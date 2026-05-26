@@ -3,6 +3,7 @@ import {jsonResponse, optionsResponse} from '../_shared/cors.ts';
 import {botHeaders, isBotInGuild, mapDiscordPostError, verifyDiscordToken} from '../_shared/discord.ts';
 import {buildEventEmbed} from '../_shared/events.ts';
 import {validatePublishReady, type SaveEventBody} from '../_shared/eventSpec.ts';
+import {normalizeGuildName} from '../_shared/guildDisplay.ts';
 import {adminClient} from '../_shared/supabase.ts';
 
 serve(async (req) => {
@@ -39,8 +40,12 @@ serve(async (req) => {
       return jsonResponse({error: 'Server is locked for this draft'}, 400);
     }
 
+    const resolvedGuildName = normalizeGuildName(guild_name);
+    if (!resolvedGuildName) {
+      return jsonResponse({error: 'Choose a Discord server from the list before publishing.'}, 400);
+    }
     await supabase.from('discord_guilds').upsert(
-      {guild_id, guild_name: guild_name ?? 'Server'},
+      {guild_id, guild_name: resolvedGuildName},
       {onConflict: 'guild_id'},
     );
 

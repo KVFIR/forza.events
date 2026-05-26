@@ -125,7 +125,7 @@ export function useCreateEventForm() {
     if (!editId) {
       if (contextGuildId && !targetGuildId) {
         setTargetGuildId(contextGuildId);
-        setTargetGuildName(contextGuildName ?? 'Server');
+        setTargetGuildName(contextGuildName ?? '');
       }
       return;
     }

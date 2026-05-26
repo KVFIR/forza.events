@@ -16,6 +16,7 @@ import {jsonResponse, optionsResponse} from '../_shared/cors.ts';
 import {verifyDiscordToken} from '../_shared/discord.ts';
 import {resolveCoverUrl} from '../_shared/eventCovers.ts';
 import {slugify} from '../_shared/events.ts';
+import {normalizeGuildName} from '../_shared/guildDisplay.ts';
 import {adminClient} from '../_shared/supabase.ts';
 
 const UUID_RE =
@@ -88,10 +89,27 @@ serve(async (req) => {
     const draftErr = validateDraft(body);
     if (draftErr) return jsonResponse({error: draftErr}, 400);
 
-    await supabase.from('discord_guilds').upsert(
-      {guild_id: body.guild_id, guild_name: body.guild_name ?? 'Server'},
-      {onConflict: 'guild_id'},
-    );
+    if (body.guild_id) {
+      const guildName = normalizeGuildName(body.guild_name);
+      if (guildName) {
+        await supabase.from('discord_guilds').upsert(
+          {guild_id: body.guild_id, guild_name: guildName},
+          {onConflict: 'guild_id'},
+        );
+      } else {
+        const {data: existingGuild} = await supabase
+          .from('discord_guilds')
+          .select('guild_id')
+          .eq('guild_id', body.guild_id)
+          .maybeSingle();
+        if (!existingGuild) {
+          return jsonResponse(
+            {error: 'Choose a Discord server from the list so its name can be saved.'},
+            400,
+          );
+        }
+      }
+    }
 
     let existing: {
       id: string;

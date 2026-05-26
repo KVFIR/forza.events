@@ -51,6 +51,7 @@ type DbEventRow = {
   rules_allowed?: string[] | null;
   additional_car_restrictions?: string | null;
   lobby_leader_gamertag?: string | null;
+  lobby_leader_is_host?: boolean | null;
   timezone_hint?: string | null;
   users?: {username: string; avatar_url?: string | null} | null;
   discord_guilds?: {guild_name: string} | null;
@@ -269,6 +270,7 @@ export function mapDbEvent(row: DbEventRow): ForzaEvent {
         ? row.rules_allowed.find((rule) => rule.startsWith('additional:'))?.slice('additional:'.length)
         : undefined),
     lobbyLeaderGamertag: row.lobby_leader_gamertag ?? undefined,
+    lobbyLeaderIsHost: row.lobby_leader_is_host ?? true,
     timezoneHint: row.timezone_hint ?? undefined,
     participants,
   };

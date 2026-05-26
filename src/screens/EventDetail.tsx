@@ -46,6 +46,7 @@ import {useEventLiveUpdates} from '../hooks/useEventLiveUpdates';
 import {piToClass} from '../lib/pi';
 import {formatLobbyCount, LOBBY_TOTAL_PLAYERS} from '../lib/constants';
 import {resolveOrganiserLabel} from '../lib/organiser';
+import {resolveConvoyLeader, resolveRegisteredDrivers} from '../lib/eventRoster';
 import {participationButtonLabel, participationButtonVariant} from '../lib/eventActions';
 import {cn} from '../lib/cn';
 
@@ -232,11 +233,11 @@ export function EventDetail() {
   const completed = isEventCompleted(event);
   const finalized = isEventFinalized(event);
   const resultDisplay = resolveEventResultDisplay(event, resultRows);
+  const convoyLeader = resolveConvoyLeader(event, user.discordId, user.xboxGamertag);
+  const registeredDrivers = resolveRegisteredDrivers(event, convoyLeader);
   const showResultsSection = completed || (started && !finalized);
   const participationDisabled =
-    !(isHost && canEdit) &&
-    !joined &&
-    (!registrationOpen || full || joining || cancelling);
+    !joined && (!registrationOpen || full || joining || cancelling);
 
   return (
     <ContentReveal className="pb-10 pt-4">
@@ -320,23 +321,24 @@ export function EventDetail() {
               </Button>
             ) : null}
           </div>
+        ) : isHost ? (
+          canEdit ? (
+            <Button
+              variant="secondary"
+              className="shrink-0 whitespace-nowrap px-6 py-3 text-xs shadow-none"
+              onClick={() => navigate(`/create?edit=${event.id}`)}
+            >
+              Edit
+            </Button>
+          ) : null
         ) : (
           <Button
-            variant={participationButtonVariant(
-              isHost,
-              canEdit,
-              joined,
-              registrationOpen,
-              full,
-            )}
+            variant={participationButtonVariant(joined, registrationOpen, full)}
             className="shrink-0 whitespace-nowrap px-6 py-3 text-xs shadow-none"
             disabled={participationDisabled}
-            onClick={() => {
-              if (isHost && canEdit) navigate(`/create?edit=${event.id}`);
-              else void handleJoinClick();
-            }}
+            onClick={() => void handleJoinClick()}
           >
-            {participationButtonLabel(isHost, canEdit, joined, registrationOpen, full)}
+            {participationButtonLabel(joined, registrationOpen, full)}
           </Button>
         )}
       </div>
@@ -550,31 +552,63 @@ export function EventDetail() {
             {formatLobbyCount(event.currentPlayers)}
           </span>
         </div>
-        {event.participants.length === 0 ? (
-          <p className="text-sm text-muted">No participants yet.</p>
-        ) : (
-          <div className="grid grid-cols-2 gap-2">
-            {event.participants.map((p) => (
-              <div
-                key={p.discordId}
-                className={cn(
-                  'flex items-center gap-2 rounded-lg border px-3 py-2',
-                  p.discordId === user.discordId ? 'border-accent-purple/25 bg-accent-purple/10' : 'border-white/[0.06] bg-card',
-                )}
-              >
-                <div className="flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-gradient-to-br from-accent-purple-dark/60 to-accent-purple/60 text-[10px] font-bold text-white">
-                  {p.username.charAt(0).toUpperCase()}
-                </div>
-                <div className="min-w-0">
-                  <p className="truncate text-xs font-medium text-slate-200">{p.gamertag ?? p.username}</p>
-                  {p.discordId === user.discordId && (
-                    <p className="text-[9px] font-bold uppercase tracking-widest text-accent-purple-light">You</p>
-                  )}
-                </div>
+        <div className="space-y-2">
+          {convoyLeader ? (
+            <div
+              className={cn(
+                'flex items-center gap-2 rounded-lg border px-3 py-2',
+                convoyLeader.isYou
+                  ? 'border-accent-green/25 bg-accent-green/10'
+                  : 'border-white/[0.06] bg-card',
+              )}
+            >
+              <div className="flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-gradient-to-br from-accent-green/40 to-emerald-600/50 text-[10px] font-bold text-white">
+                {(convoyLeader.username ?? convoyLeader.gamertag).charAt(0).toUpperCase()}
               </div>
-            ))}
-          </div>
-        )}
+              <div className="min-w-0">
+                <p className="truncate text-xs font-medium text-slate-200">{convoyLeader.gamertag}</p>
+                <p className="text-[9px] font-bold uppercase tracking-widest text-accent-green/90">
+                  Convoy leader
+                  {convoyLeader.isYou ? ' · You' : ''}
+                  {convoyLeader.discordId === event.hostDiscordId ? ' · Host' : ''}
+                </p>
+              </div>
+            </div>
+          ) : null}
+          {registeredDrivers.length === 0 ? (
+            <p className="text-sm text-muted">
+              {convoyLeader ? 'No drivers joined yet.' : 'No participants yet.'}
+            </p>
+          ) : (
+            <div className="grid grid-cols-2 gap-2">
+              {registeredDrivers.map((p) => (
+                <div
+                  key={p.discordId}
+                  className={cn(
+                    'flex items-center gap-2 rounded-lg border px-3 py-2',
+                    p.discordId === user.discordId
+                      ? 'border-accent-purple/25 bg-accent-purple/10'
+                      : 'border-white/[0.06] bg-card',
+                  )}
+                >
+                  <div className="flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-gradient-to-br from-accent-purple-dark/60 to-accent-purple/60 text-[10px] font-bold text-white">
+                    {p.username.charAt(0).toUpperCase()}
+                  </div>
+                  <div className="min-w-0">
+                    <p className="truncate text-xs font-medium text-slate-200">
+                      {p.gamertag ?? p.username}
+                    </p>
+                    {p.discordId === user.discordId && (
+                      <p className="text-[9px] font-bold uppercase tracking-widest text-accent-purple-light">
+                        You
+                      </p>
+                    )}
+                  </div>
+                </div>
+              ))}
+            </div>
+          )}
+        </div>
       </div>
 
     </ContentReveal>

@@ -6,6 +6,7 @@ import {
   buildBotInstallUrl,
   openBotInstallUrl,
 } from '../lib/discordInstall';
+import {isPlaceholderGuildName} from '../lib/guildDisplay';
 import {Button} from './ui/Button';
 import {InlineLoading} from './ui/InlineLoading';
 
@@ -112,6 +113,15 @@ export function PublishTargetPicker({
   useEffect(() => {
     loadGuilds();
   }, [loadGuilds]);
+
+  useEffect(() => {
+    if (!guildId || lockGuild || guilds.length === 0) return;
+    const match = guilds.find((g) => g.id === guildId);
+    if (!match) return;
+    if (isPlaceholderGuildName(guildName) || guildName !== match.name) {
+      onGuildChange(guildId, match.name);
+    }
+  }, [guildId, guildName, guilds, lockGuild, onGuildChange]);
 
   useEffect(() => {
     loadChannels();
@@ -226,7 +236,7 @@ export function PublishTargetPicker({
                 setChannelError(null);
                 setChannelHint(null);
                 const next = guildOptions.find((g) => g.id === e.target.value);
-                onGuildChange(e.target.value, next?.name ?? 'Server');
+                onGuildChange(e.target.value, next?.name ?? '');
               }}
             >
               <option value="">Select a server</option>

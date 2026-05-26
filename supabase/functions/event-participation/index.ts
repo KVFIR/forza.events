@@ -39,12 +39,15 @@ serve(async (req) => {
 
       const {data: event} = await supabase
         .from('events')
-        .select('max_players, current_players, status, starts_at')
+        .select('max_players, current_players, status, starts_at, host_discord_id')
         .eq('id', event_id)
         .single();
 
       if (!event || event.status === 'draft') {
         return jsonResponse({error: 'Event not found'}, 404);
+      }
+      if (event.host_discord_id === discordUser.id) {
+        return jsonResponse({error: 'Event hosts do not need to join'}, 400);
       }
       if (['completed', 'cancelled', 'archived'].includes(event.status)) {
         return jsonResponse({error: 'Registration is closed'}, 400);
