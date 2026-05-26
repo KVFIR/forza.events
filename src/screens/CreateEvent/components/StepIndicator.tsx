@@ -51,10 +51,12 @@ export function StepIndicator({step, freeNavigation, onStepClick}: StepIndicator
 export function FormAlerts({
   isConfigured,
   isSignedIn,
+  authInitializing,
   globalError,
 }: {
   isConfigured: boolean;
   isSignedIn: boolean;
+  authInitializing: boolean;
   globalError: string | null;
 }) {
   return (
@@ -66,7 +68,7 @@ export function FormAlerts({
           <code>npm run dev</code>.
         </Alert>
       )}
-      {isConfigured && !isSignedIn && (
+      {isConfigured && !isSignedIn && !authInitializing && (
         <Alert variant="neutral" className="mb-4">
           Open this app in Discord to save drafts, join events, and publish.
         </Alert>

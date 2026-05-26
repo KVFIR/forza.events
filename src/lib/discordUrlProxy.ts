@@ -20,5 +20,3 @@ export function setupDiscordSupabaseProxy(): void {
 
   patchUrlMappings([{prefix: DISCORD_SUPABASE_PROXY_PREFIX, target: host}]);
 }
-
-export const discordSupabaseProxyPrefix = DISCORD_SUPABASE_PROXY_PREFIX;

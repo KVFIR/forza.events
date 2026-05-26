@@ -175,9 +175,6 @@ export async function initDiscordActivity(): Promise<InitResult> {
     sdkInstance = sdk;
     await sdk.ready();
 
-    const {setupDiscordSupabaseProxy} = await import('./discordUrlProxy');
-    setupDiscordSupabaseProxy();
-
     const launchEventId = eventIdFromOpenEventCustomId(sdk.customId);
     const {user, accessToken} = await authenticateDiscordActivity(sdk, clientId);
 

@@ -4,7 +4,7 @@ import {EVENT_TYPES} from '../lib/eventTypes';
 import {EventList} from '../components/EventList';
 import {EventListMetaSelect} from '../components/EventListMetaSelect';
 import {useAuth} from '../context/AuthContext';
-import {discordSupabaseProxyPrefix} from '../lib/discordUrlProxy';
+import {DISCORD_SUPABASE_PROXY_PREFIX} from '../lib/supabaseEnv';
 import {usePublishedEvents} from '../hooks/usePublishedEvents';
 import {filterByEventType, sortEvents, type EventSortKey} from '../lib/eventList';
 
@@ -47,7 +47,7 @@ export function BrowseEvents() {
       ? 'Add Supabase URL and anon key to your environment, then reload.'
       : isStandalone
         ? 'Check your connection and try again.'
-        : `In Discord Developer Portal add URL mapping ${discordSupabaseProxyPrefix} → your-project.supabase.co`;
+        : `In Discord Developer Portal add URL mapping ${DISCORD_SUPABASE_PROXY_PREFIX} → your-project.supabase.co`;
 
   const emptyTitle = 'No events match these filters';
 

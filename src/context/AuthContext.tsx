@@ -18,20 +18,15 @@ import {
   setResolvedUser,
   type InitResult,
 } from '../lib/discord';
-import {
-  hasEmbedLaunchEventId,
-  resolveLaunchEventTarget,
-  shouldResolveLaunchRedirect,
-} from '../lib/launchRedirect';
+import {resolveLaunchEventTarget, shouldResolveLaunchRedirect} from '../lib/launchRedirect';
 import {loadDiscordSession} from '../lib/discordAuth';
 import {GUEST_USER} from '../lib/guestUser';
 import type {AppUser} from '../lib/types';
 
 type AuthState = {
   user: AppUser;
+  /** Discord Activity auth still in progress; does not block route rendering. */
   loading: boolean;
-  /** Shown on the boot screen while `loading` is true. */
-  bootMessage: string;
   discordReady: boolean;
   isConfigured: boolean;
   isSignedIn: boolean;
@@ -68,9 +63,6 @@ export function AuthProvider({children}: {children: ReactNode}) {
   const [guildId, setGuildId] = useState<string | null>(null);
   const [guildName, setGuildName] = useState<string | null>(null);
   const [authRetrying, setAuthRetrying] = useState(false);
-  const [bootMessage, setBootMessage] = useState(() =>
-    isStandaloneBrowser() ? 'Loading' : 'Connecting',
-  );
 
   const isConfigured = isApiConfigured();
   const isStandalone = isStandaloneBrowser();
@@ -89,10 +81,6 @@ export function AuthProvider({children}: {children: ReactNode}) {
         setDiscordReady(result.ready);
         setGuildId(result.guildId);
         setGuildName(result.guildName);
-
-        if (!cancelled && hasEmbedLaunchEventId(result)) {
-          setBootMessage('Opening your event');
-        }
 
         await navigateToLaunchTarget(result, isConfigured, navigate, () => cancelled);
       } finally {
@@ -132,7 +120,6 @@ export function AuthProvider({children}: {children: ReactNode}) {
       setGuildName(result.guildName);
 
       if (result.accessToken) {
-        setBootMessage(hasEmbedLaunchEventId(result) ? 'Opening your event' : 'Connecting');
         await navigateToLaunchTarget(result, isConfigured, navigate, () => false);
       }
     } finally {
@@ -144,7 +131,6 @@ export function AuthProvider({children}: {children: ReactNode}) {
     () => ({
       user,
       loading,
-      bootMessage,
       discordReady,
       isConfigured,
       isSignedIn,
@@ -159,7 +145,6 @@ export function AuthProvider({children}: {children: ReactNode}) {
     [
       user,
       loading,
-      bootMessage,
       discordReady,
       isConfigured,
       isSignedIn,

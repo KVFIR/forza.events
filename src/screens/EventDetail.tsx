@@ -77,8 +77,16 @@ export function EventDetail() {
   const loadedForIdRef = useRef<string | null>(null);
   const showLoadingUI = useLoadingUI(loading && !event);
   const {isJoined, toggleJoin, bumpRefresh, refreshKey} = useJoinedEvents();
-  const {user, refreshUser, getAccessToken, isSignedIn, isStandalone, authRetrying, retryDiscordAuth} =
-    useAuth();
+  const {
+    user,
+    refreshUser,
+    getAccessToken,
+    isSignedIn,
+    isStandalone,
+    loading: authInitializing,
+    authRetrying,
+    retryDiscordAuth,
+  } = useAuth();
   const discordToken = getAccessToken();
   const [gamertagOpen, setGamertagOpen] = useState(false);
   const [joining, setJoining] = useState(false);
@@ -265,7 +273,8 @@ export function EventDetail() {
   const registeredDrivers = resolveRegisteredDrivers(event, convoyLeader);
   const showResultsSection = shouldShowEventResults(event);
   const showParticipantActions = !isHost && !isDraft;
-  const needsSignInToParticipate = showParticipantActions && !isSignedIn && !isStandalone;
+  const needsSignInToParticipate =
+    showParticipantActions && !isSignedIn && !isStandalone && !authInitializing;
   const participationDisabled =
     !isSignedIn ||
     (!joined && (!registrationOpen || full || joining || cancelling));

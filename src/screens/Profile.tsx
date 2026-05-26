@@ -18,8 +18,17 @@ import {StatCard} from '../components/ui/StatCard';
 import {cn} from '../lib/cn';
 
 export function Profile() {
-  const {user, refreshUser, getAccessToken, isConfigured, isSignedIn, isStandalone, authRetrying, retryDiscordAuth} =
-    useAuth();
+  const {
+    user,
+    refreshUser,
+    getAccessToken,
+    isConfigured,
+    isSignedIn,
+    isStandalone,
+    loading: authInitializing,
+    authRetrying,
+    retryDiscordAuth,
+  } = useAuth();
   const {isJoined} = useJoinedEvents();
   const {allMine, active, completed, isLoading, loadError, refetch} = useMyEventsCatalog('all');
   const showLoadingUI = useLoadingUI(isLoading);
@@ -36,7 +45,7 @@ export function Profile() {
     (e) => isJoined(e) && isEventSuccessfullyCompleted(e),
   ).length;
 
-  if (isConfigured && !isStandalone && !isSignedIn) {
+  if (isConfigured && !isStandalone && !isSignedIn && !authInitializing) {
     return (
       <SignInRequiredState
         description="Connect your Discord account to view your profile and stats."

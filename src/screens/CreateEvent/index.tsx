@@ -18,7 +18,7 @@ import {useLoadingUI} from '../../hooks/useLoadingUI';
 
 export function CreateEvent() {
   const [publishConfirmOpen, setPublishConfirmOpen] = useState(false);
-  const {isStandalone, authRetrying, retryDiscordAuth} = useAuth();
+  const {isStandalone, loading: authInitializing, authRetrying, retryDiscordAuth} = useAuth();
   const form = useCreateEventForm();
   const showLoadingUI = useLoadingUI(form.loadingEdit);
   const {
@@ -139,7 +139,7 @@ export function CreateEvent() {
     return null;
   }
 
-  if (isConfigured && !isStandalone && !isSignedIn) {
+  if (isConfigured && !isStandalone && !isSignedIn && !authInitializing) {
     return (
       <SignInRequiredState
         description="Connect your Discord account to create, save, and publish events."
@@ -161,6 +161,7 @@ export function CreateEvent() {
       <FormAlerts
         isConfigured={isConfigured}
         isSignedIn={isSignedIn}
+        authInitializing={authInitializing}
         globalError={globalError}
       />
 
