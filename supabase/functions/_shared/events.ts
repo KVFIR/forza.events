@@ -138,6 +138,10 @@ function listTrackCodes(event: EmbedEventInput): string[] {
 }
 
 function formatTrackCodes(codes: string[]): string {
+  if (codes.length === 1) {
+    return truncateFieldValue(inlineCode(codes[0]));
+  }
+
   let result = '';
   for (let i = 0; i < codes.length; i++) {
     const line = `${i + 1}. ${inlineCode(codes[i])}`;
@@ -165,14 +169,14 @@ function formatCarName(car: EmbedAllowedCar): string {
 }
 
 function formatRestrictedCarBlock(car: EmbedAllowedCar): string {
-  const parts = [formatCarName(car), inlineCode(formatMaxPi(car.max_pi))];
+  const coded: string[] = [inlineCode(formatMaxPi(car.max_pi))];
   if (car.tune_share_code?.trim()) {
-    parts.push(inlineCode(car.tune_share_code));
+    coded.push(inlineCode(car.tune_share_code));
   }
   for (const rule of (car.car_restrictions ?? []).filter(Boolean)) {
-    parts.push(inlineCode(rule));
+    coded.push(inlineCode(rule));
   }
-  return parts.join(' ');
+  return [formatCarName(car), ...coded].join(' · ');
 }
 
 function splitOversizedBlock(block: string, max = EMBED_FIELD_VALUE_MAX): string[] {
@@ -187,12 +191,13 @@ function splitOversizedBlock(block: string, max = EMBED_FIELD_VALUE_MAX): string
   return parts;
 }
 
-function chunkEmbedFieldValues(blocks: string[], max = EMBED_FIELD_VALUE_MAX): string[] {
+/** Join car lines with spaces only (no blank lines between cars). */
+function chunkCarFieldValues(blocks: string[], max = EMBED_FIELD_VALUE_MAX): string[] {
   const normalized = blocks.flatMap((block) => splitOversizedBlock(block, max));
   const chunks: string[] = [];
   let current = '';
   for (const block of normalized) {
-    const piece = chunks.length > 0 || current ? `\n${block}` : block;
+    const piece = current ? ` ${block}` : block;
     if (current.length + piece.length > max && current) {
       chunks.push(truncateFieldValue(current, max));
       current = block;
@@ -220,7 +225,7 @@ function fitRestrictedCarFields(
   for (let count = cars.length; count >= 1; count--) {
     const omitted = cars.length - count;
     const blocks = cars.slice(0, count).map(formatRestrictedCarBlock);
-    let values = chunkEmbedFieldValues(blocks);
+    let values = chunkCarFieldValues(blocks);
 
     if (omitted > 0) {
       const suffix = omittedSuffix(omitted, 'car');
@@ -258,7 +263,7 @@ function fitRestrictedCarFields(
 
 function formatOpenBuildCarField(event: EmbedEventInput): string {
   const pi = event.max_pi ? formatMaxPi(event.max_pi) : 'PI cap';
-  return `Open build ${inlineCode(pi)}`;
+  return `Open build · ${inlineCode(pi)}`;
 }
 
 function formatOpenBuildRestrictionsField(event: EmbedEventInput): string | null {
