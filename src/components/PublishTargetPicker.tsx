@@ -1,7 +1,7 @@
 import {useCallback, useEffect, useState} from 'react';
 import {listChannels, listGuilds} from '../lib/api';
 import {getGuildContext} from '../lib/discord';
-import {buildBotInstallUrl, openBotInstallUrl} from '../lib/discordInstall';
+import {buildBotInstallUrl, getBotInstallRedirectUri, openBotInstallUrl} from '../lib/discordInstall';
 import {Button} from './ui/Button';
 import {InlineLoading} from './ui/InlineLoading';
 
@@ -30,6 +30,7 @@ export function PublishTargetPicker({
   const [loadingGuilds, setLoadingGuilds] = useState(true);
   const [loadingChannels, setLoadingChannels] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const botInstallRedirect = getBotInstallRedirectUri();
   const canAddBot = Boolean(buildBotInstallUrl());
   const activityGuildId = getGuildContext().guildId;
 
@@ -107,8 +108,16 @@ export function PublishTargetPicker({
             )}
             <p className="text-[10px] leading-relaxed text-muted">
               One install adds the bot so events can be announced in a channel. Launching from App
-              Launcher alone is not enough.
+              Launcher alone is not enough. After approving in Discord, return here and tap Refresh
+              list.
             </p>
+            {!botInstallRedirect && (
+              <p className="text-[10px] leading-relaxed text-amber-200/90">
+                Set <code className="text-amber-50">APP_ORIGIN</code> (or{' '}
+                <code className="text-amber-50">BOT_INSTALL_REDIRECT_URI</code>) in env and add that
+                URL under OAuth2 → Redirects in the Discord Developer Portal.
+              </p>
+            )}
           </div>
         ) : (
           <select

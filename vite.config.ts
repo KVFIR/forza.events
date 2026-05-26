@@ -11,6 +11,9 @@ function clientEnv(env: Record<string, string>) {
     VITE_API_BASE_URL: env.VITE_API_BASE_URL || '',
     VITE_DISCORD_REDIRECT_URI:
       env.VITE_DISCORD_REDIRECT_URI || env.DISCORD_REDIRECT_URI || '',
+    VITE_APP_ORIGIN: env.VITE_APP_ORIGIN || env.APP_ORIGIN || '',
+    VITE_BOT_INSTALL_REDIRECT_URI:
+      env.VITE_BOT_INSTALL_REDIRECT_URI || env.BOT_INSTALL_REDIRECT_URI || '',
   };
 }
 
@@ -39,6 +42,10 @@ export default defineConfig(({mode}) => {
       'import.meta.env.VITE_API_BASE_URL': JSON.stringify(client.VITE_API_BASE_URL),
       'import.meta.env.VITE_DISCORD_REDIRECT_URI': JSON.stringify(
         client.VITE_DISCORD_REDIRECT_URI,
+      ),
+      'import.meta.env.VITE_APP_ORIGIN': JSON.stringify(client.VITE_APP_ORIGIN),
+      'import.meta.env.VITE_BOT_INSTALL_REDIRECT_URI': JSON.stringify(
+        client.VITE_BOT_INSTALL_REDIRECT_URI,
       ),
     },
     build: {

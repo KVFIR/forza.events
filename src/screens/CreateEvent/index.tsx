@@ -15,7 +15,6 @@ export function CreateEvent() {
   const form = useCreateEventForm();
   const showLoadingUI = useLoadingUI(form.loadingEdit);
   const {
-    editId,
     user,
     token,
     isConfigured,
@@ -27,6 +26,7 @@ export function CreateEvent() {
     globalError,
     setGlobalError,
     saving,
+    eventId,
     setEventId,
     showPublishModal,
     setShowPublishModal,
@@ -65,6 +65,9 @@ export function CreateEvent() {
     carCount: values.eventCars.length,
   });
 
+  const hasDraftId = Boolean(eventId);
+  const draftFlow = !isPublished;
+
   async function handleSaveDraft() {
     const id = await persistDraft();
     if (id) navigate('/my-events');
@@ -80,6 +83,7 @@ export function CreateEvent() {
     const publishErr = validatePublish();
     if (publishErr) {
       setGlobalError(publishErr);
+      window.scrollTo({top: 0, behavior: 'smooth'});
       return;
     }
     const id = await persistDraft();
@@ -94,8 +98,17 @@ export function CreateEvent() {
 
   function onPublishModalConfirm() {
     void (async () => {
+      const publishErr = validatePublish();
+      if (publishErr) {
+        setGlobalError(publishErr);
+        setShowPublishModal(false);
+        window.scrollTo({top: 0, behavior: 'smooth'});
+        return;
+      }
       const id = await persistDraft();
-      if (id) await confirmPublish(id);
+      if (!id) return;
+      if (!values.targetChannelId) return;
+      await confirmPublish(id);
     })();
   }
 
@@ -199,7 +212,41 @@ export function CreateEvent() {
             Back
           </Button>
         )}
-        {step === 3 && editId && (
+
+        {step === 3 && draftFlow && (
+          <>
+            <Button
+              variant="primary"
+              className="w-full"
+              disabled={saving || !canPersist}
+              onClick={() => void handlePublishClick()}
+            >
+              {saving ? 'Working…' : 'Publish event'}
+            </Button>
+            <Button
+              variant="secondary"
+              className="w-full"
+              disabled={saving || !canPersist}
+              onClick={() =>
+                void (hasDraftId ? handleSaveChanges() : handleSaveDraft())
+              }
+            >
+              {saving ? 'Saving…' : hasDraftId ? 'Save changes' : 'Save as draft'}
+            </Button>
+            {hasDraftId && (
+              <Button
+                variant="danger"
+                className="w-full"
+                disabled={saving || !canPersist}
+                onClick={() => void deleteDraft()}
+              >
+                Delete draft
+              </Button>
+            )}
+          </>
+        )}
+
+        {step === 3 && isPublished && (
           <Button
             variant="primary"
             className="w-full"
@@ -207,46 +254,6 @@ export function CreateEvent() {
             onClick={() => void handleSaveChanges()}
           >
             {saving ? 'Saving…' : 'Save changes'}
-          </Button>
-        )}
-        {step === 3 && !editId && (
-          <>
-            <Button
-              variant="secondary"
-              className="w-full"
-              disabled={saving}
-              onClick={() => void handleSaveDraft()}
-            >
-              Save as draft
-            </Button>
-            <Button
-              variant="primary"
-              className="w-full"
-              disabled={saving || !canPersist}
-              onClick={() => void handlePublishClick()}
-            >
-              {saving ? 'Saving…' : 'Publish event'}
-            </Button>
-          </>
-        )}
-        {step === 3 && editId && !isPublished && (
-          <Button
-            variant="primary"
-            className="w-full"
-            disabled={saving || !canPersist}
-            onClick={() => void handlePublishClick()}
-          >
-            {saving ? 'Publishing…' : 'Publish event'}
-          </Button>
-        )}
-        {step === 3 && editId && !isPublished && (
-          <Button
-            variant="danger"
-            className="w-full"
-            disabled={saving}
-            onClick={() => void deleteDraft()}
-          >
-            Delete draft
           </Button>
         )}
       </div>

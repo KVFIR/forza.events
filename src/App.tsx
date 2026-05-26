@@ -26,6 +26,9 @@ const Profile = lazy(() => import('./screens/Profile').then((m) => ({default: m.
 const AuthCallback = lazy(() =>
   import('./screens/AuthCallback').then((m) => ({default: m.AuthCallback})),
 );
+const BotInstalled = lazy(() =>
+  import('./screens/BotInstalled').then((m) => ({default: m.BotInstalled})),
+);
 
 function RouteFallback() {
   const showLoading = useLoadingUI(true);
@@ -54,6 +57,7 @@ export default function App() {
                     <Route path="/create" element={<CreateEvent />} />
                     <Route path="/profile" element={<Profile />} />
                     <Route path="/auth/callback" element={<AuthCallback />} />
+                    <Route path="/bot-installed" element={<BotInstalled />} />
                     <Route path="*" element={<Navigate to="/" replace />} />
                   </Routes>
                 </Suspense>
