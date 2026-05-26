@@ -17,7 +17,8 @@ If any older note, prototype, or backlog item conflicts with this spec, the froz
 - **Track code model:** track share codes are **optional** (ordered list when provided).
 - **Event types:** `Road racing` (blue), `Dirt racing` (orange), `Touge` (purple), `Car/Drift Meet` (red), `Cruise` (green).
 - **Editing policy:** drafts are freely editable. Published events are editable only until the event starts.
-- **Post-start policy:** after start, the only organizer actions allowed are `submit results` and `cancel event`.
+- **Post-start policy:** after start, the only **host** actions allowed are `submit results` and `cancel event` (permissions; not guild admins).
+- **Organiser (display):** browse/cards show the target Discord **server name** when `guild_id` is set; otherwise the **host** display name. The creating user remains **host** for all organizer permissions (`host_discord_id`).
 - **Discord sync:** published event embeds auto-sync all participant-facing fields, including cover image and description.
 - **Capacity policy:** full events block new joins; waitlists are out of MVP.
 - **Results model:** results support finishing positions, `DNF`, and `DNS`.
@@ -65,7 +66,7 @@ The user stays in Discord:
 
 - Drafts remain fully editable.
 - Published events are editable only before the start time.
-- After start, the organizer can only cancel the event or submit results.
+- After start, the host can only cancel the event or submit results.
 
 ### Submit results
 

@@ -45,6 +45,7 @@ import {useAuth} from '../context/AuthContext';
 import {useEventLiveUpdates} from '../hooks/useEventLiveUpdates';
 import {piToClass} from '../lib/pi';
 import {formatLobbyCount, LOBBY_TOTAL_PLAYERS} from '../lib/constants';
+import {resolveOrganiserLabel} from '../lib/organiser';
 import {participationButtonLabel, participationButtonVariant} from '../lib/eventActions';
 import {cn} from '../lib/cn';
 
@@ -275,7 +276,7 @@ export function EventDetail() {
           {event.description && (
             <p className="mt-1.5 text-sm leading-relaxed text-slate-400">{event.description}</p>
           )}
-          <p className="mt-1 text-xs text-muted">by {event.hostUsername}</p>
+          <p className="mt-1 text-xs text-muted">by {resolveOrganiserLabel(event)}</p>
         </div>
         {showDraftActions ? (
           <div className="flex shrink-0 flex-col gap-2">

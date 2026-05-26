@@ -22,6 +22,11 @@ Lessons from implementation work (keep in sync when behavior changes).
 
 ## Product / data model
 
+- **Roles (do not conflate):**
+  - **Organiser (display only):** `resolveOrganiserLabel()` in `src/lib/organiser.ts` — `guildName` when set, else `hostUsername`. Used on event cards and detail (`by …`). Not a DB column.
+  - **Host (`host_discord_id`):** Discord user who created the event; all edit/publish/delete/cancel/results permissions stay on the host.
+  - **Convoy leader (`lobby_leader_*`):** in-game Forza lobby leader (Xbox gamertag); may differ from the host.
+  - **Publish target:** `guild_id` + `channel_id` (Discord server + announcement channel). MVP still requires `guild_id` on draft; optional guild for personal events is deferred.
 - **Event types:** `road` (Road racing), `dirt`, `touge`, `drift` (Car/Drift Meet), `cruise`. Labels/colors live in `src/lib/eventTypes.ts` and `supabase/functions/_shared/eventTypes.ts`. Type is required on save/publish; track share codes are optional.
 - **Draft events** (`status: draft`) are **not** in the public browse feed. RLS policy `status != 'draft'` blocks anon PostgREST reads.
 - Hosts see drafts only via **authenticated Edge paths** (`host-drafts` or `browse-events` with `host_drafts: true` + `x-discord-access-token`).

@@ -7,6 +7,7 @@ import {eventTypeMeta} from '../lib/eventTypes';
 import {cn} from '../lib/cn';
 import {isDraftEvent} from '../lib/eventList';
 import {formatLobbyCount} from '../lib/constants';
+import {resolveOrganiserLabel} from '../lib/organiser';
 import {defaultCoverPath} from '../lib/eventCovers';
 import {piToClass} from '../lib/pi';
 import {useAuth} from '../context/AuthContext';
@@ -98,6 +99,7 @@ export function EventCard({event}: Props) {
     !draft && !ended && (event.status === 'full' || event.currentPlayers >= event.maxPlayers);
   const {user} = useAuth();
   const isHost = event.hostDiscordId === user.discordId;
+  const organiserLabel = resolveOrganiserLabel(event);
   const coverSrc = event.coverImageUrl ?? defaultCoverPath(event.type);
   const [coverReady, setCoverReady] = useState(false);
   const cardTo = draft && isHost ? `/create?edit=${event.id}` : `/event/${event.id}`;
@@ -140,7 +142,7 @@ export function EventCard({event}: Props) {
                 {event.title}
               </h2>
               <p className="mt-0.5 truncate text-xs text-slate-400">
-                {event.hostUsername}
+                {organiserLabel}
                 {isHost && (
                   <span className="ml-1.5 text-[9px] font-bold uppercase tracking-widest text-accent-purple-light">
                     · You
