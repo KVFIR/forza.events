@@ -6,13 +6,13 @@ import {PageLoading} from './ui/PageLoading';
 import {Spinner} from './ui/Spinner';
 import {useLoadingUI} from '../hooks/useLoadingUI';
 import type {ForzaEvent} from '../lib/types';
-import type {PublishedEventsLoadError} from '../lib/events';
+import type {HostDraftsLoadError, PublishedEventsLoadError} from '../lib/events';
 
 type Props = {
   events: ForzaEvent[];
   isLoading: boolean;
   isRefreshing?: boolean;
-  loadError?: PublishedEventsLoadError | null;
+  loadError?: PublishedEventsLoadError | HostDraftsLoadError | null;
   onRetry?: () => void;
   emptyTitle: string;
   emptyDescription?: string;

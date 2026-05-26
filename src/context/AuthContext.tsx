@@ -13,8 +13,10 @@ import {
   getDiscordAccessToken,
   initDiscordActivity,
   isStandaloneBrowser,
+  setDiscordSession,
   setResolvedUser,
 } from '../lib/discord';
+import {loadDiscordSession} from '../lib/discordAuth';
 import {GUEST_USER} from '../lib/guestUser';
 import type {AppUser} from '../lib/types';
 
@@ -43,7 +45,8 @@ export function AuthProvider({children}: {children: ReactNode}) {
 
   const isConfigured = isApiConfigured();
   const isStandalone = isStandaloneBrowser();
-  const isSignedIn = Boolean(user.discordId && getDiscordAccessToken());
+  const accessToken = getDiscordAccessToken();
+  const isSignedIn = Boolean(user.discordId && accessToken);
 
   useEffect(() => {
     let cancelled = false;
@@ -74,6 +77,14 @@ export function AuthProvider({children}: {children: ReactNode}) {
       cancelled = true;
     };
   }, [navigate, isConfigured]);
+
+  useEffect(() => {
+    const session = loadDiscordSession();
+    if (!session?.accessToken || !session.user.discordId) return;
+    if (user.discordId === session.user.discordId && accessToken) return;
+    setDiscordSession(session.accessToken, session.user);
+    setUser(session.user);
+  }, [user.discordId, accessToken]);
 
   const refreshUser = useCallback((next: AppUser) => {
     setUser(next);

@@ -1,7 +1,10 @@
 import {useCallback, useEffect, useRef, useState} from 'react';
 import {useAuth} from '../context/AuthContext';
 import {useJoinedEvents} from '../context/JoinedEventsContext';
-import {fetchHostDraftEvents} from '../lib/events';
+import {
+  fetchHostDraftEvents,
+  type HostDraftsLoadError,
+} from '../lib/events';
 import {applyDevLoadingDelay} from '../lib/devLoadingDelay';
 import type {ForzaEvent} from '../lib/types';
 
@@ -10,29 +13,39 @@ export function useHostDrafts() {
   const {refreshKey} = useJoinedEvents();
   const [drafts, setDrafts] = useState<ForzaEvent[]>([]);
   const [isLoading, setIsLoading] = useState(false);
+  const [loadError, setLoadError] = useState<HostDraftsLoadError | null>(null);
   const loadedOnceRef = useRef(false);
 
-  const refetch = useCallback(() => {
+  const runFetch = useCallback(() => {
     const token = getAccessToken();
     if (!isSignedIn || !token) {
       setDrafts([]);
+      setLoadError(null);
       return Promise.resolve();
     }
 
     setIsLoading(true);
     return applyDevLoadingDelay()
       .then(() => fetchHostDraftEvents(token))
-      .then(setDrafts)
+      .then(({events, error}) => {
+        setDrafts(events);
+        setLoadError(error);
+      })
       .finally(() => {
         loadedOnceRef.current = true;
         setIsLoading(false);
       });
   }, [getAccessToken, isSignedIn]);
 
+  const refetch = useCallback(() => {
+    void runFetch();
+  }, [runFetch]);
+
   useEffect(() => {
     const token = getAccessToken();
     if (!isSignedIn || !token) {
       setDrafts([]);
+      setLoadError(null);
       setIsLoading(false);
       return;
     }
@@ -42,8 +55,11 @@ export function useHostDrafts() {
 
     void applyDevLoadingDelay()
       .then(() => fetchHostDraftEvents(token))
-      .then((next) => {
-        if (!cancelled) setDrafts(next);
+      .then(({events, error}) => {
+        if (!cancelled) {
+          setDrafts(events);
+          setLoadError(error);
+        }
       })
       .finally(() => {
         if (!cancelled) {
@@ -57,5 +73,5 @@ export function useHostDrafts() {
     };
   }, [refreshKey, isSignedIn, getAccessToken]);
 
-  return {drafts, isLoading, refetch};
+  return {drafts, isLoading, loadError, refetch};
 }

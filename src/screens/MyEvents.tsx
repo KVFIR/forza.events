@@ -16,25 +16,30 @@ export function MyEvents() {
   const navigate = useNavigate();
   const [scope, setScope] = useState<MyEventsScope>('all');
   const {isSignedIn, loading: authLoading} = useAuth();
-  const {filtered, isLoading, isRefreshing, loadError, refetch} = useMyEventsCatalog(scope);
+  const {filtered, isLoading, isRefreshing, combinedLoadError, refetch} =
+    useMyEventsCatalog(scope);
 
   const emptyTitle =
     !authLoading && !isSignedIn
       ? 'Unable to load your events'
-      : loadError
-        ? 'Could not load your events'
+        : combinedLoadError === 'unauthorized'
+          ? 'Discord session expired'
+          : combinedLoadError
+            ? 'Could not load your events'
         : scope === 'joined'
           ? 'No joined events yet'
           : 'No events in this list yet';
 
   const emptyDescription =
-    !authLoading && !isSignedIn
-      ? 'Open this app in Discord to see events you host or join.'
-      : loadError
-        ? 'Check your connection and try again.'
-        : scope !== 'joined' && isSignedIn
-          ? 'Saved drafts and published events you host appear here.'
-          : undefined;
+    combinedLoadError === 'unauthorized'
+      ? 'Sign in with Discord again to load your drafts.'
+      : !authLoading && !isSignedIn
+        ? 'Open this app in Discord to see events you host or join.'
+        : combinedLoadError
+          ? 'Deploy the host-drafts Edge Function or check the browser console.'
+          : scope !== 'joined' && isSignedIn
+            ? 'Saved drafts and published events you host appear here.'
+            : undefined;
 
   return (
     <div className="pb-8 pt-5">
@@ -42,7 +47,7 @@ export function MyEvents() {
         events={filtered}
         isLoading={isLoading}
         isRefreshing={isRefreshing}
-        loadError={loadError}
+        loadError={combinedLoadError}
         onRetry={refetch}
         emptyTitle={emptyTitle}
         emptyDescription={emptyDescription}
@@ -51,7 +56,7 @@ export function MyEvents() {
             ? undefined
             : scope !== 'all'
               ? {label: 'Clear filters', onClick: () => setScope('all')}
-              : !loadError && isSignedIn
+              : !combinedLoadError && isSignedIn
                 ? {label: 'Create event', onClick: () => navigate('/create')}
                 : undefined
         }

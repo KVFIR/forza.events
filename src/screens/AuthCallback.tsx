@@ -3,9 +3,11 @@ import {useNavigate, useSearchParams} from 'react-router-dom';
 import {exchangeToken, isApiConfigured} from '../lib/api';
 import {getDiscordRedirectUri, saveDiscordSession} from '../lib/discordAuth';
 import {setDiscordSession} from '../lib/discord';
+import {useAuth} from '../context/AuthContext';
 
 export function AuthCallback() {
   const navigate = useNavigate();
+  const {refreshUser} = useAuth();
   const [params] = useSearchParams();
   const [error, setError] = useState<string | null>(null);
 
@@ -36,7 +38,8 @@ export function AuthCallback() {
         if (cancelled) return;
         saveDiscordSession({accessToken: result.access_token, user: result.user});
         setDiscordSession(result.access_token, result.user);
-        navigate('/', {replace: true});
+        refreshUser(result.user);
+        navigate('/my-events', {replace: true});
       } catch (e) {
         if (!cancelled) setError(String(e));
       }

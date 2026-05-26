@@ -1,4 +1,4 @@
-import {invokeBrowseEvents} from './api';
+import {invokeBrowseEvents, invokeHostDrafts} from './api';
 import {getSupabase, isSupabaseConfigured} from './supabase';
 import {isDiscordActivityFrame} from './supabaseEnv';
 import {searchCarCatalog} from './carCatalog';
@@ -321,14 +321,44 @@ async function fetchEventsViaEdge(options: {
   }
 }
 
+export type HostDraftsLoadError = 'unauthorized' | 'fetch_failed';
+
+export type HostDraftsResult = {
+  events: ForzaEvent[];
+  error: HostDraftsLoadError | null;
+};
+
 /** Draft events for the signed-in host (not shown on public browse). */
 export async function fetchHostDraftEvents(
   discordToken: string,
-): Promise<ForzaEvent[]> {
-  if (!isSupabaseConfigured()) return [];
+): Promise<HostDraftsResult> {
+  if (!isSupabaseConfigured()) {
+    return {events: [], error: null};
+  }
 
-  const events = await fetchEventsViaEdge({hostDrafts: true, discordToken});
-  return events ?? [];
+  try {
+    const {data} = await invokeHostDrafts(discordToken);
+    const events = (data ?? []).map((row) => mapDbEventWithRelations(row as DbEventRow));
+    const onlyDrafts = events.filter((e) => e.lifecycle === 'draft');
+    return {events: onlyDrafts, error: null};
+  } catch (err) {
+    const message = err instanceof Error ? err.message : String(err);
+    console.error('host-drafts', err);
+    if (/unauthorized/i.test(message)) {
+      return {events: [], error: 'unauthorized'};
+    }
+
+    // Backward compatibility if host-drafts is not deployed yet.
+    try {
+      const fallback = await fetchEventsViaEdge({hostDrafts: true, discordToken});
+      if (fallback === null) return {events: [], error: 'fetch_failed'};
+      const events = fallback.filter((e) => e.lifecycle === 'draft');
+      return {events, error: null};
+    } catch (fallbackErr) {
+      console.error('browse-events host_drafts', fallbackErr);
+      return {events: [], error: 'fetch_failed'};
+    }
+  }
 }
 
 export async function fetchPublishedEventsResult(

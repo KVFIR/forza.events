@@ -52,6 +52,12 @@ export async function invokeBrowseEvents(
   return invoke<{data: unknown[]}>('browse-events', body, discordAccessToken);
 }
 
+export async function invokeHostDrafts(
+  discordAccessToken: string,
+): Promise<{data: unknown[]}> {
+  return invoke<{data: unknown[]}>('host-drafts', {}, discordAccessToken);
+}
+
 export async function exchangeToken(
   code: string,
   options?: {guildId?: string; guildName?: string; redirectUri?: string},

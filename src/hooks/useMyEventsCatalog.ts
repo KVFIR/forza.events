@@ -12,12 +12,17 @@ import {useHostDrafts} from './useHostDrafts';
 import {usePublishedEvents} from './usePublishedEvents';
 
 export function useMyEventsCatalog(scope: MyEventsScope = 'all') {
-  const {user} = useAuth();
+  const {user, isSignedIn} = useAuth();
   const {isJoined} = useJoinedEvents();
   const {events, isLoading, isRefreshing, loadError, refetch} = usePublishedEvents({
     includeCompleted: true,
   });
-  const {drafts, isLoading: draftsLoading, refetch: refetchDrafts} = useHostDrafts();
+  const {
+    drafts,
+    isLoading: draftsLoading,
+    loadError: draftsLoadError,
+    refetch: refetchDrafts,
+  } = useHostDrafts();
 
   const sortedDrafts = useMemo(() => sortHostDrafts(drafts), [drafts]);
 
@@ -49,6 +54,9 @@ export function useMyEventsCatalog(scope: MyEventsScope = 'all') {
     refetchDrafts();
   };
 
+  const combinedLoadError =
+    loadError ?? (scope !== 'joined' && isSignedIn ? draftsLoadError : null);
+
   return {
     filtered,
     allMine,
@@ -58,6 +66,8 @@ export function useMyEventsCatalog(scope: MyEventsScope = 'all') {
     isLoading: isLoading || draftsLoading,
     isRefreshing,
     loadError,
+    draftsLoadError,
+    combinedLoadError,
     refetch: refetchAll,
   };
 }
