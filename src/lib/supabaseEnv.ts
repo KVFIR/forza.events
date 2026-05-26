@@ -1,6 +1,14 @@
 /** Discord Activity URL mapping prefix (must match Developer Portal). */
 export const DISCORD_SUPABASE_PROXY_PREFIX = '/supabase';
 
+/** Local Vite dev — read PostgREST directly (skip Edge) so Browse works without function deploy. */
+export function shouldUseDirectSupabaseReads(): boolean {
+  if (typeof window === 'undefined') return false;
+  const host = window.location.hostname;
+  if (host === 'localhost' || host === '127.0.0.1') return true;
+  return !isDiscordActivityFrame();
+}
+
 export function isDiscordActivityFrame(): boolean {
   if (typeof window === 'undefined') return false;
   try {

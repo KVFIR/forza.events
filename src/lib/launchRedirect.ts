@@ -15,10 +15,10 @@ export function shouldResolveLaunchRedirect(result: LaunchRedirectInput): boolea
 
 export async function resolveLaunchEventTarget(
   result: LaunchRedirectInput,
-  fetchIntent: (token: string, guildId: string) => Promise<string | null>,
+  fetchIntent: (token: string, guildId: string | null) => Promise<string | null>,
 ): Promise<string | null> {
   if (!result.ready || !result.accessToken) return null;
   if (result.launchEventId) return result.launchEventId;
   if (result.guildId) return fetchIntent(result.accessToken, result.guildId);
-  return null;
+  return fetchIntent(result.accessToken, null);
 }

@@ -79,6 +79,11 @@ export function isRegistrationOpen(event: ForzaEvent): boolean {
   return !eventHasStarted(event);
 }
 
+/** Join/leave window — roster locks after start (leave disabled). */
+export function canLeaveRegistration(event: ForzaEvent): boolean {
+  return isRegistrationOpen(event);
+}
+
 /** True once publish-event has posted the Discord announcement embed. */
 export function isPublishedToDiscord(event: ForzaEvent): boolean {
   return Boolean(event.discordMessageId?.trim());

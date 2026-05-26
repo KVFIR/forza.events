@@ -27,6 +27,7 @@ export type EmbedEventInput = {
   id: string;
   title: string;
   type: string;
+  status?: string;
   starts_at: string;
   max_players: number;
   current_players: number;
@@ -105,10 +106,9 @@ function embedFieldName(label: string, part?: string): string {
 function measureEmbedChars(parts: {
   title: string;
   description?: string;
-  footerText: string;
   fields: {name: string; value: string}[];
 }): number {
-  let n = parts.title.length + parts.footerText.length;
+  let n = parts.title.length;
   if (parts.description) n += parts.description.length;
   for (const f of parts.fields) {
     n += f.name.length + f.value.length;
@@ -128,9 +128,17 @@ function inlineCode(text: string): string {
 }
 
 function listTrackCodes(event: EmbedEventInput): string[] {
-  return [event.event_share_code, ...(event.track_codes ?? [])].filter((code): code is string =>
-    Boolean(code?.trim()),
-  );
+  const seen = new Set<string>();
+  const codes: string[] = [];
+  for (const raw of [event.event_share_code, ...(event.track_codes ?? [])]) {
+    const code = raw?.trim();
+    if (!code) continue;
+    const key = code.toLowerCase();
+    if (seen.has(key)) continue;
+    seen.add(key);
+    codes.push(code);
+  }
+  return codes;
 }
 
 function formatTrackCodes(codes: string[]): string {
@@ -187,13 +195,13 @@ function splitOversizedBlock(block: string, max = EMBED_FIELD_VALUE_MAX): string
   return parts;
 }
 
-/** Join car lines with spaces only (no blank lines between cars). */
+/** One car per line within the embed field value. */
 function chunkCarFieldValues(blocks: string[], max = EMBED_FIELD_VALUE_MAX): string[] {
   const normalized = blocks.flatMap((block) => splitOversizedBlock(block, max));
   const chunks: string[] = [];
   let current = '';
   for (const block of normalized) {
-    const piece = current ? ` ${block}` : block;
+    const piece = current ? `\n${block}` : block;
     if (current.length + piece.length > max && current) {
       chunks.push(truncateFieldValue(current, max));
       current = block;
@@ -266,9 +274,70 @@ function formatOpenBuildRestrictionsField(event: EmbedEventInput): string | null
   return resolveOpenBuildNotes(event);
 }
 
-function embedFooter(guildName?: string | null): {text: string} | undefined {
-  const server = guildName?.trim();
-  return server ? {text: server} : undefined;
+const EMBED_STATUS_COLORS: Record<string, number> = {
+  cancelled: 0x6b7280,
+  completed: 0x374151,
+  archived: 0x374151,
+};
+
+type EmbedLifecycleUi = {
+  titlePrefix: string;
+  color: number;
+  statusField: EmbedField | null;
+  buttonLabel: string;
+  buttonDisabled: boolean;
+};
+
+function resolveEmbedLifecycleUi(
+  status: string | undefined,
+  defaultColor: number,
+): EmbedLifecycleUi {
+  switch (status) {
+    case 'cancelled':
+      return {
+        titlePrefix: '🚫 CANCELLED · ',
+        color: EMBED_STATUS_COLORS.cancelled,
+        statusField: {
+          name: embedFieldName('Status'),
+          value: 'This event was **cancelled** by the host. Registration is closed.',
+          inline: false,
+        },
+        buttonLabel: 'Event cancelled',
+        buttonDisabled: true,
+      };
+    case 'completed':
+      return {
+        titlePrefix: '✅ COMPLETED · ',
+        color: EMBED_STATUS_COLORS.completed,
+        statusField: {
+          name: embedFieldName('Status'),
+          value: 'Results are in — open **FORZA.EVENTS** for standings.',
+          inline: false,
+        },
+        buttonLabel: 'View in FORZA.EVENTS',
+        buttonDisabled: false,
+      };
+    case 'archived':
+      return {
+        titlePrefix: '📦 ARCHIVED · ',
+        color: EMBED_STATUS_COLORS.archived,
+        statusField: {
+          name: embedFieldName('Status'),
+          value: 'This event is archived.',
+          inline: false,
+        },
+        buttonLabel: 'View in FORZA.EVENTS',
+        buttonDisabled: false,
+      };
+    default:
+      return {
+        titlePrefix: '',
+        color: defaultColor,
+        statusField: null,
+        buttonLabel: 'Open in FORZA.EVENTS',
+        buttonDisabled: false,
+      };
+  }
 }
 
 export function buildEventEmbed(event: EmbedEventInput) {
@@ -279,13 +348,14 @@ export function buildEventEmbed(event: EmbedEventInput) {
   const coverUrl = resolveCoverAbsolute(event.type, event.cover_image_url, siteOrigin);
   const isOpenBuild = event.car_rule_mode !== 'restricted_list';
   const lobbyCount = formatLobbyCount(event.current_players);
+  const typeColor = eventTypeEmbedColor(event.type);
+  const lifecycle = resolveEmbedLifecycleUi(event.status, typeColor);
 
-  const title = event.title.slice(0, EMBED_TITLE_MAX);
+  const rawTitle = `${lifecycle.titlePrefix}${event.title}`.trim();
+  const title = rawTitle.slice(0, EMBED_TITLE_MAX);
   const description = event.description?.trim()
     ? event.description.slice(0, EMBED_DESCRIPTION_MAX)
     : undefined;
-  const footer = embedFooter(event.guild_name);
-
   const participantsField: EmbedField = {
     name: embedFieldName(`👤 Participants (${lobbyCount})`),
     value: truncateFieldValue(`Convoy leader: ${event.lobby_leader_gamertag.trim() || 'TBD'}`),
@@ -307,20 +377,20 @@ export function buildEventEmbed(event: EmbedEventInput) {
   const restrictionsField: EmbedField | null = restrictionsText
     ? {
         name: embedFieldName('🔧 Restrictions'),
-        value: truncateFieldValue(inlineCode(restrictionsText)),
+        value: truncateFieldValue(restrictionsText),
         inline: false,
       }
     : null;
 
   const skeletonFields = [
     ...fixedFields,
+    ...(lifecycle.statusField ? [lifecycle.statusField] : []),
     ...(restrictionsField ? [restrictionsField] : []),
     participantsField,
   ];
   const skeletonChars = measureEmbedChars({
     title,
     description,
-    footerText: footer?.text ?? '',
     fields: skeletonFields,
   });
   const skeletonFieldCount = skeletonFields.length + (isOpenBuild ? 1 : 0);
@@ -355,7 +425,7 @@ export function buildEventEmbed(event: EmbedEventInput) {
 
   if (!isOpenBuild && carFit) {
     while (
-      measureEmbedChars({title, description, footerText: footer?.text ?? '', fields: finalFields}) >
+      measureEmbedChars({title, description, fields: finalFields}) >
         EMBED_TOTAL_CHAR_MAX &&
       carFit.shown > 1
     ) {
@@ -367,10 +437,9 @@ export function buildEventEmbed(event: EmbedEventInput) {
   const embed = {
     title,
     description,
-    color: eventTypeEmbedColor(event.type),
+    color: lifecycle.color,
     image: {url: coverUrl},
     fields: finalFields,
-    ...(footer ? {footer} : {}),
   };
 
   const components = [
@@ -379,9 +448,10 @@ export function buildEventEmbed(event: EmbedEventInput) {
       components: [
         {
           type: 2,
-          style: 1,
-          label: 'Open in FORZA.EVENTS',
+          style: lifecycle.buttonDisabled ? 2 : 1,
+          label: lifecycle.buttonLabel,
           custom_id: openEventCustomId(event.id),
+          ...(lifecycle.buttonDisabled ? {disabled: true} : {}),
         },
       ],
     },

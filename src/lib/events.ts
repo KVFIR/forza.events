@@ -1,6 +1,6 @@
 import {invokeBrowseEvents, invokeHostDrafts} from './api';
 import {getSupabase, isSupabaseConfigured} from './supabase';
-import {isDiscordActivityFrame} from './supabaseEnv';
+import {isDiscordActivityFrame, shouldUseDirectSupabaseReads} from './supabaseEnv';
 import {searchCarCatalog} from './carCatalog';
 import {EVENT_PLAYER_SLOTS} from './constants';
 import {resolveEventCoverUrl} from './eventCovers';
@@ -326,7 +326,16 @@ async function fetchEventsViaEdge(options: {
       },
       options.discordToken ?? null,
     );
-    return (data ?? []).map((row) => mapDbEventWithRelations(row as DbEventRow));
+    return (data ?? [])
+      .map((row) => {
+        try {
+          return mapDbEventWithRelations(row as DbEventRow);
+        } catch (mapErr) {
+          console.error('browse-events map row', mapErr, row);
+          return null;
+        }
+      })
+      .filter((event): event is ForzaEvent => event !== null);
   } catch (err) {
     console.error('browse-events', err);
     return null;
@@ -378,13 +387,16 @@ export async function fetchPublishedEventsResult(
   options: FetchEventsOptions = {},
 ): Promise<PublishedEventsResult> {
   const {includeCompleted = false} = options;
+  const directReads = shouldUseDirectSupabaseReads();
+  /** Localhost dev: show every published row (incl. cancelled) so an empty open feed is not confusing. */
+  const showAllPublished = includeCompleted || directReads;
 
   if (!isSupabaseConfigured()) {
     return {events: [], error: 'not_configured'};
   }
 
-  if (isDiscordActivityFrame()) {
-    const events = await fetchEventsViaEdge({includeCompleted});
+  if (!directReads) {
+    const events = await fetchEventsViaEdge({includeCompleted: showAllPublished});
     if (events === null) {
       return {events: [], error: 'fetch_failed'};
     }
@@ -398,7 +410,7 @@ export async function fetchPublishedEventsResult(
       .neq('status', 'draft')
       .order('starts_at', {ascending: true});
 
-    if (!includeCompleted) {
+    if (!showAllPublished) {
       query = query.in('status', ['open', 'checkin', 'live']);
     }
 
@@ -412,6 +424,14 @@ export async function fetchPublishedEventsResult(
   return {events, error: null};
 }
 
+async function fetchPublishedEventViaPostgrest(id: string): Promise<ForzaEvent | undefined> {
+  const events = await fetchEventsWithRelations((supabase) =>
+    supabase.from('events').select(EVENT_LIST_SELECT).eq('id', id).neq('status', 'draft'),
+  );
+  if (events === null) return undefined;
+  return events[0];
+}
+
 export async function fetchEventById(
   id: string,
   options: FetchEventByIdOptions = {},
@@ -421,26 +441,29 @@ export async function fetchEventById(
   }
 
   const {discordToken} = options;
+  const directReads = shouldUseDirectSupabaseReads();
+
+  if (directReads) {
+    const fromDb = await fetchPublishedEventViaPostgrest(id);
+    if (fromDb) return fromDb;
+    if (!discordToken) return undefined;
+  }
 
   if (discordToken || isDiscordActivityFrame()) {
-    const events = await fetchEventsViaEdge({
+    const fromEdge = await fetchEventsViaEdge({
       includeCompleted: true,
       eventId: id,
       discordToken,
     });
-    if (events?.length) return events[0];
-    if (discordToken || isDiscordActivityFrame()) return undefined;
-  }
+    if (fromEdge?.length) return fromEdge[0];
 
-  const events = await fetchEventsWithRelations((supabase) =>
-    supabase.from('events').select(EVENT_LIST_SELECT).eq('id', id).neq('status', 'draft'),
-  );
+    const fromDb = await fetchPublishedEventViaPostgrest(id);
+    if (fromDb) return fromDb;
 
-  if (events === null) {
     return undefined;
   }
 
-  return events[0];
+  return fetchPublishedEventViaPostgrest(id);
 }
 
 export async function fetchEventResults(eventId: string): Promise<EventResultRow[]> {

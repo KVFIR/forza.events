@@ -1,21 +1,34 @@
 import {serve} from 'https://deno.land/std@0.224.0/http/server.ts';
-import {corsHeaders, jsonResponse, optionsResponse} from '../_shared/cors.ts';
+import {jsonResponse, optionsResponse} from '../_shared/cors.ts';
 import {avatarUrl, exchangeCode, fetchDiscordUser} from '../_shared/discord.ts';
+import {resolveGuildNameForUser} from '../_shared/guildAccess.ts';
+import {resolveOAuthRedirectUri} from '../_shared/oauthRedirect.ts';
+import {rateLimitOAuthExchange} from '../_shared/rateLimitPresets.ts';
 import {adminClient} from '../_shared/supabase.ts';
 
 serve(async (req) => {
-  if (req.method === 'OPTIONS') return optionsResponse();
+  if (req.method === 'OPTIONS') return optionsResponse(req);
   if (req.method !== 'POST') {
-    return jsonResponse({error: 'Method not allowed'}, 405);
+    return jsonResponse({error: 'Method not allowed'}, 405, req);
   }
 
   try {
-    const {code, guild_id, guild_name, redirect_uri} = await req.json();
+    const {code, guild_id, redirect_uri} = await req.json();
     if (!code) {
-      return jsonResponse({error: 'Missing code'}, 400);
+      return jsonResponse({error: 'Missing code'}, 400, req);
     }
 
-    const tokens = await exchangeCode(code, redirect_uri);
+    const oauthLimited = await rateLimitOAuthExchange(req);
+    if (oauthLimited) return oauthLimited;
+
+    let safeRedirect: string;
+    try {
+      safeRedirect = resolveOAuthRedirectUri(redirect_uri);
+    } catch {
+      return jsonResponse({error: 'Invalid redirect_uri'}, 400, req);
+    }
+
+    const tokens = await exchangeCode(code, safeRedirect);
     const discordUser = await fetchDiscordUser(tokens.access_token);
     const displayName = discordUser.global_name ?? discordUser.username;
     const supabase = adminClient();
@@ -36,14 +49,20 @@ serve(async (req) => {
 
     if (userErr) {
       console.error(userErr);
-      return jsonResponse({error: 'Failed to upsert user'}, 500);
+      return jsonResponse({error: 'Failed to upsert user'}, 500, req);
     }
 
-    if (guild_id && guild_name) {
-      await supabase.from('discord_guilds').upsert(
-        {guild_id, guild_name},
-        {onConflict: 'guild_id'},
+    if (guild_id) {
+      const canonicalName = await resolveGuildNameForUser(
+        tokens.access_token,
+        guild_id,
       );
+      if (canonicalName) {
+        await supabase.from('discord_guilds').upsert(
+          {guild_id, guild_name: canonicalName},
+          {onConflict: 'guild_id'},
+        );
+      }
     }
 
     return jsonResponse({
@@ -59,9 +78,9 @@ serve(async (req) => {
         noShows: user.no_shows,
         hostRatingAvg: 0,
       },
-    });
+    }, 200, req);
   } catch (e) {
     console.error(e);
-    return jsonResponse({error: String(e)}, 500);
+    return jsonResponse({error: String(e)}, 500, req);
   }
 });

@@ -110,13 +110,8 @@ export function EventCard({event}: Props) {
   }, [coverSrc, event.id]);
 
   return (
-    <article
-      className={cn(
-        'group relative transition-opacity duration-300 motion-reduce:transition-none',
-        coverReady ? 'pointer-events-auto opacity-100' : 'pointer-events-none opacity-0',
-      )}
-    >
-      <Link to={cardTo} className="block" tabIndex={coverReady ? undefined : -1}>
+    <article className="group relative">
+      <Link to={cardTo} state={{event}} className="block">
         <div
           className={cn(
             'relative min-h-[7.5rem] overflow-hidden rounded-xl border transition-all duration-200',
@@ -131,9 +126,18 @@ export function EventCard({event}: Props) {
             src={coverSrc}
             variant="card"
             className="absolute inset-0"
-            imgClassName="transition-transform duration-300 group-hover:scale-[1.02]"
+            imgClassName={cn(
+              'transition-all duration-300 group-hover:scale-[1.02]',
+              coverReady ? 'opacity-100' : 'opacity-0',
+            )}
             onReady={() => setCoverReady(true)}
           />
+          {!coverReady ? (
+            <div
+              className="absolute inset-0 animate-pulse bg-white/[0.04]"
+              aria-hidden
+            />
+          ) : null}
           <div className="absolute inset-0 bg-gradient-to-r from-base/80 via-base/70 to-base/60" />
           <div className="absolute inset-0 bg-black/25 transition-colors duration-200 group-hover:bg-black/20" />
 

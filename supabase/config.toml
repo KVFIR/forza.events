@@ -58,3 +58,6 @@ verify_jwt = false
 
 [functions.host-drafts]
 verify_jwt = false
+
+[functions.upload-cover]
+verify_jwt = false

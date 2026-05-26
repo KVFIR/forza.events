@@ -1,25 +1,43 @@
 import {serve} from 'https://deno.land/std@0.224.0/http/server.ts';
 import {jsonResponse, optionsResponse} from '../_shared/cors.ts';
-import {botHeaders, isBotInGuild, mapDiscordPostError, verifyDiscordToken} from '../_shared/discord.ts';
+import {botHeaders, mapDiscordPostError, verifyDiscordToken} from '../_shared/discord.ts';
+import {resolveGuildNameForUser, userCanManageGuildById, userIsGuildMember} from '../_shared/guildAccess.ts';
+import {validatePublishChannelTarget} from '../_shared/publishTarget.ts';
 import {buildEventEmbed, mapEventCarsForEmbed} from '../_shared/events.ts';
 import {validatePublishReady, type SaveEventBody} from '../_shared/eventSpec.ts';
 import {normalizeGuildName} from '../_shared/guildDisplay.ts';
+import {rateLimitMutation} from '../_shared/rateLimitPresets.ts';
 import {adminClient} from '../_shared/supabase.ts';
 
 serve(async (req) => {
-  if (req.method === 'OPTIONS') return optionsResponse();
-  if (req.method !== 'POST') return jsonResponse({error: 'Method not allowed'}, 405);
+  if (req.method === 'OPTIONS') return optionsResponse(req);
+  if (req.method !== 'POST') return jsonResponse({error: 'Method not allowed'}, 405, req);
 
   const token =
     req.headers.get('x-discord-access-token') ??
     req.headers.get('authorization')?.replace(/^Bearer\s+/i, '');
   const user = await verifyDiscordToken(token);
-  if (!user) return jsonResponse({error: 'Unauthorized'}, 401);
+  if (!user) return jsonResponse({error: 'Unauthorized'}, 401, req);
+
+  const mutationLimited = await rateLimitMutation(req, user.id);
+  if (mutationLimited) return mutationLimited;
 
   try {
-    const {event_id, guild_id, channel_id, guild_name} = await req.json();
+    const {event_id, guild_id, channel_id} = await req.json();
     if (!event_id || !guild_id || !channel_id) {
-      return jsonResponse({error: 'Missing event_id, guild_id, or channel_id'}, 400);
+      return jsonResponse({error: 'Missing event_id, guild_id, or channel_id'}, 400, req);
+    }
+
+    if (!(await userIsGuildMember(token!, guild_id))) {
+      return jsonResponse({error: 'Forbidden'}, 403, req);
+    }
+    if (!(await userCanManageGuildById(token!, guild_id))) {
+      return jsonResponse({error: 'You need Manage Server permission to publish here.'}, 403, req);
+    }
+
+    const channelCheck = await validatePublishChannelTarget(guild_id, channel_id);
+    if (!channelCheck.ok) {
+      return jsonResponse({error: channelCheck.error}, 400, req);
     }
 
     const supabase = adminClient();
@@ -29,20 +47,22 @@ serve(async (req) => {
       .eq('id', event_id)
       .single();
 
-    if (error || !event) return jsonResponse({error: 'Event not found'}, 404);
+    if (error || !event) return jsonResponse({error: 'Event not found'}, 404, req);
     if (event.host_discord_id !== user.id) {
-      return jsonResponse({error: 'Only the host can publish'}, 403);
+      return jsonResponse({error: 'Only the host can publish'}, 403, req);
     }
     if (event.status !== 'draft') {
-      return jsonResponse({error: 'Only draft events can be published'}, 400);
+      return jsonResponse({error: 'Only draft events can be published'}, 400, req);
     }
     if (event.guild_id && event.guild_id !== guild_id) {
-      return jsonResponse({error: 'Server is locked for this draft'}, 400);
+      return jsonResponse({error: 'Server is locked for this draft'}, 400, req);
     }
 
-    const resolvedGuildName = normalizeGuildName(guild_name);
+    const resolvedGuildName = normalizeGuildName(
+      await resolveGuildNameForUser(token!, guild_id),
+    );
     if (!resolvedGuildName) {
-      return jsonResponse({error: 'Choose a Discord server from the list before publishing.'}, 400);
+      return jsonResponse({error: 'Choose a Discord server from the list before publishing.'}, 400, req);
     }
     await supabase.from('discord_guilds').upsert(
       {guild_id, guild_name: resolvedGuildName},
@@ -95,15 +115,7 @@ serve(async (req) => {
     };
 
     const publishErr = validatePublishReady(body);
-    if (publishErr) return jsonResponse({error: publishErr}, 400);
-
-    const botInstalled = await isBotInGuild(guild_id);
-    if (!botInstalled) {
-      return jsonResponse(
-        {error: 'FORZA.EVENTS is not installed in this server. Add the app to the server first.'},
-        400,
-      );
-    }
+    if (publishErr) return jsonResponse({error: publishErr}, 400, req);
 
     const payload = buildEventEmbed({
       ...event,
@@ -121,7 +133,7 @@ serve(async (req) => {
 
     if (!msgRes.ok) {
       const text = await msgRes.text();
-      return jsonResponse({error: mapDiscordPostError(msgRes.status, text)}, 502);
+      return jsonResponse({error: mapDiscordPostError(msgRes.status, text)}, 502, req);
     }
 
     const message = await msgRes.json();
@@ -137,12 +149,12 @@ serve(async (req) => {
       .eq('id', event_id);
 
     if (updateErr) {
-      return jsonResponse({error: 'Posted but failed to update event'}, 500);
+      return jsonResponse({error: 'Posted but failed to update event'}, 500, req);
     }
 
-    return jsonResponse({message_id: message.id, channel_id, guild_id});
+    return jsonResponse({message_id: message.id, channel_id, guild_id}, 200, req);
   } catch (e) {
     console.error(e);
-    return jsonResponse({error: String(e)}, 500);
+    return jsonResponse({error: String(e)}, 500, req);
   }
 });

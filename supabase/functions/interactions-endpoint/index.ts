@@ -47,17 +47,28 @@ serve(async (req) => {
   if (interaction.type === INTERACTION_COMPONENT) {
     const customId = interaction.data?.custom_id as string | undefined;
     if (customId?.startsWith(OPEN_EVENT_BUTTON_PREFIX)) {
-      const eventId = customId.slice(OPEN_EVENT_BUTTON_PREFIX.length);
+      const eventId = customId.slice(OPEN_EVENT_BUTTON_PREFIX.length).trim();
       const discordId = interaction.member?.user?.id ?? interaction.user?.id;
-      const guildId = interaction.guild_id;
+      const guildId = (interaction.guild_id as string | undefined) ?? null;
 
-      if (discordId && guildId && eventId) {
+      if (discordId && eventId) {
         const supabase = adminClient();
-        await supabase.from('launch_intents').insert({
+        const {error} = await supabase.from('launch_intents').insert({
           discord_id: discordId,
           guild_id: guildId,
           event_id: eventId,
         });
+        if (error) {
+          console.error(
+            JSON.stringify({
+              msg: 'launch_intents insert failed',
+              eventId,
+              discordId,
+              guildId,
+              detail: error.message,
+            }),
+          );
+        }
         await supabase
           .from('launch_intents')
           .delete()

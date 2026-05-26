@@ -7,16 +7,20 @@ import {
   userCanManageGuild,
   verifyDiscordToken,
 } from '../_shared/discord.ts';
+import {rateLimitAuth} from '../_shared/rateLimitPresets.ts';
 
 serve(async (req) => {
-  if (req.method === 'OPTIONS') return optionsResponse();
-  if (req.method !== 'POST') return jsonResponse({error: 'Method not allowed'}, 405);
+  if (req.method === 'OPTIONS') return optionsResponse(req);
+  if (req.method !== 'POST') return jsonResponse({error: 'Method not allowed'}, 405, req);
 
   const token =
     req.headers.get('x-discord-access-token') ??
     req.headers.get('authorization')?.replace(/^Bearer\s+/i, '');
   const user = await verifyDiscordToken(token);
-  if (!user) return jsonResponse({error: 'Unauthorized'}, 401);
+  if (!user) return jsonResponse({error: 'Unauthorized'}, 401, req);
+
+  const authLimited = await rateLimitAuth(req, user.id);
+  if (authLimited) return authLimited;
 
   try {
     const userGuilds = await fetchUserGuilds(token!);
@@ -37,9 +41,9 @@ serve(async (req) => {
     return jsonResponse({
       guilds: list,
       hint: list.length === 0 ? publishTargetHint() : null,
-    });
+    }, 200, req);
   } catch (e) {
     console.error(e);
-    return jsonResponse({error: String(e)}, 500);
+    return jsonResponse({error: String(e)}, 500, req);
   }
 });

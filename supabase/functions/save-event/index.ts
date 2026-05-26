@@ -14,23 +14,28 @@ import {
 } from '../_shared/eventSpec.ts';
 import {jsonResponse, optionsResponse} from '../_shared/cors.ts';
 import {verifyDiscordToken} from '../_shared/discord.ts';
+import {resolveGuildNameForUser} from '../_shared/guildAccess.ts';
 import {resolveCoverUrl} from '../_shared/eventCovers.ts';
 import {slugify} from '../_shared/events.ts';
 import {normalizeGuildName} from '../_shared/guildDisplay.ts';
+import {rateLimitMutation} from '../_shared/rateLimitPresets.ts';
 import {adminClient} from '../_shared/supabase.ts';
 
 const UUID_RE =
   /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
 
 serve(async (req) => {
-  if (req.method === 'OPTIONS') return optionsResponse();
-  if (req.method !== 'POST') return jsonResponse({error: 'Method not allowed'}, 405);
+  if (req.method === 'OPTIONS') return optionsResponse(req);
+  if (req.method !== 'POST') return jsonResponse({error: 'Method not allowed'}, 405, req);
 
   const token =
     req.headers.get('x-discord-access-token') ??
     req.headers.get('authorization')?.replace(/^Bearer\s+/i, '');
   const discordUser = await verifyDiscordToken(token);
-  if (!discordUser) return jsonResponse({error: 'Unauthorized'}, 401);
+  if (!discordUser) return jsonResponse({error: 'Unauthorized'}, 401, req);
+
+  const mutationLimited = await rateLimitMutation(req, discordUser.id);
+  if (mutationLimited) return mutationLimited;
 
   try {
     const body = (await req.json()) as SaveEventBody;
@@ -43,7 +48,7 @@ serve(async (req) => {
         .eq('id', body.id)
         .single();
       if (!existing || existing.host_discord_id !== discordUser.id) {
-        return jsonResponse({error: 'Forbidden'}, 403);
+        return jsonResponse({error: 'Forbidden'}, 403, req);
       }
       const published = Boolean(existing.discord_message_id);
       const closed = ['completed', 'cancelled', 'archived'].includes(existing.status);
@@ -51,11 +56,12 @@ serve(async (req) => {
         return jsonResponse(
           {error: 'Only unpublished drafts can be deleted'},
           400,
+          req,
         );
       }
       const {error} = await supabase.from('events').delete().eq('id', body.id);
-      if (error) return jsonResponse({error: error.message}, 500);
-      return jsonResponse({id: body.id, deleted: true});
+      if (error) return jsonResponse({error: error.message}, 500, req);
+      return jsonResponse({id: body.id, deleted: true}, 200, req);
     }
 
     if (body.cancel && body.id) {
@@ -65,13 +71,13 @@ serve(async (req) => {
         .eq('id', body.id)
         .single();
       if (!existing || existing.host_discord_id !== discordUser.id) {
-        return jsonResponse({error: 'Forbidden'}, 403);
+        return jsonResponse({error: 'Forbidden'}, 403, req);
       }
       if (!existing.discord_message_id) {
-        return jsonResponse({error: 'Only published events can be cancelled'}, 400);
+        return jsonResponse({error: 'Only published events can be cancelled'}, 400, req);
       }
       if (['completed', 'cancelled', 'archived'].includes(existing.status)) {
-        return jsonResponse({error: 'Event is already closed'}, 400);
+        return jsonResponse({error: 'Event is already closed'}, 400, req);
       }
       const {data: updated, error} = await supabase
         .from('events')
@@ -79,18 +85,29 @@ serve(async (req) => {
         .eq('id', body.id)
         .select('*')
         .single();
-      if (error) return jsonResponse({error: error.message}, 500);
+      if (error) return jsonResponse({error: error.message}, 500, req);
       if (updated?.channel_id && updated.discord_message_id) {
-        await syncPublishedEmbed(supabase, updated);
+        const embedSync = await syncPublishedEmbed(supabase, updated);
+        if (!embedSync.ok) {
+          console.error(
+            JSON.stringify({
+              msg: 'Cancel saved but Discord embed sync failed',
+              eventId: body.id,
+              status: embedSync.status,
+            }),
+          );
+        }
       }
-      return jsonResponse({id: body.id, cancelled: true});
+      return jsonResponse({id: body.id, cancelled: true}, 200, req);
     }
 
     const draftErr = validateDraft(body);
-    if (draftErr) return jsonResponse({error: draftErr}, 400);
+    if (draftErr) return jsonResponse({error: draftErr}, 400, req);
 
     if (body.guild_id) {
-      const guildName = normalizeGuildName(body.guild_name);
+      const guildName = normalizeGuildName(
+        (await resolveGuildNameForUser(token!, body.guild_id)) ?? body.guild_name,
+      );
       if (guildName) {
         await supabase.from('discord_guilds').upsert(
           {guild_id: body.guild_id, guild_name: guildName},
@@ -106,6 +123,7 @@ serve(async (req) => {
           return jsonResponse(
             {error: 'Choose a Discord server from the list so its name can be saved.'},
             400,
+            req,
           );
         }
       }
@@ -132,18 +150,18 @@ serve(async (req) => {
         .single();
       existing = data;
       if (!existing || existing.host_discord_id !== discordUser.id) {
-        return jsonResponse({error: 'Forbidden'}, 403);
+        return jsonResponse({error: 'Forbidden'}, 403, req);
       }
       if (!canEditPublishedEvent(existing)) {
-        return jsonResponse({error: 'Published events cannot be edited after start'}, 403);
+        return jsonResponse({error: 'Published events cannot be edited after start'}, 403, req);
       }
       const lockErr = await assertTargetNotLocked(supabase, existing, body);
-      if (lockErr) return jsonResponse({error: lockErr}, 400);
+      if (lockErr) return jsonResponse({error: lockErr}, 400, req);
     }
 
     if (body.publish) {
       const publishErr = validatePublishReady(body);
-      if (publishErr) return jsonResponse({error: publishErr}, 400);
+      if (publishErr) return jsonResponse({error: publishErr}, 400, req);
     }
 
     const cars: CarPayload[] =
@@ -162,12 +180,21 @@ serve(async (req) => {
         .eq('id', eventId)
         .select('*')
         .single();
-      if (error) return jsonResponse({error: error.message}, 500);
+      if (error) return jsonResponse({error: error.message}, 500, req);
       await syncEventCars(supabase, eventId, cars, body.car_rule_mode ?? 'anything_goes');
       if (isPublishedStatus(data.status)) {
-        await syncPublishedEmbed(supabase, data);
+        const embedSync = await syncPublishedEmbed(supabase, data);
+        if (!embedSync.ok) {
+          console.error(
+            JSON.stringify({
+              msg: 'Event saved but Discord embed sync failed',
+              eventId: data.id,
+              status: embedSync.status,
+            }),
+          );
+        }
       }
-      return jsonResponse({id: eventId, slug: data.slug});
+      return jsonResponse({id: eventId, slug: data.slug}, 200, req);
     }
 
     let slug = slugify(body.title ?? 'event');
@@ -180,18 +207,18 @@ serve(async (req) => {
         .single();
       if (!error && data) {
         await syncEventCars(supabase, data.id, cars, body.car_rule_mode ?? 'anything_goes');
-        return jsonResponse({id: data.id, slug: data.slug});
+        return jsonResponse({id: data.id, slug: data.slug}, 200, req);
       }
       if (error?.code !== '23505') {
-        return jsonResponse({error: error?.message ?? 'Insert failed'}, 500);
+        return jsonResponse({error: error?.message ?? 'Insert failed'}, 500, req);
       }
       slug = trySlug;
     }
 
-    return jsonResponse({error: 'Could not create unique slug'}, 500);
+    return jsonResponse({error: 'Could not create unique slug'}, 500, req);
   } catch (e) {
     console.error(e);
-    return jsonResponse({error: String(e)}, 500);
+    return jsonResponse({error: String(e)}, 500, req);
   }
 });
 
@@ -207,24 +234,7 @@ async function resolveCarId(
   let q = supabase.from('cars').select('id').eq('make', c.make).eq('model', c.model);
   if (c.year != null) q = q.eq('year', c.year);
   const {data: existing} = await q.maybeSingle();
-  if (existing) return existing.id;
-
-  const {data: inserted, error} = await supabase
-    .from('cars')
-    .insert({
-      make: c.make,
-      model: c.model,
-      year: c.year,
-      pi: c.pi,
-    })
-    .select('id')
-    .single();
-
-  if (error) {
-    console.error('car insert', error);
-    return null;
-  }
-  return inserted.id;
+  return existing?.id ?? null;
 }
 
 async function syncEventCars(

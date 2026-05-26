@@ -86,6 +86,12 @@ export function eventHasStarted(event: Pick<DbEvent, 'status' | 'starts_at'>): b
   return new Date(event.starts_at).getTime() <= Date.now();
 }
 
+/** Players may leave only before start; roster locks when the event goes live. */
+export function canLeaveEvent(event: Pick<DbEvent, 'status' | 'starts_at'>): boolean {
+  if (['completed', 'cancelled', 'archived'].includes(event.status)) return false;
+  return !eventHasStarted(event);
+}
+
 export function isPublishedStatus(status: string): boolean {
   return status !== 'draft';
 }
@@ -163,6 +169,13 @@ export async function assertTargetNotLocked(
   if (!existing || !isPublishedStatus(existing.status)) return null;
   if (body.guild_id && body.guild_id !== existing.guild_id) {
     return 'Server cannot be changed after publish.';
+  }
+  if (
+    body.channel_id !== undefined &&
+    existing.channel_id &&
+    body.channel_id.trim() !== existing.channel_id
+  ) {
+    return 'Channel cannot be changed after publish.';
   }
   return null;
 }

@@ -1,5 +1,5 @@
-import {getSupabase, isSupabaseConfigured, resolveSupabaseUrl} from './supabase';
 import {createSupabaseFetch, isDiscordActivityFrame} from './supabaseEnv';
+import {isSupabaseConfigured, resolveSupabaseUrl} from './supabase';
 
 function apiBase(): string {
   const explicit = import.meta.env.VITE_API_BASE_URL as string | undefined;
@@ -89,11 +89,11 @@ export async function exchangeToken(
 
 export async function fetchLaunchIntent(
   discordToken: string,
-  guildId: string,
+  guildId: string | null,
 ): Promise<string | null> {
   const data = await invoke<{event_id: string | null}>(
     'launch-intent',
-    {guild_id: guildId},
+    guildId ? {guild_id: guildId} : {},
     discordToken,
   );
   return data.event_id;
@@ -208,24 +208,44 @@ export async function updateProfile(
   );
 }
 
+function fileToBase64(file: File): Promise<string> {
+  return new Promise((resolve, reject) => {
+    const reader = new FileReader();
+    reader.onload = () => {
+      const result = reader.result;
+      if (typeof result !== 'string') {
+        reject(new Error('Failed to read cover image'));
+        return;
+      }
+      const base64 = result.split(',')[1];
+      if (!base64) {
+        reject(new Error('Failed to encode cover image'));
+        return;
+      }
+      resolve(base64);
+    };
+    reader.onerror = () => reject(reader.error ?? new Error('Failed to read cover image'));
+    reader.readAsDataURL(file);
+  });
+}
+
 export async function uploadCoverImage(
+  discordToken: string,
   guildId: string,
   eventId: string,
   file: File,
 ): Promise<string> {
-  const supabase = await getSupabase();
-  if (!supabase) throw new Error('Supabase not configured');
-
-  const ext = (file.name.split('.').pop() ?? 'webp').toLowerCase();
-  const safeExt = ['webp', 'jpg', 'jpeg', 'png'].includes(ext) ? ext : 'webp';
-  const path = `${guildId}/${eventId}/cover.${safeExt}`;
-
-  const {error} = await supabase.storage.from('event-covers').upload(path, file, {
-    upsert: true,
-    contentType: file.type,
-  });
-  if (error) throw error;
-
-  const {data} = supabase.storage.from('event-covers').getPublicUrl(path);
-  return data.publicUrl;
+  const content_base64 = await fileToBase64(file);
+  const data = await invoke<{url: string}>(
+    'upload-cover',
+    {
+      guild_id: guildId,
+      event_id: eventId,
+      content_base64,
+      content_type: file.type,
+      filename: file.name,
+    },
+    discordToken,
+  );
+  return data.url;
 }

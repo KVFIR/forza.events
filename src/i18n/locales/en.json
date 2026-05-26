@@ -127,6 +127,8 @@
   "participation": {
     "join": "Join",
     "leave": "Leave",
+    "registered": "Registered",
+    "leaveLockedAfterStart": "You cannot leave after the event has started. Contact the host if you cannot attend.",
     "closed": "Closed",
     "full": "Full"
   },

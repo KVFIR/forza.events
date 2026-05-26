@@ -42,7 +42,7 @@ Vite injects `DISCORD_CLIENT_ID`, `SUPABASE_URL`, and `SUPABASE_ANON_KEY` at bui
 
 Add the same URL in Discord → OAuth2 → Redirects.
 
-`token-exchange` accepts `redirect_uri` from the client body; redeploy functions after pulling latest `discord.ts` shared helper changes.
+`token-exchange` only accepts `redirect_uri` values on an allowlist (`DISCORD_REDIRECT_URI`, Activity `https://127.0.0.1`, localhost callbacks, optional `DISCORD_REDIRECT_URI_ALLOWLIST`). Redeploy Edge Functions after auth changes.
 
 ### Optional
 
@@ -87,6 +87,8 @@ railway variable set APP_ORIGIN=https://forzaevents-production.up.railway.app
 
 Without sign-in, Browse still loads **public** published events. Join, Create, and Profile mutations require sign-in.
 
+On **localhost**, Browse reads the database directly (PostgREST, no Edge deploy required) and lists **all non-draft** events—including `cancelled` and `completed`—so you can open and test cards that are no longer `open`. Production Discord Activity still shows only active registrations (`open` / `live`) unless you opt into completed events.
+
 ### Discord Activity (iframe)
 
 1. `initDiscordActivity()` runs Embedded App SDK `authorize`
@@ -117,7 +119,7 @@ Alternatively apply migration `014_seed_sample_events.sql` via `supabase db push
 | Asset | Location |
 |-------|----------|
 | Default covers (WebP) | `public/covers/*.webp` |
-| Uploaded covers | Supabase Storage bucket `event-covers` |
+| Uploaded covers | Supabase Storage bucket `event-covers` via **`upload-cover`** Edge Function (host-only; apply migration `018_security_hardening.sql` to revoke anon writes) |
 
 Regenerate bundled assets after replacing source images:
 

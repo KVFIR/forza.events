@@ -87,7 +87,7 @@ const MANAGE_GUILD = 0x20n;
 const ADMINISTRATOR = 0x8n;
 
 export function userCanManageGuild(permissions: string | undefined): boolean {
-  if (!permissions) return true;
+  if (permissions === undefined || permissions === '') return false;
   const p = BigInt(permissions);
   return (p & ADMINISTRATOR) === ADMINISTRATOR || (p & MANAGE_GUILD) === MANAGE_GUILD;
 }

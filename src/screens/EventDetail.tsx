@@ -1,7 +1,7 @@
 import {useCallback, useEffect, useRef, useState} from 'react';
 import {useTranslation} from 'react-i18next';
 import {busyLabel} from '../i18n/busyLabels';
-import {useNavigate, useParams} from 'react-router-dom';
+import {useLocation, useNavigate, useParams} from 'react-router-dom';
 import {
   ArrowLeft,
   Calendar,
@@ -31,6 +31,7 @@ import {
   canCancelEvent,
   canDeleteDraft,
   canEditEvent,
+  canLeaveRegistration,
   eventHasStarted,
   isEventFinalized,
   isPublishedToDiscord,
@@ -68,10 +69,16 @@ const piClassColor: Record<string, string> = {
 const carRuleRowClass =
   'grid grid-cols-[minmax(0,1fr)_3.5rem] items-center gap-x-3 text-sm leading-tight';
 
+type EventDetailLocationState = {
+  event?: ForzaEvent;
+};
+
 export function EventDetail() {
   const {t} = useTranslation();
   const navigate = useNavigate();
+  const location = useLocation();
   const {id} = useParams<{id: string}>();
+  const routeEvent = (location.state as EventDetailLocationState | null)?.event;
   const [event, setEvent] = useState<ForzaEvent | undefined>();
   const [resultRows, setResultRows] = useState<EventResultRow[]>([]);
   const [loading, setLoading] = useState(true);
@@ -111,7 +118,7 @@ export function EventDetail() {
 
     if (idChanged) {
       loadedForIdRef.current = id;
-      setEvent(undefined);
+      setEvent(routeEvent?.id === id ? routeEvent : undefined);
       setResultRows([]);
     }
     setLoading(true);
@@ -119,7 +126,11 @@ export function EventDetail() {
     void fetchEventById(id, {discordToken})
       .then(async (ev) => {
         if (fetchSeqRef.current !== seq) return;
-        setEvent(ev);
+        if (ev) {
+          setEvent(ev);
+        } else if (!routeEvent || routeEvent.id !== id) {
+          setEvent(undefined);
+        }
         if (ev && shouldShowEventResults(ev)) {
           setResultRows(await fetchEventResults(id));
         } else {
@@ -129,7 +140,7 @@ export function EventDetail() {
       .finally(() => {
         if (fetchSeqRef.current === seq) setLoading(false);
       });
-  }, [id, refreshKey, discordToken]);
+  }, [id, refreshKey, discordToken, routeEvent]);
 
   async function handleJoinClick() {
     if (!event) return;
@@ -138,6 +149,10 @@ export function EventDetail() {
       return;
     }
     if (isJoined(event)) {
+      if (!canLeaveRegistration(event)) {
+        setJoinError(t('participation.leaveLockedAfterStart'));
+        return;
+      }
       await toggleJoin(event);
       const next = await fetchEventById(event.id, {discordToken});
       setEvent(next);
@@ -231,7 +246,7 @@ export function EventDetail() {
   }
 
   if (!event) {
-    if (loading) {
+    if (loading || (!isStandalone && authInitializing)) {
       return <PageLoading label={t('loading.event')} className="pb-10 pt-4" />;
     }
 
@@ -254,6 +269,7 @@ export function EventDetail() {
   const canDelete = canDeleteDraft(event, user);
   const joined = isJoined(event);
   const registrationOpen = isRegistrationOpen(event);
+  const canLeave = canLeaveRegistration(event);
   const started = eventHasStarted(event);
   const full = event.status === 'full' || event.currentPlayers >= event.maxPlayers;
   const showDraftActions = isDraft && isHost;
@@ -270,7 +286,9 @@ export function EventDetail() {
     showParticipantActions && !isSignedIn && !isStandalone && !authInitializing;
   const participationDisabled =
     !isSignedIn ||
-    (!joined && (!registrationOpen || full || joining || cancelling));
+    (joined
+      ? !canLeave || joining || cancelling
+      : !registrationOpen || full || joining || cancelling);
 
   return (
     <ContentReveal className="pb-10 pt-4">
@@ -377,7 +395,7 @@ export function EventDetail() {
             variant={
               needsSignInToParticipate
                 ? 'secondary'
-                : participationButtonVariant(joined, registrationOpen, full)
+                : participationButtonVariant(joined, registrationOpen, full, canLeave)
             }
             size={needsSignInToParticipate ? 'compact' : undefined}
             className="shrink-0 whitespace-nowrap"
@@ -388,7 +406,7 @@ export function EventDetail() {
               ? authRetrying
                 ? busyLabel('signingIn')
                 : t('auth.signInToJoin')
-              : participationButtonLabel(joined, registrationOpen, full)}
+              : participationButtonLabel(joined, registrationOpen, full, canLeave)}
           </Button>
         ) : null}
       </div>

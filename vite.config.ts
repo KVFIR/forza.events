@@ -64,6 +64,15 @@ export default defineConfig(({mode}) => {
     server: {
       port: 5180,
       strictPort: true,
+      proxy: client.VITE_SUPABASE_URL
+        ? {
+            '/supabase': {
+              target: client.VITE_SUPABASE_URL,
+              changeOrigin: true,
+              rewrite: (path) => path.replace(/^\/supabase/, ''),
+            },
+          }
+        : undefined,
     },
   };
 });

@@ -18,6 +18,7 @@ FUNCTIONS=(
   submit-results
   user-profile
   launch-intent
+  upload-cover
 )
 
 echo "Deploying ${#FUNCTIONS[@]} Supabase Edge Functions..."

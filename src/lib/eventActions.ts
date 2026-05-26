@@ -6,7 +6,9 @@ export function participationButtonVariant(
   joined: boolean,
   registrationOpen: boolean,
   isFull: boolean,
+  canLeave: boolean,
 ): ButtonVariant {
+  if (joined && !canLeave) return 'secondary';
   if (isFull && registrationOpen && !joined) return 'full';
   if (joined) return 'leave';
   if (registrationOpen) return 'open';
@@ -17,7 +19,9 @@ export function participationButtonLabel(
   joined: boolean,
   registrationOpen: boolean,
   isFull: boolean,
+  canLeave: boolean,
 ): string {
+  if (joined && !canLeave) return i18n.t('participation.registered');
   if (joined) return i18n.t('participation.leave');
   if (!registrationOpen) return i18n.t('participation.closed');
   if (isFull) return i18n.t('participation.full');

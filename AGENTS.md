@@ -16,8 +16,9 @@ Lessons from implementation work (keep in sync when behavior changes).
 - **Delete draft:** `save-event` with `{ delete: true }` (draft + host only). UI: Event Detail + Create Review step.
 - **Save published edits:** `save-event` update uses `buildEventFields` only — never overwrites `status` (avoids reverting `open` → `draft`).
 - **Post-start host:** Event Detail shows separate **Submit results** + **Cancel event** buttons; cancel syncs Discord embed via `syncPublishedEmbed`.
+- **Join/leave:** `event-participation` validates gamertag server-side, ensures `users` row exists, DB trigger `enforce_event_participant_capacity` prevents over-capacity races; **leave locked after event start** (`canLeaveEvent` / `canLeaveRegistration`). Join/leave/cancel/results sync published embed via `syncPublishedEmbedByEventId`. Profile `events_joined` synced via migration `018` trigger.
   - After publish, server and channel are **locked** in the form (`lockGuild` / `lockChannel`).
-  - **Publish embed:** `publish-event` posts a Discord message embed + **Open in FORZA.EVENTS** button (`custom_id` `open_event:{event_id}` via `buildEventEmbed` in `supabase/functions/_shared/events.ts`). Fields: date (Discord `<t:…:F>`), numbered track share codes, cars (restricted list with per-car restrictions/tunes, truncated with `_+N more cars — open in FORZA.EVENTS…_` when embed/field limits apply, or open build + optional **Restrictions**), participants `1+current/12` + convoy leader gamertag; footer is organizer server name when known. Track field omitted when no share codes. Button click → `interactions-endpoint` returns `LAUNCH_ACTIVITY` + stores `launch_intents` fallback → after OAuth, `AuthContext` navigates to `/event/{id}` from `sdk.customId` (primary) or `launch-intent` Edge Function. Browse loads immediately and does not wait on auth.
+  - **Publish embed:** `buildEventEmbed` — date, track codes (deduped), cars, participants `1+current/12`, optional restrictions (plain text). **Status on embed:** `cancelled` / `completed` / `archived` show a Status field, title prefix, grey/green color, and disabled or relabelled button. Sync on join/leave, save/cancel, submit-results. Failed PATCH logs structured JSON (`embedSync` returns `{ok:false}`). Button `open_event:{id}` → `interactions-endpoint` stores `launch_intents` (nullable `guild_id` for DMs, migration `019`) → navigate from `sdk.customId` or `launch-intent` fallback. Browse loads immediately and does not wait on auth.
   - Browse/join/create/publish all depend on Edge Functions + Discord token headers; test in Discord after API/proxy changes, not only localhost. Interactions Endpoint URL must be set in Discord Developer Portal.
 
 ## Product / data model
@@ -91,6 +92,21 @@ Lessons from implementation work (keep in sync when behavior changes).
 - **UI copy:** use `useTranslation()` / `t('key')` in React; non-React helpers use `i18n.t` from `src/i18n` (e.g. validation, `eventTypeLabel`, `participationButtonLabel`).
 - **Dates:** pass `dateFnsLocale()` from `src/i18n/dateLocale.ts` into `date-fns` `format` / `formatInTimeZone`.
 - New user-facing strings: add keys to **both** `en.json` and `ru.json`.
+
+## Security (Edge + Storage + RLS)
+
+- **Mutations** use Edge Functions + `verifyDiscordToken()`; Postgres RLS is read-only for anon on sensitive tables.
+- **Cover uploads:** `upload-cover` only (host + matching `guild_id`/`event_id`); migration `018_security_hardening.sql` drops anon storage write policies.
+- **Publish target:** `publish-event` and `validate-channel` call `validatePublishChannelTarget`; user must be guild member with Manage Server (`guildAccess.ts`).
+- **OAuth:** `token-exchange` whitelists `redirect_uri` via `oauthRedirect.ts` (+ optional `DISCORD_REDIRECT_URI_ALLOWLIST`).
+- **Cars catalog:** `save-event` resolves cars by id/lookup only — no client-driven inserts into `cars`.
+- **Results:** `submit-results` requires `discord_id` in `event_participants`.
+- After publish, `assertTargetNotLocked` blocks changing `guild_id` and `channel_id` on save.
+- **Anon PostgREST reads (migration `021_api_hardening.sql`):** `users` / `event_participants` / `event_results` only for non-draft events the row is tied to — not full-table scraping.
+- **CORS:** Edge Functions use `corsHeadersFor(req)` — reflect allowlisted origins (`APP_ORIGIN`, localhost dev ports, `*.discordsays.com`, `*.discord.com`, optional `ALLOWED_CORS_ORIGINS`); no `Access-Control-Allow-Origin: *`.
+- **Rate limits:** `check_api_rate_limit` RPC (Postgres, global) via `enforceRateLimit` / `rateLimitPresets.ts` on browse + auth + mutations; in-memory fallback if RPC fails.
+- **SPA:** CSP + `frame-ancestors` for Discord embed in `index.html`; `npm overrides` pins `esbuild` ≥ 0.25.
+- Deploy **`upload-cover`** with other functions (`npm run deploy:functions`). Apply migrations `018` + `021` on Supabase.
 
 ## References
 
