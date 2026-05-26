@@ -19,8 +19,8 @@ export type EmbedAllowedCar = {
   model: string;
   year: number | null;
   max_pi: number;
-  tune_share_code?: string | null;
-  car_restrictions?: string[];
+  tune_share_code: string | null;
+  car_restrictions: string[];
 };
 
 export type EmbedEventInput = {
@@ -64,25 +64,21 @@ export function slugify(title: string): string {
 }
 
 export function mapEventCarsForEmbed(eventCars: EventCarJoinRow[]): EmbedAllowedCar[] {
-  return (eventCars ?? [])
-    .map((ec) => {
-      const raw = ec.cars;
-      const car = (Array.isArray(raw) ? raw[0] : raw) as {
-        make: string;
-        model: string;
-        year: number | null;
-      } | null;
-      if (!car) return null;
-      return {
-        make: car.make,
-        model: car.model,
-        year: car.year,
-        max_pi: ec.max_pi,
-        tune_share_code: ec.tune_share_code,
-        car_restrictions: ec.car_restrictions ?? [],
-      };
-    })
-    .filter((c): c is EmbedAllowedCar => c !== null);
+  const mapped: EmbedAllowedCar[] = [];
+  for (const ec of eventCars ?? []) {
+    const raw = ec.cars;
+    const car = Array.isArray(raw) ? raw[0] : raw;
+    if (!car) continue;
+    mapped.push({
+      make: car.make,
+      model: car.model,
+      year: car.year,
+      max_pi: ec.max_pi,
+      tune_share_code: ec.tune_share_code,
+      car_restrictions: ec.car_restrictions ?? [],
+    });
+  }
+  return mapped;
 }
 
 function discordTimestamp(iso: string, style: 'F' | 'R' = 'F'): string {
