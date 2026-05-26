@@ -1,5 +1,6 @@
 import {exchangeToken, isApiConfigured} from './api';
 import {DISCORD_ACTIVITY_REDIRECT_URI} from './discordConstants';
+import {applyEmbedLaunchRoute, finishEmbedSdkProbe} from './activityLaunch';
 import {eventIdFromOpenEventCustomId} from './eventLaunch';
 import {loadDiscordSession, saveDiscordSession} from './discordAuth';
 import {GUEST_USER} from './guestUser';
@@ -126,6 +127,10 @@ export async function retryDiscordActivityAuth(): Promise<InitResult | null> {
   if (!sdk || !clientId || isStandaloneBrowser()) return null;
 
   const launchEventId = eventIdFromOpenEventCustomId(sdk.customId);
+  if (launchEventId) {
+    applyEmbedLaunchRoute(launchEventId);
+  }
+
   const {user, accessToken} = await authenticateDiscordActivity(sdk, clientId);
 
   return {
@@ -176,6 +181,12 @@ export async function initDiscordActivity(): Promise<InitResult> {
     await sdk.ready();
 
     const launchEventId = eventIdFromOpenEventCustomId(sdk.customId);
+    if (launchEventId) {
+      applyEmbedLaunchRoute(launchEventId);
+    } else {
+      finishEmbedSdkProbe();
+    }
+
     const {user, accessToken} = await authenticateDiscordActivity(sdk, clientId);
 
     return {

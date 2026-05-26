@@ -1,32 +1,47 @@
-import {useLayoutEffect} from 'react';
+import {useEffect, useLayoutEffect} from 'react';
 import {useLocation, useNavigate} from 'react-router-dom';
 import {
   endDeferBrowseFeed,
   getEmbedLaunchEventIdFromLocation,
+  subscribeEmbedLaunchRoute,
 } from '../lib/activityLaunch';
 import {isStandaloneBrowser} from '../lib/discord';
 
+function routeToEmbedEvent(
+  eventId: string,
+  pathname: string,
+  navigate: (path: string, options: {replace: boolean}) => void,
+): void {
+  const targetPath = `/event/${eventId}`;
+  if (pathname !== targetPath) {
+    navigate(targetPath, {replace: true});
+  }
+  endDeferBrowseFeed();
+}
+
 /**
- * Routes embed-button launches to `/event/:id` before browse effects run.
- * Uses `custom_id` from the iframe URL (same value as `sdk.customId` after ready).
+ * Keeps React Router in sync with embed deep links (URL `custom_id` or post-`sdk.ready()`).
  */
 export function LaunchRedirector() {
   const navigate = useNavigate();
   const {pathname} = useLocation();
-  const embedEventId = getEmbedLaunchEventIdFromLocation();
 
   useLayoutEffect(() => {
-    if (isStandaloneBrowser() || !embedEventId) return;
+    if (isStandaloneBrowser()) return;
 
-    const targetPath = `/event/${embedEventId}`;
-    if (pathname === targetPath) {
-      endDeferBrowseFeed();
-      return;
-    }
+    const embedEventId = getEmbedLaunchEventIdFromLocation();
+    if (!embedEventId) return;
 
-    navigate(targetPath, {replace: true});
-    endDeferBrowseFeed();
-  }, [embedEventId, pathname, navigate]);
+    routeToEmbedEvent(embedEventId, pathname, navigate);
+  }, [pathname, navigate]);
+
+  useEffect(() => {
+    if (isStandaloneBrowser()) return;
+
+    return subscribeEmbedLaunchRoute((eventId) => {
+      routeToEmbedEvent(eventId, window.location.pathname, navigate);
+    });
+  }, [navigate]);
 
   return null;
 }

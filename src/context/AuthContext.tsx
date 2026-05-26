@@ -18,7 +18,7 @@ import {
   setResolvedUser,
   type InitResult,
 } from '../lib/discord';
-import {endDeferBrowseFeed} from '../lib/activityLaunch';
+import {applyEmbedLaunchRoute, endDeferBrowseFeed} from '../lib/activityLaunch';
 import {resolveLaunchIntentTarget, shouldResolveLaunchRedirect} from '../lib/launchRedirect';
 import {loadDiscordSession} from '../lib/discordAuth';
 import {GUEST_USER} from '../lib/guestUser';
@@ -45,8 +45,11 @@ function applyEmbedLaunchRedirect(
   navigate: (path: string, options: {replace: boolean}) => void,
 ): void {
   if (!result.launchEventId) return;
+  applyEmbedLaunchRoute(result.launchEventId);
+  if (window.location.pathname !== `/event/${result.launchEventId}`) {
+    navigate(`/event/${result.launchEventId}`, {replace: true});
+  }
   endDeferBrowseFeed();
-  navigate(`/event/${result.launchEventId}`, {replace: true});
 }
 
 function tryLaunchIntentRedirect(
