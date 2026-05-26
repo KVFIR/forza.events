@@ -1,6 +1,8 @@
 import type {CarRuleMode, ForzaEvent} from './types';
 import type {AppUser} from './types';
 import {isEventType} from './eventTypes';
+import {VALIDATION_CODES, type ValidationCode} from './validationCodes';
+import {validationMessage} from './validationMessages';
 
 export function normalizeTrackCodes(codes: string[]): string[] {
   return codes.map((c) => c.trim()).filter(Boolean);
@@ -11,11 +13,11 @@ export function validateDraftForm(input: {
   type: string;
   startsAtLocal: string;
   guildId: string | null;
-}): string | null {
-  if (!input.title.trim()) return 'Event name is required.';
-  if (!isEventType(input.type)) return 'Event type is required.';
-  if (!input.startsAtLocal) return 'Date and time are required.';
-  if (!input.guildId) return 'Choose a Discord server for this event.';
+}): ValidationCode | null {
+  if (!input.title.trim()) return VALIDATION_CODES.TITLE_REQUIRED;
+  if (!isEventType(input.type)) return VALIDATION_CODES.TYPE_REQUIRED;
+  if (!input.startsAtLocal) return VALIDATION_CODES.STARTS_AT_REQUIRED;
+  if (!input.guildId) return VALIDATION_CODES.GUILD_REQUIRED;
   return null;
 }
 
@@ -29,7 +31,7 @@ export function validatePublishForm(input: {
   maxPi: number;
   carCount: number;
   lobbyLeaderGamertag: string;
-}): string | null {
+}): ValidationCode | null {
   const draftErr = validateDraftForm({
     title: input.title,
     type: input.type,
@@ -37,15 +39,30 @@ export function validatePublishForm(input: {
     guildId: input.guildId,
   });
   if (draftErr) return draftErr;
-  if (!input.channelId) return 'Choose a channel before publishing.';
-  if (!input.lobbyLeaderGamertag.trim()) return 'Convoy leader gamertag is required.';
+  if (!input.channelId) return VALIDATION_CODES.CHANNEL_REQUIRED;
+  if (!input.lobbyLeaderGamertag.trim()) return VALIDATION_CODES.CONVOY_LEADER_REQUIRED;
   if (input.carRuleMode === 'restricted_list' && input.carCount === 0) {
-    return 'Add at least one car for a restricted car list.';
+    return VALIDATION_CODES.CARS_REQUIRED;
   }
   if (input.carRuleMode === 'anything_goes' && (input.maxPi < 100 || input.maxPi > 999)) {
-    return 'Set a PI cap between 100 and 999.';
+    return VALIDATION_CODES.PI_RANGE;
   }
   return null;
+}
+
+/** Localized message for create/review validation. */
+export function validateDraftFormMessage(
+  input: Parameters<typeof validateDraftForm>[0],
+): string | null {
+  const code = validateDraftForm(input);
+  return code ? validationMessage(code) : null;
+}
+
+export function validatePublishFormMessage(
+  input: Parameters<typeof validatePublishForm>[0],
+): string | null {
+  const code = validatePublishForm(input);
+  return code ? validationMessage(code) : null;
 }
 
 export function eventHasStarted(event: ForzaEvent): boolean {

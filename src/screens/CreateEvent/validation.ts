@@ -2,7 +2,10 @@ import i18n from '../../i18n';
 import {gamertagError} from '../../lib/gamertag';
 import {defaultTimezone, localInputToUtc} from '../../lib/datetime';
 import {isEventType} from '../../lib/eventTypes';
-import {validateDraftForm, validatePublishForm} from '../../lib/eventSpec';
+import {
+  validateDraftFormMessage,
+  validatePublishFormMessage,
+} from '../../lib/eventSpec';
 import type {CarRuleMode} from '../../lib/types';
 import {COVER_ACCEPT, COVER_MAX_BYTES, TITLE_MAX_LENGTH} from './constants';
 import type {CreateEventFormValues, FieldErrors} from './types';
@@ -129,7 +132,7 @@ export function validateDraftSave(
   if (detailsErr) return detailsErr;
   const targetErr = firstFieldError(validateTargetStep(values));
   if (targetErr) return targetErr;
-  return validateDraftForm({
+  return validateDraftFormMessage({
     title: values.title,
     type: values.type,
     startsAtLocal: values.startsAtLocal,
@@ -153,7 +156,7 @@ export function validatePublish(
     ? hostGamertag
     : values.lobbyLeaderGamertag;
 
-  return validatePublishForm({
+  return validatePublishFormMessage({
     title: values.title,
     type: values.type,
     startsAtLocal: values.startsAtLocal,

@@ -76,6 +76,8 @@ The user stays in Discord:
 
 ## What is explicitly out of MVP
 
+> **Tracking:** post-MVP ideas and acceptance notes live in [`BACKLOG.md`](BACKLOG.md).
+
 The following items are intentionally deferred and must not block launch:
 
 - Reminders

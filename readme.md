@@ -29,6 +29,7 @@ Works in server channels, voice, DMs, and App Launcher (desktop and mobile).
 | i18n (English + Russian) | Post-MVP bot automation |
 
 **Start here:** [`docs/STATUS.md`](docs/STATUS.md)  
+**Planned features:** [`docs/BACKLOG.md`](docs/BACKLOG.md)  
 **Local setup:** [`docs/DEVELOPMENT.md`](docs/DEVELOPMENT.md)  
 **Discord portal:** [`docs/DISCORD_PLATFORM.md`](docs/DISCORD_PLATFORM.md)
 

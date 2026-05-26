@@ -12,6 +12,7 @@ import {
   isPublishedStatus,
   eventHasStarted,
 } from '../_shared/eventSpec.ts';
+import {appErrorResponse, internalErrorResponse} from '../_shared/apiResponse.ts';
 import {jsonResponse, optionsResponse} from '../_shared/cors.ts';
 import {verifyDiscordToken} from '../_shared/discord.ts';
 import {resolveGuildNameForUser} from '../_shared/guildAccess.ts';
@@ -102,7 +103,7 @@ serve(async (req) => {
     }
 
     const draftErr = validateDraft(body);
-    if (draftErr) return jsonResponse({error: draftErr}, 400, req);
+    if (draftErr) return appErrorResponse(req, 400, draftErr);
 
     if (body.guild_id) {
       const guildName = normalizeGuildName(
@@ -156,12 +157,12 @@ serve(async (req) => {
         return jsonResponse({error: 'Published events cannot be edited after start'}, 403, req);
       }
       const lockErr = await assertTargetNotLocked(supabase, existing, body);
-      if (lockErr) return jsonResponse({error: lockErr}, 400, req);
+      if (lockErr) return appErrorResponse(req, 400, lockErr);
     }
 
     if (body.publish) {
       const publishErr = validatePublishReady(body);
-      if (publishErr) return jsonResponse({error: publishErr}, 400, req);
+      if (publishErr) return appErrorResponse(req, 400, publishErr);
     }
 
     const cars: CarPayload[] =
@@ -217,8 +218,7 @@ serve(async (req) => {
 
     return jsonResponse({error: 'Could not create unique slug'}, 500, req);
   } catch (e) {
-    console.error(e);
-    return jsonResponse({error: String(e)}, 500, req);
+    return internalErrorResponse(req, e);
   }
 });
 

@@ -251,6 +251,26 @@
     "placeholder": "Your Xbox GT",
     "saveAndJoin": "Save & join"
   },
+  "errors": {
+    "unauthorized": "Sign in to continue.",
+    "forbidden": "You do not have permission to do that.",
+    "internal": "Something went wrong. Try again in a moment.",
+    "tooManyRequests": "Too many requests. Wait a moment and try again.",
+    "badRequest": "Invalid request.",
+    "botNotInGuild": "FORZA.EVENTS is not installed in this server. Add the app to the server first.",
+    "channelNotFound": "Channel not found. Choose another channel or refresh the list.",
+    "channelNotText": "Only text channels can be used for announcements.",
+    "channelWrongGuild": "Channel does not belong to the selected server.",
+    "botNotGuildMember": "The bot is not a member of this server.",
+    "botCannotPost": "FORZA.EVENTS cannot post in this channel. Allow View Channel, Send Messages, and Embed Links for the bot (or its role).",
+    "eventFull": "This event is full.",
+    "registrationClosed": "Registration is closed.",
+    "registrationAfterStart": "Registration closed after the event started.",
+    "hostCannotJoin": "Event hosts do not need to join.",
+    "eventNotFound": "Event not found.",
+    "notDraft": "Only draft events can be published.",
+    "invalidResponse": "Could not reach the server. Try again."
+  },
   "validation": {
     "futureDate": "Choose a date and time in the future.",
     "coverFormat": "Use JPEG, PNG, or WebP.",
@@ -263,7 +283,10 @@
     "carsRequired": "Add at least one car for a restricted list.",
     "piRange": "Set a PI cap between 100 and 999.",
     "guildRequired": "Choose a Discord server for this event.",
-    "channelRequired": "Choose a channel before publishing."
+    "channelRequired": "Choose a channel before publishing.",
+    "convoyLeaderRequired": "Convoy leader gamertag is required.",
+    "targetGuildLocked": "Server cannot be changed after publish.",
+    "targetChannelLocked": "Channel cannot be changed after publish."
   },
   "results": {
     "dnf": "DNF",

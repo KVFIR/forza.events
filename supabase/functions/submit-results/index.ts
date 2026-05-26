@@ -1,4 +1,5 @@
 import {serve} from 'https://deno.land/std@0.224.0/http/server.ts';
+import {internalErrorResponse} from '../_shared/apiResponse.ts';
 import {jsonResponse, optionsResponse} from '../_shared/cors.ts';
 import {syncPublishedEmbedByEventId} from '../_shared/embedSync.ts';
 import {verifyDiscordToken} from '../_shared/discord.ts';
@@ -102,7 +103,6 @@ serve(async (req) => {
 
     return jsonResponse({ok: true, embed_synced: embedSync.ok}, 200, req);
   } catch (e) {
-    console.error(e);
-    return jsonResponse({error: String(e)}, 500, req);
+    return internalErrorResponse(req, e);
   }
 });

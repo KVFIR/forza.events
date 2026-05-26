@@ -39,7 +39,9 @@ function resolveInitialLanguage(): AppLanguage {
 }
 
 function applyDocumentLanguage(lng: string) {
-  document.documentElement.lang = lng;
+  if (typeof document !== 'undefined') {
+    document.documentElement.lang = lng;
+  }
 }
 
 void i18n.use(initReactI18next).init({

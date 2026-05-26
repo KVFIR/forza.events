@@ -34,12 +34,12 @@ serve(async (req) => {
 
     const result = await validatePublishChannelTarget(guild_id, channel_id);
     if (!result.ok) {
-      return jsonResponse({ok: false, error: result.error}, 400, req);
+      return jsonResponse({ok: false, error: result.error, code: result.code}, 400, req);
     }
 
     return jsonResponse({ok: true}, 200, req);
   } catch (e) {
-    console.error(e);
-    return jsonResponse({error: String(e)}, 500, req);
+    const {internalErrorResponse} = await import('../_shared/apiResponse.ts');
+    return internalErrorResponse(req, e);
   }
 });

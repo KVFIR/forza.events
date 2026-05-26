@@ -1,5 +1,6 @@
 import {decodeBase64} from 'https://deno.land/std@0.224.0/encoding/base64.ts';
 import {serve} from 'https://deno.land/std@0.224.0/http/server.ts';
+import {internalErrorResponse} from '../_shared/apiResponse.ts';
 import {jsonResponse, optionsResponse} from '../_shared/cors.ts';
 import {verifyDiscordToken} from '../_shared/discord.ts';
 import {rateLimitMutation} from '../_shared/rateLimitPresets.ts';
@@ -75,7 +76,6 @@ serve(async (req) => {
     const {data: urlData} = supabase.storage.from('event-covers').getPublicUrl(path);
     return jsonResponse({url: urlData.publicUrl}, 200, req);
   } catch (e) {
-    console.error(e);
-    return jsonResponse({error: String(e)}, 500, req);
+    return internalErrorResponse(req, e);
   }
 });

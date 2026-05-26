@@ -1,4 +1,5 @@
 import {serve} from 'https://deno.land/std@0.224.0/http/server.ts';
+import {internalErrorResponse} from '../_shared/apiResponse.ts';
 import {jsonResponse, optionsResponse} from '../_shared/cors.ts';
 import {avatarUrl, exchangeCode, fetchDiscordUser} from '../_shared/discord.ts';
 import {resolveGuildNameForUser} from '../_shared/guildAccess.ts';
@@ -80,7 +81,6 @@ serve(async (req) => {
       },
     }, 200, req);
   } catch (e) {
-    console.error(e);
-    return jsonResponse({error: String(e)}, 500, req);
+    return internalErrorResponse(req, e);
   }
 });

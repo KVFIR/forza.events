@@ -1,0 +1,42 @@
+# Engineering quality bar
+
+Practices that protect the frozen MVP during pilot releases.
+
+## CI
+
+Every push/PR to `main` / `master` runs [`.github/workflows/ci.yml`](../.github/workflows/ci.yml):
+
+1. `npm run typecheck`
+2. `npm run test`
+3. `npm run build`
+
+Run locally before pushing:
+
+```bash
+npm run typecheck && npm run test && npm run build
+```
+
+## Unit tests (Vitest)
+
+Focus on **pure logic** without Discord or Supabase:
+
+| Area | Location |
+|------|----------|
+| Client validation / policy | `src/lib/eventSpec.test.ts` |
+| Client ↔ Edge validation parity | `tests/validationParity.test.ts` |
+| Event types, gamertag, datetime | `src/lib/*.test.ts` |
+| Edge slugify | `tests/slugify.test.ts` |
+
+When changing validation rules, update **both** `src/lib/eventSpec.ts` and `supabase/functions/_shared/eventSpec.ts`, and keep `validationCodes.ts` copies identical.
+
+## API error codes
+
+- Edge: `{ "error": "…", "code": "BOT_CANNOT_POST" }` via `appErrorResponse()` / `internalErrorResponse()` in `supabase/functions/_shared/apiResponse.ts`.
+- Client: `invoke()` throws `ApiRequestError`; UI should show `err.message` (already mapped with `mapApiError()`).
+- i18n keys live under `errors.*` and `validation.*` in `src/i18n/locales/`.
+
+## Not in scope yet
+
+- ESLint across the full repo
+- Playwright / Discord Activity E2E in CI
+- Shared npm package for client + Edge (fixtures + parity tests are enough for pilot)

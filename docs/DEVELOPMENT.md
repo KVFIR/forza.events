@@ -15,6 +15,16 @@ npm install
 npm run dev
 ```
 
+### CI checks (before push)
+
+```bash
+npm run typecheck
+npm run test
+npm run build
+```
+
+GitHub Actions runs the same on every push/PR to `main` / `master`.
+
 Open http://localhost:5180 → **Sign in** (navbar) for create/join/profile → browse events.
 
 ---

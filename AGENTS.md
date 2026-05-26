@@ -111,9 +111,18 @@ Lessons from implementation work (keep in sync when behavior changes).
 - Deploy **`upload-cover`** with other functions (`npm run deploy:functions`). Apply migrations `018`–`021` on Supabase.
 - **Docs:** keep [`docs/STATUS.md`](docs/STATUS.md), [`docs/DEVELOPMENT.md`](docs/DEVELOPMENT.md), [`supabase/README.md`](supabase/README.md) in sync when migrations or function list changes.
 
+## CI / tests
+
+- **CI:** `.github/workflows/ci.yml` — `npm ci` → `typecheck` → `test` → `build`.
+- **Unit tests:** Vitest on pure logic (`src/lib/eventSpec`, `gamertag`, `datetime`, parity with `supabase/functions/_shared/eventSpec`). Run `npm test`.
+- **API errors:** Edge responses include `code` where possible; client maps via `mapApiError()` / `ApiRequestError` in `src/lib/apiErrors.ts`. Keep `src/lib/validationCodes.ts` and `supabase/functions/_shared/validationCodes.ts` in sync.
+- **500 responses:** use `internalErrorResponse()` — never `String(e)` to clients.
+
 ## References
 
 - [`docs/STATUS.md`](docs/STATUS.md) — current feature matrix and migrations
+- [`docs/ENGINEERING.md`](docs/ENGINEERING.md) — quality bar (CI, tests, error codes)
+- [`docs/BACKLOG.md`](docs/BACKLOG.md) — post-MVP planned features (update when adding or shipping backlog items)
 - [`docs/DISCORD_PLATFORM.md`](docs/DISCORD_PLATFORM.md) — proxy mapping, portal checklist
 - [`docs/DEVELOPMENT.md`](docs/DEVELOPMENT.md) — local OAuth, testing checklist
 - [`supabase/README.md`](supabase/README.md) — migrations `001`–`021`, Edge Functions

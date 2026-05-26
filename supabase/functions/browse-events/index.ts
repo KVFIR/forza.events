@@ -1,5 +1,6 @@
 import {serve} from 'https://deno.land/std@0.224.0/http/server.ts';
 import {EVENT_LIST_SELECT} from '../_shared/eventListSelect.ts';
+import {internalErrorResponse} from '../_shared/apiResponse.ts';
 import {jsonResponse, optionsResponse} from '../_shared/cors.ts';
 import {verifyDiscordToken} from '../_shared/discord.ts';
 import {rateLimitPublicRead} from '../_shared/rateLimitPresets.ts';
@@ -90,7 +91,6 @@ serve(async (req) => {
 
     return jsonResponse({data: data ?? []}, 200, req);
   } catch (e) {
-    console.error(e);
-    return jsonResponse({error: String(e)}, 500, req);
+    return internalErrorResponse(req, e);
   }
 });

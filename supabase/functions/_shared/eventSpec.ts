@@ -1,5 +1,6 @@
 import type {adminClient} from './supabase.ts';
 import {isValidEventType} from './eventTypes.ts';
+import {VALIDATION_CODES, type ValidationCode} from './validationCodes.ts';
 
 export type CarRuleMode = 'anything_goes' | 'restricted_list';
 
@@ -54,27 +55,28 @@ export function normalizeTrackCodes(codes?: string[]): string[] {
   return (codes ?? []).map((c) => String(c).trim()).filter(Boolean);
 }
 
-export function validateDraft(body: SaveEventBody): string | null {
-  if (!body.title?.trim()) return 'Event name is required.';
-  if (!isValidEventType(body.type)) return 'Event type is required.';
-  if (!body.starts_at) return 'Start time is required.';
-  if (!body.guild_id) return 'Choose a Discord server for this event.';
+export function validateDraft(body: SaveEventBody): ValidationCode | null {
+  if (!body.title?.trim()) return VALIDATION_CODES.TITLE_REQUIRED;
+  if (!isValidEventType(body.type)) return VALIDATION_CODES.TYPE_REQUIRED;
+  if (!body.starts_at) return VALIDATION_CODES.STARTS_AT_REQUIRED;
+  if (!body.guild_id) return VALIDATION_CODES.GUILD_REQUIRED;
   return null;
 }
 
-export function validatePublishReady(body: SaveEventBody): string | null {
+export function validatePublishReady(body: SaveEventBody): ValidationCode | null {
   const draftErr = validateDraft(body);
   if (draftErr) return draftErr;
+  if (!body.channel_id?.trim()) return VALIDATION_CODES.CHANNEL_REQUIRED;
 
   const leader = body.lobby_leader_gamertag?.trim();
-  if (!leader) return 'Convoy leader gamertag is required.';
+  if (!leader) return VALIDATION_CODES.CONVOY_LEADER_REQUIRED;
 
   const mode = body.car_rule_mode ?? 'anything_goes';
   if (mode === 'restricted_list') {
-    if (!body.cars?.length) return 'Add at least one car for a restricted car list.';
+    if (!body.cars?.length) return VALIDATION_CODES.CARS_REQUIRED;
   } else {
     const maxPi = Number(body.max_pi ?? 0);
-    if (maxPi < 100 || maxPi > 999) return 'Set a PI cap between 100 and 999 for Open build.';
+    if (maxPi < 100 || maxPi > 999) return VALIDATION_CODES.PI_RANGE;
   }
 
   return null;
@@ -165,17 +167,17 @@ export async function assertTargetNotLocked(
   supabase: ReturnType<typeof adminClient>,
   existing: DbEvent | null,
   body: SaveEventBody,
-): Promise<string | null> {
+): Promise<ValidationCode | null> {
   if (!existing || !isPublishedStatus(existing.status)) return null;
   if (body.guild_id && body.guild_id !== existing.guild_id) {
-    return 'Server cannot be changed after publish.';
+    return VALIDATION_CODES.TARGET_GUILD_LOCKED;
   }
   if (
     body.channel_id !== undefined &&
     existing.channel_id &&
     body.channel_id.trim() !== existing.channel_id
   ) {
-    return 'Channel cannot be changed after publish.';
+    return VALIDATION_CODES.TARGET_CHANNEL_LOCKED;
   }
   return null;
 }

@@ -1,5 +1,9 @@
+import {ApiRequestError, apiErrorFromPayload} from './apiErrors';
+import {API_ERROR_CODES} from './apiErrorCodes';
 import {createSupabaseFetch, isDiscordActivityFrame} from './supabaseEnv';
 import {isSupabaseConfigured, resolveSupabaseUrl} from './supabase';
+
+export {ApiRequestError, mapApiError} from './apiErrors';
 
 function apiBase(): string {
   const explicit = import.meta.env.VITE_API_BASE_URL as string | undefined;
@@ -42,11 +46,28 @@ async function invoke<T>(
     body: JSON.stringify(body),
   });
 
-  const data = (await res.json()) as {error?: string; message?: string; code?: string};
+  const contentType = res.headers.get('content-type') ?? '';
+  let data: {error?: string; message?: string; code?: string};
+  if (contentType.includes('application/json')) {
+    try {
+      data = (await res.json()) as typeof data;
+    } catch {
+      throw new ApiRequestError('Invalid server response', {
+        code: API_ERROR_CODES.INVALID_RESPONSE,
+        status: res.status,
+      });
+    }
+  } else {
+    const text = await res.text();
+    console.error('invoke non-json', {name, status: res.status, snippet: text.slice(0, 200)});
+    throw new ApiRequestError('Invalid server response', {
+      code: API_ERROR_CODES.INVALID_RESPONSE,
+      status: res.status,
+    });
+  }
+
   if (!res.ok) {
-    throw new Error(
-      data.error ?? data.message ?? data.code ?? `Request failed: ${res.status}`,
-    );
+    throw apiErrorFromPayload(data, res.status);
   }
   return data as T;
 }
@@ -118,7 +139,7 @@ export async function validatePublishChannel(
   guildId: string,
   channelId: string,
 ) {
-  return invoke<{ok: boolean; error?: string}>(
+  return invoke<{ok: boolean; error?: string; code?: string}>(
     'validate-channel',
     {guild_id: guildId, channel_id: channelId},
     discordToken,

@@ -1,4 +1,6 @@
 import {serve} from 'https://deno.land/std@0.224.0/http/server.ts';
+import {API_ERROR_CODES} from '../_shared/apiErrorCodes.ts';
+import {appErrorResponse, internalErrorResponse} from '../_shared/apiResponse.ts';
 import {jsonResponse, optionsResponse} from '../_shared/cors.ts';
 import {verifyDiscordToken} from '../_shared/discord.ts';
 import {ensureDiscordUserRow} from '../_shared/discordUserRow.ts';
@@ -20,10 +22,10 @@ function participationError(
 ): Response {
   const msg = error.message ?? fallback;
   if (msg.includes('EVENT_FULL')) {
-    return jsonResponse({error: 'Event full'}, 409, req);
+    return appErrorResponse(req, 409, API_ERROR_CODES.EVENT_FULL);
   }
   if (msg.includes('EVENT_NOT_FOUND')) {
-    return jsonResponse({error: 'Event not found'}, 404, req);
+    return appErrorResponse(req, 404, API_ERROR_CODES.EVENT_NOT_FOUND);
   }
   if (msg.includes('foreign key') && msg.includes('users')) {
     return jsonResponse({error: 'Complete sign-in before joining events'}, 400, req);
@@ -63,7 +65,7 @@ serve(async (req) => {
         .maybeSingle();
 
       if (!event || event.status === 'draft') {
-        return jsonResponse({error: 'Event not found'}, 404, req);
+        return appErrorResponse(req, 404, API_ERROR_CODES.EVENT_NOT_FOUND);
       }
       if (!canLeaveEvent(event)) {
         return jsonResponse(
@@ -99,19 +101,19 @@ serve(async (req) => {
         .single();
 
       if (!event || event.status === 'draft') {
-        return jsonResponse({error: 'Event not found'}, 404, req);
+        return appErrorResponse(req, 404, API_ERROR_CODES.EVENT_NOT_FOUND);
       }
       if (event.host_discord_id === discordUser.id) {
-        return jsonResponse({error: 'Event hosts do not need to join'}, 400, req);
+        return appErrorResponse(req, 400, API_ERROR_CODES.HOST_CANNOT_JOIN);
       }
       if (CLOSED_STATUSES.has(event.status)) {
-        return jsonResponse({error: 'Registration is closed'}, 400, req);
+        return appErrorResponse(req, 400, API_ERROR_CODES.REGISTRATION_CLOSED);
       }
       if (eventHasStarted(event)) {
-        return jsonResponse({error: 'Registration closed after event start'}, 400, req);
+        return appErrorResponse(req, 400, API_ERROR_CODES.REGISTRATION_AFTER_START);
       }
       if (event.current_players >= event.max_players) {
-        return jsonResponse({error: 'Event full'}, 409, req);
+        return appErrorResponse(req, 409, API_ERROR_CODES.EVENT_FULL);
       }
 
       await ensureDiscordUserRow(supabase, discordUser);
@@ -140,7 +142,6 @@ serve(async (req) => {
 
     return jsonResponse({error: 'Unknown action'}, 400, req);
   } catch (e) {
-    console.error(e);
-    return jsonResponse({error: String(e)}, 500, req);
+    return internalErrorResponse(req, e);
   }
 });

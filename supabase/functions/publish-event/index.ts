@@ -1,4 +1,6 @@
 import {serve} from 'https://deno.land/std@0.224.0/http/server.ts';
+import {API_ERROR_CODES} from '../_shared/apiErrorCodes.ts';
+import {appErrorResponse, internalErrorResponse} from '../_shared/apiResponse.ts';
 import {jsonResponse, optionsResponse} from '../_shared/cors.ts';
 import {botHeaders, mapDiscordPostError, verifyDiscordToken} from '../_shared/discord.ts';
 import {requireManageGuildAccess, resolveGuildNameForUser} from '../_shared/guildAccess.ts';
@@ -38,7 +40,7 @@ serve(async (req) => {
 
     const channelCheck = await validatePublishChannelTarget(guild_id, channel_id);
     if (!channelCheck.ok) {
-      return jsonResponse({error: channelCheck.error}, 400, req);
+      return jsonResponse({error: channelCheck.error, code: channelCheck.code}, 400, req);
     }
 
     const supabase = adminClient();
@@ -53,7 +55,24 @@ serve(async (req) => {
       return jsonResponse({error: 'Only the host can publish'}, 403, req);
     }
     if (event.status !== 'draft') {
-      return jsonResponse({error: 'Only draft events can be published'}, 400, req);
+      if (
+        event.discord_message_id &&
+        event.status === 'open' &&
+        event.channel_id &&
+        event.guild_id
+      ) {
+        return jsonResponse(
+          {
+            message_id: event.discord_message_id,
+            channel_id: event.channel_id,
+            guild_id: event.guild_id,
+            already_published: true,
+          },
+          200,
+          req,
+        );
+      }
+      return appErrorResponse(req, 400, API_ERROR_CODES.NOT_DRAFT);
     }
     if (event.guild_id && event.guild_id !== guild_id) {
       return jsonResponse({error: 'Server is locked for this draft'}, 400, req);
@@ -116,7 +135,7 @@ serve(async (req) => {
     };
 
     const publishErr = validatePublishReady(body);
-    if (publishErr) return jsonResponse({error: publishErr}, 400, req);
+    if (publishErr) return appErrorResponse(req, 400, publishErr);
 
     const payload = buildEventEmbed({
       ...event,
@@ -155,7 +174,6 @@ serve(async (req) => {
 
     return jsonResponse({message_id: message.id, channel_id, guild_id}, 200, req);
   } catch (e) {
-    console.error(e);
-    return jsonResponse({error: String(e)}, 500, req);
+    return internalErrorResponse(req, e);
   }
 });

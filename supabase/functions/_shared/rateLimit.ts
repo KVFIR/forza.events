@@ -55,6 +55,7 @@ export async function rateLimitOr429(
 ): Promise<Response | null> {
   const ok = await enforceRateLimit(key, maxRequests, windowSeconds);
   if (ok) return null;
-  const {jsonResponse} = await import('./cors.ts');
-  return jsonResponse({error: 'Too many requests'}, 429, req);
+  const {appErrorResponse} = await import('./apiResponse.ts');
+  const {API_ERROR_CODES} = await import('./apiErrorCodes.ts');
+  return appErrorResponse(req, 429, API_ERROR_CODES.TOO_MANY_REQUESTS);
 }

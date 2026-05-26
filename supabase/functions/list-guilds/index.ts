@@ -1,4 +1,6 @@
 import {serve} from 'https://deno.land/std@0.224.0/http/server.ts';
+import {API_ERROR_CODES} from '../_shared/apiErrorCodes.ts';
+import {appErrorResponse, internalErrorResponse} from '../_shared/apiResponse.ts';
 import {jsonResponse, optionsResponse} from '../_shared/cors.ts';
 import {
   fetchUserGuilds,
@@ -43,9 +45,10 @@ serve(async (req) => {
       hint: list.length === 0 ? publishTargetHint() : null,
     }, 200, req);
   } catch (e) {
-    console.error(e);
     const msg = e instanceof Error ? e.message : String(e);
-    const status = msg.includes('rate limit') ? 429 : 500;
-    return jsonResponse({error: msg}, status, req);
+    if (msg.includes('rate limit')) {
+      return appErrorResponse(req, 429, API_ERROR_CODES.TOO_MANY_REQUESTS);
+    }
+    return internalErrorResponse(req, e);
   }
 });
