@@ -4,7 +4,7 @@
  */
 export function DiscordOnlyGate() {
   return (
-    <div className="flex min-h-screen flex-col items-center justify-center bg-dots px-6 text-center">
+    <div className="flex min-h-screen flex-col items-center justify-center px-6 text-center">
       <div className="max-w-md space-y-4">
         <p className="text-[13px] font-black tracking-tight text-white">
           FORZA<span className="text-accent-purple-light">.EVENTS</span>

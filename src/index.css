@@ -13,9 +13,20 @@
 
   body {
     @apply m-0 min-h-screen bg-base font-sans text-slate-100 antialiased;
+  }
+
+  body::before {
+    content: '';
+    position: fixed;
+    inset: 0;
+    z-index: -1;
+    pointer-events: none;
+    background-color: #06060e;
     background-image:
       radial-gradient(ellipse 90% 45% at 50% -5%, rgba(139, 92, 246, 0.11) 0%, transparent 100%),
-      radial-gradient(ellipse 45% 35% at 95% 95%, rgba(34, 211, 238, 0.05) 0%, transparent 100%);
+      radial-gradient(ellipse 45% 35% at 95% 95%, rgba(34, 211, 238, 0.05) 0%, transparent 100%),
+      radial-gradient(rgba(255, 255, 255, 0.035) 1px, transparent 1px);
+    background-size: auto, auto, 22px 22px;
   }
 
   #root {
@@ -73,11 +84,6 @@
 
   .text-glow-purple {
     text-shadow: 0 0 16px rgba(139, 92, 246, 0.8), 0 0 32px rgba(139, 92, 246, 0.4);
-  }
-
-  .bg-dots {
-    background-image: radial-gradient(rgba(255, 255, 255, 0.035) 1px, transparent 1px);
-    background-size: 22px 22px;
   }
 
   .no-scrollbar {
