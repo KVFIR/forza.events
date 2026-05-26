@@ -1,4 +1,4 @@
-import {useCallback, useEffect, useState} from 'react';
+import {useCallback, useEffect, useRef, useState} from 'react';
 import {Link, useNavigate, useParams} from 'react-router-dom';
 import {
   ArrowLeft,
@@ -20,6 +20,9 @@ import {
   type EventResultRow,
 } from '../lib/events';
 import {EventResultsTable} from '../components/EventResultsTable';
+import {ContentReveal} from '../components/ui/ContentReveal';
+import {PageLoading} from '../components/ui/PageLoading';
+import {useLoadingUI} from '../hooks/useLoadingUI';
 import {formatEventTime} from '../lib/datetime';
 import {cancelEvent, isApiConfigured, updateProfile} from '../lib/api';
 import {canCancelEvent, canEditEvent} from '../lib/eventSpec';
@@ -72,6 +75,8 @@ export function EventDetail() {
   const [event, setEvent] = useState<ForzaEvent | undefined>();
   const [resultRows, setResultRows] = useState<EventResultRow[]>([]);
   const [loading, setLoading] = useState(true);
+  const loadedForIdRef = useRef<string | null>(null);
+  const showLoadingUI = useLoadingUI(loading && !event);
   const {isJoined, toggleJoin, bumpRefresh, refreshKey} = useJoinedEvents();
   const {user, refreshUser, getAccessToken, isSignedIn} = useAuth();
   const [gamertagOpen, setGamertagOpen] = useState(false);
@@ -88,9 +93,19 @@ export function EventDetail() {
 
   useEffect(() => {
     if (!id) return;
-    setLoading(true);
+    let cancelled = false;
+    const isInitial = loadedForIdRef.current !== id;
+
+    if (isInitial) {
+      loadedForIdRef.current = id;
+      setLoading(true);
+      setEvent(undefined);
+      setResultRows([]);
+    }
+
     void fetchEventById(id)
       .then(async (ev) => {
+        if (cancelled) return;
         setEvent(ev);
         if (ev && isEventCompleted(ev)) {
           setResultRows(await fetchEventResults(id));
@@ -98,7 +113,13 @@ export function EventDetail() {
           setResultRows([]);
         }
       })
-      .finally(() => setLoading(false));
+      .finally(() => {
+        if (!cancelled) setLoading(false);
+      });
+
+    return () => {
+      cancelled = true;
+    };
   }, [id, refreshKey]);
 
   async function handleJoinClick() {
@@ -160,12 +181,19 @@ export function EventDetail() {
     }
   }
 
-  if (loading) return <p className="py-20 text-center text-muted">Loading…</p>;
+  if (showLoadingUI) {
+    return <PageLoading label="Loading event" className="pb-10 pt-4" />;
+  }
+
+  if (!event && loading) {
+    return null;
+  }
 
   if (!event) {
     return (
       <div className="flex flex-col items-center gap-4 py-20 text-center">
-        <p className="text-muted">Event not found.</p>
+        <p className="text-sm font-medium text-slate-200">Event not found</p>
+        <p className="max-w-xs text-xs text-muted">It may have been removed or the link is incorrect.</p>
         <Link to="/" className="text-sm font-semibold text-accent-purple hover:text-accent-purple-light transition-colors">
           Back to events
         </Link>
@@ -186,7 +214,7 @@ export function EventDetail() {
   const resultDisplay = resolveEventResultDisplay(event, resultRows);
 
   return (
-    <div className="pb-10 pt-4 animate-fade-in">
+    <ContentReveal className="pb-10 pt-4">
       <Link
         to="/"
         className="mb-5 inline-flex items-center gap-1.5 text-xs font-semibold uppercase tracking-widest text-muted hover:text-accent-purple-light transition-colors duration-200"
@@ -468,6 +496,6 @@ export function EventDetail() {
         )}
       </div>
 
-    </div>
+    </ContentReveal>
   );
 }

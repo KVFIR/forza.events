@@ -5,6 +5,8 @@ import {DiscordOnlyGate} from './components/DiscordOnlyGate';
 import {Navbar} from './components/Navbar';
 import {AuthProvider} from './context/AuthContext';
 import {JoinedEventsProvider} from './context/JoinedEventsContext';
+import {PageLoading} from './components/ui/PageLoading';
+import {useLoadingUI} from './hooks/useLoadingUI';
 import {shouldShowDiscordOnlyGate} from './lib/runtime';
 
 const BrowseEvents = lazy(() =>
@@ -26,11 +28,8 @@ const AuthCallback = lazy(() =>
 );
 
 function RouteFallback() {
-  return (
-    <div className="flex min-h-[40vh] items-center justify-center text-sm text-muted">
-      Loading…
-    </div>
-  );
+  const showLoading = useLoadingUI(true);
+  return showLoading ? <PageLoading label="Loading page" className="pb-8 pt-5" /> : null;
 }
 
 export default function App() {

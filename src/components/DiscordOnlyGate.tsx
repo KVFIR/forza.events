@@ -14,10 +14,6 @@ export function DiscordOnlyGate() {
           This build is a Discord Activity. Launch it from the App Launcher or a server voice
           channel — not from a regular browser tab.
         </p>
-        <p className="text-xs text-muted/80">
-          Local development at <span className="text-muted-light">localhost:5180</span> still
-          works in a browser for engineering.
-        </p>
       </div>
     </div>
   );

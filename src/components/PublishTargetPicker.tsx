@@ -1,6 +1,7 @@
-import {useEffect, useState} from 'react';
+import {useCallback, useEffect, useState} from 'react';
 import {listChannels, listGuilds} from '../lib/api';
 import {Button} from './ui/Button';
+import {InlineLoading} from './ui/InlineLoading';
 
 type Props = {
   accessToken: string;
@@ -28,7 +29,9 @@ export function PublishTargetPicker({
   const [loadingChannels, setLoadingChannels] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  useEffect(() => {
+  const loadGuilds = useCallback(() => {
+    setLoadingGuilds(true);
+    setError(null);
     void listGuilds(accessToken)
       .then((r) => {
         setGuilds(r.guilds);
@@ -38,17 +41,26 @@ export function PublishTargetPicker({
       .finally(() => setLoadingGuilds(false));
   }, [accessToken]);
 
-  useEffect(() => {
+  const loadChannels = useCallback(() => {
     if (!guildId) {
       setChannels([]);
       return;
     }
     setLoadingChannels(true);
+    setError(null);
     void listChannels(accessToken, guildId)
       .then((r) => setChannels(r.channels))
       .catch((e) => setError(String(e)))
       .finally(() => setLoadingChannels(false));
   }, [accessToken, guildId]);
+
+  useEffect(() => {
+    loadGuilds();
+  }, [loadGuilds]);
+
+  useEffect(() => {
+    loadChannels();
+  }, [loadChannels]);
 
   return (
     <div className="space-y-4">
@@ -57,7 +69,7 @@ export function PublishTargetPicker({
           Discord server
         </p>
         {loadingGuilds ? (
-          <p className="text-sm text-muted">Loading servers…</p>
+          <InlineLoading label="Loading servers" />
         ) : guilds.length === 0 ? (
           <p className="text-sm text-muted">
             {guildHint ?? 'No servers available for publishing yet.'}
@@ -93,7 +105,7 @@ export function PublishTargetPicker({
         {!guildId ? (
           <p className="text-sm text-muted">Choose a server first.</p>
         ) : loadingChannels ? (
-          <p className="text-sm text-muted">Loading channels…</p>
+          <InlineLoading label="Loading channels" />
         ) : (
           <select
             className="w-full rounded-lg border border-white/[0.08] bg-white/[0.03] px-3.5 py-2.5 text-sm text-white"
@@ -114,7 +126,22 @@ export function PublishTargetPicker({
         )}
       </div>
 
-      {error && <p className="text-xs text-accent-red">{error}</p>}
+      {error && (
+        <div className="space-y-2">
+          <p className="text-xs text-accent-red">{error}</p>
+          <Button
+            type="button"
+            variant="ghost"
+            className="h-auto px-0 py-0 text-xs font-semibold text-accent-purple"
+            onClick={() => {
+              if (loadingGuilds || guilds.length === 0) loadGuilds();
+              else loadChannels();
+            }}
+          >
+            Try again
+          </Button>
+        </div>
+      )}
     </div>
   );
 }

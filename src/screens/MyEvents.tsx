@@ -14,19 +14,34 @@ const scopeOptions: {value: MyEventsScope; label: string}[] = [
 export function MyEvents() {
   const [scope, setScope] = useState<MyEventsScope>('all');
   const {isSignedIn, loading: authLoading} = useAuth();
-  const {filtered, loading} = useMyEventsCatalog(scope);
+  const {filtered, isLoading, isRefreshing, loadError, refetch} = useMyEventsCatalog(scope);
 
   const emptyTitle =
     !authLoading && !isSignedIn
       ? 'Sign in to see events you host or join'
-      : 'No events in this list yet';
+      : loadError
+        ? 'Could not load your events'
+        : 'No events in this list yet';
+
+  const emptyDescription =
+    loadError && !isSignedIn
+      ? 'Check your connection and try again.'
+      : !authLoading && !isSignedIn
+        ? 'Use Discord sign-in to sync hosted and joined events.'
+        : loadError
+          ? 'Check your connection and try again.'
+          : undefined;
 
   return (
     <div className="pb-8 pt-5">
       <EventList
         events={filtered}
-        loading={loading}
+        isLoading={isLoading}
+        isRefreshing={isRefreshing}
+        loadError={loadError}
+        onRetry={refetch}
         emptyTitle={emptyTitle}
+        emptyDescription={emptyDescription}
         emptyAction={
           scope !== 'all'
             ? {label: 'Clear filters', onClick: () => setScope('all')}

@@ -25,7 +25,8 @@ const sortOptions: {value: EventSortKey; label: string}[] = [
 
 export function BrowseEvents() {
   const {isStandalone} = useAuth();
-  const {events, loading, loadError} = usePublishedEvents();
+  const {events, isLoading, isRefreshing, loadError, refetch} = usePublishedEvents();
+
   const [typeFilter, setTypeFilter] = useState<TypeFilter>('all');
   const [sort, setSort] = useState<EventSortKey>('event_date');
 
@@ -36,22 +37,36 @@ export function BrowseEvents() {
 
   const hasActiveFilters = typeFilter !== 'all';
 
-  const emptyTitle = loadError
-    ? loadError === 'not_configured'
+  const errorTitle =
+    loadError === 'not_configured'
       ? 'App is missing Supabase configuration'
       : isStandalone
         ? 'Could not load events from the database'
-        : `Could not reach the database. In Discord Developer Portal add URL mapping ${discordSupabaseProxyPrefix} → your-project.supabase.co`
-    : 'No events match these filters';
+        : 'Could not reach the database';
+
+  const errorDescription =
+    loadError === 'not_configured'
+      ? 'Add Supabase URL and anon key to your environment, then reload.'
+      : isStandalone
+        ? 'Check your connection and try again.'
+        : `In Discord Developer Portal add URL mapping ${discordSupabaseProxyPrefix} → your-project.supabase.co`;
+
+  const emptyTitle = 'No events match these filters';
 
   return (
     <div className="pb-8 pt-5">
       <EventList
         events={filtered}
-        loading={loading}
-        emptyTitle={emptyTitle}
+        isLoading={isLoading}
+        isRefreshing={isRefreshing}
+        loadError={loadError}
+        onRetry={refetch}
+        emptyTitle={loadError ? errorTitle : emptyTitle}
+        emptyDescription={loadError ? errorDescription : undefined}
         emptyAction={
-          hasActiveFilters ? {label: 'Clear filters', onClick: () => setTypeFilter('all')} : undefined
+          !loadError && hasActiveFilters
+            ? {label: 'Clear filters', onClick: () => setTypeFilter('all')}
+            : undefined
         }
         metaRight={
           <>

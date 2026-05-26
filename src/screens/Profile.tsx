@@ -6,6 +6,10 @@ import {isApiConfigured, updateProfile} from '../lib/api';
 import {GamertagModal} from '../components/GamertagModal';
 import {EventCard} from '../components/EventCard';
 import {useMyEventsCatalog} from '../hooks/useMyEventsCatalog';
+import {ContentReveal} from '../components/ui/ContentReveal';
+import {EmptyState} from '../components/ui/EmptyState';
+import {PageLoading} from '../components/ui/PageLoading';
+import {useLoadingUI} from '../hooks/useLoadingUI';
 import {cn} from '../lib/cn';
 
 function StatPill({label, value}: {label: string; value: string | number}) {
@@ -20,7 +24,8 @@ function StatPill({label, value}: {label: string; value: string | number}) {
 export function Profile() {
   const {user, refreshUser, getAccessToken, isConfigured, isSignedIn, signIn} = useAuth();
   const {isJoined} = useJoinedEvents();
-  const {allMine, active, completed, loading} = useMyEventsCatalog('all');
+  const {allMine, active, completed, isLoading, loadError, refetch} = useMyEventsCatalog('all');
+  const showLoadingUI = useLoadingUI(isLoading);
   const [editGamertag, setEditGamertag] = useState(false);
   const [saving, setSaving] = useState(false);
   const initial = user.username.charAt(0).toUpperCase();
@@ -29,6 +34,28 @@ export function Profile() {
   const recentCompleted = completed.slice(0, 3);
   const hostedCount = allMine.filter((e) => e.hostDiscordId === user.discordId).length;
   const participatedCount = allMine.filter((e) => isJoined(e)).length;
+
+  if (showLoadingUI) {
+    return <PageLoading label="Loading profile" className="pb-10 pt-5" />;
+  }
+
+  if (isLoading) {
+    return null;
+  }
+
+  if (loadError) {
+    return (
+      <ContentReveal>
+        <EmptyState
+          icon="⚠️"
+          title="Could not load profile data"
+          description="Check your connection and try again."
+          action={{label: 'Try again', onClick: refetch}}
+          className="min-h-[40vh] py-20"
+        />
+      </ContentReveal>
+    );
+  }
 
   async function handleSaveGamertag(gamertag: string) {
     if (!token || !isApiConfigured()) {
@@ -47,7 +74,7 @@ export function Profile() {
   }
 
   return (
-    <div className="pb-10 pt-5 animate-fade-in">
+    <ContentReveal className="pb-10 pt-5">
       <div className="relative overflow-hidden rounded-2xl border border-white/[0.08] bg-card">
         <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_80%_20%,rgba(139,92,246,0.12)_0%,transparent_70%)]" />
         <div className="relative flex items-center gap-4 p-5">
@@ -80,8 +107,8 @@ export function Profile() {
       )}
 
       <div className="mt-4 flex gap-2">
-        <StatPill label="Hosted" value={loading ? 0 : hostedCount} />
-        <StatPill label="Participated" value={loading ? 0 : participatedCount} />
+        <StatPill label="Hosted" value={hostedCount} />
+        <StatPill label="Participated" value={participatedCount} />
         <StatPill label="Rating" value="TBD" />
       </div>
 
@@ -106,7 +133,7 @@ export function Profile() {
         </section>
       )}
 
-      {!loading && active.length > 0 && (
+      {active.length > 0 && (
         <section className="mt-6">
           <p className="mb-3 text-[11px] font-medium text-muted">Upcoming for you</p>
           <ul className="flex list-none flex-col gap-2">
@@ -144,6 +171,6 @@ export function Profile() {
         onSave={handleSaveGamertag}
         onClose={() => setEditGamertag(false)}
       />
-    </div>
+    </ContentReveal>
   );
 }

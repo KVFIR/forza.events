@@ -7,9 +7,13 @@ import {BasicsStep} from './steps/BasicsStep';
 import {DetailsStep} from './steps/DetailsStep';
 import {TargetStep} from './steps/TargetStep';
 import {ReviewStep, collectPublishGaps} from './steps/ReviewStep';
+import {ContentReveal} from '../../components/ui/ContentReveal';
+import {PageLoading} from '../../components/ui/PageLoading';
+import {useLoadingUI} from '../../hooks/useLoadingUI';
 
 export function CreateEvent() {
   const form = useCreateEventForm();
+  const showLoadingUI = useLoadingUI(form.loadingEdit);
   const {
     editId,
     user,
@@ -24,7 +28,6 @@ export function CreateEvent() {
     globalError,
     setGlobalError,
     saving,
-    loadingEdit,
     eventId,
     setEventId,
     showPublishModal,
@@ -94,12 +97,16 @@ export function CreateEvent() {
     if (eventId) void confirmPublish(eventId);
   }
 
-  if (loadingEdit) {
-    return <p className="py-20 text-center text-sm text-muted">Loading event…</p>;
+  if (showLoadingUI) {
+    return <PageLoading label="Loading event" className="pb-10 pt-5" />;
+  }
+
+  if (form.loadingEdit) {
+    return null;
   }
 
   return (
-    <div className="pb-10 pt-5 animate-fade-in">
+    <ContentReveal className="pb-10 pt-5">
       <StepIndicator
         step={step}
         onStepClick={(i) => {
@@ -245,6 +252,6 @@ export function CreateEvent() {
           onConfirm={onPublishModalConfirm}
         />
       )}
-    </div>
+    </ContentReveal>
   );
 }

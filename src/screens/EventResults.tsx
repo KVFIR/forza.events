@@ -12,6 +12,9 @@ import {
 } from '../lib/events';
 import type {EventParticipant} from '../lib/types';
 import {Button} from '../components/ui/Button';
+import {ContentReveal} from '../components/ui/ContentReveal';
+import {PageLoading} from '../components/ui/PageLoading';
+import {useLoadingUI} from '../hooks/useLoadingUI';
 import {cn} from '../lib/cn';
 
 type Placement = {
@@ -41,6 +44,7 @@ export function EventResults() {
   const {bumpRefresh} = useJoinedEvents();
   const [placements, setPlacements] = useState<Placement[]>([]);
   const [loading, setLoading] = useState(true);
+  const showLoadingUI = useLoadingUI(loading);
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [title, setTitle] = useState('');
@@ -138,12 +142,16 @@ export function EventResults() {
     }
   }
 
+  if (showLoadingUI) {
+    return <PageLoading label="Loading results" className="pb-10 pt-5" />;
+  }
+
   if (loading) {
-    return <p className="py-20 text-center text-sm text-muted">Loading…</p>;
+    return null;
   }
 
   return (
-    <div className="pb-10 pt-5 animate-fade-in">
+    <ContentReveal className="pb-10 pt-5">
       <Link
         to={id ? `/event/${id}` : '/'}
         className="mb-5 inline-flex items-center gap-1.5 text-xs font-semibold uppercase tracking-widest text-muted hover:text-accent-purple-light transition-colors"
@@ -234,6 +242,6 @@ export function EventResults() {
       >
         {saving ? 'Saving…' : 'Submit results'}
       </Button>
-    </div>
+    </ContentReveal>
   );
 }

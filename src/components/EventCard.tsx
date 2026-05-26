@@ -1,4 +1,5 @@
 import {format} from 'date-fns';
+import {useEffect, useState} from 'react';
 import {Link} from 'react-router-dom';
 import {Users} from 'lucide-react';
 import type {EventAllowedCar, EventType, ForzaEvent} from '../lib/types';
@@ -96,10 +97,21 @@ export function EventCard({event}: Props) {
   const full = !ended && (event.status === 'full' || event.currentPlayers >= event.maxPlayers);
   const {user} = useAuth();
   const isHost = event.hostDiscordId === user.discordId;
+  const coverSrc = event.coverImageUrl ?? defaultCoverPath(event.type);
+  const [coverReady, setCoverReady] = useState(false);
+
+  useEffect(() => {
+    setCoverReady(false);
+  }, [coverSrc, event.id]);
 
   return (
-    <article className="group relative animate-fade-in">
-      <Link to={`/event/${event.id}`} className="block">
+    <article
+      className={cn(
+        'group relative transition-opacity duration-300 motion-reduce:transition-none',
+        coverReady ? 'pointer-events-auto opacity-100' : 'pointer-events-none opacity-0',
+      )}
+    >
+      <Link to={`/event/${event.id}`} className="block" tabIndex={coverReady ? undefined : -1}>
         <div
           className={cn(
             'relative overflow-hidden rounded-xl border border-white/[0.08] transition-all duration-200',
@@ -109,10 +121,11 @@ export function EventCard({event}: Props) {
           )}
         >
           <EventCover
-            src={event.coverImageUrl ?? defaultCoverPath(event.type)}
+            src={coverSrc}
             variant="card"
             className="absolute inset-0"
             imgClassName="transition-transform duration-300 group-hover:scale-[1.02]"
+            onReady={() => setCoverReady(true)}
           />
           <div className="absolute inset-0 bg-gradient-to-r from-base/80 via-base/70 to-base/60" />
           <div className="absolute inset-0 bg-black/25 transition-colors duration-200 group-hover:bg-black/20" />
@@ -145,11 +158,12 @@ export function EventCard({event}: Props) {
               </p>
             </div>
 
-            {event.carRuleMode === 'restricted_list' && event.allowedCars.length > 0 && <CarList cars={event.allowedCars} />}
+            {event.carRuleMode === 'restricted_list' && event.allowedCars.length > 0 && (
+              <CarList cars={event.allowedCars} />
+            )}
             {event.carRuleMode === 'anything_goes' && <OpenBuildSummary event={event} />}
           </div>
 
-          {/* Type accent — bottom strip */}
           <div className={cn('absolute inset-x-0 bottom-0 h-[2px]', typeAccentBar[event.type])} />
         </div>
       </Link>

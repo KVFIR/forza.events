@@ -1,4 +1,4 @@
-import {useCallback, useEffect, useState} from 'react';
+import {useCallback, useEffect, useRef, useState} from 'react';
 import {useJoinedEvents} from '../context/JoinedEventsContext';
 import {
   fetchPublishedEventsResult,
@@ -6,23 +6,53 @@ import {
   type FetchEventsOptions,
   type PublishedEventsLoadError,
 } from '../lib/events';
+import {applyDevLoadingDelay} from '../lib/devLoadingDelay';
 import {usePublishedEventsLiveUpdates} from './useEventLiveUpdates';
 import type {ForzaEvent} from '../lib/types';
+
+async function fetchWithDevDelay(includeCompleted: boolean) {
+  await applyDevLoadingDelay();
+  return fetchPublishedEventsResult(undefined, {includeCompleted});
+}
 
 /** Global public browse feed (frozen MVP spec). Does not wait on Discord auth. */
 export function usePublishedEvents(options: FetchEventsOptions = {}) {
   const {refreshKey} = useJoinedEvents();
   const includeCompleted = options.includeCompleted ?? false;
   const [events, setEvents] = useState<ForzaEvent[]>([]);
-  const [loading, setLoading] = useState(true);
+  const [isLoading, setIsLoading] = useState(true);
+  const [isRefreshing, setIsRefreshing] = useState(false);
   const [loadError, setLoadError] = useState<PublishedEventsLoadError | null>(null);
+  const loadedOnceRef = useRef(false);
+
+  const runFetch = useCallback(
+    (silent: boolean) => {
+      if (silent) {
+        setIsRefreshing(true);
+      } else {
+        setIsLoading(true);
+      }
+
+      return fetchWithDevDelay(includeCompleted).then(({events: next, error}) => {
+          setEvents(next);
+          setLoadError(error);
+        })
+        .finally(() => {
+          loadedOnceRef.current = true;
+          setIsLoading(false);
+          setIsRefreshing(false);
+        });
+    },
+    [includeCompleted],
+  );
+
+  const refetch = useCallback(() => {
+    void runFetch(loadedOnceRef.current);
+  }, [runFetch]);
 
   const silentRefetch = useCallback(() => {
-    void fetchPublishedEventsResult(undefined, {includeCompleted}).then(({events: next, error}) => {
-      setEvents(next);
-      setLoadError(error);
-    });
-  }, [includeCompleted]);
+    void runFetch(true);
+  }, [runFetch]);
 
   const onLobbyPatch = useCallback(
     (row: {id: string; current_players: number; max_players: number; status: string}) => {
@@ -45,16 +75,25 @@ export function usePublishedEvents(options: FetchEventsOptions = {}) {
 
   useEffect(() => {
     let cancelled = false;
-    setLoading(true);
+    const silent = loadedOnceRef.current;
 
-    void fetchPublishedEventsResult(undefined, {includeCompleted})
-      .then(({events: next, error}) => {
+    if (!silent) {
+      setIsLoading(true);
+    } else {
+      setIsRefreshing(true);
+    }
+
+    void fetchWithDevDelay(includeCompleted).then(({events: next, error}) => {
         if (cancelled) return;
         setEvents(next);
         setLoadError(error);
       })
       .finally(() => {
-        if (!cancelled) setLoading(false);
+        if (!cancelled) {
+          loadedOnceRef.current = true;
+          setIsLoading(false);
+          setIsRefreshing(false);
+        }
       });
 
     return () => {
@@ -62,5 +101,5 @@ export function usePublishedEvents(options: FetchEventsOptions = {}) {
     };
   }, [refreshKey, includeCompleted]);
 
-  return {events, loading, loadError};
+  return {events, isLoading, isRefreshing, loadError, refetch};
 }

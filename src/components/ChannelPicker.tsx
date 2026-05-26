@@ -1,6 +1,7 @@
-import {useEffect, useState} from 'react';
+import {useCallback, useEffect, useState} from 'react';
 import {listChannels} from '../lib/api';
 import {Button} from './ui/Button';
+import {InlineLoading} from './ui/InlineLoading';
 
 type Props = {
   guildId: string;
@@ -15,12 +16,18 @@ export function ChannelPicker({guildId, accessToken, onSelect, onCancel}: Props)
   const [error, setError] = useState<string | null>(null);
   const [selected, setSelected] = useState('');
 
-  useEffect(() => {
+  const loadChannels = useCallback(() => {
+    setLoading(true);
+    setError(null);
     void listChannels(accessToken, guildId)
       .then((r) => setChannels(r.channels))
       .catch((e) => setError(String(e)))
       .finally(() => setLoading(false));
   }, [guildId, accessToken]);
+
+  useEffect(() => {
+    loadChannels();
+  }, [loadChannels]);
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 p-4">
@@ -28,8 +35,16 @@ export function ChannelPicker({guildId, accessToken, onSelect, onCancel}: Props)
         <h2 className="text-lg font-bold text-white">Publish to channel</h2>
         <p className="mt-1 text-sm text-muted">Choose where the event embed will be posted.</p>
 
-        {loading && <p className="mt-4 text-sm text-muted">Loading channels…</p>}
-        {error && <p className="mt-4 text-sm text-accent-red">{error}</p>}
+        {loading && <InlineLoading label="Loading channels" className="mt-4" />}
+
+        {!loading && error && (
+          <div className="mt-4 space-y-3">
+            <p className="text-sm text-accent-red">{error}</p>
+            <Button type="button" variant="secondary" className="w-full" onClick={loadChannels}>
+              Try again
+            </Button>
+          </div>
+        )}
 
         {!loading && !error && (
           <select
@@ -54,7 +69,7 @@ export function ChannelPicker({guildId, accessToken, onSelect, onCancel}: Props)
             type="button"
             variant="primary"
             className="flex-1"
-            disabled={!selected}
+            disabled={!selected || loading || !!error}
             onClick={() => onSelect(selected)}
           >
             Publish
