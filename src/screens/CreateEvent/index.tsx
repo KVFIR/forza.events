@@ -3,7 +3,7 @@ import {BUSY_LABEL} from '../../components/ui/buttonStyles';
 import {ConfirmDialog} from '../../components/ui/ConfirmDialog';
 import {PublishTargetModal} from '../../components/PublishTargetPicker';
 import {FormAlerts, StepIndicator} from './components/StepIndicator';
-import type {CreateEventStepIndex} from './constants';
+import {PREVIEW_STEP_INDEX, type CreateEventStepIndex} from './constants';
 import {useState} from 'react';
 import {useCreateEventForm} from './useCreateEventForm';
 import {BasicsStep} from './steps/BasicsStep';
@@ -167,21 +167,22 @@ export function CreateEvent() {
       {step === 0 && (
         <BasicsStep
           values={values}
-          hostGamertag={user.xboxGamertag}
           fieldErrors={fieldErrors}
           onTitle={setTitle}
           onType={setType}
           onStartsAtLocal={setStartsAtLocal}
           onDescription={setDescription}
           onCoverChange={onCoverChange}
-          lobbyLeaderIsHost={values.lobbyLeaderIsHost}
-          onLobbyLeaderIsHost={setLobbyLeaderIsHost}
-          onLobbyLeaderGamertag={setLobbyLeaderGamertag}
         />
       )}
 
       {step === 1 && (
         <DetailsStep
+          hostGamertag={user.xboxGamertag}
+          lobbyLeaderIsHost={values.lobbyLeaderIsHost}
+          lobbyLeaderGamertag={values.lobbyLeaderGamertag}
+          onLobbyLeaderIsHost={setLobbyLeaderIsHost}
+          onLobbyLeaderGamertag={setLobbyLeaderGamertag}
           trackCodes={values.trackCodes}
           onTrackCodes={setTrackCodes}
           carRuleMode={values.carRuleMode}
@@ -211,9 +212,10 @@ export function CreateEvent() {
         />
       )}
 
-      {step === 3 && (
+      {step === PREVIEW_STEP_INDEX && (
         <ReviewStep
           title={values.title}
+          description={values.description}
           type={values.type}
           startsAtLocal={values.startsAtLocal}
           coverPreview={values.coverPreview}
@@ -225,11 +227,14 @@ export function CreateEvent() {
           carCount={values.eventCars.length}
           lobbyLeaderLabel={lobbyLeaderLabel}
           missingForPublish={missingForPublish}
+          isPublished={isPublished}
+          isEditMode={hasDraftId}
+          onJumpToStep={setStep}
         />
       )}
 
       <div className="mt-8 flex flex-col gap-2">
-        {step < 3 && (
+        {step < PREVIEW_STEP_INDEX && (
           <Button variant="primary" fullWidth onClick={() => tryContinue()}>
             Continue
           </Button>
@@ -244,7 +249,7 @@ export function CreateEvent() {
           </Button>
         )}
 
-        {step === 3 && draftFlow && (
+        {step === PREVIEW_STEP_INDEX && draftFlow && (
           <>
             <Button
               variant="primary"
@@ -277,7 +282,7 @@ export function CreateEvent() {
           </>
         )}
 
-        {step === 3 && isPublished && (
+        {step === PREVIEW_STEP_INDEX && isPublished && (
           <>
             <Button
               variant="primary"

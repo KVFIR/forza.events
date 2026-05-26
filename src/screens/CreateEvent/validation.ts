@@ -36,11 +36,8 @@ export function validateCoverFile(file: File | null): string | null {
 }
 
 export function validateBasicsStep(
-  values: Pick<
-    CreateEventFormValues,
-    'title' | 'type' | 'startsAtLocal' | 'coverFile' | 'lobbyLeaderIsHost' | 'lobbyLeaderGamertag'
-  >,
-  options?: {allowPastStart?: boolean; hostGamertag?: string},
+  values: Pick<CreateEventFormValues, 'title' | 'type' | 'startsAtLocal' | 'coverFile'>,
+  options?: {allowPastStart?: boolean},
 ): FieldErrors {
   const errors: FieldErrors = {};
   const title = values.title.trim();
@@ -56,6 +53,22 @@ export function validateBasicsStep(
   }
   const coverErr = validateCoverFile(values.coverFile);
   if (coverErr) errors.cover = coverErr;
+  return errors;
+}
+
+export function validateDetailsStep(
+  values: Pick<
+    CreateEventFormValues,
+    | 'carRuleMode'
+    | 'maxPi'
+    | 'eventCars'
+    | 'trackCodes'
+    | 'lobbyLeaderIsHost'
+    | 'lobbyLeaderGamertag'
+  >,
+  options?: {hostGamertag?: string},
+): FieldErrors {
+  const errors: FieldErrors = {};
   if (values.lobbyLeaderIsHost) {
     const tagErr = gamertagError(options?.hostGamertag ?? '');
     if (tagErr) {
@@ -66,14 +79,6 @@ export function validateBasicsStep(
     const tagErr = gamertagError(values.lobbyLeaderGamertag);
     if (tagErr) errors.lobbyLeaderGamertag = tagErr;
   }
-  return errors;
-}
-
-export function validateDetailsStep(values: Pick<
-  CreateEventFormValues,
-  'carRuleMode' | 'maxPi' | 'eventCars' | 'trackCodes'
->): FieldErrors {
-  const errors: FieldErrors = {};
   if (values.carRuleMode === 'restricted_list' && values.eventCars.length === 0) {
     errors.eventCars = 'Add at least one car for a restricted list.';
   }
@@ -104,12 +109,9 @@ export function validateStep(
 ): FieldErrors {
   switch (step) {
     case 0:
-      return validateBasicsStep(values, {
-        allowPastStart: options?.allowPastStart,
-        hostGamertag: options?.hostGamertag,
-      });
+      return validateBasicsStep(values, {allowPastStart: options?.allowPastStart});
     case 1:
-      return validateDetailsStep(values);
+      return validateDetailsStep(values, {hostGamertag: options?.hostGamertag});
     case 2:
       return validateTargetStep(values, options);
     default:
@@ -121,8 +123,10 @@ export function validateDraftSave(
   values: CreateEventFormValues,
   hostGamertag?: string,
 ): string | null {
-  const stepErr = firstFieldError(validateBasicsStep(values, {hostGamertag}));
+  const stepErr = firstFieldError(validateBasicsStep(values));
   if (stepErr) return stepErr;
+  const detailsErr = firstFieldError(validateDetailsStep(values, {hostGamertag}));
+  if (detailsErr) return detailsErr;
   const targetErr = firstFieldError(validateTargetStep(values));
   if (targetErr) return targetErr;
   return validateDraftForm({
@@ -138,12 +142,9 @@ export function validatePublish(
   hostGamertag: string,
   options?: {allowPastStart?: boolean},
 ): string | null {
-  const basics = validateBasicsStep(values, {
-    allowPastStart: options?.allowPastStart,
-    hostGamertag,
-  });
+  const basics = validateBasicsStep(values, {allowPastStart: options?.allowPastStart});
   if (hasFieldErrors(basics)) return firstFieldError(basics);
-  const details = validateDetailsStep(values);
+  const details = validateDetailsStep(values, {hostGamertag});
   if (hasFieldErrors(details)) return firstFieldError(details);
   const target = validateTargetStep(values, {requireChannel: true});
   if (hasFieldErrors(target)) return firstFieldError(target);

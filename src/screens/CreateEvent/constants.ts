@@ -1,8 +1,9 @@
 export {EVENT_TYPES} from '../../lib/eventTypes';
 
-export const STEPS = ['Basics', 'Details', 'Target', 'Review'] as const;
+export const STEPS = ['Basics', 'Details', 'Target', 'Preview'] as const;
 export type CreateEventStep = (typeof STEPS)[number];
 export type CreateEventStepIndex = 0 | 1 | 2 | 3;
+export const PREVIEW_STEP_INDEX = 3 satisfies CreateEventStepIndex;
 
 export const TITLE_MAX_LENGTH = 100;
 export const COVER_MAX_BYTES = 2 * 1024 * 1024;

@@ -1,41 +1,31 @@
-import {Alert} from '../../../components/ui/Alert';
 import {Input} from '../../../components/ui/Input';
 import {SegmentGroup} from '../../../components/ui/SegmentGroup';
 import {Textarea} from '../../../components/ui/Textarea';
-import {fileUploadLabelClass, toggleRowClass} from '../../../components/ui/formStyles';
+import {fileUploadLabelClass} from '../../../components/ui/formStyles';
 import {TITLE_MAX_LENGTH, EVENT_TYPES, COVER_ACCEPT} from '../constants';
-import {Divider, Field} from '../components/Field';
+import {Field} from '../components/Field';
 import {EventCover} from '../../../components/EventCover';
 import type {CreateEventFormValues, FieldErrors} from '../types';
-import {hasGamertag} from '../../../lib/gamertag';
 import type {EventType} from '../../../lib/types';
 
 type Props = {
   values: CreateEventFormValues;
-  hostGamertag?: string;
   fieldErrors: FieldErrors;
   onTitle: (v: string) => void;
   onType: (v: EventType) => void;
   onStartsAtLocal: (v: string) => void;
   onDescription: (v: string) => void;
   onCoverChange: (file: File | null) => void;
-  lobbyLeaderIsHost: boolean;
-  onLobbyLeaderIsHost: (v: boolean) => void;
-  onLobbyLeaderGamertag: (v: string) => void;
 };
 
 export function BasicsStep({
   values,
-  hostGamertag,
   fieldErrors,
   onTitle,
   onType,
   onStartsAtLocal,
   onDescription,
   onCoverChange,
-  lobbyLeaderIsHost,
-  onLobbyLeaderIsHost,
-  onLobbyLeaderGamertag,
 }: Props) {
   const titleLen = values.title.length;
 
@@ -94,13 +84,17 @@ export function BasicsStep({
         />
       </Field>
 
-      <Field title="Description" htmlFor="create-description">
+      <Field
+        title="Description"
+        htmlFor="create-description"
+        hint="General info for players — not cars, tracks, PI, or convoy leader (those are on Details)."
+      >
         <Textarea
           id="create-description"
           rows={3}
           value={values.description}
           onChange={(e) => onDescription(e.target.value)}
-          placeholder="Optional — rules, meetup spot, voice channel notes"
+          placeholder="Optional — e.g. meetup plan, Discord voice channel, what to expect"
         />
       </Field>
 
@@ -125,47 +119,6 @@ export function BasicsStep({
         <p className="mt-1.5 text-xs text-muted">
           Optional — a default cover is used by event type. JPEG, PNG, or WebP, max 2 MB.
         </p>
-      </Field>
-
-      <Divider />
-
-      <Field title="Convoy leader">
-        <label className={toggleRowClass}>
-          <span className="text-sm text-slate-300">I am the convoy leader</span>
-          <input
-            type="checkbox"
-            checked={lobbyLeaderIsHost}
-            onChange={(e) => onLobbyLeaderIsHost(e.target.checked)}
-            className="h-4 w-4 accent-white"
-          />
-        </label>
-        {lobbyLeaderIsHost && !hasGamertag(hostGamertag) && (
-          <Alert variant="warning" className="mt-2">
-            Add your Xbox gamertag in Profile before publishing, or enter another convoy leader below.
-          </Alert>
-        )}
-        {!lobbyLeaderIsHost && (
-          <Input
-            id="create-lobbyLeaderGamertag"
-            className="mt-2"
-            invalid={Boolean(fieldErrors.lobbyLeaderGamertag)}
-            placeholder="Gamertag"
-            value={values.lobbyLeaderGamertag}
-            onChange={(e) => onLobbyLeaderGamertag(e.target.value)}
-            maxLength={15}
-            aria-invalid={Boolean(fieldErrors.lobbyLeaderGamertag)}
-            aria-describedby={
-              fieldErrors.lobbyLeaderGamertag
-                ? 'create-lobbyLeaderGamertag-error'
-                : undefined
-            }
-          />
-        )}
-        {fieldErrors.lobbyLeaderGamertag && (
-          <p id="create-lobbyLeaderGamertag-error" role="alert" className="mt-1.5 text-xs text-red-300/90">
-            {fieldErrors.lobbyLeaderGamertag}
-          </p>
-        )}
       </Field>
     </div>
   );

@@ -24,7 +24,7 @@ import {
   normalizeTrackCodes,
 } from '../../lib/eventSpec';
 import type {EventCarEntry} from '../../components/EventCarList';
-import type {CreateEventStepIndex} from './constants';
+import {PREVIEW_STEP_INDEX, type CreateEventStepIndex} from './constants';
 import type {CreateEventFormValues, FieldErrors} from './types';
 import {
   validateCoverFile,
@@ -47,7 +47,7 @@ export function useCreateEventForm() {
     isConfigured,
   } = useAuth();
 
-  const [step, setStep] = useState<CreateEventStepIndex>(0);
+  const [step, setStep] = useState<CreateEventStepIndex>(editId ? PREVIEW_STEP_INDEX : 0);
   const [fieldErrors, setFieldErrors] = useState<FieldErrors>({});
   const [globalError, setGlobalError] = useState<string | null>(null);
   const [saving, setSaving] = useState(false);
@@ -384,7 +384,7 @@ export function useCreateEventForm() {
       return false;
     }
     setFieldErrors({});
-    if (step < 3) goToStep((step + 1) as CreateEventStepIndex);
+    if (step < PREVIEW_STEP_INDEX) goToStep((step + 1) as CreateEventStepIndex);
     return true;
   }
 
