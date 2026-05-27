@@ -97,9 +97,9 @@ supabase link --project-ref <ref>
 supabase db push
 ```
 
-Apply through **`021`** (see [`supabase/README.md`](../supabase/README.md)). If `db push` reports remote-only migration versions, repair history then push — e.g. mark `014`–`016` applied and revert orphan timestamp versions before pushing `017`–`021`.
+Single baseline migration `001_baseline.sql` — apply with `supabase db push` (see [`supabase/README.md`](../supabase/README.md)). After applying, seed the cars catalog and optionally sample events.
 
-After schema changes that affect security (`018`, `021`), redeploy Edge Functions.
+After any schema changes that affect security (RLS, storage policies), redeploy Edge Functions.
 
 ---
 
@@ -125,7 +125,7 @@ Browse can use PostgREST directly (all non-draft events, including completed/can
 
 ## Edge Functions (local testing)
 
-All 14 functions are invoked from `src/lib/api.ts` with:
+All functions from [`scripts/deploy-edge-functions.sh`](../scripts/deploy-edge-functions.sh) are invoked from `src/lib/api.ts` with:
 
 - `apikey` + `Authorization: Bearer <anon>`
 - `x-discord-access-token` when signed in
@@ -148,7 +148,7 @@ Standard aspect ratio: **16:9** (1280×720 uploads). Client `compressCoverForUpl
 | Default covers | `public/covers/*.webp` |
 | Custom uploads | `event-covers` bucket via **`upload-cover`** only |
 
-Migration **`018_security_hardening.sql`** must be applied (revokes anonymous Storage writes).
+Anonymous Storage writes on `event-covers` are revoked in the baseline schema — uploads go through the Edge Function only.
 
 Flow:
 

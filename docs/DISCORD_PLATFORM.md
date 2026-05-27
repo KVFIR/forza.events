@@ -14,7 +14,7 @@ Last updated: 2026-05-27
 1. **App Launcher** — primary discovery inside Discord.
 2. **Published event embed** — `Open in FORZA.EVENTS` → `LAUNCH_ACTIVITY` (type `12`) + `launch_intents` fallback.
 
-Also supported by Discord: voice channels, DMs, group DMs (guild context may be null — see migration `019`).
+Also supported by Discord: voice channels, DMs, group DMs (guild context may be null — `launch_intents.guild_id` is nullable).
 
 ## Auth flow (matches Discord docs)
 
@@ -100,7 +100,7 @@ Host must be guild member with **Manage Server** (or Administrator). Server re-v
 
 - `npm run sync:secrets` — Discord secrets
 - `npm run deploy:functions` — all Edge functions (incl. `list-guild-members`), `--no-verify-jwt`
-- `supabase db push` — through migration `022`
+- `supabase db push` — single baseline migration
 - Railway: `APP_ORIGIN` = deploy URL; rebuild frontend after env changes
 
 ### Validate in Discord

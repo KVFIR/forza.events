@@ -15,7 +15,7 @@ See [`docs/PLAN.md`](../docs/PLAN.md), [`docs/STATUS.md`](../docs/STATUS.md), [`
 
 ## Migrations
 
-Apply through **`022`**:
+Single baseline migration — squash of the original 001–024:
 
 ```bash
 supabase login
@@ -25,29 +25,18 @@ supabase db push
 
 | Migration | Purpose |
 |-----------|---------|
-| `001_initial.sql` | Core schema |
-| `002_engineering_plan.sql` | Launch intents, storage bucket, cars |
-| `003_storage_upload_policy.sql` | *(superseded)* anon upload — revoked in `018` |
-| `004`–`008` | Event types, PI, catalog, per-car setup |
-| `009_frozen_mvp_spec.sql` | Car rule mode, DNS, track model |
-| `010`–`011` | Track list, open-build notes |
-| `012_realtime_and_join_concurrency.sql` | Realtime + join capacity trigger |
-| `013_events_replica_identity.sql` | Replica identity for live updates |
-| `014_seed_sample_events.sql` | Dev sample events |
-| `015_discord_guilds_public_read.sql` | Guild names on cards |
-| `016_event_type_cruise.sql` | `cruise` enum value |
-| `017_sample_cruise_type.sql` | Sample data fix |
-| `018_security_hardening.sql` | **Drop anon Storage write** on `event-covers` |
-| `019_launch_intents_nullable_guild.sql` | DM / no-guild launch intents |
-| `020_user_event_join_stats.sql` | `events_joined` trigger |
-| `021_api_hardening.sql` | Scoped RLS reads + `check_api_rate_limit` |
-| `022_lobby_leader_discord_id.sql` | `events.lobby_leader_discord_id` for convoy leader roster + results |
-| `023_results_null_position_dnf_dns.sql` | Nullable finish positions; DNF/DNS flags |
-| `024_participant_convoy_leader_role.sql` | Convoy leader as `event_participants` role; `max_players` = 12 total racers |
+| `001_baseline.sql` | Full schema: enums, tables, indexes, functions, triggers, RLS, realtime, storage |
+
+Seeds are **not** included in the migration. Run separately after `db push`:
+
+```bash
+npm run seed:events   # sample events (dev only)
+# Cars catalog is seeded via scripts/seed-cars.mjs or import from supabase/seed/fh6cars.json
+```
 
 ## Edge Functions
 
-**14 functions** — deploy all:
+**15 functions** — canonical list in [`scripts/deploy-edge-functions.sh`](../scripts/deploy-edge-functions.sh). Deploy all:
 
 ```bash
 npm run deploy:functions
@@ -109,9 +98,9 @@ Uses `DISCORD_PUBLIC_KEY` for request verification (not user OAuth).
 npm run seed:events   # needs SUPABASE_SERVICE_ROLE_KEY
 ```
 
-Or migration `014`. Host: `000000000000000001`, guild `000000000000000001`.
+Host: `000000000000000001`, guild `000000000000000001`.
 
 ## Cars catalog
 
-- `supabase/seed/fh6cars.json`, migration `006`
+- `supabase/seed/fh6cars.json` (source data)
 - `save-event` resolves cars by id/lookup only (no arbitrary catalog inserts)

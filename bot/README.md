@@ -7,4 +7,4 @@ Post-MVP, a dedicated companion bot may be added for deferred features such as r
 
 - MVP scope and launch checklist: [`docs/PLAN.md`](../docs/PLAN.md)
 - Current implementation status: [`docs/STATUS.md`](../docs/STATUS.md)
-- Env vars: see [`docs/PLAN.md`](../docs/PLAN.md#environment-variables)
+- Env vars: [`docs/DEVELOPMENT.md`](../docs/DEVELOPMENT.md#environment)

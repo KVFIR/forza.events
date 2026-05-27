@@ -1,6 +1,6 @@
 # FORZA.EVENTS — MVP Plan
 
-> **Current implementation:** see [`STATUS.md`](STATUS.md) for what is already built and what is still needed to launch.
+> **Implementation state:** [`STATUS.md`](STATUS.md). **Post-MVP ideas:** [`BACKLOG.md`](BACKLOG.md).
 
 ## Frozen MVP spec (May 2026)
 
@@ -96,80 +96,15 @@ The following items are intentionally deferred and must not block launch:
 - Livery / build database
 - **Standalone browser web app** — separate Discord application (or OAuth client) with its own redirect URIs (`https://<web-host>/auth/callback`). The current app uses Activity OAuth (`https://127.0.0.1`) and blocks the production deploy URL in a normal browser tab (`shouldShowDiscordOnlyGate` in `src/lib/runtime.ts`). Localhost (`npm run dev`) remains available for engineering.
 
-## Launch checklist
+## Launch readiness
 
-The MVP should be considered launch-ready only when all items below are complete.
+**Shipped in code:** frozen MVP spec above, Activity UI, `001_baseline.sql`, 15 Edge Functions, launch-intent / deep-link flow, production Supabase + Railway wiring.
 
-### Product and code
-
-- [x] Frozen MVP spec documented
-- [x] Activity UI aligned with frozen MVP
-- [x] Supabase schema aligned with frozen MVP
-- [x] Edge Functions aligned with frozen MVP
-- [x] Launch-intent / deep link flow implemented
-
-### Infrastructure
-
-- [x] Supabase schema through migration `021` (in repo)
-- [x] Supabase project linked and migrations applied through `021` in target env (`uoysqfczahqmctbrrizn`, verified 2026-05-27)
-- [x] Edge Functions deployed — 10 functions `ACTIVE` (v8–v9)
-- [x] Production secrets configured (`DISCORD_*`, `APP_ORIGIN`, `DISCORD_REDIRECT_URI` in Edge secrets)
-- [x] Activity deployed on Railway — https://forzaevents-production.up.railway.app (`SUPABASE_*` at build time; SPA returns 200)
-
-### Discord platform
-
-- [x] Discord Application configured for Activities
-- [x] Activity URL set to the deployed app
-- [x] Interactions endpoint configured if needed for publish flows
-- [ ] Bot/app permissions verified for publish targets and guild listing
-- [ ] Launch flow verified from embed back into the Activity
-
-### End-to-end validation
-
-- [ ] Sign in inside Discord Activity
-- [ ] Browse published events from the global feed
-- [ ] Create draft event
-- [ ] Publish event to selected server/channel
-- [ ] Open event from Discord embed
-- [ ] Join event
-- [ ] Leave event
-- [ ] Edit published event before start
-- [ ] Verify post-start edit lock
-- [ ] Submit results with `position`, `DNF`, and `DNS`
-- [ ] Verify results are immutable after submission
-- [ ] Verify full event blocks new joins
-
-### Pilot
-
-- [ ] Test in 3–5 real Forza Discord servers
-- [ ] Validate publish permissions and channel targeting in real communities
-- [ ] Confirm people use the Activity instead of falling back to manual channel posts
+**Still open:** Discord portal verification in pilot guilds, full E2E in Activity, pilot with real communities. Checklists: [`DISCORD_PLATFORM.md`](DISCORD_PLATFORM.md#operational-checklist), [`STATUS.md`](STATUS.md#remaining-work-before-pilot-sign-off), [`DEVELOPMENT.md`](DEVELOPMENT.md#testing-checklist).
 
 ## Environment variables
 
-Single root `.env` (see [`.env.example`](../.env.example)):
-
-```env
-DISCORD_CLIENT_ID=
-DISCORD_CLIENT_SECRET=
-DISCORD_PUBLIC_KEY=
-DISCORD_BOT_TOKEN=
-SUPABASE_URL=
-SUPABASE_ANON_KEY=
-```
-
-Vite maps `DISCORD_CLIENT_ID` and `SUPABASE_*` into the client bundle. Push server secrets with `npm run sync:secrets`.
-
-Required for localhost browser testing: `DISCORD_REDIRECT_URI=http://localhost:5180/auth/callback` (same URL in Discord OAuth2 redirects).
-
-Optional:
-
-- `APP_ORIGIN` — embed cover URLs and Edge CORS (Railway deploy URL)
-- `DISCORD_REDIRECT_URI` — localhost browser OAuth (`http://localhost:5180/auth/callback`)
-- `DISCORD_REDIRECT_URI_ALLOWLIST` / `ALLOWED_CORS_ORIGINS` — extra Supabase Edge secrets
-- `SUPABASE_SERVICE_ROLE_KEY` — `npm run seed:events`, car catalog scripts
-
-See [`DEVELOPMENT.md`](DEVELOPMENT.md) for the full local workflow. Mock mode has been removed; Browse requires a valid anon key. Security model: [`STATUS.md`](STATUS.md) and [`AGENTS.md`](../AGENTS.md).
+See [`.env.example`](../.env.example) and [`DEVELOPMENT.md`](DEVELOPMENT.md#environment).
 
 ## Validation question
 

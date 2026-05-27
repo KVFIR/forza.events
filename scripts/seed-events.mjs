@@ -26,7 +26,7 @@ const supabase = createClient(url, key);
 async function findCar({make, year, model_like}) {
   const {data, error} = await supabase
     .from('cars')
-    .select('id, make, model, year, pi, class')
+    .select('id, make, model, year, pi')
     .eq('make', make)
     .eq('year', year)
     .eq('active', true)

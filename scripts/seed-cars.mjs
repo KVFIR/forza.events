@@ -26,6 +26,13 @@ if (delErr) console.warn('event_cars cleanup:', delErr.message);
 
 await supabase.from('cars').delete().neq('id', '00000000-0000-0000-0000-000000000000');
 
+function carSearchText(c) {
+  return [c.make, c.model, c.year != null ? String(c.year) : '']
+    .join(' ')
+    .trim()
+    .toLowerCase();
+}
+
 const batch = 100;
 for (let i = 0; i < cars.length; i += batch) {
   const chunk = cars.slice(i, i + batch).map((c) => ({
@@ -33,7 +40,7 @@ for (let i = 0; i < cars.length; i += batch) {
     model: c.model,
     year: c.year,
     pi: c.pi,
-    class: c.class,
+    search_text: carSearchText(c),
   }));
   const {error} = await supabase.from('cars').insert(chunk);
   if (error) {

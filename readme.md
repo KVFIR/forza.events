@@ -10,7 +10,7 @@ Community events for **Forza Horizon 6**, shipped as a **Discord Activity** (emb
 
 - **Discord Activity** — SPA in an iframe (`@discord/embedded-app-sdk`)
 - **Supabase** — Postgres, RLS, Storage, Edge Functions
-- **Discord bot** — publish embeds, channel posts, interactions (not a separate website product in production)
+- **Discord bot token** — publish embeds, channel APIs, interactions (no always-on bot process in MVP)
 
 Works in server channels, voice, DMs, and App Launcher (desktop and mobile).
 
@@ -24,14 +24,11 @@ Works in server channels, voice, DMs, and App Launcher (desktop and mobile).
 |------|------------|
 | Browse, Detail, Create, My Events, Profile | Pilot validation in real Discord servers |
 | Discord Activity auth + localhost dev OAuth | Optional custom domain DNS |
-| Migrations `001`–`021`, 14 Edge Functions | — |
-| Security: scoped RLS, CORS, rate limits, host-only covers | — |
-| i18n (English + Russian) | Post-MVP bot automation |
+| Baseline schema + 15 Edge Functions | Post-MVP bot automation |
+| Security: scoped RLS, CORS, rate limits, host-only covers | |
+| i18n (English + Russian) | |
 
-**Start here:** [`docs/STATUS.md`](docs/STATUS.md)  
-**Planned features:** [`docs/BACKLOG.md`](docs/BACKLOG.md)  
-**Local setup:** [`docs/DEVELOPMENT.md`](docs/DEVELOPMENT.md)  
-**Discord portal:** [`docs/DISCORD_PLATFORM.md`](docs/DISCORD_PLATFORM.md)
+**Start here:** [`docs/STATUS.md`](docs/STATUS.md)
 
 ---
 
@@ -51,16 +48,11 @@ Works in server channels, voice, DMs, and App Launcher (desktop and mobile).
 forza.events/
 ├── src/                 # React Activity (Vite)
 ├── supabase/
-│   ├── migrations/      # 001–021
-│   └── functions/       # 14 Edge Functions
+│   ├── migrations/      # 001_baseline.sql
+│   └── functions/       # 15 Edge Functions
 ├── scripts/             # deploy, seed, optimize-covers
 ├── docs/
-│   ├── STATUS.md
-│   ├── DEVELOPMENT.md
-│   ├── PLAN.md
-│   └── DISCORD_PLATFORM.md
-├── AGENTS.md            # Agent / implementation notes
-└── railway.toml         # Railway deploy (Railpack)
+└── AGENTS.md            # Agent / implementation notes
 ```
 
 ---
@@ -81,7 +73,7 @@ forza.events/
 
 ```bash
 cp .env.example .env
-# Fill DISCORD_* and SUPABASE_* (see DEVELOPMENT.md)
+# Fill DISCORD_* and SUPABASE_* — see docs/DEVELOPMENT.md
 npm install
 npm run dev
 ```
@@ -90,7 +82,7 @@ Open http://localhost:5180 → **Sign in** for mutations; Browse works with anon
 
 ```bash
 npm run deploy:functions   # after Edge Function changes
-supabase db push           # after new migrations
+supabase db push           # after schema changes
 ```
 
 ---
@@ -99,12 +91,14 @@ supabase db push           # after new migrations
 
 | Doc | Contents |
 |-----|----------|
-| [`docs/STATUS.md`](docs/STATUS.md) | Feature matrix, migrations, infra, gaps |
+| [`docs/STATUS.md`](docs/STATUS.md) | Feature matrix, infra, pilot gaps, troubleshooting |
 | [`docs/DEVELOPMENT.md`](docs/DEVELOPMENT.md) | Env, auth, covers, testing checklist |
-| [`docs/PLAN.md`](docs/PLAN.md) | Frozen MVP contract |
+| [`docs/PLAN.md`](docs/PLAN.md) | Frozen MVP product contract |
 | [`docs/DISCORD_PLATFORM.md`](docs/DISCORD_PLATFORM.md) | Portal checklist, proxy, OAuth |
-| [`supabase/README.md`](supabase/README.md) | Migrations + functions reference |
-| [`AGENTS.md`](AGENTS.md) | Runtime rules for agents |
+| [`docs/ENGINEERING.md`](docs/ENGINEERING.md) | CI, tests, API error codes |
+| [`docs/BACKLOG.md`](docs/BACKLOG.md) | Post-MVP features |
+| [`supabase/README.md`](supabase/README.md) | Schema, Edge Functions, seeds |
+| [`AGENTS.md`](AGENTS.md) | Runtime rules for coding agents |
 
 ---
 
