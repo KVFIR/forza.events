@@ -4,7 +4,6 @@ import {
   eventHasStarted,
   isBrowseFeedEvent,
   isRegistrationOpen,
-  normalizeTrackCodes,
   resolveEventDisplayStatus,
   validateDraftForm,
 } from './eventSpec';
@@ -33,12 +32,6 @@ function event(partial: Partial<ForzaEvent>): ForzaEvent {
     ...partial,
   };
 }
-
-describe('normalizeTrackCodes', () => {
-  it('trims and drops empty', () => {
-    expect(normalizeTrackCodes(['  abc  ', '', 'def'])).toEqual(['abc', 'def']);
-  });
-});
 
 describe('validateDraftForm', () => {
   it('requires title', () => {

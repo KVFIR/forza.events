@@ -40,6 +40,24 @@ describe('buildEventEmbed', () => {
     expect(carField?.value).toBe('Open build `A 650`');
   });
 
+  it('formats named tracks with share code and format', () => {
+    const embed = buildEventEmbed(
+      event({
+        tracks: [
+          {name: 'Laguna Seca', share_code: '123 456 789', format: '15 laps'},
+          {name: 'Highlands', share_code: null, format: '30 min'},
+        ],
+      }),
+    ).embeds[0];
+
+    const trackField = embed.fields.find((field) => field.name === '🛣️ Tracks');
+    expect(trackField?.value).toContain('Laguna Seca');
+    expect(trackField?.value).toContain('`123 456 789`');
+    expect(trackField?.value).toContain('15 laps');
+    expect(trackField?.value).toContain('2. Highlands');
+    expect(trackField?.value).toContain('30 min');
+  });
+
   it('summarizes per-car tuning rules as extra rules on restricted list', () => {
     const embed = buildEventEmbed(
       event({
