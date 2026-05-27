@@ -2,45 +2,42 @@ import {getDiscordSdk, isStandaloneBrowser} from './discord';
 import {
   DiscordLayoutMode,
   type DiscordLayoutModeValue,
-  isCompactViewport,
   layoutModeFromUpdate,
 } from './discordLayoutMode';
 
 type LayoutUpdateHandler = (mode: DiscordLayoutModeValue) => void;
 
-type LayoutCapableSdk = {
-  subscribeToLayoutModeUpdatesCompat?: (handler: (update: {layout_mode?: number}) => void) => void;
-  unsubscribeFromLayoutModeUpdatesCompat?: (
-    handler: (update: {layout_mode?: number}) => void,
-  ) => void;
-};
-
-function viewportFallbackMode(): DiscordLayoutModeValue {
-  return isCompactViewport() ? DiscordLayoutMode.PIP : DiscordLayoutMode.FOCUSED;
-}
+const LAYOUT_MODE_EVENT = 'ACTIVITY_LAYOUT_MODE_UPDATE' as const;
 
 /**
  * Subscribe to Discord Activity layout mode (focused / PIP / grid).
- * Falls back to viewport size in standalone dev when the SDK is absent.
+ * Logo-only UI uses `layout_mode === 1` (PIP) only — no viewport heuristics.
  */
 export function subscribeDiscordLayoutMode(onMode: LayoutUpdateHandler): () => void {
   if (isStandaloneBrowser()) {
-    const sync = () => onMode(viewportFallbackMode());
-    sync();
-    window.addEventListener('resize', sync);
-    return () => window.removeEventListener('resize', sync);
-  }
-
-  const sdk = getDiscordSdk() as LayoutCapableSdk | null;
-  if (!sdk?.subscribeToLayoutModeUpdatesCompat) {
     onMode(DiscordLayoutMode.FOCUSED);
     return () => {};
   }
 
-  const handler = (update: {layout_mode?: number}) => {
-    onMode(layoutModeFromUpdate(update));
+  const sdk = getDiscordSdk();
+  if (!sdk) {
+    onMode(DiscordLayoutMode.FOCUSED);
+    return () => {};
+  }
+
+  const handler = (data: {layout_mode?: number}) => {
+    onMode(layoutModeFromUpdate(data));
   };
 
-  sdk.subscribeToLayoutModeUpdatesCompat(handler);
-  return () => sdk.unsubscribeFromLayoutModeUpdatesCompat?.(handler);
+  let disposed = false;
+
+  void sdk.subscribe(LAYOUT_MODE_EVENT, handler).catch((err) => {
+    console.warn('Discord ACTIVITY_LAYOUT_MODE_UPDATE subscribe failed', err);
+    if (!disposed) onMode(DiscordLayoutMode.FOCUSED);
+  });
+
+  return () => {
+    disposed = true;
+    void sdk.unsubscribe(LAYOUT_MODE_EVENT, handler).catch(() => {});
+  };
 }

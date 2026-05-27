@@ -9,14 +9,9 @@ export const DiscordLayoutMode = {
 export type DiscordLayoutModeValue =
   (typeof DiscordLayoutMode)[keyof typeof DiscordLayoutMode];
 
-export function isCompactLayoutMode(mode: DiscordLayoutModeValue): boolean {
-  return mode === DiscordLayoutMode.PIP || mode === DiscordLayoutMode.GRID;
-}
-
-/** Heuristic when SDK layout events are unavailable (dev browser resize). */
-export function isCompactViewport(): boolean {
-  if (typeof window === 'undefined') return false;
-  return window.innerWidth <= 420 || window.innerHeight <= 300;
+/** True when Discord reports picture-in-picture (`layout_mode === 1`). */
+export function isPipLayoutMode(mode: DiscordLayoutModeValue): boolean {
+  return mode === DiscordLayoutMode.PIP;
 }
 
 export function layoutModeFromUpdate(update: {layout_mode?: number}): DiscordLayoutModeValue {
