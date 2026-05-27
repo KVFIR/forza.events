@@ -11,7 +11,8 @@ import {eventTypeMeta, isEventType} from '../../../lib/eventTypes';
 import {clampPi, piToClass} from '../../../lib/pi';
 import type {EventCarEntry} from '../../../components/EventCarList';
 import type {CreateEventType} from '../types';
-import type {CarRuleMode} from '../../../lib/types';
+import {formatTrackDisplayLine} from '../../../lib/eventTracks';
+import type {CarRuleMode, EventTrack} from '../../../lib/types';
 
 const MAX_CARS_SHOWN = 3;
 const MAX_TRACKS_SHOWN = 3;
@@ -36,7 +37,7 @@ type Props = {
   maxPi: number;
   additionalCarRestrictions: string;
   eventCars: EventCarEntry[];
-  trackCodes: string[];
+  tracks: EventTrack[];
   lobbyLeaderLabel: string;
 };
 
@@ -50,7 +51,7 @@ export function EventPublishPreviewCard({
   maxPi,
   additionalCarRestrictions,
   eventCars,
-  trackCodes,
+  tracks,
   lobbyLeaderLabel,
 }: Props) {
   const {t} = useTranslation();
@@ -69,8 +70,8 @@ export function EventPublishPreviewCard({
   const maxClass = piToClass(maxPi);
   const shownCars = eventCars.slice(0, MAX_CARS_SHOWN);
   const extraCars = eventCars.length - shownCars.length;
-  const shownTracks = trackCodes.slice(0, MAX_TRACKS_SHOWN);
-  const extraTracks = trackCodes.length - shownTracks.length;
+  const shownTracks = tracks.slice(0, MAX_TRACKS_SHOWN);
+  const extraTracks = tracks.length - shownTracks.length;
 
   useEffect(() => {
     setCoverReady(false);
@@ -122,11 +123,11 @@ export function EventPublishPreviewCard({
                 <span className="text-muted">{t('create.leader')}:</span>
                 {lobbyLeaderLabel}
               </span>
-              {trackCodes.length > 0 ? (
+              {tracks.length > 0 ? (
                 <span className="inline-flex items-center gap-1.5">
                   <MapPin className="h-3.5 w-3.5 shrink-0 text-muted" aria-hidden />
                   <span className="text-muted">{t('eventDetail.tracks')}:</span>
-                  {t('create.trackCount', {count: trackCodes.length})}
+                  {t('create.trackCount', {count: tracks.length})}
                 </span>
               ) : null}
             </div>
@@ -185,15 +186,17 @@ export function EventPublishPreviewCard({
 
       {shownTracks.length > 0 ? (
         <ol className="border-t border-white/[0.06] px-4 py-2.5">
-          {shownTracks.map((code, i) => (
+          {shownTracks.map((track, i) => (
             <li
-              key={`${code}-${i}`}
-              className="flex items-center gap-2 font-mono text-[11px] tracking-wide text-slate-300"
+              key={`${track.name}-${track.shareCode ?? ''}-${i}`}
+              className="flex items-start gap-2 text-[11px] leading-snug text-slate-300"
             >
               <span className="w-4 shrink-0 text-right text-[10px] font-bold tabular-nums text-muted">
                 {i + 1}.
               </span>
-              {code}
+              <span className={track.shareCode && !track.name ? 'font-mono tracking-wide' : ''}>
+                {formatTrackDisplayLine(track, t('create.trackFallback', {n: i + 1}))}
+              </span>
             </li>
           ))}
           {extraTracks > 0 ? (

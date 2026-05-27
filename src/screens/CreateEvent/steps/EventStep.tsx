@@ -12,7 +12,7 @@ import {datetimeLocalInputBounds} from '../../../lib/datetime';
 import {TITLE_MAX_LENGTH, EVENT_TYPES, COVER_ACCEPT, formInput, formLabel} from '../constants';
 import {Field, FormSection} from '../components/Field';
 import {EventCover} from '../../../components/EventCover';
-import {EventTrackCodeList} from '../../../components/EventTrackCodeList';
+import {EventTrackList} from '../../../components/EventTrackList';
 import {EventCarList, type EventCarEntry} from '../../../components/EventCarList';
 import {MaxPiInput} from '../../../components/MaxPiInput';
 import {ConvoyLeaderPicker, type ConvoyLeaderSelection} from '../../../components/ConvoyLeaderPicker';
@@ -33,7 +33,7 @@ type Props = {
   onStartsAtLocal: (v: string) => void;
   onDescription: (v: string) => void;
   onCoverChange: (file: File | null) => void;
-  onTrackCodes: (codes: string[]) => void;
+  onTracks: (tracks: CreateEventFormValues['tracks']) => void;
   onCarRuleMode: (mode: CarRuleMode) => void;
   onMaxPi: (n: number) => void;
   onAdditionalCarRestrictions: (v: string) => void;
@@ -56,7 +56,7 @@ export function EventStep({
   onStartsAtLocal,
   onDescription,
   onCoverChange,
-  onTrackCodes,
+  onTracks,
   onCarRuleMode,
   onMaxPi,
   onAdditionalCarRestrictions,
@@ -164,12 +164,15 @@ export function EventStep({
       </FormSection>
 
       <FormSection title={t('create.sectionRace')}>
-        <EventTrackCodeList
-          codes={values.trackCodes}
-          onChange={onTrackCodes}
+        <EventTrackList
+          tracks={values.tracks}
+          onChange={onTracks}
           inputClass={formInput}
           labelClass={formLabel}
         />
+        {fieldErrors.tracks ? (
+          <p className={fieldErrorClass}>{fieldErrors.tracks}</p>
+        ) : null}
 
         <Field title={t('create.carRules')}>
           <SegmentGroup

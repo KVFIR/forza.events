@@ -11,7 +11,7 @@ import type {PublishGap} from '../publishGaps';
 import {PUBLISH_STEP_INDEX, type CreateEventStepIndex} from '../constants';
 import type {FieldErrors} from '../types';
 import type {CreateEventType} from '../types';
-import type {CarRuleMode} from '../../../lib/types';
+import type {CarRuleMode, EventTrack} from '../../../lib/types';
 
 type Props = {
   token: string | null;
@@ -25,7 +25,7 @@ type Props = {
   maxPi: number;
   additionalCarRestrictions: string;
   eventCars: EventCarEntry[];
-  trackCodes: string[];
+  tracks: EventTrack[];
   lobbyLeaderLabel: string;
   guildId: string;
   guildName: string;
@@ -51,7 +51,7 @@ export function PublishStep({
   maxPi,
   additionalCarRestrictions,
   eventCars,
-  trackCodes,
+  tracks,
   lobbyLeaderLabel,
   guildId,
   guildName,
@@ -87,7 +87,7 @@ export function PublishStep({
           maxPi={maxPi}
           additionalCarRestrictions={additionalCarRestrictions}
           eventCars={eventCars}
-          trackCodes={trackCodes}
+          tracks={tracks}
           lobbyLeaderLabel={lobbyLeaderLabel}
         />
       </div>

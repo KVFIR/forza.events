@@ -6,6 +6,8 @@ import {
   validateDraftFormMessage,
   validatePublishFormMessage,
 } from '../../lib/eventSpec';
+import {validateTracks} from '../../lib/eventTracks';
+import {validationMessage} from '../../lib/validationMessages';
 import type {CarRuleMode} from '../../lib/types';
 import {COVER_ACCEPT, COVER_MAX_BYTES, TITLE_MAX_LENGTH} from './constants';
 import type {CreateEventFormValues, FieldErrors} from './types';
@@ -63,10 +65,12 @@ export function validateBasicsStep(
 export function validateDetailsStep(
   values: Pick<
     CreateEventFormValues,
-    'carRuleMode' | 'maxPi' | 'eventCars' | 'trackCodes'
+    'carRuleMode' | 'maxPi' | 'eventCars' | 'tracks'
   >,
 ): FieldErrors {
   const errors: FieldErrors = {};
+  const trackCode = validateTracks(values.tracks);
+  if (trackCode) errors.tracks = validationMessage(trackCode);
   if (values.carRuleMode === 'restricted_list' && values.eventCars.length === 0) {
     errors.eventCars = i18n.t('validation.carsRequired');
   }

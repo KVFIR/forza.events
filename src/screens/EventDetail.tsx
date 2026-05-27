@@ -13,6 +13,7 @@ import {
 import {COVER_HERO_BAND_CLASS, COVER_PAGE_BLEED_CLASS, coverDisplayUrl} from '../lib/coverImage';
 import {defaultCoverPath} from '../lib/eventCovers';
 import {RoadIcon} from '../components/icons/RoadIcon';
+import {formatTrackDisplayLine} from '../lib/eventTracks';
 import type {ForzaEvent} from '../lib/types';
 import {
   canSubmitEventResults,
@@ -461,7 +462,7 @@ export function EventDetail() {
                     isCurrentConvoyLeader,
                   )
             }
-            size={needsSignInToParticipate ? 'toolbar' : undefined}
+            size="toolbar"
             className="shrink-0 whitespace-nowrap"
             disabled={needsSignInToParticipate ? authRetrying : participationDisabled}
             onClick={() => void handleJoinClick()}
@@ -586,25 +587,44 @@ export function EventDetail() {
         )}
 
         {/* Tracks */}
-        {(event.trackCodes?.length ?? 0) > 0 && (
+        {(event.tracks?.length ?? 0) > 0 && (
           <div className="flex items-start gap-3 px-4 py-3">
             <div className={iconTileClass}>
               <RoadIcon className="text-muted-light" />
             </div>
             <div className="min-w-0">
               <p className={sectionLabelClass}>{t('eventDetail.tracks')}</p>
-              {event.trackCodes!.length === 1 ? (
-                <p className="mt-1 font-mono text-sm tracking-wide text-slate-200">
-                  {event.trackCodes![0]}
+              {event.tracks!.length === 1 ? (
+                <p
+                  className={cn(
+                    'mt-1 text-sm text-slate-200',
+                    event.tracks![0].shareCode && !event.tracks![0].name
+                      ? 'font-mono tracking-wide'
+                      : '',
+                  )}
+                >
+                  {formatTrackDisplayLine(
+                    event.tracks![0],
+                    t('create.trackFallback', {n: 1}),
+                  )}
                 </p>
               ) : (
                 <ol className="mt-1 space-y-0.5">
-                  {event.trackCodes!.map((code, i) => (
-                    <li key={`${code}-${i}`} className="flex items-center gap-2 text-sm text-slate-200">
-                      <span className="inline-flex h-5 min-w-5 items-center justify-center rounded-full border border-white/[0.08] bg-white/[0.03] px-1.5 text-[10px] font-bold text-muted">
+                  {event.tracks!.map((track, i) => (
+                    <li
+                      key={`${track.name}-${track.shareCode ?? ''}-${i}`}
+                      className="flex items-start gap-2 text-sm text-slate-200"
+                    >
+                      <span className="inline-flex h-5 min-w-5 shrink-0 items-center justify-center rounded-full border border-white/[0.08] bg-white/[0.03] px-1.5 text-[10px] font-bold text-muted">
                         {i + 1}
                       </span>
-                      <span className="font-mono tracking-wide">{code}</span>
+                      <span
+                        className={
+                          track.shareCode && !track.name ? 'font-mono tracking-wide' : ''
+                        }
+                      >
+                        {formatTrackDisplayLine(track, t('create.trackFallback', {n: i + 1}))}
+                      </span>
                     </li>
                   ))}
                 </ol>

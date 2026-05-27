@@ -28,8 +28,9 @@ import {
   canCancelPublishedEvent,
   canEditEvent,
   isPublishedToDiscord,
-  normalizeTrackCodes,
 } from '../../lib/eventSpec';
+import {normalizeTracks, tracksToRows} from '../../lib/eventTracks';
+import type {EventTrack} from '../../lib/types';
 import type {EventCarEntry} from '../../components/EventCarList';
 import type {ConvoyLeaderSelection} from '../../components/ConvoyLeaderPicker';
 import {PUBLISH_STEP_INDEX, type CreateEventStepIndex} from './constants';
@@ -75,7 +76,7 @@ export function useCreateEventForm() {
   const [coverFile, setCoverFile] = useState<File | null>(null);
   const [coverPreview, setCoverPreview] = useState<string | null>(null);
   const [coverUrl, setCoverUrl] = useState<string | null>(null);
-  const [trackCodes, setTrackCodes] = useState<string[]>([]);
+  const [tracks, setTracks] = useState<EventTrack[]>([]);
   const [carRuleMode, setCarRuleMode] = useState<CarRuleMode>('anything_goes');
   const [maxPi, setMaxPi] = useState(800);
   const [additionalCarRestrictions, setAdditionalCarRestrictions] = useState('');
@@ -94,7 +95,7 @@ export function useCreateEventForm() {
 
   const token = getAccessToken();
   const canPersist = isApiConfigured() && token && isSignedIn;
-  const normalizedTrackCodes = useMemo(() => normalizeTrackCodes(trackCodes), [trackCodes]);
+  const normalizedTracks = useMemo(() => normalizeTracks(tracks), [tracks]);
 
   const lobbyLeaderSelection = useMemo((): ConvoyLeaderSelection | null => {
     if (!lobbyLeaderDiscordId) return null;
@@ -114,7 +115,7 @@ export function useCreateEventForm() {
       coverFile,
       coverPreview,
       coverUrl,
-      trackCodes,
+      tracks,
       carRuleMode,
       maxPi,
       additionalCarRestrictions,
@@ -135,7 +136,7 @@ export function useCreateEventForm() {
       coverFile,
       coverPreview,
       coverUrl,
-      trackCodes,
+      tracks,
       carRuleMode,
       maxPi,
       additionalCarRestrictions,
@@ -192,7 +193,7 @@ export function useCreateEventForm() {
         setType(ev.type);
         setStartsAtLocal(utcToLocalInput(ev.startsAt, tz));
         setDescription(ev.description ?? '');
-        setTrackCodes(ev.trackCodes ?? []);
+        setTracks(ev.tracks ?? []);
         setCarRuleMode(ev.carRuleMode);
         setMaxPi(ev.maxPi);
         setAdditionalCarRestrictions(ev.additionalCarRestrictions ?? '');
@@ -272,7 +273,7 @@ export function useCreateEventForm() {
       max_players: EVENT_PLAYER_SLOTS,
       description,
       cover_image_url: coverUrl,
-      track_codes: normalizedTrackCodes,
+      tracks: tracksToRows(normalizedTracks),
       car_rule_mode: carRuleMode,
       max_pi: carRuleMode === 'anything_goes' ? maxPi : undefined,
       additional_car_restrictions:
@@ -475,7 +476,7 @@ export function useCreateEventForm() {
     setShowPublishModal,
     isPublished,
     values,
-    normalizedTrackCodes,
+    normalizedTracks,
     tryContinue,
     onCoverChange,
     persistDraft,
@@ -513,7 +514,7 @@ export function useCreateEventForm() {
       setStartsAtLocal(normalizeDatetimeLocalInput(v));
     },
     setDescription,
-    setTrackCodes,
+    setTracks,
     setCarRuleMode: (m: CarRuleMode) => {
       clearFieldError('eventCars');
       clearFieldError('maxPi');

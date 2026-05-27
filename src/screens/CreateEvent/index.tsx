@@ -47,7 +47,7 @@ export function CreateEvent() {
     setShowPublishModal,
     isPublished,
     values,
-    normalizedTrackCodes,
+    normalizedTracks,
     tryContinue,
     onCoverChange,
     persistDraft,
@@ -67,7 +67,7 @@ export function CreateEvent() {
     setType,
     setStartsAtLocal,
     setDescription,
-    setTrackCodes,
+    setTracks,
     setCarRuleMode,
     setMaxPi,
     setAdditionalCarRestrictions,
@@ -195,7 +195,7 @@ export function CreateEvent() {
     onStartsAtLocal: setStartsAtLocal,
     onDescription: setDescription,
     onCoverChange,
-    onTrackCodes: setTrackCodes,
+    onTracks: setTracks,
     onCarRuleMode: setCarRuleMode,
     onMaxPi: setMaxPi,
     onAdditionalCarRestrictions: setAdditionalCarRestrictions,
@@ -246,7 +246,7 @@ export function CreateEvent() {
           maxPi={values.maxPi}
           additionalCarRestrictions={values.additionalCarRestrictions}
           eventCars={values.eventCars}
-          trackCodes={normalizedTrackCodes}
+          tracks={normalizedTracks}
           lobbyLeaderLabel={lobbyLeaderLabel}
           guildId={values.targetGuildId}
           guildName={values.targetGuildName}

@@ -1,4 +1,4 @@
-import type {CarRuleMode, EventType} from '../../lib/types';
+import type {CarRuleMode, EventTrack, EventType} from '../../lib/types';
 import type {EventCarEntry} from '../../components/EventCarList';
 
 export type FieldErrors = Partial<Record<string, string>>;
@@ -14,7 +14,7 @@ export interface CreateEventFormValues {
   coverFile: File | null;
   coverPreview: string | null;
   coverUrl: string | null;
-  trackCodes: string[];
+  tracks: EventTrack[];
   carRuleMode: CarRuleMode;
   maxPi: number;
   additionalCarRestrictions: string;
