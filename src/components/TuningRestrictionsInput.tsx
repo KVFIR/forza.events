@@ -1,5 +1,6 @@
+import {useTranslation} from 'react-i18next';
 import {RuleListInput} from './RuleListInput';
-import {TUNING_RESTRICTION_TEMPLATES} from '../lib/tuning';
+import {TUNING_RESTRICTION_TEMPLATE_KEYS} from '../lib/tuning';
 
 type Props = {
   items: string[];
@@ -7,12 +8,16 @@ type Props = {
 };
 
 export function TuningRestrictionsInput({items, onChange}: Props) {
+  const {t} = useTranslation();
   return (
     <RuleListInput
-      label="Tuning & parts restrictions"
+      label={t('create.tuningRestrictions')}
       items={items}
       onChange={onChange}
-      templates={[...TUNING_RESTRICTION_TEMPLATES]}
+      templates={TUNING_RESTRICTION_TEMPLATE_KEYS.map((key) =>
+        t(`create.tuningTemplates.${key}`),
+      )}
+      customRulePlaceholder={t('create.customRulePlaceholder')}
     />
   );
 }

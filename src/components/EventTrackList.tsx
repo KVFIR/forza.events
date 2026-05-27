@@ -8,12 +8,15 @@ import {cn} from '../lib/cn';
 import {Button} from './ui/Button';
 import {FieldLabel} from './ui/FieldLabel';
 import {Panel} from './ui/Panel';
+import {useCollapseAllOnLoad} from '../hooks/useCollapseAllOnLoad';
 
 type Props = {
   tracks: EventTrack[];
   onChange: (tracks: EventTrack[]) => void;
   inputClass: string;
   labelClass: string;
+  /** When set (edit flow), collapse all cards once after tracks load. */
+  collapseAllKey?: string | null;
 };
 
 const mobileInputClass = 'text-base sm:text-sm';
@@ -27,17 +30,27 @@ function syncRowIds(idsRef: MutableRefObject<string[]>, length: number) {
   }
 }
 
-export function EventTrackList({tracks, onChange, inputClass, labelClass}: Props) {
+export function EventTrackList({
+  tracks,
+  onChange,
+  inputClass,
+  labelClass,
+  collapseAllKey,
+}: Props) {
   const {t} = useTranslation();
   const [draftName, setDraftName] = useState('');
-  const [collapsedIds, setCollapsedIds] = useState<Set<string>>(() => new Set());
+  const {collapsedIds, setCollapsedIds, collapseAll} = useCollapseAllOnLoad(collapseAllKey);
   const rowIdsRef = useRef<string[]>([]);
 
   syncRowIds(rowIdsRef, tracks.length);
 
   useEffect(() => {
-    if (tracks.length === 0) setCollapsedIds(new Set());
-  }, [tracks.length]);
+    if (tracks.length === 0) {
+      setCollapsedIds(new Set());
+      return;
+    }
+    collapseAll(rowIdsRef.current);
+  }, [collapseAll, tracks.length, setCollapsedIds]);
 
   function emit(next: EventTrack[]) {
     onChange(next);

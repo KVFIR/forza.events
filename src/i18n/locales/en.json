@@ -231,6 +231,15 @@
     "removeCar": "Remove car",
     "maxPiAria": "Max PI",
     "tuningRestrictions": "Tuning & parts restrictions",
+    "tuningTemplates": {
+      "noForzaAero": "No Forza aero",
+      "noEngineSwap": "No engine swap",
+      "noWidebodyKit": "No widebody kit",
+      "noDrivetrainSwap": "No drivetrain swap",
+      "stockTuneOnly": "Stock tune only",
+      "noSlickTires": "No slick tires",
+      "noDragTires": "No drag tires"
+    },
     "beforePublish": "Before you publish",
     "publishTarget": "Publish target",
     "server": "Server",

@@ -20,9 +20,16 @@ type Props = {
   items: string[];
   onChange: (items: string[]) => void;
   templates?: string[];
+  customRulePlaceholder?: string;
 };
 
-export function RuleListInput({label, items, onChange, templates = DEFAULT_TEMPLATES}: Props) {
+export function RuleListInput({
+  label,
+  items,
+  onChange,
+  templates = DEFAULT_TEMPLATES,
+  customRulePlaceholder = 'Custom rule…',
+}: Props) {
   const [draft, setDraft] = useState('');
 
   function addItem(text: string) {
@@ -52,7 +59,7 @@ export function RuleListInput({label, items, onChange, templates = DEFAULT_TEMPL
               addItem(draft);
             }
           }}
-          placeholder="Custom rule…"
+          placeholder={customRulePlaceholder}
           className="flex-1"
         />
         <Button type="button" variant="secondary" onClick={() => addItem(draft)}>

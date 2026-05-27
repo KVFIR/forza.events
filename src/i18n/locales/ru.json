@@ -235,6 +235,15 @@
     "removeCar": "Убрать машину",
     "maxPiAria": "Макс. PI",
     "tuningRestrictions": "Ограничения тюнинга и деталей",
+    "tuningTemplates": {
+      "noForzaAero": "Без Forza-аэро",
+      "noEngineSwap": "Без свапа двигателя",
+      "noWidebodyKit": "Без widebody",
+      "noDrivetrainSwap": "Без свапа трансмиссии",
+      "stockTuneOnly": "Только сток-тюн",
+      "noSlickTires": "Без сликов",
+      "noDragTires": "Без drag-шин"
+    },
     "beforePublish": "Перед публикацией",
     "publishTarget": "Куда публиковать",
     "server": "Сервер",

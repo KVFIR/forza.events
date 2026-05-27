@@ -14,6 +14,7 @@ import {DropdownItem, DropdownList} from './ui/DropdownList';
 import {EmptyPlaceholder} from './ui/EmptyPlaceholder';
 import {FieldLabel} from './ui/FieldLabel';
 import {Panel} from './ui/Panel';
+import {useCollapseAllOnLoad} from '../hooks/useCollapseAllOnLoad';
 
 export type EventCarEntry = {
   id: string;
@@ -31,6 +32,8 @@ type Props = {
   onChange: (cars: EventCarEntry[]) => void;
   inputClass: string;
   labelClass: string;
+  /** When set (edit flow), collapse all cards once after cars load. */
+  collapseAllKey?: string | null;
 };
 
 function toEntry(c: CarSearchResult): EventCarEntry {
@@ -46,13 +49,27 @@ function toEntry(c: CarSearchResult): EventCarEntry {
   };
 }
 
-export function EventCarList({cars, onChange, inputClass, labelClass}: Props) {
+export function EventCarList({
+  cars,
+  onChange,
+  inputClass,
+  labelClass,
+  collapseAllKey,
+}: Props) {
   const {t} = useTranslation();
   const [query, setQuery] = useState('');
   const [results, setResults] = useState<CarSearchResult[]>([]);
   const [open, setOpen] = useState(false);
-  const [collapsedIds, setCollapsedIds] = useState<Set<string>>(() => new Set());
+  const {collapsedIds, setCollapsedIds, collapseAll} = useCollapseAllOnLoad(collapseAllKey);
   const wrapRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    if (cars.length === 0) {
+      setCollapsedIds(new Set());
+      return;
+    }
+    collapseAll(cars.map((c) => c.id));
+  }, [cars, collapseAll, setCollapsedIds]);
 
   useEffect(() => {
     if (!query.trim()) {

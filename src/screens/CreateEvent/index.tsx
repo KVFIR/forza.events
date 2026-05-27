@@ -41,6 +41,7 @@ export function CreateEvent() {
     globalError,
     setGlobalError,
     saving,
+    editId,
     eventId,
     setEventId,
     showPublishModal,
@@ -204,6 +205,7 @@ export function CreateEvent() {
     onLobbyLeaderGamertag: setLobbyLeaderGamertag,
     onLobbyLeaderSelect,
     onAddHostGamertag: () => setGamertagModalOpen(true),
+    editSessionKey: editId ?? eventId,
   };
 
   return (

@@ -42,6 +42,7 @@ type Props = {
   onLobbyLeaderGamertag: (v: string) => void;
   onLobbyLeaderSelect: (member: ConvoyLeaderSelection | null) => void;
   onAddHostGamertag?: () => void;
+  editSessionKey?: string | null;
 };
 
 export function EventStep({
@@ -65,6 +66,7 @@ export function EventStep({
   onLobbyLeaderGamertag,
   onLobbyLeaderSelect,
   onAddHostGamertag,
+  editSessionKey,
 }: Props) {
   const {t} = useTranslation();
   const titleLen = values.title.length;
@@ -174,6 +176,7 @@ export function EventStep({
           onChange={onTracks}
           inputClass={formInput}
           labelClass={formLabel}
+          collapseAllKey={editSessionKey}
         />
       </FormSection>
 
@@ -228,6 +231,7 @@ export function EventStep({
               onChange={onEventCars}
               inputClass={formInput}
               labelClass={formLabel}
+              collapseAllKey={editSessionKey}
             />
           </div>
         )}

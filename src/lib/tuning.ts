@@ -1,13 +1,15 @@
-/** Part / build restrictions hosts can attach to any event (general mode). */
-export const TUNING_RESTRICTION_TEMPLATES = [
-  'No Forza aero',
-  'No engine swap',
-  'No widebody kit',
-  'No drivetrain swap',
-  'Stock tune only',
-  'No race tires',
-  'Homologation parts only',
+/** i18n keys under `create.tuningTemplates.*` — keep order stable for chip layout. */
+export const TUNING_RESTRICTION_TEMPLATE_KEYS = [
+  'noForzaAero',
+  'noEngineSwap',
+  'noWidebodyKit',
+  'noDrivetrainSwap',
+  'stockTuneOnly',
+  'noSlickTires',
+  'noDragTires',
 ] as const;
+
+export type TuningRestrictionTemplateKey = (typeof TUNING_RESTRICTION_TEMPLATE_KEYS)[number];
 
 export type CarSetupMode = 'general' | 'prescribed_tunes';
 
