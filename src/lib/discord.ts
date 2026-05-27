@@ -170,20 +170,10 @@ export async function initDiscordActivity(): Promise<InitResult> {
       };
     }
 
-    const {Common, DiscordSDK} = await import('@discord/embedded-app-sdk');
+    const {DiscordSDK} = await import('@discord/embedded-app-sdk');
     const sdk = new DiscordSDK(clientId);
     sdkInstance = sdk;
     await sdk.ready();
-
-    try {
-      await sdk.commands.setOrientationLockState({
-        lock_state: Common.OrientationLockStateTypeObject.LANDSCAPE,
-        picture_in_picture_lock_state: Common.OrientationLockStateTypeObject.LANDSCAPE,
-        grid_lock_state: Common.OrientationLockStateTypeObject.LANDSCAPE,
-      });
-    } catch (err) {
-      console.warn('Discord orientation lock not applied', err);
-    }
 
     const launchEventId = eventIdFromOpenEventCustomId(sdk.customId);
     const {user, accessToken} = await authenticateDiscordActivity(sdk, clientId);

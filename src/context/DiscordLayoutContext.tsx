@@ -10,14 +10,13 @@ import {
   DiscordLayoutMode,
   type DiscordLayoutModeValue,
   isCompactLayoutMode,
-  isCompactViewport,
 } from '../lib/discordLayoutMode';
 import {subscribeDiscordLayoutMode} from '../lib/subscribeDiscordLayoutMode';
 import {useAuth} from './AuthContext';
 
 type DiscordLayoutState = {
   layoutMode: DiscordLayoutModeValue;
-  /** PIP / grid tile, or small viewport in dev. */
+  /** Discord PIP / grid tile — app shows logo only until expanded. */
   isCompact: boolean;
 };
 
@@ -35,11 +34,7 @@ export function DiscordLayoutProvider({children}: {children: ReactNode}) {
     return subscribeDiscordLayoutMode(setLayoutMode);
   }, [discordReady, isStandalone]);
 
-  const isCompact = useMemo(() => {
-    if (isCompactLayoutMode(layoutMode)) return true;
-    if (layoutMode === DiscordLayoutMode.UNHANDLED) return isCompactViewport();
-    return false;
-  }, [layoutMode]);
+  const isCompact = useMemo(() => isCompactLayoutMode(layoutMode), [layoutMode]);
 
   const value = useMemo(() => ({layoutMode, isCompact}), [layoutMode, isCompact]);
 

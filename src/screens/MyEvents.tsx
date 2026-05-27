@@ -10,13 +10,10 @@ import {useMyEventsCatalog} from '../hooks/useMyEventsCatalog';
 import {useParticipantResults} from '../hooks/useParticipantResults';
 import {isEventSuccessfullyCompleted} from '../lib/eventSpec';
 import type {MyEventsScope} from '../lib/eventList';
-import {CompactLayoutBanner} from '../components/CompactLayoutBanner';
-import {useDiscordLayout} from '../context/DiscordLayoutContext';
 
 export function MyEvents() {
   const {t} = useTranslation();
   const navigate = useNavigate();
-  const {isCompact} = useDiscordLayout();
 
   const scopeOptions: {value: MyEventsScope; label: string}[] = [
     {value: 'all', label: t('myEvents.scopeAll')},
@@ -26,7 +23,7 @@ export function MyEvents() {
   const [scope, setScope] = useState<MyEventsScope>('all');
   const {isSignedIn, loading: authLoading, user} = useAuth();
   const {isJoined} = useJoinedEvents();
-  const {filtered, active, drafts, isLoading, isRefreshing, loadError, draftsLoadError, refetch} =
+  const {filtered, isLoading, isRefreshing, loadError, draftsLoadError, refetch} =
     useMyEventsCatalog(scope);
 
   const placementEventIds = useMemo(
@@ -65,14 +62,6 @@ export function MyEvents() {
 
   return (
     <div className="pb-8 pt-5">
-      {isCompact && !isLoading && !loadError ? (
-        <p className="mb-2 text-[11px] font-medium text-muted">
-          {t('discordLayout.myEventsSummary', {
-            active: active.length,
-            drafts: drafts.length,
-          })}
-        </p>
-      ) : null}
       {draftsHint ? (
         <Alert variant="warning" className="mb-3">
           {draftsHint}
@@ -97,17 +86,14 @@ export function MyEvents() {
         }
         participantResults={participantResults}
         metaRight={
-          isCompact ? null : (
-            <EventListMetaSelect
-              value={scope}
-              onChange={setScope}
-              options={scopeOptions}
-              aria-label={t('myEvents.filterAria')}
-            />
-          )
+          <EventListMetaSelect
+            value={scope}
+            onChange={setScope}
+            options={scopeOptions}
+            aria-label={t('myEvents.filterAria')}
+          />
         }
       />
-      {isCompact ? <CompactLayoutBanner placement="footer" /> : null}
     </div>
   );
 }

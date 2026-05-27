@@ -1,12 +1,10 @@
-import {NavLink, useLocation} from 'react-router-dom';
+import {NavLink} from 'react-router-dom';
 import {useTranslation} from 'react-i18next';
-import {compactRouteTitle} from './compact/compactRouteTitle';
 import {CalendarDays, Compass, PlusCircle, User2, type LucideIcon} from 'lucide-react';
 import {AuthStatusIndicator} from './AuthStatusIndicator';
 import {Logo} from './ui/Logo';
 import {navShellBorderClass} from './ui/formStyles';
 import {cn} from '../lib/cn';
-import {useDiscordLayout} from '../context/DiscordLayoutContext';
 
 const navBrandBarClass = cn(
   'glass border-b bg-base/85',
@@ -28,7 +26,6 @@ function NavItem({
   layout,
 }: (typeof NAV_ITEMS)[number] & {layout: 'top' | 'side'}) {
   const {t} = useTranslation();
-  const {isCompact} = useDiscordLayout();
   const isSide = layout === 'side';
 
   return (
@@ -67,9 +64,7 @@ function NavItem({
               isActive && '[filter:drop-shadow(0_0_8px_rgba(139,92,246,0.9))]',
             )}
           />
-          <span className={cn(isActive ? 'text-glow-purple' : '', !isSide && isCompact && 'sr-only')}>
-            {t(labelKey)}
-          </span>
+          <span className={isActive ? 'text-glow-purple' : ''}>{t(labelKey)}</span>
         </>
       )}
     </NavLink>
@@ -77,43 +72,28 @@ function NavItem({
 }
 
 function NavbarTop() {
-  const {t} = useTranslation();
-  const {pathname} = useLocation();
-  const {isCompact} = useDiscordLayout();
-
   return (
-    <header className={cn('sticky top-0 z-20', isCompact ? 'block' : 'lg:hidden')}>
+    <header className="sticky top-0 z-20 lg:hidden">
       <div
         className={cn(
           navBrandBarClass,
           'flex items-center justify-between gap-3 px-4 py-3',
         )}
       >
-        <div className="flex min-w-0 items-center gap-3">
-          <Logo size="nav" />
-          {isCompact ? (
-            <p className="truncate text-[11px] font-semibold uppercase tracking-widest text-muted">
-              {compactRouteTitle(pathname, t)}
-            </p>
-          ) : null}
-        </div>
+        <Logo size="nav" />
         <AuthStatusIndicator />
       </div>
 
-      {!isCompact ? (
-        <nav className={cn('glass flex border-b bg-surface/75', navShellBorderClass)}>
-          {NAV_ITEMS.map((item) => (
-            <NavItem key={item.to} {...item} layout="top" />
-          ))}
-        </nav>
-      ) : null}
+      <nav className={cn('glass flex border-b bg-surface/75', navShellBorderClass)}>
+        {NAV_ITEMS.map((item) => (
+          <NavItem key={item.to} {...item} layout="top" />
+        ))}
+      </nav>
     </header>
   );
 }
 
 function NavbarSide() {
-  const {isCompact} = useDiscordLayout();
-  if (isCompact) return null;
   return (
     <aside
       className={cn(

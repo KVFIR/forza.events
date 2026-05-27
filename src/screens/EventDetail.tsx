@@ -50,9 +50,6 @@ import {useJoinedEvents} from '../context/JoinedEventsContext';
 import {useAuth} from '../context/AuthContext';
 import {useEventLiveUpdates} from '../hooks/useEventLiveUpdates';
 import {useResolveEventDisplayStatus} from '../hooks/useResolveEventDisplayStatus';
-import {CompactLayoutBanner} from '../components/CompactLayoutBanner';
-import {CompactEventFacts} from '../components/compact/CompactEventFacts';
-import {useDiscordLayout} from '../context/DiscordLayoutContext';
 import {formatCarDisplayName} from '../lib/carDisplay';
 import {piToClass} from '../lib/pi';
 import {formatLobbyCount, LOBBY_TOTAL_PLAYERS} from '../lib/constants';
@@ -124,7 +121,6 @@ export function EventDetail() {
 
   useEventLiveUpdates(id, reloadEvent);
   const displayStatus = useResolveEventDisplayStatus(event);
-  const {isCompact} = useDiscordLayout();
 
   useEffect(() => {
     if (!id) return;
@@ -319,6 +315,7 @@ export function EventDetail() {
   const needsSignInToParticipate =
     showParticipantActions && !isSignedIn && !isStandalone && !authInitializing;
   const participationBusy = joining || leaving;
+  const participationAction = leaving ? 'leaving' : joining ? 'joining' : null;
   const participationDisabled =
     !isSignedIn ||
     participationBusy ||
@@ -333,33 +330,19 @@ export function EventDetail() {
     convoyLeader != null &&
     !convoyLeader.isYou;
 
-  const participantGamertags = [
-    ...(convoyLeader && !registeredDrivers.some((p) => p.discordId === convoyLeader.discordId)
-      ? [convoyLeader.gamertag]
-      : []),
-    ...registeredDrivers.map((p) => p.gamertag ?? p.username),
-  ];
-
   return (
     <ContentReveal className="pb-10 pt-4">
-      {!isCompact ? (
-        <TextLink
-          to={isDraft && isHost ? '/my-events' : '/'}
-          tone="nav"
-          className="mb-5 inline-flex items-center gap-1.5"
-        >
-          <ArrowLeft className="h-3.5 w-3.5" />
-          {t('common.back')}
-        </TextLink>
-      ) : null}
+      <TextLink
+        to={isDraft && isHost ? '/my-events' : '/'}
+        tone="nav"
+        className="mb-5 inline-flex items-center gap-1.5"
+      >
+        <ArrowLeft className="h-3.5 w-3.5" />
+        {t('common.back')}
+      </TextLink>
 
       {/* Hero */}
-      <div
-        className={cn(
-          'event-detail-hero relative -mx-3 mb-0 overflow-hidden bg-base sm:-mx-5 md:-mx-8',
-          isCompact ? 'hidden' : 'h-44',
-        )}
-      >
+      <div className="event-detail-hero relative -mx-3 mb-0 h-44 overflow-hidden bg-base sm:-mx-5 md:-mx-8">
         <EventCover
           src={event.coverImageUrl ?? defaultCoverPath(event.type)}
           variant="hero"
@@ -382,37 +365,15 @@ export function EventDetail() {
             <Badge type={event.type} />
             {isDraft ? <DraftBadge /> : <StatusBadge status={displayStatus} />}
           </div>
-          <h1
-            className={cn(
-              'mt-1.5 font-black tracking-tight text-white',
-              isCompact ? 'text-base' : 'text-xl',
-            )}
-          >
-            {event.title}
-          </h1>
-          {isCompact ? (
-            <>
-              <p className="mt-1 text-xs text-muted">
-                {when} · {formatLobbyCount(event.currentPlayers)}
-              </p>
-              {joined && !isHost && !isDraft ? (
-                <p className="mt-1 text-[10px] font-bold uppercase tracking-widest text-accent-purple-light">
-                  {t('discordLayout.joined')}
-                </p>
-              ) : null}
-            </>
-          ) : (
-            <>
-              {event.description && (
-                <p className="mt-1.5 text-sm leading-relaxed text-slate-400">{event.description}</p>
-              )}
-              <p className="mt-1 text-xs text-muted">
-                {t('common.by')} {resolveOrganiserLabel(event)}
-              </p>
-            </>
+          <h1 className="mt-1.5 text-xl font-black tracking-tight text-white">{event.title}</h1>
+          {event.description && (
+            <p className="mt-1.5 text-sm leading-relaxed text-slate-400">{event.description}</p>
           )}
+          <p className="mt-1 text-xs text-muted">
+            {t('common.by')} {resolveOrganiserLabel(event)}
+          </p>
         </div>
-        {!isCompact && showDraftActions ? (
+        {showDraftActions ? (
           <div className="flex shrink-0 flex-col gap-2">
             <Button
               variant="primary"
@@ -434,7 +395,7 @@ export function EventDetail() {
               </Button>
             ) : null}
           </div>
-        ) : !isCompact && showHostPostStartActions ? (
+        ) : showHostPostStartActions ? (
           <div className="flex shrink-0 flex-col gap-2">
             {canEnterResults ? (
               <Button
@@ -458,7 +419,7 @@ export function EventDetail() {
               </Button>
             ) : null}
           </div>
-        ) : !isCompact && isHost ? (
+        ) : isHost ? (
           canEdit ? (
             <Button
               variant="secondary"
@@ -469,12 +430,18 @@ export function EventDetail() {
               {t('eventDetail.edit')}
             </Button>
           ) : null
-        ) : !isCompact && showParticipantActions ? (
+        ) : showParticipantActions ? (
           <Button
             variant={
               needsSignInToParticipate
                 ? 'secondary'
-                : participationButtonVariant(joined, registrationOpen, full, canLeave)
+                : participationButtonVariant(
+                    joined,
+                    registrationOpen,
+                    full,
+                    canLeave,
+                    participationAction,
+                  )
             }
             size={needsSignInToParticipate ? 'toolbar' : undefined}
             className="shrink-0 whitespace-nowrap"
@@ -493,15 +460,6 @@ export function EventDetail() {
           </Button>
         ) : null}
       </div>
-
-      {isCompact ? (
-        <CompactEventFacts
-          event={event}
-          when={when}
-          convoyLeaderGamertag={event.lobbyLeaderGamertag}
-          participantGamertags={participantGamertags}
-        />
-      ) : null}
 
       {isDraft && isHost ? <EventStatusBanner variant="draft" /> : null}
       {showHostPostStartActions ? <EventStatusBanner variant="host-in-progress" /> : null}
@@ -583,7 +541,6 @@ export function EventDetail() {
         </div>
       )}
 
-      {!isCompact ? (
       <Panel divided className="mt-5 overflow-hidden">
 
         {/* Date */}
@@ -709,9 +666,7 @@ export function EventDetail() {
           </div>
         </div>
       </Panel>
-      ) : null}
 
-      {!isCompact ? (
       <div className="mt-6">
         <div className="mb-3 flex items-center justify-between">
           <p className="text-sm font-semibold text-white">{t('eventDetail.participants')}</p>
@@ -777,9 +732,6 @@ export function EventDetail() {
           )}
         </div>
       </div>
-      ) : null}
-
-      {isCompact ? <CompactLayoutBanner placement="footer" /> : null}
     </ContentReveal>
   );
 }

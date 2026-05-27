@@ -18,13 +18,9 @@ import {PageLoading} from '../components/ui/PageLoading';
 import {Alert} from '../components/ui/Alert';
 import {StatCard} from '../components/ui/StatCard';
 import {cn} from '../lib/cn';
-import {CompactLayoutBanner} from '../components/CompactLayoutBanner';
-import {CompactEventRow} from '../components/compact/CompactEventRow';
-import {useDiscordLayout} from '../context/DiscordLayoutContext';
 
 export function Profile() {
   const {t} = useTranslation();
-  const {isCompact} = useDiscordLayout();
   const {
     user,
     refreshUser,
@@ -99,14 +95,12 @@ export function Profile() {
     }
   }
 
-  const compactUpcoming = active.slice(0, 3);
-
   return (
     <ContentReveal className="pb-10 pt-5">
       <div className="relative overflow-hidden rounded-2xl border border-white/[0.08] bg-card">
         <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_80%_20%,rgba(139,92,246,0.12)_0%,transparent_70%)]" />
-        {!isCompact ? <LanguageToggle className="absolute right-3 top-3 z-10" /> : null}
-        <div className={cn('relative flex items-center gap-4 p-5', isCompact ? 'pr-5' : 'pr-20')}>
+        <LanguageToggle className="absolute right-3 top-3 z-10" />
+        <div className="relative flex items-center gap-4 p-5 pr-20">
           <div className="flex h-14 w-14 shrink-0 items-center justify-center rounded-2xl bg-gradient-to-br from-accent-purple-dark to-accent-purple-light text-xl font-black text-white shadow-glow-purple-sm">
             {initial}
           </div>
@@ -118,100 +112,69 @@ export function Profile() {
                 {user.xboxGamertag ?? t('common.notSet')}
               </span>
             </p>
-            {!isCompact ? (
-              <TextButton type="button" className="mt-2" onClick={() => setEditGamertag(true)}>
-                {user.xboxGamertag ? t('profile.editGamertag') : t('profile.addGamertag')}
-              </TextButton>
-            ) : null}
+            <TextButton type="button" className="mt-2" onClick={() => setEditGamertag(true)}>
+              {user.xboxGamertag ? t('profile.editGamertag') : t('profile.addGamertag')}
+            </TextButton>
           </div>
         </div>
       </div>
 
-      {!isCompact && needsGamertag ? (
+      {needsGamertag ? (
         <Alert variant="warning" className="mt-3">
           {t('profile.gamertagWarning')}
         </Alert>
       ) : null}
 
       <div className="mt-4 flex gap-2">
-        <StatCard
-          label={t('profile.hosted')}
-          value={isCompact ? user.eventsHosted : hostedCount}
-        />
-        <StatCard
-          label={t('profile.participated')}
-          value={isCompact ? user.eventsJoined : participatedCount}
-        />
+        <StatCard label={t('profile.hosted')} value={hostedCount} />
+        <StatCard label={t('profile.participated')} value={participatedCount} />
         <StatCard label={t('profile.rating')} value={t('profile.ratingTbd')} />
       </div>
 
-      {isCompact ? (
-        <>
-          {compactUpcoming.length > 0 ? (
-            <section className="mt-4 space-y-2">
-              <p className="text-[11px] font-medium text-muted">{t('profile.upcoming')}</p>
-              {compactUpcoming.map((event) => (
-                <CompactEventRow
-                  key={event.id}
+      {recentCompleted.length > 0 && (
+        <section className="mt-6">
+          <div className="mb-3 flex items-center justify-between gap-2">
+            <p className="text-[11px] font-medium text-muted">{t('profile.recentResults')}</p>
+            <TextLink to="/my-events" className="text-[11px]">
+              {t('profile.allInMyEvents')}
+            </TextLink>
+          </div>
+          <ul className="flex list-none flex-col gap-2">
+            {recentCompleted.map((event) => (
+              <li key={event.id}>
+                <EventCard
                   event={event}
-                  joined={isJoined(event)}
-                  host={event.hostDiscordId === user.discordId}
+                  participantResult={participantPlacements.get(event.id)}
                 />
-              ))}
-            </section>
-          ) : null}
-          <CompactLayoutBanner placement="footer" />
-        </>
-      ) : (
-        <>
-          {recentCompleted.length > 0 && (
-            <section className="mt-6">
-              <div className="mb-3 flex items-center justify-between gap-2">
-                <p className="text-[11px] font-medium text-muted">{t('profile.recentResults')}</p>
-                <TextLink to="/my-events" className="text-[11px]">
-                  {t('profile.allInMyEvents')}
-                </TextLink>
-              </div>
-              <ul className="flex list-none flex-col gap-2">
-                {recentCompleted.map((event) => (
-                  <li key={event.id}>
-                    <EventCard
-                      event={event}
-                      participantResult={participantPlacements.get(event.id)}
-                    />
-                  </li>
-                ))}
-              </ul>
-            </section>
-          )}
-
-          {active.length > 0 && (
-            <section className="mt-6">
-              <p className="mb-3 text-[11px] font-medium text-muted">{t('profile.upcoming')}</p>
-              <ul className="flex list-none flex-col gap-2">
-                {active.slice(0, 2).map((event) => (
-                  <li key={event.id}>
-                    <EventCard event={event} />
-                  </li>
-                ))}
-              </ul>
-            </section>
-          )}
-        </>
+              </li>
+            ))}
+          </ul>
+        </section>
       )}
 
-      {!isConfigured && !isCompact ? (
+      {active.length > 0 && (
+        <section className="mt-6">
+          <p className="mb-3 text-[11px] font-medium text-muted">{t('profile.upcoming')}</p>
+          <ul className="flex list-none flex-col gap-2">
+            {active.slice(0, 2).map((event) => (
+              <li key={event.id}>
+                <EventCard event={event} />
+              </li>
+            ))}
+          </ul>
+        </section>
+      )}
+
+      {!isConfigured ? (
         <p className="mt-6 text-center text-[10px] text-muted">{t('profile.supabaseHint')}</p>
       ) : null}
-      {!isCompact ? (
-        <GamertagModal
-          open={editGamertag}
-          initialValue={user.xboxGamertag ?? ''}
-          saving={saving}
-          onSave={handleSaveGamertag}
-          onClose={() => setEditGamertag(false)}
-        />
-      ) : null}
+      <GamertagModal
+        open={editGamertag}
+        initialValue={user.xboxGamertag ?? ''}
+        saving={saving}
+        onSave={handleSaveGamertag}
+        onClose={() => setEditGamertag(false)}
+      />
     </ContentReveal>
   );
 }

@@ -33,10 +33,8 @@ export function subscribeDiscordLayoutMode(onMode: LayoutUpdateHandler): () => v
 
   const sdk = getDiscordSdk() as LayoutCapableSdk | null;
   if (!sdk?.subscribeToLayoutModeUpdatesCompat) {
-    const sync = () => onMode(viewportFallbackMode());
-    sync();
-    window.addEventListener('resize', sync);
-    return () => window.removeEventListener('resize', sync);
+    onMode(DiscordLayoutMode.FOCUSED);
+    return () => {};
   }
 
   const handler = (update: {layout_mode?: number}) => {

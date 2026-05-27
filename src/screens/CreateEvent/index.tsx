@@ -16,13 +16,8 @@ import {ContentReveal} from '../../components/ui/ContentReveal';
 import {PageLoading} from '../../components/ui/PageLoading';
 import {useAuth} from '../../context/AuthContext';
 import {useLoadingUI} from '../../hooks/useLoadingUI';
-import {CompactLayoutBanner} from '../../components/CompactLayoutBanner';
-import {CompactCreateSummary} from '../../components/compact/CompactCreateSummary';
-import {useDiscordLayout} from '../../context/DiscordLayoutContext';
-
 export function CreateEvent() {
   const {t} = useTranslation();
-  const {isCompact} = useDiscordLayout();
   const [publishConfirmOpen, setPublishConfirmOpen] = useState(false);
   const {isStandalone, loading: authInitializing, authRetrying, retryDiscordAuth} = useAuth();
   const form = useCreateEventForm();
@@ -162,18 +157,6 @@ export function CreateEvent() {
 
   return (
     <ContentReveal className="pb-10 pt-5">
-      {isCompact ? (
-        <>
-          <CompactCreateSummary
-            values={values}
-            step={step}
-            eventId={eventId}
-            isPublished={isPublished}
-          />
-          <CompactLayoutBanner placement="footer" />
-        </>
-      ) : (
-        <>
       <StepIndicator
         step={step}
         freeNavigation={hasDraftId}
@@ -383,8 +366,6 @@ export function CreateEvent() {
           confirming={saving}
           onConfirm={onPublishModalConfirm}
         />
-      )}
-        </>
       )}
     </ContentReveal>
   );

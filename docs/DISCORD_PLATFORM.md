@@ -29,16 +29,16 @@ Local browser dev only: `http://localhost:5180/auth/callback`.
 
 ## Layout modes (focused / PIP / grid)
 
-When users minimize the Activity or view it in a voice grid tile, Discord shrinks the iframe. The client subscribes via `subscribeToLayoutModeUpdatesCompat` (`DiscordLayoutProvider` → `data-discord-layout="compact"`).
+When users minimize the Activity or view it in a voice grid tile, Discord shrinks the iframe. The client subscribes via `subscribeToLayoutModeUpdatesCompat` (`DiscordLayoutProvider`).
 
 | Mode | UX in FORZA.EVENTS |
 |------|---------------------|
-| **Focused** | Full browse filters, event detail, create wizard |
-| **PIP / grid** | Read-only summaries (event facts, profile stats, draft snapshot); nav hidden; tap activity to expand for controls |
+| **Focused** | Full app (browse, create, profile, event detail) |
+| **PIP / grid** | Centered FORZA.EVENTS logo only — expand the activity for controls |
 
-After `sdk.ready()`, we call `setOrientationLockState` with **landscape** for focused, PIP, and grid so the tile stays wide enough for event rows.
+We do **not** call `setOrientationLockState` — the activity follows the device orientation (portrait on phones is allowed).
 
-Local dev: resize the window below ~420×300 to preview compact layout without Discord.
+Local dev: resize the browser below ~420×300 while signed in on localhost to preview the logo-only layout.
 
 ## Networking (Activity proxy)
 

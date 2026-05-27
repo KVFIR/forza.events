@@ -5,6 +5,7 @@ import {BrowserRouter, Navigate, Route, Routes} from 'react-router-dom';
 import {AppBootGate} from './components/AppBootGate';
 import {DiscordOnlyGate} from './components/DiscordOnlyGate';
 import {Navbar} from './components/Navbar';
+import {Logo} from './components/ui/Logo';
 import {AuthProvider} from './context/AuthContext';
 import {DiscordLayoutProvider, useDiscordLayout} from './context/DiscordLayoutContext';
 import {JoinedEventsProvider} from './context/JoinedEventsContext';
@@ -40,11 +41,20 @@ function RouteFallback() {
 
 function AppShell({children}: {children: ReactNode}) {
   const {isCompact} = useDiscordLayout();
+
+  if (isCompact) {
+    return (
+      <div
+        className="flex min-h-screen items-center justify-center bg-base"
+        data-discord-layout="compact"
+      >
+        <Logo size="hero" />
+      </div>
+    );
+  }
+
   return (
-    <div
-      className="min-h-screen"
-      data-discord-layout={isCompact ? 'compact' : 'focused'}
-    >
+    <div className="min-h-screen" data-discord-layout="focused">
       {children}
     </div>
   );

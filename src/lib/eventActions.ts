@@ -1,13 +1,18 @@
 import i18n from '../i18n';
 import type {ButtonVariant} from '../components/ui/Button';
 
+export type ParticipationAction = 'joining' | 'leaving' | null;
+
 /** Join / leave / closed — hosts use Edit or post-start actions, never Join. */
 export function participationButtonVariant(
   joined: boolean,
   registrationOpen: boolean,
   isFull: boolean,
   canLeave: boolean,
+  action: ParticipationAction = null,
 ): ButtonVariant {
+  if (action === 'leaving') return 'leave';
+  if (action === 'joining') return 'open';
   if (joined && !canLeave) return 'secondary';
   if (isFull && registrationOpen && !joined) return 'full';
   if (joined) return 'leave';
