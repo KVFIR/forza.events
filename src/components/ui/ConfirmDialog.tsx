@@ -59,6 +59,7 @@ export function ConfirmDialog({
           <Button
             type="button"
             variant={variant === 'danger' ? 'danger' : 'primary'}
+            emphasis="solid"
             className="flex-1"
             disabled={busy}
             onClick={onConfirm}

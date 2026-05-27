@@ -2,6 +2,7 @@ import {describe, expect, it} from 'vitest';
 import {
   canLeaveRegistration,
   eventHasStarted,
+  isBrowseFeedEvent,
   isRegistrationOpen,
   normalizeTrackCodes,
   resolveEventDisplayStatus,
@@ -49,6 +50,60 @@ describe('validateDraftForm', () => {
         guildId: 'g1',
       }),
     ).toBe(VALIDATION_CODES.TITLE_REQUIRED);
+  });
+});
+
+describe('isBrowseFeedEvent', () => {
+  const published = {discordMessageId: 'discord-msg-1'};
+
+  it('includes upcoming published events', () => {
+    expect(isBrowseFeedEvent(event({...published}))).toBe(true);
+  });
+
+  it('excludes live, completed, and cancelled', () => {
+    expect(
+      isBrowseFeedEvent(
+        event({
+          ...published,
+          lifecycle: 'live',
+          status: 'live',
+          startsAt: new Date(Date.now() - 60_000).toISOString(),
+        }),
+      ),
+    ).toBe(false);
+    expect(
+      isBrowseFeedEvent(
+        event({
+          ...published,
+          lifecycle: 'completed',
+          status: 'ended',
+          startsAt: new Date(Date.now() - 3_600_000).toISOString(),
+        }),
+      ),
+    ).toBe(false);
+    expect(
+      isBrowseFeedEvent(
+        event({
+          ...published,
+          lifecycle: 'cancelled',
+          status: 'ended',
+          startsAt: new Date(Date.now() + 3_600_000).toISOString(),
+        }),
+      ),
+    ).toBe(false);
+  });
+
+  it('excludes started events still marked open in the database', () => {
+    expect(
+      isBrowseFeedEvent(
+        event({
+          ...published,
+          lifecycle: 'open',
+          status: 'open',
+          startsAt: new Date(Date.now() - 60_000).toISOString(),
+        }),
+      ),
+    ).toBe(false);
   });
 });
 

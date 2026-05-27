@@ -41,7 +41,12 @@ export function EmptyState({
       {(action || secondaryAction) && (
         <div className="flex flex-wrap items-center justify-center gap-3 pt-1">
           {action ? (
-            <Button type="button" variant="primary" className="min-w-[7rem]" onClick={action.onClick}>
+            <Button
+              type="button"
+              variant="secondary"
+              className="min-w-[7rem] border-accent-purple/35 text-accent-purple-light hover:border-accent-purple/50"
+              onClick={action.onClick}
+            >
               {action.label}
             </Button>
           ) : null}

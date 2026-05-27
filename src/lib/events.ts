@@ -6,6 +6,7 @@ import {sortEventResultRows} from './eventResults';
 import {EVENT_PLAYER_SLOTS} from './constants';
 import {resolveEventCoverUrl} from './eventCovers';
 import {normalizeEventType} from './eventTypes';
+import {isBrowseFeedEvent} from './eventSpec';
 import type {
   AppUser,
   CarRuleMode,
@@ -25,6 +26,7 @@ export {
   isEventFinalized,
   isEventSuccessfullyCompleted,
   isPublishedEvent,
+  isBrowseFeedEvent,
   isPublishedToDiscord,
   isRegistrationOpen,
   resolveEventDisplayStatus,
@@ -294,7 +296,7 @@ export function isEventCompleted(event: ForzaEvent): boolean {
 }
 
 export function isBrowsableEvent(event: ForzaEvent): boolean {
-  return !isEventCompleted(event);
+  return isBrowseFeedEvent(event);
 }
 
 export type PublishedEventsLoadError = 'not_configured' | 'fetch_failed';
@@ -393,19 +395,20 @@ export async function fetchPublishedEventsResult(
 ): Promise<PublishedEventsResult> {
   const {includeCompleted = false} = options;
   const directReads = shouldUseDirectSupabaseReads();
-  /** Localhost dev: show every published row (incl. cancelled) so an empty open feed is not confusing. */
-  const showAllPublished = includeCompleted || directReads;
 
   if (!isSupabaseConfigured()) {
     return {events: [], error: 'not_configured'};
   }
 
   if (!directReads) {
-    const events = await fetchEventsViaEdge({includeCompleted: showAllPublished});
+    const events = await fetchEventsViaEdge({includeCompleted});
     if (events === null) {
       return {events: [], error: 'fetch_failed'};
     }
-    return {events, error: null};
+    return {
+      events: includeCompleted ? events : events.filter(isBrowseFeedEvent),
+      error: null,
+    };
   }
 
   const events = await fetchEventsWithRelations((supabase) => {
@@ -415,8 +418,8 @@ export async function fetchPublishedEventsResult(
       .neq('status', 'draft')
       .order('starts_at', {ascending: true});
 
-    if (!showAllPublished) {
-      query = query.in('status', ['open', 'checkin', 'live']);
+    if (!includeCompleted) {
+      query = query.eq('status', 'open').gt('starts_at', new Date().toISOString());
     }
 
     return query;
@@ -426,7 +429,10 @@ export async function fetchPublishedEventsResult(
     return {events: [], error: 'fetch_failed'};
   }
 
-  return {events, error: null};
+  return {
+    events: includeCompleted ? events : events.filter(isBrowseFeedEvent),
+    error: null,
+  };
 }
 
 async function fetchPublishedEventViaPostgrest(id: string): Promise<ForzaEvent | undefined> {

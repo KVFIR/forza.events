@@ -1,4 +1,8 @@
-/** Shared button / modal tokens — keep UI actions consistent across screens. */
+/** Shared button / modal tokens — keep UI actions consistent across screens.
+ *  Page CTAs: `<Button variant="primary|danger" />` (soft glass, default).
+ *  Modal confirms: add `emphasis="solid"`.
+ *  Participation: `open` | `leave` | `full` chips; neutral actions: `secondary` | `ghost`.
+ */
 
 export const buttonBaseClass =
   'inline-flex items-center justify-center gap-2 transition-all duration-200';

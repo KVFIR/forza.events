@@ -68,6 +68,7 @@ export function ChannelPicker({guildId, accessToken, onSelect, onCancel}: Props)
           <Button
             type="button"
             variant="primary"
+            emphasis="solid"
             className="flex-1"
             disabled={!selected || loading || !!error}
             onClick={() => onSelect(selected)}

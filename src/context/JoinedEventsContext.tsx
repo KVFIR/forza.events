@@ -17,6 +17,9 @@ type Overrides = Record<string, boolean>;
 
 type Ctx = {
   isJoined: (event: ForzaEvent) => boolean;
+  joinParticipation: (event: ForzaEvent, gamertag: string) => Promise<void>;
+  leaveParticipation: (eventId: string) => Promise<void>;
+  /** @deprecated Prefer joinParticipation / leaveParticipation */
   toggleJoin: (event: ForzaEvent, gamertag?: string) => Promise<void>;
   refreshKey: number;
   bumpRefresh: () => void;
@@ -40,23 +43,29 @@ export function JoinedEventsProvider({children}: {children: ReactNode}) {
     [overrides, user],
   );
 
-  const toggleJoin = useCallback(
-    async (event: ForzaEvent, gamertag?: string) => {
-      const currently = isJoined(event);
+  const clearOverride = useCallback((eventId: string) => {
+    setOverrides((prev) => {
+      if (prev[eventId] === undefined) return prev;
+      const next = {...prev};
+      delete next[eventId];
+      return next;
+    });
+  }, []);
+
+  const joinParticipation = useCallback(
+    async (event: ForzaEvent, gamertag: string) => {
       const token = getAccessToken();
+      const gt = gamertag.trim();
 
       if (isSignedIn && isApiConfigured() && token) {
+        if (!hasGamertag(gt)) throw new Error('Xbox gamertag is required to join events.');
+        setOverrides((prev) => ({...prev, [event.id]: true}));
         try {
-          if (currently) {
-            await leaveEvent(token, event.id);
-          } else {
-            const gt = (gamertag ?? user.xboxGamertag)?.trim();
-            if (!hasGamertag(gt)) throw new Error('Xbox gamertag is required to join events.');
-            await joinEvent(token, event.id, gt!);
-            refreshUser((prev) => ({...prev, xboxGamertag: gt!}));
-          }
+          await joinEvent(token, event.id, gt);
+          refreshUser((prev) => ({...prev, xboxGamertag: gt}));
           bumpRefresh();
         } catch (err) {
+          clearOverride(event.id);
           bumpRefresh();
           throw err;
         }
@@ -67,19 +76,60 @@ export function JoinedEventsProvider({children}: {children: ReactNode}) {
         throw new Error('Sign in with Discord to join or leave events.');
       }
 
-      setOverrides((prev) => ({...prev, [event.id]: !currently}));
+      setOverrides((prev) => ({...prev, [event.id]: true}));
     },
-    [isJoined, getAccessToken, isSignedIn, user.xboxGamertag, bumpRefresh, refreshUser],
+    [getAccessToken, isSignedIn, bumpRefresh, refreshUser, clearOverride],
+  );
+
+  const leaveParticipation = useCallback(
+    async (eventId: string) => {
+      const token = getAccessToken();
+
+      if (isSignedIn && isApiConfigured() && token) {
+        setOverrides((prev) => ({...prev, [eventId]: false}));
+        try {
+          await leaveEvent(token, eventId);
+          bumpRefresh();
+        } catch (err) {
+          clearOverride(eventId);
+          bumpRefresh();
+          throw err;
+        }
+        return;
+      }
+
+      if (!isStandaloneBrowser()) {
+        throw new Error('Sign in with Discord to join or leave events.');
+      }
+
+      setOverrides((prev) => ({...prev, [eventId]: false}));
+    },
+    [getAccessToken, isSignedIn, bumpRefresh, clearOverride],
+  );
+
+  const toggleJoin = useCallback(
+    async (event: ForzaEvent, gamertag?: string) => {
+      if (isJoined(event)) {
+        await leaveParticipation(event.id);
+        return;
+      }
+      const gt = (gamertag ?? user.xboxGamertag)?.trim();
+      if (!hasGamertag(gt)) throw new Error('Xbox gamertag is required to join events.');
+      await joinParticipation(event, gt!);
+    },
+    [isJoined, leaveParticipation, joinParticipation, user.xboxGamertag],
   );
 
   const value = useMemo(
     () => ({
       isJoined,
+      joinParticipation,
+      leaveParticipation,
       toggleJoin,
       refreshKey,
       bumpRefresh,
     }),
-    [isJoined, toggleJoin, refreshKey, bumpRefresh],
+    [isJoined, joinParticipation, leaveParticipation, toggleJoin, refreshKey, bumpRefresh],
   );
 
   return (

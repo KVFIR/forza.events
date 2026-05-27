@@ -192,8 +192,13 @@ export function PublishTargetPicker({
       <div className="mt-2 flex flex-wrap gap-2">
         <Button
           type="button"
-          variant={guilds.length === 0 ? 'primary' : 'secondary'}
+          variant="secondary"
           size="toolbar"
+          className={
+            guilds.length === 0
+              ? 'border-accent-purple/35 text-accent-purple-light hover:border-accent-purple/50'
+              : undefined
+          }
           onClick={handleAddBot}
         >
           {guilds.length === 0 ? 'Add to server' : 'Add to another server'}
@@ -381,6 +386,7 @@ export function PublishTargetModal({
           <Button
             type="button"
             variant="primary"
+            emphasis="solid"
             className="flex-1"
             disabled={!guildId || !channelId || confirming}
             onClick={onConfirm}

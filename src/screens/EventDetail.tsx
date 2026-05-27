@@ -59,6 +59,7 @@ import {formatLobbyCount, LOBBY_TOTAL_PLAYERS} from '../lib/constants';
 import {resolveOrganiserLabel} from '../lib/organiser';
 import {resolveConvoyLeader, resolveRegisteredDrivers} from '../lib/eventRoster';
 import {participationButtonLabel, participationButtonVariant} from '../lib/eventActions';
+import {patchEventAfterSelfLeave} from '../lib/eventParticipation';
 import {gamertagError, hasGamertag} from '../lib/gamertag';
 import {cn} from '../lib/cn';
 
@@ -90,7 +91,8 @@ export function EventDetail() {
   const [loading, setLoading] = useState(true);
   const loadedForIdRef = useRef<string | null>(null);
   const fetchSeqRef = useRef(0);
-  const {isJoined, toggleJoin, bumpRefresh, refreshKey} = useJoinedEvents();
+  const {isJoined, joinParticipation, leaveParticipation, bumpRefresh, refreshKey} =
+    useJoinedEvents();
   const {
     user,
     getAccessToken,
@@ -103,6 +105,7 @@ export function EventDetail() {
   const discordToken = getAccessToken();
   const [gamertagOpen, setGamertagOpen] = useState(false);
   const [joining, setJoining] = useState(false);
+  const [leaving, setLeaving] = useState(false);
   const [joinError, setJoinError] = useState<string | null>(null);
   const [cancelling, setCancelling] = useState(false);
   const [confirmAction, setConfirmAction] = useState<'delete' | 'cancel' | null>(null);
@@ -132,8 +135,8 @@ export function EventDetail() {
       loadedForIdRef.current = id;
       setEvent(routeEvent?.id === id ? routeEvent : undefined);
       setResultRows([]);
+      setLoading(true);
     }
-    setLoading(true);
 
     void fetchEventById(id, {discordToken})
       .then(async (ev) => {
@@ -165,9 +168,7 @@ export function EventDetail() {
         setJoinError(t('participation.leaveLockedAfterStart'));
         return;
       }
-      await toggleJoin(event);
-      const next = await fetchEventById(event.id, {discordToken});
-      setEvent(next);
+      await doLeave();
       return;
     }
     if (!hasGamertag(user.xboxGamertag)) {
@@ -175,6 +176,32 @@ export function EventDetail() {
       return;
     }
     await doJoin(user.xboxGamertag!.trim());
+  }
+
+  async function doLeave() {
+    if (!event) return;
+    const token = getAccessToken();
+    if (!isSignedIn || !token) {
+      setJoinError(t('auth.signInDiscordJoin'));
+      return;
+    }
+
+    const eventId = event.id;
+    setLeaving(true);
+    setJoinError(null);
+    setEvent((prev) => (prev ? patchEventAfterSelfLeave(prev, user.discordId) : prev));
+
+    try {
+      await leaveParticipation(eventId);
+      const next = await fetchEventById(eventId, {discordToken});
+      setEvent(next ?? undefined);
+    } catch (err) {
+      setJoinError(err instanceof Error ? err.message : t('eventDetail.leaveFailed'));
+      const next = await fetchEventById(eventId, {discordToken});
+      setEvent(next ?? undefined);
+    } finally {
+      setLeaving(false);
+    }
   }
 
   async function handleCancelEvent() {
@@ -239,8 +266,7 @@ export function EventDetail() {
     setJoining(true);
     setJoinError(null);
     try {
-      await toggleJoin(event, trimmed);
-      bumpRefresh();
+      await joinParticipation(event, trimmed);
       const next = await fetchEventById(event.id, {discordToken});
       setEvent(next);
     } catch (err) {
@@ -292,11 +318,12 @@ export function EventDetail() {
   const showParticipantActions = !isHost && !isDraft;
   const needsSignInToParticipate =
     showParticipantActions && !isSignedIn && !isStandalone && !authInitializing;
+  const participationBusy = joining || leaving;
   const participationDisabled =
     !isSignedIn ||
-    (joined
-      ? !canLeave || joining || cancelling
-      : !registrationOpen || full || joining || cancelling);
+    participationBusy ||
+    cancelling ||
+    (joined ? !canLeave : !registrationOpen || full);
   const showJoinXboxHint =
     joined &&
     !isHost &&
@@ -389,8 +416,8 @@ export function EventDetail() {
           <div className="flex shrink-0 flex-col gap-2">
             <Button
               variant="primary"
-              size="compact"
-              className="whitespace-nowrap"
+              size="toolbar"
+              className="shrink-0 whitespace-nowrap"
               onClick={() => navigate(`/create?edit=${event.id}`)}
             >
               {t('eventDetail.continueEditing')}
@@ -398,8 +425,8 @@ export function EventDetail() {
             {canDelete ? (
               <Button
                 variant="danger"
-                size="compact"
-                className="whitespace-nowrap"
+                size="toolbar"
+                className="shrink-0 whitespace-nowrap"
                 disabled={deleting}
                 onClick={() => setConfirmAction('delete')}
               >
@@ -412,8 +439,8 @@ export function EventDetail() {
             {canEnterResults ? (
               <Button
                 variant="primary"
-                size="compact"
-                className="whitespace-nowrap"
+                size="toolbar"
+                className="shrink-0 whitespace-nowrap"
                 onClick={() => navigate(`/event/${event.id}/results`)}
               >
                 {t('eventDetail.submitResults')}
@@ -422,8 +449,8 @@ export function EventDetail() {
             {canCancel ? (
               <Button
                 variant="danger"
-                size="compact"
-                className="whitespace-nowrap"
+                size="toolbar"
+                className="shrink-0 whitespace-nowrap"
                 disabled={cancelling}
                 onClick={() => setConfirmAction('cancel')}
               >
@@ -435,7 +462,7 @@ export function EventDetail() {
           canEdit ? (
             <Button
               variant="secondary"
-              size="compact"
+              size="toolbar"
               className="shrink-0 whitespace-nowrap"
               onClick={() => navigate(`/create?edit=${event.id}`)}
             >
@@ -449,7 +476,7 @@ export function EventDetail() {
                 ? 'secondary'
                 : participationButtonVariant(joined, registrationOpen, full, canLeave)
             }
-            size={needsSignInToParticipate ? 'compact' : undefined}
+            size={needsSignInToParticipate ? 'toolbar' : undefined}
             className="shrink-0 whitespace-nowrap"
             disabled={needsSignInToParticipate ? authRetrying : participationDisabled}
             onClick={() => void handleJoinClick()}
@@ -458,7 +485,11 @@ export function EventDetail() {
               ? authRetrying
                 ? busyLabel('signingIn')
                 : t('auth.signInToJoin')
-              : participationButtonLabel(joined, registrationOpen, full, canLeave)}
+              : participationBusy
+                ? leaving
+                  ? busyLabel('leaving')
+                  : busyLabel('working')
+                : participationButtonLabel(joined, registrationOpen, full, canLeave)}
           </Button>
         ) : null}
       </div>

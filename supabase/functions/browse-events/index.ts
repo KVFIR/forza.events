@@ -79,7 +79,7 @@ serve(async (req) => {
       .order('starts_at', {ascending: true});
 
     if (!includeCompleted) {
-      query = query.in('status', ['open', 'checkin', 'live']);
+      query = query.eq('status', 'open').gt('starts_at', new Date().toISOString());
     }
 
     const {data, error} = await query;

@@ -74,7 +74,13 @@ export function GamertagModal({open, initialValue = '', saving, onSave, onClose}
               {t('common.cancel')}
             </Button>
           )}
-          <Button type="submit" variant="primary" className="flex-1" disabled={saving}>
+          <Button
+            type="submit"
+            variant="primary"
+            emphasis="solid"
+            className="flex-1"
+            disabled={saving}
+          >
             {saving ? busyLabel('saving') : t('gamertag.saveAndJoin')}
           </Button>
         </div>

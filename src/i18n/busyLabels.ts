@@ -2,6 +2,7 @@ import i18n from './index';
 
 export type BusyLabelKey =
   | 'working'
+  | 'leaving'
   | 'saving'
   | 'deleting'
   | 'cancelling'

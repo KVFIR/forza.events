@@ -29,6 +29,7 @@
   },
   "busy": {
     "working": "Working…",
+    "leaving": "Leaving…",
     "saving": "Saving…",
     "deleting": "Deleting…",
     "cancelling": "Cancelling…",
@@ -182,6 +183,7 @@
     "cancelFailed": "Could not cancel event",
     "deleteFailed": "Could not delete draft",
     "joinFailed": "Could not join event",
+    "leaveFailed": "Could not leave event",
     "deleteDraftTitle": "Delete draft?",
     "deleteDraftDesc": "Delete this draft permanently? This cannot be undone.",
     "cancelEventTitle": "Cancel event?",

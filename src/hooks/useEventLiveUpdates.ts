@@ -82,7 +82,7 @@ export function usePublishedEventsLiveUpdates(
             const newStatus = String(newRow.status);
             const browseStatuses = includeCompleted
               ? ['open', 'checkin', 'live', 'completed', 'cancelled', 'archived']
-              : ['open', 'checkin', 'live'];
+              : ['open'];
 
             const wasBrowsable = browseStatuses.includes(oldStatus);
             const isBrowsable = browseStatuses.includes(newStatus);
