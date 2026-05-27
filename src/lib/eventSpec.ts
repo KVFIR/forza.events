@@ -65,7 +65,9 @@ export function validatePublishFormMessage(
   return code ? validationMessage(code) : null;
 }
 
-export function eventHasStarted(event: ForzaEvent): boolean {
+export function eventHasStarted(
+  event: Pick<ForzaEvent, 'lifecycle' | 'status' | 'startsAt'>,
+): boolean {
   if (event.lifecycle === 'live') return true;
   if (event.status === 'live' || event.status === 'ended') return true;
   return new Date(event.startsAt).getTime() <= Date.now();
@@ -81,7 +83,7 @@ export function resolveEventDisplayStatus(
   return 'open';
 }
 
-export function isEventFinalized(event: ForzaEvent): boolean {
+export function isEventFinalized(event: Pick<ForzaEvent, 'lifecycle'>): boolean {
   return (
     event.lifecycle === 'cancelled' ||
     event.lifecycle === 'completed' ||
