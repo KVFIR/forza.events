@@ -19,6 +19,7 @@ import {Alert} from '../components/ui/Alert';
 import {Button} from '../components/ui/Button';
 import {CheckboxField} from '../components/ui/CheckboxField';
 import {Panel} from '../components/ui/Panel';
+import {UserAvatar} from '../components/UserAvatar';
 import {TextLink} from '../components/ui/TextButton';
 import {ConfirmDialog} from '../components/ui/ConfirmDialog';
 import {ContentReveal} from '../components/ui/ContentReveal';
@@ -29,6 +30,7 @@ import {cn} from '../lib/cn';
 type Placement = {
   discordId: string;
   label: string;
+  avatarUrl?: string;
   dnf: boolean;
   dns: boolean;
 };
@@ -41,6 +43,7 @@ function buildPlacements(participants: EventParticipant[]): Placement[] {
   return participants.map((p) => ({
     discordId: p.discordId,
     label: participantLabel(p),
+    avatarUrl: p.avatarUrl,
     dnf: false,
     dns: false,
   }));
@@ -208,6 +211,7 @@ export function EventResults() {
             <span className="w-6 shrink-0 text-center text-sm font-bold tabular-nums text-muted">
               {positionLabel}
             </span>
+            <UserAvatar src={row.avatarUrl} name={row.label} size="xs" variant="neutral" />
             <span
               className={cn(
                 'min-w-0 flex-1 truncate text-sm',

@@ -6,9 +6,24 @@ export type DiscordUser = {
   discriminator?: string;
 };
 
-export function avatarUrl(user: DiscordUser): string | null {
-  if (!user.avatar) return null;
-  return `https://cdn.discordapp.com/avatars/${user.id}/${user.avatar}.png`;
+export function avatarUrl(user: DiscordUser, size = 128): string {
+  if (user.avatar) {
+    const ext = user.avatar.startsWith('a_') ? 'gif' : 'png';
+    return `https://cdn.discordapp.com/avatars/${user.id}/${user.avatar}.${ext}?size=${size}`;
+  }
+  const disc = user.discriminator?.trim();
+  if (disc && disc !== '0') {
+    const n = parseInt(disc, 10);
+    if (!Number.isNaN(n)) {
+      return `https://cdn.discordapp.com/embed/avatars/${n % 5}.png`;
+    }
+  }
+  try {
+    const index = Number((BigInt(user.id) >> 22n) % 6n);
+    return `https://cdn.discordapp.com/embed/avatars/${index}.png`;
+  } catch {
+    return 'https://cdn.discordapp.com/embed/avatars/0.png';
+  }
 }
 
 export async function exchangeCode(

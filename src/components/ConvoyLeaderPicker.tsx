@@ -5,6 +5,7 @@ import {ApiRequestError} from '../lib/apiErrors';
 import {cn} from '../lib/cn';
 import {hasGamertag} from '../lib/gamertag';
 import {Alert} from './ui/Alert';
+import {UserAvatar} from './UserAvatar';
 import {Input} from './ui/Input';
 import {controlInvalidClass} from './ui/formStyles';
 
@@ -155,17 +156,12 @@ export function ConvoyLeaderPicker({
                           setHits([]);
                         }}
                       >
-                        {m.avatar_url ? (
-                          <img
-                            src={m.avatar_url}
-                            alt=""
-                            className="h-7 w-7 shrink-0 rounded-full"
-                          />
-                        ) : (
-                          <span className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-white/10 text-xs font-bold">
-                            {m.display_name.charAt(0).toUpperCase()}
-                          </span>
-                        )}
+                        <UserAvatar
+                          src={m.avatar_url}
+                          name={m.display_name}
+                          size="sm"
+                          variant="neutral"
+                        />
                         <span className="min-w-0 flex-1 truncate">
                           <span className="font-medium">{m.display_name}</span>
                           {m.xbox_gamertag && (

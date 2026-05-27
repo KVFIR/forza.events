@@ -69,6 +69,7 @@ type DbEventRow = {
     gamertag_snapshot?: string | null;
     is_convoy_leader?: boolean | null;
     participation_source?: string | null;
+    users?: {username: string; avatar_url?: string | null} | null;
   }[];
   event_cars?: DbEventCarRow[];
 };
@@ -99,7 +100,13 @@ const EVENT_LIST_SELECT = `
   *,
   users!events_host_discord_id_fkey(username, avatar_url),
   discord_guilds(guild_name),
-  event_participants(discord_id, gamertag_snapshot, is_convoy_leader, participation_source),
+  event_participants(
+    discord_id,
+    gamertag_snapshot,
+    is_convoy_leader,
+    participation_source,
+    users!event_participants_discord_id_fkey(username, avatar_url)
+  ),
   event_cars(max_pi, tune_share_code, car_restrictions, cars(id, make, model, year, pi))
 `;
 
@@ -240,7 +247,8 @@ export function mapDbEvent(row: DbEventRow): ForzaEvent {
   const participants =
     row.event_participants?.map((p) => ({
       discordId: p.discord_id,
-      username: p.gamertag_snapshot ?? 'Driver',
+      username: p.users?.username ?? p.gamertag_snapshot ?? 'Driver',
+      avatarUrl: p.users?.avatar_url ?? undefined,
       gamertag: p.gamertag_snapshot ?? undefined,
       isConvoyLeader: p.is_convoy_leader ?? false,
       participationSource: (p.participation_source as EventParticipant['participationSource']) ??

@@ -1,4 +1,4 @@
-import {botHeaders, discordRateLimitMessage} from './discord.ts';
+import {avatarUrl, botHeaders, discordRateLimitMessage} from './discord.ts';
 
 export type GuildMemberSearchHit = {
   discord_id: string;
@@ -21,14 +21,11 @@ export function mapGuildMemberSearchRow(row: DiscordMemberSearchRow): GuildMembe
   const user = row.user;
   if (!user?.id) return null;
   const display = row.nick?.trim() || user.global_name?.trim() || user.username;
-  const avatar = user.avatar
-    ? `https://cdn.discordapp.com/avatars/${user.id}/${user.avatar}.png`
-    : null;
   return {
     discord_id: user.id,
     username: user.username,
     display_name: display,
-    avatar_url: avatar,
+    avatar_url: avatarUrl(user),
   };
 }
 

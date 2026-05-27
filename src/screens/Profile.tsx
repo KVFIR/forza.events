@@ -17,6 +17,7 @@ import {EmptyState} from '../components/ui/EmptyState';
 import {PageLoading} from '../components/ui/PageLoading';
 import {Alert} from '../components/ui/Alert';
 import {StatCard} from '../components/ui/StatCard';
+import {UserAvatar} from '../components/UserAvatar';
 import {cn} from '../lib/cn';
 
 export function Profile() {
@@ -36,7 +37,6 @@ export function Profile() {
   const {allMine, active, isLoading, loadError, refetch} = useMyEventsCatalog('all');
   const [editGamertag, setEditGamertag] = useState(false);
   const [saving, setSaving] = useState(false);
-  const initial = user.username.charAt(0).toUpperCase();
   const token = getAccessToken();
   const needsGamertag = !hasGamertag(user.xboxGamertag);
   const participatedCompleted = allMine.filter(
@@ -101,9 +101,13 @@ export function Profile() {
         <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_80%_20%,rgba(139,92,246,0.12)_0%,transparent_70%)]" />
         <LanguageToggle className="absolute right-3 top-3 z-10" />
         <div className="relative flex items-center gap-4 p-5 pr-20">
-          <div className="flex h-14 w-14 shrink-0 items-center justify-center rounded-2xl bg-gradient-to-br from-accent-purple-dark to-accent-purple-light text-xl font-black text-white shadow-glow-purple-sm">
-            {initial}
-          </div>
+          <UserAvatar
+            src={user.avatarUrl}
+            name={user.username}
+            size="lg"
+            variant="profile"
+            className="rounded-2xl"
+          />
           <div className="min-w-0 flex-1">
             <p className="truncate text-lg font-black tracking-tight text-white">{user.username}</p>
             <p className="mt-0.5 text-xs text-muted-light">

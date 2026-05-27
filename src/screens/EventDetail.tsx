@@ -24,6 +24,7 @@ import {
   type EventResultRow,
 } from '../lib/events';
 import {EventResultsTable} from '../components/EventResultsTable';
+import {UserAvatar} from '../components/UserAvatar';
 import {ContentReveal} from '../components/ui/ContentReveal';
 import {PageLoading} from '../components/ui/PageLoading';
 import {formatEventTime} from '../lib/datetime';
@@ -701,9 +702,12 @@ export function EventDetail() {
                   : 'border-white/[0.06] bg-card',
               )}
             >
-              <div className="flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-gradient-to-br from-accent-green/40 to-emerald-600/50 text-[10px] font-bold text-white">
-                {(convoyLeader.username ?? convoyLeader.gamertag).charAt(0).toUpperCase()}
-              </div>
+              <UserAvatar
+                src={convoyLeader.avatarUrl}
+                name={convoyLeader.username ?? convoyLeader.gamertag}
+                size="xs"
+                variant="green"
+              />
               <div className="min-w-0">
                 <p className="truncate text-xs font-medium text-slate-200">{convoyLeader.gamertag}</p>
                 <p className="text-[9px] font-bold uppercase tracking-widest text-accent-green/90">
@@ -730,9 +734,12 @@ export function EventDetail() {
                       : 'border-white/[0.06] bg-card',
                   )}
                 >
-                  <div className="flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-gradient-to-br from-accent-purple-dark/60 to-accent-purple/60 text-[10px] font-bold text-white">
-                    {p.username.charAt(0).toUpperCase()}
-                  </div>
+                  <UserAvatar
+                    src={p.avatarUrl}
+                    name={p.gamertag ?? p.username}
+                    size="xs"
+                    variant="purple"
+                  />
                   <div className="min-w-0">
                     <p className="truncate text-xs font-medium text-slate-200">
                       {p.gamertag ?? p.username}
