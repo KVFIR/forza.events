@@ -15,7 +15,8 @@ export type SegmentOption<T extends string> = {
 };
 
 type Props<T extends string> = {
-  value: T;
+  /** When empty, no segment is selected. */
+  value: T | '';
   onChange: (value: T) => void;
   options: SegmentOption<T>[];
   ariaLabel: string;
