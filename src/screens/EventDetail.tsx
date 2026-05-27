@@ -112,6 +112,7 @@ export function EventDetail() {
   }, [id, discordToken]);
 
   useEventLiveUpdates(id, reloadEvent);
+  const displayStatus = useResolveEventDisplayStatus(event);
 
   useEffect(() => {
     if (!id) return;
@@ -273,7 +274,6 @@ export function EventDetail() {
   const registrationOpen = isRegistrationOpen(event);
   const canLeave = canLeaveRegistration(event);
   const started = eventHasStarted(event);
-  const displayStatus = useResolveEventDisplayStatus(event);
   const full = displayStatus === 'full';
   const showDraftActions = isDraft && isHost;
   const showHostPostStartActions = isHost && started && (canEnterResults || canCancel);

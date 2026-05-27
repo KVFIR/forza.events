@@ -11,8 +11,10 @@ export function useEventLiveUpdates(eventId: string | undefined, onChange: () =>
     let channel: RealtimeChannel | null = null;
     let cancelled = false;
 
+    const channelName = `event-live:${eventId}:${crypto.randomUUID()}`;
+
     void (async () => {
-      channel = await subscribePostgresChanges(`event-live:${eventId}`, [
+      const ch = await subscribePostgresChanges(channelName, [
         {
           event: '*',
           table: 'event_participants',
@@ -30,6 +32,11 @@ export function useEventLiveUpdates(eventId: string | undefined, onChange: () =>
           },
         },
       ]);
+      if (cancelled) {
+        await unsubscribeChannel(ch);
+        return;
+      }
+      channel = ch;
     })();
 
     return () => {
@@ -56,8 +63,10 @@ export function usePublishedEventsLiveUpdates(
     let channel: RealtimeChannel | null = null;
     let cancelled = false;
 
+    const channelName = `published-events:${crypto.randomUUID()}`;
+
     void (async () => {
-      channel = await subscribePostgresChanges('published-events', [
+      const ch = await subscribePostgresChanges(channelName, [
         {
           event: 'UPDATE',
           table: 'events',
@@ -110,6 +119,11 @@ export function usePublishedEventsLiveUpdates(
           },
         },
       ]);
+      if (cancelled) {
+        await unsubscribeChannel(ch);
+        return;
+      }
+      channel = ch;
     })();
 
     return () => {

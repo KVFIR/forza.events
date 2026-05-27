@@ -47,7 +47,7 @@ export function EventCover({
         sizes={sizes}
         decoding="async"
         loading={priority ? 'eager' : 'lazy'}
-        fetchPriority={priority ? 'high' : 'auto'}
+        {...(priority ? {fetchpriority: 'high'} : {fetchpriority: 'auto'})}
         onLoad={onLoad}
         onError={onError}
         className={cn('h-full w-full object-cover object-center', imgClassName)}

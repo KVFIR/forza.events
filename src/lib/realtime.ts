@@ -8,12 +8,24 @@ type PostgresChangeBinding = {
   callback: (payload: unknown) => void;
 };
 
+/** Drop a channel with this name if it is still registered (Strict Mode remounts). */
+async function removeChannelByName(
+  supabase: NonNullable<Awaited<ReturnType<typeof getSupabase>>>,
+  channelName: string,
+) {
+  const topic = `realtime:${channelName}`;
+  const existing = supabase.getChannels().find((ch) => ch.topic === topic);
+  if (existing) await supabase.removeChannel(existing);
+}
+
 export async function subscribePostgresChanges(
   channelName: string,
   bindings: PostgresChangeBinding[],
 ): Promise<RealtimeChannel | null> {
   const supabase = await getSupabase();
   if (!supabase) return null;
+
+  await removeChannelByName(supabase, channelName);
 
   let channel = supabase.channel(channelName);
   for (const binding of bindings) {
