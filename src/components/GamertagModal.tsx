@@ -13,11 +13,23 @@ type Props = {
   open: boolean;
   initialValue?: string;
   saving?: boolean;
+  /** Defaults to `gamertag.saveAndJoin`. */
+  submitLabel?: string;
+  /** Defaults to `gamertag.modalBody`. */
+  description?: string;
   onSave: (gamertag: string) => void | Promise<void>;
   onClose?: () => void;
 };
 
-export function GamertagModal({open, initialValue = '', saving, onSave, onClose}: Props) {
+export function GamertagModal({
+  open,
+  initialValue = '',
+  saving,
+  submitLabel,
+  description,
+  onSave,
+  onClose,
+}: Props) {
   const {t} = useTranslation();
   const [value, setValue] = useState(initialValue);
   const [error, setError] = useState<string | null>(null);
@@ -50,7 +62,7 @@ export function GamertagModal({open, initialValue = '', saving, onSave, onClose}
         onClick={(e) => e.stopPropagation()}
       >
         <h2 className="text-lg font-bold text-white">{t('gamertag.modalTitle')}</h2>
-        <p className="mt-1 text-sm text-muted">{t('gamertag.modalBody')}</p>
+        <p className="mt-1 text-sm text-muted">{description ?? t('gamertag.modalBody')}</p>
         <FieldLabel htmlFor="gamertag" className="mt-4 block">
           {t('gamertag.label')}
         </FieldLabel>
@@ -81,7 +93,7 @@ export function GamertagModal({open, initialValue = '', saving, onSave, onClose}
             className="flex-1"
             disabled={saving}
           >
-            {saving ? busyLabel('saving') : t('gamertag.saveAndJoin')}
+            {saving ? busyLabel('saving') : (submitLabel ?? t('gamertag.saveAndJoin'))}
           </Button>
         </div>
       </form>

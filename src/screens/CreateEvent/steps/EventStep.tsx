@@ -3,6 +3,7 @@ import {Input} from '../../../components/ui/Input';
 import {SegmentGroup} from '../../../components/ui/SegmentGroup';
 import {Textarea} from '../../../components/ui/Textarea';
 import {Alert} from '../../../components/ui/Alert';
+import {TextButton} from '../../../components/ui/TextButton';
 import {fileUploadLabelClass, toggleRowClass} from '../../../components/ui/formStyles';
 import {eventTypeLabel} from '../../../lib/eventTypes';
 import {COVER_ASPECT_CLASS} from '../../../lib/coverImage';
@@ -40,6 +41,7 @@ type Props = {
   onLobbyLeaderIsHost: (v: boolean) => void;
   onLobbyLeaderGamertag: (v: string) => void;
   onLobbyLeaderSelect: (member: ConvoyLeaderSelection | null) => void;
+  onAddHostGamertag?: () => void;
 };
 
 export function EventStep({
@@ -62,6 +64,7 @@ export function EventStep({
   onLobbyLeaderIsHost,
   onLobbyLeaderGamertag,
   onLobbyLeaderSelect,
+  onAddHostGamertag,
 }: Props) {
   const {t} = useTranslation();
   const titleLen = values.title.length;
@@ -234,7 +237,14 @@ export function EventStep({
           />
         </label>
         {values.lobbyLeaderIsHost && !hasGamertag(hostGamertag) && (
-          <Alert variant="warning">{t('create.convoyLeaderProfileWarning')}</Alert>
+          <Alert variant="warning">
+            <p>{t('create.convoyLeaderProfileWarning')}</p>
+            {onAddHostGamertag ? (
+              <TextButton type="button" className="mt-2" onClick={onAddHostGamertag}>
+                {t('profile.addGamertag')}
+              </TextButton>
+            ) : null}
+          </Alert>
         )}
         {!values.lobbyLeaderIsHost && token && (
           <ConvoyLeaderPicker

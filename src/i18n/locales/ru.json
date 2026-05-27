@@ -250,7 +250,7 @@
     "convoyLeaderClear": "Сменить",
     "convoyLeaderPickServerFirst": "Сначала выберите сервер выше, затем лидера конвоя.",
     "convoyLeaderGamertagHint": "У игрока ещё нет Xbox gamertag в FORZA.EVENTS — укажите его для результатов и карточки.",
-    "convoyLeaderProfileWarning": "Добавьте Xbox gamertag в профиле перед публикацией или укажите другого лидера ниже.",
+    "convoyLeaderProfileWarning": "Добавьте Xbox gamertag, чтобы опубликовать ивент как лидер конвоя, или выберите другого лидера ниже.",
     "openBuildOption": "Любая сборка",
     "restrictedListOption": "Список машин"
   },
@@ -287,7 +287,9 @@
     "modalBody": "Укажите Xbox gamertag для участия. Его увидят организатор и другие игроки.",
     "label": "Gamertag",
     "placeholder": "Ваш Xbox GT",
-    "saveAndJoin": "Сохранить и участвовать"
+    "save": "Сохранить",
+    "saveAndJoin": "Сохранить и участвовать",
+    "modalBodyCreate": "Геймертег отображается на карточке ивента и нужен для лидера конвоя и результатов."
   },
   "errors": {
     "unauthorized": "Войдите, чтобы продолжить.",

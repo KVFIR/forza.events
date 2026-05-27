@@ -155,18 +155,17 @@ export function EventCarList({cars, onChange, inputClass, labelClass}: Props) {
                 </Button>
               </div>
 
-              <div className="grid grid-cols-2 gap-3">
+              <div className="grid grid-cols-2 items-start gap-3">
                 <div>
-                  <FieldLabel className="block">Max PI</FieldLabel>
+                  <FieldLabel className="mb-1.5 block">Max PI</FieldLabel>
                   <MaxPiInput
-                    className="mt-1.5"
                     inputClass={inputClass}
                     value={c.maxPi}
                     onChange={(maxPi) => update(c.id, {maxPi})}
                   />
                 </div>
                 <div>
-                  <FieldLabel className="block">Tune share code</FieldLabel>
+                  <FieldLabel className="mb-1.5 block">Tune share code</FieldLabel>
                   <ShareCodeInput
                     className={inputClass}
                     value={c.tuneShareCode}

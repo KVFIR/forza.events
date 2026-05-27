@@ -8,7 +8,7 @@ import type {EventCarEntry} from '../../../components/EventCarList';
 import {FormSection} from '../components/Field';
 import {isLocalDevHost} from '../../../lib/runtime';
 import type {PublishGap} from '../publishGaps';
-import type {CreateEventStepIndex} from '../constants';
+import {PUBLISH_STEP_INDEX, type CreateEventStepIndex} from '../constants';
 import type {FieldErrors} from '../types';
 import type {CreateEventType} from '../types';
 import type {CarRuleMode} from '../../../lib/types';
@@ -100,7 +100,7 @@ export function PublishStep({
                 <span>
                   <Trans i18nKey={gap.message} />
                 </span>
-                {onJumpToStep ? (
+                {onJumpToStep && gap.step !== PUBLISH_STEP_INDEX ? (
                   <TextButton type="button" onClick={() => onJumpToStep(gap.step)}>
                     {t('create.fixIssue')}
                   </TextButton>

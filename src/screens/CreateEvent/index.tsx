@@ -14,6 +14,8 @@ import {PublishStep} from './steps/PublishStep';
 import {SignInRequiredState} from '../../components/SignInRequiredState';
 import {ContentReveal} from '../../components/ui/ContentReveal';
 import {PageLoading} from '../../components/ui/PageLoading';
+import {GamertagModal} from '../../components/GamertagModal';
+import {isApiConfigured, updateProfile} from '../../lib/api';
 import {useAuth} from '../../context/AuthContext';
 import {useLoadingUI} from '../../hooks/useLoadingUI';
 import {isLocalDevHost} from '../../lib/runtime';
@@ -21,7 +23,10 @@ import {isLocalDevHost} from '../../lib/runtime';
 export function CreateEvent() {
   const {t} = useTranslation();
   const [publishConfirmOpen, setPublishConfirmOpen] = useState(false);
-  const {isStandalone, loading: authInitializing, authRetrying, retryDiscordAuth} = useAuth();
+  const [gamertagModalOpen, setGamertagModalOpen] = useState(false);
+  const [savingGamertag, setSavingGamertag] = useState(false);
+  const {refreshUser, isStandalone, loading: authInitializing, authRetrying, retryDiscordAuth} =
+    useAuth();
   const form = useCreateEventForm();
   const showLoadingUI = useLoadingUI(form.loadingEdit);
   const {
@@ -73,6 +78,7 @@ export function CreateEvent() {
     onLobbyLeaderSelect,
     onGuildChange,
     setTargetChannelId,
+    clearFieldError,
   } = form;
 
   const missingForPublish = collectPublishGaps({
@@ -83,6 +89,26 @@ export function CreateEvent() {
 
   const hasDraftId = Boolean(eventId);
   const draftFlow = !isPublished;
+
+  async function handleSaveHostGamertag(gamertag: string) {
+    if (!token || !isApiConfigured()) {
+      refreshUser({...user, xboxGamertag: gamertag});
+      setLobbyLeaderGamertag(gamertag);
+      clearFieldError('lobbyLeaderGamertag');
+      setGamertagModalOpen(false);
+      return;
+    }
+    setSavingGamertag(true);
+    try {
+      const {user: updated} = await updateProfile(token, {xbox_gamertag: gamertag});
+      refreshUser(updated);
+      setLobbyLeaderGamertag(gamertag);
+      clearFieldError('lobbyLeaderGamertag');
+      setGamertagModalOpen(false);
+    } finally {
+      setSavingGamertag(false);
+    }
+  }
 
   const lobbyLeaderLabel = values.lobbyLeaderIsHost
     ? (user.xboxGamertag?.trim() || t('create.youHost'))
@@ -177,6 +203,7 @@ export function CreateEvent() {
     onLobbyLeaderIsHost: setLobbyLeaderIsHost,
     onLobbyLeaderGamertag: setLobbyLeaderGamertag,
     onLobbyLeaderSelect,
+    onAddHostGamertag: () => setGamertagModalOpen(true),
   };
 
   return (
@@ -354,6 +381,16 @@ export function CreateEvent() {
           setPublishConfirmOpen(false);
           void executePublish();
         }}
+      />
+
+      <GamertagModal
+        open={gamertagModalOpen}
+        initialValue={user.xboxGamertag ?? ''}
+        saving={savingGamertag}
+        submitLabel={t('gamertag.save')}
+        description={t('gamertag.modalBodyCreate')}
+        onSave={(gt) => void handleSaveHostGamertag(gt)}
+        onClose={() => setGamertagModalOpen(false)}
       />
 
       {showPublishModal && token && (

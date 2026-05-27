@@ -246,7 +246,7 @@
     "convoyLeaderClear": "Change",
     "convoyLeaderPickServerFirst": "Choose a server above, then pick the convoy leader.",
     "convoyLeaderGamertagHint": "This player has no Xbox gamertag in FORZA.EVENTS yet — enter it for results and the event card.",
-    "convoyLeaderProfileWarning": "Add your Xbox gamertag in Profile before publishing, or enter another convoy leader below.",
+    "convoyLeaderProfileWarning": "Add your Xbox gamertag to publish as convoy leader, or choose another leader below.",
     "openBuildOption": "Open build",
     "restrictedListOption": "Restricted list"
   },
@@ -281,7 +281,9 @@
     "modalBody": "Enter your Xbox gamertag to join events. It is shown to the host and other players.",
     "label": "Gamertag",
     "placeholder": "Your Xbox GT",
-    "saveAndJoin": "Save & join"
+    "save": "Save",
+    "saveAndJoin": "Save & join",
+    "modalBodyCreate": "Your gamertag is shown on the event card and used for convoy leader and results."
   },
   "errors": {
     "unauthorized": "Sign in to continue.",
