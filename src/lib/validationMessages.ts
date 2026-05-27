@@ -13,6 +13,10 @@ const VALIDATION_I18N_KEYS: Record<ValidationCode, string> = {
   PI_RANGE: 'validation.piRange',
   TARGET_GUILD_LOCKED: 'validation.targetGuildLocked',
   TARGET_CHANNEL_LOCKED: 'validation.targetChannelLocked',
+  TRACK_NAME_REQUIRED: 'validation.trackNameRequired',
+  TRACK_SHARE_CODE_INVALID: 'validation.trackShareCodeInvalid',
+  TRACK_FORMAT_TOO_LONG: 'validation.trackFormatTooLong',
+  TRACKS_TOO_MANY: 'validation.tracksTooMany',
 };
 
 export function validationMessage(code: ValidationCode): string {

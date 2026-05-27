@@ -5,6 +5,7 @@ import {searchCarCatalog} from './carCatalog';
 import {sortEventResultRows} from './eventResults';
 import {EVENT_PLAYER_SLOTS} from './constants';
 import {resolveEventCoverUrl} from './eventCovers';
+import {parseTracksFromRow} from './eventTracks';
 import {normalizeEventType} from './eventTypes';
 import {isBrowseFeedEvent} from './eventSpec';
 import type {
@@ -54,6 +55,7 @@ type DbEventRow = {
   host_discord_id: string;
   description?: string | null;
   cover_image_url?: string | null;
+  tracks?: unknown;
   event_share_code?: string | null;
   track_codes?: string[] | null;
   rules_allowed?: string[] | null;
@@ -283,9 +285,10 @@ export function mapDbEvent(row: DbEventRow): ForzaEvent {
     rules: rulesFromRow(row),
     description: row.description ?? undefined,
     coverImageUrl: resolveEventCoverUrl(normalizeEventType(row.type), row.cover_image_url),
-    trackCodes: [row.event_share_code, ...(row.track_codes ?? [])].filter(
-      (code): code is string => Boolean(code?.trim()),
-    ),
+    tracks: parseTracksFromRow(row.tracks, {
+      event_share_code: row.event_share_code,
+      track_codes: row.track_codes,
+    }),
     additionalCarRestrictions:
       row.additional_car_restrictions ??
       (Array.isArray(row.rules_allowed)

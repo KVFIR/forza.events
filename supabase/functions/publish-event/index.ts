@@ -108,7 +108,7 @@ serve(async (req) => {
       channel_id,
       car_rule_mode: event.car_rule_mode,
       max_pi: event.max_pi,
-      track_codes: [event.event_share_code, ...(event.track_codes ?? [])].filter(Boolean),
+      tracks: event.tracks ?? [],
       additional_car_restrictions:
         event.additional_car_restrictions ??
         (Array.isArray(event.rules_allowed)

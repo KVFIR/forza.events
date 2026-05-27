@@ -1,5 +1,6 @@
 import type {adminClient} from './supabase.ts';
 import {isValidEventType} from './eventTypes.ts';
+import {normalizeTrackRows, validateTrackRows, type EventTrackRow} from './eventTracks.ts';
 import {VALIDATION_CODES, type ValidationCode} from './validationCodes.ts';
 
 export type CarRuleMode = 'anything_goes' | 'restricted_list';
@@ -35,7 +36,9 @@ export type SaveEventBody = {
   voice_policy?: string;
   car_rule_mode?: CarRuleMode;
   max_pi?: number;
+  /** @deprecated legacy — use `tracks` */
   track_codes?: string[];
+  tracks?: EventTrackRow[];
   additional_car_restrictions?: string | null;
   cars?: CarPayload[];
   publish?: boolean;
@@ -55,8 +58,10 @@ type DbEvent = {
 
 const PLAYER_SLOTS = 12;
 
-export function normalizeTrackCodes(codes?: string[]): string[] {
-  return (codes ?? []).map((c) => String(c).trim()).filter(Boolean);
+export function resolveSaveTracks(body: SaveEventBody): EventTrackRow[] {
+  if (body.tracks?.length) return normalizeTrackRows(body.tracks);
+  const legacy = (body.track_codes ?? []).map((c) => String(c).trim()).filter(Boolean);
+  return legacy.map((share_code) => ({name: '', share_code, format: null}));
 }
 
 export function validateDraft(body: SaveEventBody): ValidationCode | null {
@@ -64,6 +69,8 @@ export function validateDraft(body: SaveEventBody): ValidationCode | null {
   if (!isValidEventType(body.type)) return VALIDATION_CODES.TYPE_REQUIRED;
   if (!body.starts_at) return VALIDATION_CODES.STARTS_AT_REQUIRED;
   if (!body.guild_id) return VALIDATION_CODES.GUILD_REQUIRED;
+  const trackErr = validateTrackRows(resolveSaveTracks(body));
+  if (trackErr) return trackErr;
   return null;
 }
 
@@ -121,7 +128,7 @@ export function buildEventFields(
     lobby_leader_gamertag: string;
   },
 ) {
-  const trackCodes = normalizeTrackCodes(body.track_codes);
+  const tracks = resolveSaveTracks(body);
   const cars = body.cars ?? [];
   const mode: CarRuleMode = body.car_rule_mode ?? 'anything_goes';
   const maxPi =
@@ -147,8 +154,9 @@ export function buildEventFields(
     max_players: PLAYER_SLOTS,
     cover_image_url: coverUrl,
     description: body.description ?? null,
-    event_share_code: trackCodes[0] ?? null,
-    track_codes: trackCodes.slice(1),
+    tracks,
+    event_share_code: null,
+    track_codes: [],
     rules_allowed:
       mode === 'anything_goes' && body.additional_car_restrictions?.trim()
         ? [`additional:${body.additional_car_restrictions.trim()}`]

@@ -4,10 +4,6 @@ import {isEventType} from './eventTypes';
 import {VALIDATION_CODES, type ValidationCode} from './validationCodes';
 import {validationMessage} from './validationMessages';
 
-export function normalizeTrackCodes(codes: string[]): string[] {
-  return codes.map((c) => c.trim()).filter(Boolean);
-}
-
 export function validateDraftForm(input: {
   title: string;
   type: string;

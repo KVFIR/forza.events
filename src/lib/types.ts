@@ -10,6 +10,10 @@ export type EventLifecycle = 'draft' | 'open' | 'live' | 'completed' | 'cancelle
 
 export type CarRuleMode = 'anything_goes' | 'restricted_list';
 
+import type {EventTrack} from './eventTracks';
+
+export type {EventTrack};
+
 export interface EventAllowedCar {
   carId: string;
   make: string;
@@ -59,7 +63,7 @@ export interface ForzaEvent {
   rules: string;
   description?: string;
   coverImageUrl?: string;
-  trackCodes?: string[];
+  tracks?: EventTrack[];
   additionalCarRestrictions?: string;
   lobbyLeaderGamertag?: string;
   /** Set when convoy leader is chosen from the server roster (or host). */

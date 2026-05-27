@@ -4,6 +4,7 @@ import {resolveCoverAbsolute} from './eventCovers.ts';
 import {openEventCustomId} from './eventLaunch.ts';
 import {eventTypeEmbedColor} from './eventTypes.ts';
 import type {CarRuleMode} from './eventSpec.ts';
+import {formatTrackEmbedLine, resolveTrackRows} from './eventTracks.ts';
 import {formatMaxPi} from './pi.ts';
 
 const LOBBY_TOTAL_PLAYERS = 12;
@@ -35,7 +36,10 @@ export type EmbedEventInput = {
   current_players: number;
   max_pi?: number | null;
   car_rule_mode?: CarRuleMode | null;
+  tracks?: unknown;
+  /** @deprecated — use `tracks` */
   event_share_code?: string | null;
+  /** @deprecated — use `tracks` */
   track_codes?: string[] | null;
   rules_allowed?: string[] | null;
   additional_car_restrictions?: string | null;
@@ -129,30 +133,25 @@ function inlineCode(text: string): string {
   return `\`${flat.replace(/`/g, "'")}\``;
 }
 
-function listTrackCodes(event: EmbedEventInput): string[] {
-  const seen = new Set<string>();
-  const codes: string[] = [];
-  for (const raw of [event.event_share_code, ...(event.track_codes ?? [])]) {
-    const code = raw?.trim();
-    if (!code) continue;
-    const key = code.toLowerCase();
-    if (seen.has(key)) continue;
-    seen.add(key);
-    codes.push(code);
-  }
-  return codes;
+function listEventTracks(event: EmbedEventInput) {
+  return resolveTrackRows(event.tracks, {
+    event_share_code: event.event_share_code,
+    track_codes: event.track_codes,
+  });
 }
 
-function formatTrackCodes(codes: string[]): string {
-  if (codes.length === 1) {
-    return truncateFieldValue(inlineCode(codes[0]));
+function formatTrackFieldLines(tracks: ReturnType<typeof listEventTracks>): string {
+  if (tracks.length === 0) return '';
+
+  if (tracks.length === 1) {
+    return truncateFieldValue(formatTrackEmbedLine(tracks[0], inlineCode));
   }
 
   let result = '';
-  for (let i = 0; i < codes.length; i++) {
-    const line = `${i + 1}. ${inlineCode(codes[i])}`;
+  for (let i = 0; i < tracks.length; i++) {
+    const line = `${i + 1}. ${formatTrackEmbedLine(tracks[i], inlineCode)}`;
     const next = result ? `${result}\n${line}` : line;
-    const remaining = codes.length - i - 1;
+    const remaining = tracks.length - i - 1;
     if (remaining > 0 && next.length + omittedSuffix(remaining, 'track').length > EMBED_FIELD_VALUE_MAX) {
       return truncateFieldValue(`${result}${omittedSuffix(remaining, 'track')}`);
     }
@@ -391,10 +390,10 @@ export function buildEventEmbed(event: EmbedEventInput) {
     inline: false,
   };
 
-  const trackCodes = listTrackCodes(event);
+  const eventTracks = listEventTracks(event);
   const trackField: EmbedField | null =
-    trackCodes.length > 0
-      ? {name: embedFieldName('🛣️ Tracks'), value: formatTrackCodes(trackCodes), inline: false}
+    eventTracks.length > 0
+      ? {name: embedFieldName('🛣️ Tracks'), value: formatTrackFieldLines(eventTracks), inline: false}
       : null;
 
   const fixedFields: EmbedField[] = [
