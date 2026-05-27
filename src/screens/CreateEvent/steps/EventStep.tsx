@@ -119,7 +119,6 @@ export function EventStep({
             min={startsAtMin}
             max={startsAtMax}
             invalid={Boolean(fieldErrors.startsAtLocal)}
-            className="[color-scheme:dark]"
             value={values.startsAtLocal}
             onChange={(e) => onStartsAtLocal(e.target.value)}
             onBlur={(e) => onStartsAtLocal(e.target.value)}

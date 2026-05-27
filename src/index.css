@@ -62,6 +62,16 @@
     -webkit-box-shadow: 0 0 0 100px #0b0d1c inset;
     -webkit-text-fill-color: #f1f5f9;
   }
+
+  /* Native selects on Windows ignore dark theme unless color-scheme + option colors are set */
+  select {
+    color-scheme: dark;
+  }
+
+  select option {
+    background-color: #0e1020;
+    color: #e2e8f0;
+  }
 }
 
 @layer utilities {

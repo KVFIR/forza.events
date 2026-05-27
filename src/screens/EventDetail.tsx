@@ -312,7 +312,10 @@ export function EventDetail() {
   const full = displayStatus === 'full';
   const showDraftActions = isDraft && isHost;
   const showHostPostStartActions = isHost && started && (canEnterResults || canCancel);
-  const {primary: when} = formatEventTime(event.startsAt, event.timezoneHint);
+  const {primary: when, secondary: whenSecondary} = formatEventTime(
+    event.startsAt,
+    event.timezoneHint,
+  );
   const fillPct = Math.round((event.currentPlayers / LOBBY_TOTAL_PLAYERS) * 100);
   const finalized = isEventFinalized(event);
   const resultDisplay = resolveEventResultDisplay(event, resultRows);
@@ -570,6 +573,9 @@ export function EventDetail() {
           <div>
             <p className={sectionLabelClass}>{t('eventDetail.dateTime')}</p>
             <p className="mt-0.5 text-sm text-slate-200">{when}</p>
+            {whenSecondary ? (
+              <p className="mt-0.5 text-xs text-muted">{whenSecondary}</p>
+            ) : null}
           </div>
         </div>
 

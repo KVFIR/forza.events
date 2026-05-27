@@ -1,5 +1,4 @@
 import {formatInTimeZone, fromZonedTime} from 'date-fns-tz';
-import {format} from 'date-fns';
 import i18n from '../i18n';
 import {dateFnsLocale} from '../i18n/dateLocale';
 
@@ -50,15 +49,16 @@ export function formatEventTime(
   const d = new Date(startsAt);
   const viewerTz = defaultTimezone();
   const hint = timezoneHint ?? viewerTz;
-
   const locale = dateFnsLocale();
-  const primary = formatInTimeZone(d, hint, 'EEE d MMM, HH:mm', {locale});
+  const pattern = 'EEE d MMM, HH:mm';
+
+  const primary = formatInTimeZone(d, viewerTz, pattern, {locale});
   const secondary =
     hint !== viewerTz
-      ? i18n.t('common.yourTime', {
-          time: formatInTimeZone(d, viewerTz, 'EEE d MMM, HH:mm', {locale}),
+      ? i18n.t('common.eventTime', {
+          time: formatInTimeZone(d, hint, pattern, {locale}),
         })
-      : `${i18n.t('common.todayAt')} ${format(d, 'HH:mm', {locale})}`;
+      : '';
 
   return {primary, secondary};
 }

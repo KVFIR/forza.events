@@ -183,7 +183,6 @@ export function useCreateEventForm() {
           navigate(`/event/${editId}`, {replace: true});
           return;
         }
-        const tz = ev.timezoneHint ?? defaultTimezone();
         setEventId(ev.id);
         const published = isPublishedToDiscord(ev);
         setIsPublished(published);
@@ -191,7 +190,7 @@ export function useCreateEventForm() {
         if (published) setStep(0);
         setTitle(ev.title);
         setType(ev.type);
-        setStartsAtLocal(utcToLocalInput(ev.startsAt, tz));
+        setStartsAtLocal(utcToLocalInput(ev.startsAt, defaultTimezone()));
         setDescription(ev.description ?? '');
         setTracks(ev.tracks ?? []);
         setCarRuleMode(ev.carRuleMode);

@@ -22,7 +22,7 @@ export const fieldHintClass = 'mt-1.5 text-xs text-muted';
 export const fieldErrorClass = 'mt-1.5 text-xs text-red-300/90';
 
 export const controlClass =
-  'w-full rounded-lg border border-white/[0.08] bg-white/[0.03] px-3.5 py-2.5 text-sm text-white transition-colors duration-150';
+  'w-full rounded-lg border border-white/[0.08] bg-white/[0.03] px-3.5 py-2.5 text-sm text-white [color-scheme:dark] transition-colors duration-150';
 
 export const controlFocusClass = 'focus:border-white/20 focus:outline-none';
 

@@ -25,8 +25,7 @@
     "dash": "—",
     "optional": "Необязательно",
     "openBuild": "Любая сборка",
-    "todayAt": "Сегодня в",
-    "yourTime": "Ваше время: {{time}}"
+    "eventTime": "Время события: {{time}}"
   },
   "busy": {
     "working": "Выполняется…",

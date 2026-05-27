@@ -25,8 +25,7 @@
     "dash": "—",
     "optional": "Optional",
     "openBuild": "Open build",
-    "todayAt": "Today at",
-    "yourTime": "Your time: {{time}}"
+    "eventTime": "Event time: {{time}}"
   },
   "busy": {
     "working": "Working…",

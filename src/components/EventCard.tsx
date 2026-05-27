@@ -1,5 +1,3 @@
-import {format} from 'date-fns';
-import {dateFnsLocale} from '../i18n/dateLocale';
 import {useEffect, useState} from 'react';
 import {useTranslation} from 'react-i18next';
 import {Link} from 'react-router-dom';
@@ -12,6 +10,7 @@ import {cn} from '../lib/cn';
 import {isDraftEvent} from '../lib/eventList';
 import {formatLobbyCount} from '../lib/constants';
 import {resolveOrganiserLabel} from '../lib/organiser';
+import {formatEventTime} from '../lib/datetime';
 import {defaultCoverPath} from '../lib/eventCovers';
 import {formatCarDisplayName} from '../lib/carDisplay';
 import {piToClass} from '../lib/pi';
@@ -101,7 +100,7 @@ function OpenBuildSummary({event}: {event: ForzaEvent}) {
 
 export function EventCard({event, participantResult}: Props) {
   const {t} = useTranslation();
-  const when = format(new Date(event.startsAt), 'EEE d MMM · HH:mm', {locale: dateFnsLocale()});
+  const {primary: when} = formatEventTime(event.startsAt, event.timezoneHint);
   const draft = isDraftEvent(event);
   const displayStatus = useResolveEventDisplayStatus(event);
   const ended = !draft && displayStatus === 'ended';
