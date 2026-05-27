@@ -10,7 +10,7 @@ import {
   Shield,
   Wrench,
 } from 'lucide-react';
-import {EventCover} from '../components/EventCover';
+import {COVER_HERO_BAND_CLASS, COVER_PAGE_BLEED_CLASS, coverDisplayUrl} from '../lib/coverImage';
 import {defaultCoverPath} from '../lib/eventCovers';
 import {RoadIcon} from '../components/icons/RoadIcon';
 import type {ForzaEvent} from '../lib/types';
@@ -20,6 +20,7 @@ import {
   fetchEventResults,
   resolveEventResultDisplay,
   shouldShowEventResults,
+  userHasParticipantRow,
   type EventResultRow,
 } from '../lib/events';
 import {EventResultsTable} from '../components/EventResultsTable';
@@ -157,6 +158,10 @@ export function EventDetail() {
     if (!event) return;
     if (!isSignedIn) {
       if (!isStandalone) void retryDiscordAuth();
+      return;
+    }
+    if (isCurrentConvoyLeader) {
+      setJoinError(t('errors.leaderCannotLeave'));
       return;
     }
     if (isJoined(event)) {
@@ -298,6 +303,7 @@ export function EventDetail() {
   const canCancel = canCancelEvent(event, user);
   const canDelete = canDeleteDraft(event, user);
   const joined = isJoined(event);
+  const isInParticipants = userHasParticipantRow(event, user);
   const registrationOpen = isRegistrationOpen(event);
   const canLeave = canLeaveRegistration(event);
   const started = eventHasStarted(event);
@@ -305,24 +311,26 @@ export function EventDetail() {
   const showDraftActions = isDraft && isHost;
   const showHostPostStartActions = isHost && started && (canEnterResults || canCancel);
   const {primary: when} = formatEventTime(event.startsAt, event.timezoneHint);
-  const fillPct = Math.round(((1 + event.currentPlayers) / LOBBY_TOTAL_PLAYERS) * 100);
+  const fillPct = Math.round((event.currentPlayers / LOBBY_TOTAL_PLAYERS) * 100);
   const finalized = isEventFinalized(event);
   const resultDisplay = resolveEventResultDisplay(event, resultRows);
-  const convoyLeader = resolveConvoyLeader(event, user.discordId, user.xboxGamertag);
-  const registeredDrivers = resolveRegisteredDrivers(event, convoyLeader);
+  const convoyLeader = resolveConvoyLeader(event, user.discordId);
+  const registeredDrivers = resolveRegisteredDrivers(event.participants);
   const showResultsSection = shouldShowEventResults(event);
   const showParticipantActions = !isHost && !isDraft;
   const needsSignInToParticipate =
     showParticipantActions && !isSignedIn && !isStandalone && !authInitializing;
   const participationBusy = joining || leaving;
   const participationAction = leaving ? 'leaving' : joining ? 'joining' : null;
+  const isCurrentConvoyLeader = convoyLeader?.isYou ?? false;
   const participationDisabled =
     !isSignedIn ||
     participationBusy ||
     cancelling ||
-    (joined ? !canLeave : !registrationOpen || full);
+    isCurrentConvoyLeader ||
+    (joined ? !canLeave : isInParticipants || !registrationOpen || full);
   const showJoinXboxHint =
-    joined &&
+    (joined || isInParticipants) &&
     !isHost &&
     !isDraft &&
     !finalized &&
@@ -341,14 +349,22 @@ export function EventDetail() {
         {t('common.back')}
       </TextLink>
 
-      {/* Hero */}
-      <div className="event-detail-hero relative -mx-3 mb-0 h-44 overflow-hidden bg-base sm:-mx-5 md:-mx-8">
-        <EventCover
-          src={event.coverImageUrl ?? defaultCoverPath(event.type)}
-          variant="hero"
-          priority
-          className="absolute inset-0"
-        />
+      {/* Hero — background cover avoids <img> sizing quirks with bleed margins */}
+      <div
+        className={cn(
+          'event-detail-hero relative mb-0 overflow-hidden rounded-t-xl bg-base bg-cover bg-center bg-no-repeat ring-1 ring-inset ring-white/[0.08] sm:rounded-t-2xl',
+          COVER_PAGE_BLEED_CLASS,
+          COVER_HERO_BAND_CLASS,
+        )}
+        style={{
+          backgroundImage: `url(${coverDisplayUrl(
+            event.coverImageUrl ?? defaultCoverPath(event.type),
+            'hero',
+          )})`,
+        }}
+        role="img"
+        aria-label={event.title}
+      >
         <div
           className="pointer-events-none absolute inset-x-0 bottom-0 h-16"
           style={{
@@ -441,6 +457,7 @@ export function EventDetail() {
                     full,
                     canLeave,
                     participationAction,
+                    isCurrentConvoyLeader,
                   )
             }
             size={needsSignInToParticipate ? 'toolbar' : undefined}
@@ -456,7 +473,7 @@ export function EventDetail() {
                 ? leaving
                   ? busyLabel('leaving')
                   : busyLabel('working')
-                : participationButtonLabel(joined, registrationOpen, full, canLeave)}
+                : participationButtonLabel(joined, registrationOpen, full, canLeave, isCurrentConvoyLeader)}
           </Button>
         ) : null}
       </div>

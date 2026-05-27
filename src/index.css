@@ -26,9 +26,7 @@
     background-color: #06060e;
     background-image:
       radial-gradient(ellipse 90% 45% at 50% -5%, rgba(139, 92, 246, 0.11) 0%, transparent 100%),
-      radial-gradient(ellipse 45% 35% at 95% 95%, rgba(34, 211, 238, 0.05) 0%, transparent 100%),
-      radial-gradient(rgba(255, 255, 255, 0.035) 1px, transparent 1px);
-    background-size: auto, auto, 22px 22px;
+      radial-gradient(ellipse 45% 35% at 95% 95%, rgba(34, 211, 238, 0.05) 0%, transparent 100%);
   }
 
   #root {
@@ -123,4 +121,36 @@
     }
   }
 
+  /* Full-bleed cover band inside `.app-main-column` padding (explicit width + margin). */
+  .cover-page-bleed {
+    box-sizing: border-box;
+    max-width: none;
+    width: calc(100% + 1.5rem) !important;
+    margin-left: -0.75rem;
+    margin-right: -0.75rem;
+  }
+
+  @media (min-width: 640px) {
+    .cover-page-bleed {
+      width: calc(100% + 2.5rem) !important;
+      margin-left: -1.25rem;
+      margin-right: -1.25rem;
+    }
+  }
+
+  @media (min-width: 768px) {
+    .cover-page-bleed {
+      width: calc(100% + 4rem) !important;
+      margin-left: -2rem;
+      margin-right: -2rem;
+    }
+  }
+
+  @media (min-width: 1024px) {
+    .cover-page-bleed {
+      width: calc(100% + 5rem) !important;
+      margin-left: -2.5rem;
+      margin-right: -2.5rem;
+    }
+  }
 }

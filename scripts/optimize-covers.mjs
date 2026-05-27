@@ -1,6 +1,7 @@
 #!/usr/bin/env node
 /**
- * Resize default event covers in public/covers to WebP (~1200px wide).
+ * Resize default event covers in public/covers to 16:9 WebP (1280×720).
+ * Keep in sync with COVER_UPLOAD_* in src/lib/coverImage.ts.
  * Run: npm run optimize:covers
  */
 import {readdir, mkdir, unlink} from 'node:fs/promises';
@@ -10,7 +11,8 @@ import sharp from 'sharp';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const coversDir = path.join(__dirname, '..', 'public', 'covers');
-const MAX_WIDTH = 1200;
+const OUTPUT_WIDTH = 1280;
+const OUTPUT_HEIGHT = 720;
 const QUALITY = 82;
 
 const inputs = await readdir(coversDir);
@@ -29,14 +31,20 @@ for (const file of images) {
   const outputPath = path.join(coversDir, `${base}.webp`);
 
   const before = (await sharp(inputPath).toBuffer()).length;
+  const tempPath = path.join(coversDir, `${base}.optimized.webp`);
 
   await sharp(inputPath)
-    .resize({width: MAX_WIDTH, withoutEnlargement: true})
+    .resize(OUTPUT_WIDTH, OUTPUT_HEIGHT, {fit: 'cover', position: 'centre'})
     .webp({quality: QUALITY})
-    .toFile(outputPath);
+    .toFile(tempPath);
 
-  const after = (await sharp(outputPath).toBuffer()).length;
-  console.log(`${file} → ${base}.webp (${Math.round(before / 1024)}KB → ${Math.round(after / 1024)}KB)`);
+  const after = (await sharp(tempPath).toBuffer()).length;
+  await unlink(outputPath).catch(() => {});
+  const {rename} = await import('node:fs/promises');
+  await rename(tempPath, outputPath);
+  console.log(
+    `${file} → ${base}.webp ${OUTPUT_WIDTH}×${OUTPUT_HEIGHT} (${Math.round(before / 1024)}KB → ${Math.round(after / 1024)}KB)`,
+  );
 
   if (file !== `${base}.webp`) {
     await unlink(inputPath);

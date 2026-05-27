@@ -84,7 +84,7 @@ export function EventResults() {
         }
         setPlacements(
           buildPlacements(
-            resolveResultsRoster(event, user.discordId, user.xboxGamertag),
+            resolveResultsRoster(event),
           ),
         );
       })
@@ -141,7 +141,7 @@ export function EventResults() {
         throw new Error('Event not found.');
       }
       const allowedIds = new Set(
-        resolveResultsRoster(fresh, user.discordId, user.xboxGamertag).map((p) => p.discordId),
+        resolveResultsRoster(fresh).map((p) => p.discordId),
       );
       const payload = buildResultSubmitRows(
         placements.filter((p) => allowedIds.has(p.discordId)),

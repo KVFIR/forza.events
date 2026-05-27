@@ -11,6 +11,7 @@ import type {
   AppUser,
   CarRuleMode,
   EventLifecycle,
+  EventParticipant,
   EventStatus,
   EventType,
   ForzaEvent,
@@ -66,6 +67,8 @@ type DbEventRow = {
   event_participants?: {
     discord_id: string;
     gamertag_snapshot?: string | null;
+    is_convoy_leader?: boolean | null;
+    participation_source?: string | null;
   }[];
   event_cars?: DbEventCarRow[];
 };
@@ -96,7 +99,7 @@ const EVENT_LIST_SELECT = `
   *,
   users!events_host_discord_id_fkey(username, avatar_url),
   discord_guilds(guild_name),
-  event_participants(discord_id, gamertag_snapshot),
+  event_participants(discord_id, gamertag_snapshot, is_convoy_leader, participation_source),
   event_cars(max_pi, tune_share_code, car_restrictions, cars(id, make, model, year, pi))
 `;
 
@@ -173,9 +176,6 @@ export function resolveEventResultDisplay(
   const labelById = new Map(
     event.participants.map((p) => [p.discordId, p.gamertag ?? p.username]),
   );
-  if (!labelById.has(event.hostDiscordId)) {
-    labelById.set(event.hostDiscordId, event.hostUsername);
-  }
 
   return sortEventResultRows(rows).map((r) => ({
       discordId: r.discordId,
@@ -242,7 +242,12 @@ export function mapDbEvent(row: DbEventRow): ForzaEvent {
       discordId: p.discord_id,
       username: p.gamertag_snapshot ?? 'Driver',
       gamertag: p.gamertag_snapshot ?? undefined,
+      isConvoyLeader: p.is_convoy_leader ?? false,
+      participationSource: (p.participation_source as EventParticipant['participationSource']) ??
+        undefined,
     })) ?? [];
+
+  const leaderParticipant = participants.find((p) => p.isConvoyLeader);
 
   return {
     id: row.id,
@@ -278,9 +283,13 @@ export function mapDbEvent(row: DbEventRow): ForzaEvent {
       (Array.isArray(row.rules_allowed)
         ? row.rules_allowed.find((rule) => rule.startsWith('additional:'))?.slice('additional:'.length)
         : undefined),
-    lobbyLeaderGamertag: row.lobby_leader_gamertag ?? undefined,
-    lobbyLeaderIsHost: row.lobby_leader_is_host ?? true,
-    lobbyLeaderDiscordId: row.lobby_leader_discord_id ?? undefined,
+    lobbyLeaderGamertag:
+      leaderParticipant?.gamertag ?? row.lobby_leader_gamertag ?? undefined,
+    lobbyLeaderIsHost: leaderParticipant
+      ? leaderParticipant.discordId === row.host_discord_id
+      : (row.lobby_leader_is_host ?? true),
+    lobbyLeaderDiscordId:
+      leaderParticipant?.discordId ?? row.lobby_leader_discord_id ?? undefined,
     timezoneHint: row.timezone_hint ?? undefined,
     participants,
   };
@@ -543,7 +552,14 @@ export async function searchCars(query: string): Promise<CarSearchResult[]> {
   }));
 }
 
+/** True when the user has a self_join participant row — used for My Events "Joined" tab. */
 export function userIsJoined(event: ForzaEvent, user: AppUser): boolean {
+  const row = event.participants.find((p) => p.discordId === user.discordId);
+  return row?.participationSource === 'self_join';
+}
+
+/** True when the user has any participant row (any source) — used for Join/Leave button visibility. */
+export function userHasParticipantRow(event: ForzaEvent, user: AppUser): boolean {
   return event.participants.some((p) => p.discordId === user.discordId);
 }
 

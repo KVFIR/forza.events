@@ -132,7 +132,7 @@ export function EventCard({event, participantResult}: Props) {
           <EventCover
             src={coverSrc}
             variant="card"
-            className="absolute inset-0"
+            fill
             imgClassName={cn(
               'transition-all duration-300 group-hover:scale-[1.02]',
               coverReady ? 'opacity-100' : 'opacity-0',

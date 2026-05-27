@@ -21,6 +21,10 @@ import {resolveCoverUrl} from '../_shared/eventCovers.ts';
 import {slugify} from '../_shared/events.ts';
 import {normalizeGuildName} from '../_shared/guildDisplay.ts';
 import {resolveLobbyLeaderFields} from '../_shared/lobbyLeader.ts';
+import {
+  recalculateEventPlayerCount,
+  syncConvoyLeaderParticipant,
+} from '../_shared/participantLeader.ts';
 import {rateLimitMutation} from '../_shared/rateLimitPresets.ts';
 import {adminClient} from '../_shared/supabase.ts';
 
@@ -196,6 +200,8 @@ serve(async (req) => {
         .select('*')
         .single();
       if (error) return jsonResponse({error: error.message}, 500, req);
+      await syncConvoyLeaderParticipant(supabase, eventId, lobbyResolved);
+      await recalculateEventPlayerCount(supabase, eventId);
       await syncEventCars(supabase, eventId, cars, body.car_rule_mode ?? 'anything_goes');
       if (isPublishedStatus(data.status)) {
         const embedSync = await syncPublishedEmbed(supabase, data);
@@ -221,6 +227,8 @@ serve(async (req) => {
         .select('id, slug')
         .single();
       if (!error && data) {
+        await syncConvoyLeaderParticipant(supabase, data.id, lobbyResolved);
+        await recalculateEventPlayerCount(supabase, data.id);
         await syncEventCars(supabase, data.id, cars, body.car_rule_mode ?? 'anything_goes');
         return jsonResponse({id: data.id, slug: data.slug}, 200, req);
       }

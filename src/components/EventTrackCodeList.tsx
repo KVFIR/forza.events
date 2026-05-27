@@ -39,9 +39,6 @@ export function EventTrackCodeList({codes, onChange, inputClass, labelClass}: Pr
     <div className="space-y-3">
       <div>
         <p className={labelClass}>Tracks</p>
-        <p className="mt-1 text-xs text-muted">
-          Optional — add one or more event share codes for an ordered route list.
-        </p>
       </div>
 
       <ol className="space-y-2">

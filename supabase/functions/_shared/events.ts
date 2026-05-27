@@ -91,7 +91,7 @@ function discordTimestamp(iso: string, style: 'F' | 'R' = 'F'): string {
 }
 
 function formatLobbyCount(currentPlayers: number): string {
-  const filled = 1 + Math.max(0, currentPlayers);
+  const filled = Math.max(0, currentPlayers);
   return `${filled}/${LOBBY_TOTAL_PLAYERS}`;
 }
 
@@ -273,12 +273,10 @@ function fitRestrictedCarFields(
 
 function formatOpenBuildCarField(event: EmbedEventInput): string {
   const pi = event.max_pi ? formatMaxPi(event.max_pi) : 'PI cap';
-  return `Open build ${inlineCode(pi)}`;
+  const label = `Open build ${inlineCode(pi)}`;
+  return resolveOpenBuildNotes(event) ? `${label} (${inlineCode('extra rules')})` : label;
 }
 
-function formatOpenBuildRestrictionsField(event: EmbedEventInput): string | null {
-  return resolveOpenBuildNotes(event);
-}
 
 const EMBED_STATUS_COLORS: Record<string, number> = {
   cancelled: 0x6b7280,
@@ -402,20 +400,7 @@ export function buildEventEmbed(event: EmbedEventInput) {
     ...(trackField ? [trackField] : []),
   ];
 
-  const restrictionsText = isOpenBuild ? formatOpenBuildRestrictionsField(event) : null;
-  const restrictionsField: EmbedField | null = restrictionsText
-    ? {
-        name: embedFieldName('🔧 Restrictions'),
-        value: truncateFieldValue(restrictionsText),
-        inline: false,
-      }
-    : null;
-
-  const skeletonFields = [
-    ...fixedFields,
-    ...(restrictionsField ? [restrictionsField] : []),
-    participantsField,
-  ];
+  const skeletonFields = [...fixedFields, participantsField];
   const skeletonChars = measureEmbedChars({
     title,
     description,
@@ -437,11 +422,10 @@ export function buildEventEmbed(event: EmbedEventInput) {
     const list: EmbedField[] = [...fixedFields];
     if (isOpenBuild) {
       list.push({
-        name: embedFieldName('🚗 Car'),
+        name: embedFieldName('🚗 Car rules'),
         value: truncateFieldValue(formatOpenBuildCarField(event)),
         inline: false,
       });
-      if (restrictionsField) list.push(restrictionsField);
     } else {
       list.push(...carFields);
     }

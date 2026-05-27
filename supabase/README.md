@@ -42,6 +42,8 @@ supabase db push
 | `020_user_event_join_stats.sql` | `events_joined` trigger |
 | `021_api_hardening.sql` | Scoped RLS reads + `check_api_rate_limit` |
 | `022_lobby_leader_discord_id.sql` | `events.lobby_leader_discord_id` for convoy leader roster + results |
+| `023_results_null_position_dnf_dns.sql` | Nullable finish positions; DNF/DNS flags |
+| `024_participant_convoy_leader_role.sql` | Convoy leader as `event_participants` role; `max_players` = 12 total racers |
 
 ## Edge Functions
 

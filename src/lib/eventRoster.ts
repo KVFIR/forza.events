@@ -1,104 +1,52 @@
-import type {EventParticipant, ForzaEvent} from './types';
+import type {EventParticipant, ForzaEvent, ParticipationSource} from './types';
 
 export type RosterConvoyLeader = {
   gamertag: string;
-  discordId?: string;
+  discordId: string;
   username?: string;
   avatarUrl?: string;
   isYou: boolean;
+  participationSource?: ParticipationSource;
 };
 
+export function findConvoyLeaderParticipant(
+  participants: EventParticipant[],
+): EventParticipant | undefined {
+  return participants.find((p) => p.isConvoyLeader);
+}
+
 export function resolveConvoyLeader(
-  event: Pick<
-    ForzaEvent,
-    | 'lobbyLeaderGamertag'
-    | 'lobbyLeaderIsHost'
-    | 'lobbyLeaderDiscordId'
-    | 'hostDiscordId'
-    | 'hostUsername'
-    | 'hostAvatarUrl'
-    | 'participants'
-  >,
+  event: Pick<ForzaEvent, 'participants' | 'hostDiscordId' | 'hostUsername' | 'hostAvatarUrl'>,
   viewerDiscordId: string,
-  viewerGamertag?: string | null,
 ): RosterConvoyLeader | null {
-  const gamertag = event.lobbyLeaderGamertag?.trim();
+  const leader = findConvoyLeaderParticipant(event.participants);
+  if (!leader) return null;
+
+  const gamertag = leader.gamertag?.trim();
   if (!gamertag) return null;
 
-  if (event.lobbyLeaderDiscordId) {
-    const isHostLeader = event.lobbyLeaderDiscordId === event.hostDiscordId;
-    const participant = event.participants?.find(
-      (p) => p.discordId === event.lobbyLeaderDiscordId,
-    );
-    return {
-      gamertag,
-      discordId: event.lobbyLeaderDiscordId,
-      username: isHostLeader ? event.hostUsername : participant?.username,
-      avatarUrl: isHostLeader ? event.hostAvatarUrl : participant?.avatarUrl,
-      isYou: viewerDiscordId === event.lobbyLeaderDiscordId,
-    };
-  }
+  const isHostLeader = leader.discordId === event.hostDiscordId;
 
-  if (event.lobbyLeaderIsHost !== false) {
-    return {
-      gamertag,
-      discordId: event.hostDiscordId,
-      username: event.hostUsername,
-      avatarUrl: event.hostAvatarUrl,
-      isYou: viewerDiscordId === event.hostDiscordId,
-    };
-  }
-
-  const viewerTag = viewerGamertag?.trim();
   return {
     gamertag,
-    isYou: Boolean(
-      viewerTag && viewerTag.toLowerCase() === gamertag.toLowerCase(),
-    ),
+    discordId: leader.discordId,
+    username: isHostLeader ? event.hostUsername : leader.username,
+    avatarUrl: isHostLeader ? event.hostAvatarUrl : leader.avatarUrl,
+    isYou: viewerDiscordId === leader.discordId,
+    participationSource: leader.participationSource,
   };
 }
 
-/** Registered drivers only — convoy leader is shown separately when they are the host. */
+/** Registered drivers excluding convoy leader row (shown separately in UI). */
 export function resolveRegisteredDrivers(
-  event: Pick<ForzaEvent, 'participants' | 'lobbyLeaderIsHost'>,
-  convoy: RosterConvoyLeader | null,
+  participants: EventParticipant[],
 ): EventParticipant[] {
-  if (!convoy?.discordId || event.lobbyLeaderIsHost === false) {
-    return event.participants;
-  }
-  return event.participants.filter((p) => p.discordId !== convoy.discordId);
+  return participants.filter((p) => !p.isConvoyLeader);
 }
 
-/**
- * Everyone who can appear in submitted results: joined drivers plus convoy leader when we know their Discord id.
- * The host convoy leader races but cannot use Join — they are included here by host_discord_id.
- */
+/** All participants eligible for results (one row per racer). */
 export function resolveResultsRoster(
-  event: Pick<
-    ForzaEvent,
-    | 'participants'
-    | 'lobbyLeaderGamertag'
-    | 'lobbyLeaderIsHost'
-    | 'lobbyLeaderDiscordId'
-    | 'hostDiscordId'
-    | 'hostUsername'
-    | 'hostAvatarUrl'
-    | 'participants'
-  >,
-  viewerDiscordId: string,
-  viewerGamertag?: string | null,
+  event: Pick<ForzaEvent, 'participants'>,
 ): EventParticipant[] {
-  const convoy = resolveConvoyLeader(event, viewerDiscordId, viewerGamertag);
-  const drivers = [...event.participants];
-
-  if (convoy?.discordId && !drivers.some((p) => p.discordId === convoy.discordId)) {
-    drivers.unshift({
-      discordId: convoy.discordId,
-      username: convoy.username ?? convoy.gamertag,
-      gamertag: convoy.gamertag,
-      avatarUrl: convoy.avatarUrl,
-    });
-  }
-
-  return drivers;
+  return [...event.participants];
 }

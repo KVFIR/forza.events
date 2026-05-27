@@ -18,7 +18,7 @@ Lessons from implementation work (keep in sync when behavior changes).
 - **Post-start host:** Event Detail shows separate **Submit results** + **Cancel event** buttons; cancel syncs Discord embed via `syncPublishedEmbed`.
 - **Join/leave:** `event-participation` validates gamertag server-side, ensures `users` row exists, DB trigger `enforce_event_participant_capacity` prevents over-capacity races; **leave locked after event start** (`canLeaveEvent` / `canLeaveRegistration`). Join/leave/cancel/results sync published embed via `syncPublishedEmbedByEventId`. Profile `events_joined` synced via migration `020_user_event_join_stats.sql` trigger.
   - After publish, server and channel are **locked** in the form (`lockGuild` / `lockChannel`).
-  - **Publish embed:** `buildEventEmbed` — date, track codes (deduped), cars, participants `1+current/12`, optional restrictions (plain text). **Status on embed:** `cancelled` / `completed` / `archived` show a Status field, title prefix, grey/green color, and disabled or relabelled button. Sync on join/leave, save/cancel, submit-results. Failed PATCH logs structured JSON (`embedSync` returns `{ok:false}`). Button `open_event:{id}` → `interactions-endpoint` stores `launch_intents` (nullable `guild_id` for DMs, migration `019`) → navigate from `sdk.customId` or `launch-intent` fallback. Browse loads immediately and does not wait on auth.
+  - **Publish embed:** `buildEventEmbed` — date, track codes (deduped), cars, participants `current/12`, optional restrictions (plain text). **Status on embed:** `cancelled` / `completed` / `archived` show a Status field, title prefix, grey/green color, and disabled or relabelled button. Sync on join/leave, save/cancel, submit-results. Failed PATCH logs structured JSON (`embedSync` returns `{ok:false}`). Button `open_event:{id}` → `interactions-endpoint` stores `launch_intents` (nullable `guild_id` for DMs, migration `019`) → navigate from `sdk.customId` or `launch-intent` fallback. Browse loads immediately and does not wait on auth.
   - Browse/join/create/publish all depend on Edge Functions + Discord token headers; test in Discord after API/proxy changes, not only localhost. Interactions Endpoint URL must be set in Discord Developer Portal.
 
 ## Product / data model
@@ -27,7 +27,7 @@ Lessons from implementation work (keep in sync when behavior changes).
   - **Organiser (display only):** `resolveOrganiserLabel()` in `src/lib/organiser.ts` — `guildName` when set, else `hostUsername`. Used on event cards and detail (`by …`). Not a DB column.
   - **Host (`host_discord_id`):** Discord user who created the event; all edit/publish/delete/cancel/results permissions stay on the host. Hosts never use Join/Leave (`event-participation` rejects host join).
   - **Guild display names:** placeholder `Server` is not shown as organiser (`guildDisplay.ts`); `PublishTargetPicker` syncs the real name from `list-guilds` after load.
-  - **Convoy leader (`lobby_leader_*`):** in-game Forza lobby leader (Xbox gamertag); may differ from the host.
+  - **Convoy leader:** in-game Forza lobby leader (Xbox gamertag); may differ from the host. **Source of truth:** `event_participants.is_convoy_leader` + `participation_source` (`self_join` | `host_assigned` | `host_self_assigned`). `events.lobby_leader_*` is a denormalized projection updated on save. Leader always has a participant row; `max_players` / `current_players` count all racers (12 total). Assigned leaders cannot leave until the host picks someone else (`LEADER_CANNOT_LEAVE`). `Joined` / `userIsJoined()` = `participation_source === 'self_join'` only (host system rows do not count).
   - **Publish target:** `guild_id` + `channel_id` (Discord server + announcement channel). MVP still requires `guild_id` on draft; optional guild for personal events is deferred.
 - **Event types:** `road` (Road racing), `dirt`, `touge`, `drift` (Car/Drift Meet), `cruise`. Labels/colors live in `src/lib/eventTypes.ts` and `supabase/functions/_shared/eventTypes.ts`. Type is required on save/publish; track share codes are optional.
 - **Draft events** (`status: draft`) are **not** in the public browse feed. RLS policy `status != 'draft'` blocks anon PostgREST reads.
@@ -125,6 +125,6 @@ Lessons from implementation work (keep in sync when behavior changes).
 - [`docs/BACKLOG.md`](docs/BACKLOG.md) — post-MVP planned features (update when adding or shipping backlog items)
 - [`docs/DISCORD_PLATFORM.md`](docs/DISCORD_PLATFORM.md) — proxy mapping, portal checklist
 - [`docs/DEVELOPMENT.md`](docs/DEVELOPMENT.md) — local OAuth, testing checklist
-- [`supabase/README.md`](supabase/README.md) — migrations `001`–`022`, Edge Functions
+- [`supabase/README.md`](supabase/README.md) — migrations `001`–`024`, Edge Functions
 - [`scripts/deploy-edge-functions.sh`](scripts/deploy-edge-functions.sh) — canonical function list (15)
 - **Convoy leader:** `events.lobby_leader_discord_id` (migration `022`); pick via `list-guild-members` on Create → Target; host leader uses `host_discord_id`; results roster includes leader without Join when id is set.

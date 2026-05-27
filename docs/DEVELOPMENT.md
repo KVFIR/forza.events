@@ -141,6 +141,8 @@ npm run deploy:functions  # --no-verify-jwt on each
 
 ## Covers
 
+Standard aspect ratio: **16:9** (1280×720 uploads). Client `compressCoverForUpload` center-crops then scales; bundled defaults are regenerated with `npm run optimize:covers` (same crop). UI uses `COVER_ASPECT_CLASS` on create preview and review; event detail hero uses `COVER_HERO_BAND_CLASS` + `COVER_PAGE_BLEED_CLASS` (full width — avoid `aspect-video` + `max-h` on bleed heroes).
+
 | Asset | Location |
 |-------|----------|
 | Default covers | `public/covers/*.webp` |

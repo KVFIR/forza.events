@@ -6,6 +6,7 @@ import {Badge, CarRuleBadge} from '../../../components/ui/Badge';
 import {Panel} from '../../../components/ui/Panel';
 import {TextButton} from '../../../components/ui/TextButton';
 import {EventCover} from '../../../components/EventCover';
+import {COVER_ASPECT_CLASS} from '../../../lib/coverImage';
 import {defaultCoverPath} from '../../../lib/eventCovers';
 import {defaultTimezone, formatEventTime, localInputToUtc} from '../../../lib/datetime';
 import type {CarRuleMode, EventType} from '../../../lib/types';
@@ -123,7 +124,7 @@ export function ReviewStep({
         <EventCover
           src={coverPreview ?? defaultCoverPath(type)}
           variant="preview"
-          className="aspect-[2/1] w-full sm:aspect-video"
+          className={`${COVER_ASPECT_CLASS} w-full`}
         />
         <div className="absolute inset-0 bg-gradient-to-t from-base via-base/40 to-transparent" />
         <div className="absolute inset-x-0 bottom-0 space-y-2 px-4 pb-4 pt-10">

@@ -10,9 +10,11 @@ export function participationButtonVariant(
   isFull: boolean,
   canLeave: boolean,
   action: ParticipationAction = null,
+  isConvoyLeader = false,
 ): ButtonVariant {
   if (action === 'leaving') return 'leave';
   if (action === 'joining') return 'open';
+  if (isConvoyLeader) return 'secondary';
   if (joined && !canLeave) return 'secondary';
   if (isFull && registrationOpen && !joined) return 'full';
   if (joined) return 'leave';
@@ -25,7 +27,9 @@ export function participationButtonLabel(
   registrationOpen: boolean,
   isFull: boolean,
   canLeave: boolean,
+  isConvoyLeader = false,
 ): string {
+  if (isConvoyLeader) return i18n.t('participation.convoyLeader');
   if (joined && !canLeave) return i18n.t('participation.registered');
   if (joined) return i18n.t('participation.leave');
   if (!registrationOpen) return i18n.t('participation.closed');

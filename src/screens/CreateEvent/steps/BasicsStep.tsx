@@ -4,6 +4,7 @@ import {SegmentGroup} from '../../../components/ui/SegmentGroup';
 import {Textarea} from '../../../components/ui/Textarea';
 import {fileUploadLabelClass} from '../../../components/ui/formStyles';
 import {eventTypeLabel} from '../../../lib/eventTypes';
+import {COVER_ASPECT_CLASS} from '../../../lib/coverImage';
 import {TITLE_MAX_LENGTH, EVENT_TYPES, COVER_ACCEPT} from '../constants';
 import {Field} from '../components/Field';
 import {EventCover} from '../../../components/EventCover';
@@ -100,9 +101,15 @@ export function BasicsStep({
         />
       </Field>
 
-      <Field title={t('create.coverImage')} error={fieldErrors.cover}>
+      <Field
+        title={t('create.coverImage')}
+        error={fieldErrors.cover}
+        hint={t('create.coverHint')}
+      >
         <label className={fileUploadLabelClass}>
-          <span>{values.coverFile ? values.coverFile.name : 'Choose file (max 2 MB)'}</span>
+          <span>
+            {values.coverFile ? values.coverFile.name : t('create.coverChooseFile')}
+          </span>
           <input
             type="file"
             accept={COVER_ACCEPT}
@@ -114,13 +121,10 @@ export function BasicsStep({
           <EventCover
             src={values.coverPreview}
             variant="preview"
-            className="mt-2 aspect-video w-full rounded-lg"
-            alt="Cover preview"
+            className={`mt-2 ${COVER_ASPECT_CLASS} w-full rounded-lg`}
+            alt={t('create.coverPreviewAlt')}
           />
         )}
-        <p className="mt-1.5 text-xs text-muted">
-          Optional — a default cover is used by event type. JPEG, PNG, or WebP, max 2 MB.
-        </p>
       </Field>
     </div>
   );

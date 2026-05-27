@@ -43,9 +43,7 @@ serve(async (req) => {
     const supabase = adminClient();
     const {data: event} = await supabase
       .from('events')
-      .select(
-        'host_discord_id, starts_at, status, lobby_leader_is_host, lobby_leader_discord_id',
-      )
+      .select('host_discord_id, starts_at, status')
       .eq('id', eventId)
       .single();
 
@@ -73,7 +71,7 @@ serve(async (req) => {
       .from('event_participants')
       .select('discord_id, gamertag_snapshot')
       .eq('event_id', eventId);
-    const allowedIds = allowedResultDiscordIds(event, participants ?? []);
+    const allowedIds = allowedResultDiscordIds(participants ?? []);
 
     const finisherPositions = new Set<number>();
 

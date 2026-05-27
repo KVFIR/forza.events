@@ -58,6 +58,17 @@ serve(async (req) => {
     const supabase = adminClient();
 
     if (action === 'leave') {
+      const {data: participant} = await supabase
+        .from('event_participants')
+        .select('is_convoy_leader')
+        .eq('event_id', event_id)
+        .eq('discord_id', discordUser.id)
+        .maybeSingle();
+
+      if (participant?.is_convoy_leader) {
+        return appErrorResponse(req, 400, API_ERROR_CODES.LEADER_CANNOT_LEAVE);
+      }
+
       const {data: event} = await supabase
         .from('events')
         .select('status, starts_at')
@@ -96,9 +107,7 @@ serve(async (req) => {
 
       const {data: event} = await supabase
         .from('events')
-        .select(
-          'max_players, current_players, status, starts_at, host_discord_id, lobby_leader_is_host, lobby_leader_gamertag, lobby_leader_discord_id',
-        )
+        .select('max_players, current_players, status, starts_at, host_discord_id')
         .eq('id', event_id)
         .single();
 
@@ -126,28 +135,33 @@ serve(async (req) => {
         .eq('discord_id', discordUser.id);
       if (profileErr) return jsonResponse({error: profileErr.message}, 500, req);
 
+      const {data: existing} = await supabase
+        .from('event_participants')
+        .select('is_convoy_leader, participation_source')
+        .eq('event_id', event_id)
+        .eq('discord_id', discordUser.id)
+        .maybeSingle();
+
+      // Preserve host-managed sources; a voluntary join from a non-leader row becomes self_join.
+      const participationSource: string =
+        existing?.participation_source === 'host_assigned' ||
+        existing?.participation_source === 'host_self_assigned'
+          ? existing.participation_source
+          : 'self_join';
+
       const {error} = await supabase.from('event_participants').upsert(
         {
           event_id,
           discord_id: discordUser.id,
           gamertag_snapshot: tag.gamertag,
           waitlisted: false,
+          is_convoy_leader: existing?.is_convoy_leader ?? false,
+          participation_source: participationSource,
         },
         {onConflict: 'event_id,discord_id'},
       );
 
       if (error) return participationError(req, error, 'Could not join event');
-
-      if (
-        event.lobby_leader_is_host === false &&
-        !event.lobby_leader_discord_id &&
-        event.lobby_leader_gamertag?.trim().toLowerCase() === tag.gamertag.toLowerCase()
-      ) {
-        await supabase
-          .from('events')
-          .update({lobby_leader_discord_id: discordUser.id})
-          .eq('id', event_id);
-      }
 
       await syncPublishedEmbedByEventId(supabase, event_id);
       return jsonResponse({joined: true}, 200, req);

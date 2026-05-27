@@ -53,7 +53,7 @@ type DbEvent = {
   starts_at: string;
 };
 
-const PLAYER_SLOTS = 11;
+const PLAYER_SLOTS = 12;
 
 export function normalizeTrackCodes(codes?: string[]): string[] {
   return (codes ?? []).map((c) => String(c).trim()).filter(Boolean);

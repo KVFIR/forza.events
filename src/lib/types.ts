@@ -21,11 +21,15 @@ export interface EventAllowedCar {
   restrictions: string[];
 }
 
+export type ParticipationSource = 'self_join' | 'host_assigned' | 'host_self_assigned';
+
 export interface EventParticipant {
   discordId: string;
   username: string;
   avatarUrl?: string;
   gamertag?: string;
+  isConvoyLeader?: boolean;
+  participationSource?: ParticipationSource;
 }
 
 export interface ForzaEvent {

@@ -1,6 +1,22 @@
 import {describe, expect, it} from 'vitest';
-import {resolveResultsRoster} from './eventRoster';
-import type {ForzaEvent} from './types';
+import {
+  resolveConvoyLeader,
+  resolveRegisteredDrivers,
+  resolveResultsRoster,
+} from './eventRoster';
+import type {EventParticipant, ForzaEvent} from './types';
+
+function participant(
+  partial: Partial<EventParticipant> & Pick<EventParticipant, 'discordId'>,
+): EventParticipant {
+  return {
+    username: partial.username ?? 'Driver',
+    gamertag: partial.gamertag ?? 'GT',
+    isConvoyLeader: false,
+    participationSource: 'self_join',
+    ...partial,
+  };
+}
 
 function event(
   partial: Partial<ForzaEvent> & Pick<ForzaEvent, 'hostDiscordId'>,
@@ -18,62 +34,75 @@ function event(
     allowedCars: [],
     voicePolicy: 'optional',
     maxPlayers: 12,
-    currentPlayers: 1,
+    currentPlayers: 2,
     hostUsername: 'Host',
     rules: '',
     participants: [],
-    lobbyLeaderGamertag: 'HostGT',
-    lobbyLeaderIsHost: true,
     ...partial,
   };
 }
 
-describe('resolveResultsRoster', () => {
-  it('includes host convoy leader when there are no joins', () => {
-    const roster = resolveResultsRoster(event({hostDiscordId: 'host-1'}), 'host-1', 'HostGT');
-    expect(roster).toHaveLength(1);
-    expect(roster[0]?.discordId).toBe('host-1');
+describe('resolveConvoyLeader', () => {
+  it('reads leader from participant role', () => {
+    const ev = event({
+      hostDiscordId: 'host-1',
+      participants: [
+        participant({
+          discordId: 'host-1',
+          gamertag: 'HostGT',
+          isConvoyLeader: true,
+          participationSource: 'host_self_assigned',
+        }),
+        participant({discordId: 'p2', gamertag: 'BGT'}),
+      ],
+    });
+    const convoy = resolveConvoyLeader(ev, 'host-1');
+    expect(convoy?.discordId).toBe('host-1');
+    expect(convoy?.gamertag).toBe('HostGT');
   });
+});
 
-  it('merges joiners with host leader without duplicate', () => {
-    const roster = resolveResultsRoster(
-      event({
-        hostDiscordId: 'host-1',
-        participants: [
-          {discordId: 'host-1', username: 'Host', gamertag: 'HostGT'},
-          {discordId: 'p2', username: 'B', gamertag: 'BGT'},
-        ],
+describe('resolveRegisteredDrivers', () => {
+  it('excludes convoy leader from driver grid', () => {
+    const participants = [
+      participant({
+        discordId: 'leader-9',
+        gamertag: 'LeaderGT',
+        isConvoyLeader: true,
+        participationSource: 'host_assigned',
       }),
-      'host-1',
-    );
+      participant({discordId: 'p2', gamertag: 'BGT'}),
+    ];
+    expect(resolveRegisteredDrivers(participants).map((p) => p.discordId)).toEqual(['p2']);
+  });
+});
+
+describe('resolveResultsRoster', () => {
+  it('returns all participants once', () => {
+    const participants = [
+      participant({
+        discordId: 'host-1',
+        gamertag: 'HostGT',
+        isConvoyLeader: true,
+        participationSource: 'host_self_assigned',
+      }),
+      participant({discordId: 'p2', gamertag: 'BGT'}),
+    ];
+    const roster = resolveResultsRoster(event({hostDiscordId: 'host-1', participants}));
     expect(roster.map((p) => p.discordId)).toEqual(['host-1', 'p2']);
   });
 
-  it('includes external convoy leader by discord id without join', () => {
-    const roster = resolveResultsRoster(
-      event({
-        hostDiscordId: 'host-1',
-        lobbyLeaderIsHost: false,
-        lobbyLeaderDiscordId: 'leader-9',
-        lobbyLeaderGamertag: 'LeaderGT',
-        participants: [],
+  it('includes non-host leader assigned before self join', () => {
+    const participants = [
+      participant({
+        discordId: 'leader-9',
+        gamertag: 'LeaderGT',
+        isConvoyLeader: true,
+        participationSource: 'host_assigned',
       }),
-      'host-1',
-    );
-    expect(roster).toHaveLength(1);
-    expect(roster[0]?.discordId).toBe('leader-9');
-  });
-
-  it('uses joiners only when convoy leader is not the host', () => {
-    const roster = resolveResultsRoster(
-      event({
-        hostDiscordId: 'host-1',
-        lobbyLeaderIsHost: false,
-        lobbyLeaderGamertag: 'OtherGT',
-        participants: [{discordId: 'p2', username: 'B', gamertag: 'OtherGT'}],
-      }),
-      'host-1',
-    );
-    expect(roster.map((p) => p.discordId)).toEqual(['p2']);
+      participant({discordId: 'p2', gamertag: 'BGT'}),
+    ];
+    const roster = resolveResultsRoster(event({hostDiscordId: 'host-1', participants}));
+    expect(roster.map((p) => p.discordId)).toEqual(['leader-9', 'p2']);
   });
 });

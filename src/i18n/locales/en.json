@@ -129,6 +129,7 @@
     "join": "Join",
     "leave": "Leave",
     "registered": "Registered",
+    "convoyLeader": "Convoy Leader",
     "leaveLockedAfterStart": "You cannot leave after the event has started. Contact the host if you cannot attend.",
     "closed": "Closed",
     "full": "Full",
@@ -187,8 +188,11 @@
     "type": "Type",
     "dateTime": "Date & time",
     "description": "Description",
-    "descriptionPlaceholder": "Optional — e.g. meetup plan, Discord voice channel, what to expect",
+    "descriptionPlaceholder": "Optional — for example: event plan, settings, livery recommendations, or what to expect",
     "coverImage": "Cover image",
+    "coverChooseFile": "Choose file (max 2 MB)",
+    "coverHint": "Optional — a default cover is used by event type. JPEG, PNG, or WebP, max 2 MB. Use 16:9 (e.g. 1280×720); other shapes are center-cropped on upload.",
+    "coverPreviewAlt": "Cover preview",
     "convoyLeader": "Convoy leader",
     "xboxGamertag": "Xbox gamertag",
     "carRules": "Car rules",
@@ -277,10 +281,11 @@
     "registrationClosed": "Registration is closed.",
     "registrationAfterStart": "Registration closed after the event started.",
     "hostCannotJoin": "Event hosts do not need to join.",
+    "leaderCannotLeave": "Convoy leaders cannot leave. Ask the host to assign a different leader first.",
     "eventNotFound": "Event not found.",
     "notDraft": "Only draft events can be published.",
     "invalidResponse": "Could not reach the server. Try again.",
-    "resultsParticipantsOnly": "Results can only include joined drivers or the convoy leader (host leader is always allowed)."
+    "resultsParticipantsOnly": "Results can only include registered participants for this event."
   },
   "validation": {
     "futureDate": "Choose a date and time in the future.",
