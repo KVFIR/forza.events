@@ -25,9 +25,10 @@ export function buildBotInstallUrl(options?: {guildId?: string}): string | null 
     scope: 'bot',
   });
 
+  // Pre-select the Activity server when known; do not disable the guild picker — the host
+  // may need to install the bot on a different server they manage.
   if (options?.guildId) {
     params.set('guild_id', options.guildId);
-    params.set('disable_guild_select', 'true');
   }
 
   return `https://discord.com/oauth2/authorize?${params.toString()}`;
