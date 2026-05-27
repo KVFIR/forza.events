@@ -23,6 +23,16 @@ if (!url || !key) {
 
 const supabase = createClient(url, key);
 
+function buildTracks(ev) {
+  if (Array.isArray(ev.tracks) && ev.tracks.length > 0) return ev.tracks;
+  const codes = [ev.event_share_code, ...(ev.track_codes ?? [])].filter(Boolean);
+  return codes.map((share_code, i) => ({
+    name: `Route ${i + 1}`,
+    share_code,
+    format: null,
+  }));
+}
+
 async function findCar({make, year, model_like}) {
   const {data, error} = await supabase
     .from('cars')
@@ -79,8 +89,9 @@ async function main() {
       max_players: 11,
       current_players: ev.current_players ?? 0,
       description: ev.description ?? null,
-      event_share_code: ev.event_share_code,
-      track_codes: ev.track_codes ?? [],
+      tracks: buildTracks(ev),
+      event_share_code: null,
+      track_codes: [],
       additional_car_restrictions: ev.additional_car_restrictions ?? null,
       lobby_leader_gamertag: 'FORZA.EVENTS',
       lobby_leader_is_host: true,

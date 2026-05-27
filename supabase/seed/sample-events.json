@@ -12,8 +12,10 @@
       "max_pi": 580,
       "starts_in_hours": 30,
       "current_players": 6,
-      "event_share_code": "842 193 405",
-      "track_codes": ["291 044 118"],
+      "tracks": [
+        {"name": "Hakone Descent", "share_code": "842 193 405", "format": "3 laps"},
+        {"name": "Hakone Uphill", "share_code": "291 044 118", "format": "3 laps"}
+      ],
       "description": "Class B Japanese icons from the same era — tight PI band, stock aero, no swaps.",
       "cars": [
         {"make": "Honda", "year": 1992, "model_like": "%NSX-R%", "max_pi": 580, "restrictions": ["No engine swap", "No Forza aero"]},
