@@ -16,8 +16,10 @@ import {defaultCoverPath} from '../lib/eventCovers';
 import {formatCarDisplayName} from '../lib/carDisplay';
 import {piToClass} from '../lib/pi';
 import {useAuth} from '../context/AuthContext';
+import {useJoinedEvents} from '../context/JoinedEventsContext';
 import {useResolveEventDisplayStatus} from '../hooks/useResolveEventDisplayStatus';
 import {useDiscordLayout} from '../context/DiscordLayoutContext';
+import {eventTypeLabel} from '../lib/eventTypes';
 import {EventCover} from './EventCover';
 
 type Props = {
@@ -103,6 +105,7 @@ function OpenBuildSummary({event}: {event: ForzaEvent}) {
 export function EventCard({event, participantResult}: Props) {
   const {t} = useTranslation();
   const {isCompact} = useDiscordLayout();
+  const {isJoined} = useJoinedEvents();
   const when = format(new Date(event.startsAt), 'EEE d MMM · HH:mm', {locale: dateFnsLocale()});
   const draft = isDraftEvent(event);
   const displayStatus = useResolveEventDisplayStatus(event);
@@ -116,14 +119,13 @@ export function EventCard({event, participantResult}: Props) {
   const coverSrc = event.coverImageUrl ?? defaultCoverPath(event.type);
   const [coverReady, setCoverReady] = useState(false);
   const cardTo = draft && isHost ? `/create?edit=${event.id}` : `/event/${event.id}`;
+  const joined = isJoined(event);
 
   useEffect(() => {
     setCoverReady(false);
   }, [coverSrc, event.id]);
 
-  return (
-    <article className="group relative">
-      <Link to={cardTo} state={{event}} className="block">
+  const cardInner = (
         <div
           className={cn(
             'relative overflow-hidden rounded-xl border transition-all duration-200',
@@ -169,16 +171,22 @@ export function EventCard({event, participantResult}: Props) {
               >
                 {event.title}
               </h2>
-              {!isCompact && (
-                <p className="mt-0.5 truncate text-xs text-slate-400">
-                  {organiserLabel}
-                  {isHost && (
-                    <span className="ml-1.5 text-[9px] font-bold uppercase tracking-widest text-accent-purple-light">
-                      · You
-                    </span>
-                  )}
-                </p>
-              )}
+              <p className="mt-0.5 truncate text-xs text-slate-400">
+                {isCompact ? (
+                  <span className="text-[10px] font-bold uppercase tracking-widest text-muted">
+                    {eventTypeLabel(event.type)}
+                  </span>
+                ) : (
+                  <>
+                    {organiserLabel}
+                    {isHost && (
+                      <span className="ml-1.5 text-[9px] font-bold uppercase tracking-widest text-accent-purple-light">
+                        · You
+                      </span>
+                    )}
+                  </>
+                )}
+              </p>
               <p className={cn('text-xs text-muted', isCompact ? 'mt-0.5' : 'mt-0.5')}>{when}</p>
               {draft ? (
                 <p className="mt-1.5 text-[10px] font-bold uppercase tracking-widest text-sky-300/90">
@@ -208,6 +216,11 @@ export function EventCard({event, participantResult}: Props) {
                       · {placement}
                     </span>
                   )}
+                  {isCompact && joined && !isHost && (
+                    <span className="ml-1 text-[9px] font-bold uppercase tracking-widest text-accent-purple-light">
+                      · {t('discordLayout.joined')}
+                    </span>
+                  )}
                 </p>
               )}
             </div>
@@ -227,7 +240,17 @@ export function EventCard({event, participantResult}: Props) {
             )}
           />
         </div>
-      </Link>
+  );
+
+  return (
+    <article className={cn('group relative', isCompact && 'pointer-events-none')}>
+      {isCompact ? (
+        <div className="block">{cardInner}</div>
+      ) : (
+        <Link to={cardTo} state={{event}} className="block">
+          {cardInner}
+        </Link>
+      )}
     </article>
   );
 }

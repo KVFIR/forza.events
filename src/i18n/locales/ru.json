@@ -50,7 +50,18 @@
     "body": "Эта сборка — Discord Activity. Запускайте её из App Launcher или голосового канала сервера, а не из обычной вкладки браузера."
   },
   "discordLayout": {
-    "compactHint": "Компактный режим — нажмите на Activity, чтобы развернуть фильтры, списки машин и полные детали ивента."
+    "compactHint": "Нажмите на Activity, чтобы развернуть — кнопки и навигация работают в полном окне.",
+    "routeEvent": "Ивент",
+    "browseCount": "{{count}} ивентов",
+    "myEventsSummary": "{{active}} активных · {{drafts}} черновиков",
+    "joined": "Участвуете",
+    "participantsMore": "ещё {{count}}",
+    "carsMore": "ещё {{count}} машин",
+    "untitledDraft": "Без названия",
+    "draftInProgress": "Черновик",
+    "newDraft": "Новый ивент",
+    "editingPublished": "Редактирование опубликованного",
+    "createStep": "Шаг {{current}} из {{total}}"
   },
   "auth": {
     "signInRequired": "Требуется вход",

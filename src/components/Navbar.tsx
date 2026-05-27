@@ -1,5 +1,6 @@
-import {NavLink} from 'react-router-dom';
+import {NavLink, useLocation} from 'react-router-dom';
 import {useTranslation} from 'react-i18next';
+import {compactRouteTitle} from './compact/compactRouteTitle';
 import {CalendarDays, Compass, PlusCircle, User2, type LucideIcon} from 'lucide-react';
 import {AuthStatusIndicator} from './AuthStatusIndicator';
 import {Logo} from './ui/Logo';
@@ -76,7 +77,10 @@ function NavItem({
 }
 
 function NavbarTop() {
+  const {t} = useTranslation();
+  const {pathname} = useLocation();
   const {isCompact} = useDiscordLayout();
+
   return (
     <header className={cn('sticky top-0 z-20', isCompact ? 'block' : 'lg:hidden')}>
       <div
@@ -85,15 +89,24 @@ function NavbarTop() {
           'flex items-center justify-between gap-3 px-4 py-3',
         )}
       >
-        <Logo size="nav" />
+        <div className="flex min-w-0 items-center gap-3">
+          <Logo size="nav" />
+          {isCompact ? (
+            <p className="truncate text-[11px] font-semibold uppercase tracking-widest text-muted">
+              {compactRouteTitle(pathname, t)}
+            </p>
+          ) : null}
+        </div>
         <AuthStatusIndicator />
       </div>
 
-      <nav className={cn('glass flex border-b bg-surface/75', navShellBorderClass)}>
-        {NAV_ITEMS.map((item) => (
-          <NavItem key={item.to} {...item} layout="top" />
-        ))}
-      </nav>
+      {!isCompact ? (
+        <nav className={cn('glass flex border-b bg-surface/75', navShellBorderClass)}>
+          {NAV_ITEMS.map((item) => (
+            <NavItem key={item.to} {...item} layout="top" />
+          ))}
+        </nav>
+      ) : null}
     </header>
   );
 }

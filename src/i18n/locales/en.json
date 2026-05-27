@@ -50,7 +50,18 @@
     "body": "This build is a Discord Activity. Launch it from the App Launcher or a server voice channel — not from a regular browser tab."
   },
   "discordLayout": {
-    "compactHint": "Compact view — click the activity to expand for filters, car lists, and full event details."
+    "compactHint": "Tap the activity to expand — full controls and navigation work in the main window.",
+    "routeEvent": "Event",
+    "browseCount": "{{count}} events",
+    "myEventsSummary": "{{active}} active · {{drafts}} drafts",
+    "joined": "Joined",
+    "participantsMore": "+{{count}} more",
+    "carsMore": "+{{count}} more cars",
+    "untitledDraft": "Untitled draft",
+    "draftInProgress": "Draft in progress",
+    "newDraft": "New event",
+    "editingPublished": "Editing published event",
+    "createStep": "Step {{current}} of {{total}}"
   },
   "auth": {
     "signInRequired": "Sign in required",

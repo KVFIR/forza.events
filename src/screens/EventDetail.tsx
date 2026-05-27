@@ -26,7 +26,7 @@ import {EventResultsTable} from '../components/EventResultsTable';
 import {ContentReveal} from '../components/ui/ContentReveal';
 import {PageLoading} from '../components/ui/PageLoading';
 import {formatEventTime} from '../lib/datetime';
-import {cancelEvent, deleteDraftEvent, isApiConfigured, updateProfile} from '../lib/api';
+import {cancelEvent, deleteDraftEvent, isApiConfigured} from '../lib/api';
 import {
   canCancelEvent,
   canDeleteDraft,
@@ -51,6 +51,7 @@ import {useAuth} from '../context/AuthContext';
 import {useEventLiveUpdates} from '../hooks/useEventLiveUpdates';
 import {useResolveEventDisplayStatus} from '../hooks/useResolveEventDisplayStatus';
 import {CompactLayoutBanner} from '../components/CompactLayoutBanner';
+import {CompactEventFacts} from '../components/compact/CompactEventFacts';
 import {useDiscordLayout} from '../context/DiscordLayoutContext';
 import {formatCarDisplayName} from '../lib/carDisplay';
 import {piToClass} from '../lib/pi';
@@ -92,7 +93,6 @@ export function EventDetail() {
   const {isJoined, toggleJoin, bumpRefresh, refreshKey} = useJoinedEvents();
   const {
     user,
-    refreshUser,
     getAccessToken,
     isSignedIn,
     isStandalone,
@@ -239,10 +239,6 @@ export function EventDetail() {
     setJoining(true);
     setJoinError(null);
     try {
-      if (isApiConfigured()) {
-        await updateProfile(token, {xbox_gamertag: trimmed});
-        refreshUser({...user, xboxGamertag: trimmed});
-      }
       await toggleJoin(event, trimmed);
       bumpRefresh();
       const next = await fetchEventById(event.id, {discordToken});
@@ -310,17 +306,25 @@ export function EventDetail() {
     convoyLeader != null &&
     !convoyLeader.isYou;
 
+  const participantGamertags = [
+    ...(convoyLeader && !registeredDrivers.some((p) => p.discordId === convoyLeader.discordId)
+      ? [convoyLeader.gamertag]
+      : []),
+    ...registeredDrivers.map((p) => p.gamertag ?? p.username),
+  ];
+
   return (
     <ContentReveal className="pb-10 pt-4">
-      <CompactLayoutBanner className="mb-3" />
-      <TextLink
-        to={isDraft && isHost ? '/my-events' : '/'}
-        tone="nav"
-        className={cn('inline-flex items-center gap-1.5', isCompact ? 'mb-3' : 'mb-5')}
-      >
-        <ArrowLeft className="h-3.5 w-3.5" />
-        {t('common.back')}
-      </TextLink>
+      {!isCompact ? (
+        <TextLink
+          to={isDraft && isHost ? '/my-events' : '/'}
+          tone="nav"
+          className="mb-5 inline-flex items-center gap-1.5"
+        >
+          <ArrowLeft className="h-3.5 w-3.5" />
+          {t('common.back')}
+        </TextLink>
+      ) : null}
 
       {/* Hero */}
       <div
@@ -360,9 +364,16 @@ export function EventDetail() {
             {event.title}
           </h1>
           {isCompact ? (
-            <p className="mt-1 text-xs text-muted">
-              {when} · {formatLobbyCount(event.currentPlayers)}
-            </p>
+            <>
+              <p className="mt-1 text-xs text-muted">
+                {when} · {formatLobbyCount(event.currentPlayers)}
+              </p>
+              {joined && !isHost && !isDraft ? (
+                <p className="mt-1 text-[10px] font-bold uppercase tracking-widest text-accent-purple-light">
+                  {t('discordLayout.joined')}
+                </p>
+              ) : null}
+            </>
           ) : (
             <>
               {event.description && (
@@ -374,7 +385,7 @@ export function EventDetail() {
             </>
           )}
         </div>
-        {showDraftActions ? (
+        {!isCompact && showDraftActions ? (
           <div className="flex shrink-0 flex-col gap-2">
             <Button
               variant="primary"
@@ -396,7 +407,7 @@ export function EventDetail() {
               </Button>
             ) : null}
           </div>
-        ) : showHostPostStartActions ? (
+        ) : !isCompact && showHostPostStartActions ? (
           <div className="flex shrink-0 flex-col gap-2">
             {canEnterResults ? (
               <Button
@@ -420,7 +431,7 @@ export function EventDetail() {
               </Button>
             ) : null}
           </div>
-        ) : isHost ? (
+        ) : !isCompact && isHost ? (
           canEdit ? (
             <Button
               variant="secondary"
@@ -431,7 +442,7 @@ export function EventDetail() {
               {t('eventDetail.edit')}
             </Button>
           ) : null
-        ) : showParticipantActions ? (
+        ) : !isCompact && showParticipantActions ? (
           <Button
             variant={
               needsSignInToParticipate
@@ -451,6 +462,15 @@ export function EventDetail() {
           </Button>
         ) : null}
       </div>
+
+      {isCompact ? (
+        <CompactEventFacts
+          event={event}
+          when={when}
+          convoyLeaderGamertag={event.lobbyLeaderGamertag}
+          participantGamertags={participantGamertags}
+        />
+      ) : null}
 
       {isDraft && isHost ? <EventStatusBanner variant="draft" /> : null}
       {showHostPostStartActions ? <EventStatusBanner variant="host-in-progress" /> : null}
@@ -728,6 +748,7 @@ export function EventDetail() {
       </div>
       ) : null}
 
+      {isCompact ? <CompactLayoutBanner placement="footer" /> : null}
     </ContentReveal>
   );
 }

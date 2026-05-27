@@ -19,7 +19,7 @@ import {
   type InitResult,
 } from '../lib/discord';
 import {resolveLaunchEventTarget, shouldResolveLaunchRedirect} from '../lib/launchRedirect';
-import {loadDiscordSession} from '../lib/discordAuth';
+import {loadDiscordSession, mergeSessionUser} from '../lib/discordAuth';
 import {GUEST_USER} from '../lib/guestUser';
 import type {AppUser} from '../lib/types';
 
@@ -33,7 +33,7 @@ type AuthState = {
   isStandalone: boolean;
   guildId: string | null;
   guildName: string | null;
-  refreshUser: (next: AppUser) => void;
+  refreshUser: (next: AppUser | ((prev: AppUser) => AppUser)) => void;
   getAccessToken: () => string | null;
   authRetrying: boolean;
   retryDiscordAuth: () => Promise<void>;
@@ -77,7 +77,7 @@ export function AuthProvider({children}: {children: ReactNode}) {
         const result = await initDiscordActivity();
         if (cancelled) return;
 
-        setUser(result.user);
+        setUser(mergeSessionUser(result.user));
         setDiscordReady(result.ready);
         setGuildId(result.guildId);
         setGuildName(result.guildName);
@@ -96,14 +96,28 @@ export function AuthProvider({children}: {children: ReactNode}) {
   useEffect(() => {
     const session = loadDiscordSession();
     if (!session?.accessToken || !session.user.discordId) return;
-    if (user.discordId === session.user.discordId && accessToken) return;
+
+    if (user.discordId === session.user.discordId && accessToken) {
+      const sessionTag = session.user.xboxGamertag?.trim();
+      const userTag = user.xboxGamertag?.trim();
+      if (sessionTag && sessionTag !== userTag) {
+        const merged = {...user, xboxGamertag: sessionTag};
+        setUser(merged);
+        setResolvedUser(merged);
+      }
+      return;
+    }
+
     setDiscordSession(session.accessToken, session.user);
     setUser(session.user);
-  }, [user.discordId, accessToken]);
+  }, [user.discordId, user.xboxGamertag, accessToken]);
 
-  const refreshUser = useCallback((next: AppUser) => {
-    setUser(next);
-    setResolvedUser(next);
+  const refreshUser = useCallback((next: AppUser | ((prev: AppUser) => AppUser)) => {
+    setUser((prev) => {
+      const merged = typeof next === 'function' ? next(prev) : next;
+      setResolvedUser(merged);
+      return merged;
+    });
   }, []);
 
   const retryDiscordAuth = useCallback(async () => {
@@ -114,7 +128,7 @@ export function AuthProvider({children}: {children: ReactNode}) {
       const result = await retryDiscordActivityAuth();
       if (!result) return;
 
-      setUser(result.user);
+      setUser(mergeSessionUser(result.user));
       setDiscordReady(result.ready);
       setGuildId(result.guildId);
       setGuildName(result.guildName);

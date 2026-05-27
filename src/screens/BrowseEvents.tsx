@@ -57,7 +57,11 @@ export function BrowseEvents() {
 
   return (
     <div className="pb-8 pt-5">
-      <CompactLayoutBanner />
+      {isCompact && !isLoading && !loadError ? (
+        <p className="mb-2 text-[11px] font-medium text-muted">
+          {t('discordLayout.browseCount', {count: filtered.length})}
+        </p>
+      ) : null}
       <EventList
         events={filtered}
         isLoading={isLoading}
@@ -96,6 +100,7 @@ export function BrowseEvents() {
           )
         }
       />
+      {isCompact ? <CompactLayoutBanner placement="footer" /> : null}
     </div>
   );
 }

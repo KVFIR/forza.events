@@ -34,7 +34,7 @@ When users minimize the Activity or view it in a voice grid tile, Discord shrink
 | Mode | UX in FORZA.EVENTS |
 |------|---------------------|
 | **Focused** | Full browse filters, event detail, create wizard |
-| **PIP / grid** | Compact cards (title, time, lobby), join CTA on detail, filters hidden; banner asks user to expand |
+| **PIP / grid** | Read-only summaries (event facts, profile stats, draft snapshot); nav hidden; tap activity to expand for controls |
 
 After `sdk.ready()`, we call `setOrientationLockState` with **landscape** for focused, PIP, and grid so the tile stays wide enough for event rows.
 

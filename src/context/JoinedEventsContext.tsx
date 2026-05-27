@@ -25,7 +25,7 @@ type Ctx = {
 const JoinedEventsContext = createContext<Ctx | null>(null);
 
 export function JoinedEventsProvider({children}: {children: ReactNode}) {
-  const {user, getAccessToken, isSignedIn} = useAuth();
+  const {user, getAccessToken, isSignedIn, refreshUser} = useAuth();
   const [overrides, setOverrides] = useState<Overrides>({});
   const [refreshKey, setRefreshKey] = useState(0);
 
@@ -53,6 +53,7 @@ export function JoinedEventsProvider({children}: {children: ReactNode}) {
             const gt = (gamertag ?? user.xboxGamertag)?.trim();
             if (!hasGamertag(gt)) throw new Error('Xbox gamertag is required to join events.');
             await joinEvent(token, event.id, gt!);
+            refreshUser((prev) => ({...prev, xboxGamertag: gt!}));
           }
           bumpRefresh();
         } catch (err) {
@@ -68,7 +69,7 @@ export function JoinedEventsProvider({children}: {children: ReactNode}) {
 
       setOverrides((prev) => ({...prev, [event.id]: !currently}));
     },
-    [isJoined, getAccessToken, isSignedIn, user.xboxGamertag, bumpRefresh],
+    [isJoined, getAccessToken, isSignedIn, user.xboxGamertag, bumpRefresh, refreshUser],
   );
 
   const value = useMemo(
