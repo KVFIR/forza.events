@@ -165,51 +165,44 @@ export function EventCarList({cars, onChange, inputClass, labelClass}: Props) {
           {cars.map((c) => {
             const collapsed = isCollapsed(c.id);
             const displayName = formatCarDisplayName(c);
-            const maxClass = piToClass(c.maxPi);
             return (
             <li key={c.id}>
               <Panel variant="soft" className="p-0">
-              <div className={cn('flex items-start gap-1 p-4', !collapsed && 'pb-3')}>
-                <button
-                  type="button"
-                  className="flex min-w-0 flex-1 items-start gap-2 rounded-md text-left hover:bg-white/5 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-white/40"
-                  onClick={() => toggleCollapsed(c.id)}
-                  aria-expanded={!collapsed}
-                  aria-controls={`event-car-${c.id}-details`}
-                >
-                  <span className="mt-0.5 shrink-0 text-muted" aria-hidden>
-                    {collapsed ? (
-                      <ChevronDown className="h-4 w-4" />
-                    ) : (
-                      <ChevronUp className="h-4 w-4" />
-                    )}
-                  </span>
-                  <span className="min-w-0 flex-1">
-                    <p className="font-semibold text-white">{displayName}</p>
-                    <p className="text-xs text-muted">
-                      {collapsed
-                        ? t('create.carSummaryCollapsed', {
-                            maxPi: c.maxPi,
-                            class: maxClass,
-                          })
-                        : [
-                            t('create.carSummaryStock', {
-                              pi: c.pi,
-                              class: piToClass(c.pi),
-                            }),
-                            c.year != null ? String(c.year) : null,
-                          ]
-                            .filter(Boolean)
-                            .join(' · ')}
-                    </p>
-                  </span>
-                </button>
+              <div
+                role="button"
+                tabIndex={0}
+                aria-expanded={!collapsed}
+                aria-controls={`event-car-${c.id}-details`}
+                className="flex cursor-pointer items-center gap-2 px-3 py-2.5 transition-colors hover:bg-white/[0.03]"
+                onClick={() => toggleCollapsed(c.id)}
+                onKeyDown={(e) => {
+                  if (e.key === 'Enter' || e.key === ' ') {
+                    e.preventDefault();
+                    toggleCollapsed(c.id);
+                  }
+                }}
+              >
+                <span className="shrink-0 text-muted" aria-hidden>
+                  {collapsed ? (
+                    <ChevronDown className="h-4 w-4" />
+                  ) : (
+                    <ChevronUp className="h-4 w-4" />
+                  )}
+                </span>
+                <span className="min-w-0 flex-1">
+                  <p className="truncate text-sm font-semibold leading-tight text-white">
+                    {displayName}
+                  </p>
+                </span>
                 <Button
                   type="button"
                   variant="ghost"
                   size="icon"
-                  className="shrink-0 text-muted hover:text-accent-red"
-                  onClick={() => remove(c.id)}
+                  className="shrink-0 !p-1.5 text-muted hover:text-accent-red"
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    remove(c.id);
+                  }}
                   aria-label={t('create.removeCar')}
                 >
                   <Trash2 className="h-4 w-4" />
@@ -220,6 +213,8 @@ export function EventCarList({cars, onChange, inputClass, labelClass}: Props) {
                 <div
                   id={`event-car-${c.id}-details`}
                   className="space-y-3 border-t border-white/5 p-4 pt-3"
+                  onClick={(e) => e.stopPropagation()}
+                  onKeyDown={(e) => e.stopPropagation()}
                 >
                   <div className="grid grid-cols-2 items-start gap-3">
                     <div>

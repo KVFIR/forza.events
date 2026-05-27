@@ -163,17 +163,21 @@ export function EventStep({
         </Field>
       </FormSection>
 
-      <FormSection title={t('create.sectionRace')}>
+      <FormSection title={t('create.sectionTracks')}>
+        {fieldErrors.tracks ? (
+          <p role="alert" className={cn(fieldErrorClass, 'mb-2')}>
+            {fieldErrors.tracks}
+          </p>
+        ) : null}
         <EventTrackList
           tracks={values.tracks}
           onChange={onTracks}
           inputClass={formInput}
           labelClass={formLabel}
         />
-        {fieldErrors.tracks ? (
-          <p className={fieldErrorClass}>{fieldErrors.tracks}</p>
-        ) : null}
+      </FormSection>
 
+      <FormSection title={t('create.sectionCars')}>
         <Field title={t('create.carRules')}>
           <SegmentGroup
             value={values.carRuleMode}
