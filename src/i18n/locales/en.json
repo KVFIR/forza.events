@@ -24,8 +24,7 @@
     "host": "Host",
     "dash": "—",
     "optional": "Optional",
-    "openBuild": "Open build",
-    "eventTime": "Event time: {{time}}"
+    "openBuild": "Open build"
   },
   "busy": {
     "working": "Working…",

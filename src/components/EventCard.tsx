@@ -10,7 +10,7 @@ import {cn} from '../lib/cn';
 import {isDraftEvent} from '../lib/eventList';
 import {formatLobbyCount} from '../lib/constants';
 import {resolveOrganiserLabel} from '../lib/organiser';
-import {formatEventTime} from '../lib/datetime';
+import {formatEventStart} from '../lib/datetime';
 import {defaultCoverPath} from '../lib/eventCovers';
 import {formatCarDisplayName} from '../lib/carDisplay';
 import {piToClass} from '../lib/pi';
@@ -100,7 +100,7 @@ function OpenBuildSummary({event}: {event: ForzaEvent}) {
 
 export function EventCard({event, participantResult}: Props) {
   const {t} = useTranslation();
-  const {primary: when} = formatEventTime(event.startsAt, event.timezoneHint);
+  const when = formatEventStart(event.startsAt);
   const draft = isDraftEvent(event);
   const displayStatus = useResolveEventDisplayStatus(event);
   const ended = !draft && displayStatus === 'ended';

@@ -1,5 +1,4 @@
 import {formatInTimeZone, fromZonedTime} from 'date-fns-tz';
-import i18n from '../i18n';
 import {dateFnsLocale} from '../i18n/dateLocale';
 
 export function defaultTimezone(): string {
@@ -42,23 +41,10 @@ export function localInputToUtc(isoLocal: string, timezone = defaultTimezone()):
   return fromZonedTime(isoLocal, timezone).toISOString();
 }
 
-export function formatEventTime(
-  startsAt: string,
-  timezoneHint?: string,
-): {primary: string; secondary: string} {
-  const d = new Date(startsAt);
-  const viewerTz = defaultTimezone();
-  const hint = timezoneHint ?? viewerTz;
+/** Event start time in the viewer's local timezone. */
+export function formatEventStart(startsAt: string): string {
   const locale = dateFnsLocale();
-  const pattern = 'EEE d MMM, HH:mm';
-
-  const primary = formatInTimeZone(d, viewerTz, pattern, {locale});
-  const secondary =
-    hint !== viewerTz
-      ? i18n.t('common.eventTime', {
-          time: formatInTimeZone(d, hint, pattern, {locale}),
-        })
-      : '';
-
-  return {primary, secondary};
+  return formatInTimeZone(new Date(startsAt), defaultTimezone(), 'EEE d MMM, HH:mm', {
+    locale,
+  });
 }

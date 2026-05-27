@@ -28,7 +28,7 @@ import {EventResultsTable} from '../components/EventResultsTable';
 import {UserAvatar} from '../components/UserAvatar';
 import {ContentReveal} from '../components/ui/ContentReveal';
 import {PageLoading} from '../components/ui/PageLoading';
-import {formatEventTime} from '../lib/datetime';
+import {formatEventStart} from '../lib/datetime';
 import {cancelEvent, deleteDraftEvent, isApiConfigured} from '../lib/api';
 import {
   canCancelEvent,
@@ -312,10 +312,7 @@ export function EventDetail() {
   const full = displayStatus === 'full';
   const showDraftActions = isDraft && isHost;
   const showHostPostStartActions = isHost && started && (canEnterResults || canCancel);
-  const {primary: when, secondary: whenSecondary} = formatEventTime(
-    event.startsAt,
-    event.timezoneHint,
-  );
+  const when = formatEventStart(event.startsAt);
   const fillPct = Math.round((event.currentPlayers / LOBBY_TOTAL_PLAYERS) * 100);
   const finalized = isEventFinalized(event);
   const resultDisplay = resolveEventResultDisplay(event, resultRows);
@@ -573,9 +570,6 @@ export function EventDetail() {
           <div>
             <p className={sectionLabelClass}>{t('eventDetail.dateTime')}</p>
             <p className="mt-0.5 text-sm text-slate-200">{when}</p>
-            {whenSecondary ? (
-              <p className="mt-0.5 text-xs text-muted">{whenSecondary}</p>
-            ) : null}
           </div>
         </div>
 

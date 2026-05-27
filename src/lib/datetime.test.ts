@@ -4,7 +4,7 @@ import {dateFnsLocale} from '../i18n/dateLocale';
 import {
   datetimeLocalInputBounds,
   defaultTimezone,
-  formatEventTime,
+  formatEventStart,
   localInputToUtc,
   normalizeDatetimeLocalInput,
   utcToLocalInput,
@@ -34,28 +34,14 @@ describe('datetime', () => {
     expect(max).toMatch(/^2099-/);
   });
 
-  it('formatEventTime primary is in the viewer timezone', () => {
+  it('formatEventStart uses the viewer timezone', () => {
     const startsAt = '2030-06-15T12:00:00.000Z';
     const viewerTz = defaultTimezone();
     const locale = dateFnsLocale();
     const pattern = 'EEE d MMM, HH:mm';
 
-    const {primary} = formatEventTime(startsAt, 'Pacific/Kiritimati');
-    expect(primary).toBe(
+    expect(formatEventStart(startsAt)).toBe(
       formatInTimeZone(new Date(startsAt), viewerTz, pattern, {locale}),
     );
-  });
-
-  it('formatEventTime secondary shows host timezone when it differs from viewer', () => {
-    const viewerTz = defaultTimezone();
-    const hostTz = viewerTz === 'UTC' ? 'Pacific/Auckland' : 'UTC';
-    const {secondary} = formatEventTime('2030-06-15T12:00:00.000Z', hostTz);
-    expect(secondary).not.toBe('');
-  });
-
-  it('formatEventTime omits secondary when host timezone matches viewer', () => {
-    const viewerTz = defaultTimezone();
-    const {secondary} = formatEventTime('2030-06-15T12:00:00.000Z', viewerTz);
-    expect(secondary).toBe('');
   });
 });

@@ -6,7 +6,7 @@ import {EventCover} from '../../../components/EventCover';
 import {defaultCoverPath} from '../../../lib/eventCovers';
 import {formatCarDisplayName} from '../../../lib/carDisplay';
 import {cn} from '../../../lib/cn';
-import {defaultTimezone, formatEventTime, localInputToUtc} from '../../../lib/datetime';
+import {defaultTimezone, formatEventStart, localInputToUtc} from '../../../lib/datetime';
 import {eventTypeMeta, isEventType} from '../../../lib/eventTypes';
 import {clampPi, piToClass} from '../../../lib/pi';
 import type {EventCarEntry} from '../../../components/EventCarList';
@@ -60,7 +60,7 @@ export function EventPublishPreviewCard({
   const trimmedDescription = description.trim();
   const when =
     startsAtLocal
-      ? formatEventTime(localInputToUtc(startsAtLocal, defaultTimezone()), defaultTimezone())
+      ? formatEventStart(localInputToUtc(startsAtLocal, defaultTimezone()))
       : null;
   const coverSrc =
     coverPreview ??
@@ -109,7 +109,7 @@ export function EventPublishPreviewCard({
             {when ? (
               <p className="flex items-center gap-1.5 text-xs text-slate-300">
                 <Calendar className="h-3.5 w-3.5 shrink-0 text-muted" aria-hidden />
-                {when.primary}
+                {when}
               </p>
             ) : null}
             {trimmedDescription ? (
