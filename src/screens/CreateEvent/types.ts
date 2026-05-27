@@ -3,9 +3,12 @@ import type {EventCarEntry} from '../../components/EventCarList';
 
 export type FieldErrors = Partial<Record<string, string>>;
 
+/** Empty until the host picks a type on create. */
+export type CreateEventType = EventType | '';
+
 export interface CreateEventFormValues {
   title: string;
-  type: EventType;
+  type: CreateEventType;
   startsAtLocal: string;
   description: string;
   coverFile: File | null;

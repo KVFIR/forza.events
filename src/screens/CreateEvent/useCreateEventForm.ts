@@ -14,7 +14,14 @@ import {
 import {compressCoverForUpload} from '../../lib/coverImage';
 import {defaultCoverPath, isBundledDefaultCover} from '../../lib/eventCovers';
 import {fetchEventById} from '../../lib/events';
-import {defaultTimezone, localInputToUtc, utcToLocalInput} from '../../lib/datetime';
+import {
+  defaultTimezone,
+  localInputToUtc,
+  normalizeDatetimeLocalInput,
+  utcToLocalInput,
+} from '../../lib/datetime';
+import {isLocalDevHost} from '../../lib/runtime';
+import {isEventType} from '../../lib/eventTypes';
 import {clampPi} from '../../lib/pi';
 import {EVENT_PLAYER_SLOTS} from '../../lib/constants';
 import {
@@ -25,12 +32,13 @@ import {
 } from '../../lib/eventSpec';
 import type {EventCarEntry} from '../../components/EventCarList';
 import type {ConvoyLeaderSelection} from '../../components/ConvoyLeaderPicker';
-import {PREVIEW_STEP_INDEX, type CreateEventStepIndex} from './constants';
-import type {CreateEventFormValues, FieldErrors} from './types';
+import {PUBLISH_STEP_INDEX, type CreateEventStepIndex} from './constants';
+import type {CreateEventFormValues, CreateEventType, FieldErrors} from './types';
 import {
   validateCoverFile,
   validateDraftSave,
   validatePublish,
+  validateBasicsStep,
   validateStep,
 } from './validation';
 
@@ -48,7 +56,7 @@ export function useCreateEventForm() {
     isConfigured,
   } = useAuth();
 
-  const [step, setStep] = useState<CreateEventStepIndex>(editId ? PREVIEW_STEP_INDEX : 0);
+  const [step, setStep] = useState<CreateEventStepIndex>(editId ? PUBLISH_STEP_INDEX : 0);
   const [fieldErrors, setFieldErrors] = useState<FieldErrors>({});
   const [globalError, setGlobalError] = useState<string | null>(null);
   const [saving, setSaving] = useState(false);
@@ -61,7 +69,7 @@ export function useCreateEventForm() {
   const [canCancelPublished, setCanCancelPublished] = useState(false);
 
   const [title, setTitle] = useState('');
-  const [type, setType] = useState<EventType>('road');
+  const [type, setType] = useState<CreateEventType>('');
   const [startsAtLocal, setStartsAtLocal] = useState('');
   const [description, setDescription] = useState('');
   const [coverFile, setCoverFile] = useState<File | null>(null);
@@ -176,8 +184,10 @@ export function useCreateEventForm() {
         }
         const tz = ev.timezoneHint ?? defaultTimezone();
         setEventId(ev.id);
-        setIsPublished(isPublishedToDiscord(ev));
+        const published = isPublishedToDiscord(ev);
+        setIsPublished(published);
         setCanCancelPublished(canCancelPublishedEvent(ev, user));
+        if (published) setStep(0);
         setTitle(ev.title);
         setType(ev.type);
         setStartsAtLocal(utcToLocalInput(ev.startsAt, tz));
@@ -246,6 +256,9 @@ export function useCreateEventForm() {
   ]);
 
   function buildPayload() {
+    if (!isEventType(type)) {
+      throw new Error('Event type is required');
+    }
     const tz = defaultTimezone();
     return {
       id: eventId ?? undefined,
@@ -407,10 +420,13 @@ export function useCreateEventForm() {
   }
 
   function tryContinue(): boolean {
-    const errors = validateStep(step, values, {
-      allowPastStart: Boolean(editId),
-      hostGamertag: user.xboxGamertag,
-    });
+    const errors =
+      isLocalDevHost() && step === 0
+        ? validateBasicsStep(values, {allowPastStart: true})
+        : validateStep(step, values, {
+            allowPastStart: Boolean(editId),
+            hostGamertag: user.xboxGamertag,
+          });
     if (Object.keys(errors).length > 0) {
       setFieldErrors(errors);
       setGlobalError(null);
@@ -420,7 +436,7 @@ export function useCreateEventForm() {
       return false;
     }
     setFieldErrors({});
-    if (step < PREVIEW_STEP_INDEX) goToStep((step + 1) as CreateEventStepIndex);
+    if (step < PUBLISH_STEP_INDEX) goToStep((step + 1) as CreateEventStepIndex);
     return true;
   }
 
@@ -485,6 +501,7 @@ export function useCreateEventForm() {
       setTitle(v);
     },
     setType: (nextType: EventType) => {
+      clearFieldError('type');
       setType(nextType);
       if (coverFile) return;
       if (coverUrl !== null && !isBundledDefaultCover(coverUrl)) return;
@@ -493,7 +510,7 @@ export function useCreateEventForm() {
     },
     setStartsAtLocal: (v: string) => {
       clearFieldError('startsAtLocal');
-      setStartsAtLocal(v);
+      setStartsAtLocal(normalizeDatetimeLocalInput(v));
     },
     setDescription,
     setTrackCodes,

@@ -4,18 +4,20 @@ import {Button} from '../../components/ui/Button';
 import {ConfirmDialog} from '../../components/ui/ConfirmDialog';
 import {PublishTargetModal} from '../../components/PublishTargetPicker';
 import {FormAlerts, StepIndicator} from './components/StepIndicator';
-import {PREVIEW_STEP_INDEX, type CreateEventStepIndex} from './constants';
+import {PublishedTargetSummary} from './components/PublishedTargetSummary';
+import {PUBLISH_STEP_INDEX} from './constants';
+import {collectPublishGaps} from './publishGaps';
 import {useState} from 'react';
 import {useCreateEventForm} from './useCreateEventForm';
-import {BasicsStep} from './steps/BasicsStep';
-import {DetailsStep} from './steps/DetailsStep';
-import {TargetStep} from './steps/TargetStep';
-import {ReviewStep, collectPublishGaps} from './steps/ReviewStep';
+import {EventStep} from './steps/EventStep';
+import {PublishStep} from './steps/PublishStep';
 import {SignInRequiredState} from '../../components/SignInRequiredState';
 import {ContentReveal} from '../../components/ui/ContentReveal';
 import {PageLoading} from '../../components/ui/PageLoading';
 import {useAuth} from '../../context/AuthContext';
 import {useLoadingUI} from '../../hooks/useLoadingUI';
+import {isLocalDevHost} from '../../lib/runtime';
+
 export function CreateEvent() {
   const {t} = useTranslation();
   const [publishConfirmOpen, setPublishConfirmOpen] = useState(false);
@@ -73,12 +75,6 @@ export function CreateEvent() {
     setTargetChannelId,
   } = form;
 
-  const lobbyLeaderLabel = values.lobbyLeaderIsHost
-    ? (user.xboxGamertag?.trim() || t('create.youHost'))
-    : values.lobbyLeaderDisplayName.trim() ||
-      values.lobbyLeaderGamertag.trim() ||
-      t('common.dash');
-
   const missingForPublish = collectPublishGaps({
     channelId: values.targetChannelId,
     carRuleMode: values.carRuleMode,
@@ -87,6 +83,12 @@ export function CreateEvent() {
 
   const hasDraftId = Boolean(eventId);
   const draftFlow = !isPublished;
+
+  const lobbyLeaderLabel = values.lobbyLeaderIsHost
+    ? (user.xboxGamertag?.trim() || t('create.youHost'))
+    : values.lobbyLeaderDisplayName.trim() ||
+      values.lobbyLeaderGamertag.trim() ||
+      t('common.dash');
 
   async function handleSaveDraft() {
     const id = await persistDraft();
@@ -155,13 +157,37 @@ export function CreateEvent() {
     );
   }
 
+  const eventStepProps = {
+    values,
+    fieldErrors,
+    token,
+    hostDiscordId: user.discordId,
+    hostGamertag: user.xboxGamertag,
+    lobbyLeaderSelection,
+    onTitle: setTitle,
+    onType: setType,
+    onStartsAtLocal: setStartsAtLocal,
+    onDescription: setDescription,
+    onCoverChange,
+    onTrackCodes: setTrackCodes,
+    onCarRuleMode: setCarRuleMode,
+    onMaxPi: setMaxPi,
+    onAdditionalCarRestrictions: setAdditionalCarRestrictions,
+    onEventCars: setEventCars,
+    onLobbyLeaderIsHost: setLobbyLeaderIsHost,
+    onLobbyLeaderGamertag: setLobbyLeaderGamertag,
+    onLobbyLeaderSelect,
+  };
+
   return (
     <ContentReveal className="pb-10 pt-5">
-      <StepIndicator
-        step={step}
-        freeNavigation={hasDraftId}
-        onStepClick={setStep}
-      />
+      {!isPublished && (
+        <StepIndicator
+          step={step}
+          freeNavigation={hasDraftId || isLocalDevHost()}
+          onStepClick={setStep}
+        />
+      )}
 
       <FormAlerts
         isConfigured={isConfigured}
@@ -170,95 +196,87 @@ export function CreateEvent() {
         globalError={globalError}
       />
 
-      {step === 0 && (
-        <BasicsStep
-          values={values}
-          fieldErrors={fieldErrors}
-          onTitle={setTitle}
-          onType={setType}
-          onStartsAtLocal={setStartsAtLocal}
-          onDescription={setDescription}
-          onCoverChange={onCoverChange}
-        />
-      )}
-
-      {step === 1 && (
-        <DetailsStep
-          trackCodes={values.trackCodes}
-          onTrackCodes={setTrackCodes}
-          carRuleMode={values.carRuleMode}
-          onCarRuleMode={setCarRuleMode}
-          maxPi={values.maxPi}
-          onMaxPi={setMaxPi}
-          additionalCarRestrictions={values.additionalCarRestrictions}
-          onAdditionalCarRestrictions={setAdditionalCarRestrictions}
-          eventCars={values.eventCars}
-          onEventCars={setEventCars}
-          fieldErrors={fieldErrors}
-        />
-      )}
-
-      {step === 2 && (
-        <TargetStep
+      {isPublished ? (
+        <>
+          <EventStep {...eventStepProps} />
+          <PublishedTargetSummary
+            guildName={values.targetGuildName}
+            hasChannel={Boolean(values.targetChannelId)}
+          />
+        </>
+      ) : step === 0 ? (
+        <EventStep {...eventStepProps} />
+      ) : (
+        <PublishStep
           token={token}
           accessToken={token ?? ''}
-          hostDiscordId={user.discordId}
-          hostGamertag={user.xboxGamertag}
+          title={values.title}
+          type={values.type}
+          description={values.description}
+          coverPreview={values.coverPreview}
+          startsAtLocal={values.startsAtLocal}
+          carRuleMode={values.carRuleMode}
+          maxPi={values.maxPi}
+          additionalCarRestrictions={values.additionalCarRestrictions}
+          eventCars={values.eventCars}
+          trackCodes={normalizedTrackCodes}
+          lobbyLeaderLabel={lobbyLeaderLabel}
           guildId={values.targetGuildId}
           guildName={values.targetGuildName}
           channelId={values.targetChannelId}
-          lockGuild={isPublished}
-          lockChannel={isPublished}
-          lobbyLeaderIsHost={values.lobbyLeaderIsHost}
-          lobbyLeaderGamertag={values.lobbyLeaderGamertag}
-          lobbyLeaderSelection={lobbyLeaderSelection}
+          lockGuild={false}
+          lockChannel={false}
           fieldErrors={fieldErrors}
+          missingForPublish={missingForPublish}
           onGuildChange={onGuildChange}
           onChannelChange={setTargetChannelId}
-          onLobbyLeaderIsHost={setLobbyLeaderIsHost}
-          onLobbyLeaderGamertag={setLobbyLeaderGamertag}
-          onLobbyLeaderSelect={onLobbyLeaderSelect}
-        />
-      )}
-
-      {step === PREVIEW_STEP_INDEX && (
-        <ReviewStep
-          title={values.title}
-          description={values.description}
-          type={values.type}
-          startsAtLocal={values.startsAtLocal}
-          coverPreview={values.coverPreview}
-          targetGuildName={values.targetGuildName}
-          targetChannelId={values.targetChannelId}
-          normalizedTrackCodes={normalizedTrackCodes}
-          carRuleMode={values.carRuleMode}
-          maxPi={values.maxPi}
-          carCount={values.eventCars.length}
-          lobbyLeaderLabel={lobbyLeaderLabel}
-          missingForPublish={missingForPublish}
-          isPublished={isPublished}
-          isEditMode={hasDraftId}
           onJumpToStep={setStep}
         />
       )}
 
       <div className="mt-8 flex flex-col gap-2">
-        {step < PREVIEW_STEP_INDEX && (
-          <Button variant="primary" fullWidth onClick={() => tryContinue()}>
-            {t('common.continue')}
-          </Button>
-        )}
-        {step > 0 && (
-          <Button
-            variant="secondary"
-            fullWidth
-            onClick={() => setStep((step - 1) as CreateEventStepIndex)}
-          >
-            {t('common.back')}
-          </Button>
+        {isPublished && (
+          <>
+            <Button
+              variant="primary"
+              fullWidth
+              disabled={saving || !canPersist}
+              onClick={() => void handleSaveChanges()}
+            >
+              {saving ? busyLabel('saving') : t('create.saveChanges')}
+            </Button>
+            {canCancelPublished ? (
+              <Button
+                variant="danger"
+                fullWidth
+                disabled={saving || !canPersist}
+                onClick={requestCancelPublished}
+              >
+                {t('eventDetail.cancelEvent')}
+              </Button>
+            ) : null}
+          </>
         )}
 
-        {step === PREVIEW_STEP_INDEX && draftFlow && (
+        {!isPublished && step === 0 && (
+          <>
+            <Button variant="primary" fullWidth onClick={() => tryContinue()}>
+              {t('create.continueToPublish')}
+            </Button>
+            {canPersist && (
+              <Button
+                variant="secondary"
+                fullWidth
+                disabled={saving}
+                onClick={() => void handleSaveDraft()}
+              >
+                {saving ? busyLabel('saving') : t('create.saveAsDraft')}
+              </Button>
+            )}
+          </>
+        )}
+
+        {!isPublished && step === PUBLISH_STEP_INDEX && draftFlow && (
           <>
             <Button
               variant="primary"
@@ -282,6 +300,13 @@ export function CreateEvent() {
                   ? t('create.saveChanges')
                   : t('create.saveAsDraft')}
             </Button>
+            <Button
+              variant="secondary"
+              fullWidth
+              onClick={() => setStep(0)}
+            >
+              {t('common.back')}
+            </Button>
             {hasDraftId && (
               <Button
                 variant="danger"
@@ -292,29 +317,6 @@ export function CreateEvent() {
                 {t('eventDetail.deleteDraft')}
               </Button>
             )}
-          </>
-        )}
-
-        {step === PREVIEW_STEP_INDEX && isPublished && (
-          <>
-            <Button
-              variant="primary"
-              fullWidth
-              disabled={saving || !canPersist}
-              onClick={() => void handleSaveChanges()}
-            >
-              {saving ? busyLabel('saving') : t('create.saveChanges')}
-            </Button>
-            {canCancelPublished ? (
-              <Button
-                variant="danger"
-                fullWidth
-                disabled={saving || !canPersist}
-                onClick={requestCancelPublished}
-              >
-                {t('eventDetail.cancelEvent')}
-              </Button>
-            ) : null}
           </>
         )}
       </div>

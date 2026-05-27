@@ -3,11 +3,7 @@ import {useTranslation} from 'react-i18next';
 import {busyLabel} from '../i18n/busyLabels';
 import {listChannels, listGuilds, validatePublishChannel} from '../lib/api';
 import {getGuildContext} from '../lib/discord';
-import {
-  botInstallOpensExternally,
-  buildBotInstallUrl,
-  openBotInstallUrl,
-} from '../lib/discordInstall';
+import {buildBotInstallUrl, openBotInstallUrl} from '../lib/discordInstall';
 import {isPlaceholderGuildName} from '../lib/guildDisplay';
 import {Button} from './ui/Button';
 import {FieldLabel} from './ui/FieldLabel';
@@ -53,7 +49,6 @@ export function PublishTargetPicker({
   const channelValidateRef = useRef(0);
   const validatedChannelKeyRef = useRef('');
   const canAddBot = Boolean(buildBotInstallUrl());
-  const installInBrowser = botInstallOpensExternally();
   const activityGuildId = getGuildContext().guildId;
 
   const guildOptions = useMemo(() => {
@@ -224,17 +219,9 @@ export function PublishTargetPicker({
         ) : guilds.length === 0 ? (
           <div className="space-y-3">
             <p className="text-sm text-muted">
-              {guildHint ??
-                'Add FORZA.EVENTS to a Discord server you manage, then refresh the list.'}
+              {guildHint ?? t('publish.noServersHint')}
             </p>
             {botInstallActions}
-            <p className="text-[10px] leading-relaxed text-muted">
-              One install adds the bot so events can be announced in a channel. Launching from App
-              Launcher alone is not enough.
-              {installInBrowser
-                ? ' Discord will open your browser to approve — finish there, then return to this Activity and tap Refresh list.'
-                : ' After approving, tap Refresh list.'}
-            </p>
           </div>
         ) : (
           <>
@@ -258,25 +245,17 @@ export function PublishTargetPicker({
               ))}
             </Select>
             {botInstallActions}
-            {!lockGuild && (
-              <p className="mt-1.5 text-[10px] leading-relaxed text-muted">
-                Only servers where you manage the server and FORZA.EVENTS is installed are listed.
-                Use Add to another server to install the bot elsewhere, then refresh.
-                {installInBrowser &&
-                  ' Install opens in your browser; return to the Activity when done.'}
-              </p>
-            )}
           </>
         )}
         {lockGuild && (
-          <p className="mt-1 text-[10px] text-muted">Server is locked after publish.</p>
+          <p className="mt-1.5 text-xs text-muted">{t('create.serverLocked')}</p>
         )}
       </div>
 
       <div>
         <FieldLabel className="mb-1.5 block">{t('publish.announcementChannel')}</FieldLabel>
         {!guildId ? (
-          <p className="text-sm text-muted">Choose a server first.</p>
+          <p className="text-sm text-muted">{t('publish.selectServerFirst')}</p>
         ) : (
           <>
             <Select
@@ -296,10 +275,10 @@ export function PublishTargetPicker({
               ))}
             </Select>
             {loadingChannels && (
-              <p className="mt-1.5 text-[10px] text-muted">Refreshing channel list…</p>
+              <p className="mt-1.5 text-xs text-muted">{t('publish.refreshingChannels')}</p>
             )}
             {validatingChannel && (
-              <p className="mt-1.5 text-[10px] text-muted">Checking bot permissions…</p>
+              <p className="mt-1.5 text-xs text-muted">{t('publish.checkingChannel')}</p>
             )}
             {channelsError && (
               <div className="mt-2 space-y-2">
@@ -329,7 +308,7 @@ export function PublishTargetPicker({
           </>
         )}
         {lockChannel && (
-          <p className="mt-1 text-[10px] text-muted">Channel is locked after publish.</p>
+          <p className="mt-1.5 text-xs text-muted">{t('create.channelLocked')}</p>
         )}
       </div>
 
@@ -366,9 +345,7 @@ export function PublishTargetModal({
     <ModalBackdrop>
       <ModalPanel>
         <h2 className="text-lg font-bold text-white">{t('publish.choosePublishTarget')}</h2>
-        <p className="mt-1 text-sm text-muted">
-          Pick the server and channel. These cannot be changed after publish.
-        </p>
+        <p className="mt-1 text-sm text-muted">{t('publish.modalHint')}</p>
         <div className="mt-4">
           <PublishTargetPicker
             accessToken={accessToken}

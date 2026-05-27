@@ -5,8 +5,17 @@ import {cn} from '../../lib/cn';
 export const fieldLabelClass =
   'block text-[10px] font-bold uppercase tracking-[0.14em] text-muted';
 
+/** Compact caps label inside cards/detail rows (not form section titles). */
 export const sectionLabelClass =
   'text-[10px] font-bold uppercase tracking-widest text-muted';
+
+/** Create/edit form block heading — distinct from `fieldLabelClass`. */
+export const formSectionTitleClass =
+  'text-sm font-semibold tracking-tight text-slate-100';
+
+/** Border-only panels for create/edit form sections (no fill). */
+export const formSectionPanelClass =
+  'rounded-xl border border-white/[0.1]';
 
 export const fieldHintClass = 'mt-1.5 text-xs text-muted';
 

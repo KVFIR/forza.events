@@ -10,16 +10,10 @@ import {
 import {Alert} from '../../../components/ui/Alert';
 import type {CreateEventStepIndex} from '../constants';
 
-const STEP_KEYS = [
-  'create.steps.basics',
-  'create.steps.details',
-  'create.steps.target',
-  'create.steps.preview',
-] as const;
+const STEP_KEYS = ['create.steps.event', 'create.steps.publish'] as const;
 
 type StepIndicatorProps = {
   step: CreateEventStepIndex;
-  /** When true (e.g. editing an existing event), every step except the current one is clickable. */
   freeNavigation?: boolean;
   onStepClick?: (index: CreateEventStepIndex) => void;
 };
@@ -28,13 +22,15 @@ export function StepIndicator({step, freeNavigation, onStepClick}: StepIndicator
   const {t} = useTranslation();
 
   return (
-    <nav className={cn('mb-6 flex gap-1', segmentContainerClass)}>
+    <nav
+      className={cn('mb-6 flex gap-1', segmentContainerClass)}
+      aria-label={t('create.formProgress')}
+    >
       {STEP_KEYS.map((labelKey, i) => {
         const idx = i as CreateEventStepIndex;
         const done = idx < step;
         const active = idx === step;
-        const clickable =
-          Boolean(onStepClick) && (freeNavigation ? !active : done);
+        const clickable = Boolean(onStepClick) && (freeNavigation ? !active : done);
 
         return (
           <button
@@ -44,7 +40,7 @@ export function StepIndicator({step, freeNavigation, onStepClick}: StepIndicator
             onClick={() => clickable && onStepClick?.(idx)}
             className={cn(
               segmentItemBaseClass,
-              'flex-1 py-1.5 text-center text-[10px] uppercase tracking-widest',
+              'flex-1 py-2 text-center text-[11px] font-semibold uppercase tracking-wide',
               active && segmentItemSelectedClass,
               clickable && !active && 'text-slate-400 hover:text-slate-200',
               !active && !clickable && segmentItemIdleClass,

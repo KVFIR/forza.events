@@ -78,6 +78,29 @@ export function validateDetailsStep(
   return errors;
 }
 
+export function validateConvoyFields(
+  values: Pick<
+    CreateEventFormValues,
+    'lobbyLeaderIsHost' | 'lobbyLeaderGamertag' | 'lobbyLeaderDiscordId'
+  >,
+  options?: {hostGamertag?: string},
+): FieldErrors {
+  const errors: FieldErrors = {};
+  if (values.lobbyLeaderIsHost) {
+    const tagErr = gamertagError(options?.hostGamertag ?? '');
+    if (tagErr) {
+      errors.lobbyLeaderGamertag = i18n.t('validation.convoyLeaderProfile');
+    }
+  } else {
+    if (!values.lobbyLeaderDiscordId) {
+      errors.lobbyLeaderDiscordId = i18n.t('validation.convoyLeaderDiscordRequired');
+    }
+    const tagErr = gamertagError(values.lobbyLeaderGamertag);
+    if (tagErr) errors.lobbyLeaderGamertag = tagErr;
+  }
+  return errors;
+}
+
 export function validateTargetStep(
   values: Pick<
     CreateEventFormValues,
@@ -94,19 +117,25 @@ export function validateTargetStep(
   if (options?.requireChannel && !values.targetChannelId) {
     errors.targetChannelId = i18n.t('validation.channelRequired');
   }
-  if (values.lobbyLeaderIsHost) {
-    const tagErr = gamertagError(options?.hostGamertag ?? '');
-    if (tagErr) {
-      errors.lobbyLeaderGamertag = i18n.t('validation.convoyLeaderProfile');
-    }
-  } else {
-    if (!values.lobbyLeaderDiscordId) {
-      errors.lobbyLeaderDiscordId = i18n.t('validation.convoyLeaderDiscordRequired');
-    }
-    const tagErr = gamertagError(values.lobbyLeaderGamertag);
-    if (tagErr) errors.lobbyLeaderGamertag = tagErr;
-  }
-  return errors;
+  return {...errors, ...validateConvoyFields(values, options)};
+}
+
+export function validateEventStep(
+  values: CreateEventFormValues,
+  options?: {allowPastStart?: boolean; hostGamertag?: string},
+): FieldErrors {
+  return {
+    ...validateBasicsStep(values, {allowPastStart: options?.allowPastStart}),
+    ...validateDetailsStep(values),
+    ...validateConvoyFields(values, options),
+  };
+}
+
+export function validatePublishStep(
+  values: CreateEventFormValues,
+  options?: {requireChannel?: boolean; hostGamertag?: string},
+): FieldErrors {
+  return validateTargetStep(values, options);
 }
 
 export function validateStep(
@@ -116,11 +145,9 @@ export function validateStep(
 ): FieldErrors {
   switch (step) {
     case 0:
-      return validateBasicsStep(values, {allowPastStart: options?.allowPastStart});
+      return validateEventStep(values, options);
     case 1:
-      return validateDetailsStep(values);
-    case 2:
-      return validateTargetStep(values, options);
+      return validatePublishStep(values, options);
     default:
       return {};
   }
@@ -134,11 +161,13 @@ export function validateDraftSave(
   if (stepErr) return stepErr;
   const detailsErr = firstFieldError(validateDetailsStep(values));
   if (detailsErr) return detailsErr;
-  const targetErr = firstFieldError(validateTargetStep(values, {hostGamertag}));
+  const targetErr = firstFieldError(
+    validateTargetStep(values, {hostGamertag, requireChannel: false}),
+  );
   if (targetErr) return targetErr;
   return validateDraftFormMessage({
     title: values.title,
-    type: values.type,
+    type: isEventType(values.type) ? values.type : '',
     startsAtLocal: values.startsAtLocal,
     guildId: values.targetGuildId,
   });
@@ -159,6 +188,10 @@ export function validatePublish(
   const leader = values.lobbyLeaderIsHost
     ? hostGamertag
     : values.lobbyLeaderGamertag;
+
+  if (!isEventType(values.type)) {
+    return i18n.t('validation.typeRequired');
+  }
 
   return validatePublishFormMessage({
     title: values.title,
