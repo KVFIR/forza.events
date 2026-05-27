@@ -215,6 +215,12 @@
     "supabaseEnvAlert": "Добавьте <1>SUPABASE_URL</1> и <3>SUPABASE_ANON_KEY</3> в <5>.env</5> и перезапустите <7>npm run dev</7>.",
     "iAmConvoyLeader": "Я лидер конвоя",
     "convoyLeaderHint": "Лидер лобби Forza в игре — может отличаться от организатора в Discord.",
+    "convoyLeaderSearchPlaceholder": "Поиск участников сервера (мин. 2 символа)",
+    "convoyLeaderSearching": "Поиск…",
+    "convoyLeaderNoResults": "Никого не найдено. Попробуйте другое имя.",
+    "convoyLeaderClear": "Сменить",
+    "convoyLeaderPickServerFirst": "Сначала выберите сервер выше, затем лидера конвоя.",
+    "convoyLeaderGamertagHint": "У игрока ещё нет Xbox gamertag в FORZA.EVENTS — укажите его для результатов и карточки.",
     "convoyLeaderProfileWarning": "Добавьте Xbox gamertag в профиле перед публикацией или укажите другого лидера ниже.",
     "tracksOptionalHint": "Необязательно — коды трасс для списка маршрута.",
     "openBuildOption": "Любая сборка",
@@ -271,7 +277,8 @@
     "hostCannotJoin": "Организатору не нужно регистрироваться на своё событие.",
     "eventNotFound": "Событие не найдено.",
     "notDraft": "Опубликовать можно только черновик.",
-    "invalidResponse": "Не удалось связаться с сервером. Попробуйте снова."
+    "invalidResponse": "Не удалось связаться с сервером. Попробуйте снова.",
+    "resultsParticipantsOnly": "В результатах только участники с Join или лидер конвоя (хост-лидер всегда допускается)."
   },
   "validation": {
     "futureDate": "Укажите дату и время в будущем.",
@@ -287,6 +294,7 @@
     "guildRequired": "Выберите сервер Discord для события.",
     "channelRequired": "Выберите канал перед публикацией.",
     "convoyLeaderRequired": "Укажите gamertag лидера конвоя.",
+    "convoyLeaderDiscordRequired": "Выберите лидера конвоя из участников сервера Discord.",
     "targetGuildLocked": "Сервер нельзя изменить после публикации.",
     "targetChannelLocked": "Канал нельзя изменить после публикации."
   },
@@ -296,7 +304,8 @@
     "moveUp": "Выше",
     "moveDown": "Ниже",
     "submitTitle": "Отправить результаты?",
-    "submitDesc": "Отправить эти результаты? После отправки их нельзя изменить."
+    "submitDesc": "Отправить эти результаты? После отправки их нельзя изменить.",
+    "noParticipants": "Нужен хотя бы один гонщик: участники с Join или лидер конвоя (он всегда в гонке — для хоста укажите себя лидером на карточке события)."
   },
   "confirm": {
     "defaultConfirm": "Подтвердить"

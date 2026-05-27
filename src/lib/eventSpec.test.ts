@@ -4,6 +4,7 @@ import {
   eventHasStarted,
   isRegistrationOpen,
   normalizeTrackCodes,
+  resolveEventDisplayStatus,
   validateDraftForm,
 } from './eventSpec';
 import {VALIDATION_CODES} from './validationCodes';
@@ -66,5 +67,36 @@ describe('registration policy', () => {
     });
     expect(eventHasStarted(e)).toBe(true);
     expect(canLeaveRegistration(e)).toBe(false);
+  });
+});
+
+describe('resolveEventDisplayStatus', () => {
+  it('shows live when start time passed but DB status is still open', () => {
+    const e = event({
+      lifecycle: 'open',
+      status: 'open',
+      startsAt: new Date(Date.now() - 60_000).toISOString(),
+    });
+    expect(resolveEventDisplayStatus(e)).toBe('live');
+  });
+
+  it('shows ended when completed', () => {
+    const e = event({
+      lifecycle: 'completed',
+      status: 'ended',
+      startsAt: new Date(Date.now() - 3_600_000).toISOString(),
+    });
+    expect(resolveEventDisplayStatus(e)).toBe('ended');
+  });
+
+  it('prefers live over full after start', () => {
+    const e = event({
+      lifecycle: 'open',
+      status: 'full',
+      currentPlayers: 12,
+      maxPlayers: 12,
+      startsAt: new Date(Date.now() - 60_000).toISOString(),
+    });
+    expect(resolveEventDisplayStatus(e)).toBe('live');
   });
 });

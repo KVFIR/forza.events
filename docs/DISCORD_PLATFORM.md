@@ -80,14 +80,15 @@ Host must be guild member with **Manage Server** (or Administrator). Server re-v
    - `http://localhost:5180/auth/callback` — optional local browser dev
 5. **Interactions Endpoint URL** — see above.
 6. **Bot** — token in Supabase secrets; Code Grant off.
-7. **Install in pilot guilds** — bot must be in server before `list-guilds` returns it.
-8. **Channel permissions** — bot can post in chosen announcement channels.
+7. **Privileged Gateway Intent: Server Members** — required for `list-guild-members` (convoy leader search when creating events).
+8. **Install in pilot guilds** — bot must be in server before `list-guilds` returns it.
+9. **Channel permissions** — bot can post in chosen announcement channels.
 
 ### Supabase / Railway
 
 - `npm run sync:secrets` — Discord secrets
-- `npm run deploy:functions` — all 14 functions, `--no-verify-jwt`
-- `supabase db push` — through migration `021`
+- `npm run deploy:functions` — all Edge functions (incl. `list-guild-members`), `--no-verify-jwt`
+- `supabase db push` — through migration `022`
 - Railway: `APP_ORIGIN` = deploy URL; rebuild frontend after env changes
 
 ### Validate in Discord

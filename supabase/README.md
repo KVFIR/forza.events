@@ -15,7 +15,7 @@ See [`docs/PLAN.md`](../docs/PLAN.md), [`docs/STATUS.md`](../docs/STATUS.md), [`
 
 ## Migrations
 
-Apply through **`021`**:
+Apply through **`022`**:
 
 ```bash
 supabase login
@@ -41,6 +41,7 @@ supabase db push
 | `019_launch_intents_nullable_guild.sql` | DM / no-guild launch intents |
 | `020_user_event_join_stats.sql` | `events_joined` trigger |
 | `021_api_hardening.sql` | Scoped RLS reads + `check_api_rate_limit` |
+| `022_lobby_leader_discord_id.sql` | `events.lobby_leader_discord_id` for convoy leader roster + results |
 
 ## Edge Functions
 
@@ -56,6 +57,7 @@ npm run deploy:functions
 | `host-drafts` | Discord token | Draft list for host |
 | `token-exchange` | OAuth code | Activity / localhost OAuth |
 | `list-guilds` | Discord token | Publish target servers |
+| `list-guild-members` | Discord token | Convoy leader search (needs Server Members intent) |
 | `list-channels` | Discord token | Postable channels |
 | `validate-channel` | Discord token | Channel validation |
 | `publish-event` | Discord token | Post Discord embed |

@@ -127,6 +127,22 @@ export async function listGuilds(discordToken: string) {
   }>('list-guilds', {}, discordToken);
 }
 
+export async function listGuildMembers(
+  discordToken: string,
+  guildId: string,
+  query: string,
+) {
+  return invoke<{
+    members: {
+      discord_id: string;
+      username: string;
+      display_name: string;
+      avatar_url: string | null;
+      xbox_gamertag: string | null;
+    }[];
+  }>('list-guild-members', {guild_id: guildId, query}, discordToken);
+}
+
 export async function listChannels(discordToken: string, guildId: string) {
   return invoke<{
     channels: {id: string; name: string; position: number}[];

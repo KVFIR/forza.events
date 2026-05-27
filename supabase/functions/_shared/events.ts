@@ -1,3 +1,5 @@
+import {formatCarEmbedName} from './carDisplay.ts';
+import {eventHasStarted} from './eventSpec.ts';
 import {resolveCoverAbsolute} from './eventCovers.ts';
 import {openEventCustomId} from './eventLaunch.ts';
 import {eventTypeEmbedColor} from './eventTypes.ts';
@@ -169,7 +171,11 @@ function resolveOpenBuildNotes(event: EmbedEventInput): string | null {
 }
 
 function formatCarName(car: EmbedAllowedCar): string {
-  return [car.year, car.make, car.model].filter(Boolean).join(' ');
+  return formatCarEmbedName({
+    make: car.make,
+    model: car.model,
+    year: car.year,
+  });
 }
 
 function formatRestrictedCarBlock(car: EmbedAllowedCar): string {
@@ -180,7 +186,7 @@ function formatRestrictedCarBlock(car: EmbedAllowedCar): string {
   for (const rule of (car.car_restrictions ?? []).filter(Boolean)) {
     coded.push(inlineCode(rule));
   }
-  return [formatCarName(car), ...coded].join(' · ');
+  return [formatCarName(car), ...coded].join(' ');
 }
 
 function splitOversizedBlock(block: string, max = EMBED_FIELD_VALUE_MAX): string[] {
@@ -267,7 +273,7 @@ function fitRestrictedCarFields(
 
 function formatOpenBuildCarField(event: EmbedEventInput): string {
   const pi = event.max_pi ? formatMaxPi(event.max_pi) : 'PI cap';
-  return `Open build · ${inlineCode(pi)}`;
+  return `Open build ${inlineCode(pi)}`;
 }
 
 function formatOpenBuildRestrictionsField(event: EmbedEventInput): string | null {
@@ -286,16 +292,18 @@ type EmbedLifecycleUi = {
   statusField: EmbedField | null;
   buttonLabel: string;
   buttonDisabled: boolean;
+  buttonStyle: 1 | 2 | 3 | 4;
 };
 
 function resolveEmbedLifecycleUi(
   status: string | undefined,
+  startsAt: string,
   defaultColor: number,
 ): EmbedLifecycleUi {
   switch (status) {
     case 'cancelled':
       return {
-        titlePrefix: '🚫 CANCELLED · ',
+        titlePrefix: '🚫 CANCELLED ',
         color: EMBED_STATUS_COLORS.cancelled,
         statusField: {
           name: embedFieldName('Status'),
@@ -304,10 +312,11 @@ function resolveEmbedLifecycleUi(
         },
         buttonLabel: 'Event cancelled',
         buttonDisabled: true,
+        buttonStyle: 2,
       };
     case 'completed':
       return {
-        titlePrefix: '✅ COMPLETED · ',
+        titlePrefix: '✅ COMPLETED ',
         color: EMBED_STATUS_COLORS.completed,
         statusField: {
           name: embedFieldName('Status'),
@@ -316,10 +325,11 @@ function resolveEmbedLifecycleUi(
         },
         buttonLabel: 'View in FORZA.EVENTS',
         buttonDisabled: false,
+        buttonStyle: 1,
       };
     case 'archived':
       return {
-        titlePrefix: '📦 ARCHIVED · ',
+        titlePrefix: '📦 ARCHIVED ',
         color: EMBED_STATUS_COLORS.archived,
         statusField: {
           name: embedFieldName('Status'),
@@ -328,14 +338,30 @@ function resolveEmbedLifecycleUi(
         },
         buttonLabel: 'View in FORZA.EVENTS',
         buttonDisabled: false,
+        buttonStyle: 1,
       };
     default:
+      if (eventHasStarted({status: status ?? 'open', starts_at: startsAt})) {
+        return {
+          titlePrefix: '🏁 LIVE ',
+          color: defaultColor,
+          statusField: {
+            name: embedFieldName('Status'),
+            value: 'This event has **started**. Registration is closed.',
+            inline: false,
+          },
+          buttonLabel: 'Registration closed',
+          buttonDisabled: true,
+          buttonStyle: 2,
+        };
+      }
       return {
         titlePrefix: '',
         color: defaultColor,
         statusField: null,
-        buttonLabel: 'Open in FORZA.EVENTS',
+        buttonLabel: '✅ Register for the Event',
         buttonDisabled: false,
+        buttonStyle: 3,
       };
   }
 }
@@ -349,7 +375,7 @@ export function buildEventEmbed(event: EmbedEventInput) {
   const isOpenBuild = event.car_rule_mode !== 'restricted_list';
   const lobbyCount = formatLobbyCount(event.current_players);
   const typeColor = eventTypeEmbedColor(event.type);
-  const lifecycle = resolveEmbedLifecycleUi(event.status, typeColor);
+  const lifecycle = resolveEmbedLifecycleUi(event.status, event.starts_at, typeColor);
 
   const rawTitle = `${lifecycle.titlePrefix}${event.title}`.trim();
   const title = rawTitle.slice(0, EMBED_TITLE_MAX);
@@ -448,7 +474,7 @@ export function buildEventEmbed(event: EmbedEventInput) {
       components: [
         {
           type: 2,
-          style: lifecycle.buttonDisabled ? 2 : 1,
+          style: lifecycle.buttonDisabled ? 2 : lifecycle.buttonStyle,
           label: lifecycle.buttonLabel,
           custom_id: openEventCustomId(event.id),
           ...(lifecycle.buttonDisabled ? {disabled: true} : {}),

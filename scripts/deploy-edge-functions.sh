@@ -9,6 +9,7 @@ FUNCTIONS=(
   host-drafts
   token-exchange
   list-guilds
+  list-guild-members
   list-channels
   validate-channel
   publish-event

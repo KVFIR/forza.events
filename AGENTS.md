@@ -125,5 +125,6 @@ Lessons from implementation work (keep in sync when behavior changes).
 - [`docs/BACKLOG.md`](docs/BACKLOG.md) — post-MVP planned features (update when adding or shipping backlog items)
 - [`docs/DISCORD_PLATFORM.md`](docs/DISCORD_PLATFORM.md) — proxy mapping, portal checklist
 - [`docs/DEVELOPMENT.md`](docs/DEVELOPMENT.md) — local OAuth, testing checklist
-- [`supabase/README.md`](supabase/README.md) — migrations `001`–`021`, Edge Functions
-- [`scripts/deploy-edge-functions.sh`](scripts/deploy-edge-functions.sh) — canonical function list (14)
+- [`supabase/README.md`](supabase/README.md) — migrations `001`–`022`, Edge Functions
+- [`scripts/deploy-edge-functions.sh`](scripts/deploy-edge-functions.sh) — canonical function list (15)
+- **Convoy leader:** `events.lobby_leader_discord_id` (migration `022`); pick via `list-guild-members` on Create → Target; host leader uses `host_discord_id`; results roster includes leader without Join when id is set.

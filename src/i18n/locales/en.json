@@ -215,6 +215,12 @@
     "supabaseEnvAlert": "Add <1>SUPABASE_URL</1> and <3>SUPABASE_ANON_KEY</3> to <5>.env</5>, then restart <7>npm run dev</7>.",
     "iAmConvoyLeader": "I am the convoy leader",
     "convoyLeaderHint": "In-game Forza lobby leader — can differ from the Discord host.",
+    "convoyLeaderSearchPlaceholder": "Search server members (min. 2 characters)",
+    "convoyLeaderSearching": "Searching…",
+    "convoyLeaderNoResults": "No members found. Try another name.",
+    "convoyLeaderClear": "Change",
+    "convoyLeaderPickServerFirst": "Choose a server above, then pick the convoy leader.",
+    "convoyLeaderGamertagHint": "This player has no Xbox gamertag in FORZA.EVENTS yet — enter it for results and the event card.",
     "convoyLeaderProfileWarning": "Add your Xbox gamertag in Profile before publishing, or enter another convoy leader below.",
     "tracksOptionalHint": "Optional — add track share codes for the route list.",
     "openBuildOption": "Open build",
@@ -269,7 +275,8 @@
     "hostCannotJoin": "Event hosts do not need to join.",
     "eventNotFound": "Event not found.",
     "notDraft": "Only draft events can be published.",
-    "invalidResponse": "Could not reach the server. Try again."
+    "invalidResponse": "Could not reach the server. Try again.",
+    "resultsParticipantsOnly": "Results can only include joined drivers or the convoy leader (host leader is always allowed)."
   },
   "validation": {
     "futureDate": "Choose a date and time in the future.",
@@ -285,6 +292,7 @@
     "guildRequired": "Choose a Discord server for this event.",
     "channelRequired": "Choose a channel before publishing.",
     "convoyLeaderRequired": "Convoy leader gamertag is required.",
+    "convoyLeaderDiscordRequired": "Choose a convoy leader from your Discord server.",
     "targetGuildLocked": "Server cannot be changed after publish.",
     "targetChannelLocked": "Channel cannot be changed after publish."
   },
@@ -294,7 +302,8 @@
     "moveUp": "Move up",
     "moveDown": "Move down",
     "submitTitle": "Submit results?",
-    "submitDesc": "Submit these results? They cannot be changed after submission."
+    "submitDesc": "Submit these results? They cannot be changed after submission.",
+    "noParticipants": "Add drivers who joined the event, or set yourself as convoy leader on the event — the leader always races and can be ranked in results."
   },
   "confirm": {
     "defaultConfirm": "Confirm"

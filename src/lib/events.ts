@@ -26,6 +26,7 @@ export {
   isPublishedEvent,
   isPublishedToDiscord,
   isRegistrationOpen,
+  resolveEventDisplayStatus,
   shouldShowEventResults,
 } from './eventSpec';
 
@@ -55,6 +56,7 @@ type DbEventRow = {
   additional_car_restrictions?: string | null;
   lobby_leader_gamertag?: string | null;
   lobby_leader_is_host?: boolean | null;
+  lobby_leader_discord_id?: string | null;
   timezone_hint?: string | null;
   users?: {username: string; avatar_url?: string | null} | null;
   discord_guilds?: {guild_name: string} | null;
@@ -185,6 +187,7 @@ export function resolveEventResultDisplay(
 function mapStatus(row: DbEventRow): EventStatus {
   if (row.status === 'live' || row.status === 'checkin') return 'live';
   if (['completed', 'cancelled', 'archived'].includes(row.status)) return 'ended';
+  if (new Date(row.starts_at).getTime() <= Date.now()) return 'live';
   if (row.current_players >= row.max_players) return 'full';
   return 'open';
 }
@@ -274,6 +277,7 @@ export function mapDbEvent(row: DbEventRow): ForzaEvent {
         : undefined),
     lobbyLeaderGamertag: row.lobby_leader_gamertag ?? undefined,
     lobbyLeaderIsHost: row.lobby_leader_is_host ?? true,
+    lobbyLeaderDiscordId: row.lobby_leader_discord_id ?? undefined,
     timezoneHint: row.timezone_hint ?? undefined,
     participants,
   };

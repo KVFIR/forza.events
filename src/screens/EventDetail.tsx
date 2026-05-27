@@ -48,6 +48,8 @@ import {GamertagModal} from '../components/GamertagModal';
 import {useJoinedEvents} from '../context/JoinedEventsContext';
 import {useAuth} from '../context/AuthContext';
 import {useEventLiveUpdates} from '../hooks/useEventLiveUpdates';
+import {useResolveEventDisplayStatus} from '../hooks/useResolveEventDisplayStatus';
+import {formatCarDisplayName} from '../lib/carDisplay';
 import {piToClass} from '../lib/pi';
 import {formatLobbyCount, LOBBY_TOTAL_PLAYERS} from '../lib/constants';
 import {resolveOrganiserLabel} from '../lib/organiser';
@@ -271,7 +273,8 @@ export function EventDetail() {
   const registrationOpen = isRegistrationOpen(event);
   const canLeave = canLeaveRegistration(event);
   const started = eventHasStarted(event);
-  const full = event.status === 'full' || event.currentPlayers >= event.maxPlayers;
+  const displayStatus = useResolveEventDisplayStatus(event);
+  const full = displayStatus === 'full';
   const showDraftActions = isDraft && isHost;
   const showHostPostStartActions = isHost && started && (canEnterResults || canCancel);
   const {primary: when} = formatEventTime(event.startsAt, event.timezoneHint);
@@ -323,7 +326,7 @@ export function EventDetail() {
         <div className="min-w-0 flex-1">
           <div className="flex flex-wrap items-center gap-2">
             <Badge type={event.type} />
-            {isDraft ? <DraftBadge /> : <StatusBadge status={event.status} />}
+            {isDraft ? <DraftBadge /> : <StatusBadge status={displayStatus} />}
           </div>
           <h1 className="mt-1.5 text-xl font-black tracking-tight text-white">{event.title}</h1>
           {event.description && (
@@ -569,7 +572,7 @@ export function EventDetail() {
                     <li key={c.carId} className="py-2.5 first:pt-0 last:pb-0">
                       <div className={carRuleRowClass}>
                         <span className="truncate font-medium text-slate-200">
-                          {c.make} {c.model}
+                          {formatCarDisplayName(c)}
                           {c.year ? (
                             <span className="ml-1 text-xs font-normal text-muted">{c.year}</span>
                           ) : null}

@@ -6,6 +6,7 @@ import {ArrowLeft, ChevronDown, ChevronUp} from 'lucide-react';
 import {useAuth} from '../context/AuthContext';
 import {useJoinedEvents} from '../context/JoinedEventsContext';
 import {isApiConfigured, submitEventResults} from '../lib/api';
+import {resolveResultsRoster} from '../lib/eventRoster';
 import {
   canSubmitEventResults,
   eventHasStarted,
@@ -80,17 +81,11 @@ export function EventResults() {
           navigate(`/event/${id}`, {replace: true});
           return;
         }
-        const base =
-          event.participants.length > 0
-            ? event.participants
-            : [
-                {
-                  discordId: user.discordId,
-                  username: user.username,
-                  gamertag: user.xboxGamertag,
-                },
-              ];
-        setPlacements(buildPlacements(base));
+        setPlacements(
+          buildPlacements(
+            resolveResultsRoster(event, user.discordId, user.xboxGamertag),
+          ),
+        );
       })
       .finally(() => {
         if (!cancelled) setLoading(false);
@@ -130,12 +125,6 @@ export function EventResults() {
     if (!id || placements.length === 0 || alreadySubmitted) return;
     setSaving(true);
     setError(null);
-    const payload = placements.map((p, i) => ({
-      discord_id: p.discordId,
-      position: i + 1,
-      dnf: p.dnf,
-      dns: p.dns,
-    }));
 
     try {
       const token = getAccessToken();
@@ -145,11 +134,32 @@ export function EventResults() {
       if (!isApiConfigured()) {
         throw new Error('App is not configured for saving results.');
       }
+
+      const fresh = await fetchEventById(id, {discordToken: token});
+      if (!fresh) {
+        throw new Error('Event not found.');
+      }
+      const allowedIds = new Set(
+        resolveResultsRoster(fresh, user.discordId, user.xboxGamertag).map((p) => p.discordId),
+      );
+      const payload = placements
+        .filter((p) => allowedIds.has(p.discordId))
+        .map((p, i) => ({
+          discord_id: p.discordId,
+          position: i + 1,
+          dnf: p.dnf,
+          dns: p.dns,
+        }));
+
+      if (payload.length === 0) {
+        throw new Error(t('results.noParticipants'));
+      }
+
       await submitEventResults(token, id, payload);
       bumpRefresh();
       navigate(`/event/${id}`);
     } catch (e) {
-      setError(String(e));
+      setError(e instanceof Error ? e.message : String(e));
     } finally {
       setSaving(false);
     }
@@ -240,7 +250,7 @@ export function EventResults() {
       </ol>
 
       {placements.length === 0 && (
-        <p className="mt-8 text-center text-sm text-muted">No participants to rank yet.</p>
+        <p className="mt-8 text-center text-sm text-muted">{t('results.noParticipants')}</p>
       )}
 
       <Button

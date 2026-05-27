@@ -82,6 +82,21 @@ describe('publish validation parity', () => {
     ).toBe(code);
   });
 
+  it('publish-event payload shape passes when channel_id set', () => {
+    expect(
+      validatePublishReady({
+        title: base.title,
+        type: base.type,
+        starts_at: '2030-01-01T00:00:00.000Z',
+        guild_id: base.guildId,
+        channel_id: base.channelId,
+        lobby_leader_gamertag: base.lobbyLeaderGamertag,
+        car_rule_mode: 'anything_goes',
+        max_pi: base.maxPi,
+      }),
+    ).toBeNull();
+  });
+
   it('PI range for open build', () => {
     const code = VALIDATION_CODES.PI_RANGE;
     expect(validatePublishForm({...base, maxPi: 50})).toBe(code);

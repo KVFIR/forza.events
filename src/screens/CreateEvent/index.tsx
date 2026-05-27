@@ -66,15 +66,19 @@ export function CreateEvent() {
     setMaxPi,
     setAdditionalCarRestrictions,
     setEventCars,
+    lobbyLeaderSelection,
     setLobbyLeaderIsHost,
     setLobbyLeaderGamertag,
+    onLobbyLeaderSelect,
     onGuildChange,
     setTargetChannelId,
   } = form;
 
   const lobbyLeaderLabel = values.lobbyLeaderIsHost
     ? (user.xboxGamertag?.trim() || t('create.youHost'))
-    : values.lobbyLeaderGamertag.trim() || t('common.dash');
+    : values.lobbyLeaderDisplayName.trim() ||
+      values.lobbyLeaderGamertag.trim() ||
+      t('common.dash');
 
   const missingForPublish = collectPublishGaps({
     channelId: values.targetChannelId,
@@ -181,11 +185,6 @@ export function CreateEvent() {
 
       {step === 1 && (
         <DetailsStep
-          hostGamertag={user.xboxGamertag}
-          lobbyLeaderIsHost={values.lobbyLeaderIsHost}
-          lobbyLeaderGamertag={values.lobbyLeaderGamertag}
-          onLobbyLeaderIsHost={setLobbyLeaderIsHost}
-          onLobbyLeaderGamertag={setLobbyLeaderGamertag}
           trackCodes={values.trackCodes}
           onTrackCodes={setTrackCodes}
           carRuleMode={values.carRuleMode}
@@ -204,14 +203,22 @@ export function CreateEvent() {
         <TargetStep
           token={token}
           accessToken={token ?? ''}
+          hostDiscordId={user.discordId}
+          hostGamertag={user.xboxGamertag}
           guildId={values.targetGuildId}
           guildName={values.targetGuildName}
           channelId={values.targetChannelId}
           lockGuild={isPublished}
           lockChannel={isPublished}
+          lobbyLeaderIsHost={values.lobbyLeaderIsHost}
+          lobbyLeaderGamertag={values.lobbyLeaderGamertag}
+          lobbyLeaderSelection={lobbyLeaderSelection}
           fieldErrors={fieldErrors}
           onGuildChange={onGuildChange}
           onChannelChange={setTargetChannelId}
+          onLobbyLeaderIsHost={setLobbyLeaderIsHost}
+          onLobbyLeaderGamertag={setLobbyLeaderGamertag}
+          onLobbyLeaderSelect={onLobbyLeaderSelect}
         />
       )}
 

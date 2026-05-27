@@ -8,6 +8,7 @@ const VALIDATION_MESSAGES_EN: Record<ValidationCode, string> = {
   GUILD_REQUIRED: 'Choose a Discord server for this event.',
   CHANNEL_REQUIRED: 'Choose a channel before publishing.',
   CONVOY_LEADER_REQUIRED: 'Convoy leader gamertag is required.',
+  CONVOY_LEADER_DISCORD_REQUIRED: 'Choose a convoy leader from your Discord server.',
   CARS_REQUIRED: 'Add at least one car for a restricted car list.',
   PI_RANGE: 'Set a PI cap between 100 and 999.',
   TARGET_GUILD_LOCKED: 'Server cannot be changed after publish.',

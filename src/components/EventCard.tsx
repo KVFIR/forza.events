@@ -1,6 +1,7 @@
 import {format} from 'date-fns';
 import {dateFnsLocale} from '../i18n/dateLocale';
 import {useEffect, useState} from 'react';
+import {useTranslation} from 'react-i18next';
 import {Link} from 'react-router-dom';
 import {Users} from 'lucide-react';
 import type {EventAllowedCar, ForzaEvent} from '../lib/types';
@@ -10,8 +11,10 @@ import {isDraftEvent} from '../lib/eventList';
 import {formatLobbyCount} from '../lib/constants';
 import {resolveOrganiserLabel} from '../lib/organiser';
 import {defaultCoverPath} from '../lib/eventCovers';
+import {formatCarDisplayName} from '../lib/carDisplay';
 import {piToClass} from '../lib/pi';
 import {useAuth} from '../context/AuthContext';
+import {useResolveEventDisplayStatus} from '../hooks/useResolveEventDisplayStatus';
 import {EventCover} from './EventCover';
 
 type Props = {
@@ -46,7 +49,7 @@ function CarList({cars}: {cars: EventAllowedCar[]}) {
               className="grid grid-cols-[minmax(0,1fr)_2.75rem] items-center gap-x-2.5 py-1 text-[10px] leading-tight first:pt-0 last:pb-0"
             >
               <span className="truncate font-medium text-slate-200">
-                {car.make} {car.model}
+                {formatCarDisplayName(car)}
               </span>
               <span
                 className={cn(
@@ -93,11 +96,13 @@ function OpenBuildSummary({event}: {event: ForzaEvent}) {
 }
 
 export function EventCard({event}: Props) {
+  const {t} = useTranslation();
   const when = format(new Date(event.startsAt), 'EEE d MMM · HH:mm', {locale: dateFnsLocale()});
   const draft = isDraftEvent(event);
-  const ended = !draft && event.status === 'ended';
-  const full =
-    !draft && !ended && (event.status === 'full' || event.currentPlayers >= event.maxPlayers);
+  const displayStatus = useResolveEventDisplayStatus(event);
+  const ended = !draft && displayStatus === 'ended';
+  const live = !draft && displayStatus === 'live';
+  const full = !draft && displayStatus === 'full';
   const {user} = useAuth();
   const isHost = event.hostDiscordId === user.discordId;
   const organiserLabel = resolveOrganiserLabel(event);
@@ -165,12 +170,17 @@ export function EventCard({event}: Props) {
                   {formatLobbyCount(event.currentPlayers)}
                   {ended && (
                     <span className="ml-1 text-[9px] font-bold uppercase tracking-widest text-muted">
-                      · Ended
+                      · {t('eventStatus.ended')}
+                    </span>
+                  )}
+                  {live && (
+                    <span className="ml-1 text-[9px] font-bold uppercase tracking-widest text-accent-green">
+                      · {t('eventStatus.live')}
                     </span>
                   )}
                   {full && (
                     <span className="ml-1 text-[9px] font-bold uppercase tracking-widest text-amber-300/90">
-                      · Full
+                      · {t('eventStatus.full')}
                     </span>
                   )}
                 </p>

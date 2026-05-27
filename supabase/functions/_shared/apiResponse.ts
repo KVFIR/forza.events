@@ -27,6 +27,8 @@ const API_MESSAGES_EN: Partial<Record<ApiErrorCode, string>> = {
   [API_ERROR_CODES.HOST_CANNOT_JOIN]: 'Event hosts do not need to join',
   [API_ERROR_CODES.EVENT_NOT_FOUND]: 'Event not found',
   [API_ERROR_CODES.NOT_DRAFT]: 'Only draft events can be published',
+  [API_ERROR_CODES.RESULTS_PARTICIPANTS_ONLY]:
+    'Results can only include joined drivers or the convoy leader (host leader is always allowed).',
 };
 
 export function apiErrorMessage(code: ApiErrorCode | ValidationCode, fallback?: string): string {

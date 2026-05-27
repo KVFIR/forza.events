@@ -18,6 +18,8 @@ export interface CreateEventFormValues {
   eventCars: EventCarEntry[];
   lobbyLeaderIsHost: boolean;
   lobbyLeaderGamertag: string;
+  lobbyLeaderDiscordId: string | null;
+  lobbyLeaderDisplayName: string;
   targetGuildId: string;
   targetGuildName: string;
   targetChannelId: string;

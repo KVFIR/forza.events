@@ -1,9 +1,11 @@
 import {serve} from 'https://deno.land/std@0.224.0/http/server.ts';
-import {internalErrorResponse} from '../_shared/apiResponse.ts';
+import {API_ERROR_CODES} from '../_shared/apiErrorCodes.ts';
+import {appErrorResponse, internalErrorResponse} from '../_shared/apiResponse.ts';
 import {jsonResponse, optionsResponse} from '../_shared/cors.ts';
 import {syncPublishedEmbedByEventId} from '../_shared/embedSync.ts';
 import {verifyDiscordToken} from '../_shared/discord.ts';
 import {eventHasStarted} from '../_shared/eventSpec.ts';
+import {allowedResultDiscordIds} from '../_shared/resultsRoster.ts';
 import {rateLimitMutation} from '../_shared/rateLimitPresets.ts';
 import {adminClient} from '../_shared/supabase.ts';
 
@@ -40,7 +42,9 @@ serve(async (req) => {
     const supabase = adminClient();
     const {data: event} = await supabase
       .from('events')
-      .select('host_discord_id, starts_at, status')
+      .select(
+        'host_discord_id, starts_at, status, lobby_leader_is_host, lobby_leader_discord_id',
+      )
       .eq('id', eventId)
       .single();
 
@@ -66,13 +70,13 @@ serve(async (req) => {
 
     const {data: participants} = await supabase
       .from('event_participants')
-      .select('discord_id')
+      .select('discord_id, gamertag_snapshot')
       .eq('event_id', eventId);
-    const participantIds = new Set((participants ?? []).map((p) => p.discord_id));
+    const allowedIds = allowedResultDiscordIds(event, participants ?? []);
 
     for (const r of results) {
-      if (!participantIds.has(r.discord_id)) {
-        return jsonResponse({error: 'Results must only include event participants'}, 400, req);
+      if (!allowedIds.has(String(r.discord_id))) {
+        return appErrorResponse(req, 400, API_ERROR_CODES.RESULTS_PARTICIPANTS_ONLY);
       }
     }
 

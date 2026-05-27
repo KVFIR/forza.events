@@ -28,6 +28,7 @@ const API_I18N_KEYS: Partial<Record<ApiErrorCode, string>> = {
   [API_ERROR_CODES.EVENT_NOT_FOUND]: 'errors.eventNotFound',
   [API_ERROR_CODES.NOT_DRAFT]: 'errors.notDraft',
   [API_ERROR_CODES.INVALID_RESPONSE]: 'errors.invalidResponse',
+  [API_ERROR_CODES.RESULTS_PARTICIPANTS_ONLY]: 'errors.resultsParticipantsOnly',
 };
 
 export class ApiRequestError extends Error {

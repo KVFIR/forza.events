@@ -96,7 +96,9 @@ serve(async (req) => {
 
       const {data: event} = await supabase
         .from('events')
-        .select('max_players, current_players, status, starts_at, host_discord_id')
+        .select(
+          'max_players, current_players, status, starts_at, host_discord_id, lobby_leader_is_host, lobby_leader_gamertag, lobby_leader_discord_id',
+        )
         .eq('id', event_id)
         .single();
 
@@ -135,6 +137,17 @@ serve(async (req) => {
       );
 
       if (error) return participationError(req, error, 'Could not join event');
+
+      if (
+        event.lobby_leader_is_host === false &&
+        !event.lobby_leader_discord_id &&
+        event.lobby_leader_gamertag?.trim().toLowerCase() === tag.gamertag.toLowerCase()
+      ) {
+        await supabase
+          .from('events')
+          .update({lobby_leader_discord_id: discordUser.id})
+          .eq('id', event_id);
+      }
 
       await syncPublishedEmbedByEventId(supabase, event_id);
       return jsonResponse({joined: true}, 200, req);

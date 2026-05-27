@@ -24,6 +24,7 @@ import {
   normalizeTrackCodes,
 } from '../../lib/eventSpec';
 import type {EventCarEntry} from '../../components/EventCarList';
+import type {ConvoyLeaderSelection} from '../../components/ConvoyLeaderPicker';
 import {PREVIEW_STEP_INDEX, type CreateEventStepIndex} from './constants';
 import type {CreateEventFormValues, FieldErrors} from './types';
 import {
@@ -73,6 +74,8 @@ export function useCreateEventForm() {
   const [eventCars, setEventCars] = useState<EventCarEntry[]>([]);
   const [lobbyLeaderIsHost, setLobbyLeaderIsHost] = useState(true);
   const [lobbyLeaderGamertag, setLobbyLeaderGamertag] = useState(user.xboxGamertag ?? '');
+  const [lobbyLeaderDiscordId, setLobbyLeaderDiscordId] = useState<string | null>(null);
+  const [lobbyLeaderDisplayName, setLobbyLeaderDisplayName] = useState('');
   const [targetGuildId, setTargetGuildId] = useState(contextGuildId ?? '');
   const [targetGuildName, setTargetGuildName] = useState(contextGuildName ?? '');
   const [targetChannelId, setTargetChannelId] = useState('');
@@ -80,6 +83,15 @@ export function useCreateEventForm() {
   const token = getAccessToken();
   const canPersist = isApiConfigured() && token && isSignedIn;
   const normalizedTrackCodes = useMemo(() => normalizeTrackCodes(trackCodes), [trackCodes]);
+
+  const lobbyLeaderSelection = useMemo((): ConvoyLeaderSelection | null => {
+    if (!lobbyLeaderDiscordId) return null;
+    return {
+      discordId: lobbyLeaderDiscordId,
+      displayName: lobbyLeaderDisplayName,
+      xboxGamertag: lobbyLeaderGamertag.trim() || null,
+    };
+  }, [lobbyLeaderDiscordId, lobbyLeaderDisplayName, lobbyLeaderGamertag]);
 
   const values: CreateEventFormValues = useMemo(
     () => ({
@@ -97,6 +109,8 @@ export function useCreateEventForm() {
       eventCars,
       lobbyLeaderIsHost,
       lobbyLeaderGamertag,
+      lobbyLeaderDiscordId,
+      lobbyLeaderDisplayName,
       targetGuildId,
       targetGuildName,
       targetChannelId,
@@ -116,6 +130,8 @@ export function useCreateEventForm() {
       eventCars,
       lobbyLeaderIsHost,
       lobbyLeaderGamertag,
+      lobbyLeaderDiscordId,
+      lobbyLeaderDisplayName,
       targetGuildId,
       targetGuildName,
       targetChannelId,
@@ -181,13 +197,24 @@ export function useCreateEventForm() {
         setTargetGuildId(ev.guildId ?? '');
         setTargetGuildName(ev.guildName ?? '');
         setTargetChannelId(ev.channelId ?? '');
-        const leader = ev.lobbyLeaderGamertag?.trim();
-        if (leader && user.xboxGamertag && leader !== user.xboxGamertag) {
+        if (ev.lobbyLeaderIsHost === false && ev.lobbyLeaderDiscordId) {
           setLobbyLeaderIsHost(false);
-          setLobbyLeaderGamertag(leader);
+          setLobbyLeaderDiscordId(ev.lobbyLeaderDiscordId);
+          setLobbyLeaderGamertag(ev.lobbyLeaderGamertag ?? '');
+          setLobbyLeaderDisplayName(ev.lobbyLeaderGamertag ?? '');
         } else {
-          setLobbyLeaderIsHost(true);
-          setLobbyLeaderGamertag(user.xboxGamertag ?? leader ?? '');
+          const leader = ev.lobbyLeaderGamertag?.trim();
+          if (leader && user.xboxGamertag && leader !== user.xboxGamertag) {
+            setLobbyLeaderIsHost(false);
+            setLobbyLeaderGamertag(leader);
+            setLobbyLeaderDiscordId(null);
+            setLobbyLeaderDisplayName('');
+          } else {
+            setLobbyLeaderIsHost(true);
+            setLobbyLeaderGamertag(user.xboxGamertag ?? leader ?? '');
+            setLobbyLeaderDiscordId(null);
+            setLobbyLeaderDisplayName('');
+          }
         }
         if (ev.coverImageUrl && !isBundledDefaultCover(ev.coverImageUrl)) {
           setCoverPreview(ev.coverImageUrl);
@@ -236,6 +263,7 @@ export function useCreateEventForm() {
         ? (user.xboxGamertag?.trim() || lobbyLeaderGamertag.trim())
         : lobbyLeaderGamertag.trim(),
       lobby_leader_is_host: lobbyLeaderIsHost,
+      lobby_leader_discord_id: lobbyLeaderIsHost ? null : lobbyLeaderDiscordId,
       voice_policy: 'optional' as const,
       cars:
         carRuleMode === 'restricted_list'
@@ -263,7 +291,7 @@ export function useCreateEventForm() {
       setShowPublishModal(false);
       navigate(`/event/${id}`);
     } catch (e) {
-      setGlobalError(String(e));
+      setGlobalError(e instanceof Error ? e.message : String(e));
     } finally {
       setSaving(false);
     }
@@ -475,13 +503,33 @@ export function useCreateEventForm() {
       clearFieldError('eventCars');
       setEventCars(cars);
     },
+    lobbyLeaderSelection,
     setLobbyLeaderIsHost: (v: boolean) => {
       clearFieldError('lobbyLeaderGamertag');
+      clearFieldError('lobbyLeaderDiscordId');
       setLobbyLeaderIsHost(v);
+      if (v) {
+        setLobbyLeaderDiscordId(null);
+        setLobbyLeaderDisplayName('');
+        setLobbyLeaderGamertag(user.xboxGamertag ?? '');
+      }
     },
     setLobbyLeaderGamertag: (v: string) => {
       clearFieldError('lobbyLeaderGamertag');
       setLobbyLeaderGamertag(v);
+    },
+    onLobbyLeaderSelect: (member: ConvoyLeaderSelection | null) => {
+      clearFieldError('lobbyLeaderDiscordId');
+      clearFieldError('lobbyLeaderGamertag');
+      if (!member) {
+        setLobbyLeaderDiscordId(null);
+        setLobbyLeaderDisplayName('');
+        setLobbyLeaderGamertag('');
+        return;
+      }
+      setLobbyLeaderDiscordId(member.discordId);
+      setLobbyLeaderDisplayName(member.displayName);
+      if (member.xboxGamertag) setLobbyLeaderGamertag(member.xboxGamertag);
     },
     setTargetGuildId,
     setTargetGuildName,

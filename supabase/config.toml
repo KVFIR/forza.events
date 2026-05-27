@@ -26,6 +26,9 @@ verify_jwt = false
 [functions.list-guilds]
 verify_jwt = false
 
+[functions.list-guild-members]
+verify_jwt = false
+
 [functions.list-channels]
 verify_jwt = false
 

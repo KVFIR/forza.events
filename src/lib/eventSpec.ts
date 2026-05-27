@@ -1,4 +1,4 @@
-import type {CarRuleMode, ForzaEvent} from './types';
+import type {CarRuleMode, EventStatus, ForzaEvent} from './types';
 import type {AppUser} from './types';
 import {isEventType} from './eventTypes';
 import {VALIDATION_CODES, type ValidationCode} from './validationCodes';
@@ -69,6 +69,16 @@ export function eventHasStarted(event: ForzaEvent): boolean {
   if (event.lifecycle === 'live') return true;
   if (event.status === 'live' || event.status === 'ended') return true;
   return new Date(event.startsAt).getTime() <= Date.now();
+}
+
+/** UI status badge / card styling — accounts for start time, not only DB `status`. */
+export function resolveEventDisplayStatus(
+  event: Pick<ForzaEvent, 'status' | 'lifecycle' | 'startsAt' | 'currentPlayers' | 'maxPlayers'>,
+): EventStatus {
+  if (isEventFinalized(event)) return 'ended';
+  if (eventHasStarted(event)) return 'live';
+  if (event.status === 'full' || event.currentPlayers >= event.maxPlayers) return 'full';
+  return 'open';
 }
 
 export function isEventFinalized(event: ForzaEvent): boolean {

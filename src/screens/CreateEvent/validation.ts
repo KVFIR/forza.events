@@ -63,25 +63,10 @@ export function validateBasicsStep(
 export function validateDetailsStep(
   values: Pick<
     CreateEventFormValues,
-    | 'carRuleMode'
-    | 'maxPi'
-    | 'eventCars'
-    | 'trackCodes'
-    | 'lobbyLeaderIsHost'
-    | 'lobbyLeaderGamertag'
+    'carRuleMode' | 'maxPi' | 'eventCars' | 'trackCodes'
   >,
-  options?: {hostGamertag?: string},
 ): FieldErrors {
   const errors: FieldErrors = {};
-  if (values.lobbyLeaderIsHost) {
-    const tagErr = gamertagError(options?.hostGamertag ?? '');
-    if (tagErr) {
-      errors.lobbyLeaderGamertag = i18n.t('validation.convoyLeaderProfile');
-    }
-  } else {
-    const tagErr = gamertagError(values.lobbyLeaderGamertag);
-    if (tagErr) errors.lobbyLeaderGamertag = tagErr;
-  }
   if (values.carRuleMode === 'restricted_list' && values.eventCars.length === 0) {
     errors.eventCars = i18n.t('validation.carsRequired');
   }
@@ -93,14 +78,33 @@ export function validateDetailsStep(
   return errors;
 }
 
-export function validateTargetStep(values: Pick<
-  CreateEventFormValues,
-  'targetGuildId' | 'targetChannelId'
->, options?: {requireChannel?: boolean}): FieldErrors {
+export function validateTargetStep(
+  values: Pick<
+    CreateEventFormValues,
+    | 'targetGuildId'
+    | 'targetChannelId'
+    | 'lobbyLeaderIsHost'
+    | 'lobbyLeaderGamertag'
+    | 'lobbyLeaderDiscordId'
+  >,
+  options?: {requireChannel?: boolean; hostGamertag?: string},
+): FieldErrors {
   const errors: FieldErrors = {};
   if (!values.targetGuildId) errors.targetGuildId = i18n.t('validation.guildRequired');
   if (options?.requireChannel && !values.targetChannelId) {
     errors.targetChannelId = i18n.t('validation.channelRequired');
+  }
+  if (values.lobbyLeaderIsHost) {
+    const tagErr = gamertagError(options?.hostGamertag ?? '');
+    if (tagErr) {
+      errors.lobbyLeaderGamertag = i18n.t('validation.convoyLeaderProfile');
+    }
+  } else {
+    if (!values.lobbyLeaderDiscordId) {
+      errors.lobbyLeaderDiscordId = i18n.t('validation.convoyLeaderDiscordRequired');
+    }
+    const tagErr = gamertagError(values.lobbyLeaderGamertag);
+    if (tagErr) errors.lobbyLeaderGamertag = tagErr;
   }
   return errors;
 }
@@ -114,7 +118,7 @@ export function validateStep(
     case 0:
       return validateBasicsStep(values, {allowPastStart: options?.allowPastStart});
     case 1:
-      return validateDetailsStep(values, {hostGamertag: options?.hostGamertag});
+      return validateDetailsStep(values);
     case 2:
       return validateTargetStep(values, options);
     default:
@@ -128,9 +132,9 @@ export function validateDraftSave(
 ): string | null {
   const stepErr = firstFieldError(validateBasicsStep(values));
   if (stepErr) return stepErr;
-  const detailsErr = firstFieldError(validateDetailsStep(values, {hostGamertag}));
+  const detailsErr = firstFieldError(validateDetailsStep(values));
   if (detailsErr) return detailsErr;
-  const targetErr = firstFieldError(validateTargetStep(values));
+  const targetErr = firstFieldError(validateTargetStep(values, {hostGamertag}));
   if (targetErr) return targetErr;
   return validateDraftFormMessage({
     title: values.title,
@@ -147,9 +151,9 @@ export function validatePublish(
 ): string | null {
   const basics = validateBasicsStep(values, {allowPastStart: options?.allowPastStart});
   if (hasFieldErrors(basics)) return firstFieldError(basics);
-  const details = validateDetailsStep(values, {hostGamertag});
+  const details = validateDetailsStep(values);
   if (hasFieldErrors(details)) return firstFieldError(details);
-  const target = validateTargetStep(values, {requireChannel: true});
+  const target = validateTargetStep(values, {requireChannel: true, hostGamertag});
   if (hasFieldErrors(target)) return firstFieldError(target);
 
   const leader = values.lobbyLeaderIsHost

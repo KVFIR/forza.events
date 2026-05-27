@@ -28,6 +28,7 @@ export type SaveEventBody = {
   cover_image_url?: string | null;
   lobby_leader_gamertag?: string;
   lobby_leader_is_host?: boolean;
+  lobby_leader_discord_id?: string | null;
   voice_policy?: string;
   car_rule_mode?: CarRuleMode;
   max_pi?: number;
@@ -111,6 +112,11 @@ export function buildEventFields(
   body: SaveEventBody,
   hostDiscordId: string,
   coverUrl: string | null,
+  lobbyLeader?: {
+    lobby_leader_discord_id: string;
+    lobby_leader_is_host: boolean;
+    lobby_leader_gamertag: string;
+  },
 ) {
   const trackCodes = normalizeTrackCodes(body.track_codes);
   const cars = body.cars ?? [];
@@ -147,8 +153,11 @@ export function buildEventFields(
     additional_car_restrictions:
       mode === 'anything_goes' ? body.additional_car_restrictions?.trim() || null : null,
     rules_forbidden: [] as string[],
-    lobby_leader_gamertag: body.lobby_leader_gamertag?.trim() ?? 'TBD',
-    lobby_leader_is_host: body.lobby_leader_is_host ?? true,
+    lobby_leader_gamertag: lobbyLeader?.lobby_leader_gamertag ??
+      body.lobby_leader_gamertag?.trim() ?? 'TBD',
+    lobby_leader_is_host: lobbyLeader?.lobby_leader_is_host ??
+      body.lobby_leader_is_host ?? true,
+    lobby_leader_discord_id: lobbyLeader?.lobby_leader_discord_id ?? null,
   };
 }
 
@@ -156,9 +165,14 @@ export function buildEventRow(
   body: SaveEventBody,
   hostDiscordId: string,
   coverUrl: string | null,
+  lobbyLeader?: {
+    lobby_leader_discord_id: string;
+    lobby_leader_is_host: boolean;
+    lobby_leader_gamertag: string;
+  },
 ) {
   return {
-    ...buildEventFields(body, hostDiscordId, coverUrl),
+    ...buildEventFields(body, hostDiscordId, coverUrl, lobbyLeader),
     status: 'draft' as const,
   };
 }

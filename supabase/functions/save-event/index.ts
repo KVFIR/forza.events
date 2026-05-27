@@ -19,6 +19,7 @@ import {resolveGuildNameForUser} from '../_shared/guildAccess.ts';
 import {resolveCoverUrl} from '../_shared/eventCovers.ts';
 import {slugify} from '../_shared/events.ts';
 import {normalizeGuildName} from '../_shared/guildDisplay.ts';
+import {resolveLobbyLeaderFields} from '../_shared/lobbyLeader.ts';
 import {rateLimitMutation} from '../_shared/rateLimitPresets.ts';
 import {adminClient} from '../_shared/supabase.ts';
 
@@ -160,8 +161,19 @@ serve(async (req) => {
       if (lockErr) return appErrorResponse(req, 400, lockErr);
     }
 
+    const lobbyResolved = await resolveLobbyLeaderFields(body, discordUser.id, supabase);
+    if (typeof lobbyResolved === 'string') {
+      return appErrorResponse(req, 400, lobbyResolved);
+    }
+
+    const publishBody = {
+      ...body,
+      lobby_leader_gamertag: lobbyResolved.lobby_leader_gamertag,
+      channel_id: body.channel_id,
+    };
+
     if (body.publish) {
-      const publishErr = validatePublishReady(body);
+      const publishErr = validatePublishReady(publishBody);
       if (publishErr) return appErrorResponse(req, 400, publishErr);
     }
 
@@ -169,8 +181,8 @@ serve(async (req) => {
       body.car_rule_mode === 'restricted_list' ? body.cars ?? [] : [];
 
     const coverUrl = resolveCoverUrl(body.type ?? 'road', body.cover_image_url);
-    const fields = buildEventFields(body, discordUser.id, coverUrl);
-    const insertRow = buildEventRow(body, discordUser.id, coverUrl);
+    const fields = buildEventFields(body, discordUser.id, coverUrl, lobbyResolved);
+    const insertRow = buildEventRow(body, discordUser.id, coverUrl, lobbyResolved);
 
     let eventId = body.id;
 
