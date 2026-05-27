@@ -15,6 +15,7 @@ import {
 import {appErrorResponse, internalErrorResponse} from '../_shared/apiResponse.ts';
 import {jsonResponse, optionsResponse} from '../_shared/cors.ts';
 import {verifyDiscordToken} from '../_shared/discord.ts';
+import {ensureDiscordUserRow} from '../_shared/discordUserRow.ts';
 import {resolveGuildNameForUser} from '../_shared/guildAccess.ts';
 import {resolveCoverUrl} from '../_shared/eventCovers.ts';
 import {slugify} from '../_shared/events.ts';
@@ -42,6 +43,7 @@ serve(async (req) => {
   try {
     const body = (await req.json()) as SaveEventBody;
     const supabase = adminClient();
+    await ensureDiscordUserRow(supabase, discordUser);
 
     if (body.delete && body.id) {
       const {data: existing} = await supabase

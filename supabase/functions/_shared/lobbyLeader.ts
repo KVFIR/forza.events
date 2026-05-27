@@ -1,3 +1,4 @@
+import {ensureUserRowForDiscordId} from './discordUserRow.ts';
 import type {adminClient} from './supabase.ts';
 import type {SaveEventBody} from './eventSpec.ts';
 import {VALIDATION_CODES, type ValidationCode} from './validationCodes.ts';
@@ -39,6 +40,11 @@ export async function resolveLobbyLeaderFields(
     gamertag = profile?.xbox_gamertag?.trim() ?? '';
   }
   if (!gamertag) return VALIDATION_CODES.CONVOY_LEADER_REQUIRED;
+
+  await ensureUserRowForDiscordId(supabase, leaderId, {
+    username: body.lobby_leader_display_name,
+    avatar_url: body.lobby_leader_avatar_url,
+  });
 
   return {
     lobby_leader_discord_id: leaderId,

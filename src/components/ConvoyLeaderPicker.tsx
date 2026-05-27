@@ -85,7 +85,8 @@ export function ConvoyLeaderPicker({
     };
   }, [accessToken, guildId, hostDiscordId, query]);
 
-  const needsGamertag = Boolean(selected && !hasGamertag(selected.xboxGamertag ?? gamertag));
+  /** Profile tag at pick time only — do not fold in `gamertag` while typing or the field unmounts. */
+  const needsGamertag = Boolean(selected && !hasGamertag(selected.xboxGamertag));
 
   return (
     <div className="mt-2 space-y-2">

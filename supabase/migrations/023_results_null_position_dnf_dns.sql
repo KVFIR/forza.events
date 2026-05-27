@@ -1,11 +1,11 @@
 -- DNF/DNS rows have no finishing position; only classified finishers get 1..N.
 
+alter table event_results
+  alter column position drop not null;
+
 update event_results
 set position = null
 where dnf or dns;
-
-alter table event_results
-  alter column position drop not null;
 
 alter table event_results
   drop constraint if exists event_results_event_id_position_key;

@@ -133,7 +133,9 @@
     "registered": "Registered",
     "leaveLockedAfterStart": "You cannot leave after the event has started. Contact the host if you cannot attend.",
     "closed": "Closed",
-    "full": "Full"
+    "full": "Full",
+    "xboxHintTitle": "You're registered",
+    "xboxHintBody": "On Xbox, add convoy leader {{leader}} as a friend and join their Forza session shortly before the event starts."
   },
   "statusBanner": {
     "draftTitle": "Draft",

@@ -227,7 +227,7 @@ function fitRestrictedCarFields(
 ): {fields: EmbedField[]; shown: number} {
   if (cars.length === 0) {
     return {
-      fields: [{name: embedFieldName('🚗 Car'), value: 'Restricted car list (no cars configured)', inline: false}],
+      fields: [{name: embedFieldName('🚗 Car rules'), value: 'Restricted car list (no cars configured)', inline: false}],
       shown: 0,
     };
   }
@@ -287,13 +287,31 @@ const EMBED_STATUS_COLORS: Record<string, number> = {
 };
 
 type EmbedLifecycleUi = {
-  titlePrefix: string;
+  /** Short status line shown in the embed description (subtitle). */
+  statusSubtitle: string;
+  /** Optional detail paragraph under the status line in the description. */
+  statusDetail: string | null;
   color: number;
-  statusField: EmbedField | null;
   buttonLabel: string;
   buttonDisabled: boolean;
   buttonStyle: 1 | 2 | 3 | 4;
 };
+
+function buildEmbedDescription(
+  statusSubtitle: string,
+  statusDetail: string | null,
+  eventDescription: string | null | undefined,
+): string | undefined {
+  const parts: string[] = [];
+  const subtitle = statusSubtitle.trim();
+  if (subtitle) parts.push(subtitle);
+  const detail = statusDetail?.trim();
+  if (detail) parts.push(detail);
+  const body = eventDescription?.trim();
+  if (body) parts.push(body);
+  if (!parts.length) return undefined;
+  return parts.join('\n\n').slice(0, EMBED_DESCRIPTION_MAX);
+}
 
 function resolveEmbedLifecycleUi(
   status: string | undefined,
@@ -303,39 +321,27 @@ function resolveEmbedLifecycleUi(
   switch (status) {
     case 'cancelled':
       return {
-        titlePrefix: '🚫 CANCELLED ',
+        statusSubtitle: '🚫 CANCELLED',
+        statusDetail: 'This event was **cancelled** by the host. Registration is closed.',
         color: EMBED_STATUS_COLORS.cancelled,
-        statusField: {
-          name: embedFieldName('Status'),
-          value: 'This event was **cancelled** by the host. Registration is closed.',
-          inline: false,
-        },
         buttonLabel: 'Event cancelled',
         buttonDisabled: true,
         buttonStyle: 2,
       };
     case 'completed':
       return {
-        titlePrefix: '✅ COMPLETED ',
+        statusSubtitle: '✅ COMPLETED',
+        statusDetail: 'Results are in — open **FORZA.EVENTS** for standings.',
         color: EMBED_STATUS_COLORS.completed,
-        statusField: {
-          name: embedFieldName('Status'),
-          value: 'Results are in — open **FORZA.EVENTS** for standings.',
-          inline: false,
-        },
         buttonLabel: 'View in FORZA.EVENTS',
         buttonDisabled: false,
         buttonStyle: 1,
       };
     case 'archived':
       return {
-        titlePrefix: '📦 ARCHIVED ',
+        statusSubtitle: '📦 ARCHIVED',
+        statusDetail: 'This event is archived.',
         color: EMBED_STATUS_COLORS.archived,
-        statusField: {
-          name: embedFieldName('Status'),
-          value: 'This event is archived.',
-          inline: false,
-        },
         buttonLabel: 'View in FORZA.EVENTS',
         buttonDisabled: false,
         buttonStyle: 1,
@@ -343,22 +349,18 @@ function resolveEmbedLifecycleUi(
     default:
       if (eventHasStarted({status: status ?? 'open', starts_at: startsAt})) {
         return {
-          titlePrefix: '🏁 LIVE ',
+          statusSubtitle: '🏁 LIVE',
+          statusDetail: 'This event has **started**. Registration is closed.',
           color: defaultColor,
-          statusField: {
-            name: embedFieldName('Status'),
-            value: 'This event has **started**. Registration is closed.',
-            inline: false,
-          },
           buttonLabel: 'Registration closed',
           buttonDisabled: true,
           buttonStyle: 2,
         };
       }
       return {
-        titlePrefix: '',
+        statusSubtitle: '',
+        statusDetail: null,
         color: defaultColor,
-        statusField: null,
         buttonLabel: '✅ Register for the Event',
         buttonDisabled: false,
         buttonStyle: 3,
@@ -377,11 +379,12 @@ export function buildEventEmbed(event: EmbedEventInput) {
   const typeColor = eventTypeEmbedColor(event.type);
   const lifecycle = resolveEmbedLifecycleUi(event.status, event.starts_at, typeColor);
 
-  const rawTitle = `${lifecycle.titlePrefix}${event.title}`.trim();
-  const title = rawTitle.slice(0, EMBED_TITLE_MAX);
-  const description = event.description?.trim()
-    ? event.description.slice(0, EMBED_DESCRIPTION_MAX)
-    : undefined;
+  const title = event.title.trim().slice(0, EMBED_TITLE_MAX);
+  const description = buildEmbedDescription(
+    lifecycle.statusSubtitle,
+    lifecycle.statusDetail,
+    event.description,
+  );
   const participantsField: EmbedField = {
     name: embedFieldName(`👤 Participants (${lobbyCount})`),
     value: truncateFieldValue(`Convoy leader: ${event.lobby_leader_gamertag.trim() || 'TBD'}`),
@@ -391,11 +394,11 @@ export function buildEventEmbed(event: EmbedEventInput) {
   const trackCodes = listTrackCodes(event);
   const trackField: EmbedField | null =
     trackCodes.length > 0
-      ? {name: embedFieldName('🛣️ Track'), value: formatTrackCodes(trackCodes), inline: false}
+      ? {name: embedFieldName('🛣️ Tracks'), value: formatTrackCodes(trackCodes), inline: false}
       : null;
 
   const fixedFields: EmbedField[] = [
-    {name: embedFieldName('📅 Date'), value: discordTimestamp(event.starts_at), inline: false},
+    {name: embedFieldName('📅 Date & Time'), value: discordTimestamp(event.starts_at), inline: false},
     ...(trackField ? [trackField] : []),
   ];
 
@@ -410,7 +413,6 @@ export function buildEventEmbed(event: EmbedEventInput) {
 
   const skeletonFields = [
     ...fixedFields,
-    ...(lifecycle.statusField ? [lifecycle.statusField] : []),
     ...(restrictionsField ? [restrictionsField] : []),
     participantsField,
   ];

@@ -38,6 +38,7 @@ import {
   isRegistrationOpen,
 } from '../lib/eventSpec';
 import {EventStatusBanner} from '../components/EventStatusBanner';
+import {Alert} from '../components/ui/Alert';
 import {Badge, DraftBadge, StatusBadge} from '../components/ui/Badge';
 import {Button} from '../components/ui/Button';
 import {iconTileClass, sectionLabelClass} from '../components/ui/formStyles';
@@ -300,6 +301,14 @@ export function EventDetail() {
     (joined
       ? !canLeave || joining || cancelling
       : !registrationOpen || full || joining || cancelling);
+  const showJoinXboxHint =
+    joined &&
+    !isHost &&
+    !isDraft &&
+    !finalized &&
+    !started &&
+    convoyLeader != null &&
+    !convoyLeader.isYou;
 
   return (
     <ContentReveal className="pb-10 pt-4">
@@ -449,6 +458,12 @@ export function EventDetail() {
         <EventStatusBanner variant="registration-closed" />
       ) : null}
       {event.lifecycle === 'cancelled' ? <EventStatusBanner variant="cancelled" /> : null}
+
+      {showJoinXboxHint ? (
+        <Alert variant="info" title={t('participation.xboxHintTitle')} className="mt-3 py-2.5 text-sm">
+          {t('participation.xboxHintBody', {leader: convoyLeader.gamertag})}
+        </Alert>
+      ) : null}
 
       {joinError ? <p className="mt-3 text-sm text-accent-red">{joinError}</p> : null}
       {actionError ? <p className="mt-3 text-sm text-accent-red">{actionError}</p> : null}

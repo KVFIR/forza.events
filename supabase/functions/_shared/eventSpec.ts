@@ -29,6 +29,9 @@ export type SaveEventBody = {
   lobby_leader_gamertag?: string;
   lobby_leader_is_host?: boolean;
   lobby_leader_discord_id?: string | null;
+  /** Display name from guild member search — used to create `users` row for FK. */
+  lobby_leader_display_name?: string | null;
+  lobby_leader_avatar_url?: string | null;
   voice_policy?: string;
   car_rule_mode?: CarRuleMode;
   max_pi?: number;

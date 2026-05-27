@@ -20,3 +20,24 @@ export async function ensureDiscordUserRow(
     throw new Error(`Failed to ensure user profile: ${error.message}`);
   }
 }
+
+/** Ensure `users` row exists before `events.lobby_leader_discord_id` FK insert. */
+export async function ensureUserRowForDiscordId(
+  supabase: ReturnType<typeof adminClient>,
+  discordId: string,
+  profile?: {username?: string | null; avatar_url?: string | null},
+): Promise<void> {
+  const username = profile?.username?.trim() || 'Driver';
+  const {error} = await supabase.from('users').upsert(
+    {
+      discord_id: discordId,
+      username,
+      discriminator: '',
+      avatar_url: profile?.avatar_url ?? null,
+    },
+    {onConflict: 'discord_id'},
+  );
+  if (error) {
+    throw new Error(`Failed to ensure convoy leader profile: ${error.message}`);
+  }
+}

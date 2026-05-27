@@ -76,6 +76,10 @@ export function useCreateEventForm() {
   const [lobbyLeaderGamertag, setLobbyLeaderGamertag] = useState(user.xboxGamertag ?? '');
   const [lobbyLeaderDiscordId, setLobbyLeaderDiscordId] = useState<string | null>(null);
   const [lobbyLeaderDisplayName, setLobbyLeaderDisplayName] = useState('');
+  /** Gamertag from profile/DB when the member was picked — not the live input value. */
+  const [lobbyLeaderProfileGamertag, setLobbyLeaderProfileGamertag] = useState<string | null>(
+    null,
+  );
   const [targetGuildId, setTargetGuildId] = useState(contextGuildId ?? '');
   const [targetGuildName, setTargetGuildName] = useState(contextGuildName ?? '');
   const [targetChannelId, setTargetChannelId] = useState('');
@@ -89,9 +93,9 @@ export function useCreateEventForm() {
     return {
       discordId: lobbyLeaderDiscordId,
       displayName: lobbyLeaderDisplayName,
-      xboxGamertag: lobbyLeaderGamertag.trim() || null,
+      xboxGamertag: lobbyLeaderProfileGamertag,
     };
-  }, [lobbyLeaderDiscordId, lobbyLeaderDisplayName, lobbyLeaderGamertag]);
+  }, [lobbyLeaderDiscordId, lobbyLeaderDisplayName, lobbyLeaderProfileGamertag]);
 
   const values: CreateEventFormValues = useMemo(
     () => ({
@@ -202,6 +206,7 @@ export function useCreateEventForm() {
           setLobbyLeaderDiscordId(ev.lobbyLeaderDiscordId);
           setLobbyLeaderGamertag(ev.lobbyLeaderGamertag ?? '');
           setLobbyLeaderDisplayName(ev.lobbyLeaderGamertag ?? '');
+          setLobbyLeaderProfileGamertag(null);
         } else {
           const leader = ev.lobbyLeaderGamertag?.trim();
           if (leader && user.xboxGamertag && leader !== user.xboxGamertag) {
@@ -264,6 +269,9 @@ export function useCreateEventForm() {
         : lobbyLeaderGamertag.trim(),
       lobby_leader_is_host: lobbyLeaderIsHost,
       lobby_leader_discord_id: lobbyLeaderIsHost ? null : lobbyLeaderDiscordId,
+      lobby_leader_display_name: lobbyLeaderIsHost
+        ? null
+        : lobbyLeaderDisplayName.trim() || null,
       voice_policy: 'optional' as const,
       cars:
         carRuleMode === 'restricted_list'
@@ -511,6 +519,7 @@ export function useCreateEventForm() {
       if (v) {
         setLobbyLeaderDiscordId(null);
         setLobbyLeaderDisplayName('');
+        setLobbyLeaderProfileGamertag(null);
         setLobbyLeaderGamertag(user.xboxGamertag ?? '');
       }
     },
@@ -524,12 +533,14 @@ export function useCreateEventForm() {
       if (!member) {
         setLobbyLeaderDiscordId(null);
         setLobbyLeaderDisplayName('');
+        setLobbyLeaderProfileGamertag(null);
         setLobbyLeaderGamertag('');
         return;
       }
       setLobbyLeaderDiscordId(member.discordId);
       setLobbyLeaderDisplayName(member.displayName);
-      if (member.xboxGamertag) setLobbyLeaderGamertag(member.xboxGamertag);
+      setLobbyLeaderProfileGamertag(member.xboxGamertag);
+      setLobbyLeaderGamertag(member.xboxGamertag?.trim() ?? '');
     },
     setTargetGuildId,
     setTargetGuildName,
