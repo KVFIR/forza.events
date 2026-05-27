@@ -49,6 +49,8 @@ import {useJoinedEvents} from '../context/JoinedEventsContext';
 import {useAuth} from '../context/AuthContext';
 import {useEventLiveUpdates} from '../hooks/useEventLiveUpdates';
 import {useResolveEventDisplayStatus} from '../hooks/useResolveEventDisplayStatus';
+import {CompactLayoutBanner} from '../components/CompactLayoutBanner';
+import {useDiscordLayout} from '../context/DiscordLayoutContext';
 import {formatCarDisplayName} from '../lib/carDisplay';
 import {piToClass} from '../lib/pi';
 import {formatLobbyCount, LOBBY_TOTAL_PLAYERS} from '../lib/constants';
@@ -113,6 +115,7 @@ export function EventDetail() {
 
   useEventLiveUpdates(id, reloadEvent);
   const displayStatus = useResolveEventDisplayStatus(event);
+  const {isCompact} = useDiscordLayout();
 
   useEffect(() => {
     if (!id) return;
@@ -295,17 +298,23 @@ export function EventDetail() {
 
   return (
     <ContentReveal className="pb-10 pt-4">
+      <CompactLayoutBanner className="mb-3" />
       <TextLink
         to={isDraft && isHost ? '/my-events' : '/'}
         tone="nav"
-        className="mb-5 inline-flex items-center gap-1.5"
+        className={cn('inline-flex items-center gap-1.5', isCompact ? 'mb-3' : 'mb-5')}
       >
         <ArrowLeft className="h-3.5 w-3.5" />
         {t('common.back')}
       </TextLink>
 
       {/* Hero */}
-      <div className="relative -mx-3 mb-0 h-44 overflow-hidden bg-base sm:-mx-5 md:-mx-8">
+      <div
+        className={cn(
+          'event-detail-hero relative -mx-3 mb-0 overflow-hidden bg-base sm:-mx-5 md:-mx-8',
+          isCompact ? 'hidden' : 'h-44',
+        )}
+      >
         <EventCover
           src={event.coverImageUrl ?? defaultCoverPath(event.type)}
           variant="hero"
@@ -328,13 +337,28 @@ export function EventDetail() {
             <Badge type={event.type} />
             {isDraft ? <DraftBadge /> : <StatusBadge status={displayStatus} />}
           </div>
-          <h1 className="mt-1.5 text-xl font-black tracking-tight text-white">{event.title}</h1>
-          {event.description && (
-            <p className="mt-1.5 text-sm leading-relaxed text-slate-400">{event.description}</p>
+          <h1
+            className={cn(
+              'mt-1.5 font-black tracking-tight text-white',
+              isCompact ? 'text-base' : 'text-xl',
+            )}
+          >
+            {event.title}
+          </h1>
+          {isCompact ? (
+            <p className="mt-1 text-xs text-muted">
+              {when} · {formatLobbyCount(event.currentPlayers)}
+            </p>
+          ) : (
+            <>
+              {event.description && (
+                <p className="mt-1.5 text-sm leading-relaxed text-slate-400">{event.description}</p>
+              )}
+              <p className="mt-1 text-xs text-muted">
+                {t('common.by')} {resolveOrganiserLabel(event)}
+              </p>
+            </>
           )}
-          <p className="mt-1 text-xs text-muted">
-            {t('common.by')} {resolveOrganiserLabel(event)}
-          </p>
         </div>
         {showDraftActions ? (
           <div className="flex shrink-0 flex-col gap-2">
@@ -484,7 +508,7 @@ export function EventDetail() {
         </div>
       )}
 
-      {/* Info grid */}
+      {!isCompact ? (
       <Panel divided className="mt-5 overflow-hidden">
 
         {/* Date */}
@@ -610,8 +634,9 @@ export function EventDetail() {
           </div>
         </div>
       </Panel>
+      ) : null}
 
-      {/* Participants */}
+      {!isCompact ? (
       <div className="mt-6">
         <div className="mb-3 flex items-center justify-between">
           <p className="text-sm font-semibold text-white">{t('eventDetail.participants')}</p>
@@ -677,6 +702,7 @@ export function EventDetail() {
           )}
         </div>
       </div>
+      ) : null}
 
     </ContentReveal>
   );

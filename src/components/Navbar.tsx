@@ -5,6 +5,7 @@ import {AuthStatusIndicator} from './AuthStatusIndicator';
 import {Logo} from './ui/Logo';
 import {navShellBorderClass} from './ui/formStyles';
 import {cn} from '../lib/cn';
+import {useDiscordLayout} from '../context/DiscordLayoutContext';
 
 const navBrandBarClass = cn(
   'glass border-b bg-base/85',
@@ -26,6 +27,7 @@ function NavItem({
   layout,
 }: (typeof NAV_ITEMS)[number] & {layout: 'top' | 'side'}) {
   const {t} = useTranslation();
+  const {isCompact} = useDiscordLayout();
   const isSide = layout === 'side';
 
   return (
@@ -64,7 +66,9 @@ function NavItem({
               isActive && '[filter:drop-shadow(0_0_8px_rgba(139,92,246,0.9))]',
             )}
           />
-          <span className={isActive ? 'text-glow-purple' : ''}>{t(labelKey)}</span>
+          <span className={cn(isActive ? 'text-glow-purple' : '', !isSide && isCompact && 'sr-only')}>
+            {t(labelKey)}
+          </span>
         </>
       )}
     </NavLink>
@@ -72,8 +76,9 @@ function NavItem({
 }
 
 function NavbarTop() {
+  const {isCompact} = useDiscordLayout();
   return (
-    <header className="sticky top-0 z-20 lg:hidden">
+    <header className={cn('sticky top-0 z-20', isCompact ? 'block' : 'lg:hidden')}>
       <div
         className={cn(
           navBrandBarClass,
@@ -94,6 +99,8 @@ function NavbarTop() {
 }
 
 function NavbarSide() {
+  const {isCompact} = useDiscordLayout();
+  if (isCompact) return null;
   return (
     <aside
       className={cn(

@@ -49,6 +49,9 @@
     "title": "Open in Discord",
     "body": "This build is a Discord Activity. Launch it from the App Launcher or a server voice channel — not from a regular browser tab."
   },
+  "discordLayout": {
+    "compactHint": "Compact view — click the activity to expand for filters, car lists, and full event details."
+  },
   "auth": {
     "signInRequired": "Sign in required",
     "signInDefault": "Connect your Discord account to use this feature.",

@@ -122,4 +122,13 @@
       margin-right: auto;
     }
   }
+
+  /* Discord PIP / grid tile — narrow iframe, see DiscordLayoutProvider */
+  [data-discord-layout='compact'] .app-main-column {
+    max-width: 100%;
+    margin-left: auto;
+    margin-right: auto;
+    padding-left: 0.75rem;
+    padding-right: 0.75rem;
+  }
 }

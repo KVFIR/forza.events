@@ -6,7 +6,9 @@ import {AppBootGate} from './components/AppBootGate';
 import {DiscordOnlyGate} from './components/DiscordOnlyGate';
 import {Navbar} from './components/Navbar';
 import {AuthProvider} from './context/AuthContext';
+import {DiscordLayoutProvider, useDiscordLayout} from './context/DiscordLayoutContext';
 import {JoinedEventsProvider} from './context/JoinedEventsContext';
+import type {ReactNode} from 'react';
 import {PageLoading} from './components/ui/PageLoading';
 import {shouldShowDiscordOnlyGate} from './lib/runtime';
 
@@ -36,6 +38,18 @@ function RouteFallback() {
   return <PageLoading label={t('loading.page')} className="pb-8 pt-5" />;
 }
 
+function AppShell({children}: {children: ReactNode}) {
+  const {isCompact} = useDiscordLayout();
+  return (
+    <div
+      className="min-h-screen"
+      data-discord-layout={isCompact ? 'compact' : 'focused'}
+    >
+      {children}
+    </div>
+  );
+}
+
 export default function App() {
   if (shouldShowDiscordOnlyGate()) {
     return <DiscordOnlyGate />;
@@ -44,30 +58,32 @@ export default function App() {
   return (
     <BrowserRouter>
       <AuthProvider>
-        <JoinedEventsProvider>
-          <div className="min-h-screen">
-            <Navbar />
-            <div className="app-main-column flex min-h-screen flex-col px-3 sm:px-5 md:px-8 lg:px-10">
-              <main className="min-w-0 flex-1 pb-8">
-                <AppBootGate>
-                  <Suspense fallback={<RouteFallback />}>
-                    <Routes>
-                    <Route path="/" element={<BrowseEvents />} />
-                    <Route path="/my-events" element={<MyEvents />} />
-                    <Route path="/event/:id" element={<EventDetail />} />
-                    <Route path="/event/:id/results" element={<EventResults />} />
-                    <Route path="/create" element={<CreateEvent />} />
-                    <Route path="/profile" element={<Profile />} />
-                    <Route path="/auth/callback" element={<AuthCallback />} />
-                    <Route path="/bot-installed" element={<BotInstalled />} />
-                    <Route path="*" element={<Navigate to="/" replace />} />
-                    </Routes>
-                  </Suspense>
-                </AppBootGate>
-              </main>
-            </div>
-          </div>
-        </JoinedEventsProvider>
+        <DiscordLayoutProvider>
+          <JoinedEventsProvider>
+            <AppShell>
+              <Navbar />
+              <div className="app-main-column flex min-h-screen flex-col px-3 sm:px-5 md:px-8 lg:px-10">
+                <main className="min-w-0 flex-1 pb-8">
+                  <AppBootGate>
+                    <Suspense fallback={<RouteFallback />}>
+                      <Routes>
+                        <Route path="/" element={<BrowseEvents />} />
+                        <Route path="/my-events" element={<MyEvents />} />
+                        <Route path="/event/:id" element={<EventDetail />} />
+                        <Route path="/event/:id/results" element={<EventResults />} />
+                        <Route path="/create" element={<CreateEvent />} />
+                        <Route path="/profile" element={<Profile />} />
+                        <Route path="/auth/callback" element={<AuthCallback />} />
+                        <Route path="/bot-installed" element={<BotInstalled />} />
+                        <Route path="*" element={<Navigate to="/" replace />} />
+                      </Routes>
+                    </Suspense>
+                  </AppBootGate>
+                </main>
+              </div>
+            </AppShell>
+          </JoinedEventsProvider>
+        </DiscordLayoutProvider>
       </AuthProvider>
     </BrowserRouter>
   );

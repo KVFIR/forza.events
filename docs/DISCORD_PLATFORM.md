@@ -27,6 +27,19 @@ Activity redirect URI in portal: **`https://127.0.0.1`** (not the Railway deploy
 
 Local browser dev only: `http://localhost:5180/auth/callback`.
 
+## Layout modes (focused / PIP / grid)
+
+When users minimize the Activity or view it in a voice grid tile, Discord shrinks the iframe. The client subscribes via `subscribeToLayoutModeUpdatesCompat` (`DiscordLayoutProvider` → `data-discord-layout="compact"`).
+
+| Mode | UX in FORZA.EVENTS |
+|------|---------------------|
+| **Focused** | Full browse filters, event detail, create wizard |
+| **PIP / grid** | Compact cards (title, time, lobby), join CTA on detail, filters hidden; banner asks user to expand |
+
+After `sdk.ready()`, we call `setOrientationLockState` with **landscape** for focused, PIP, and grid so the tile stays wide enough for event rows.
+
+Local dev: resize the window below ~420×300 to preview compact layout without Discord.
+
 ## Networking (Activity proxy)
 
 Activities are served through Discord’s proxy (`*.discordsays.com`).

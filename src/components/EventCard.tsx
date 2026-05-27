@@ -15,6 +15,7 @@ import {formatCarDisplayName} from '../lib/carDisplay';
 import {piToClass} from '../lib/pi';
 import {useAuth} from '../context/AuthContext';
 import {useResolveEventDisplayStatus} from '../hooks/useResolveEventDisplayStatus';
+import {useDiscordLayout} from '../context/DiscordLayoutContext';
 import {EventCover} from './EventCover';
 
 type Props = {
@@ -97,6 +98,7 @@ function OpenBuildSummary({event}: {event: ForzaEvent}) {
 
 export function EventCard({event}: Props) {
   const {t} = useTranslation();
+  const {isCompact} = useDiscordLayout();
   const when = format(new Date(event.startsAt), 'EEE d MMM · HH:mm', {locale: dateFnsLocale()});
   const draft = isDraftEvent(event);
   const displayStatus = useResolveEventDisplayStatus(event);
@@ -119,7 +121,8 @@ export function EventCard({event}: Props) {
       <Link to={cardTo} state={{event}} className="block">
         <div
           className={cn(
-            'relative min-h-[7.5rem] overflow-hidden rounded-xl border transition-all duration-200',
+            'relative overflow-hidden rounded-xl border transition-all duration-200',
+            isCompact ? 'min-h-[4.75rem]' : 'min-h-[7.5rem]',
             draft
               ? 'border border-dashed border-b-0 border-sky-500/25 bg-sky-950/20 hover:border-sky-500/40'
               : ended
@@ -146,20 +149,32 @@ export function EventCard({event}: Props) {
           <div className="absolute inset-0 bg-gradient-to-r from-base/80 via-base/70 to-base/60" />
           <div className="absolute inset-0 bg-black/25 transition-colors duration-200 group-hover:bg-black/20" />
 
-          <div className="relative flex items-center gap-3 px-4 pt-3 pb-4">
+          <div
+            className={cn(
+              'relative flex items-center gap-3 px-4',
+              isCompact ? 'py-2.5' : 'pt-3 pb-4',
+            )}
+          >
             <div className="min-w-0 flex-1 text-left">
-              <h2 className="truncate text-lg font-semibold leading-tight text-white">
+              <h2
+                className={cn(
+                  'truncate font-semibold leading-tight text-white',
+                  isCompact ? 'text-sm' : 'text-lg',
+                )}
+              >
                 {event.title}
               </h2>
-              <p className="mt-0.5 truncate text-xs text-slate-400">
-                {organiserLabel}
-                {isHost && (
-                  <span className="ml-1.5 text-[9px] font-bold uppercase tracking-widest text-accent-purple-light">
-                    · You
-                  </span>
-                )}
-              </p>
-              <p className="mt-0.5 text-xs text-muted">{when}</p>
+              {!isCompact && (
+                <p className="mt-0.5 truncate text-xs text-slate-400">
+                  {organiserLabel}
+                  {isHost && (
+                    <span className="ml-1.5 text-[9px] font-bold uppercase tracking-widest text-accent-purple-light">
+                      · You
+                    </span>
+                  )}
+                </p>
+              )}
+              <p className={cn('text-xs text-muted', isCompact ? 'mt-0.5' : 'mt-0.5')}>{when}</p>
               {draft ? (
                 <p className="mt-1.5 text-[10px] font-bold uppercase tracking-widest text-sky-300/90">
                   Draft · not published
@@ -187,10 +202,12 @@ export function EventCard({event}: Props) {
               )}
             </div>
 
-            {event.carRuleMode === 'restricted_list' && event.allowedCars.length > 0 && (
+            {!isCompact && event.carRuleMode === 'restricted_list' && event.allowedCars.length > 0 && (
               <CarList cars={event.allowedCars} />
             )}
-            {event.carRuleMode === 'anything_goes' && <OpenBuildSummary event={event} />}
+            {!isCompact && event.carRuleMode === 'anything_goes' && (
+              <OpenBuildSummary event={event} />
+            )}
           </div>
 
           <div

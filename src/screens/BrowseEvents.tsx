@@ -8,6 +8,8 @@ import {useAuth} from '../context/AuthContext';
 import {DISCORD_SUPABASE_PROXY_PREFIX} from '../lib/supabaseEnv';
 import {usePublishedEvents} from '../hooks/usePublishedEvents';
 import {filterByEventType, sortEvents, type EventSortKey} from '../lib/eventList';
+import {CompactLayoutBanner} from '../components/CompactLayoutBanner';
+import {useDiscordLayout} from '../context/DiscordLayoutContext';
 
 type TypeFilter = EventType | 'all';
 
@@ -25,6 +27,7 @@ export function BrowseEvents() {
     {value: 'created', label: t('browse.sortCreated')},
     {value: 'fill', label: t('browse.sortFill')},
   ];
+  const {isCompact} = useDiscordLayout();
   const {events, isLoading, isRefreshing, loadError, refetch} = usePublishedEvents();
   const [typeFilter, setTypeFilter] = useState<TypeFilter>('all');
   const [sort, setSort] = useState<EventSortKey>('event_date');
@@ -54,6 +57,7 @@ export function BrowseEvents() {
 
   return (
     <div className="pb-8 pt-5">
+      <CompactLayoutBanner />
       <EventList
         events={filtered}
         isLoading={isLoading}
@@ -68,24 +72,28 @@ export function BrowseEvents() {
             : undefined
         }
         metaRight={
-          <>
-            <EventListMetaSelect
-              value={typeFilter}
-              onChange={setTypeFilter}
-              options={typeOptions}
-              aria-label={t('browse.filterByType')}
-            />
-            <span className="text-[11px] text-muted/35" aria-hidden>
-              ·
-            </span>
-            <span className="shrink-0 text-[11px] font-medium text-muted">{t('common.sortBy')}</span>
-            <EventListMetaSelect
-              value={sort}
-              onChange={setSort}
-              options={sortOptions}
-              aria-label={t('browse.sortEvents')}
-            />
-          </>
+          isCompact ? null : (
+            <>
+              <EventListMetaSelect
+                value={typeFilter}
+                onChange={setTypeFilter}
+                options={typeOptions}
+                aria-label={t('browse.filterByType')}
+              />
+              <span className="text-[11px] text-muted/35" aria-hidden>
+                ·
+              </span>
+              <span className="shrink-0 text-[11px] font-medium text-muted">
+                {t('common.sortBy')}
+              </span>
+              <EventListMetaSelect
+                value={sort}
+                onChange={setSort}
+                options={sortOptions}
+                aria-label={t('browse.sortEvents')}
+              />
+            </>
+          )
         }
       />
     </div>
