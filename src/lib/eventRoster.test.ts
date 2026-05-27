@@ -43,6 +43,21 @@ function event(
 }
 
 describe('resolveConvoyLeader', () => {
+  it('falls back to denormalized event fields when participant row is missing', () => {
+    const ev = event({
+      hostDiscordId: 'host-1',
+      lobbyLeaderGamertag: 'HostGT',
+      lobbyLeaderDiscordId: 'host-1',
+      lobbyLeaderIsHost: true,
+      participants: [],
+      currentPlayers: 0,
+    });
+    const convoy = resolveConvoyLeader(ev, 'host-1');
+    expect(convoy?.gamertag).toBe('HostGT');
+    expect(convoy?.isYou).toBe(true);
+    expect(convoy?.participationSource).toBe('host_self_assigned');
+  });
+
   it('reads leader from participant role', () => {
     const ev = event({
       hostDiscordId: 'host-1',

@@ -8,6 +8,7 @@ import {validatePublishChannelTarget} from '../_shared/publishTarget.ts';
 import {buildEventEmbed, mapEventCarsForEmbed} from '../_shared/events.ts';
 import {validatePublishReady, type SaveEventBody} from '../_shared/eventSpec.ts';
 import {normalizeGuildName} from '../_shared/guildDisplay.ts';
+import {ensureConvoyLeaderParticipantForEvent} from '../_shared/participantLeader.ts';
 import {rateLimitMutation} from '../_shared/rateLimitPresets.ts';
 import {adminClient} from '../_shared/supabase.ts';
 
@@ -138,8 +139,26 @@ serve(async (req) => {
     const publishErr = validatePublishReady(body);
     if (publishErr) return appErrorResponse(req, 400, publishErr);
 
+    await ensureConvoyLeaderParticipantForEvent(supabase, {
+      id: event_id,
+      host_discord_id: event.host_discord_id,
+      lobby_leader_discord_id: event.lobby_leader_discord_id,
+      lobby_leader_is_host: event.lobby_leader_is_host,
+      lobby_leader_gamertag: event.lobby_leader_gamertag,
+    });
+
+    const {data: eventForEmbed, error: refreshErr} = await supabase
+      .from('events')
+      .select('current_players')
+      .eq('id', event_id)
+      .single();
+    if (refreshErr || !eventForEmbed) {
+      return jsonResponse({error: 'Failed to refresh event after roster sync'}, 500, req);
+    }
+
     const payload = buildEventEmbed({
       ...event,
+      current_players: eventForEmbed.current_players,
       guild_name: resolvedGuildName,
       allowed_cars: mapEventCarsForEmbed(eventCars ?? []),
     });

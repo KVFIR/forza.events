@@ -16,24 +16,52 @@ export function findConvoyLeaderParticipant(
 }
 
 export function resolveConvoyLeader(
-  event: Pick<ForzaEvent, 'participants' | 'hostDiscordId' | 'hostUsername' | 'hostAvatarUrl'>,
+  event: Pick<
+    ForzaEvent,
+    | 'participants'
+    | 'hostDiscordId'
+    | 'hostUsername'
+    | 'hostAvatarUrl'
+    | 'lobbyLeaderGamertag'
+    | 'lobbyLeaderDiscordId'
+    | 'lobbyLeaderIsHost'
+  >,
   viewerDiscordId: string,
 ): RosterConvoyLeader | null {
   const leader = findConvoyLeaderParticipant(event.participants);
-  if (!leader) return null;
+  if (leader) {
+    const gamertag = leader.gamertag?.trim();
+    if (!gamertag) return null;
 
-  const gamertag = leader.gamertag?.trim();
+    const isHostLeader = leader.discordId === event.hostDiscordId;
+
+    return {
+      gamertag,
+      discordId: leader.discordId,
+      username: isHostLeader ? event.hostUsername : leader.username,
+      avatarUrl: isHostLeader ? event.hostAvatarUrl : leader.avatarUrl,
+      isYou: viewerDiscordId === leader.discordId,
+      participationSource: leader.participationSource,
+    };
+  }
+
+  const gamertag = event.lobbyLeaderGamertag?.trim();
   if (!gamertag) return null;
 
-  const isHostLeader = leader.discordId === event.hostDiscordId;
+  const discordId =
+    event.lobbyLeaderDiscordId ??
+    (event.lobbyLeaderIsHost !== false ? event.hostDiscordId : undefined);
+  if (!discordId) return null;
+
+  const isHostLeader = discordId === event.hostDiscordId;
 
   return {
     gamertag,
-    discordId: leader.discordId,
-    username: isHostLeader ? event.hostUsername : leader.username,
-    avatarUrl: isHostLeader ? event.hostAvatarUrl : leader.avatarUrl,
-    isYou: viewerDiscordId === leader.discordId,
-    participationSource: leader.participationSource,
+    discordId,
+    username: isHostLeader ? event.hostUsername : undefined,
+    avatarUrl: isHostLeader ? event.hostAvatarUrl : undefined,
+    isYou: viewerDiscordId === discordId,
+    participationSource: isHostLeader ? 'host_self_assigned' : 'host_assigned',
   };
 }
 

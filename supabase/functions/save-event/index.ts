@@ -1,5 +1,5 @@
 import {serve} from 'https://deno.land/std@0.224.0/http/server.ts';
-import {syncPublishedEmbed} from '../_shared/embedSync.ts';
+import {syncPublishedEmbed, syncPublishedEmbedByEventId} from '../_shared/embedSync.ts';
 import {
   assertTargetNotLocked,
   buildEventFields,
@@ -21,10 +21,7 @@ import {resolveCoverUrl} from '../_shared/eventCovers.ts';
 import {slugify} from '../_shared/events.ts';
 import {normalizeGuildName} from '../_shared/guildDisplay.ts';
 import {resolveLobbyLeaderFields} from '../_shared/lobbyLeader.ts';
-import {
-  recalculateEventPlayerCount,
-  syncConvoyLeaderParticipant,
-} from '../_shared/participantLeader.ts';
+import {ensureConvoyLeaderParticipantForEvent} from '../_shared/participantLeader.ts';
 import {rateLimitMutation} from '../_shared/rateLimitPresets.ts';
 import {adminClient} from '../_shared/supabase.ts';
 
@@ -200,11 +197,16 @@ serve(async (req) => {
         .select('*')
         .single();
       if (error) return jsonResponse({error: error.message}, 500, req);
-      await syncConvoyLeaderParticipant(supabase, eventId, lobbyResolved);
-      await recalculateEventPlayerCount(supabase, eventId);
+      await ensureConvoyLeaderParticipantForEvent(supabase, {
+        id: eventId,
+        host_discord_id: discordUser.id,
+        lobby_leader_discord_id: lobbyResolved.lobby_leader_discord_id,
+        lobby_leader_is_host: lobbyResolved.lobby_leader_is_host,
+        lobby_leader_gamertag: lobbyResolved.lobby_leader_gamertag,
+      });
       await syncEventCars(supabase, eventId, cars, body.car_rule_mode ?? 'anything_goes');
       if (isPublishedStatus(data.status)) {
-        const embedSync = await syncPublishedEmbed(supabase, data);
+        const embedSync = await syncPublishedEmbedByEventId(supabase, eventId);
         if (!embedSync.ok) {
           console.error(
             JSON.stringify({
@@ -227,8 +229,13 @@ serve(async (req) => {
         .select('id, slug')
         .single();
       if (!error && data) {
-        await syncConvoyLeaderParticipant(supabase, data.id, lobbyResolved);
-        await recalculateEventPlayerCount(supabase, data.id);
+        await ensureConvoyLeaderParticipantForEvent(supabase, {
+          id: data.id,
+          host_discord_id: discordUser.id,
+          lobby_leader_discord_id: lobbyResolved.lobby_leader_discord_id,
+          lobby_leader_is_host: lobbyResolved.lobby_leader_is_host,
+          lobby_leader_gamertag: lobbyResolved.lobby_leader_gamertag,
+        });
         await syncEventCars(supabase, data.id, cars, body.car_rule_mode ?? 'anything_goes');
         return jsonResponse({id: data.id, slug: data.slug}, 200, req);
       }
