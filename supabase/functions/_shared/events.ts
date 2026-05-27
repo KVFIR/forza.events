@@ -183,8 +183,9 @@ function formatRestrictedCarBlock(car: EmbedAllowedCar): string {
   if (car.tune_share_code?.trim()) {
     coded.push(inlineCode(car.tune_share_code));
   }
-  for (const rule of (car.car_restrictions ?? []).filter(Boolean)) {
-    coded.push(inlineCode(rule));
+  const hasTuningRules = (car.car_restrictions ?? []).some((rule) => rule?.trim());
+  if (hasTuningRules) {
+    coded.push(inlineCode('extra rules'));
   }
   return [formatCarName(car), ...coded].join(' ');
 }
@@ -246,7 +247,7 @@ function fitRestrictedCarFields(
     }
 
     const fields: EmbedField[] = values.map((value, i) => ({
-      name: embedFieldName('🚗 Car', values.length > 1 ? `${i + 1}/${values.length}` : undefined),
+      name: embedFieldName('🚗 Car rules', values.length > 1 ? `${i + 1}/${values.length}` : undefined),
       value,
       inline: false,
     }));
@@ -260,7 +261,7 @@ function fitRestrictedCarFields(
   return {
     fields: [
       {
-        name: embedFieldName('🚗 Car'),
+        name: embedFieldName('🚗 Car rules'),
         value: truncateFieldValue(
           `${cars.length} cars on the restricted list — ${OPEN_IN_APP_HINT}.`,
         ),
@@ -274,7 +275,8 @@ function fitRestrictedCarFields(
 function formatOpenBuildCarField(event: EmbedEventInput): string {
   const pi = event.max_pi ? formatMaxPi(event.max_pi) : 'PI cap';
   const label = `Open build ${inlineCode(pi)}`;
-  return resolveOpenBuildNotes(event) ? `${label} (${inlineCode('extra rules')})` : label;
+  const notes = resolveOpenBuildNotes(event);
+  return notes ? `${label} ${inlineCode(notes)}` : label;
 }
 
 
@@ -359,7 +361,7 @@ function resolveEmbedLifecycleUi(
         statusSubtitle: '',
         statusDetail: null,
         color: defaultColor,
-        buttonLabel: '✅ Register for the Event',
+        buttonLabel: 'Join in FORZA.EVENTS',
         buttonDisabled: false,
         buttonStyle: 3,
       };

@@ -21,22 +21,47 @@ function event(partial: Partial<EmbedEventInput> = {}): EmbedEventInput {
 }
 
 describe('buildEventEmbed', () => {
-  it('shows only PI plus a short note for open build custom restrictions', () => {
+  it('shows PI and full additional restrictions for open build', () => {
     const embed = buildEventEmbed(
       event({additional_car_restrictions: 'No engine swap; stock bodykit only'}),
     ).embeds[0];
 
     const carField = embed.fields.find((field) => field.name === '🚗 Car rules');
-    expect(carField?.value).toBe('Open build `A 650` (`extra rules`)');
-    expect(embed.fields.some((field) => field.name === '🔧 Restrictions')).toBe(false);
-    expect(JSON.stringify(embed)).not.toContain('No engine swap');
-    expect(JSON.stringify(embed)).not.toContain('stock bodykit only');
+    expect(carField?.value).toBe(
+      'Open build `A 650` `No engine swap; stock bodykit only`',
+    );
+    expect(carField?.value).not.toContain('extra rules');
   });
 
-  it('omits the note when there are no extra restrictions', () => {
+  it('omits restrictions when open build has no additional notes', () => {
     const embed = buildEventEmbed(event()).embeds[0];
 
     const carField = embed.fields.find((field) => field.name === '🚗 Car rules');
     expect(carField?.value).toBe('Open build `A 650`');
+  });
+
+  it('summarizes per-car tuning rules as extra rules on restricted list', () => {
+    const embed = buildEventEmbed(
+      event({
+        car_rule_mode: 'restricted_list',
+        allowed_cars: [
+          {
+            make: 'Lotus',
+            model: 'Lotus Emira',
+            year: 2023,
+            max_pi: 800,
+            tune_share_code: null,
+            car_restrictions: ['No engine swap', 'No drivetrain swap'],
+          },
+        ],
+      }),
+    ).embeds[0];
+
+    const carField = embed.fields.find((field) => field.name === '🚗 Car rules');
+    expect(carField?.value).toContain('2023 Lotus Emira');
+    expect(carField?.value).toContain('`S1 800`');
+    expect(carField?.value).toContain('`extra rules`');
+    expect(carField?.value).not.toContain('No engine swap');
+    expect(carField?.value).not.toContain('No drivetrain swap');
   });
 });
