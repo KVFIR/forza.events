@@ -8,6 +8,7 @@ import {isApiConfigured, updateProfile} from '../lib/api';
 import {GamertagModal} from '../components/GamertagModal';
 import {EventCard} from '../components/EventCard';
 import {useMyEventsCatalog} from '../hooks/useMyEventsCatalog';
+import {useParticipantResults} from '../hooks/useParticipantResults';
 import {isEventSuccessfullyCompleted} from '../lib/eventSpec';
 import {hasGamertag} from '../lib/gamertag';
 import {SignInRequiredState} from '../components/SignInRequiredState';
@@ -32,19 +33,22 @@ export function Profile() {
     retryDiscordAuth,
   } = useAuth();
   const {isJoined} = useJoinedEvents();
-  const {allMine, active, completed, isLoading, loadError, refetch} = useMyEventsCatalog('all');
+  const {allMine, active, isLoading, loadError, refetch} = useMyEventsCatalog('all');
   const [editGamertag, setEditGamertag] = useState(false);
   const [saving, setSaving] = useState(false);
   const initial = user.username.charAt(0).toUpperCase();
   const token = getAccessToken();
   const needsGamertag = !hasGamertag(user.xboxGamertag);
-  const recentCompleted = completed.slice(0, 3);
+  const participatedCompleted = allMine.filter(
+    (e) => isJoined(e) && isEventSuccessfullyCompleted(e),
+  );
+  const recentCompleted = participatedCompleted.slice(0, 3);
+  const placementIds = participatedCompleted.map((e) => e.id);
+  const participantPlacements = useParticipantResults(placementIds, user.discordId);
   const hostedCount = allMine.filter(
     (e) => e.hostDiscordId === user.discordId && isEventSuccessfullyCompleted(e),
   ).length;
-  const participatedCount = allMine.filter(
-    (e) => isJoined(e) && isEventSuccessfullyCompleted(e),
-  ).length;
+  const participatedCount = participatedCompleted.length;
 
   if (isConfigured && !isStandalone && !isSignedIn && !authInitializing) {
     return (
@@ -138,7 +142,10 @@ export function Profile() {
           <ul className="flex list-none flex-col gap-2">
             {recentCompleted.map((event) => (
               <li key={event.id}>
-                <EventCard event={event} />
+                <EventCard
+                  event={event}
+                  participantResult={participantPlacements.get(event.id)}
+                />
               </li>
             ))}
           </ul>

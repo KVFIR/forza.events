@@ -2,6 +2,7 @@ import {invokeBrowseEvents, invokeHostDrafts} from './api';
 import {getSupabase, isSupabaseConfigured} from './supabase';
 import {isDiscordActivityFrame, shouldUseDirectSupabaseReads} from './supabaseEnv';
 import {searchCarCatalog} from './carCatalog';
+import {sortEventResultRows} from './eventResults';
 import {EVENT_PLAYER_SLOTS} from './constants';
 import {resolveEventCoverUrl} from './eventCovers';
 import {normalizeEventType} from './eventTypes';
@@ -148,14 +149,15 @@ async function fetchEventsWithRelations(
 
 export type EventResultRow = {
   discordId: string;
-  position: number;
+  position: number | null;
   dnf: boolean;
   dns: boolean;
   points?: number | null;
 };
 
 export type EventResultDisplay = {
-  position: number;
+  discordId: string;
+  position: number | null;
   label: string;
   dnf: boolean;
   dns: boolean;
@@ -173,9 +175,8 @@ export function resolveEventResultDisplay(
     labelById.set(event.hostDiscordId, event.hostUsername);
   }
 
-  return [...rows]
-    .sort((a, b) => a.position - b.position)
-    .map((r) => ({
+  return sortEventResultRows(rows).map((r) => ({
+      discordId: r.discordId,
       position: r.position,
       label: labelById.get(r.discordId) ?? 'Driver',
       dnf: r.dnf,

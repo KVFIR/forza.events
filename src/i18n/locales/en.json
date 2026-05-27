@@ -302,6 +302,9 @@
   "results": {
     "dnf": "DNF",
     "dns": "DNS",
+    "positionShort": "P{{position}}",
+    "noPosition": "—",
+    "yourRow": "You",
     "moveUp": "Move up",
     "moveDown": "Move down",
     "submitTitle": "Submit results?",

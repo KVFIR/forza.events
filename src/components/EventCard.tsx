@@ -4,6 +4,8 @@ import {useEffect, useState} from 'react';
 import {useTranslation} from 'react-i18next';
 import {Link} from 'react-router-dom';
 import {Users} from 'lucide-react';
+import type {ParticipantEventResult} from '../lib/participantResults';
+import {participantResultLabel} from '../lib/participantResultsLabel';
 import type {EventAllowedCar, ForzaEvent} from '../lib/types';
 import {eventTypeMeta} from '../lib/eventTypes';
 import {cn} from '../lib/cn';
@@ -20,6 +22,8 @@ import {EventCover} from './EventCover';
 
 type Props = {
   event: ForzaEvent;
+  /** User's published result on this event (My Events / Profile history). */
+  participantResult?: ParticipantEventResult;
 };
 
 const classColor: Record<string, string> = {
@@ -96,7 +100,7 @@ function OpenBuildSummary({event}: {event: ForzaEvent}) {
   );
 }
 
-export function EventCard({event}: Props) {
+export function EventCard({event, participantResult}: Props) {
   const {t} = useTranslation();
   const {isCompact} = useDiscordLayout();
   const when = format(new Date(event.startsAt), 'EEE d MMM · HH:mm', {locale: dateFnsLocale()});
@@ -105,6 +109,7 @@ export function EventCard({event}: Props) {
   const ended = !draft && displayStatus === 'ended';
   const live = !draft && displayStatus === 'live';
   const full = !draft && displayStatus === 'full';
+  const placement = participantResultLabel(participantResult, t);
   const {user} = useAuth();
   const isHost = event.hostDiscordId === user.discordId;
   const organiserLabel = resolveOrganiserLabel(event);
@@ -196,6 +201,11 @@ export function EventCard({event}: Props) {
                   {full && (
                     <span className="ml-1 text-[9px] font-bold uppercase tracking-widest text-amber-300/90">
                       · {t('eventStatus.full')}
+                    </span>
+                  )}
+                  {placement && (
+                    <span className="ml-1 text-[9px] font-bold uppercase tracking-widest text-amber-300">
+                      · {placement}
                     </span>
                   )}
                 </p>

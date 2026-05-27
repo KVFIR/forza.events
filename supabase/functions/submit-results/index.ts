@@ -5,13 +5,14 @@ import {jsonResponse, optionsResponse} from '../_shared/cors.ts';
 import {syncPublishedEmbedByEventId} from '../_shared/embedSync.ts';
 import {verifyDiscordToken} from '../_shared/discord.ts';
 import {eventHasStarted} from '../_shared/eventSpec.ts';
+import {validateResultSubmitRow} from '../_shared/eventResults.ts';
 import {allowedResultDiscordIds} from '../_shared/resultsRoster.ts';
 import {rateLimitMutation} from '../_shared/rateLimitPresets.ts';
 import {adminClient} from '../_shared/supabase.ts';
 
 type ResultInput = {
   discord_id: string;
-  position: number;
+  position: number | null;
   dnf?: boolean;
   dns?: boolean;
 };
@@ -74,9 +75,19 @@ serve(async (req) => {
       .eq('event_id', eventId);
     const allowedIds = allowedResultDiscordIds(event, participants ?? []);
 
+    const finisherPositions = new Set<number>();
+
     for (const r of results) {
       if (!allowedIds.has(String(r.discord_id))) {
         return appErrorResponse(req, 400, API_ERROR_CODES.RESULTS_PARTICIPANTS_ONLY);
+      }
+      const rowErr = validateResultSubmitRow(r);
+      if (rowErr) return jsonResponse({error: rowErr}, 400, req);
+      if (r.position != null) {
+        if (finisherPositions.has(r.position)) {
+          return jsonResponse({error: 'Duplicate finishing position'}, 400, req);
+        }
+        finisherPositions.add(r.position);
       }
     }
 

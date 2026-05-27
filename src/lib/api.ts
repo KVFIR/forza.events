@@ -221,7 +221,7 @@ export async function leaveEvent(discordToken: string, eventId: string) {
 
 export type SubmitResultEntry = {
   discord_id: string;
-  position: number;
+  position: number | null;
   dnf?: boolean;
   dns?: boolean;
 };

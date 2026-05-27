@@ -1,11 +1,14 @@
-import {useState} from 'react';
+import {useMemo, useState} from 'react';
 import {useTranslation} from 'react-i18next';
 import {useNavigate} from 'react-router-dom';
 import {Alert} from '../components/ui/Alert';
 import {EventList} from '../components/EventList';
 import {EventListMetaSelect} from '../components/EventListMetaSelect';
 import {useAuth} from '../context/AuthContext';
+import {useJoinedEvents} from '../context/JoinedEventsContext';
 import {useMyEventsCatalog} from '../hooks/useMyEventsCatalog';
+import {useParticipantResults} from '../hooks/useParticipantResults';
+import {isEventSuccessfullyCompleted} from '../lib/eventSpec';
 import type {MyEventsScope} from '../lib/eventList';
 
 export function MyEvents() {
@@ -18,9 +21,19 @@ export function MyEvents() {
     {value: 'joined', label: t('myEvents.scopeJoined')},
   ];
   const [scope, setScope] = useState<MyEventsScope>('all');
-  const {isSignedIn, loading: authLoading} = useAuth();
+  const {isSignedIn, loading: authLoading, user} = useAuth();
+  const {isJoined} = useJoinedEvents();
   const {filtered, isLoading, isRefreshing, loadError, draftsLoadError, refetch} =
     useMyEventsCatalog(scope);
+
+  const placementEventIds = useMemo(
+    () =>
+      filtered
+        .filter((e) => isEventSuccessfullyCompleted(e) && isJoined(e))
+        .map((e) => e.id),
+    [filtered, isJoined],
+  );
+  const participantResults = useParticipantResults(placementEventIds, user.discordId);
 
   const emptyTitle =
     !authLoading && !isSignedIn
@@ -71,6 +84,7 @@ export function MyEvents() {
                 ? {label: t('myEvents.createEvent'), onClick: () => navigate('/create')}
                 : undefined
         }
+        participantResults={participantResults}
         metaRight={
           <EventListMetaSelect
             value={scope}

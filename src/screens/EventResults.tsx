@@ -6,6 +6,7 @@ import {ArrowLeft, ChevronDown, ChevronUp} from 'lucide-react';
 import {useAuth} from '../context/AuthContext';
 import {useJoinedEvents} from '../context/JoinedEventsContext';
 import {isApiConfigured, submitEventResults} from '../lib/api';
+import {buildResultSubmitRows} from '../lib/eventResults';
 import {resolveResultsRoster} from '../lib/eventRoster';
 import {
   canSubmitEventResults,
@@ -142,14 +143,9 @@ export function EventResults() {
       const allowedIds = new Set(
         resolveResultsRoster(fresh, user.discordId, user.xboxGamertag).map((p) => p.discordId),
       );
-      const payload = placements
-        .filter((p) => allowedIds.has(p.discordId))
-        .map((p, i) => ({
-          discord_id: p.discordId,
-          position: i + 1,
-          dnf: p.dnf,
-          dns: p.dns,
-        }));
+      const payload = buildResultSubmitRows(
+        placements.filter((p) => allowedIds.has(p.discordId)),
+      );
 
       if (payload.length === 0) {
         throw new Error(t('results.noParticipants'));
@@ -196,11 +192,21 @@ export function EventResults() {
       )}
 
       <ol className="mt-5 space-y-2">
-        {placements.map((row, index) => (
+        {placements.map((row, index) => {
+          const finisherIndex = placements
+            .slice(0, index + 1)
+            .filter((p) => !p.dnf && !p.dns).length;
+          const positionLabel = row.dns
+            ? t('results.dns')
+            : row.dnf
+              ? t('results.dnf')
+              : String(finisherIndex);
+
+          return (
           <li key={row.discordId}>
             <Panel variant="soft" className="flex items-center gap-2 px-3 py-2.5">
             <span className="w-6 shrink-0 text-center text-sm font-bold tabular-nums text-muted">
-              {index + 1}
+              {positionLabel}
             </span>
             <span
               className={cn(
@@ -246,7 +252,8 @@ export function EventResults() {
             </div>
             </Panel>
           </li>
-        ))}
+          );
+        })}
       </ol>
 
       {placements.length === 0 && (

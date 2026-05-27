@@ -5,6 +5,7 @@ import {EmptyState} from './ui/EmptyState';
 import {PageLoading} from './ui/PageLoading';
 import {Spinner} from './ui/Spinner';
 import {useTranslation} from 'react-i18next';
+import type {ParticipantEventResult} from '../lib/participantResults';
 import type {ForzaEvent} from '../lib/types';
 import type {HostDraftsLoadError, PublishedEventsLoadError} from '../lib/events';
 
@@ -18,6 +19,8 @@ type Props = {
   emptyDescription?: string;
   emptyAction?: {label: string; onClick: () => void};
   metaRight?: ReactNode;
+  /** Published placement per event for the signed-in participant. */
+  participantResults?: Map<string, ParticipantEventResult>;
 };
 
 export function EventList({
@@ -30,6 +33,7 @@ export function EventList({
   emptyDescription,
   emptyAction,
   metaRight,
+  participantResults,
 }: Props) {
   const {t} = useTranslation();
   const hasFetchError = !!loadError && events.length === 0 && !isLoading;
@@ -74,7 +78,10 @@ export function EventList({
       <ul className="flex list-none flex-col gap-2">
         {events.map((event) => (
           <li key={event.id}>
-            <EventCard event={event} />
+            <EventCard
+              event={event}
+              participantResult={participantResults?.get(event.id)}
+            />
           </li>
         ))}
       </ul>

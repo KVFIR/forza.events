@@ -110,7 +110,12 @@ export function EventDetail() {
 
   const reloadEvent = useCallback(() => {
     if (!id) return;
-    void fetchEventById(id, {discordToken}).then(setEvent);
+    void fetchEventById(id, {discordToken}).then(async (ev) => {
+      setEvent(ev);
+      if (ev && shouldShowEventResults(ev)) {
+        setResultRows(await fetchEventResults(id));
+      }
+    });
   }, [id, discordToken]);
 
   useEventLiveUpdates(id, reloadEvent);
@@ -485,7 +490,11 @@ export function EventDetail() {
       {showResultsSection ? (
         <div className="mt-4">
           <p className={cn(sectionLabelClass, 'mb-2')}>{t('eventDetail.results')}</p>
-          <EventResultsTable rows={resultDisplay} pending={resultDisplay.length === 0} />
+          <EventResultsTable
+            rows={resultDisplay}
+            pending={resultDisplay.length === 0}
+            viewerDiscordId={user.discordId}
+          />
         </div>
       ) : (
         <div className="mt-4">
