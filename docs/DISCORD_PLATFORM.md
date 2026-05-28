@@ -85,7 +85,7 @@ Host must be guild member with **Manage Server** (or Administrator). Server re-v
 [Discord Developer Portal](https://discord.com/developers/applications):
 
 1. **Activities enabled** — App Launcher + `LAUNCH_ACTIVITY`.
-2. **Activity URL Mapping** — production origin (e.g. Railway URL).
+2. **Activity URL Mapping** — `https://forzaevents.up.railway.app` (must match Railway `APP_ORIGIN`).
 3. **Second mapping** — `/supabase` → `<project-ref>.supabase.co`.
 4. **OAuth2 Redirects**
    - `https://127.0.0.1` — Activity (required)
@@ -112,7 +112,7 @@ Set in Developer Portal → **General Information**:
 | Terms of Service | `https://<APP_ORIGIN>/terms` |
 | Privacy Policy | `https://<APP_ORIGIN>/privacy` |
 
-Use your Railway deploy URL (same as `APP_ORIGIN`), e.g. `https://forzaevents-production.up.railway.app/terms`. These paths load in a normal browser tab without the Discord-only gate. Optional: set `VITE_LEGAL_CONTACT_EMAIL` at build time for privacy/contact requests (default `rudolfs@oas.lv`).
+Use your Railway deploy URL (same as `APP_ORIGIN`), e.g. `https://forzaevents.up.railway.app/terms`. These paths load in a normal browser tab without the Discord-only gate. Optional: set `VITE_LEGAL_CONTACT_EMAIL` at build time for privacy/contact requests (default `rudolfs@oas.lv`).
 
 ### Validate in Discord
 

@@ -371,7 +371,7 @@ export function buildEventEmbed(event: EmbedEventInput) {
   const siteOrigin =
     (globalThis as {Deno?: {env: {get: (name: string) => string | undefined}}}).Deno?.env.get(
       'APP_ORIGIN',
-    ) ?? 'https://forza.events';
+    ) ?? 'https://forzaevents.up.railway.app';
   const coverUrl = resolveCoverAbsolute(event.type, event.cover_image_url, siteOrigin);
   const isOpenBuild = event.car_rule_mode !== 'restricted_list';
   const lobbyCount = formatLobbyCount(event.current_players);

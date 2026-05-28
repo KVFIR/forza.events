@@ -77,13 +77,13 @@ Set at **build time** (redeploy after changes):
 DISCORD_CLIENT_ID=...
 SUPABASE_URL=...
 SUPABASE_ANON_KEY=...
-APP_ORIGIN=https://forzaevents-production.up.railway.app
+APP_ORIGIN=https://forzaevents.up.railway.app
 ```
 
 Discord OAuth for Activity uses `https://127.0.0.1` — not the Railway origin. Production browser tabs show **Open in Discord** (`DiscordOnlyGate`).
 
 ```bash
-railway variable set APP_ORIGIN=https://forzaevents-production.up.railway.app
+railway variable set APP_ORIGIN=https://forzaevents.up.railway.app
 ```
 
 ---

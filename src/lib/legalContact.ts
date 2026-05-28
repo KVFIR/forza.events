@@ -10,5 +10,5 @@ export function getServiceOrigin(): string {
     return window.location.origin;
   }
   const fromEnv = import.meta.env.VITE_APP_ORIGIN as string | undefined;
-  return fromEnv?.trim().replace(/\/$/, '') || 'https://forza.events';
+  return fromEnv?.trim().replace(/\/$/, '') || 'https://forzaevents.up.railway.app';
 }

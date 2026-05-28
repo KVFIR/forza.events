@@ -16,7 +16,7 @@ Remaining work is mostly **Discord portal validation in real guilds**, **Railway
 | Security hardening | Done — storage, RLS scope, CORS, rate limits, publish validation |
 | Local browser dev | Done — Discord OAuth + Supabase (not mock mode) |
 | Sample content | Done — optional `sample-*` seed |
-| Production infra | Done — Supabase + Railway (`forzaevents-production.up.railway.app`) |
+| Production infra | Done — Supabase + Railway (`forzaevents.up.railway.app`) |
 | Production launch | Partial — Discord E2E in pilot guilds still open |
 
 Product contract: [`PLAN.md`](PLAN.md). Discord setup: [`DISCORD_PLATFORM.md`](DISCORD_PLATFORM.md). Agent/runtime notes: [`AGENTS.md`](../AGENTS.md).
@@ -80,7 +80,7 @@ Schema: single migration `001_baseline.sql` — see [`supabase/README.md`](../su
 | Supabase project | `uoysqfczahqmctbrrizn` (FORZA.EVENTS) |
 | Schema | `001_baseline` on remote |
 | Edge Functions | 15 via `deploy:functions` |
-| Activity hosting | Railway `https://forzaevents-production.up.railway.app` |
+| Activity hosting | Railway `https://forzaevents.up.railway.app` |
 | Discord Activity OAuth | `https://127.0.0.1` + `token-exchange` allowlist |
 
 Set **`APP_ORIGIN`** on Railway to the deploy URL (embed cover URLs + Edge CORS). Redeploy frontend after changing env at build time.
