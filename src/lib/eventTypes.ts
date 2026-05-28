@@ -18,6 +18,15 @@ export function normalizeEventType(value: string | undefined | null): EventType 
   return isEventType(value) ? value : 'road';
 }
 
+/** English type labels (Discord Rich Presence + parity with en.json `eventTypes`). */
+export const EVENT_TYPE_LABEL_EN: Record<EventType, string> = {
+  road: 'Road racing',
+  dirt: 'Dirt racing',
+  touge: 'Touge',
+  drift: 'Car meet',
+  cruise: 'Cruise',
+};
+
 export type EventTypeOption = {
   value: EventType;
   accentBar: string;

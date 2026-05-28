@@ -51,7 +51,12 @@ import {TextLink} from '../components/ui/TextButton';
 import {ConfirmDialog} from '../components/ui/ConfirmDialog';
 import {GamertagModal} from '../components/GamertagModal';
 import {useJoinedEvents} from '../context/JoinedEventsContext';
+import {useRichPresenceOverride} from '../context/DiscordRichPresenceContext';
 import {useAuth} from '../context/AuthContext';
+import {
+  buildEventRichPresence,
+  type EventRichPresenceRole,
+} from '../lib/discordRichPresence';
 import {useEventLiveUpdates} from '../hooks/useEventLiveUpdates';
 import {useResolveEventDisplayStatus} from '../hooks/useResolveEventDisplayStatus';
 import {formatCarDisplayName} from '../lib/carDisplay';
@@ -122,6 +127,23 @@ export function EventDetail() {
     [event, id, getLobbyPatch],
   );
   const displayStatus = useResolveEventDisplayStatus(displayEvent);
+  const {setRichPresenceOverride} = useRichPresenceOverride();
+
+  const richPresenceRole: EventRichPresenceRole | undefined = displayEvent
+    ? displayEvent.hostDiscordId === user.discordId
+      ? 'host'
+      : isJoined(displayEvent)
+        ? 'joined'
+        : 'viewing'
+    : undefined;
+
+  useEffect(() => {
+    if (!displayEvent || !richPresenceRole) return;
+    setRichPresenceOverride(
+      buildEventRichPresence(displayEvent, {role: richPresenceRole, displayStatus}),
+    );
+    return () => setRichPresenceOverride(null);
+  }, [displayEvent, richPresenceRole, displayStatus, setRichPresenceOverride]);
 
   useEffect(() => {
     if (!id) return;

@@ -1,5 +1,7 @@
 import {exchangeToken, isApiConfigured} from './api';
 import {DISCORD_ACTIVITY_REDIRECT_URI} from './discordConstants';
+import {DISCORD_ACTIVITY_OAUTH_SCOPES} from './discordScopes';
+import {resetRichPresenceSession} from './discordRichPresenceSession';
 import {eventIdFromOpenEventCustomId} from './eventLaunch';
 import {loadDiscordSession, saveDiscordSession} from './discordAuth';
 import {GUEST_USER} from './guestUser';
@@ -73,6 +75,7 @@ async function authenticateDiscordActivity(
   sdk: DiscordSDKInstance,
   clientId: string,
 ): Promise<{user: AppUser; accessToken: string | null}> {
+  resetRichPresenceSession();
   guildId = sdk.guildId ?? null;
   guildName = null;
 
@@ -81,7 +84,7 @@ async function authenticateDiscordActivity(
     response_type: 'code',
     state: '',
     prompt: 'none',
-    scope: ['identify', 'guilds'],
+    scope: [...DISCORD_ACTIVITY_OAUTH_SCOPES],
   });
 
   if (!isApiConfigured()) {

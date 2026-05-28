@@ -7,7 +7,7 @@ import {FormAlerts, StepIndicator} from './components/StepIndicator';
 import {PublishedTargetSummary} from './components/PublishedTargetSummary';
 import {PUBLISH_STEP_INDEX} from './constants';
 import {collectPublishGaps} from './publishGaps';
-import {useState} from 'react';
+import {useEffect, useState} from 'react';
 import {useCreateEventForm} from './useCreateEventForm';
 import {EventStep} from './steps/EventStep';
 import {PublishStep} from './steps/PublishStep';
@@ -17,6 +17,8 @@ import {PageLoading} from '../../components/ui/PageLoading';
 import {GamertagModal} from '../../components/GamertagModal';
 import {isApiConfigured, updateProfile} from '../../lib/api';
 import {useAuth} from '../../context/AuthContext';
+import {useRichPresenceOverride} from '../../context/DiscordRichPresenceContext';
+import {buildCreateRichPresence} from '../../lib/discordRichPresence';
 import {useLoadingUI} from '../../hooks/useLoadingUI';
 import {formatDiscordHandle} from '../../lib/discordHandle';
 import {isLocalDevHost} from '../../lib/runtime';
@@ -29,7 +31,15 @@ export function CreateEvent() {
   const {refreshUser, isStandalone, loading: authInitializing, authRetrying, retryDiscordAuth} =
     useAuth();
   const form = useCreateEventForm();
+  const {setRichPresenceOverride} = useRichPresenceOverride();
   const showLoadingUI = useLoadingUI(form.loadingEdit);
+
+  useEffect(() => {
+    setRichPresenceOverride(
+      buildCreateRichPresence(form.values.title, Boolean(form.editId)),
+    );
+    return () => setRichPresenceOverride(null);
+  }, [form.values.title, form.editId, setRichPresenceOverride]);
   const {
     user,
     token,

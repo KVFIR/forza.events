@@ -4,7 +4,10 @@ import {busyLabel} from '../i18n/busyLabels';
 import {useNavigate, useParams} from 'react-router-dom';
 import {ArrowLeft, ChevronDown, ChevronUp} from 'lucide-react';
 import {useAuth} from '../context/AuthContext';
+import {useRichPresenceOverride} from '../context/DiscordRichPresenceContext';
 import {useJoinedEvents} from '../context/JoinedEventsContext';
+import {buildResultsRichPresence} from '../lib/discordRichPresence';
+import type {ForzaEvent} from '../lib/types';
 import {isApiConfigured, submitEventResults} from '../lib/api';
 import {buildResultSubmitRows} from '../lib/eventResults';
 import {resolveResultsRoster} from '../lib/eventRoster';
@@ -61,22 +64,31 @@ export function EventResults() {
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [title, setTitle] = useState('');
+  const [event, setEvent] = useState<ForzaEvent | null>(null);
   const [alreadySubmitted, setAlreadySubmitted] = useState(false);
   const [submitConfirmOpen, setSubmitConfirmOpen] = useState(false);
+  const {setRichPresenceOverride} = useRichPresenceOverride();
+
+  useEffect(() => {
+    if (!event) return;
+    setRichPresenceOverride(buildResultsRichPresence(event));
+    return () => setRichPresenceOverride(null);
+  }, [event, setRichPresenceOverride]);
 
   useEffect(() => {
     if (!id) return;
     let cancelled = false;
     setLoading(true);
     void Promise.all([fetchEventById(id), fetchEventResults(id)])
-      .then(([event, saved]) => {
-        if (cancelled || !event) return;
-        setTitle(event.title);
-        if (!canSubmitEventResults(event, user)) {
+      .then(([loaded, saved]) => {
+        if (cancelled || !loaded) return;
+        setEvent(loaded);
+        setTitle(loaded.title);
+        if (!canSubmitEventResults(loaded, user)) {
           navigate(`/event/${id}`, {replace: true});
           return;
         }
-        if (!eventHasStarted(event)) {
+        if (!eventHasStarted(loaded)) {
           navigate(`/event/${id}`, {replace: true});
           return;
         }
@@ -85,11 +97,7 @@ export function EventResults() {
           navigate(`/event/${id}`, {replace: true});
           return;
         }
-        setPlacements(
-          buildPlacements(
-            resolveResultsRoster(event),
-          ),
-        );
+        setPlacements(buildPlacements(resolveResultsRoster(loaded)));
       })
       .finally(() => {
         if (!cancelled) setLoading(false);

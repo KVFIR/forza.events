@@ -16,10 +16,26 @@ Last updated: 2026-05-27
 
 Also supported by Discord: voice channels, DMs, group DMs (guild context may be null — `launch_intents.guild_id` is nullable).
 
+## Rich Presence
+
+Custom profile status while the Activity is open uses Embedded App SDK `setActivity()` (see [`src/lib/discordRichPresence.ts`](../src/lib/discordRichPresence.ts)).
+
+| Requirement | Notes |
+|-------------|--------|
+| OAuth scope | `rpc.activities.write` — included in Activity `authorize()` (`DISCORD_ACTIVITY_OAUTH_SCOPES`) |
+| When it updates | Route changes + **Event Detail** / **Results** / **Create** (draft title) screen overrides |
+| Copy | Always **English** on the profile (`RICH_PRESENCE_EN` in `discordRichPresence.ts`) — UI locale does not affect Rich Presence; event types use `EVENT_TYPE_LABEL_EN` in `eventTypes.ts` |
+| Event state line | Role (`Hosting`, `Registered`) or status (`Lobby full`, `Race in progress`, …) — lobby count only in `party.size`, not duplicated in `state` |
+| Assets | URLs use `VITE_APP_ORIGIN` when set (Discord fetches server-side), else iframe origin — `/logo/logo.png`, bundled `/covers/*` |
+| Activity type | RPC `5` (Competing) |
+| Localhost | Rich Presence sync runs only in the Activity iframe (`isDiscordActivityFrame()`), not in a standalone browser tab |
+
+After deploying a scope change, users may need to **re-open** the Activity (or use in-app auth retry) so Discord re-issues a token with `rpc.activities.write`.
+
 ## Auth flow (matches Discord docs)
 
 1. `await sdk.ready()`
-2. `sdk.commands.authorize({ client_id, response_type: 'code', scope: ['identify','guilds'], prompt: 'none' })`
+2. `sdk.commands.authorize({ client_id, response_type: 'code', scope: ['identify','guilds','rpc.activities.write'], prompt: 'none' })`
 3. Backend `token-exchange` exchanges `code` for `access_token` (with allowlisted `redirect_uri`)
 4. `sdk.commands.authenticate({ access_token })`
 
@@ -121,6 +137,7 @@ Use your Railway deploy URL (same as `APP_ORIGIN`), e.g. `https://forzaevents.up
 - [ ] Embed button opens correct event
 - [ ] Join/leave updates embed
 - [ ] Cancel / complete updates embed appearance
+- [ ] Rich Presence on profile shows current screen (Browse / event title on Detail)
 
 ## Out of MVP
 

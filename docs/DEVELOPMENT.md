@@ -116,7 +116,7 @@ Browse can use PostgREST directly (all non-draft events, including completed/can
 
 ### Discord Activity (iframe)
 
-1. `initDiscordActivity()` → SDK `authorize` (`identify`, `guilds`)
+1. `initDiscordActivity()` → SDK `authorize` (`identify`, `guilds`, `rpc.activities.write`)
 2. `token-exchange` with `redirect_uri: https://127.0.0.1`
 3. `authenticate(access_token)`
 4. API calls use `createSupabaseFetch(anonKey)` so `apikey` / `Authorization` survive Discord’s proxy

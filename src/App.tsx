@@ -8,7 +8,9 @@ import {Navbar} from './components/Navbar';
 import {Logo} from './components/ui/Logo';
 import {AuthProvider} from './context/AuthContext';
 import {DiscordLayoutProvider, useDiscordLayout} from './context/DiscordLayoutContext';
+import {DiscordRichPresenceProvider} from './context/DiscordRichPresenceContext';
 import {JoinedEventsProvider} from './context/JoinedEventsContext';
+import {DiscordRichPresenceSync} from './components/DiscordRichPresenceSync';
 import type {ReactNode} from 'react';
 import {PageLoading} from './components/ui/PageLoading';
 import {isPublicLegalBrowserPath} from './lib/publicLegalPaths';
@@ -114,9 +116,12 @@ export default function App() {
     <BrowserRouter>
       <AuthProvider>
         <DiscordLayoutProvider>
-          <JoinedEventsProvider>
-            <AppRoutes />
-          </JoinedEventsProvider>
+          <DiscordRichPresenceProvider>
+            <JoinedEventsProvider>
+              <DiscordRichPresenceSync />
+              <AppRoutes />
+            </JoinedEventsProvider>
+          </DiscordRichPresenceProvider>
         </DiscordLayoutProvider>
       </AuthProvider>
     </BrowserRouter>
