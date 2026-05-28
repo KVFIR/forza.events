@@ -1,7 +1,7 @@
 import './App.css';
 import {lazy, Suspense} from 'react';
 import {useTranslation} from 'react-i18next';
-import {BrowserRouter, Navigate, Route, Routes} from 'react-router-dom';
+import {BrowserRouter, Navigate, Route, Routes, useLocation} from 'react-router-dom';
 import {AppBootGate} from './components/AppBootGate';
 import {DiscordOnlyGate} from './components/DiscordOnlyGate';
 import {Navbar} from './components/Navbar';
@@ -11,6 +11,7 @@ import {DiscordLayoutProvider, useDiscordLayout} from './context/DiscordLayoutCo
 import {JoinedEventsProvider} from './context/JoinedEventsContext';
 import type {ReactNode} from 'react';
 import {PageLoading} from './components/ui/PageLoading';
+import {isPublicLegalBrowserPath} from './lib/publicLegalPaths';
 import {shouldShowDiscordOnlyGate} from './lib/runtime';
 
 const BrowseEvents = lazy(() =>
@@ -32,6 +33,12 @@ const AuthCallback = lazy(() =>
 );
 const BotInstalled = lazy(() =>
   import('./screens/BotInstalled').then((m) => ({default: m.BotInstalled})),
+);
+const TermsOfService = lazy(() =>
+  import('./screens/TermsOfService').then((m) => ({default: m.TermsOfService})),
+);
+const PrivacyPolicy = lazy(() =>
+  import('./screens/PrivacyPolicy').then((m) => ({default: m.PrivacyPolicy})),
 );
 
 function RouteFallback() {
@@ -60,6 +67,44 @@ function AppShell({children}: {children: ReactNode}) {
   );
 }
 
+function AppRoutes() {
+  const location = useLocation();
+  const isLegalPage = isPublicLegalBrowserPath(location.pathname);
+
+  return (
+    <AppShell>
+      {!isLegalPage ? <Navbar /> : null}
+      <div
+        className={
+          isLegalPage
+            ? 'min-w-0 flex-1'
+            : 'app-main-column flex min-h-screen flex-col px-3 sm:px-5 md:px-8 lg:px-10'
+        }
+      >
+        <main className={isLegalPage ? 'min-w-0' : 'min-w-0 flex-1 pb-8'}>
+          <AppBootGate>
+            <Suspense fallback={<RouteFallback />}>
+              <Routes>
+                <Route path="/" element={<BrowseEvents />} />
+                <Route path="/my-events" element={<MyEvents />} />
+                <Route path="/event/:id" element={<EventDetail />} />
+                <Route path="/event/:id/results" element={<EventResults />} />
+                <Route path="/create" element={<CreateEvent />} />
+                <Route path="/profile" element={<Profile />} />
+                <Route path="/auth/callback" element={<AuthCallback />} />
+                <Route path="/bot-installed" element={<BotInstalled />} />
+                <Route path="/terms" element={<TermsOfService />} />
+                <Route path="/privacy" element={<PrivacyPolicy />} />
+                <Route path="*" element={<Navigate to="/" replace />} />
+              </Routes>
+            </Suspense>
+          </AppBootGate>
+        </main>
+      </div>
+    </AppShell>
+  );
+}
+
 export default function App() {
   if (shouldShowDiscordOnlyGate()) {
     return <DiscordOnlyGate />;
@@ -70,28 +115,7 @@ export default function App() {
       <AuthProvider>
         <DiscordLayoutProvider>
           <JoinedEventsProvider>
-            <AppShell>
-              <Navbar />
-              <div className="app-main-column flex min-h-screen flex-col px-3 sm:px-5 md:px-8 lg:px-10">
-                <main className="min-w-0 flex-1 pb-8">
-                  <AppBootGate>
-                    <Suspense fallback={<RouteFallback />}>
-                      <Routes>
-                        <Route path="/" element={<BrowseEvents />} />
-                        <Route path="/my-events" element={<MyEvents />} />
-                        <Route path="/event/:id" element={<EventDetail />} />
-                        <Route path="/event/:id/results" element={<EventResults />} />
-                        <Route path="/create" element={<CreateEvent />} />
-                        <Route path="/profile" element={<Profile />} />
-                        <Route path="/auth/callback" element={<AuthCallback />} />
-                        <Route path="/bot-installed" element={<BotInstalled />} />
-                        <Route path="*" element={<Navigate to="/" replace />} />
-                      </Routes>
-                    </Suspense>
-                  </AppBootGate>
-                </main>
-              </div>
-            </AppShell>
+            <AppRoutes />
           </JoinedEventsProvider>
         </DiscordLayoutProvider>
       </AuthProvider>

@@ -47,7 +47,19 @@
   },
   "discordGate": {
     "title": "Open in Discord",
-    "body": "This build is a Discord Activity. Launch it from the App Launcher or a server voice channel — not from a regular browser tab."
+    "body": "This build is a Discord Activity. Launch it from the App Launcher or a server voice channel — not from a regular browser tab.",
+    "legal": "Terms of Service · Privacy Policy"
+  },
+  "legal": {
+    "termsLink": "Terms of Service",
+    "privacyLink": "Privacy Policy",
+    "viewPrivacy": "Privacy Policy →",
+    "viewTerms": "Terms of Service →",
+    "lastUpdated": "Last updated: {{date}}",
+    "englishAuthoritative": "The English text on this page is authoritative. UI translations elsewhere in the app do not replace these terms.",
+    "footer": "FORZA.EVENTS — community events for Forza Horizon, delivered as a Discord Activity.",
+    "homeAria": "FORZA.EVENTS home",
+    "navAria": "Legal"
   },
   "auth": {
     "signInRequired": "Sign in required",

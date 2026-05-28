@@ -14,6 +14,15 @@ export function DiscordOnlyGate() {
         <Logo size="wordmark" className="justify-center" />
         <h1 className="text-lg font-semibold text-white">{t('discordGate.title')}</h1>
         <p className="text-sm leading-relaxed text-muted">{t('discordGate.body')}</p>
+        <p className="text-xs text-muted">
+          <a href="/terms" className="hover:text-white">
+            {t('legal.termsLink')}
+          </a>
+          <span aria-hidden="true"> · </span>
+          <a href="/privacy" className="hover:text-white">
+            {t('legal.privacyLink')}
+          </a>
+        </p>
       </div>
     </div>
   );
