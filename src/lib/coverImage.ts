@@ -10,8 +10,8 @@ export const COVER_ASPECT_HEIGHT = 9;
 export const COVER_ASPECT_RATIO = COVER_ASPECT_WIDTH / COVER_ASPECT_HEIGHT;
 
 /** Max size of the file the user picks before client-side crop/compress (fits 4K PNG screenshots). */
-export const COVER_SOURCE_MAX_BYTES = 15 * 1024 * 1024;
-export const COVER_SOURCE_MAX_MB = 15;
+export const COVER_SOURCE_MAX_BYTES = 20 * 1024 * 1024;
+export const COVER_SOURCE_MAX_MB = 20;
 
 /** Encoded upload size (center-cropped to {@link COVER_ASPECT_RATIO}). */
 export const COVER_UPLOAD_MAX_WIDTH = 1280;
