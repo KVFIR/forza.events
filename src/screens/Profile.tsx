@@ -11,6 +11,7 @@ import {EventCard} from '../components/EventCard';
 import {useMyEventsCatalog} from '../hooks/useMyEventsCatalog';
 import {useParticipantResults} from '../hooks/useParticipantResults';
 import {isEventSuccessfullyCompleted} from '../lib/eventSpec';
+import {formatDiscordHandle} from '../lib/discordHandle';
 import {hasGamertag} from '../lib/gamertag';
 import {SignInRequiredState} from '../components/SignInRequiredState';
 import {ContentReveal} from '../components/ui/ContentReveal';
@@ -110,7 +111,9 @@ export function Profile() {
             className="rounded-2xl"
           />
           <div className="min-w-0 flex-1">
-            <p className="truncate text-lg font-black tracking-tight text-white">{user.username}</p>
+            <p className="truncate text-lg font-black tracking-tight text-white">
+              {formatDiscordHandle(user.username)}
+            </p>
             <p className="mt-0.5 text-xs text-muted-light">
               {t('profile.xboxGt')}{' '}
               <span className={cn('font-semibold', needsGamertag ? 'text-amber-300' : 'text-slate-300')}>

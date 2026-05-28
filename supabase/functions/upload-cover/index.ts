@@ -8,7 +8,7 @@ import {adminClient} from '../_shared/supabase.ts';
 
 const UUID_RE =
   /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
-const MAX_BYTES = 2 * 1024 * 1024;
+const MAX_BYTES = 15 * 1024 * 1024;
 const ALLOWED_TYPES = new Set(['image/jpeg', 'image/png', 'image/webp']);
 
 serve(async (req) => {
@@ -43,7 +43,7 @@ serve(async (req) => {
 
     const bytes = decodeBase64(contentBase64);
     if (bytes.byteLength > MAX_BYTES) {
-      return jsonResponse({error: 'Image exceeds 2 MB limit'}, 400, req);
+      return jsonResponse({error: 'Image exceeds 15 MB limit'}, 400, req);
     }
 
     const supabase = adminClient();

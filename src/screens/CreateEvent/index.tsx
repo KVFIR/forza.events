@@ -18,6 +18,7 @@ import {GamertagModal} from '../../components/GamertagModal';
 import {isApiConfigured, updateProfile} from '../../lib/api';
 import {useAuth} from '../../context/AuthContext';
 import {useLoadingUI} from '../../hooks/useLoadingUI';
+import {formatDiscordHandle} from '../../lib/discordHandle';
 import {isLocalDevHost} from '../../lib/runtime';
 
 export function CreateEvent() {
@@ -113,7 +114,7 @@ export function CreateEvent() {
 
   const lobbyLeaderLabel = values.lobbyLeaderIsHost
     ? (user.xboxGamertag?.trim() || t('create.youHost'))
-    : values.lobbyLeaderDisplayName.trim() ||
+    : formatDiscordHandle(values.lobbyLeaderUsername) ||
       values.lobbyLeaderGamertag.trim() ||
       t('common.dash');
 

@@ -1,4 +1,5 @@
 import type {ValidationCode} from './validationCodes.ts';
+import {piRangeLabelEn} from './pi.ts';
 
 /** English fallback for API `error` field (client maps `code` via i18n). */
 const VALIDATION_MESSAGES_EN: Record<ValidationCode, string> = {
@@ -10,7 +11,7 @@ const VALIDATION_MESSAGES_EN: Record<ValidationCode, string> = {
   CONVOY_LEADER_REQUIRED: 'Convoy leader gamertag is required.',
   CONVOY_LEADER_DISCORD_REQUIRED: 'Choose a convoy leader from your Discord server.',
   CARS_REQUIRED: 'Add at least one car for a restricted car list.',
-  PI_RANGE: 'Set a PI cap between 100 and 999.',
+  PI_RANGE: `Set a PI cap from ${piRangeLabelEn()}.`,
   TARGET_GUILD_LOCKED: 'Server cannot be changed after publish.',
   TARGET_CHANNEL_LOCKED: 'Channel cannot be changed after publish.',
 };

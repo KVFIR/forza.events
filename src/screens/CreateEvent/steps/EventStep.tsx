@@ -6,7 +6,7 @@ import {Alert} from '../../../components/ui/Alert';
 import {TextButton} from '../../../components/ui/TextButton';
 import {fileUploadLabelClass, toggleRowClass} from '../../../components/ui/formStyles';
 import {eventTypeLabel} from '../../../lib/eventTypes';
-import {COVER_ASPECT_CLASS} from '../../../lib/coverImage';
+import {COVER_ASPECT_CLASS, COVER_SOURCE_MAX_MB} from '../../../lib/coverImage';
 import {hasGamertag} from '../../../lib/gamertag';
 import {datetimeLocalInputBounds} from '../../../lib/datetime';
 import {TITLE_MAX_LENGTH, EVENT_TYPES, COVER_ACCEPT, formInput, formLabel} from '../constants';
@@ -144,7 +144,9 @@ export function EventStep({
         <Field title={t('create.coverImage')} error={fieldErrors.cover} optional>
           <label className={fileUploadLabelClass}>
             <span>
-              {values.coverFile ? values.coverFile.name : t('create.coverChooseFile')}
+              {values.coverFile
+                ? values.coverFile.name
+                : t('create.coverChooseFile', {maxMb: COVER_SOURCE_MAX_MB})}
             </span>
             <input
               type="file"

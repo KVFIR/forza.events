@@ -136,7 +136,6 @@ export async function listGuildMembers(
     members: {
       discord_id: string;
       username: string;
-      display_name: string;
       avatar_url: string | null;
       xbox_gamertag: string | null;
     }[];

@@ -139,13 +139,32 @@ serve(async (req) => {
     const publishErr = validatePublishReady(body);
     if (publishErr) return appErrorResponse(req, 400, publishErr);
 
-    await ensureConvoyLeaderParticipantForEvent(supabase, {
-      id: event_id,
-      host_discord_id: event.host_discord_id,
-      lobby_leader_discord_id: event.lobby_leader_discord_id,
-      lobby_leader_is_host: event.lobby_leader_is_host,
-      lobby_leader_gamertag: event.lobby_leader_gamertag,
-    });
+    let leaderProfile: {username?: string | null; avatar_url?: string | null} | undefined;
+    if (event.lobby_leader_discord_id && event.lobby_leader_is_host === false) {
+      const {data: leaderUser} = await supabase
+        .from('users')
+        .select('username, avatar_url')
+        .eq('discord_id', event.lobby_leader_discord_id)
+        .maybeSingle();
+      if (leaderUser) {
+        leaderProfile = {
+          username: leaderUser.username,
+          avatar_url: leaderUser.avatar_url,
+        };
+      }
+    }
+
+    await ensureConvoyLeaderParticipantForEvent(
+      supabase,
+      {
+        id: event_id,
+        host_discord_id: event.host_discord_id,
+        lobby_leader_discord_id: event.lobby_leader_discord_id,
+        lobby_leader_is_host: event.lobby_leader_is_host,
+        lobby_leader_gamertag: event.lobby_leader_gamertag,
+      },
+      leaderProfile,
+    );
 
     const {data: eventForEmbed, error: refreshErr} = await supabase
       .from('events')

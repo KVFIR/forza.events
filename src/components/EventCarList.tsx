@@ -165,7 +165,7 @@ export function EventCarList({
                       {c.year ? ` · ${c.year}` : ''}
                     </span>
                     <span className="text-xs text-muted">
-                      {c.pi} {piToClass(c.pi)}
+                      {piToClass(c.pi)} {c.pi}
                     </span>
                   </DropdownItem>
                 ))

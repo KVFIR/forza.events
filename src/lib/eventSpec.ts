@@ -1,6 +1,7 @@
 import type {CarRuleMode, EventStatus, ForzaEvent} from './types';
 import type {AppUser} from './types';
 import {isEventType} from './eventTypes';
+import {isPiInRange} from './pi';
 import {VALIDATION_CODES, type ValidationCode} from './validationCodes';
 import {validationMessage} from './validationMessages';
 
@@ -40,7 +41,7 @@ export function validatePublishForm(input: {
   if (input.carRuleMode === 'restricted_list' && input.carCount === 0) {
     return VALIDATION_CODES.CARS_REQUIRED;
   }
-  if (input.carRuleMode === 'anything_goes' && (input.maxPi < 100 || input.maxPi > 999)) {
+  if (input.carRuleMode === 'anything_goes' && !isPiInRange(input.maxPi)) {
     return VALIDATION_CODES.PI_RANGE;
   }
   return null;

@@ -69,7 +69,7 @@ serve(async (req) => {
       access_token: tokens.access_token,
       user: {
         discordId: user.discord_id,
-        username: user.username,
+        username: discordUniqueUsername(discordUser),
         avatarUrl: user.avatar_url,
         xboxGamertag: user.xbox_gamertag,
         eventsJoined: user.events_joined,

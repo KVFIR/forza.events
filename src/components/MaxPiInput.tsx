@@ -1,6 +1,7 @@
 import {useEffect, useState} from 'react';
 import {cn} from '../lib/cn';
-import {clampPi, PI_MIN, piClassColor, piToClass} from '../lib/pi';
+import {clampPi, PI_MAX, PI_MIN, piClassColor, piRangeI18nParams, piToClass} from '../lib/pi';
+import {useTranslation} from 'react-i18next';
 
 type Props = {
   value: number;
@@ -18,7 +19,9 @@ function parsePiDraft(draft: string): number | null {
 }
 
 export function MaxPiInput({value, onChange, id, error, className, inputClass}: Props) {
+  const {t} = useTranslation();
   const [draft, setDraft] = useState(String(value));
+  const range = piRangeI18nParams();
 
   useEffect(() => {
     setDraft(String(value));
@@ -50,8 +53,9 @@ export function MaxPiInput({value, onChange, id, error, className, inputClass}: 
         type="text"
         inputMode="numeric"
         autoComplete="off"
-        maxLength={3}
+        maxLength={String(PI_MAX).length}
         placeholder={`${PI_MIN}`}
+        title={t('validation.piRange', range)}
         className={cn(
           inputClass,
           'rounded-l-none',
@@ -59,7 +63,7 @@ export function MaxPiInput({value, onChange, id, error, className, inputClass}: 
         )}
         value={draft}
         onChange={(e) => {
-          const digits = e.target.value.replace(/\D/g, '').slice(0, 3);
+          const digits = e.target.value.replace(/\D/g, '').slice(0, String(PI_MAX).length);
           setDraft(digits);
         }}
         onBlur={commit}
@@ -71,7 +75,7 @@ export function MaxPiInput({value, onChange, id, error, className, inputClass}: 
           }
         }}
         aria-invalid={error}
-        aria-label="Max PI"
+        aria-label={t('create.maxPiAria')}
       />
     </div>
   );

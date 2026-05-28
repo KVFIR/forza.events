@@ -1,6 +1,7 @@
 import type {adminClient} from './supabase.ts';
 import {isValidEventType} from './eventTypes.ts';
 import {normalizeTrackRows, validateTrackRows, type EventTrackRow} from './eventTracks.ts';
+import {clampPi, isPiInRange, PI_MAX} from './pi.ts';
 import {VALIDATION_CODES, type ValidationCode} from './validationCodes.ts';
 
 export type CarRuleMode = 'anything_goes' | 'restricted_list';
@@ -87,7 +88,7 @@ export function validatePublishReady(body: SaveEventBody): ValidationCode | null
     if (!body.cars?.length) return VALIDATION_CODES.CARS_REQUIRED;
   } else {
     const maxPi = Number(body.max_pi ?? 0);
-    if (maxPi < 100 || maxPi > 999) return VALIDATION_CODES.PI_RANGE;
+    if (!isPiInRange(maxPi)) return VALIDATION_CODES.PI_RANGE;
   }
 
   return null;
@@ -133,10 +134,10 @@ export function buildEventFields(
   const mode: CarRuleMode = body.car_rule_mode ?? 'anything_goes';
   const maxPi =
     mode === 'anything_goes'
-      ? Math.max(100, Math.min(999, Number(body.max_pi ?? 999)))
+      ? clampPi(Number(body.max_pi ?? PI_MAX))
       : cars.length
-      ? Math.max(...cars.map((c) => c.max_pi ?? 999))
-      : Number(body.max_pi ?? 999);
+      ? Math.max(...cars.map((c) => clampPi(c.max_pi ?? PI_MAX)))
+      : clampPi(Number(body.max_pi ?? PI_MAX));
 
   return {
     title: body.title?.trim(),

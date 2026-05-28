@@ -46,7 +46,7 @@ export const privacyPolicyEn: LegalDocument = {
         {
           type: 'ul',
           items: [
-            'Discord account data (via OAuth scopes identify and guilds): Discord user ID, username, display name, avatar URL, and related profile fields — used to sign you in and show your profile.',
+            'Discord account data (via OAuth scopes identify and guilds): Discord user ID, unique username (handle), avatar URL, and related profile fields — used to sign you in and show your profile.',
             'Discord server (guild) access via API: when you pick or refresh a publish target, we call Discord’s API with the guilds scope to list servers your account can access that also have our bot installed. We do not store a full snapshot of every server on your account. We store guild ID and display name for servers you use with the Service (for example when you publish an event, or when the Activity passes a guild context at sign-in), and guild_id on events you create.',
             'Profile and gameplay preferences you provide: Xbox gamertag, region, timezone, language preferences, and preferred event types — stored in our database to run events and show your participation.',
             'Event and participation data: event titles, types, schedules, tracks, cars, restrictions, cover images you upload, server and channel IDs for publishing, join/leave actions, convoy leader assignments, race results, and related metadata created when you host or join events.',

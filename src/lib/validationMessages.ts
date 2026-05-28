@@ -1,5 +1,7 @@
 import i18n from '../i18n';
+import {piRangeI18nParams} from './pi';
 import type {ValidationCode} from './validationCodes';
+import {VALIDATION_CODES} from './validationCodes';
 
 const VALIDATION_I18N_KEYS: Record<ValidationCode, string> = {
   TITLE_REQUIRED: 'validation.titleRequired',
@@ -21,5 +23,9 @@ const VALIDATION_I18N_KEYS: Record<ValidationCode, string> = {
 
 export function validationMessage(code: ValidationCode): string {
   const key = VALIDATION_I18N_KEYS[code];
-  return key ? i18n.t(key) : code;
+  if (!key) return code;
+  if (code === VALIDATION_CODES.PI_RANGE) {
+    return i18n.t(key, piRangeI18nParams());
+  }
+  return i18n.t(key);
 }

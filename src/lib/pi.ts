@@ -6,12 +6,13 @@
 export const PI_MIN = 100;
 export const PI_MAX = 999;
 
-/** FH6 classes (includes R — “Racing” tier) */
-export type CarClassLetter = 'D' | 'C' | 'B' | 'A' | 'S1' | 'S2' | 'R';
+/** FH6 classes (R = 901–998; X = 999 only). */
+export type CarClassLetter = 'D' | 'C' | 'B' | 'A' | 'S1' | 'S2' | 'R' | 'X';
 
 /** Official PI → class bands derived from forza.net/fh6cars */
 export function piToClass(pi: number): CarClassLetter {
   const p = clampPi(pi);
+  if (p === PI_MAX) return 'X';
   if (p >= 901) return 'R';
   if (p >= 801) return 'S2';
   if (p >= 701) return 'S1';
@@ -34,10 +35,31 @@ export const piClassColor: Record<CarClassLetter, string> = {
   S1: 'text-violet-400/90',
   S2: 'text-fuchsia-400/90',
   R: 'text-amber-400/90',
+  X: 'text-rose-300/95',
 };
 
 export function clampPi(value: number): number {
   return Math.min(PI_MAX, Math.max(PI_MIN, Math.round(value)));
+}
+
+export function isPiInRange(value: number): boolean {
+  const p = Math.round(value);
+  return Number.isFinite(p) && p >= PI_MIN && p <= PI_MAX;
+}
+
+/** Params for `validation.piRange` (D 100 … X 999). */
+export function piRangeI18nParams(): {
+  minClass: CarClassLetter;
+  minPi: number;
+  maxClass: CarClassLetter;
+  maxPi: number;
+} {
+  return {
+    minClass: piToClass(PI_MIN),
+    minPi: PI_MIN,
+    maxClass: piToClass(PI_MAX),
+    maxPi: PI_MAX,
+  };
 }
 
 export const FH6_CLASS_BANDS: {class: CarClassLetter; min: number; max: number}[] = [
@@ -47,5 +69,6 @@ export const FH6_CLASS_BANDS: {class: CarClassLetter; min: number; max: number}[
   {class: 'A', min: 601, max: 700},
   {class: 'S1', min: 701, max: 800},
   {class: 'S2', min: 801, max: 900},
-  {class: 'R', min: 901, max: 999},
+  {class: 'R', min: 901, max: 998},
+  {class: 'X', min: 999, max: 999},
 ];

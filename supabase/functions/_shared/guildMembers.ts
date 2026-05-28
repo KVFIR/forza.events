@@ -2,8 +2,8 @@ import {avatarUrl, botHeaders, discordRateLimitMessage} from './discord.ts';
 
 export type GuildMemberSearchHit = {
   discord_id: string;
+  /** Discord unique handle (`user.username`). */
   username: string;
-  display_name: string;
   avatar_url: string | null;
 };
 
@@ -20,11 +20,11 @@ type DiscordMemberSearchRow = {
 export function mapGuildMemberSearchRow(row: DiscordMemberSearchRow): GuildMemberSearchHit | null {
   const user = row.user;
   if (!user?.id) return null;
-  const display = row.nick?.trim() || user.global_name?.trim() || user.username;
+  const handle = user.username.trim();
+  if (!handle) return null;
   return {
     discord_id: user.id,
-    username: user.username,
-    display_name: display,
+    username: handle,
     avatar_url: avatarUrl(user),
   };
 }

@@ -113,4 +113,21 @@ describe('publish validation parity', () => {
       }),
     ).toBe(code);
   });
+
+  it('accepts X-class cap at 999', () => {
+    expect(validatePublishForm({...base, maxPi: 999})).toBeNull();
+    expect(
+      validatePublishReady({
+        title: base.title,
+        type: base.type,
+        starts_at: '2030-01-01T00:00:00.000Z',
+        guild_id: base.guildId,
+        channel_id: base.channelId,
+        lobby_leader_gamertag: base.lobbyLeaderGamertag,
+        car_rule_mode: 'anything_goes',
+        max_pi: 999,
+      }),
+    ).toBeNull();
+    expect(validatePublishForm({...base, maxPi: 1000})).toBe(VALIDATION_CODES.PI_RANGE);
+  });
 });

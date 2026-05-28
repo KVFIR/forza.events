@@ -538,7 +538,6 @@ export function useCreateEventForm() {
       setLobbyLeaderIsHost(v);
       if (v) {
         setLobbyLeaderDiscordId(null);
-        setLobbyLeaderDisplayName('');
         setLobbyLeaderUsername('');
         setLobbyLeaderProfileGamertag(null);
         setLobbyLeaderGamertag(user.xboxGamertag ?? '');

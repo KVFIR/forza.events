@@ -6,6 +6,11 @@ export type DiscordUser = {
   discriminator?: string;
 };
 
+/** Discord login handle (`user.username`), not `global_name` or server nick. */
+export function discordUniqueUsername(user: DiscordUser): string {
+  return user.username.trim() || 'User';
+}
+
 export function avatarUrl(user: DiscordUser, size = 128): string {
   if (user.avatar) {
     const ext = user.avatar.startsWith('a_') ? 'gif' : 'png';

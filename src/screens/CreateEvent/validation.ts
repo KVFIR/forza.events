@@ -9,6 +9,8 @@ import {
 import {validateTracks} from '../../lib/eventTracks';
 import {validationMessage} from '../../lib/validationMessages';
 import type {CarRuleMode} from '../../lib/types';
+import {COVER_SOURCE_MAX_MB} from '../../lib/coverImage';
+import {isPiInRange, piRangeI18nParams} from '../../lib/pi';
 import {COVER_ACCEPT, COVER_MAX_BYTES, TITLE_MAX_LENGTH} from './constants';
 import type {CreateEventFormValues, FieldErrors} from './types';
 
@@ -36,7 +38,7 @@ export function validateCoverFile(file: File | null): string | null {
     return i18n.t('validation.coverFormat');
   }
   if (file.size > COVER_MAX_BYTES) {
-    return i18n.t('validation.coverSize');
+    return i18n.t('validation.coverSize', {maxMb: COVER_SOURCE_MAX_MB});
   }
   return null;
 }
@@ -75,8 +77,8 @@ export function validateDetailsStep(
     errors.eventCars = i18n.t('validation.carsRequired');
   }
   if (values.carRuleMode === 'anything_goes') {
-    if (values.maxPi < 100 || values.maxPi > 999) {
-      errors.maxPi = i18n.t('validation.piRange');
+    if (!isPiInRange(values.maxPi)) {
+      errors.maxPi = i18n.t('validation.piRange', piRangeI18nParams());
     }
   }
   return errors;

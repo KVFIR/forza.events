@@ -22,7 +22,7 @@ export interface CreateEventFormValues {
   lobbyLeaderIsHost: boolean;
   lobbyLeaderGamertag: string;
   lobbyLeaderDiscordId: string | null;
-  lobbyLeaderDisplayName: string;
+  lobbyLeaderUsername: string;
   targetGuildId: string;
   targetGuildName: string;
   targetChannelId: string;

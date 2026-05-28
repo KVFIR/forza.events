@@ -40,6 +40,20 @@ describe('buildEventEmbed', () => {
     expect(carField?.value).toBe('Open build `A 650`');
   });
 
+  it('shows X class for open build capped at 999', () => {
+    const embed = buildEventEmbed(event({max_pi: 999})).embeds[0];
+
+    const carField = embed.fields.find((field) => field.name === '🚗 Car rules');
+    expect(carField?.value).toBe('Open build `X 999`');
+  });
+
+  it('shows R class for open build capped at 998', () => {
+    const embed = buildEventEmbed(event({max_pi: 998})).embeds[0];
+
+    const carField = embed.fields.find((field) => field.name === '🚗 Car rules');
+    expect(carField?.value).toBe('Open build `R 998`');
+  });
+
   it('formats named tracks with share code and format', () => {
     const embed = buildEventEmbed(
       event({

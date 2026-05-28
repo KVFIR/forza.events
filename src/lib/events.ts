@@ -8,6 +8,7 @@ import {resolveEventCoverUrl} from './eventCovers';
 import {parseTracksFromRow} from './eventTracks';
 import {normalizeEventType} from './eventTypes';
 import {isBrowseFeedEvent} from './eventSpec';
+import {PI_MAX} from './pi';
 import type {
   AppUser,
   CarRuleMode,
@@ -274,7 +275,7 @@ export function mapDbEvent(row: DbEventRow): ForzaEvent {
     channelId: row.channel_id ?? undefined,
     discordMessageId: row.discord_message_id ?? undefined,
     carRuleMode: row.car_rule_mode ?? 'anything_goes',
-    maxPi: row.max_pi ?? 999,
+    maxPi: row.max_pi ?? PI_MAX,
     allowedCars: [],
     voicePolicy: row.voice_policy,
     maxPlayers: row.max_players,

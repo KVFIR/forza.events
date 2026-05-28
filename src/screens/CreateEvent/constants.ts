@@ -6,7 +6,7 @@ export type CreateEventStepIndex = 0 | 1;
 export const PUBLISH_STEP_INDEX = 1 satisfies CreateEventStepIndex;
 
 export const TITLE_MAX_LENGTH = 100;
-export const COVER_MAX_BYTES = 2 * 1024 * 1024;
+export {COVER_SOURCE_MAX_BYTES as COVER_MAX_BYTES} from '../../lib/coverImage';
 export const COVER_ACCEPT = 'image/jpeg,image/png,image/webp';
 
 import {

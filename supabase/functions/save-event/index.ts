@@ -22,6 +22,7 @@ import {slugify} from '../_shared/events.ts';
 import {normalizeGuildName} from '../_shared/guildDisplay.ts';
 import {resolveLobbyLeaderFields} from '../_shared/lobbyLeader.ts';
 import {ensureConvoyLeaderParticipantForEvent} from '../_shared/participantLeader.ts';
+import {PI_MAX} from '../_shared/pi.ts';
 import {rateLimitMutation} from '../_shared/rateLimitPresets.ts';
 import {adminClient} from '../_shared/supabase.ts';
 
@@ -197,13 +198,22 @@ serve(async (req) => {
         .select('*')
         .single();
       if (error) return jsonResponse({error: error.message}, 500, req);
-      await ensureConvoyLeaderParticipantForEvent(supabase, {
-        id: eventId,
-        host_discord_id: discordUser.id,
-        lobby_leader_discord_id: lobbyResolved.lobby_leader_discord_id,
-        lobby_leader_is_host: lobbyResolved.lobby_leader_is_host,
-        lobby_leader_gamertag: lobbyResolved.lobby_leader_gamertag,
-      });
+      await ensureConvoyLeaderParticipantForEvent(
+        supabase,
+        {
+          id: eventId,
+          host_discord_id: discordUser.id,
+          lobby_leader_discord_id: lobbyResolved.lobby_leader_discord_id,
+          lobby_leader_is_host: lobbyResolved.lobby_leader_is_host,
+          lobby_leader_gamertag: lobbyResolved.lobby_leader_gamertag,
+        },
+        lobbyResolved.lobby_leader_is_host
+          ? undefined
+          : {
+              username: body.lobby_leader_username,
+              avatar_url: body.lobby_leader_avatar_url,
+            },
+      );
       await syncEventCars(supabase, eventId, cars, body.car_rule_mode ?? 'anything_goes');
       if (isPublishedStatus(data.status)) {
         const embedSync = await syncPublishedEmbedByEventId(supabase, eventId);
@@ -229,13 +239,22 @@ serve(async (req) => {
         .select('id, slug')
         .single();
       if (!error && data) {
-        await ensureConvoyLeaderParticipantForEvent(supabase, {
-          id: data.id,
-          host_discord_id: discordUser.id,
-          lobby_leader_discord_id: lobbyResolved.lobby_leader_discord_id,
-          lobby_leader_is_host: lobbyResolved.lobby_leader_is_host,
-          lobby_leader_gamertag: lobbyResolved.lobby_leader_gamertag,
-        });
+        await ensureConvoyLeaderParticipantForEvent(
+          supabase,
+          {
+            id: data.id,
+            host_discord_id: discordUser.id,
+            lobby_leader_discord_id: lobbyResolved.lobby_leader_discord_id,
+            lobby_leader_is_host: lobbyResolved.lobby_leader_is_host,
+            lobby_leader_gamertag: lobbyResolved.lobby_leader_gamertag,
+          },
+          lobbyResolved.lobby_leader_is_host
+            ? undefined
+            : {
+                username: body.lobby_leader_username,
+                avatar_url: body.lobby_leader_avatar_url,
+              },
+        );
         await syncEventCars(supabase, data.id, cars, body.car_rule_mode ?? 'anything_goes');
         return jsonResponse({id: data.id, slug: data.slug}, 200, req);
       }
@@ -290,7 +309,7 @@ async function syncEventCars(
     rows.push({
       event_id: eventId,
       car_id: carId,
-      max_pi: c.max_pi ?? 999,
+      max_pi: c.max_pi ?? PI_MAX,
       tune_share_code: c.tune_share_code?.trim() || null,
       car_restrictions: c.car_restrictions ?? [],
     });
