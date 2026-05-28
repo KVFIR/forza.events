@@ -108,6 +108,25 @@ describe('discordRichPresence', () => {
     expect(activity.state).toBe('Hosting');
     expect(activity.state).not.toContain('4/12');
     expect(activity.party?.size).toEqual([4, 12]);
+    expect(activity.assets?.large_text).toBeUndefined();
+    expect(activity.assets?.small_text).toBeUndefined();
+  });
+
+  it('does not repeat title in large_text after route merge', () => {
+    const route = buildRouteRichPresence('/event/abc-123');
+    const override = buildEventRichPresence(publishedEvent({title: 'GT4'}), {role: 'host'});
+    const merged = mergeRichPresence(route, override);
+    expect(merged.details).toBe('GT4');
+    expect(merged.state).toBe('Hosting');
+    expect(merged.assets?.large_text).toBeUndefined();
+    expect(merged.assets?.large_image).toContain('cover-road');
+    expect(merged.assets?.small_text).toBeUndefined();
+  });
+
+  it('avoids duplicate FORZA.EVENTS on profile route assets', () => {
+    const activity = buildRouteRichPresence('/profile');
+    expect(activity.details).toBe('In FORZA.EVENTS');
+    expect(activity.assets?.large_text).toBeUndefined();
   });
 
   it('builds joined presence as Registered', () => {

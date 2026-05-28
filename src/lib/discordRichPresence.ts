@@ -5,7 +5,7 @@ import {
   isEventFinalized,
   resolveEventDisplayStatus,
 } from './eventSpec';
-import {EVENT_TYPE_LABEL_EN, normalizeEventType} from './eventTypes';
+import {eventTypeLabelEn, normalizeEventType} from './eventTypes';
 import {getDiscordSdk, isStandaloneBrowser} from './discord';
 import {
   getRichPresenceSessionStart,
@@ -13,7 +13,6 @@ import {
   shouldApplyRichPresencePayload,
 } from './discordRichPresenceSession';
 import {isDiscordActivityFrame} from './supabaseEnv';
-import type {EventType} from './types';
 import type {EventStatus, ForzaEvent} from './types';
 
 export {resetRichPresenceSession} from './discordRichPresenceSession';
@@ -48,10 +47,6 @@ function rp(key: keyof typeof RICH_PRESENCE_EN): string {
 
 function rpOpen(typeLabel: string): string {
   return `${typeLabel} · open`;
-}
-
-function eventTypeEn(type: EventType): string {
-  return EVENT_TYPE_LABEL_EN[normalizeEventType(type)];
 }
 
 export type RichPresenceActivity = {
@@ -112,7 +107,6 @@ export function defaultRichPresenceAssets(
 ): NonNullable<RichPresenceActivity['assets']> {
   return {
     large_image: richPresenceLogoUrl(origin),
-    large_text: 'FORZA.EVENTS',
   };
 }
 
@@ -191,6 +185,16 @@ export function buildCreateRichPresence(
   });
 }
 
+function eventRichPresenceAssets(
+  event: Pick<ForzaEvent, 'type' | 'coverImageUrl'>,
+  origin: string,
+): NonNullable<RichPresenceActivity['assets']> {
+  return {
+    large_image: richPresenceEventCoverUrl(event, origin),
+    small_image: richPresenceLogoUrl(origin),
+  };
+}
+
 export function buildResultsRichPresence(event: ForzaEvent): RichPresenceActivity {
   const title = truncateRichPresenceField(event.title || 'Event');
   const origin = richPresenceAssetOrigin();
@@ -199,12 +203,7 @@ export function buildResultsRichPresence(event: ForzaEvent): RichPresenceActivit
     details: title,
     state: rp('submittingResults'),
     party: publishedPartySize(event),
-    assets: {
-      large_image: richPresenceEventCoverUrl(event, origin),
-      large_text: title,
-      small_image: richPresenceLogoUrl(origin),
-      small_text: 'FORZA.EVENTS',
-    },
+    assets: eventRichPresenceAssets(event, origin),
   });
 }
 
@@ -234,7 +233,7 @@ export function eventPresenceState(
   if (displayStatus === 'full') return rp('full');
   if (displayStatus === 'live' || eventHasStarted(event)) return rp('live');
 
-  return rpOpen(eventTypeEn(event.type));
+  return rpOpen(eventTypeLabelEn(event.type));
 }
 
 export function buildEventRichPresence(
@@ -256,12 +255,7 @@ export function buildEventRichPresence(
     details: title,
     state,
     party: publishedPartySize(event),
-    assets: {
-      large_image: richPresenceEventCoverUrl(event, origin),
-      large_text: title,
-      small_image: richPresenceLogoUrl(origin),
-      small_text: 'FORZA.EVENTS',
-    },
+    assets: eventRichPresenceAssets(event, origin),
   });
 }
 
@@ -273,7 +267,7 @@ export function mergeRichPresence(
   return withSessionTimestamp({
     ...route,
     ...override,
-    assets: override.assets ? {...route.assets, ...override.assets} : route.assets,
+    assets: override.assets ?? route.assets,
     timestamps: override.timestamps ?? route.timestamps,
     party: 'party' in override ? override.party : route.party,
   });
