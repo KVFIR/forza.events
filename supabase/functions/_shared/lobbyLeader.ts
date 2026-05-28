@@ -1,4 +1,7 @@
-import {ensureUserRowForDiscordId} from './discordUserRow.ts';
+import {
+  fetchDiscordUserById,
+} from './discord.ts';
+import {ensureUserRowForDiscordId, resolveDiscordHandleForUserId} from './discordUserRow.ts';
 import type {adminClient} from './supabase.ts';
 import type {SaveEventBody} from './eventSpec.ts';
 import {VALIDATION_CODES, type ValidationCode} from './validationCodes.ts';
@@ -30,30 +33,43 @@ export async function resolveLobbyLeaderFields(
   if (!leaderId) return VALIDATION_CODES.CONVOY_LEADER_DISCORD_REQUIRED;
   if (leaderId === hostDiscordId) return VALIDATION_CODES.CONVOY_LEADER_DISCORD_REQUIRED;
 
+  const {data: existingUser} = await supabase
+    .from('users')
+    .select('username, xbox_gamertag, avatar_url')
+    .eq('discord_id', leaderId)
+    .maybeSingle();
+
   let gamertag = body.lobby_leader_gamertag?.trim() ?? '';
   if (!gamertag) {
-    const {data: profile} = await supabase
-      .from('users')
-      .select('xbox_gamertag')
-      .eq('discord_id', leaderId)
-      .maybeSingle();
-    gamertag = profile?.xbox_gamertag?.trim() ?? '';
+    gamertag = existingUser?.xbox_gamertag?.trim() ?? '';
   }
   if (!gamertag) return VALIDATION_CODES.CONVOY_LEADER_REQUIRED;
 
-  let leaderHandle = body.lobby_leader_username?.trim();
+  let leaderHandle: string | null;
+  try {
+    leaderHandle = await resolveDiscordHandleForUserId(leaderId, {
+      bodyHandle: body.lobby_leader_username,
+      existingUsername: existingUser?.username,
+      fetchById: fetchDiscordUserById,
+    });
+  } catch (e) {
+    console.error(
+      JSON.stringify({
+        msg: 'Convoy leader Discord handle lookup failed',
+        leaderId,
+        error: e instanceof Error ? e.message : String(e),
+      }),
+    );
+    return VALIDATION_CODES.CONVOY_LEADER_HANDLE_REQUIRED;
+  }
+
   if (!leaderHandle) {
-    const {data: existing} = await supabase
-      .from('users')
-      .select('username')
-      .eq('discord_id', leaderId)
-      .maybeSingle();
-    leaderHandle = existing?.username?.trim() || undefined;
+    return VALIDATION_CODES.CONVOY_LEADER_HANDLE_REQUIRED;
   }
 
   await ensureUserRowForDiscordId(supabase, leaderId, {
     username: leaderHandle,
-    avatar_url: body.lobby_leader_avatar_url,
+    avatar_url: body.lobby_leader_avatar_url ?? existingUser?.avatar_url,
   });
 
   return {

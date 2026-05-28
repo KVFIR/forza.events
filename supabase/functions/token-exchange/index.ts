@@ -2,6 +2,7 @@ import {serve} from 'https://deno.land/std@0.224.0/http/server.ts';
 import {internalErrorResponse} from '../_shared/apiResponse.ts';
 import {jsonResponse, optionsResponse} from '../_shared/cors.ts';
 import {avatarUrl, discordUniqueUsername, exchangeCode, fetchDiscordUser} from '../_shared/discord.ts';
+import {ensureDiscordUserRow} from '../_shared/discordUserRow.ts';
 import {resolveGuildNameForUser} from '../_shared/guildAccess.ts';
 import {resolveOAuthRedirectUri} from '../_shared/oauthRedirect.ts';
 import {rateLimitOAuthExchange} from '../_shared/rateLimitPresets.ts';
@@ -33,23 +34,17 @@ serve(async (req) => {
     const discordUser = await fetchDiscordUser(tokens.access_token);
     const supabase = adminClient();
 
+    await ensureDiscordUserRow(supabase, discordUser);
+
     const {data: user, error: userErr} = await supabase
       .from('users')
-      .upsert(
-        {
-          discord_id: discordUser.id,
-          username: discordUniqueUsername(discordUser),
-          discriminator: discordUser.discriminator ?? '',
-          avatar_url: avatarUrl(discordUser),
-        },
-        {onConflict: 'discord_id'},
-      )
       .select()
+      .eq('discord_id', discordUser.id)
       .single();
 
     if (userErr) {
       console.error(userErr);
-      return jsonResponse({error: 'Failed to upsert user'}, 500, req);
+      return jsonResponse({error: 'Failed to load user'}, 500, req);
     }
 
     if (guild_id) {
@@ -70,7 +65,7 @@ serve(async (req) => {
       user: {
         discordId: user.discord_id,
         username: discordUniqueUsername(discordUser),
-        avatarUrl: user.avatar_url,
+        avatarUrl: avatarUrl(discordUser),
         xboxGamertag: user.xbox_gamertag,
         eventsJoined: user.events_joined,
         eventsHosted: user.events_hosted,

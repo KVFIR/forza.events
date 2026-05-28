@@ -1,7 +1,7 @@
 import {serve} from 'https://deno.land/std@0.224.0/http/server.ts';
 import {internalErrorResponse} from '../_shared/apiResponse.ts';
 import {jsonResponse, optionsResponse} from '../_shared/cors.ts';
-import {discordUniqueUsername, verifyDiscordToken} from '../_shared/discord.ts';
+import {avatarUrl, discordUniqueUsername, verifyDiscordToken} from '../_shared/discord.ts';
 import {ensureDiscordUserRow} from '../_shared/discordUserRow.ts';
 import {validateGamertag} from '../_shared/gamertag.ts';
 import {rateLimitAuth} from '../_shared/rateLimitPresets.ts';
@@ -50,7 +50,7 @@ serve(async (req) => {
       user: {
         discordId: data.discord_id,
         username: discordUniqueUsername(discordUser),
-        avatarUrl: data.avatar_url,
+        avatarUrl: avatarUrl(discordUser),
         xboxGamertag: data.xbox_gamertag,
         eventsJoined: data.events_joined,
         eventsHosted: data.events_hosted,

@@ -370,6 +370,7 @@
     "channelRequired": "Выберите канал перед публикацией.",
     "convoyLeaderRequired": "Укажите gamertag лидера конвоя.",
     "convoyLeaderDiscordRequired": "Выберите лидера конвоя из участников сервера Discord.",
+    "convoyLeaderHandleRequired": "Не удалось определить Discord username лидера конвоя. Выберите его снова через поиск по серверу.",
     "targetGuildLocked": "Сервер нельзя изменить после публикации.",
     "targetChannelLocked": "Канал нельзя изменить после публикации.",
     "trackNameRequired": "У каждой трассы должно быть название.",

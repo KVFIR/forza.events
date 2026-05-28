@@ -1,4 +1,10 @@
-import {avatarUrl, discordUniqueUsername, type DiscordUser} from './discord.ts';
+import {
+  avatarUrl,
+  discordUniqueUsername,
+  isDiscordHandle,
+  PLACEHOLDER_USER_USERNAME,
+  type DiscordUser,
+} from './discord.ts';
 import type {adminClient} from './supabase.ts';
 
 /** Ensure `users` row exists before `event_participants` FK insert. */
@@ -52,11 +58,34 @@ export async function ensureUserRowForDiscordId(
 
   const {error} = await supabase.from('users').insert({
     discord_id: discordId,
-    username: handle || 'Driver',
+    username: handle || PLACEHOLDER_USER_USERNAME,
     discriminator: '',
     avatar_url: profile?.avatar_url ?? null,
   });
   if (error) {
     throw new Error(`Failed to ensure user profile: ${error.message}`);
   }
+}
+
+/** Resolve convoy leader handle: body → valid DB row → optional Bot API fetch. */
+export async function resolveDiscordHandleForUserId(
+  discordId: string,
+  options: {
+    bodyHandle?: string | null;
+    existingUsername?: string | null;
+    fetchById?: (id: string) => Promise<DiscordUser>;
+  },
+): Promise<string | null> {
+  const fromBody = options.bodyHandle?.trim();
+  if (fromBody && isDiscordHandle(fromBody)) return fromBody;
+
+  const existing = options.existingUsername?.trim();
+  if (existing && isDiscordHandle(existing)) return existing;
+
+  if (options.fetchById) {
+    const user = await options.fetchById(discordId);
+    return discordUniqueUsername(user);
+  }
+
+  return null;
 }

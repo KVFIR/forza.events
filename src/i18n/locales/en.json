@@ -364,6 +364,7 @@
     "channelRequired": "Choose a channel before publishing.",
     "convoyLeaderRequired": "Convoy leader gamertag is required.",
     "convoyLeaderDiscordRequired": "Choose a convoy leader from your Discord server.",
+    "convoyLeaderHandleRequired": "Could not resolve the convoy leader’s Discord username. Pick them again from server search.",
     "targetGuildLocked": "Server cannot be changed after publish.",
     "targetChannelLocked": "Channel cannot be changed after publish.",
     "trackNameRequired": "Each track needs a name.",

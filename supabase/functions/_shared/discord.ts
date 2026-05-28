@@ -6,9 +6,33 @@ export type DiscordUser = {
   discriminator?: string;
 };
 
+/** Fallback `users.username` when no Discord handle is known yet (FK placeholder). */
+export const PLACEHOLDER_USER_USERNAME = 'Driver';
+
 /** Discord login handle (`user.username`), not `global_name` or server nick. */
 export function discordUniqueUsername(user: DiscordUser): string {
   return user.username.trim() || 'User';
+}
+
+/** True when a stored value looks like a Discord handle, not a display name placeholder. */
+export function isDiscordHandle(value: string | null | undefined): boolean {
+  const v = value?.trim();
+  if (!v || v === PLACEHOLDER_USER_USERNAME) return false;
+  return /^[a-z0-9_.]{2,32}$/i.test(v);
+}
+
+export async function fetchDiscordUserById(userId: string): Promise<DiscordUser> {
+  const res = await discordApiFetch(`https://discord.com/api/v10/users/${userId}`, {
+    headers: botHeaders(),
+  });
+  if (res.status === 404) {
+    throw new Error('Discord user not found');
+  }
+  if (!res.ok) {
+    const rateLimited = discordRateLimitMessage(res.status);
+    throw new Error(rateLimited ?? `Discord user fetch failed: ${res.status}`);
+  }
+  return res.json();
 }
 
 export function avatarUrl(user: DiscordUser, size = 128): string {

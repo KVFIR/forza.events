@@ -11,6 +11,7 @@ const VALIDATION_I18N_KEYS: Record<ValidationCode, string> = {
   CHANNEL_REQUIRED: 'validation.channelRequired',
   CONVOY_LEADER_REQUIRED: 'validation.convoyLeaderRequired',
   CONVOY_LEADER_DISCORD_REQUIRED: 'validation.convoyLeaderDiscordRequired',
+  CONVOY_LEADER_HANDLE_REQUIRED: 'validation.convoyLeaderHandleRequired',
   CARS_REQUIRED: 'validation.carsRequired',
   PI_RANGE: 'validation.piRange',
   TARGET_GUILD_LOCKED: 'validation.targetGuildLocked',
