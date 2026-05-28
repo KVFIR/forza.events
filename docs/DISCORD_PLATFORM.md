@@ -103,6 +103,17 @@ Host must be guild member with **Manage Server** (or Administrator). Server re-v
 - `supabase db push` — single baseline migration
 - Railway: `APP_ORIGIN` = deploy URL; rebuild frontend after env changes
 
+### Legal URLs (app verification)
+
+Set in Developer Portal → **General Information**:
+
+| Field | URL |
+|-------|-----|
+| Terms of Service | `https://<APP_ORIGIN>/terms` |
+| Privacy Policy | `https://<APP_ORIGIN>/privacy` |
+
+Use your Railway deploy URL (same as `APP_ORIGIN`), e.g. `https://forzaevents-production.up.railway.app/terms`. These paths load in a normal browser tab without the Discord-only gate. Optional: set `VITE_LEGAL_CONTACT_EMAIL` at build time for privacy/contact requests (default `rudolfs@oas.lv`).
+
 ### Validate in Discord
 
 - [ ] Auth: authorize → token exchange → authenticate
