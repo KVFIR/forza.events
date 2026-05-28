@@ -1,6 +1,7 @@
 import {useState} from 'react';
 import {useTranslation} from 'react-i18next';
 import {LanguageToggle} from '../components/LanguageToggle';
+import {ProfileLegalLinks} from '../components/legal/ProfileLegalLinks';
 import {TextButton, TextLink} from '../components/ui/TextButton';
 import {useAuth} from '../context/AuthContext';
 import {useJoinedEvents} from '../context/JoinedEventsContext';
@@ -172,6 +173,9 @@ export function Profile() {
       {!isConfigured ? (
         <p className="mt-6 text-center text-[10px] text-muted">{t('profile.supabaseHint')}</p>
       ) : null}
+
+      <ProfileLegalLinks />
+
       <GamertagModal
         open={editGamertag}
         initialValue={user.xboxGamertag ?? ''}

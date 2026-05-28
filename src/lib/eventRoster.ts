@@ -15,6 +15,16 @@ export function findConvoyLeaderParticipant(
   return participants.find((p) => p.isConvoyLeader);
 }
 
+function resolveDiscordUsername(
+  event: Pick<ForzaEvent, 'participants' | 'hostDiscordId' | 'hostUsername'>,
+  discordId: string,
+): string {
+  if (discordId === event.hostDiscordId) {
+    return event.hostUsername.trim();
+  }
+  return event.participants.find((p) => p.discordId === discordId)?.username?.trim() ?? '';
+}
+
 export function resolveConvoyLeader(
   event: Pick<
     ForzaEvent,
@@ -38,7 +48,7 @@ export function resolveConvoyLeader(
     return {
       gamertag,
       discordId: leader.discordId,
-      username: isHostLeader ? event.hostUsername : leader.username,
+      username: resolveDiscordUsername(event, leader.discordId),
       avatarUrl: isHostLeader ? event.hostAvatarUrl : leader.avatarUrl,
       isYou: viewerDiscordId === leader.discordId,
       participationSource: leader.participationSource,
@@ -54,12 +64,13 @@ export function resolveConvoyLeader(
   if (!discordId) return null;
 
   const isHostLeader = discordId === event.hostDiscordId;
+  const leaderRow = event.participants.find((p) => p.discordId === discordId);
 
   return {
     gamertag,
     discordId,
-    username: isHostLeader ? event.hostUsername : undefined,
-    avatarUrl: isHostLeader ? event.hostAvatarUrl : undefined,
+    username: resolveDiscordUsername(event, discordId),
+    avatarUrl: isHostLeader ? event.hostAvatarUrl : leaderRow?.avatarUrl,
     isYou: viewerDiscordId === discordId,
     participationSource: isHostLeader ? 'host_self_assigned' : 'host_assigned',
   };

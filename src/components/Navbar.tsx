@@ -80,7 +80,7 @@ function NavbarTop() {
           'flex items-center justify-between gap-3 px-4 py-3',
         )}
       >
-        <Logo size="nav" />
+        <Logo />
         <AuthStatusIndicator />
       </div>
 
@@ -102,7 +102,7 @@ function NavbarSide() {
       )}
     >
       <div className={cn(navBrandBarClass, 'px-4 py-5')}>
-        <Logo size="nav" />
+        <Logo />
       </div>
 
       <nav className="flex flex-1 flex-col gap-0.5 p-3">

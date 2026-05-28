@@ -4,11 +4,7 @@ import {privacyPolicyEn} from '../legal/privacyContent';
 
 export function PrivacyPolicy() {
   return (
-    <LegalPageLayout
-      title={privacyPolicyEn.title}
-      lastUpdated={privacyPolicyEn.lastUpdated}
-      otherPolicy={{href: '/terms', labelKey: 'legal.viewTerms'}}
-    >
+    <LegalPageLayout title={privacyPolicyEn.title} lastUpdated={privacyPolicyEn.lastUpdated}>
       <LegalDocumentView document={privacyPolicyEn} />
     </LegalPageLayout>
   );

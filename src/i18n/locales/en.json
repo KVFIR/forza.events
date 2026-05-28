@@ -54,6 +54,7 @@
   "legal": {
     "termsLink": "Terms of Service",
     "privacyLink": "Privacy Policy",
+    "close": "Close",
     "viewPrivacy": "Privacy Policy →",
     "viewTerms": "Terms of Service →",
     "lastUpdated": "Last updated: {{date}}",

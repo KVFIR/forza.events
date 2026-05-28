@@ -25,6 +25,7 @@ import {
   type EventResultRow,
 } from '../lib/events';
 import {EventResultsTable} from '../components/EventResultsTable';
+import {ParticipantDisplayNames} from '../components/ParticipantDisplayNames';
 import {UserAvatar} from '../components/UserAvatar';
 import {ContentReveal} from '../components/ui/ContentReveal';
 import {PageLoading} from '../components/ui/PageLoading';
@@ -729,7 +730,11 @@ export function EventDetail() {
                 variant="green"
               />
               <div className="min-w-0">
-                <p className="truncate text-xs font-medium text-slate-200">{convoyLeader.gamertag}</p>
+                <ParticipantDisplayNames
+                  gamertag={convoyLeader.gamertag}
+                  username={convoyLeader.username ?? ''}
+                  showDiscordUsername={isHost}
+                />
                 <p className="text-[9px] font-bold uppercase tracking-widest text-accent-green/90">
                   {t('eventDetail.convoyLeaderBadge')}
                   {convoyLeader.isYou ? t('eventDetail.youSuffix') : ''}
@@ -761,9 +766,11 @@ export function EventDetail() {
                     variant="purple"
                   />
                   <div className="min-w-0">
-                    <p className="truncate text-xs font-medium text-slate-200">
-                      {p.gamertag ?? p.username}
-                    </p>
+                    <ParticipantDisplayNames
+                      gamertag={p.gamertag}
+                      username={p.username}
+                      showDiscordUsername={isHost}
+                    />
                     {p.discordId === user.discordId && (
                       <p className="text-[9px] font-bold uppercase tracking-widest text-accent-purple-light">
                         {t('common.you')}

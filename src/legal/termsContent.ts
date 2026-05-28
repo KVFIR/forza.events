@@ -171,7 +171,7 @@ export const termsOfServiceEn: LegalDocument = {
       blocks: [
         {
           type: 'p',
-          text: 'These Terms are governed by the laws applicable to the operator of FORZA.EVENTS, without regard to conflict-of-law rules, except where mandatory consumer protection laws in your country require otherwise.',
+          text: 'These Terms are governed by the laws of the Republic of Latvia, without regard to conflict-of-law rules, except where mandatory consumer protection laws in your country require otherwise. {{OPERATOR_DESCRIPTION}}',
         },
       ],
     },

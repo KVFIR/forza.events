@@ -55,7 +55,7 @@ function AppShell({children}: {children: ReactNode}) {
         className="flex min-h-screen items-center justify-center bg-base"
         data-discord-layout="compact"
       >
-        <Logo size="hero" />
+        <Logo size="lg" />
       </div>
     );
   }

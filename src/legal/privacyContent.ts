@@ -13,6 +13,10 @@ export const privacyPolicyEn: LegalDocument = {
       blocks: [
         {
           type: 'p',
+          text: '{{OPERATOR_DESCRIPTION}}',
+        },
+        {
+          type: 'p',
           text: 'FORZA.EVENTS is a community tool delivered primarily as a Discord Activity (embedded web application) with a Discord bot used to publish event announcements and handle interactions. For privacy questions or requests, contact us at the email listed in Section 12.',
         },
       ],
@@ -42,10 +46,11 @@ export const privacyPolicyEn: LegalDocument = {
         {
           type: 'ul',
           items: [
-            'Discord account data (via OAuth scopes identify and guilds): Discord user ID, username, display name, discriminator (if provided by Discord), avatar URL, and the list of Discord servers (guilds) your account can access — used to sign you in, show your profile, and let hosts pick a publish target where our bot is installed.',
+            'Discord account data (via OAuth scopes identify and guilds): Discord user ID, username, display name, avatar URL, and related profile fields — used to sign you in and show your profile.',
+            'Discord server (guild) access via API: when you pick or refresh a publish target, we call Discord’s API with the guilds scope to list servers your account can access that also have our bot installed. We do not store a full snapshot of every server on your account. We store guild ID and display name for servers you use with the Service (for example when you publish an event, or when the Activity passes a guild context at sign-in), and guild_id on events you create.',
             'Profile and gameplay preferences you provide: Xbox gamertag, region, timezone, language preferences, and preferred event types — stored in our database to run events and show your participation.',
             'Event and participation data: event titles, types, schedules, tracks, cars, restrictions, cover images you upload, server and channel IDs for publishing, join/leave actions, convoy leader assignments, race results, and related metadata created when you host or join events.',
-            'Discord server metadata: guild IDs and names, channel IDs, message IDs for published embeds, and launch-intent records when you open the Activity from a button on an embed.',
+            'Discord channel and embed metadata: channel IDs, message IDs for published embeds, and launch-intent records when you open the Activity from a button on an embed.',
             'Technical and security data: API request metadata (such as client IP address and timestamps) used for rate limiting and abuse prevention; browser language preference stored locally; optional locale choice stored in your browser’s local storage.',
             'Session data on your device: after sign-in, your Discord OAuth access token and a cached copy of basic profile fields may be stored in session storage until you close the browser tab or sign out, so the Service can call our backend on your behalf.',
           ],

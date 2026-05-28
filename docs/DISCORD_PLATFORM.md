@@ -112,7 +112,7 @@ Set in Developer Portal → **General Information**:
 | Terms of Service | `https://<APP_ORIGIN>/terms` |
 | Privacy Policy | `https://<APP_ORIGIN>/privacy` |
 
-Use your Railway deploy URL (same as `APP_ORIGIN`), e.g. `https://forzaevents.up.railway.app/terms`. These paths load in a normal browser tab without the Discord-only gate. Optional: set `VITE_LEGAL_CONTACT_EMAIL` at build time for privacy/contact requests (default `rudolfs@oas.lv`).
+Use your Railway deploy URL (same as `APP_ORIGIN`), e.g. `https://forzaevents.up.railway.app/terms`. These paths load in a normal browser tab without the Discord-only gate, and are linked from Profile inside the Activity. Optional build-time: `VITE_LEGAL_CONTACT_EMAIL` (default `rudolfs@oas.lv`), `VITE_LEGAL_OPERATOR_NAME` (individual controller in Latvia).
 
 ### Validate in Discord
 

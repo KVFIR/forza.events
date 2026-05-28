@@ -54,6 +54,7 @@ describe('resolveConvoyLeader', () => {
     });
     const convoy = resolveConvoyLeader(ev, 'host-1');
     expect(convoy?.gamertag).toBe('HostGT');
+    expect(convoy?.username).toBe('Host');
     expect(convoy?.isYou).toBe(true);
     expect(convoy?.participationSource).toBe('host_self_assigned');
   });
@@ -74,6 +75,25 @@ describe('resolveConvoyLeader', () => {
     const convoy = resolveConvoyLeader(ev, 'host-1');
     expect(convoy?.discordId).toBe('host-1');
     expect(convoy?.gamertag).toBe('HostGT');
+    expect(convoy?.username).toBe('Host');
+  });
+
+  it('resolves discord username for assigned leader without duplicating gamertag', () => {
+    const ev = event({
+      hostDiscordId: 'host-1',
+      lobbyLeaderGamertag: 'LeaderGT',
+      lobbyLeaderDiscordId: 'leader-9',
+      lobbyLeaderIsHost: false,
+      participants: [
+        participant({
+          discordId: 'leader-9',
+          username: 'DiscordNick',
+          gamertag: 'LeaderGT',
+        }),
+      ],
+    });
+    const convoy = resolveConvoyLeader(ev, 'viewer');
+    expect(convoy?.username).toBe('DiscordNick');
   });
 });
 

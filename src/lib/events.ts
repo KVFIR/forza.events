@@ -249,7 +249,7 @@ export function mapDbEvent(row: DbEventRow): ForzaEvent {
   const participants =
     row.event_participants?.map((p) => ({
       discordId: p.discord_id,
-      username: p.users?.username ?? p.gamertag_snapshot ?? 'Driver',
+      username: p.users?.username?.trim() ?? '',
       avatarUrl: p.users?.avatar_url ?? undefined,
       gamertag: p.gamertag_snapshot ?? undefined,
       isConvoyLeader: p.is_convoy_leader ?? false,

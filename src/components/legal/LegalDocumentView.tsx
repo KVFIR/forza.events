@@ -1,8 +1,13 @@
 import type {LegalBlock, LegalDocument} from '../../legal/types';
-import {getLegalContactEmail} from '../../lib/legalContact';
+import {
+  getLegalContactEmail,
+  getLegalControllerDescription,
+} from '../../lib/legalContact';
 
 function interpolate(text: string): string {
-  return text.replaceAll('{{CONTACT_EMAIL}}', getLegalContactEmail());
+  return text
+    .replaceAll('{{CONTACT_EMAIL}}', getLegalContactEmail())
+    .replaceAll('{{OPERATOR_DESCRIPTION}}', getLegalControllerDescription());
 }
 
 function LegalBlockView({block}: {block: LegalBlock}) {

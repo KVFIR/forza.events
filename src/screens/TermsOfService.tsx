@@ -4,11 +4,7 @@ import {termsOfServiceEn} from '../legal/termsContent';
 
 export function TermsOfService() {
   return (
-    <LegalPageLayout
-      title={termsOfServiceEn.title}
-      lastUpdated={termsOfServiceEn.lastUpdated}
-      otherPolicy={{href: '/privacy', labelKey: 'legal.viewPrivacy'}}
-    >
+    <LegalPageLayout title={termsOfServiceEn.title} lastUpdated={termsOfServiceEn.lastUpdated}>
       <LegalDocumentView document={termsOfServiceEn} />
     </LegalPageLayout>
   );
