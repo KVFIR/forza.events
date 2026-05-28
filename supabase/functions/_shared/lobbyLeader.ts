@@ -41,8 +41,18 @@ export async function resolveLobbyLeaderFields(
   }
   if (!gamertag) return VALIDATION_CODES.CONVOY_LEADER_REQUIRED;
 
+  let leaderHandle = body.lobby_leader_username?.trim();
+  if (!leaderHandle) {
+    const {data: existing} = await supabase
+      .from('users')
+      .select('username')
+      .eq('discord_id', leaderId)
+      .maybeSingle();
+    leaderHandle = existing?.username?.trim() || undefined;
+  }
+
   await ensureUserRowForDiscordId(supabase, leaderId, {
-    username: body.lobby_leader_display_name,
+    username: leaderHandle,
     avatar_url: body.lobby_leader_avatar_url,
   });
 

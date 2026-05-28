@@ -1,7 +1,7 @@
 import {serve} from 'https://deno.land/std@0.224.0/http/server.ts';
 import {internalErrorResponse} from '../_shared/apiResponse.ts';
 import {jsonResponse, optionsResponse} from '../_shared/cors.ts';
-import {avatarUrl, exchangeCode, fetchDiscordUser} from '../_shared/discord.ts';
+import {avatarUrl, discordUniqueUsername, exchangeCode, fetchDiscordUser} from '../_shared/discord.ts';
 import {resolveGuildNameForUser} from '../_shared/guildAccess.ts';
 import {resolveOAuthRedirectUri} from '../_shared/oauthRedirect.ts';
 import {rateLimitOAuthExchange} from '../_shared/rateLimitPresets.ts';
@@ -31,7 +31,6 @@ serve(async (req) => {
 
     const tokens = await exchangeCode(code, safeRedirect);
     const discordUser = await fetchDiscordUser(tokens.access_token);
-    const displayName = discordUser.global_name ?? discordUser.username;
     const supabase = adminClient();
 
     const {data: user, error: userErr} = await supabase
@@ -39,7 +38,7 @@ serve(async (req) => {
       .upsert(
         {
           discord_id: discordUser.id,
-          username: displayName,
+          username: discordUniqueUsername(discordUser),
           discriminator: discordUser.discriminator ?? '',
           avatar_url: avatarUrl(discordUser),
         },

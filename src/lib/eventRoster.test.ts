@@ -78,7 +78,7 @@ describe('resolveConvoyLeader', () => {
     expect(convoy?.username).toBe('Host');
   });
 
-  it('resolves discord username for assigned leader without duplicating gamertag', () => {
+  it('resolves discord handle for assigned leader without duplicating gamertag', () => {
     const ev = event({
       hostDiscordId: 'host-1',
       lobbyLeaderGamertag: 'LeaderGT',
@@ -87,13 +87,13 @@ describe('resolveConvoyLeader', () => {
       participants: [
         participant({
           discordId: 'leader-9',
-          username: 'DiscordNick',
+          username: 'leader_handle',
           gamertag: 'LeaderGT',
         }),
       ],
     });
     const convoy = resolveConvoyLeader(ev, 'viewer');
-    expect(convoy?.username).toBe('DiscordNick');
+    expect(convoy?.username).toBe('leader_handle');
   });
 });
 

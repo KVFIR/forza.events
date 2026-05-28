@@ -84,7 +84,7 @@ export function useCreateEventForm() {
   const [lobbyLeaderIsHost, setLobbyLeaderIsHost] = useState(true);
   const [lobbyLeaderGamertag, setLobbyLeaderGamertag] = useState(user.xboxGamertag ?? '');
   const [lobbyLeaderDiscordId, setLobbyLeaderDiscordId] = useState<string | null>(null);
-  const [lobbyLeaderDisplayName, setLobbyLeaderDisplayName] = useState('');
+  const [lobbyLeaderUsername, setLobbyLeaderUsername] = useState('');
   /** Gamertag from profile/DB when the member was picked — not the live input value. */
   const [lobbyLeaderProfileGamertag, setLobbyLeaderProfileGamertag] = useState<string | null>(
     null,
@@ -101,10 +101,10 @@ export function useCreateEventForm() {
     if (!lobbyLeaderDiscordId) return null;
     return {
       discordId: lobbyLeaderDiscordId,
-      displayName: lobbyLeaderDisplayName,
+      username: lobbyLeaderUsername,
       xboxGamertag: lobbyLeaderProfileGamertag,
     };
-  }, [lobbyLeaderDiscordId, lobbyLeaderDisplayName, lobbyLeaderProfileGamertag]);
+  }, [lobbyLeaderDiscordId, lobbyLeaderUsername, lobbyLeaderProfileGamertag]);
 
   const values: CreateEventFormValues = useMemo(
     () => ({
@@ -123,7 +123,7 @@ export function useCreateEventForm() {
       lobbyLeaderIsHost,
       lobbyLeaderGamertag,
       lobbyLeaderDiscordId,
-      lobbyLeaderDisplayName,
+      lobbyLeaderUsername,
       targetGuildId,
       targetGuildName,
       targetChannelId,
@@ -144,7 +144,7 @@ export function useCreateEventForm() {
       lobbyLeaderIsHost,
       lobbyLeaderGamertag,
       lobbyLeaderDiscordId,
-      lobbyLeaderDisplayName,
+      lobbyLeaderUsername,
       targetGuildId,
       targetGuildName,
       targetChannelId,
@@ -212,10 +212,13 @@ export function useCreateEventForm() {
         setTargetGuildName(ev.guildName ?? '');
         setTargetChannelId(ev.channelId ?? '');
         if (ev.lobbyLeaderIsHost === false && ev.lobbyLeaderDiscordId) {
+          const leaderParticipant = ev.participants.find(
+            (p) => p.discordId === ev.lobbyLeaderDiscordId,
+          );
           setLobbyLeaderIsHost(false);
           setLobbyLeaderDiscordId(ev.lobbyLeaderDiscordId);
           setLobbyLeaderGamertag(ev.lobbyLeaderGamertag ?? '');
-          setLobbyLeaderDisplayName(ev.lobbyLeaderGamertag ?? '');
+          setLobbyLeaderUsername(leaderParticipant?.username ?? '');
           setLobbyLeaderProfileGamertag(null);
         } else {
           const leader = ev.lobbyLeaderGamertag?.trim();
@@ -223,12 +226,12 @@ export function useCreateEventForm() {
             setLobbyLeaderIsHost(false);
             setLobbyLeaderGamertag(leader);
             setLobbyLeaderDiscordId(null);
-            setLobbyLeaderDisplayName('');
+            setLobbyLeaderUsername('');
           } else {
             setLobbyLeaderIsHost(true);
             setLobbyLeaderGamertag(user.xboxGamertag ?? leader ?? '');
             setLobbyLeaderDiscordId(null);
-            setLobbyLeaderDisplayName('');
+            setLobbyLeaderUsername('');
           }
         }
         if (ev.coverImageUrl && !isBundledDefaultCover(ev.coverImageUrl)) {
@@ -282,9 +285,9 @@ export function useCreateEventForm() {
         : lobbyLeaderGamertag.trim(),
       lobby_leader_is_host: lobbyLeaderIsHost,
       lobby_leader_discord_id: lobbyLeaderIsHost ? null : lobbyLeaderDiscordId,
-      lobby_leader_display_name: lobbyLeaderIsHost
+      lobby_leader_username: lobbyLeaderIsHost
         ? null
-        : lobbyLeaderDisplayName.trim() || null,
+        : lobbyLeaderUsername.trim() || null,
       voice_policy: 'optional' as const,
       cars:
         carRuleMode === 'restricted_list'
@@ -536,6 +539,7 @@ export function useCreateEventForm() {
       if (v) {
         setLobbyLeaderDiscordId(null);
         setLobbyLeaderDisplayName('');
+        setLobbyLeaderUsername('');
         setLobbyLeaderProfileGamertag(null);
         setLobbyLeaderGamertag(user.xboxGamertag ?? '');
       }
@@ -549,13 +553,13 @@ export function useCreateEventForm() {
       clearFieldError('lobbyLeaderGamertag');
       if (!member) {
         setLobbyLeaderDiscordId(null);
-        setLobbyLeaderDisplayName('');
+        setLobbyLeaderUsername('');
         setLobbyLeaderProfileGamertag(null);
         setLobbyLeaderGamertag('');
         return;
       }
       setLobbyLeaderDiscordId(member.discordId);
-      setLobbyLeaderDisplayName(member.displayName);
+      setLobbyLeaderUsername(member.username);
       setLobbyLeaderProfileGamertag(member.xboxGamertag);
       setLobbyLeaderGamertag(member.xboxGamertag?.trim() ?? '');
     },

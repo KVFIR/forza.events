@@ -1,4 +1,4 @@
-import {avatarUrl, type DiscordUser} from './discord.ts';
+import {avatarUrl, discordUniqueUsername, type DiscordUser} from './discord.ts';
 import type {adminClient} from './supabase.ts';
 
 /** Ensure `users` row exists before `event_participants` FK insert. */
@@ -6,11 +6,10 @@ export async function ensureDiscordUserRow(
   supabase: ReturnType<typeof adminClient>,
   discordUser: DiscordUser,
 ): Promise<void> {
-  const displayName = discordUser.global_name ?? discordUser.username;
   const {error} = await supabase.from('users').upsert(
     {
       discord_id: discordUser.id,
-      username: displayName,
+      username: discordUniqueUsername(discordUser),
       discriminator: discordUser.discriminator ?? '',
       avatar_url: avatarUrl(discordUser),
     },
@@ -27,17 +26,37 @@ export async function ensureUserRowForDiscordId(
   discordId: string,
   profile?: {username?: string | null; avatar_url?: string | null},
 ): Promise<void> {
-  const username = profile?.username?.trim() || 'Driver';
-  const {error} = await supabase.from('users').upsert(
-    {
-      discord_id: discordId,
-      username,
-      discriminator: '',
-      avatar_url: profile?.avatar_url ?? null,
-    },
-    {onConflict: 'discord_id'},
-  );
+  const handle = profile?.username?.trim();
+  const {data: existing, error: loadErr} = await supabase
+    .from('users')
+    .select('discord_id, username, avatar_url')
+    .eq('discord_id', discordId)
+    .maybeSingle();
+  if (loadErr) {
+    throw new Error(`Failed to load user profile: ${loadErr.message}`);
+  }
+
+  if (existing) {
+    const updates: Record<string, unknown> = {};
+    if (handle && handle !== existing.username) updates.username = handle;
+    if (profile?.avatar_url !== undefined && profile.avatar_url !== existing.avatar_url) {
+      updates.avatar_url = profile.avatar_url;
+    }
+    if (Object.keys(updates).length === 0) return;
+    const {error} = await supabase.from('users').update(updates).eq('discord_id', discordId);
+    if (error) {
+      throw new Error(`Failed to update user profile: ${error.message}`);
+    }
+    return;
+  }
+
+  const {error} = await supabase.from('users').insert({
+    discord_id: discordId,
+    username: handle || 'Driver',
+    discriminator: '',
+    avatar_url: profile?.avatar_url ?? null,
+  });
   if (error) {
-    throw new Error(`Failed to ensure convoy leader profile: ${error.message}`);
+    throw new Error(`Failed to ensure user profile: ${error.message}`);
   }
 }

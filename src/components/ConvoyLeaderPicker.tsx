@@ -3,6 +3,7 @@ import {useTranslation} from 'react-i18next';
 import {listGuildMembers} from '../lib/api';
 import {ApiRequestError} from '../lib/apiErrors';
 import {cn} from '../lib/cn';
+import {formatDiscordHandle} from '../lib/discordHandle';
 import {hasGamertag} from '../lib/gamertag';
 import {Alert} from './ui/Alert';
 import {UserAvatar} from './UserAvatar';
@@ -11,14 +12,14 @@ import {controlInvalidClass} from './ui/formStyles';
 
 export type ConvoyLeaderSelection = {
   discordId: string;
-  displayName: string;
+  /** Discord unique handle (`user.username`). */
+  username: string;
   xboxGamertag: string | null;
 };
 
 type GuildMemberHit = {
   discord_id: string;
   username: string;
-  display_name: string;
   avatar_url: string | null;
   xbox_gamertag: string | null;
 };
@@ -97,9 +98,9 @@ export function ConvoyLeaderPicker({
         <>
           {selected ? (
             <div className="flex items-center gap-2 rounded-lg border border-white/[0.08] bg-card px-3 py-2">
-              {selected.displayName && (
+              {selected.username && (
                 <span className="min-w-0 flex-1 truncate text-sm text-slate-200">
-                  {selected.displayName}
+                  {formatDiscordHandle(selected.username)}
                 </span>
               )}
               <button
@@ -148,7 +149,7 @@ export function ConvoyLeaderPicker({
                           const tag = m.xbox_gamertag?.trim() ?? '';
                           onSelect({
                             discordId: m.discord_id,
-                            displayName: m.display_name,
+                            username: m.username,
                             xboxGamertag: m.xbox_gamertag,
                           });
                           onGamertagChange(tag);
@@ -158,12 +159,12 @@ export function ConvoyLeaderPicker({
                       >
                         <UserAvatar
                           src={m.avatar_url}
-                          name={m.display_name}
+                          name={m.username}
                           size="sm"
                           variant="neutral"
                         />
                         <span className="min-w-0 flex-1 truncate">
-                          <span className="font-medium">{m.display_name}</span>
+                          <span className="font-medium">{formatDiscordHandle(m.username)}</span>
                           {m.xbox_gamertag && (
                             <span className="ml-1 text-xs text-muted">{m.xbox_gamertag}</span>
                           )}
