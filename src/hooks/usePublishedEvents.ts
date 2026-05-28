@@ -1,4 +1,4 @@
-import {useCallback, useEffect, useRef, useState} from 'react';
+import {useCallback, useEffect, useMemo, useRef, useState} from 'react';
 import {useJoinedEvents} from '../context/JoinedEventsContext';
 import {
   fetchPublishedEventsResult,
@@ -6,6 +6,7 @@ import {
   type FetchEventsOptions,
   type PublishedEventsLoadError,
 } from '../lib/events';
+import {mergeOptimisticEventPatch} from '../lib/eventParticipation';
 import {applyDevLoadingDelay} from '../lib/devLoadingDelay';
 import {usePublishedEventsLiveUpdates} from './useEventLiveUpdates';
 import type {ForzaEvent} from '../lib/types';
@@ -17,7 +18,7 @@ async function fetchWithDevDelay(includeCompleted: boolean) {
 
 /** Global public browse feed (frozen MVP spec). Does not wait on Discord auth. */
 export function usePublishedEvents(options: FetchEventsOptions = {}) {
-  const {refreshKey} = useJoinedEvents();
+  const {refreshKey, getLobbyPatch, clearLobbyPatch} = useJoinedEvents();
   const includeCompleted = options.includeCompleted ?? false;
   const [events, setEvents] = useState<ForzaEvent[]>([]);
   const [isLoading, setIsLoading] = useState(true);
@@ -56,6 +57,7 @@ export function usePublishedEvents(options: FetchEventsOptions = {}) {
 
   const onLobbyPatch = useCallback(
     (row: {id: string; current_players: number; max_players: number; status: string}) => {
+      clearLobbyPatch(row.id);
       setEvents((prev) =>
         prev.map((event) =>
           event.id === row.id
@@ -68,7 +70,7 @@ export function usePublishedEvents(options: FetchEventsOptions = {}) {
         ),
       );
     },
-    [],
+    [clearLobbyPatch],
   );
 
   usePublishedEventsLiveUpdates(includeCompleted, onLobbyPatch, silentRefetch);
@@ -101,5 +103,10 @@ export function usePublishedEvents(options: FetchEventsOptions = {}) {
     };
   }, [refreshKey, includeCompleted]);
 
-  return {events, isLoading, isRefreshing, loadError, refetch};
+  const eventsWithOptimistic = useMemo(
+    () => events.map((event) => mergeOptimisticEventPatch(event, getLobbyPatch(event.id))),
+    [events, getLobbyPatch],
+  );
+
+  return {events: eventsWithOptimistic, isLoading, isRefreshing, loadError, refetch};
 }

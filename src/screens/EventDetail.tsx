@@ -1,4 +1,4 @@
-import {useCallback, useEffect, useRef, useState} from 'react';
+import {useCallback, useEffect, useMemo, useRef, useState} from 'react';
 import {useTranslation} from 'react-i18next';
 import {busyLabel} from '../i18n/busyLabels';
 import {useLocation, useNavigate, useParams} from 'react-router-dom';
@@ -60,7 +60,7 @@ import {formatLobbyCount, LOBBY_TOTAL_PLAYERS} from '../lib/constants';
 import {resolveOrganiserLabel} from '../lib/organiser';
 import {resolveConvoyLeader, resolveRegisteredDrivers} from '../lib/eventRoster';
 import {participationButtonLabel, participationButtonVariant} from '../lib/eventActions';
-import {patchEventAfterSelfLeave} from '../lib/eventParticipation';
+import {mergeOptimisticEventPatch} from '../lib/eventParticipation';
 import {gamertagError, hasGamertag} from '../lib/gamertag';
 import {cn} from '../lib/cn';
 
@@ -92,7 +92,7 @@ export function EventDetail() {
   const [loading, setLoading] = useState(true);
   const loadedForIdRef = useRef<string | null>(null);
   const fetchSeqRef = useRef(0);
-  const {isJoined, joinParticipation, leaveParticipation, bumpRefresh, refreshKey} =
+  const {isJoined, joinParticipation, leaveParticipation, bumpRefresh, refreshKey, getLobbyPatch} =
     useJoinedEvents();
   const {
     user,
@@ -112,9 +112,10 @@ export function EventDetail() {
   const [confirmAction, setConfirmAction] = useState<'delete' | 'cancel' | null>(null);
   const [deleting, setDeleting] = useState(false);
   const [actionError, setActionError] = useState<string | null>(null);
+  const participationInFlightRef = useRef(false);
 
   const reloadEvent = useCallback(() => {
-    if (!id) return;
+    if (!id || participationInFlightRef.current) return;
     void fetchEventById(id, {discordToken}).then(async (ev) => {
       setEvent(ev);
       if (ev && shouldShowEventResults(ev)) {
@@ -124,7 +125,13 @@ export function EventDetail() {
   }, [id, discordToken]);
 
   useEventLiveUpdates(id, reloadEvent);
-  const displayStatus = useResolveEventDisplayStatus(event);
+
+  const displayEvent = useMemo(
+    () =>
+      event && id ? mergeOptimisticEventPatch(event, getLobbyPatch(id)) : undefined,
+    [event, id, getLobbyPatch],
+  );
+  const displayStatus = useResolveEventDisplayStatus(displayEvent);
 
   useEffect(() => {
     if (!id) return;
@@ -193,10 +200,9 @@ export function EventDetail() {
     const eventId = event.id;
     setLeaving(true);
     setJoinError(null);
-    setEvent((prev) => (prev ? patchEventAfterSelfLeave(prev, user.discordId) : prev));
-
+    participationInFlightRef.current = true;
     try {
-      await leaveParticipation(eventId);
+      await leaveParticipation(event);
       const next = await fetchEventById(eventId, {discordToken});
       setEvent(next ?? undefined);
     } catch (err) {
@@ -204,6 +210,7 @@ export function EventDetail() {
       const next = await fetchEventById(eventId, {discordToken});
       setEvent(next ?? undefined);
     } finally {
+      participationInFlightRef.current = false;
       setLeaving(false);
     }
   }
@@ -269,15 +276,17 @@ export function EventDetail() {
     }
     setJoining(true);
     setJoinError(null);
+    participationInFlightRef.current = true;
     try {
       await joinParticipation(event, trimmed);
       const next = await fetchEventById(event.id, {discordToken});
-      setEvent(next);
+      setEvent(next ?? undefined);
     } catch (err) {
       setJoinError(err instanceof Error ? err.message : t('eventDetail.joinFailed'));
       const next = await fetchEventById(event.id, {discordToken});
-      setEvent(next);
+      setEvent(next ?? undefined);
     } finally {
+      participationInFlightRef.current = false;
       setJoining(false);
       setGamertagOpen(false);
     }
@@ -299,26 +308,28 @@ export function EventDetail() {
     );
   }
 
-  const isHost = event.hostDiscordId === user.discordId;
+  const ev = displayEvent!;
+
+  const isHost = ev.hostDiscordId === user.discordId;
   const isDraft = !isPublishedToDiscord(event);
   const canEnterResults = canSubmitEventResults(event, user);
   const canEdit = canEditEvent(event, user);
   const canCancel = canCancelEvent(event, user);
   const canDelete = canDeleteDraft(event, user);
   const joined = isJoined(event);
-  const isInParticipants = userHasParticipantRow(event, user);
-  const registrationOpen = isRegistrationOpen(event);
-  const canLeave = canLeaveRegistration(event);
-  const started = eventHasStarted(event);
+  const isInParticipants = userHasParticipantRow(ev, user);
+  const registrationOpen = isRegistrationOpen(ev);
+  const canLeave = canLeaveRegistration(ev);
+  const started = eventHasStarted(ev);
   const full = displayStatus === 'full';
   const showDraftActions = isDraft && isHost;
   const showHostPostStartActions = isHost && started && (canEnterResults || canCancel);
-  const when = formatEventStart(event.startsAt);
-  const fillPct = Math.round((event.currentPlayers / LOBBY_TOTAL_PLAYERS) * 100);
+  const when = formatEventStart(ev.startsAt);
+  const fillPct = Math.round((ev.currentPlayers / LOBBY_TOTAL_PLAYERS) * 100);
   const finalized = isEventFinalized(event);
   const resultDisplay = resolveEventResultDisplay(event, resultRows);
-  const convoyLeader = resolveConvoyLeader(event, user.discordId);
-  const registeredDrivers = resolveRegisteredDrivers(event.participants);
+  const convoyLeader = resolveConvoyLeader(ev, user.discordId);
+  const registeredDrivers = resolveRegisteredDrivers(ev.participants);
   const showResultsSection = shouldShowEventResults(event);
   const showParticipantActions = !isHost && !isDraft;
   const needsSignInToParticipate =
@@ -555,7 +566,7 @@ export function EventDetail() {
               />
             </div>
             <span className="shrink-0 text-xs font-semibold tabular-nums text-slate-300">
-              {formatLobbyCount(event.currentPlayers)}
+              {formatLobbyCount(ev.currentPlayers)}
             </span>
           </div>
         </div>
@@ -710,7 +721,7 @@ export function EventDetail() {
         <div className="mb-3 flex items-center justify-between">
           <p className="text-sm font-semibold text-white">{t('eventDetail.participants')}</p>
           <span className="text-xs tabular-nums text-muted">
-            {formatLobbyCount(event.currentPlayers)}
+            {formatLobbyCount(ev.currentPlayers)}
           </span>
         </div>
         <div className="space-y-2">
@@ -733,12 +744,11 @@ export function EventDetail() {
                 <ParticipantDisplayNames
                   gamertag={convoyLeader.gamertag}
                   username={convoyLeader.username ?? ''}
-                  showDiscordUsername={isHost}
                 />
                 <p className="text-[9px] font-bold uppercase tracking-widest text-accent-green/90">
                   {t('eventDetail.convoyLeaderBadge')}
                   {convoyLeader.isYou ? t('eventDetail.youSuffix') : ''}
-                  {convoyLeader.discordId === event.hostDiscordId ? t('eventDetail.hostSuffix') : ''}
+                  {convoyLeader.discordId === ev.hostDiscordId ? t('eventDetail.hostSuffix') : ''}
                 </p>
               </div>
             </div>
@@ -769,7 +779,9 @@ export function EventDetail() {
                     <ParticipantDisplayNames
                       gamertag={p.gamertag}
                       username={p.username}
-                      showDiscordUsername={isHost}
+                      showDiscordUsername={
+                        isHost && p.discordId !== ev.hostDiscordId
+                      }
                     />
                     {p.discordId === user.discordId && (
                       <p className="text-[9px] font-bold uppercase tracking-widest text-accent-purple-light">
