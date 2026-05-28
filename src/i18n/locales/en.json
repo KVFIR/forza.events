@@ -347,7 +347,9 @@
     "eventNotFound": "Event not found.",
     "notDraft": "Only draft events can be published.",
     "invalidResponse": "Could not reach the server. Try again.",
-    "resultsParticipantsOnly": "Results can only include registered participants for this event."
+    "resultsParticipantsOnly": "Results can only include registered participants for this event.",
+    "publishInProgress": "This event is already being published. Wait a moment and try again.",
+    "resultsAlreadySubmitted": "Results cannot be changed after submission."
   },
   "validation": {
     "futureDate": "Choose a date and time in the future.",

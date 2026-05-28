@@ -15,8 +15,6 @@ See [`docs/PLAN.md`](../docs/PLAN.md), [`docs/STATUS.md`](../docs/STATUS.md), [`
 
 ## Migrations
 
-Single baseline migration — squash of the original 001–024:
-
 ```bash
 supabase login
 supabase link --project-ref <your-project-ref>
@@ -26,6 +24,9 @@ supabase db push
 | Migration | Purpose |
 |-----------|---------|
 | `001_baseline.sql` | Full schema: enums, tables, indexes, functions, triggers, RLS, realtime, storage |
+| `002_event_tracks_jsonb.sql` | `events.tracks` jsonb + legacy backfill |
+| `003_security_publish_results.sql` | `event_cars` RLS (no draft leak), `publish_started_at` lock, `submit_event_results` RPC |
+| `004_rpc_submit_hardening.sql` | `submit_event_results`: trim `discord_id`, explicit `RAISE` messages |
 
 Seeds are **not** included in the migration. Run separately after `db push`:
 

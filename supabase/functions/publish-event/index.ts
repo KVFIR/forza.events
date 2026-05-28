@@ -2,13 +2,28 @@ import {serve} from 'https://deno.land/std@0.224.0/http/server.ts';
 import {API_ERROR_CODES} from '../_shared/apiErrorCodes.ts';
 import {appErrorResponse, internalErrorResponse} from '../_shared/apiResponse.ts';
 import {jsonResponse, optionsResponse} from '../_shared/cors.ts';
-import {botHeaders, mapDiscordPostError, verifyDiscordToken} from '../_shared/discord.ts';
+import {
+  deleteChannelMessage,
+  mapDiscordPostError,
+  postChannelMessage,
+  verifyDiscordToken,
+} from '../_shared/discord.ts';
 import {requireManageGuildAccess, resolveGuildNameForUser} from '../_shared/guildAccess.ts';
 import {validatePublishChannelTarget} from '../_shared/publishTarget.ts';
 import {buildEventEmbed, mapEventCarsForEmbed} from '../_shared/events.ts';
-import {validatePublishReady, type SaveEventBody} from '../_shared/eventSpec.ts';
+import {validatePublishReady} from '../_shared/eventSpec.ts';
 import {normalizeGuildName} from '../_shared/guildDisplay.ts';
 import {ensureConvoyLeaderParticipantForEvent} from '../_shared/participantLeader.ts';
+import {buildPublishEventBody} from '../_shared/publishEventBody.ts';
+import {
+  claimPublishLock,
+  clearPublishLock,
+  finalizePublish,
+  isAlreadyPublished,
+  loadPublishedSnapshot,
+  publishClaimFailureCode,
+  publishedEventResponsePayload,
+} from '../_shared/publishLock.ts';
 import {rateLimitMutation} from '../_shared/rateLimitPresets.ts';
 import {adminClient} from '../_shared/supabase.ts';
 
@@ -24,6 +39,10 @@ serve(async (req) => {
 
   const mutationLimited = await rateLimitMutation(req, user.id);
   if (mutationLimited) return mutationLimited;
+
+  let lockedEventId: string | null = null;
+  let postedChannelId: string | null = null;
+  let postedMessageId: string | null = null;
 
   try {
     const {event_id, guild_id, channel_id} = await req.json();
@@ -55,89 +74,60 @@ serve(async (req) => {
     if (event.host_discord_id !== user.id) {
       return jsonResponse({error: 'Only the host can publish'}, 403, req);
     }
-    if (event.status !== 'draft') {
-      if (
-        event.discord_message_id &&
-        event.status === 'open' &&
-        event.channel_id &&
-        event.guild_id
-      ) {
-        return jsonResponse(
-          {
-            message_id: event.discord_message_id,
-            channel_id: event.channel_id,
-            guild_id: event.guild_id,
-            already_published: true,
-          },
-          200,
-          req,
-        );
-      }
-      return appErrorResponse(req, 400, API_ERROR_CODES.NOT_DRAFT);
-    }
     if (event.guild_id && event.guild_id !== guild_id) {
       return jsonResponse({error: 'Server is locked for this draft'}, 400, req);
     }
 
-    const resolvedGuildName = normalizeGuildName(
-      await resolveGuildNameForUser(token!, guild_id),
-    );
-    if (!resolvedGuildName) {
-      return jsonResponse({error: 'Choose a Discord server from the list before publishing.'}, 400, req);
+    const snapshot = await loadPublishedSnapshot(supabase, event_id);
+    if (snapshot && isAlreadyPublished(snapshot)) {
+      return jsonResponse(publishedEventResponsePayload(snapshot), 200, req);
     }
-    await supabase.from('discord_guilds').upsert(
-      {guild_id, guild_name: resolvedGuildName},
-      {onConflict: 'guild_id'},
-    );
 
     const {data: eventCars} = await supabase
       .from('event_cars')
       .select('car_id, max_pi, tune_share_code, car_restrictions, cars(id, make, model, year, pi)')
       .eq('event_id', event_id);
 
-    const body: SaveEventBody = {
-      title: event.title,
-      type: event.type,
-      starts_at: event.starts_at,
-      timezone_hint: event.timezone_hint,
-      description: event.description,
-      cover_image_url: event.cover_image_url,
-      lobby_leader_gamertag: event.lobby_leader_gamertag,
-      lobby_leader_is_host: event.lobby_leader_is_host,
-      guild_id,
-      channel_id,
-      car_rule_mode: event.car_rule_mode,
-      max_pi: event.max_pi,
-      tracks: event.tracks ?? [],
-      additional_car_restrictions:
-        event.additional_car_restrictions ??
-        (Array.isArray(event.rules_allowed)
-          ? event.rules_allowed.find((rule: string) => rule.startsWith('additional:'))?.slice('additional:'.length) ?? null
-          : null),
-      cars: (eventCars ?? []).map((ec) => {
-        const raw = ec.cars;
-        const car = (Array.isArray(raw) ? raw[0] : raw) as {
-          id: string;
-          make: string;
-          model: string;
-          year: number | null;
-          pi: number;
-        };
-        return {
-          id: car.id,
-          make: car.make,
-          model: car.model,
-          year: car.year,
-          pi: car.pi,
-          max_pi: ec.max_pi,
-          tune_share_code: ec.tune_share_code,
-          car_restrictions: ec.car_restrictions ?? [],
-        };
-      }),
-    };
-
-    const publishErr = validatePublishReady(body);
+    const publishBody = buildPublishEventBody(event, eventCars ?? [], guild_id, channel_id);
+    const publishErr = validatePublishReady(publishBody);
     if (publishErr) return appErrorResponse(req, 400, publishErr);
+
+    const resolvedGuildName = normalizeGuildName(
+      await resolveGuildNameForUser(token!, guild_id),
+    );
+    if (!resolvedGuildName) {
+      return jsonResponse(
+        {error: 'Choose a Discord server from the list before publishing.'},
+        400,
+        req,
+      );
+    }
+
+    const claimed = await claimPublishLock(supabase, event_id, user.id, {
+      guildId: guild_id,
+      channelId: channel_id,
+    });
+
+    if (!claimed) {
+      const afterClaim = await loadPublishedSnapshot(supabase, event_id);
+      if (afterClaim && isAlreadyPublished(afterClaim)) {
+        return jsonResponse(publishedEventResponsePayload(afterClaim), 200, req);
+      }
+      if (afterClaim) {
+        const code = publishClaimFailureCode(afterClaim);
+        const status = code === API_ERROR_CODES.PUBLISH_IN_PROGRESS ? 409 : 400;
+        return appErrorResponse(req, status, code);
+      }
+      return appErrorResponse(req, 404, API_ERROR_CODES.EVENT_NOT_FOUND);
+    }
+
+    lockedEventId = event_id;
+    postedChannelId = channel_id;
+
+    await supabase.from('discord_guilds').upsert(
+      {guild_id, guild_name: resolvedGuildName},
+      {onConflict: 'guild_id'},
+    );
 
     let leaderProfile: {username?: string | null; avatar_url?: string | null} | undefined;
     if (event.lobby_leader_discord_id && event.lobby_leader_is_host === false) {
@@ -172,6 +162,8 @@ serve(async (req) => {
       .eq('id', event_id)
       .single();
     if (refreshErr || !eventForEmbed) {
+      await clearPublishLock(supabase, event_id);
+      lockedEventId = null;
       return jsonResponse({error: 'Failed to refresh event after roster sync'}, 500, req);
     }
 
@@ -181,38 +173,54 @@ serve(async (req) => {
       guild_name: resolvedGuildName,
       allowed_cars: mapEventCarsForEmbed(eventCars ?? []),
     });
-    const msgRes = await fetch(
-      `https://discord.com/api/channels/${channel_id}/messages`,
-      {
-        method: 'POST',
-        headers: botHeaders(),
-        body: JSON.stringify(payload),
-      },
-    );
 
+    const msgRes = await postChannelMessage(channel_id, payload);
     if (!msgRes.ok) {
-      const text = await msgRes.text();
-      return jsonResponse({error: mapDiscordPostError(msgRes.status, text)}, 502, req);
+      await clearPublishLock(supabase, event_id);
+      lockedEventId = null;
+      return jsonResponse(
+        {error: mapDiscordPostError(msgRes.status, msgRes.body)},
+        502,
+        req,
+      );
     }
 
-    const message = await msgRes.json();
+    postedMessageId = msgRes.id;
 
-    const {error: updateErr} = await supabase
-      .from('events')
-      .update({
-        guild_id,
-        channel_id,
-        discord_message_id: message.id,
-        status: 'open',
-      })
-      .eq('id', event_id);
+    const finalized = await finalizePublish(supabase, event_id, {
+      messageId: msgRes.id,
+      guildId: guild_id,
+      channelId: channel_id,
+    });
 
-    if (updateErr) {
-      return jsonResponse({error: 'Posted but failed to update event'}, 500, req);
+    if (!finalized) {
+      console.error(
+        JSON.stringify({
+          msg: 'publish orphan Discord message',
+          eventId: event_id,
+          channelId: channel_id,
+          messageId: msgRes.id,
+        }),
+      );
+      await deleteChannelMessage(channel_id, msgRes.id);
+      await clearPublishLock(supabase, event_id);
+      lockedEventId = null;
+      postedMessageId = null;
+      return appErrorResponse(req, 500, API_ERROR_CODES.INTERNAL);
     }
 
-    return jsonResponse({message_id: message.id, channel_id, guild_id}, 200, req);
+    lockedEventId = null;
+    postedMessageId = null;
+
+    return jsonResponse({message_id: msgRes.id, channel_id, guild_id}, 200, req);
   } catch (e) {
+    if (lockedEventId) {
+      const supabase = adminClient();
+      if (postedChannelId && postedMessageId) {
+        await deleteChannelMessage(postedChannelId, postedMessageId);
+      }
+      await clearPublishLock(supabase, lockedEventId);
+    }
     return internalErrorResponse(req, e);
   }
 });

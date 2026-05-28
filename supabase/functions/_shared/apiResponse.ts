@@ -29,6 +29,10 @@ const API_MESSAGES_EN: Partial<Record<ApiErrorCode, string>> = {
   [API_ERROR_CODES.NOT_DRAFT]: 'Only draft events can be published',
   [API_ERROR_CODES.RESULTS_PARTICIPANTS_ONLY]:
     'Results can only include joined drivers or the convoy leader (host leader is always allowed).',
+  [API_ERROR_CODES.PUBLISH_IN_PROGRESS]:
+    'This event is already being published. Wait a moment and try again.',
+  [API_ERROR_CODES.RESULTS_ALREADY_SUBMITTED]:
+    'Results cannot be changed after submission',
 };
 
 export function apiErrorMessage(code: ApiErrorCode | ValidationCode, fallback?: string): string {

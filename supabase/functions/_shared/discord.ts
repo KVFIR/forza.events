@@ -239,3 +239,61 @@ export function mapDiscordPostError(status: number, body: string): string {
   console.error('Discord post failed', status, body);
   return 'Failed to post event message to Discord.';
 }
+
+export type DiscordChannelMessageResult =
+  | {ok: true; id: string}
+  | {ok: false; status: number; body: string};
+
+export async function postChannelMessage(
+  channelId: string,
+  payload: unknown,
+): Promise<DiscordChannelMessageResult> {
+  const res = await fetch(`https://discord.com/api/channels/${channelId}/messages`, {
+    method: 'POST',
+    headers: botHeaders(),
+    body: JSON.stringify(payload),
+  });
+  if (!res.ok) {
+    const text = await res.text();
+    return {ok: false, status: res.status, body: text};
+  }
+  const message = (await res.json()) as {id: string};
+  return {ok: true, id: message.id};
+}
+
+/** Best-effort rollback when DB finalize fails after a Discord post. */
+export async function deleteChannelMessage(
+  channelId: string,
+  messageId: string,
+): Promise<boolean> {
+  try {
+    const res = await fetch(
+      `https://discord.com/api/channels/${channelId}/messages/${messageId}`,
+      {method: 'DELETE', headers: botHeaders()},
+    );
+    if (!res.ok) {
+      const text = await res.text();
+      console.error(
+        JSON.stringify({
+          msg: 'deleteChannelMessage failed',
+          channelId,
+          messageId,
+          status: res.status,
+          body: text.slice(0, 200),
+        }),
+      );
+      return false;
+    }
+    return true;
+  } catch (e) {
+    console.error(
+      JSON.stringify({
+        msg: 'deleteChannelMessage error',
+        channelId,
+        messageId,
+        error: e instanceof Error ? e.message : String(e),
+      }),
+    );
+    return false;
+  }
+}

@@ -168,7 +168,12 @@ export async function publishEvent(
   channelId: string,
   guildName?: string,
 ) {
-  return invoke<{message_id: string}>(
+  return invoke<{
+    message_id: string;
+    channel_id?: string;
+    guild_id?: string;
+    already_published?: boolean;
+  }>(
     'publish-event',
     {event_id: eventId, guild_id: guildId, channel_id: channelId, guild_name: guildName},
     discordToken,

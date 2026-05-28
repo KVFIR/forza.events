@@ -111,6 +111,8 @@ Portal setup and Activity E2E validation: [`DISCORD_PLATFORM.md`](DISCORD_PLATFO
 | OAuth redirect fails | URI mismatch | Match `.env` and Discord portal |
 | `Too many requests` | Rate limit | Wait 1 min; adjust limits only if needed |
 | `seed:events` fails | No service role | `SUPABASE_SERVICE_ROLE_KEY` in `.env` |
+| Publish stuck / 409 `PUBLISH_IN_PROGRESS` | Crashed mid-publish | Wait 5 min (lock TTL) or clear `publish_started_at` on draft row |
+| Double Discord embed after publish | Old code / race before `003` | `db push` + redeploy `publish-event`; delete duplicate message manually |
 
 ---
 

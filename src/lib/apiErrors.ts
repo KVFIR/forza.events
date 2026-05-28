@@ -30,6 +30,8 @@ const API_I18N_KEYS: Partial<Record<ApiErrorCode, string>> = {
   [API_ERROR_CODES.NOT_DRAFT]: 'errors.notDraft',
   [API_ERROR_CODES.INVALID_RESPONSE]: 'errors.invalidResponse',
   [API_ERROR_CODES.RESULTS_PARTICIPANTS_ONLY]: 'errors.resultsParticipantsOnly',
+  [API_ERROR_CODES.PUBLISH_IN_PROGRESS]: 'errors.publishInProgress',
+  [API_ERROR_CODES.RESULTS_ALREADY_SUBMITTED]: 'errors.resultsAlreadySubmitted',
 };
 
 export class ApiRequestError extends Error {

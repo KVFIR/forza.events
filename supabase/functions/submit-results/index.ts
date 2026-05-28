@@ -7,6 +7,7 @@ import {verifyDiscordToken} from '../_shared/discord.ts';
 import {eventHasStarted} from '../_shared/eventSpec.ts';
 import {validateResultSubmitRow} from '../_shared/eventResults.ts';
 import {allowedResultDiscordIds} from '../_shared/resultsRoster.ts';
+import {responseForRpcError} from '../_shared/rpcErrors.ts';
 import {rateLimitMutation} from '../_shared/rateLimitPresets.ts';
 import {adminClient} from '../_shared/supabase.ts';
 
@@ -55,16 +56,7 @@ serve(async (req) => {
       return jsonResponse({error: 'Event has not started yet'}, 400, req);
     }
     if (['completed', 'cancelled', 'archived'].includes(event.status)) {
-      return jsonResponse({error: 'Results are already final for this event'}, 409, req);
-    }
-
-    const {count: existingCount} = await supabase
-      .from('event_results')
-      .select('id', {count: 'exact', head: true})
-      .eq('event_id', eventId);
-
-    if ((existingCount ?? 0) > 0) {
-      return jsonResponse({error: 'Results cannot be changed after submission'}, 409, req);
+      return appErrorResponse(req, 409, API_ERROR_CODES.RESULTS_ALREADY_SUBMITTED);
     }
 
     const {data: participants} = await supabase
@@ -90,18 +82,21 @@ serve(async (req) => {
     }
 
     const rows = results.map((r) => ({
-      event_id: eventId,
       discord_id: r.discord_id,
       position: r.position,
       dnf: r.dnf ?? false,
       dns: r.dns ?? false,
-      points: null,
     }));
 
-    const {error: insError} = await supabase.from('event_results').insert(rows);
-    if (insError) return jsonResponse({error: insError.message}, 500, req);
+    const {error: rpcError} = await supabase.rpc('submit_event_results', {
+      p_event_id: eventId,
+      p_host_discord_id: discordUser.id,
+      p_results: rows,
+    });
 
-    await supabase.from('events').update({status: 'completed'}).eq('id', eventId);
+    if (rpcError) {
+      return responseForRpcError(req, rpcError);
+    }
 
     const embedSync = await syncPublishedEmbedByEventId(supabase, eventId);
     if (!embedSync.ok) {

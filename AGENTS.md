@@ -106,11 +106,13 @@ Lessons from implementation work (keep in sync when behavior changes).
 - **Cars catalog:** `save-event` resolves cars by id/lookup only — no client-driven inserts into `cars`.
 - **Results:** `submit-results` requires `discord_id` in `event_participants`.
 - After publish, `assertTargetNotLocked` blocks changing `guild_id` and `channel_id` on save.
-- **Anon PostgREST reads (baseline RLS):** `users` / `event_participants` / `event_results` only for non-draft events the row is tied to — not full-table scraping.
+- **Anon PostgREST reads (baseline RLS + `003_security_publish_results`):** `users` / `event_participants` / `event_results` / `event_cars` only for non-draft events (or tied rows) — not full-table scraping.
+- **Publish lock:** `events.publish_started_at` — `publish-event` claims before Discord POST, finalizes atomically, deletes orphan message on DB failure; stale lock reclaims after 5 min (`_shared/publishLock.ts`).
+- **Results atomicity:** `submit_event_results` RPC (Postgres transaction) — `submit-results` validates in Edge then calls RPC.
 - **CORS:** Edge Functions use `corsHeadersFor(req)` — reflect allowlisted origins (`APP_ORIGIN`, localhost dev ports, `*.discordsays.com`, `*.discord.com`, optional `ALLOWED_CORS_ORIGINS`); no `Access-Control-Allow-Origin: *`.
 - **Rate limits:** `check_api_rate_limit` RPC (Postgres, global) via `enforceRateLimit` / `rateLimitPresets.ts` on browse + auth + mutations; in-memory fallback if RPC fails.
 - **SPA:** CSP + `frame-ancestors` for Discord embed in `index.html`; `npm overrides` pins `esbuild` ≥ 0.25.
-- Deploy **`upload-cover`** with other functions (`npm run deploy:functions`). Schema is a single baseline migration — `supabase db push` after linking the project.
+- Deploy **`upload-cover`** with other functions (`npm run deploy:functions`). Apply migrations with `supabase db push` after linking the project (`001_baseline`, `002_event_tracks_jsonb`, `003_security_publish_results`, `004_rpc_submit_hardening`).
 - **Docs:** keep [`docs/STATUS.md`](docs/STATUS.md), [`docs/DEVELOPMENT.md`](docs/DEVELOPMENT.md), [`supabase/README.md`](supabase/README.md) in sync when migrations or function list changes.
 
 ## CI / tests
