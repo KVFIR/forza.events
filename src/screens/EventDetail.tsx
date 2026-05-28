@@ -55,7 +55,7 @@ import {useAuth} from '../context/AuthContext';
 import {useEventLiveUpdates} from '../hooks/useEventLiveUpdates';
 import {useResolveEventDisplayStatus} from '../hooks/useResolveEventDisplayStatus';
 import {formatCarDisplayName} from '../lib/carDisplay';
-import {piToClass} from '../lib/pi';
+import {piClassColor, piToClass} from '../lib/pi';
 import {formatLobbyCount, LOBBY_TOTAL_PLAYERS} from '../lib/constants';
 import {resolveOrganiserLabel} from '../lib/organiser';
 import {resolveConvoyLeader, resolveRegisteredDrivers} from '../lib/eventRoster';
@@ -63,16 +63,6 @@ import {participationButtonLabel, participationButtonVariant} from '../lib/event
 import {mergeOptimisticEventPatch} from '../lib/eventParticipation';
 import {gamertagError, hasGamertag} from '../lib/gamertag';
 import {cn} from '../lib/cn';
-
-const piClassColor: Record<string, string> = {
-  D: 'text-slate-400',
-  C: 'text-yellow-400/90',
-  B: 'text-orange-400/90',
-  A: 'text-red-400/90',
-  S1: 'text-violet-400/90',
-  S2: 'text-fuchsia-400/90',
-  R: 'text-amber-400/90',
-};
 
 const carRuleRowClass =
   'grid grid-cols-[minmax(0,1fr)_3.5rem] items-center gap-x-3 text-sm leading-tight';
@@ -197,18 +187,13 @@ export function EventDetail() {
       return;
     }
 
-    const eventId = event.id;
     setLeaving(true);
     setJoinError(null);
     participationInFlightRef.current = true;
     try {
       await leaveParticipation(event);
-      const next = await fetchEventById(eventId, {discordToken});
-      setEvent(next ?? undefined);
     } catch (err) {
       setJoinError(err instanceof Error ? err.message : t('eventDetail.leaveFailed'));
-      const next = await fetchEventById(eventId, {discordToken});
-      setEvent(next ?? undefined);
     } finally {
       participationInFlightRef.current = false;
       setLeaving(false);
@@ -279,12 +264,8 @@ export function EventDetail() {
     participationInFlightRef.current = true;
     try {
       await joinParticipation(event, trimmed);
-      const next = await fetchEventById(event.id, {discordToken});
-      setEvent(next ?? undefined);
     } catch (err) {
       setJoinError(err instanceof Error ? err.message : t('eventDetail.joinFailed'));
-      const next = await fetchEventById(event.id, {discordToken});
-      setEvent(next ?? undefined);
     } finally {
       participationInFlightRef.current = false;
       setJoining(false);

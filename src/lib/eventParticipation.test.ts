@@ -37,6 +37,59 @@ describe('patchEventAfterSelfLeave', () => {
     const next = patchEventAfterSelfLeave(base, 'unknown');
     expect(next).toBe(base);
   });
+
+  it('removes host_assigned row and decrements lobby count', () => {
+    const assigned = {
+      ...base,
+      currentPlayers: 2,
+      participants: [
+        {
+          discordId: 'u1',
+          username: 'A',
+          gamertag: 'GT1',
+          participationSource: 'host_assigned' as const,
+          isConvoyLeader: true,
+        },
+        {discordId: 'u2', username: 'B', gamertag: 'GT2', participationSource: 'self_join' as const},
+      ],
+    };
+    const next = patchEventAfterSelfLeave(assigned, 'u1');
+    expect(next.participants.map((p) => p.discordId)).toEqual(['u2']);
+    expect(next.currentPlayers).toBe(1);
+  });
+
+  it('removes host_self_assigned row and decrements lobby count', () => {
+    const hostLeader = {
+      ...base,
+      currentPlayers: 1,
+      participants: [
+        {
+          discordId: 'host',
+          username: 'Host',
+          gamertag: 'HostGT',
+          participationSource: 'host_self_assigned' as const,
+          isConvoyLeader: true,
+        },
+      ],
+    };
+    const next = patchEventAfterSelfLeave(hostLeader, 'host');
+    expect(next.participants).toHaveLength(0);
+    expect(next.currentPlayers).toBe(0);
+  });
+
+  it('removes row without participationSource and decrements lobby count', () => {
+    const legacy = {
+      ...base,
+      currentPlayers: 2,
+      participants: [
+        {discordId: 'u1', username: 'A', gamertag: 'GT1'},
+        {discordId: 'u2', username: 'B', gamertag: 'GT2', participationSource: 'self_join' as const},
+      ],
+    };
+    const next = patchEventAfterSelfLeave(legacy, 'u1');
+    expect(next.participants).toHaveLength(1);
+    expect(next.currentPlayers).toBe(1);
+  });
 });
 
 describe('patchEventAfterSelfJoin', () => {
