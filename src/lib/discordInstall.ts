@@ -15,6 +15,15 @@ export const BOT_INSTALL_PERMISSIONS = 346112;
  *
  * In Discord Developer Portal → Bot, keep **Requires OAuth2 Code Grant** disabled.
  */
+/** OAuth URL to add the Discord app (Activity) — shown on the browser-only gate. */
+export function buildDiscordAppAddUrl(): string | null {
+  const clientId = import.meta.env.VITE_DISCORD_CLIENT_ID as string | undefined;
+  if (!clientId?.trim()) return null;
+
+  const params = new URLSearchParams({client_id: clientId.trim()});
+  return `https://discord.com/oauth2/authorize?${params.toString()}`;
+}
+
 export function buildBotInstallUrl(options?: {guildId?: string}): string | null {
   const clientId = import.meta.env.VITE_DISCORD_CLIENT_ID as string | undefined;
   if (!clientId?.trim()) return null;

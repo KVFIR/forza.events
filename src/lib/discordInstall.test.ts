@@ -1,5 +1,23 @@
 import {afterEach, describe, expect, it, vi} from 'vitest';
-import {BOT_INSTALL_PERMISSIONS, buildBotInstallUrl} from './discordInstall';
+import {BOT_INSTALL_PERMISSIONS, buildBotInstallUrl, buildDiscordAppAddUrl} from './discordInstall';
+
+describe('buildDiscordAppAddUrl', () => {
+  afterEach(() => {
+    vi.unstubAllEnvs();
+  });
+
+  it('returns null without client id', () => {
+    vi.stubEnv('VITE_DISCORD_CLIENT_ID', '');
+    expect(buildDiscordAppAddUrl()).toBeNull();
+  });
+
+  it('builds app add URL with client id only', () => {
+    vi.stubEnv('VITE_DISCORD_CLIENT_ID', '1093188765851328563');
+    expect(buildDiscordAppAddUrl()).toBe(
+      'https://discord.com/oauth2/authorize?client_id=1093188765851328563',
+    );
+  });
+});
 
 describe('buildBotInstallUrl', () => {
   afterEach(() => {

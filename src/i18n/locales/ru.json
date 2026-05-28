@@ -46,8 +46,9 @@
     "refreshing": "Обновление"
   },
   "discordGate": {
-    "title": "Откройте в Discord",
-    "body": "Эта сборка — Discord Activity. Запускайте её из App Launcher или голосового канала сервера, а не из обычной вкладки браузера.",
+    "title": "В браузере пока недоступно",
+    "body": "Forza Events работает как Discord Activity. Добавьте приложение в Discord и откройте его из App Launcher или голосового канала сервера.",
+    "addInDiscord": "Добавить в Discord",
     "legal": "Условия использования · Политика конфиденциальности"
   },
   "legal": {

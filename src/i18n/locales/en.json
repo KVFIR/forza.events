@@ -46,8 +46,9 @@
     "refreshing": "Refreshing"
   },
   "discordGate": {
-    "title": "Open in Discord",
-    "body": "This build is a Discord Activity. Launch it from the App Launcher or a server voice channel — not from a regular browser tab.",
+    "title": "Not available in the browser yet",
+    "body": "Forza Events runs as a Discord Activity. Add the app in Discord, then open it from the App Launcher or a server voice channel.",
+    "addInDiscord": "Add in Discord",
     "legal": "Terms of Service · Privacy Policy"
   },
   "legal": {
