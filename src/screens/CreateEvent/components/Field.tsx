@@ -31,7 +31,7 @@ export function Field({
   const {t} = useTranslation();
   const errorId = error && htmlFor ? `${htmlFor}-error` : undefined;
   return (
-    <div className={className}>
+    <div className={cn('min-w-0', className)}>
       <div className="mb-1.5 flex items-baseline justify-between gap-2">
         <label htmlFor={htmlFor} className={fieldLabelClass}>
           {title}
@@ -42,7 +42,7 @@ export function Field({
           </span>
         ) : null}
       </div>
-      {children}
+      <div className="min-w-0">{children}</div>
       {hint && !error && <p className={fieldHintClass}>{hint}</p>}
       {error && (
         <p id={errorId} role="alert" className={fieldErrorClass}>
@@ -63,7 +63,7 @@ export function FormSection({
   className?: string;
 }) {
   return (
-    <section className={cn(formSectionPanelClass, 'px-4 py-4', className)}>
+    <section className={cn(formSectionPanelClass, 'min-w-0 px-4 py-4', className)}>
       {title ? <h2 className={cn(formSectionTitleClass, 'mb-4')}>{title}</h2> : null}
       <div className="space-y-5">{children}</div>
     </section>

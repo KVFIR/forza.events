@@ -40,6 +40,7 @@ export function SegmentGroup<T extends string>({
     <div
       className={cn(
         segmentContainerClass,
+        'min-w-0 w-full',
         layout === 'grid' && 'grid gap-1',
         layout === 'flex' && 'flex',
         containerClassName,
@@ -58,6 +59,7 @@ export function SegmentGroup<T extends string>({
             onClick={() => onChange(opt.value)}
             className={cn(
               segmentItemBaseClass,
+              layout === 'grid' && 'min-w-0',
               layout === 'flex' && 'flex-1',
               itemClassName,
               selected

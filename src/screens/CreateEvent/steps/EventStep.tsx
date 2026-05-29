@@ -143,7 +143,7 @@ export function EventStep({
 
         <Field title={t('create.coverImage')} error={fieldErrors.cover} optional>
           <label className={fileUploadLabelClass}>
-            <span>
+            <span className="min-w-0 truncate">
               {values.coverFile
                 ? values.coverFile.name
                 : t('create.coverChooseFile', {maxMb: COVER_SOURCE_MAX_MB})}

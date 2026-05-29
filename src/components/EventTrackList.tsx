@@ -9,6 +9,7 @@ import {Button} from './ui/Button';
 import {FieldLabel} from './ui/FieldLabel';
 import {Panel} from './ui/Panel';
 import {useCollapseAllOnLoad} from '../hooks/useCollapseAllOnLoad';
+import {mobileFormControlClass} from './ui/formStyles';
 
 type Props = {
   tracks: EventTrack[];
@@ -18,8 +19,6 @@ type Props = {
   /** When set (edit flow), collapse all cards once after tracks load. */
   collapseAllKey?: string | null;
 };
-
-const mobileInputClass = 'text-base sm:text-sm';
 
 function syncRowIds(idsRef: MutableRefObject<string[]>, length: number) {
   while (idsRef.current.length < length) {
@@ -130,7 +129,7 @@ export function EventTrackList({
             placeholder={t('create.addTrackPlaceholder')}
             disabled={atLimit}
             maxLength={TRACK_NAME_MAX}
-            className={cn(inputClass, mobileInputClass, 'mt-0 min-w-0 flex-1')}
+            className={cn(inputClass, mobileFormControlClass, 'mt-0 min-w-0 flex-1')}
           />
           <Button
             type="button"
@@ -231,7 +230,7 @@ export function EventTrackList({
                           onChange={(shareCode) =>
                             updateAt(index, {shareCode: shareCode || null})
                           }
-                          className={cn(inputClass, mobileInputClass)}
+                          className={cn(inputClass, mobileFormControlClass)}
                         />
                       </div>
                       <div>
@@ -242,7 +241,7 @@ export function EventTrackList({
                           onChange={(e) => updateAt(index, {format: e.target.value || null})}
                           placeholder={t('create.trackFormatPlaceholder')}
                           enterKeyHint="done"
-                          className={cn(inputClass, mobileInputClass)}
+                          className={cn(inputClass, mobileFormControlClass)}
                           maxLength={100}
                         />
                       </div>

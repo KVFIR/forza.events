@@ -72,6 +72,36 @@
     background-color: #0e1020;
     color: #e2e8f0;
   }
+
+  /*
+   * Mobile WebKit date/time pickers have a large intrinsic min-width.
+   * Tailwind min-w-0 on inputs/Field is not enough — also target ::-webkit-datetime-edit.
+   */
+  input[type='date'],
+  input[type='datetime-local'],
+  input[type='time'],
+  input[type='month'],
+  input[type='week'] {
+    display: block;
+    max-width: 100%;
+    min-width: 0;
+  }
+
+  input[type='date']::-webkit-datetime-edit,
+  input[type='time']::-webkit-datetime-edit,
+  input[type='month']::-webkit-datetime-edit,
+  input[type='week']::-webkit-datetime-edit {
+    min-width: 0;
+  }
+
+  input[type='datetime-local']::-webkit-datetime-edit {
+    min-width: 0;
+    overflow: hidden;
+  }
+
+  input[type='datetime-local']::-webkit-datetime-edit-fields-wrapper {
+    min-width: 0;
+  }
 }
 
 @layer utilities {

@@ -170,6 +170,8 @@ Implementation: **`src/screens/CreateEvent/index.tsx`** only — do not add `Cre
 Steps: Basics → Details → Target → Review  
 Validation: `validation.ts`, `src/lib/eventSpec.ts`
 
+**Mobile layout:** On a narrow viewport (~320px), Create → Basics: the `datetime-local` field must not cause horizontal page scroll; event-type segment labels should stay readable in EN and RU (`SegmentGroup` grid + `index.css` WebKit picker rules).
+
 ---
 
 ## Commands
@@ -195,6 +197,7 @@ Quick smoke before a PR or local iteration:
 - [ ] Browse lists events (seed or real data)
 - [ ] Sign in → Sign out
 - [ ] Create draft → My Events
+- [ ] Create Event (narrow ~320px): no horizontal scroll on date/time; event type segments readable (EN + RU)
 - [ ] Upload cover → image on card/detail
 - [ ] Join / leave (signed in, non-host event)
 

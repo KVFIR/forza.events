@@ -38,7 +38,7 @@ export function MaxPiInput({value, onChange, id, error, className, inputClass}: 
   }
 
   return (
-    <div className={cn('flex', className)}>
+    <div className={cn('flex min-w-0', className)}>
       <span
         className={cn(
           'flex w-11 shrink-0 items-center justify-center rounded-l-lg border border-r-0 border-white/[0.08] bg-white/[0.06] text-sm font-black tabular-nums',
@@ -58,7 +58,7 @@ export function MaxPiInput({value, onChange, id, error, className, inputClass}: 
         title={t('validation.piRange', range)}
         className={cn(
           inputClass,
-          'rounded-l-none',
+          'min-w-0 flex-1 rounded-l-none',
           error && 'border-red-500/50 focus:border-red-400/60',
         )}
         value={draft}

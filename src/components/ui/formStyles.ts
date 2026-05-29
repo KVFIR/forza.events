@@ -35,10 +35,30 @@ export const inputClass = [
   controlClass,
   controlFocusClass,
   controlPlaceholderClass,
+  /** Flex/grid shrink; pair with `index.css` WebKit rules for native date/time pickers. */
+  'min-w-0 max-w-full',
 ].join(' ');
 
+/** 16px on small screens avoids iOS focus zoom; `sm:` restores compact form typography. */
+export const mobileFormControlClass = 'text-base sm:text-sm';
+
+/** Native date/time pickers via `<Input />` — same mobile sizing as track/car fields. */
+export const nativePickerInputClass = mobileFormControlClass;
+
+const NATIVE_PICKER_INPUT_TYPES = new Set([
+  'date',
+  'datetime-local',
+  'time',
+  'month',
+  'week',
+]);
+
+export function isNativePickerInputType(type: string | undefined): boolean {
+  return type != null && NATIVE_PICKER_INPUT_TYPES.has(type);
+}
+
 /** Native &lt;select&gt; in forms (publish target, channel picker). */
-export const selectClass = [controlClass, controlFocusClass].join(' ');
+export const selectClass = [controlClass, controlFocusClass, 'min-w-0 max-w-full'].join(' ');
 
 /** Compact filter/sort controls in list headers (Browse, My Events). */
 export const selectMetaClass = [
@@ -79,7 +99,7 @@ export const statusPillClass =
   'inline-flex items-center gap-1.5 rounded-full border border-white/10 bg-white/[0.04] px-2.5 py-1';
 
 export const fileUploadLabelClass =
-  'flex cursor-pointer items-center gap-3 rounded-lg border border-dashed border-white/[0.1] px-4 py-3 text-sm text-muted transition-colors hover:border-white/20 hover:text-slate-300';
+  'flex min-w-0 cursor-pointer items-center gap-3 rounded-lg border border-dashed border-white/[0.1] px-4 py-3 text-sm text-muted transition-colors hover:border-white/20 hover:text-slate-300';
 
 export const toggleRowClass =
   'flex cursor-pointer items-center justify-between rounded-lg border border-white/[0.08] bg-white/[0.03] px-3.5 py-2.5';
