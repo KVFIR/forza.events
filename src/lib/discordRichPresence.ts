@@ -1,8 +1,9 @@
-import {LOBBY_TOTAL_PLAYERS} from './constants';
+import {formatLobbyCount, LOBBY_TOTAL_PLAYERS} from './constants';
 import {resolveEventCoverAbsolute} from './eventCovers';
 import {
   eventHasStarted,
   isEventFinalized,
+  isPublishedToDiscord,
   resolveEventDisplayStatus,
 } from './eventSpec';
 import {eventTypeLabelEn, normalizeEventType} from './eventTypes';
@@ -198,20 +199,46 @@ function eventRichPresenceAssets(
 export function buildResultsRichPresence(event: ForzaEvent): RichPresenceActivity {
   const title = truncateRichPresenceField(event.title || 'Event');
   const origin = richPresenceAssetOrigin();
+  const state = withEventLobbyCount(rp('submittingResults'), event);
   return withSessionTimestamp({
     type: RICH_PRESENCE_ACTIVITY_TYPE,
     details: title,
-    state: rp('submittingResults'),
-    party: publishedPartySize(event),
+    state,
+    party: eventLobbyParty(event),
     assets: eventRichPresenceAssets(event, origin),
   });
 }
 
-function publishedPartySize(
-  event: Pick<ForzaEvent, 'currentPlayers' | 'maxPlayers' | 'discordMessageId'>,
+function eventLobbyMaxPlayers(event: Pick<ForzaEvent, 'maxPlayers'>): number {
+  return event.maxPlayers > 0 ? event.maxPlayers : LOBBY_TOTAL_PLAYERS;
+}
+
+function eventShowsLobbyCount(event: Pick<ForzaEvent, 'discordMessageId'>): boolean {
+  return isPublishedToDiscord(event);
+}
+
+/** Exported for unit tests. */
+export function formatEventLobbyPresenceCount(
+  event: Pick<ForzaEvent, 'currentPlayers' | 'maxPlayers'>,
+): string {
+  return formatLobbyCount(event.currentPlayers, eventLobbyMaxPlayers(event));
+}
+
+function withEventLobbyCount(
+  state: string,
+  event: Pick<ForzaEvent, 'discordMessageId' | 'currentPlayers' | 'maxPlayers'>,
+): string {
+  if (!eventShowsLobbyCount(event)) return state;
+  return truncateRichPresenceField(
+    `${state} · ${formatEventLobbyPresenceCount(event)}`,
+  );
+}
+
+function eventLobbyParty(
+  event: Pick<ForzaEvent, 'discordMessageId' | 'currentPlayers' | 'maxPlayers'>,
 ): RichPresenceActivity['party'] {
-  if (!event.discordMessageId?.trim()) return null;
-  const max = event.maxPlayers > 0 ? event.maxPlayers : LOBBY_TOTAL_PLAYERS;
+  if (!eventShowsLobbyCount(event)) return null;
+  const max = eventLobbyMaxPlayers(event);
   return {size: [Math.max(0, event.currentPlayers), max]};
 }
 
@@ -246,15 +273,16 @@ export function buildEventRichPresence(
   const displayStatus = context.displayStatus ?? resolveEventDisplayStatus(event);
   const origin = richPresenceAssetOrigin();
   const title = truncateRichPresenceField(event.title || 'Event');
-  const state = truncateRichPresenceField(
+  const state = withEventLobbyCount(
     eventPresenceState(event, context.role, displayStatus),
+    event,
   );
 
   return withSessionTimestamp({
     type: RICH_PRESENCE_ACTIVITY_TYPE,
     details: title,
     state,
-    party: publishedPartySize(event),
+    party: eventLobbyParty(event),
     assets: eventRichPresenceAssets(event, origin),
   });
 }

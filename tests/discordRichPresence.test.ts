@@ -1,10 +1,12 @@
 import {describe, expect, it, vi, beforeEach, afterEach} from 'vitest';
+import * as eventTypes from '../src/lib/eventTypes';
 import {
   buildCreateRichPresence,
   buildEventRichPresence,
   buildResultsRichPresence,
   buildRouteRichPresence,
   eventPresenceState,
+  formatEventLobbyPresenceCount,
   mergeRichPresence,
   resetRichPresenceSession,
   richPresenceAssetOrigin,
@@ -87,26 +89,38 @@ describe('discordRichPresence', () => {
     expect(activity.state).toBe('Preparing a race (draft)');
   });
 
-  it('builds results presence with title and party', () => {
+  it('builds results presence with title, state lobby count, and party', () => {
     const activity = buildResultsRichPresence(publishedEvent({title: 'Final GP'}));
     expect(activity.details).toBe('Final GP');
-    expect(activity.state).toBe('Submitting results');
+    expect(activity.state).toBe('Submitting results · 4/12');
     expect(activity.party?.size).toEqual([4, 12]);
   });
 
-  it('omits party for unpublished draft events', () => {
+  it('omits lobby count for draft events', () => {
     const draft = publishedEvent({lifecycle: 'draft', discordMessageId: ''});
     const activity = buildEventRichPresence(draft, {role: 'host'});
+    expect(activity.state).toBe('Preparing a race (draft)');
     expect(activity.party).toBeNull();
   });
 
-  it('builds host presence without lobby count in state', () => {
+  it('omits lobby count when event was never published to Discord', () => {
+    const unpublished = publishedEvent({lifecycle: 'open', discordMessageId: ''});
+    const activity = buildEventRichPresence(unpublished, {role: 'host'});
+    expect(activity.state).toBe('Hosting');
+    expect(activity.party).toBeNull();
+  });
+
+  it('formats lobby count for presence', () => {
+    expect(formatEventLobbyPresenceCount({currentPlayers: 4, maxPlayers: 12})).toBe('4/12');
+    expect(formatEventLobbyPresenceCount({currentPlayers: 0, maxPlayers: 0})).toBe('0/12');
+  });
+
+  it('builds host presence with lobby count in state and party', () => {
     const activity = buildEventRichPresence(publishedEvent({title: 'Sunset Sprint'}), {
       role: 'host',
     });
     expect(activity.details).toBe('Sunset Sprint');
-    expect(activity.state).toBe('Hosting');
-    expect(activity.state).not.toContain('4/12');
+    expect(activity.state).toBe('Hosting · 4/12');
     expect(activity.party?.size).toEqual([4, 12]);
     expect(activity.assets?.large_text).toBeUndefined();
     expect(activity.assets?.small_text).toBeUndefined();
@@ -117,7 +131,7 @@ describe('discordRichPresence', () => {
     const override = buildEventRichPresence(publishedEvent({title: 'GT4'}), {role: 'host'});
     const merged = mergeRichPresence(route, override);
     expect(merged.details).toBe('GT4');
-    expect(merged.state).toBe('Hosting');
+    expect(merged.state).toBe('Hosting · 4/12');
     expect(merged.assets?.large_text).toBeUndefined();
     expect(merged.assets?.large_image).toContain('cover-road');
     expect(merged.assets?.small_text).toBeUndefined();
@@ -129,9 +143,9 @@ describe('discordRichPresence', () => {
     expect(activity.assets?.large_text).toBeUndefined();
   });
 
-  it('builds joined presence as Registered', () => {
+  it('builds joined presence as Registered with lobby count', () => {
     const activity = buildEventRichPresence(publishedEvent(), {role: 'joined'});
-    expect(activity.state).toBe('Registered');
+    expect(activity.state).toBe('Registered · 4/12');
   });
 
   it('shows full lobby for viewers when event is full', () => {
@@ -144,7 +158,34 @@ describe('discordRichPresence', () => {
       }),
       {role: 'viewing', displayStatus: 'full'},
     );
-    expect(activity.state).toBe('Lobby full');
+    expect(activity.state).toBe('Lobby full · 12/12');
+  });
+
+  it('shows lobby count for live, cancelled, and completed events', () => {
+    const live = publishedEvent({
+      startsAt: new Date(Date.now() - 60_000).toISOString(),
+      status: 'live',
+      lifecycle: 'live',
+    });
+    expect(
+      buildEventRichPresence(live, {role: 'viewing', displayStatus: 'live'}).state,
+    ).toBe('Race in progress · 4/12');
+
+    expect(
+      buildEventRichPresence(publishedEvent({lifecycle: 'cancelled'}), {role: 'host'}).state,
+    ).toBe('Cancelled · 4/12');
+
+    expect(
+      buildEventRichPresence(publishedEvent({lifecycle: 'completed'}), {role: 'joined'}).state,
+    ).toBe('Finished · 4/12');
+  });
+
+  it('truncates combined state and lobby count at 128 chars', () => {
+    vi.spyOn(eventTypes, 'eventTypeLabelEn').mockReturnValue('A'.repeat(120));
+    const activity = buildEventRichPresence(publishedEvent(), {role: 'viewing'});
+    expect(activity.state).toHaveLength(128);
+    expect(activity.state!.endsWith('…')).toBe(true);
+    vi.restoreAllMocks();
   });
 
   it('prefers cancelled over hosting in eventPresenceState', () => {

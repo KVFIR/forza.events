@@ -1,4 +1,4 @@
-import {useEffect, useState} from 'react';
+import {useEffect, useMemo, useState} from 'react';
 import {useTranslation} from 'react-i18next';
 import {busyLabel} from '../i18n/busyLabels';
 import {useNavigate, useParams} from 'react-router-dom';
@@ -7,6 +7,7 @@ import {useAuth} from '../context/AuthContext';
 import {useRichPresenceOverride} from '../context/DiscordRichPresenceContext';
 import {useJoinedEvents} from '../context/JoinedEventsContext';
 import {buildResultsRichPresence} from '../lib/discordRichPresence';
+import {mergeOptimisticEventPatch} from '../lib/eventParticipation';
 import type {ForzaEvent} from '../lib/types';
 import {isApiConfigured, submitEventResults} from '../lib/api';
 import {buildResultSubmitRows} from '../lib/eventResults';
@@ -57,7 +58,7 @@ export function EventResults() {
   const {id} = useParams<{id: string}>();
   const navigate = useNavigate();
   const {user, getAccessToken, isSignedIn} = useAuth();
-  const {bumpRefresh} = useJoinedEvents();
+  const {bumpRefresh, getLobbyPatch} = useJoinedEvents();
   const [placements, setPlacements] = useState<Placement[]>([]);
   const [loading, setLoading] = useState(true);
   const showLoadingUI = useLoadingUI(loading);
@@ -69,11 +70,16 @@ export function EventResults() {
   const [submitConfirmOpen, setSubmitConfirmOpen] = useState(false);
   const {setRichPresenceOverride} = useRichPresenceOverride();
 
+  const displayEvent = useMemo(
+    () => (event && id ? mergeOptimisticEventPatch(event, getLobbyPatch(id)) : null),
+    [event, id, getLobbyPatch],
+  );
+
   useEffect(() => {
-    if (!event) return;
-    setRichPresenceOverride(buildResultsRichPresence(event));
+    if (!displayEvent) return;
+    setRichPresenceOverride(buildResultsRichPresence(displayEvent));
     return () => setRichPresenceOverride(null);
-  }, [event, setRichPresenceOverride]);
+  }, [displayEvent, setRichPresenceOverride]);
 
   useEffect(() => {
     if (!id) return;

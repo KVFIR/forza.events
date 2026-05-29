@@ -116,7 +116,7 @@ export function isBrowseFeedEvent(event: ForzaEvent): boolean {
 }
 
 /** True once publish-event has posted the Discord announcement embed. */
-export function isPublishedToDiscord(event: ForzaEvent): boolean {
+export function isPublishedToDiscord(event: Pick<ForzaEvent, 'discordMessageId'>): boolean {
   return Boolean(event.discordMessageId?.trim());
 }
 
