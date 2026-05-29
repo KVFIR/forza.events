@@ -11,7 +11,7 @@ Remaining work is mostly **Discord portal validation in real guilds**, **Railway
 | Layer | State |
 |-------|--------|
 | React Activity (UI) | Done — Browse, Detail, Create (wizard), My Events, Profile, i18n (EN + RU) |
-| Supabase schema | Done — `001_baseline.sql` |
+| Supabase schema | Done — `001_baseline` + `002`–`004` security migrations |
 | Edge Functions | Done — 15 functions ([`supabase/README.md`](../supabase/README.md)) |
 | Security hardening | Done — storage, RLS scope, CORS, rate limits, publish validation |
 | Local browser dev | Done — Discord OAuth + Supabase (not mock mode) |

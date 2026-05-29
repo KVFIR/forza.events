@@ -1,23 +1,8 @@
 import {adminClient} from './supabase.ts';
 
-const buckets = new Map<string, {count: number; resetAt: number}>();
-
-/** In-memory fallback when Postgres rate limit is unavailable. */
-function rateLimitMemory(key: string, maxRequests: number, windowMs: number): boolean {
-  const now = Date.now();
-  const entry = buckets.get(key);
-  if (!entry || now >= entry.resetAt) {
-    buckets.set(key, {count: 1, resetAt: now + windowMs});
-    return true;
-  }
-  if (entry.count >= maxRequests) return false;
-  entry.count += 1;
-  return true;
-}
-
 /**
  * Global rate limit via Postgres (`check_api_rate_limit` RPC).
- * Falls back to per-isolate memory on error.
+ * Fail-closed: deny when RPC is unavailable (no per-isolate memory fallback).
  */
 export async function enforceRateLimit(
   key: string,
@@ -32,19 +17,20 @@ export async function enforceRateLimit(
       p_window_seconds: windowSeconds,
     });
     if (error) {
-      console.error('enforceRateLimit rpc', error);
-      return rateLimitMemory(key, maxRequests, windowSeconds * 1000);
+      console.error(JSON.stringify({msg: 'enforceRateLimit rpc failed', key, detail: error.message}));
+      return false;
     }
     return data === true;
   } catch (e) {
-    console.error('enforceRateLimit', e);
-    return rateLimitMemory(key, maxRequests, windowSeconds * 1000);
+    console.error(
+      JSON.stringify({
+        msg: 'enforceRateLimit failed',
+        key,
+        error: e instanceof Error ? e.message : String(e),
+      }),
+    );
+    return false;
   }
-}
-
-/** @deprecated Use enforceRateLimit */
-export function rateLimit(key: string, maxRequests: number, windowMs: number): boolean {
-  return rateLimitMemory(key, maxRequests, windowMs);
 }
 
 export async function rateLimitOr429(

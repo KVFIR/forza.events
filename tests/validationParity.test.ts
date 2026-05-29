@@ -1,12 +1,20 @@
 import {describe, expect, it} from 'vitest';
 import {validateDraftForm, validatePublishForm} from '../src/lib/eventSpec';
+import {API_ERROR_CODE_LIST} from '../src/lib/apiErrorCodes';
 import {VALIDATION_CODES, VALIDATION_CODE_LIST} from '../src/lib/validationCodes';
+import {API_ERROR_CODE_LIST as EDGE_API_ERROR_CODES} from '@edge/apiErrorCodes.ts';
 import {validateDraft, validatePublishReady} from '@edge/eventSpec.ts';
 import {VALIDATION_CODE_LIST as EDGE_VALIDATION_CODES} from '@edge/validationCodes.ts';
 
 describe('validation codes sync', () => {
   it('client and Edge lists match', () => {
     expect([...EDGE_VALIDATION_CODES].sort()).toEqual([...VALIDATION_CODE_LIST].sort());
+  });
+});
+
+describe('API error codes sync', () => {
+  it('client and Edge lists match', () => {
+    expect([...EDGE_API_ERROR_CODES].sort()).toEqual([...API_ERROR_CODE_LIST].sort());
   });
 });
 

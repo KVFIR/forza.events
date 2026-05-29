@@ -199,7 +199,7 @@ export async function assertTargetNotLocked(
     return VALIDATION_CODES.TARGET_GUILD_LOCKED;
   }
   if (
-    body.channel_id !== undefined &&
+    body.channel_id != null &&
     existing.channel_id &&
     body.channel_id.trim() !== existing.channel_id
   ) {

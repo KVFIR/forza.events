@@ -1,5 +1,5 @@
 import {serve} from 'https://deno.land/std@0.224.0/http/server.ts';
-import {internalErrorResponse} from '../_shared/apiResponse.ts';
+import {databaseErrorResponse, internalErrorResponse} from '../_shared/apiResponse.ts';
 import {jsonResponse, optionsResponse} from '../_shared/cors.ts';
 import {verifyDiscordToken} from '../_shared/discord.ts';
 import {rateLimitAuth} from '../_shared/rateLimitPresets.ts';
@@ -46,7 +46,7 @@ serve(async (req) => {
 
     if (error) {
       console.error(JSON.stringify({msg: 'launch-intent lookup failed', detail: error.message}));
-      return jsonResponse({error: error.message}, 500, req);
+      return databaseErrorResponse(req, 'launch-intent lookup', error);
     }
 
     if (!rows?.length) {

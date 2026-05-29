@@ -350,7 +350,9 @@
     "invalidResponse": "Could not reach the server. Try again.",
     "resultsParticipantsOnly": "Results can only include registered participants for this event.",
     "publishInProgress": "This event is already being published. Wait a moment and try again.",
-    "resultsAlreadySubmitted": "Results cannot be changed after submission."
+    "resultsAlreadySubmitted": "Results cannot be changed after submission.",
+    "profileIncomplete": "Complete sign-in before joining events.",
+    "guildMemberSearchDisabled": "Convoy leader search is unavailable. Enable the Server Members intent for the bot in the Discord Developer Portal."
   },
   "validation": {
     "futureDate": "Choose a date and time in the future.",
@@ -368,6 +370,8 @@
     "convoyLeaderRequired": "Convoy leader gamertag is required.",
     "convoyLeaderDiscordRequired": "Choose a convoy leader from your Discord server.",
     "convoyLeaderHandleRequired": "Could not resolve the convoy leader’s Discord username. Pick them again from server search.",
+    "convoyLeaderNotInGuild": "Convoy leader must be a member of the selected Discord server.",
+    "convoyLeaderGuildCheckFailed": "Could not verify convoy leader membership. Try again in a moment.",
     "targetGuildLocked": "Server cannot be changed after publish.",
     "targetChannelLocked": "Channel cannot be changed after publish.",
     "trackNameRequired": "Each track needs a name.",

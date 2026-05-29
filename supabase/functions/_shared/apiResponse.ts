@@ -33,6 +33,10 @@ const API_MESSAGES_EN: Partial<Record<ApiErrorCode, string>> = {
     'This event is already being published. Wait a moment and try again.',
   [API_ERROR_CODES.RESULTS_ALREADY_SUBMITTED]:
     'Results cannot be changed after submission',
+  [API_ERROR_CODES.PROFILE_INCOMPLETE]:
+    'Complete sign-in before joining events.',
+  [API_ERROR_CODES.GUILD_MEMBER_SEARCH_DISABLED]:
+    'Convoy leader search is unavailable. Enable the Server Members intent for the bot in the Discord Developer Portal.',
 };
 
 export function apiErrorMessage(code: ApiErrorCode | ValidationCode, fallback?: string): string {
@@ -53,5 +57,15 @@ export function appErrorResponse(
 
 export function internalErrorResponse(req: Request, e: unknown): Response {
   console.error(e);
+  return appErrorResponse(req, 500, API_ERROR_CODES.INTERNAL);
+}
+
+/** Log Postgres/Supabase details server-side; never return `error.message` to clients. */
+export function databaseErrorResponse(
+  req: Request,
+  context: string,
+  error: {message?: string},
+): Response {
+  console.error(JSON.stringify({msg: context, detail: error.message}));
   return appErrorResponse(req, 500, API_ERROR_CODES.INTERNAL);
 }

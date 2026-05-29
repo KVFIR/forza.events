@@ -356,7 +356,9 @@
     "invalidResponse": "Не удалось связаться с сервером. Попробуйте снова.",
     "resultsParticipantsOnly": "В результатах могут быть только зарегистрированные участники этого события.",
     "publishInProgress": "Событие уже публикуется. Подождите немного и попробуйте снова.",
-    "resultsAlreadySubmitted": "Результаты нельзя изменить после отправки."
+    "resultsAlreadySubmitted": "Результаты нельзя изменить после отправки.",
+    "profileIncomplete": "Завершите вход, прежде чем присоединяться к событиям.",
+    "guildMemberSearchDisabled": "Поиск лидера конвоя недоступен. Включите Server Members intent для бота в Discord Developer Portal."
   },
   "validation": {
     "futureDate": "Укажите дату и время в будущем.",
@@ -374,6 +376,8 @@
     "convoyLeaderRequired": "Укажите gamertag лидера конвоя.",
     "convoyLeaderDiscordRequired": "Выберите лидера конвоя из участников сервера Discord.",
     "convoyLeaderHandleRequired": "Не удалось определить Discord username лидера конвоя. Выберите его снова через поиск по серверу.",
+    "convoyLeaderNotInGuild": "Лидер конвоя должен состоять на выбранном сервере Discord.",
+    "convoyLeaderGuildCheckFailed": "Не удалось проверить участие лидера конвоя на сервере. Попробуйте снова через минуту.",
     "targetGuildLocked": "Сервер нельзя изменить после публикации.",
     "targetChannelLocked": "Канал нельзя изменить после публикации.",
     "trackNameRequired": "У каждой трассы должно быть название.",

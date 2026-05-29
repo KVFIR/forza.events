@@ -32,6 +32,8 @@ const API_I18N_KEYS: Partial<Record<ApiErrorCode, string>> = {
   [API_ERROR_CODES.RESULTS_PARTICIPANTS_ONLY]: 'errors.resultsParticipantsOnly',
   [API_ERROR_CODES.PUBLISH_IN_PROGRESS]: 'errors.publishInProgress',
   [API_ERROR_CODES.RESULTS_ALREADY_SUBMITTED]: 'errors.resultsAlreadySubmitted',
+  [API_ERROR_CODES.PROFILE_INCOMPLETE]: 'errors.profileIncomplete',
+  [API_ERROR_CODES.GUILD_MEMBER_SEARCH_DISABLED]: 'errors.guildMemberSearchDisabled',
 };
 
 export class ApiRequestError extends Error {

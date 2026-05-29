@@ -1,6 +1,6 @@
 import {decodeBase64} from 'https://deno.land/std@0.224.0/encoding/base64.ts';
 import {serve} from 'https://deno.land/std@0.224.0/http/server.ts';
-import {internalErrorResponse} from '../_shared/apiResponse.ts';
+import {databaseErrorResponse, internalErrorResponse} from '../_shared/apiResponse.ts';
 import {jsonResponse, optionsResponse} from '../_shared/cors.ts';
 import {COVER_SOURCE_MAX_BYTES, coverSourceLimitErrorEn} from '../_shared/coverImage.ts';
 import {verifyDiscordToken} from '../_shared/discord.ts';
@@ -70,7 +70,7 @@ serve(async (req) => {
     });
     if (uploadError) {
       console.error('upload-cover', uploadError);
-      return jsonResponse({error: uploadError.message}, 500, req);
+      return databaseErrorResponse(req, 'upload-cover', uploadError);
     }
 
     const {data: urlData} = supabase.storage.from('event-covers').getPublicUrl(path);

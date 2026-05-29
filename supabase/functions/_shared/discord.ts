@@ -119,6 +119,32 @@ export function botHeaders(): HeadersInit {
   return {Authorization: `Bot ${token}`, 'Content-Type': 'application/json'};
 }
 
+/** Bot API: whether `userId` is a member of `guildId` (bot must be in the guild). */
+export async function isUserMemberOfGuild(
+  guildId: string,
+  userId: string,
+): Promise<boolean> {
+  const res = await discordApiFetch(
+    `https://discord.com/api/v10/guilds/${guildId}/members/${userId}`,
+    {headers: botHeaders()},
+  );
+  if (res.status === 404) return false;
+  if (!res.ok) {
+    const text = await res.text();
+    console.error(
+      JSON.stringify({
+        msg: 'isUserMemberOfGuild failed',
+        guildId,
+        userId,
+        status: res.status,
+        body: text.slice(0, 200),
+      }),
+    );
+    throw new Error(discordRateLimitMessage(res.status) ?? `Guild member lookup failed: ${res.status}`);
+  }
+  return true;
+}
+
 export type DiscordGuildSummary = {
   id: string;
   name: string;

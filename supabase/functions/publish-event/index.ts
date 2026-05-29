@@ -1,6 +1,6 @@
 import {serve} from 'https://deno.land/std@0.224.0/http/server.ts';
 import {API_ERROR_CODES} from '../_shared/apiErrorCodes.ts';
-import {appErrorResponse, internalErrorResponse} from '../_shared/apiResponse.ts';
+import {appErrorResponse, databaseErrorResponse, internalErrorResponse} from '../_shared/apiResponse.ts';
 import {jsonResponse, optionsResponse} from '../_shared/cors.ts';
 import {
   deleteChannelMessage,
@@ -12,6 +12,7 @@ import {requireManageGuildAccess, resolveGuildNameForUser} from '../_shared/guil
 import {validatePublishChannelTarget} from '../_shared/publishTarget.ts';
 import {buildEventEmbed, mapEventCarsForEmbed} from '../_shared/events.ts';
 import {validatePublishReady} from '../_shared/eventSpec.ts';
+import {VALIDATION_CODES} from '../_shared/validationCodes.ts';
 import {normalizeGuildName} from '../_shared/guildDisplay.ts';
 import {ensureConvoyLeaderParticipantForEvent} from '../_shared/participantLeader.ts';
 import {buildPublishEventBody} from '../_shared/publishEventBody.ts';
@@ -96,11 +97,7 @@ serve(async (req) => {
       await resolveGuildNameForUser(token!, guild_id),
     );
     if (!resolvedGuildName) {
-      return jsonResponse(
-        {error: 'Choose a Discord server from the list before publishing.'},
-        400,
-        req,
-      );
+      return appErrorResponse(req, 400, VALIDATION_CODES.GUILD_REQUIRED);
     }
 
     const claimed = await claimPublishLock(supabase, event_id, user.id, {
@@ -164,7 +161,11 @@ serve(async (req) => {
     if (refreshErr || !eventForEmbed) {
       await clearPublishLock(supabase, event_id);
       lockedEventId = null;
-      return jsonResponse({error: 'Failed to refresh event after roster sync'}, 500, req);
+      return databaseErrorResponse(
+        req,
+        'publish-event roster refresh',
+        refreshErr ?? {message: 'missing event row'},
+      );
     }
 
     const payload = buildEventEmbed({

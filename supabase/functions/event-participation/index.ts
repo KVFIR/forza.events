@@ -1,6 +1,6 @@
 import {serve} from 'https://deno.land/std@0.224.0/http/server.ts';
 import {API_ERROR_CODES} from '../_shared/apiErrorCodes.ts';
-import {appErrorResponse, internalErrorResponse} from '../_shared/apiResponse.ts';
+import {appErrorResponse, databaseErrorResponse, internalErrorResponse} from '../_shared/apiResponse.ts';
 import {jsonResponse, optionsResponse} from '../_shared/cors.ts';
 import {verifyDiscordToken} from '../_shared/discord.ts';
 import {ensureDiscordUserRow} from '../_shared/discordUserRow.ts';
@@ -28,9 +28,10 @@ function participationError(
     return appErrorResponse(req, 404, API_ERROR_CODES.EVENT_NOT_FOUND);
   }
   if (msg.includes('foreign key') && msg.includes('users')) {
-    return jsonResponse({error: 'Complete sign-in before joining events'}, 400, req);
+    return appErrorResponse(req, 400, API_ERROR_CODES.PROFILE_INCOMPLETE);
   }
-  return jsonResponse({error: msg}, 500, req);
+  console.error(JSON.stringify({msg: 'event-participation db error', detail: msg}));
+  return appErrorResponse(req, 500, API_ERROR_CODES.INTERNAL);
 }
 
 serve(async (req) => {
@@ -133,7 +134,7 @@ serve(async (req) => {
         .from('users')
         .update({xbox_gamertag: tag.gamertag})
         .eq('discord_id', discordUser.id);
-      if (profileErr) return jsonResponse({error: profileErr.message}, 500, req);
+      if (profileErr) return databaseErrorResponse(req, 'event-participation profile', profileErr);
 
       const {data: existing} = await supabase
         .from('event_participants')

@@ -110,7 +110,10 @@ Lessons from implementation work (keep in sync when behavior changes).
 - **Publish lock:** `events.publish_started_at` — `publish-event` claims before Discord POST, finalizes atomically, deletes orphan message on DB failure; stale lock reclaims after 5 min (`_shared/publishLock.ts`).
 - **Results atomicity:** `submit_event_results` RPC (Postgres transaction) — `submit-results` validates in Edge then calls RPC.
 - **CORS:** Edge Functions use `corsHeadersFor(req)` — reflect allowlisted origins (`APP_ORIGIN`, localhost dev ports, `*.discordsays.com`, `*.discord.com`, optional `ALLOWED_CORS_ORIGINS`); no `Access-Control-Allow-Origin: *`.
-- **Rate limits:** `check_api_rate_limit` RPC (Postgres, global) via `enforceRateLimit` / `rateLimitPresets.ts` on browse + auth + mutations; in-memory fallback if RPC fails.
+- **Rate limits:** `check_api_rate_limit` RPC (Postgres, global) via `enforceRateLimit` / `rateLimitPresets.ts` on browse + auth + mutations; **fail-closed** if RPC fails (429, no per-isolate memory fallback).
+- **500 responses:** Edge uses `databaseErrorResponse()` / `internalErrorResponse()` — never raw Postgres `error.message` to clients.
+- **Convoy leader:** non-host leaders must be guild members (`isUserMemberOfGuild` bot API) when `guild_id` is set on save; Discord lookup failures return `CONVOY_LEADER_GUILD_CHECK_FAILED` (not `NOT_IN_GUILD`).
+- **Host drafts:** `host-drafts` / `browse-events?host_drafts` filter `status = draft` only.
 - **SPA:** CSP + `frame-ancestors` for Discord embed in `index.html`; `npm overrides` pins `esbuild` ≥ 0.25.
 - Deploy **`upload-cover`** with other functions (`npm run deploy:functions`). Apply migrations with `supabase db push` after linking the project (`001_baseline`, `002_event_tracks_jsonb`, `003_security_publish_results`, `004_rpc_submit_hardening`).
 - **Docs:** keep [`docs/STATUS.md`](docs/STATUS.md), [`docs/DEVELOPMENT.md`](docs/DEVELOPMENT.md), [`supabase/README.md`](supabase/README.md) in sync when migrations or function list changes.

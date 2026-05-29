@@ -1,5 +1,6 @@
 import {serve} from 'https://deno.land/std@0.224.0/http/server.ts';
-import {internalErrorResponse} from '../_shared/apiResponse.ts';
+import {API_ERROR_CODES} from '../_shared/apiErrorCodes.ts';
+import {appErrorResponse, internalErrorResponse} from '../_shared/apiResponse.ts';
 import {jsonResponse, optionsResponse} from '../_shared/cors.ts';
 import {verifyDiscordToken} from '../_shared/discord.ts';
 import {searchGuildMembers} from '../_shared/guildMembers.ts';
@@ -56,8 +57,17 @@ serve(async (req) => {
     return jsonResponse({members}, 200, req);
   } catch (e) {
     const msg = e instanceof Error ? e.message : String(e);
+    if (msg.includes('Server Members intent')) {
+      console.error(JSON.stringify({msg: 'list-guild-members intent disabled', detail: msg}));
+      return appErrorResponse(req, 503, API_ERROR_CODES.GUILD_MEMBER_SEARCH_DISABLED);
+    }
+    if (msg.includes('429') || msg.toLowerCase().includes('rate limit')) {
+      console.error(JSON.stringify({msg: 'list-guild-members rate limited', detail: msg}));
+      return appErrorResponse(req, 429, API_ERROR_CODES.TOO_MANY_REQUESTS);
+    }
     if (msg.includes('Guild member search')) {
-      return jsonResponse({error: msg}, 503, req);
+      console.error(JSON.stringify({msg: 'list-guild-members search failed', detail: msg}));
+      return appErrorResponse(req, 503, API_ERROR_CODES.INTERNAL);
     }
     return internalErrorResponse(req, e);
   }

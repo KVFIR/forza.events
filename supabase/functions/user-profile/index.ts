@@ -1,5 +1,5 @@
 import {serve} from 'https://deno.land/std@0.224.0/http/server.ts';
-import {internalErrorResponse} from '../_shared/apiResponse.ts';
+import {databaseErrorResponse, internalErrorResponse} from '../_shared/apiResponse.ts';
 import {jsonResponse, optionsResponse} from '../_shared/cors.ts';
 import {avatarUrl, discordUniqueUsername, verifyDiscordToken} from '../_shared/discord.ts';
 import {ensureDiscordUserRow} from '../_shared/discordUserRow.ts';
@@ -44,7 +44,7 @@ serve(async (req) => {
       .select()
       .single();
 
-    if (error) return jsonResponse({error: error.message}, 500, req);
+    if (error) return databaseErrorResponse(req, 'user-profile', error);
 
     return jsonResponse({
       user: {

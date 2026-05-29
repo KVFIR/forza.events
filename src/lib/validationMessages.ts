@@ -12,6 +12,8 @@ const VALIDATION_I18N_KEYS: Record<ValidationCode, string> = {
   CONVOY_LEADER_REQUIRED: 'validation.convoyLeaderRequired',
   CONVOY_LEADER_DISCORD_REQUIRED: 'validation.convoyLeaderDiscordRequired',
   CONVOY_LEADER_HANDLE_REQUIRED: 'validation.convoyLeaderHandleRequired',
+  CONVOY_LEADER_NOT_IN_GUILD: 'validation.convoyLeaderNotInGuild',
+  CONVOY_LEADER_GUILD_CHECK_FAILED: 'validation.convoyLeaderGuildCheckFailed',
   CARS_REQUIRED: 'validation.carsRequired',
   PI_RANGE: 'validation.piRange',
   TARGET_GUILD_LOCKED: 'validation.targetGuildLocked',

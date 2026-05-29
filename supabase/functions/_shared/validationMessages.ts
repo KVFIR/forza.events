@@ -10,10 +10,19 @@ const VALIDATION_MESSAGES_EN: Record<ValidationCode, string> = {
   CHANNEL_REQUIRED: 'Choose a channel before publishing.',
   CONVOY_LEADER_REQUIRED: 'Convoy leader gamertag is required.',
   CONVOY_LEADER_DISCORD_REQUIRED: 'Choose a convoy leader from your Discord server.',
+  CONVOY_LEADER_HANDLE_REQUIRED: 'Convoy leader Discord handle could not be resolved.',
+  CONVOY_LEADER_NOT_IN_GUILD:
+    'Convoy leader must be a member of the selected Discord server.',
+  CONVOY_LEADER_GUILD_CHECK_FAILED:
+    'Could not verify convoy leader membership. Try again in a moment.',
   CARS_REQUIRED: 'Add at least one car for a restricted car list.',
   PI_RANGE: `Set a PI cap from ${piRangeLabelEn()}.`,
   TARGET_GUILD_LOCKED: 'Server cannot be changed after publish.',
   TARGET_CHANNEL_LOCKED: 'Channel cannot be changed after publish.',
+  TRACK_NAME_REQUIRED: 'Each track needs a name.',
+  TRACK_SHARE_CODE_INVALID: 'Share code must be nine digits.',
+  TRACK_FORMAT_TOO_LONG: 'Format is too long (max 100 characters).',
+  TRACKS_TOO_MANY: 'You can add up to 10 tracks.',
 };
 
 export function validationMessageEn(code: ValidationCode): string {

@@ -7,6 +7,7 @@ import {EVENT_PLAYER_SLOTS} from './constants';
 import {resolveEventCoverUrl} from './eventCovers';
 import {parseTracksFromRow} from './eventTracks';
 import {normalizeEventType} from './eventTypes';
+import {isHostDraftLifecycle} from './draftEvents';
 import {isBrowseFeedEvent} from './eventSpec';
 import {PI_MAX} from './pi';
 import type {
@@ -388,8 +389,7 @@ export async function fetchHostDraftEvents(
   try {
     const {data} = await invokeHostDrafts(discordToken);
     const events = (data ?? []).map((row) => mapDbEventWithRelations(row as DbEventRow));
-    const unpublished = events.filter((e) => !e.discordMessageId);
-    return {events: unpublished, error: null};
+    return {events, error: null};
   } catch (err) {
     const message = err instanceof Error ? err.message : String(err);
     console.error('host-drafts', err);
@@ -401,7 +401,7 @@ export async function fetchHostDraftEvents(
     try {
       const fallback = await fetchEventsViaEdge({hostDrafts: true, discordToken});
       if (fallback === null) return {events: [], error: 'fetch_failed'};
-      const events = fallback.filter((e) => !e.discordMessageId);
+      const events = fallback.filter((e) => isHostDraftLifecycle(e.lifecycle));
       return {events, error: null};
     } catch (fallbackErr) {
       console.error('browse-events host_drafts', fallbackErr);

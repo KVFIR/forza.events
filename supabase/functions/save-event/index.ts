@@ -12,7 +12,8 @@ import {
   isPublishedStatus,
   eventHasStarted,
 } from '../_shared/eventSpec.ts';
-import {appErrorResponse, internalErrorResponse} from '../_shared/apiResponse.ts';
+import {API_ERROR_CODES} from '../_shared/apiErrorCodes.ts';
+import {appErrorResponse, databaseErrorResponse, internalErrorResponse} from '../_shared/apiResponse.ts';
 import {jsonResponse, optionsResponse} from '../_shared/cors.ts';
 import {verifyDiscordToken} from '../_shared/discord.ts';
 import {ensureDiscordUserRow} from '../_shared/discordUserRow.ts';
@@ -25,6 +26,7 @@ import {ensureConvoyLeaderParticipantForEvent} from '../_shared/participantLeade
 import {PI_MAX} from '../_shared/pi.ts';
 import {rateLimitMutation} from '../_shared/rateLimitPresets.ts';
 import {adminClient} from '../_shared/supabase.ts';
+import {VALIDATION_CODES} from '../_shared/validationCodes.ts';
 
 const UUID_RE =
   /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
@@ -66,7 +68,7 @@ serve(async (req) => {
         );
       }
       const {error} = await supabase.from('events').delete().eq('id', body.id);
-      if (error) return jsonResponse({error: error.message}, 500, req);
+      if (error) return databaseErrorResponse(req, 'save-event delete', error);
       return jsonResponse({id: body.id, deleted: true}, 200, req);
     }
 
@@ -91,7 +93,7 @@ serve(async (req) => {
         .eq('id', body.id)
         .select('*')
         .single();
-      if (error) return jsonResponse({error: error.message}, 500, req);
+      if (error) return databaseErrorResponse(req, 'save-event cancel', error);
       if (updated?.channel_id && updated.discord_message_id) {
         const embedSync = await syncPublishedEmbed(supabase, updated);
         if (!embedSync.ok) {
@@ -112,27 +114,15 @@ serve(async (req) => {
 
     if (body.guild_id) {
       const guildName = normalizeGuildName(
-        (await resolveGuildNameForUser(token!, body.guild_id)) ?? body.guild_name,
+        await resolveGuildNameForUser(token!, body.guild_id),
       );
-      if (guildName) {
-        await supabase.from('discord_guilds').upsert(
-          {guild_id: body.guild_id, guild_name: guildName},
-          {onConflict: 'guild_id'},
-        );
-      } else {
-        const {data: existingGuild} = await supabase
-          .from('discord_guilds')
-          .select('guild_id')
-          .eq('guild_id', body.guild_id)
-          .maybeSingle();
-        if (!existingGuild) {
-          return jsonResponse(
-            {error: 'Choose a Discord server from the list so its name can be saved.'},
-            400,
-            req,
-          );
-        }
+      if (!guildName) {
+        return appErrorResponse(req, 400, VALIDATION_CODES.GUILD_REQUIRED);
       }
+      await supabase.from('discord_guilds').upsert(
+        {guild_id: body.guild_id, guild_name: guildName},
+        {onConflict: 'guild_id'},
+      );
     }
 
     let existing: {
@@ -165,7 +155,9 @@ serve(async (req) => {
       if (lockErr) return appErrorResponse(req, 400, lockErr);
     }
 
-    const lobbyResolved = await resolveLobbyLeaderFields(body, discordUser.id, supabase);
+    const lobbyResolved = await resolveLobbyLeaderFields(body, discordUser.id, supabase, {
+      guildId: body.guild_id ?? existing?.guild_id,
+    });
     if (typeof lobbyResolved === 'string') {
       return appErrorResponse(req, 400, lobbyResolved);
     }
@@ -197,7 +189,7 @@ serve(async (req) => {
         .eq('id', eventId)
         .select('*')
         .single();
-      if (error) return jsonResponse({error: error.message}, 500, req);
+      if (error) return databaseErrorResponse(req, 'save-event update', error);
       await ensureConvoyLeaderParticipantForEvent(
         supabase,
         {
@@ -259,12 +251,12 @@ serve(async (req) => {
         return jsonResponse({id: data.id, slug: data.slug}, 200, req);
       }
       if (error?.code !== '23505') {
-        return jsonResponse({error: error?.message ?? 'Insert failed'}, 500, req);
+        return databaseErrorResponse(req, 'save-event insert', error ?? {message: 'Insert failed'});
       }
       slug = trySlug;
     }
 
-    return jsonResponse({error: 'Could not create unique slug'}, 500, req);
+    return appErrorResponse(req, 500, API_ERROR_CODES.INTERNAL);
   } catch (e) {
     return internalErrorResponse(req, e);
   }

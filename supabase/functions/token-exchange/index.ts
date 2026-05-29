@@ -1,5 +1,5 @@
 import {serve} from 'https://deno.land/std@0.224.0/http/server.ts';
-import {internalErrorResponse} from '../_shared/apiResponse.ts';
+import {databaseErrorResponse, internalErrorResponse} from '../_shared/apiResponse.ts';
 import {jsonResponse, optionsResponse} from '../_shared/cors.ts';
 import {avatarUrl, discordUniqueUsername, exchangeCode, fetchDiscordUser} from '../_shared/discord.ts';
 import {ensureDiscordUserRow} from '../_shared/discordUserRow.ts';
@@ -43,8 +43,7 @@ serve(async (req) => {
       .single();
 
     if (userErr) {
-      console.error(userErr);
-      return jsonResponse({error: 'Failed to load user'}, 500, req);
+      return databaseErrorResponse(req, 'token-exchange user load', userErr);
     }
 
     if (guild_id) {

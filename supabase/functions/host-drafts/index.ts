@@ -1,9 +1,10 @@
 import {serve} from 'https://deno.land/std@0.224.0/http/server.ts';
 import {EVENT_LIST_SELECT} from '../_shared/eventListSelect.ts';
-import {internalErrorResponse} from '../_shared/apiResponse.ts';
+import {databaseErrorResponse, internalErrorResponse} from '../_shared/apiResponse.ts';
 import {jsonResponse, optionsResponse} from '../_shared/cors.ts';
 import {verifyDiscordToken} from '../_shared/discord.ts';
 import {rateLimitAuth} from '../_shared/rateLimitPresets.ts';
+import {hostDraftStatusFilter} from '../_shared/draftEvents.ts';
 import {adminClient} from '../_shared/supabase.ts';
 
 serve(async (req) => {
@@ -27,13 +28,12 @@ serve(async (req) => {
       .from('events')
       .select(EVENT_LIST_SELECT)
       .eq('host_discord_id', discordUser.id)
-      .is('discord_message_id', null)
-      .not('status', 'in', '("completed","cancelled","archived")')
+      .in('status', hostDraftStatusFilter())
       .order('updated_at', {ascending: false});
 
     if (error) {
       console.error('host-drafts', error);
-      return jsonResponse({error: error.message}, 500, req);
+      return databaseErrorResponse(req, 'host-drafts', error);
     }
 
     return jsonResponse({data: data ?? []}, 200, req);
