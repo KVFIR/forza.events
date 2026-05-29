@@ -253,6 +253,7 @@
       "noWidebodyKit": "Без widebody",
       "noDrivetrainSwap": "Без свапа трансмиссии",
       "stockTuneOnly": "Только сток-тюн",
+      "oemPartsOnly": "Только OEM-детали",
       "noSlickTires": "Без сликов",
       "noDragTires": "Без drag-шин"
     },

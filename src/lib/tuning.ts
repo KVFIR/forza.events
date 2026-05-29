@@ -5,6 +5,7 @@ export const TUNING_RESTRICTION_TEMPLATE_KEYS = [
   'noWidebodyKit',
   'noDrivetrainSwap',
   'stockTuneOnly',
+  'oemPartsOnly',
   'noSlickTires',
   'noDragTires',
 ] as const;

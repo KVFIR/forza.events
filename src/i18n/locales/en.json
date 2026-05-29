@@ -249,6 +249,7 @@
       "noWidebodyKit": "No widebody kit",
       "noDrivetrainSwap": "No drivetrain swap",
       "stockTuneOnly": "Stock tune only",
+      "oemPartsOnly": "OEM parts only",
       "noSlickTires": "No slick tires",
       "noDragTires": "No drag tires"
     },
