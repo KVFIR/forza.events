@@ -13,6 +13,7 @@ If any older note, prototype, or backlog item conflicts with this spec, the froz
 - **Car rules:** each event must explicitly choose one mode: `Anything goes` or `Restricted car list`.
 - **Anything goes mode:** no per-car list is required; the event must still define a class and/or PI cap, and the UI should show an explicit `Anything goes` badge.
 - **Restricted mode:** at least one allowed car is required, with optional per-car restrictions.
+- **Tuning restrictions:** optional template chips and custom text (shown on embed as extra rules).
 - **Publish requirements:** title, **event type**, start time, host gamertag, cover image (or type default), target server, target channel, and a valid car rule mode are required. In `Restricted car list`, at least one car is mandatory.
 - **Track code model:** track share codes are **optional** (ordered list when provided).
 - **Event types:** `Road racing` (blue), `Dirt racing` (orange), `Touge` (purple), `Car/Drift Meet` (red), `Cruise` (green).
@@ -98,9 +99,9 @@ The following items are intentionally deferred and must not block launch:
 
 ## Launch readiness
 
-**Shipped in code:** frozen MVP spec above, Activity UI, `001_baseline.sql`, 15 Edge Functions, launch-intent / deep-link flow, production Supabase + Railway wiring.
+**Shipped in code:** frozen MVP spec above, Activity UI, migrations `001`–`004`, 15 Edge Functions, launch-intent / deep-link flow, production Supabase + Railway wiring.
 
-**Still open:** Discord portal verification in pilot guilds, full E2E in Activity, pilot with real communities. Checklists: [`DISCORD_PLATFORM.md`](DISCORD_PLATFORM.md#operational-checklist), [`STATUS.md`](STATUS.md#remaining-work-before-pilot-sign-off), [`DEVELOPMENT.md`](DEVELOPMENT.md#testing-checklist).
+**Still open:** Discord portal verification in pilot guilds, manual Activity E2E, pilot with real communities. Checklists: [`DISCORD_PLATFORM.md`](DISCORD_PLATFORM.md#operational-checklist), [`E2E.md`](E2E.md), [`STATUS.md`](STATUS.md#remaining-work-before-pilot-sign-off).
 
 ## Environment variables
 

@@ -88,6 +88,7 @@ Lessons from implementation work (keep in sync when behavior changes).
 1. `npm run deploy:functions` or deploy `browse-events` + `host-drafts` with **`--no-verify-jwt`**
 2. Ship frontend (Railway) after any `api.ts` / proxy fetch changes
 3. Hard refresh in Discord Activity
+4. Run P0 checks in [`docs/E2E.md`](docs/E2E.md) when changing auth, browse, publish, or embed sync
 
 ## Internationalization (i18n)
 
@@ -116,7 +117,17 @@ Lessons from implementation work (keep in sync when behavior changes).
 - **Host drafts:** `host-drafts` / `browse-events?host_drafts` filter `status = draft` only.
 - **SPA:** CSP + `frame-ancestors` for Discord embed in `index.html`; `npm overrides` pins `esbuild` ≥ 0.25.
 - Deploy **`upload-cover`** with other functions (`npm run deploy:functions`). Apply migrations with `supabase db push` after linking the project (`001_baseline`, `002_event_tracks_jsonb`, `003_security_publish_results`, `004_rpc_submit_hardening`).
-- **Docs:** keep [`docs/STATUS.md`](docs/STATUS.md), [`docs/DEVELOPMENT.md`](docs/DEVELOPMENT.md), [`supabase/README.md`](supabase/README.md) in sync when migrations or function list changes.
+- **Docs:** keep [`docs/STATUS.md`](docs/STATUS.md), [`docs/DEVELOPMENT.md`](docs/DEVELOPMENT.md), [`docs/E2E.md`](docs/E2E.md), [`supabase/README.md`](supabase/README.md) in sync when migrations, function list, or Activity flows change.
+
+## Policy / UI / browse changes (keep in sync)
+
+When changing **browse feed filters**, **host cancel or results UI/rules**, or **auth/session** behavior, update together:
+
+1. **`src/lib/eventSpec.ts`** and **`supabase/functions/_shared/eventSpec.ts`** (keep identical; run `npm test` / `tests/validationParity.test.ts` if validation codes move).
+2. **`docs/E2E.md`** — manual Activity QA sections affected (Browse §3, host cancel/results §5–6, auth §1).
+3. **`docs/DEVELOPMENT.md`** — only if **localhost** behavior changes (e.g. PostgREST vs `browse-events`, OAuth, Browse filters).
+
+Also align **`browse-events`** / **`src/lib/events.ts`** if the server list query diverges from `isBrowseFeedEvent`. Run P0 in [`docs/E2E.md`](docs/E2E.md) after shipping.
 
 ## CI / tests
 
@@ -131,7 +142,8 @@ Lessons from implementation work (keep in sync when behavior changes).
 - [`docs/ENGINEERING.md`](docs/ENGINEERING.md) — quality bar (CI, tests, error codes)
 - [`docs/BACKLOG.md`](docs/BACKLOG.md) — post-MVP planned features (update when adding or shipping backlog items)
 - [`docs/DISCORD_PLATFORM.md`](docs/DISCORD_PLATFORM.md) — proxy mapping, portal checklist
-- [`docs/DEVELOPMENT.md`](docs/DEVELOPMENT.md) — local OAuth, testing checklist
-- [`supabase/README.md`](supabase/README.md) — baseline migration `001_baseline.sql`, Edge Functions
+- [`docs/DEVELOPMENT.md`](docs/DEVELOPMENT.md) — local OAuth, quick testing checklist
+- [`docs/E2E.md`](docs/E2E.md) — manual Discord Activity QA matrix
+- [`supabase/README.md`](supabase/README.md) — migrations `001`–`004`, Edge Functions
 - [`scripts/deploy-edge-functions.sh`](scripts/deploy-edge-functions.sh) — canonical function list (15)
 - **Convoy leader:** `events.lobby_leader_discord_id` + `event_participants.is_convoy_leader` / `participation_source` (in baseline `001`); pick via `list-guild-members` on Create → Target; host leader uses `host_discord_id`; results roster includes leader without Join when id is set.

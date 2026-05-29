@@ -2,7 +2,7 @@
 
 English UI with optional Russian (`EN | RU` on Profile). This document describes how to run and test FORZA.EVENTS against a real Supabase backend.
 
-See also: [`STATUS.md`](STATUS.md), [`PLAN.md`](PLAN.md), [`DISCORD_PLATFORM.md`](DISCORD_PLATFORM.md), [`.env.example`](../.env.example), [`AGENTS.md`](../AGENTS.md).
+See also: [`STATUS.md`](STATUS.md), [`PLAN.md`](PLAN.md), [`DISCORD_PLATFORM.md`](DISCORD_PLATFORM.md), [`E2E.md`](E2E.md), [`.env.example`](../.env.example), [`AGENTS.md`](../AGENTS.md).
 
 ---
 
@@ -97,9 +97,9 @@ supabase link --project-ref <ref>
 supabase db push
 ```
 
-Single baseline migration `001_baseline.sql` — apply with `supabase db push` (see [`supabase/README.md`](../supabase/README.md)). After applying, seed the cars catalog and optionally sample events.
+Apply all migrations with `supabase db push` (`001`–`004` — see [`supabase/README.md`](../supabase/README.md)). After applying, seed the cars catalog and optionally sample events.
 
-After any schema changes that affect security (RLS, storage policies), redeploy Edge Functions.
+After any schema change that affects security (RLS, storage policies), redeploy Edge Functions.
 
 ---
 
@@ -112,7 +112,7 @@ After any schema changes that affect security (RLS, storage policies), redeploy 
 3. `token-exchange` → access token + `users` row
 4. `sessionStorage` until Sign out
 
-Browse can use PostgREST directly (all non-draft events, including completed/cancelled). Join/create/publish use Edge Functions + Discord token.
+On **localhost**, Browse reads via PostgREST with the same filters as Activity (`status = open`, future `starts_at`, then client `isBrowseFeedEvent` — upcoming published events with registration open). **My Events** / Profile use `include_completed` for past events. Join/create/publish always use Edge Functions + Discord token. In the Activity iframe, Browse uses the `browse-events` Edge Function (not raw PostgREST).
 
 ### Discord Activity (iframe)
 
@@ -188,6 +188,8 @@ npm run optimize:covers
 
 ## Testing checklist
 
+Quick smoke before a PR or local iteration:
+
 ### Local (browser)
 
 - [ ] Browse lists events (seed or real data)
@@ -196,19 +198,16 @@ npm run optimize:covers
 - [ ] Upload cover → image on card/detail
 - [ ] Join / leave (signed in, non-host event)
 
-### Discord Activity
-
-- [ ] Auth completes without console CORS errors
-- [ ] Browse and event detail load
-- [ ] Create → publish (bot in server, Manage Server, valid channel)
-- [ ] Embed button opens correct event
-- [ ] Join/leave updates embed participant count
-
 ### After deploy
 
-- [ ] `supabase db push` current on project
+- [ ] `supabase db push` applied (`001`–`004`)
 - [ ] `npm run deploy:functions` succeeded
 - [ ] Railway rebuild if `APP_ORIGIN` / client env changed
+
+### Discord Activity (pilot)
+
+Full manual matrix (auth, embed deep links, publish target, embed sync, races, i18n): **[`E2E.md`](E2E.md)**.  
+Portal prerequisites: [`DISCORD_PLATFORM.md`](DISCORD_PLATFORM.md#operational-checklist).
 
 ---
 

@@ -1,6 +1,6 @@
 # Implementation status
 
-Last updated: 2026-05-27
+Last updated: 2026-05-29
 
 ## Summary
 
@@ -11,7 +11,7 @@ Remaining work is mostly **Discord portal validation in real guilds**, **Railway
 | Layer | State |
 |-------|--------|
 | React Activity (UI) | Done — Browse, Detail, Create (wizard), My Events, Profile, i18n (EN + RU) |
-| Supabase schema | Done — `001_baseline` + `002`–`004` security migrations |
+| Supabase schema | Done — migrations `001`–`004` |
 | Edge Functions | Done — 15 functions ([`supabase/README.md`](../supabase/README.md)) |
 | Security hardening | Done — storage, RLS scope, CORS, rate limits, publish validation |
 | Local browser dev | Done — Discord OAuth + Supabase (not mock mode) |
@@ -19,7 +19,7 @@ Remaining work is mostly **Discord portal validation in real guilds**, **Railway
 | Production infra | Done — Supabase + Railway (`forzaevents.up.railway.app`) |
 | Production launch | Partial — Discord E2E in pilot guilds still open |
 
-Product contract: [`PLAN.md`](PLAN.md). Discord setup: [`DISCORD_PLATFORM.md`](DISCORD_PLATFORM.md). Agent/runtime notes: [`AGENTS.md`](../AGENTS.md).
+**Docs map:** product [`PLAN.md`](PLAN.md) · Discord setup [`DISCORD_PLATFORM.md`](DISCORD_PLATFORM.md) · local dev [`DEVELOPMENT.md`](DEVELOPMENT.md) · manual QA [`E2E.md`](E2E.md) · agents [`AGENTS.md`](../AGENTS.md).
 
 ---
 
@@ -27,7 +27,7 @@ Product contract: [`PLAN.md`](PLAN.md). Discord setup: [`DISCORD_PLATFORM.md`](D
 
 | Area | Status | Notes |
 |------|--------|-------|
-| Browse Events | Done | Edge `browse-events` in Activity; PostgREST on localhost |
+| Browse Events | Done | Activity: `browse-events`; localhost: PostgREST + same `isBrowseFeedEvent` filter |
 | Event Detail | Done | Join/leave, host actions, results, live updates |
 | Create Event | Done | 4 steps; cover via `upload-cover`; convoy leader via `list-guild-members` |
 | My Events | Done | Hosted/joined + host drafts merge |
@@ -35,12 +35,12 @@ Product contract: [`PLAN.md`](PLAN.md). Discord setup: [`DISCORD_PLATFORM.md`](D
 | Discord Activity auth | Done | SDK → `token-exchange` → `authenticate` |
 | Browser localhost auth | Done | `/auth/callback` + `sessionStorage` |
 | Production browser tab | Done | `DiscordOnlyGate` — Activity-only |
-| Supabase schema | Done | `001_baseline.sql` |
+| Supabase schema | Done | `001_baseline` + `002`–`004` |
 | Edge Functions | Done | `npm run deploy:functions` |
 | Realtime lobby | Done | `events` + `event_participants` |
 | FH6 cars catalog | Done | Autocomplete; no client inserts into `cars` |
 | Cover storage | Done | Host-only upload; public read |
-| Security (RLS/CORS/rate) | Done | In baseline schema + Edge shared modules |
+| Security (RLS/CORS/rate) | Done | Baseline + `003`/`004` migrations + Edge shared modules |
 | Sample seed | Done | `npm run seed:events` |
 | i18n | Done | EN default; RU toggle on profile |
 | Bot process | Deferred | [`bot/README.md`](../bot/README.md) |
@@ -53,7 +53,7 @@ Confirmed in code and schema:
 
 - Publish requires server + channel; locked after publish (client + `assertTargetNotLocked`)
 - Event types: `road`, `dirt`, `touge`, `drift`, `cruise`; track codes optional
-- Car rules: `anything_goes` or `restricted_list`
+- Car rules: `anything_goes` or `restricted_list`; optional tuning restriction templates
 - Published events editable only before start
 - After start: submit results or cancel only
 - Results immutable after submit; participants only in results payload
@@ -69,7 +69,14 @@ supabase link --project-ref uoysqfczahqmctbrrizn
 supabase db push
 ```
 
-Schema: single migration `001_baseline.sql` — see [`supabase/README.md`](../supabase/README.md).
+| Migration | Purpose |
+|-----------|---------|
+| `001_baseline.sql` | Full schema, RLS, realtime, storage |
+| `002_event_tracks_jsonb.sql` | `events.tracks` jsonb |
+| `003_security_publish_results.sql` | Publish lock, results RPC, scoped RLS |
+| `004_rpc_submit_hardening.sql` | Hardened `submit_event_results` |
+
+Details: [`supabase/README.md`](../supabase/README.md).
 
 ---
 
@@ -78,7 +85,7 @@ Schema: single migration `001_baseline.sql` — see [`supabase/README.md`](../su
 | Check | Result |
 |-------|--------|
 | Supabase project | `uoysqfczahqmctbrrizn` (FORZA.EVENTS) |
-| Schema | `001_baseline` on remote |
+| Migrations | `001`–`004` on remote |
 | Edge Functions | 15 via `deploy:functions` |
 | Activity hosting | Railway `https://forzaevents.up.railway.app` |
 | Discord Activity OAuth | `https://127.0.0.1` + `token-exchange` allowlist |
@@ -89,9 +96,13 @@ Set **`APP_ORIGIN`** on Railway to the deploy URL (embed cover URLs + Edge CORS)
 
 ## Remaining work before pilot sign-off
 
-Portal setup and Activity E2E validation: [`DISCORD_PLATFORM.md`](DISCORD_PLATFORM.md#operational-checklist). Local smoke tests: [`DEVELOPMENT.md`](DEVELOPMENT.md#testing-checklist).
+| Task | Where |
+|------|--------|
+| Portal + proxy + bot install | [`DISCORD_PLATFORM.md`](DISCORD_PLATFORM.md#operational-checklist) |
+| Local smoke | [`DEVELOPMENT.md`](DEVELOPMENT.md#testing-checklist) |
+| Full Activity matrix | [`E2E.md`](E2E.md) |
 
-### Pilot
+### Pilot goals
 
 - [ ] 3–5 real Forza Discord servers
 - [ ] Hosts publish without manual workarounds

@@ -2,6 +2,8 @@
 
 Database schema, Edge Functions, and seeds for the FORZA.EVENTS frozen MVP.
 
+Last updated: 2026-05-29
+
 ## Role
 
 - Events, participants, results, users

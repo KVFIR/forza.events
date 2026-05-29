@@ -35,6 +35,10 @@ When changing validation rules, update **both** `src/lib/eventSpec.ts` and `supa
 - Client: `invoke()` throws `ApiRequestError`; UI should show `err.message` (already mapped with `mapApiError()`).
 - i18n keys live under `errors.*` and `validation.*` in `src/i18n/locales/`.
 
+## Manual E2E (Discord Activity)
+
+Automated Activity tests are not in CI. Before pilot sign-off, run [`E2E.md`](E2E.md) (P0 on deploy day, P1–P2 during pilot week).
+
 ## Not in scope yet
 
 - ESLint across the full repo

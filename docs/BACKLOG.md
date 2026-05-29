@@ -14,6 +14,8 @@ Embed in the chosen text channel; **omit from global Activity browse**. Field e.
 
 Browse filter/tab for the current server (`sdk.guildId` or picker). Shows published events for that `guild_id` (including guild-only). Complements item 1; no privacy change by itself.
 
+---
+
 ## 3. Waitlist
 
 When capacity is full, queue joins and promote on leave. Optional notify on slot open — may need bot (item 4).

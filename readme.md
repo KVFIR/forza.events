@@ -24,7 +24,7 @@ Works in server channels, voice, DMs, and App Launcher (desktop and mobile).
 |------|------------|
 | Browse, Detail, Create, My Events, Profile | Pilot validation in real Discord servers |
 | Discord Activity auth + localhost dev OAuth | Optional custom domain DNS |
-| Baseline schema + 15 Edge Functions | Post-MVP bot automation |
+| Schema migrations `001`–`004` + 15 Edge Functions | Post-MVP bot automation |
 | Security: scoped RLS, CORS, rate limits, host-only covers | |
 | i18n (English + Russian) | |
 
@@ -48,7 +48,7 @@ Works in server channels, voice, DMs, and App Launcher (desktop and mobile).
 forza.events/
 ├── src/                 # React Activity (Vite)
 ├── supabase/
-│   ├── migrations/      # 001_baseline.sql
+│   ├── migrations/      # 001–004
 │   └── functions/       # 15 Edge Functions
 ├── scripts/             # deploy, seed, optimize-covers
 ├── docs/
@@ -96,6 +96,7 @@ supabase db push           # after schema changes
 | [`docs/PLAN.md`](docs/PLAN.md) | Frozen MVP product contract |
 | [`docs/DISCORD_PLATFORM.md`](docs/DISCORD_PLATFORM.md) | Portal checklist, proxy, OAuth |
 | [`docs/ENGINEERING.md`](docs/ENGINEERING.md) | CI, tests, API error codes |
+| [`docs/E2E.md`](docs/E2E.md) | Manual Discord Activity QA matrix |
 | [`docs/BACKLOG.md`](docs/BACKLOG.md) | Post-MVP features |
 | [`supabase/README.md`](supabase/README.md) | Schema, Edge Functions, seeds |
 | [`AGENTS.md`](AGENTS.md) | Runtime rules for coding agents |

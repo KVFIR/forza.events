@@ -1,6 +1,6 @@
 # Discord Activity reference
 
-Last updated: 2026-05-27
+Last updated: 2026-05-29
 
 ## What matters for FORZA.EVENTS
 
@@ -116,7 +116,7 @@ Host must be guild member with **Manage Server** (or Administrator). Server re-v
 
 - `npm run sync:secrets` — Discord secrets
 - `npm run deploy:functions` — all Edge functions (incl. `list-guild-members`), `--no-verify-jwt`
-- `supabase db push` — single baseline migration
+- `supabase db push` — migrations `001`–`004`
 - Railway: `APP_ORIGIN` = deploy URL; rebuild frontend after env changes
 
 ### Legal URLs (app verification)
@@ -132,12 +132,7 @@ Use your Railway deploy URL (same as `APP_ORIGIN`), e.g. `https://forzaevents.up
 
 ### Validate in Discord
 
-- [ ] Auth: authorize → token exchange → authenticate
-- [ ] Browse / create / publish in a real server
-- [ ] Embed button opens correct event
-- [ ] Join/leave updates embed
-- [ ] Cancel / complete updates embed appearance
-- [ ] Rich Presence on profile shows current screen (Browse / event title on Detail)
+Use the full manual matrix in [`E2E.md`](E2E.md) (P0 sections: infra, auth, deep link, publish target, embed sync, join rules). Minimum smoke: auth → browse → publish → embed button → join/leave count on embed → Rich Presence on profile.
 
 ## Out of MVP
 
@@ -148,6 +143,7 @@ Reminders, threads, participant roles, scheduled bot jobs — see [`PLAN.md`](PL
 - [`PLAN.md`](PLAN.md) — product contract
 - [`STATUS.md`](STATUS.md) — implementation state
 - [`DEVELOPMENT.md`](DEVELOPMENT.md) — local workflow
+- [`E2E.md`](E2E.md) — Activity manual QA matrix
 - [`AGENTS.md`](../AGENTS.md) — agent implementation notes
 - [Embedded App SDK](https://github.com/discord/embedded-app-sdk)
 - [Discord API — Interactions](https://discord.com/developers/docs/interactions/overview)
