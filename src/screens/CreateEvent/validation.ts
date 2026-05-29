@@ -11,8 +11,46 @@ import {validationMessage} from '../../lib/validationMessages';
 import type {CarRuleMode} from '../../lib/types';
 import {COVER_SOURCE_MAX_MB} from '../../lib/coverImage';
 import {isPiInRange, piRangeI18nParams} from '../../lib/pi';
-import {COVER_ACCEPT, COVER_MAX_BYTES, TITLE_MAX_LENGTH} from './constants';
+import {COVER_ACCEPT, COVER_MAX_BYTES, TITLE_MAX_LENGTH, type CreateEventStepIndex} from './constants';
 import type {CreateEventFormValues, FieldErrors} from './types';
+
+const EVENT_STEP_FIELD_KEYS = new Set([
+  'title',
+  'type',
+  'startsAtLocal',
+  'cover',
+  'tracks',
+  'eventCars',
+  'maxPi',
+]);
+
+export function firstFieldErrorStep(errors: FieldErrors): CreateEventStepIndex {
+  for (const key of Object.keys(errors)) {
+    if (EVENT_STEP_FIELD_KEYS.has(key)) return 0;
+  }
+  return 1;
+}
+
+export function scrollToFirstFieldError(errors: FieldErrors): void {
+  const firstKey = Object.keys(errors)[0];
+  if (!firstKey) return;
+  const el = document.getElementById(`create-${firstKey}`);
+  el?.scrollIntoView({behavior: 'smooth', block: 'center'});
+  if (el instanceof HTMLElement && typeof el.focus === 'function') {
+    el.focus({preventScroll: true});
+  }
+}
+
+/** Wait for step transition paint before scrolling to a field error. */
+export function scrollToFirstFieldErrorAfterPaint(errors: FieldErrors): void {
+  requestAnimationFrame(() => {
+    requestAnimationFrame(() => scrollToFirstFieldError(errors));
+  });
+}
+
+export type FormValidationOutcome =
+  | {ok: true}
+  | {ok: false; fieldErrors: FieldErrors; globalError?: string | null};
 
 export function hasFieldErrors(errors: FieldErrors): boolean {
   return Object.keys(errors).length > 0;
@@ -128,12 +166,11 @@ export function validateTargetStep(
 
 export function validateEventStep(
   values: CreateEventFormValues,
-  options?: {allowPastStart?: boolean; hostGamertag?: string},
+  options?: {allowPastStart?: boolean},
 ): FieldErrors {
   return {
     ...validateBasicsStep(values, {allowPastStart: options?.allowPastStart}),
     ...validateDetailsStep(values),
-    ...validateConvoyFields(values, options),
   };
 }
 
@@ -151,7 +188,7 @@ export function validateStep(
 ): FieldErrors {
   switch (step) {
     case 0:
-      return validateEventStep(values, options);
+      return validateEventStep(values, {allowPastStart: options?.allowPastStart});
     case 1:
       return validatePublishStep(values, options);
     default:
@@ -159,47 +196,60 @@ export function validateStep(
   }
 }
 
-export function validateDraftSave(
+function mergeDraftFieldErrors(
   values: CreateEventFormValues,
   hostGamertag?: string,
-): string | null {
-  const stepErr = firstFieldError(validateBasicsStep(values));
-  if (stepErr) return stepErr;
-  const detailsErr = firstFieldError(validateDetailsStep(values));
-  if (detailsErr) return detailsErr;
-  const targetErr = firstFieldError(
-    validateTargetStep(values, {hostGamertag, requireChannel: false}),
-  );
-  if (targetErr) return targetErr;
-  return validateDraftFormMessage({
+  options?: {allowPastStart?: boolean},
+): FieldErrors {
+  return {
+    ...validateBasicsStep(values, {allowPastStart: options?.allowPastStart}),
+    ...validateDetailsStep(values),
+    ...validateTargetStep(values, {hostGamertag, requireChannel: false}),
+  };
+}
+
+function mergePublishFieldErrors(
+  values: CreateEventFormValues,
+  hostGamertag: string,
+  options?: {allowPastStart?: boolean},
+): FieldErrors {
+  return {
+    ...validateBasicsStep(values, {allowPastStart: options?.allowPastStart}),
+    ...validateDetailsStep(values),
+    ...validateTargetStep(values, {hostGamertag, requireChannel: true}),
+  };
+}
+
+export function validateDraftFormOutcome(
+  values: CreateEventFormValues,
+  hostGamertag?: string,
+  options?: {allowPastStart?: boolean},
+): FormValidationOutcome {
+  const fieldErrors = mergeDraftFieldErrors(values, hostGamertag, options);
+  if (hasFieldErrors(fieldErrors)) {
+    return {ok: false, fieldErrors};
+  }
+  const globalError = validateDraftFormMessage({
     title: values.title,
     type: isEventType(values.type) ? values.type : '',
     startsAtLocal: values.startsAtLocal,
     guildId: values.targetGuildId,
   });
+  if (globalError) return {ok: false, fieldErrors: {}, globalError};
+  return {ok: true};
 }
 
-export function validatePublish(
+export function validatePublishFormOutcome(
   values: CreateEventFormValues,
   hostGamertag: string,
   options?: {allowPastStart?: boolean},
-): string | null {
-  const basics = validateBasicsStep(values, {allowPastStart: options?.allowPastStart});
-  if (hasFieldErrors(basics)) return firstFieldError(basics);
-  const details = validateDetailsStep(values);
-  if (hasFieldErrors(details)) return firstFieldError(details);
-  const target = validateTargetStep(values, {requireChannel: true, hostGamertag});
-  if (hasFieldErrors(target)) return firstFieldError(target);
-
-  const leader = values.lobbyLeaderIsHost
-    ? hostGamertag
-    : values.lobbyLeaderGamertag;
-
-  if (!isEventType(values.type)) {
-    return i18n.t('validation.typeRequired');
+): FormValidationOutcome {
+  const fieldErrors = mergePublishFieldErrors(values, hostGamertag, options);
+  if (hasFieldErrors(fieldErrors)) {
+    return {ok: false, fieldErrors};
   }
-
-  return validatePublishFormMessage({
+  const leader = values.lobbyLeaderIsHost ? hostGamertag : values.lobbyLeaderGamertag;
+  const globalError = validatePublishFormMessage({
     title: values.title,
     type: values.type,
     startsAtLocal: values.startsAtLocal,
@@ -210,4 +260,6 @@ export function validatePublish(
     carCount: values.eventCars.length,
     lobbyLeaderGamertag: leader,
   });
+  if (globalError) return {ok: false, fieldErrors: {}, globalError};
+  return {ok: true};
 }

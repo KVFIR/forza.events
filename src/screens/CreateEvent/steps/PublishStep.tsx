@@ -1,9 +1,12 @@
-import {useTranslation} from 'react-i18next';
-import {Trans} from 'react-i18next';
+import {Trans, useTranslation} from 'react-i18next';
 import {PublishTargetPicker} from '../../../components/PublishTargetPicker';
 import {Alert} from '../../../components/ui/Alert';
 import {TextButton} from '../../../components/ui/TextButton';
 import {EventPublishPreviewCard} from '../components/EventPublishPreviewCard';
+import {
+  CreateEventConvoySection,
+  type CreateEventConvoySectionProps,
+} from '../components/CreateEventConvoySection';
 import type {EventCarEntry} from '../../../components/EventCarList';
 import {FormSection} from '../components/Field';
 import {isLocalDevHost} from '../../../lib/runtime';
@@ -34,6 +37,7 @@ type Props = {
   lockChannel: boolean;
   fieldErrors: FieldErrors;
   missingForPublish: PublishGap[];
+  convoy: CreateEventConvoySectionProps;
   onGuildChange: (id: string, name: string) => void;
   onChannelChange: (id: string) => void;
   onJumpToStep?: (step: CreateEventStepIndex) => void;
@@ -60,6 +64,7 @@ export function PublishStep({
   lockChannel,
   fieldErrors,
   missingForPublish,
+  convoy,
   onGuildChange,
   onChannelChange,
   onJumpToStep,
@@ -135,6 +140,8 @@ export function PublishStep({
           </>
         )}
       </FormSection>
+
+      {!devPreview && <CreateEventConvoySection {...convoy} />}
     </div>
   );
 }

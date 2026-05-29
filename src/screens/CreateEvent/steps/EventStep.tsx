@@ -2,12 +2,9 @@ import {useTranslation} from 'react-i18next';
 import {Input} from '../../../components/ui/Input';
 import {SegmentGroup} from '../../../components/ui/SegmentGroup';
 import {Textarea} from '../../../components/ui/Textarea';
-import {Alert} from '../../../components/ui/Alert';
-import {TextButton} from '../../../components/ui/TextButton';
-import {fileUploadLabelClass, toggleRowClass} from '../../../components/ui/formStyles';
+import {fileUploadLabelClass} from '../../../components/ui/formStyles';
 import {eventTypeLabel} from '../../../lib/eventTypes';
 import {COVER_ASPECT_CLASS, COVER_SOURCE_MAX_MB} from '../../../lib/coverImage';
-import {hasGamertag} from '../../../lib/gamertag';
 import {datetimeLocalInputBounds} from '../../../lib/datetime';
 import {TITLE_MAX_LENGTH, EVENT_TYPES, COVER_ACCEPT, formInput, formLabel} from '../constants';
 import {Field, FormSection} from '../components/Field';
@@ -15,7 +12,6 @@ import {EventCover} from '../../../components/EventCover';
 import {EventTrackList} from '../../../components/EventTrackList';
 import {EventCarList, type EventCarEntry} from '../../../components/EventCarList';
 import {MaxPiInput} from '../../../components/MaxPiInput';
-import {ConvoyLeaderPicker, type ConvoyLeaderSelection} from '../../../components/ConvoyLeaderPicker';
 import {cn} from '../../../lib/cn';
 import {fieldErrorClass} from '../../../components/ui/formStyles';
 import type {CreateEventFormValues, FieldErrors} from '../types';
@@ -24,10 +20,6 @@ import type {CarRuleMode, EventType} from '../../../lib/types';
 type Props = {
   values: CreateEventFormValues;
   fieldErrors: FieldErrors;
-  token: string | null;
-  hostDiscordId: string;
-  hostGamertag?: string;
-  lobbyLeaderSelection: ConvoyLeaderSelection | null;
   onTitle: (v: string) => void;
   onType: (v: EventType) => void;
   onStartsAtLocal: (v: string) => void;
@@ -38,20 +30,12 @@ type Props = {
   onMaxPi: (n: number) => void;
   onAdditionalCarRestrictions: (v: string) => void;
   onEventCars: (cars: EventCarEntry[]) => void;
-  onLobbyLeaderIsHost: (v: boolean) => void;
-  onLobbyLeaderGamertag: (v: string) => void;
-  onLobbyLeaderSelect: (member: ConvoyLeaderSelection | null) => void;
-  onAddHostGamertag?: () => void;
   editSessionKey?: string | null;
 };
 
 export function EventStep({
   values,
   fieldErrors,
-  token,
-  hostDiscordId,
-  hostGamertag,
-  lobbyLeaderSelection,
   onTitle,
   onType,
   onStartsAtLocal,
@@ -62,10 +46,6 @@ export function EventStep({
   onMaxPi,
   onAdditionalCarRestrictions,
   onEventCars,
-  onLobbyLeaderIsHost,
-  onLobbyLeaderGamertag,
-  onLobbyLeaderSelect,
-  onAddHostGamertag,
   editSessionKey,
 }: Props) {
   const {t} = useTranslation();
@@ -235,51 +215,6 @@ export function EventStep({
               collapseAllKey={editSessionKey}
             />
           </div>
-        )}
-      </FormSection>
-
-      <FormSection title={t('create.sectionConvoy')}>
-        <label className={toggleRowClass}>
-          <span className="text-sm text-slate-300">{t('create.iAmConvoyLeader')}</span>
-          <input
-            type="checkbox"
-            checked={values.lobbyLeaderIsHost}
-            onChange={(e) => onLobbyLeaderIsHost(e.target.checked)}
-            className="h-4 w-4 accent-white"
-          />
-        </label>
-        {values.lobbyLeaderIsHost && !hasGamertag(hostGamertag) && (
-          <Alert variant="warning">
-            <p>{t('create.convoyLeaderProfileWarning')}</p>
-            {onAddHostGamertag ? (
-              <TextButton type="button" className="mt-2" onClick={onAddHostGamertag}>
-                {t('profile.addGamertag')}
-              </TextButton>
-            ) : null}
-          </Alert>
-        )}
-        {!values.lobbyLeaderIsHost && token && (
-          <ConvoyLeaderPicker
-            accessToken={token}
-            guildId={values.targetGuildId}
-            hostDiscordId={hostDiscordId}
-            selected={lobbyLeaderSelection}
-            gamertag={values.lobbyLeaderGamertag}
-            onSelect={onLobbyLeaderSelect}
-            onGamertagChange={onLobbyLeaderGamertag}
-            invalid={Boolean(
-              fieldErrors.lobbyLeaderGamertag || fieldErrors.lobbyLeaderDiscordId,
-            )}
-            error={
-              fieldErrors.lobbyLeaderDiscordId ?? fieldErrors.lobbyLeaderGamertag ?? null
-            }
-          />
-        )}
-        {!values.lobbyLeaderIsHost && !token && (
-          <p className="text-xs text-muted">{t('auth.openInDiscordTarget')}</p>
-        )}
-        {!values.lobbyLeaderIsHost && token && !values.targetGuildId && (
-          <p className="text-xs text-muted">{t('create.convoyLeaderPickServerOnPublish')}</p>
         )}
       </FormSection>
     </div>

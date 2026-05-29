@@ -27,6 +27,7 @@ type GuildMemberHit = {
 type Props = {
   accessToken: string;
   guildId: string;
+  guildName?: string;
   hostDiscordId: string;
   selected: ConvoyLeaderSelection | null;
   gamertag: string;
@@ -39,6 +40,7 @@ type Props = {
 export function ConvoyLeaderPicker({
   accessToken,
   guildId,
+  guildName,
   hostDiscordId,
   selected,
   gamertag,
@@ -53,6 +55,13 @@ export function ConvoyLeaderPicker({
   const [searching, setSearching] = useState(false);
   const [searchError, setSearchError] = useState<string | null>(null);
   const debounceRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const searchSerialRef = useRef(0);
+
+  useEffect(() => {
+    setQuery('');
+    setHits([]);
+    setSearchError(null);
+  }, [guildId]);
 
   useEffect(() => {
     if (!guildId || query.trim().length < 2) {
@@ -63,15 +72,18 @@ export function ConvoyLeaderPicker({
 
     if (debounceRef.current) clearTimeout(debounceRef.current);
     debounceRef.current = setTimeout(() => {
+      const serial = ++searchSerialRef.current;
       setSearching(true);
       setSearchError(null);
       void listGuildMembers(accessToken, guildId, query.trim())
         .then((res) => {
+          if (serial !== searchSerialRef.current) return;
           setHits(
             res.members.filter((m) => m.discord_id !== hostDiscordId),
           );
         })
         .catch((e) => {
+          if (serial !== searchSerialRef.current) return;
           setHits([]);
           setSearchError(
             e instanceof ApiRequestError || e instanceof Error
@@ -79,7 +91,9 @@ export function ConvoyLeaderPicker({
               : String(e),
           );
         })
-        .finally(() => setSearching(false));
+        .finally(() => {
+          if (serial === searchSerialRef.current) setSearching(false);
+        });
     }, 300);
 
     return () => {
@@ -91,11 +105,16 @@ export function ConvoyLeaderPicker({
   const needsGamertag = Boolean(selected && !hasGamertag(selected.xboxGamertag));
 
   return (
-    <div className="mt-2 space-y-2">
+    <div id="create-lobbyLeaderDiscordId" className="mt-2 space-y-2">
       {!guildId ? (
         <p className="text-xs text-muted">{t('create.convoyLeaderPickServerFirst')}</p>
       ) : (
         <>
+          {guildName ? (
+            <p className="text-xs text-muted">
+              {t('create.convoyLeaderSearchIn', {server: guildName})}
+            </p>
+          ) : null}
           {selected ? (
             <div className="flex items-center gap-2 rounded-lg border border-white/[0.08] bg-card px-3 py-2">
               {selected.username && (

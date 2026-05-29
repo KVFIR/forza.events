@@ -5,6 +5,7 @@ import {ConfirmDialog} from '../../components/ui/ConfirmDialog';
 import {PublishTargetModal} from '../../components/PublishTargetPicker';
 import {FormAlerts, StepIndicator} from './components/StepIndicator';
 import {PublishedTargetSummary} from './components/PublishedTargetSummary';
+import {CreateEventConvoySection} from './components/CreateEventConvoySection';
 import {PUBLISH_STEP_INDEX} from './constants';
 import {collectPublishGaps} from './publishGaps';
 import {useEffect, useState} from 'react';
@@ -50,7 +51,6 @@ export function CreateEvent() {
     setStep,
     fieldErrors,
     globalError,
-    setGlobalError,
     saving,
     editId,
     eventId,
@@ -73,7 +73,7 @@ export function CreateEvent() {
     requestCancelPublished,
     confirmCancelPublished,
     confirmPublish,
-    validatePublish,
+    validateBeforePublish,
     navigate,
     setTitle,
     setType,
@@ -97,6 +97,9 @@ export function CreateEvent() {
     channelId: values.targetChannelId,
     carRuleMode: values.carRuleMode,
     carCount: values.eventCars.length,
+    lobbyLeaderIsHost: values.lobbyLeaderIsHost,
+    lobbyLeaderDiscordId: values.lobbyLeaderDiscordId,
+    hostGamertag: user.xboxGamertag,
   });
 
   const hasDraftId = Boolean(eventId);
@@ -140,12 +143,7 @@ export function CreateEvent() {
   }
 
   async function handlePublishClick() {
-    const publishErr = validatePublish();
-    if (publishErr) {
-      setGlobalError(publishErr);
-      window.scrollTo({top: 0, behavior: 'smooth'});
-      return;
-    }
+    if (!validateBeforePublish()) return;
     if (!values.targetChannelId) {
       setShowPublishModal(true);
       return;
@@ -162,11 +160,8 @@ export function CreateEvent() {
 
   function onPublishModalConfirm() {
     void (async () => {
-      const publishErr = validatePublish();
-      if (publishErr) {
-        setGlobalError(publishErr);
+      if (!validateBeforePublish()) {
         setShowPublishModal(false);
-        window.scrollTo({top: 0, behavior: 'smooth'});
         return;
       }
       const id = await persistDraft();
@@ -198,10 +193,6 @@ export function CreateEvent() {
   const eventStepProps = {
     values,
     fieldErrors,
-    token,
-    hostDiscordId: user.discordId,
-    hostGamertag: user.xboxGamertag,
-    lobbyLeaderSelection,
     onTitle: setTitle,
     onType: setType,
     onStartsAtLocal: setStartsAtLocal,
@@ -212,11 +203,23 @@ export function CreateEvent() {
     onMaxPi: setMaxPi,
     onAdditionalCarRestrictions: setAdditionalCarRestrictions,
     onEventCars: setEventCars,
-    onLobbyLeaderIsHost: setLobbyLeaderIsHost,
-    onLobbyLeaderGamertag: setLobbyLeaderGamertag,
-    onLobbyLeaderSelect,
-    onAddHostGamertag: () => setGamertagModalOpen(true),
     editSessionKey: editId ?? eventId,
+  };
+
+  const convoySectionProps = {
+    accessToken: token ?? '',
+    guildId: values.targetGuildId,
+    guildName: values.targetGuildName,
+    hostDiscordId: user.discordId,
+    hostGamertag: user.xboxGamertag,
+    lobbyLeaderIsHost: values.lobbyLeaderIsHost,
+    lobbyLeaderSelection,
+    lobbyLeaderGamertag: values.lobbyLeaderGamertag,
+    fieldErrors,
+    onLobbyLeaderIsHost: setLobbyLeaderIsHost,
+    onLobbyLeaderSelect,
+    onLobbyLeaderGamertag: setLobbyLeaderGamertag,
+    onAddHostGamertag: () => setGamertagModalOpen(true),
   };
 
   return (
@@ -243,6 +246,7 @@ export function CreateEvent() {
             guildName={values.targetGuildName}
             hasChannel={Boolean(values.targetChannelId)}
           />
+          {token ? <CreateEventConvoySection {...convoySectionProps} /> : null}
         </>
       ) : step === 0 ? (
         <EventStep {...eventStepProps} />
@@ -268,6 +272,7 @@ export function CreateEvent() {
           lockChannel={false}
           fieldErrors={fieldErrors}
           missingForPublish={missingForPublish}
+          convoy={convoySectionProps}
           onGuildChange={onGuildChange}
           onChannelChange={setTargetChannelId}
           onJumpToStep={setStep}

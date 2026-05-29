@@ -37,10 +37,13 @@ import {PUBLISH_STEP_INDEX, type CreateEventStepIndex} from './constants';
 import type {CreateEventFormValues, CreateEventType, FieldErrors} from './types';
 import {
   validateCoverFile,
-  validateDraftSave,
-  validatePublish,
+  validateDraftFormOutcome,
+  validatePublishFormOutcome,
   validateBasicsStep,
   validateStep,
+  firstFieldErrorStep,
+  scrollToFirstFieldError,
+  scrollToFirstFieldErrorAfterPaint,
 } from './validation';
 
 export function useCreateEventForm() {
@@ -159,6 +162,45 @@ export function useCreateEventForm() {
       return next;
     });
   }, []);
+
+  const clearLobbyLeaderSelection = useCallback(() => {
+    setLobbyLeaderDiscordId(null);
+    setLobbyLeaderUsername('');
+    setLobbyLeaderProfileGamertag(null);
+    setLobbyLeaderGamertag('');
+    clearFieldError('lobbyLeaderDiscordId');
+    clearFieldError('lobbyLeaderGamertag');
+  }, [clearFieldError]);
+
+  const validationOptions = useMemo(
+    () => ({allowPastStart: Boolean(editId)}),
+    [editId],
+  );
+
+  const applyValidationFailure = useCallback(
+    (fieldErrors: FieldErrors, globalError?: string | null) => {
+      const errorKeys = Object.keys(fieldErrors);
+      if (errorKeys.length > 0) {
+        const focusStep = firstFieldErrorStep(fieldErrors);
+        const stepChanged = !isPublished && focusStep !== step;
+        if (stepChanged) {
+          setStep(focusStep);
+        }
+        setFieldErrors(fieldErrors);
+        setGlobalError(null);
+        if (stepChanged) {
+          scrollToFirstFieldErrorAfterPaint(fieldErrors);
+        } else {
+          requestAnimationFrame(() => scrollToFirstFieldError(fieldErrors));
+        }
+        return;
+      }
+      setFieldErrors({});
+      setGlobalError(globalError ?? null);
+      if (globalError) window.scrollTo({top: 0, behavior: 'smooth'});
+    },
+    [isPublished, step],
+  );
 
   useEffect(() => {
     if (!editId) {
@@ -384,9 +426,13 @@ export function useCreateEventForm() {
   }
 
   async function persistDraft(): Promise<string | null> {
-    const err = validateDraftSave(values, user.xboxGamertag);
-    if (err) {
-      setGlobalError(err);
+    const outcome = validateDraftFormOutcome(
+      values,
+      user.xboxGamertag,
+      validationOptions,
+    );
+    if (!outcome.ok) {
+      applyValidationFailure(outcome.fieldErrors, outcome.globalError);
       return null;
     }
     if (!canPersist || !token) {
@@ -431,16 +477,27 @@ export function useCreateEventForm() {
             hostGamertag: user.xboxGamertag,
           });
     if (Object.keys(errors).length > 0) {
-      setFieldErrors(errors);
-      setGlobalError(null);
-      const firstKey = Object.keys(errors)[0];
-      const el = document.getElementById(`create-${firstKey}`);
-      el?.focus();
+      applyValidationFailure(errors);
       return false;
     }
     setFieldErrors({});
     if (step < PUBLISH_STEP_INDEX) goToStep((step + 1) as CreateEventStepIndex);
     return true;
+  }
+
+  function validateBeforePublish(): boolean {
+    const outcome = validatePublishFormOutcome(
+      values,
+      user.xboxGamertag ?? values.lobbyLeaderGamertag,
+      validationOptions,
+    );
+    if (outcome.ok) {
+      setFieldErrors({});
+      setGlobalError(null);
+      return true;
+    }
+    applyValidationFailure(outcome.fieldErrors, outcome.globalError);
+    return false;
   }
 
   function onCoverChange(file: File | null) {
@@ -492,11 +549,7 @@ export function useCreateEventForm() {
     requestCancelPublished,
     confirmCancelPublished,
     confirmPublish,
-    validatePublish: () =>
-      validatePublish(values, user.xboxGamertag ?? lobbyLeaderGamertag, {
-        allowPastStart: Boolean(editId),
-      }),
-    buildPayload,
+    validateBeforePublish,
     navigate,
     // setters
     setTitle: (v: string) => {
@@ -537,9 +590,7 @@ export function useCreateEventForm() {
       clearFieldError('lobbyLeaderDiscordId');
       setLobbyLeaderIsHost(v);
       if (v) {
-        setLobbyLeaderDiscordId(null);
-        setLobbyLeaderUsername('');
-        setLobbyLeaderProfileGamertag(null);
+        clearLobbyLeaderSelection();
         setLobbyLeaderGamertag(user.xboxGamertag ?? '');
       }
     },
@@ -548,15 +599,12 @@ export function useCreateEventForm() {
       setLobbyLeaderGamertag(v);
     },
     onLobbyLeaderSelect: (member: ConvoyLeaderSelection | null) => {
-      clearFieldError('lobbyLeaderDiscordId');
-      clearFieldError('lobbyLeaderGamertag');
       if (!member) {
-        setLobbyLeaderDiscordId(null);
-        setLobbyLeaderUsername('');
-        setLobbyLeaderProfileGamertag(null);
-        setLobbyLeaderGamertag('');
+        clearLobbyLeaderSelection();
         return;
       }
+      clearFieldError('lobbyLeaderDiscordId');
+      clearFieldError('lobbyLeaderGamertag');
       setLobbyLeaderDiscordId(member.discordId);
       setLobbyLeaderUsername(member.username);
       setLobbyLeaderProfileGamertag(member.xboxGamertag);
@@ -570,6 +618,9 @@ export function useCreateEventForm() {
     },
     onGuildChange: (id: string, name: string) => {
       clearFieldError('targetGuildId');
+      if (targetGuildId && id !== targetGuildId && !lobbyLeaderIsHost && lobbyLeaderDiscordId) {
+        clearLobbyLeaderSelection();
+      }
       setTargetGuildId(id);
       setTargetGuildName(name);
       if (!isPublished) setTargetChannelId('');
