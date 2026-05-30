@@ -7,13 +7,14 @@ Practices that protect the frozen MVP during pilot releases.
 Every push/PR to `main` / `master` runs [`.github/workflows/ci.yml`](../.github/workflows/ci.yml) (Node **24** from [`.nvmrc`](../.nvmrc), `actions/checkout@v6` + `actions/setup-node@v6`; duplicate runs on the same ref are cancelled):
 
 1. `npm run typecheck` (SPA + `supabase/functions` Edge shared code)
-2. `npm run test`
-3. `npm run build`
+2. `npm run lint` (SPA `src/`, `tests/`, Vite/Vitest configs — not Edge Functions)
+3. `npm run test`
+4. `npm run build`
 
 Run locally before pushing:
 
 ```bash
-npm run typecheck && npm run test && npm run build
+npm run typecheck && npm run lint && npm run test && npm run build
 ```
 
 ## Unit tests (Vitest)
@@ -51,8 +52,16 @@ Config: [`knip.json`](../knip.json) (`src/main.tsx` only — Edge Functions use 
 
 The report lists unused exports reachable from the entry graph. Many are intentional shared UI tokens, validation helpers used from tests, or symbols kept for parity with Edge/shared modules. Treat findings as a cleanup backlog; do not delete exports solely because Knip flags them without checking imports and test-only usage.
 
+## Lint (ESLint)
+
+[`eslint.config.js`](../eslint.config.js) — flat config, `typescript-eslint` + `react-hooks` + `react-refresh`. Scope: `src/`, `tests/`, `vite.config.ts`, `vitest.config.ts`. Supabase Edge Functions (Deno) are excluded.
+
+```bash
+npm run lint
+```
+
 ## Not in scope yet
 
-- ESLint across the full repo
+- ESLint on Supabase Edge Functions (Deno)
 - Playwright / Discord Activity E2E in CI
 - Shared npm package for client + Edge (fixtures + parity tests are enough for pilot)

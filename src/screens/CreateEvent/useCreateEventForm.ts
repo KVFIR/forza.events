@@ -444,7 +444,7 @@ export function useCreateEventForm() {
     setGlobalError(null);
     try {
       const result = await saveEvent(token, buildPayload());
-      let id = result.id;
+      const id = result.id;
       if (coverFile && targetGuildId) {
         const compressed = await compressCoverForUpload(coverFile);
         const url = await uploadCoverImage(token, targetGuildId, id, compressed);

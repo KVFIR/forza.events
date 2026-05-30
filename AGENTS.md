@@ -131,7 +131,7 @@ Also align **`browse-events`** / **`src/lib/events.ts`** if the server list quer
 
 ## CI / tests
 
-- **CI:** `.github/workflows/ci.yml` — `npm ci` → `typecheck` → `test` → `build`.
+- **CI:** `.github/workflows/ci.yml` — `npm ci` → `typecheck` → `lint` → `test` → `build`.
 - **Unit tests:** Vitest on pure logic (`src/lib/eventSpec`, `gamertag`, `datetime`, parity with `supabase/functions/_shared/eventSpec`). Run `npm test`.
 - **API errors:** Edge responses include `code` where possible; client maps via `mapApiError()` / `ApiRequestError` in `src/lib/apiErrors.ts`. Keep `src/lib/validationCodes.ts` and `supabase/functions/_shared/validationCodes.ts` in sync.
 - **500 responses:** use `internalErrorResponse()` — never `String(e)` to clients.
