@@ -76,6 +76,15 @@ type DbEventRow = {
     users?: {username: string; avatar_url?: string | null} | null;
   }[];
   event_cars?: DbEventCarRow[];
+  event_results?: DbEventResultRow[];
+};
+
+type DbEventResultRow = {
+  discord_id: string;
+  position: number | null;
+  dnf?: boolean | null;
+  dns?: boolean | null;
+  points?: number | null;
 };
 
 type DbEventCarRow = {
@@ -114,6 +123,20 @@ const EVENT_LIST_SELECT = `
   event_cars(max_pi, tune_share_code, car_restrictions, cars(id, make, model, year, pi))
 `;
 
+/** Event detail by id — includes published results rows. */
+const EVENT_DETAIL_SELECT = `${EVENT_LIST_SELECT},
+  event_results(discord_id, position, dnf, dns, points)`;
+
+export function mapDbEventResultRows(rows: DbEventResultRow[] | null | undefined): EventResultRow[] {
+  return (rows ?? []).map((r) => ({
+    discordId: r.discord_id,
+    position: r.position,
+    dnf: r.dnf ?? false,
+    dns: r.dns ?? false,
+    points: r.points,
+  }));
+}
+
 function mapAllowedCars(eventCars: DbEventCarRow[] | undefined): ForzaEvent['allowedCars'] {
   return (eventCars ?? [])
     .map((ec) => {
@@ -143,6 +166,9 @@ function mapAllowedCars(eventCars: DbEventCarRow[] | undefined): ForzaEvent['all
 export function mapDbEventWithRelations(row: DbEventRow): ForzaEvent {
   const event = mapDbEvent(row);
   event.allowedCars = mapAllowedCars(row.event_cars);
+  if (row.event_results !== undefined) {
+    event.publishedResults = mapDbEventResultRows(row.event_results);
+  }
   return event;
 }
 
@@ -459,7 +485,7 @@ export async function fetchPublishedEventsResult(
 
 async function fetchPublishedEventViaPostgrest(id: string): Promise<ForzaEvent | undefined> {
   const events = await fetchEventsWithRelations((supabase) =>
-    supabase.from('events').select(EVENT_LIST_SELECT).eq('id', id).neq('status', 'draft'),
+    supabase.from('events').select(EVENT_DETAIL_SELECT).eq('id', id).neq('status', 'draft'),
   );
   if (events === null) return undefined;
   return events[0];

@@ -74,7 +74,17 @@ export interface ForzaEvent {
   threadLabel?: string;
   voiceLabel?: string;
   participants: EventParticipant[];
+  /** Present when loaded via event-detail select (PostgREST or browse-events by id). */
+  publishedResults?: PublishedEventResultRow[];
 }
+
+export type PublishedEventResultRow = {
+  discordId: string;
+  position: number | null;
+  dnf: boolean;
+  dns: boolean;
+  points?: number | null;
+};
 
 export interface AppUser {
   discordId: string;

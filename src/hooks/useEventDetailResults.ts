@@ -53,6 +53,10 @@ export function useEventDetailResults({eventId, event, routeState, refreshKey}: 
       const eid = eventId;
       if (!ev || !eid) return;
 
+      if (ev.publishedResults !== undefined) {
+        applyLoadOutcome(ev.publishedResults, false);
+      }
+
       const first = await loadResultRowsForPublishedEvent(eid, ev);
       if (cancelled) return;
       applyLoadOutcome(first.rows, first.failed);

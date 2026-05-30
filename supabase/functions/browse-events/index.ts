@@ -1,5 +1,5 @@
 import {serve} from 'https://deno.land/std@0.224.0/http/server.ts';
-import {EVENT_LIST_SELECT} from '../_shared/eventListSelect.ts';
+import {EVENT_DETAIL_SELECT, EVENT_LIST_SELECT} from '../_shared/eventListSelect.ts';
 import {databaseErrorResponse, internalErrorResponse} from '../_shared/apiResponse.ts';
 import {jsonResponse, optionsResponse} from '../_shared/cors.ts';
 import {verifyDiscordToken} from '../_shared/discord.ts';
@@ -50,7 +50,7 @@ serve(async (req) => {
     if (eventId) {
       const {data, error} = await supabase
         .from('events')
-        .select(EVENT_LIST_SELECT)
+        .select(EVENT_DETAIL_SELECT)
         .eq('id', eventId)
         .maybeSingle();
 
