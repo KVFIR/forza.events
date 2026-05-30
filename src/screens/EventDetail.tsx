@@ -296,7 +296,9 @@ export function EventDetail() {
   }
 
   if (!event) {
-    if (loading || (!isStandalone && authInitializing)) {
+    const awaitingAuthForPossibleDraft =
+      !isStandalone && authInitializing && !routeEvent;
+    if (loading || awaitingAuthForPossibleDraft) {
       return <PageLoading label={t('loading.event')} className="pb-10 pt-4" />;
     }
 

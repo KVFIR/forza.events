@@ -7,7 +7,7 @@ import {
   useState,
   type ReactNode,
 } from 'react';
-import {useNavigate} from 'react-router-dom';
+import {useLocation, useNavigate} from 'react-router-dom';
 import {fetchLaunchIntent, isApiConfigured} from '../lib/api';
 import {
   getDiscordAccessToken,
@@ -18,7 +18,7 @@ import {
   setResolvedUser,
   type InitResult,
 } from '../lib/discord';
-import {resolveLaunchEventTarget, shouldResolveLaunchRedirect} from '../lib/launchRedirect';
+import {applyLaunchEventRedirect} from '../lib/launchRedirect';
 import {loadDiscordSession, mergeSessionUser} from '../lib/discordAuth';
 import {GUEST_USER} from '../lib/guestUser';
 import type {AppUser} from '../lib/types';
@@ -39,24 +39,11 @@ type AuthState = {
   retryDiscordAuth: () => Promise<void>;
 };
 
-async function navigateToLaunchTarget(
-  result: InitResult,
-  isConfigured: boolean,
-  navigate: (path: string, options: {replace: boolean}) => void,
-  cancelled: () => boolean,
-): Promise<void> {
-  if (!isConfigured || !shouldResolveLaunchRedirect(result)) return;
-
-  const target = await resolveLaunchEventTarget(result, fetchLaunchIntent);
-  if (target && !cancelled()) {
-    navigate(`/event/${target}`, {replace: true});
-  }
-}
-
 const AuthContext = createContext<AuthState | null>(null);
 
 export function AuthProvider({children}: {children: ReactNode}) {
   const navigate = useNavigate();
+  const {pathname} = useLocation();
   const [user, setUser] = useState<AppUser>(GUEST_USER);
   const [loading, setLoading] = useState(true);
   const [discordReady, setDiscordReady] = useState(false);
@@ -71,25 +58,36 @@ export function AuthProvider({children}: {children: ReactNode}) {
 
   useEffect(() => {
     let cancelled = false;
+    setLoading(true);
 
     (async () => {
+      let result: InitResult | undefined;
       try {
-        const result = await initDiscordActivity();
+        result = await initDiscordActivity();
         if (cancelled) return;
 
         setUser(mergeSessionUser(result.user));
         setDiscordReady(result.ready);
         setGuildId(result.guildId);
         setGuildName(result.guildName);
-
-        await navigateToLaunchTarget(result, isConfigured, navigate, () => cancelled);
       } finally {
         if (!cancelled) setLoading(false);
+      }
+
+      if (!cancelled && result) {
+        void applyLaunchEventRedirect(result, {
+          isConfigured,
+          pathname: window.location.pathname,
+          navigate,
+          cancelled: () => cancelled,
+          fetchIntent: fetchLaunchIntent,
+        });
       }
     })();
 
     return () => {
       cancelled = true;
+      setLoading(false);
     };
   }, [navigate, isConfigured]);
 
@@ -134,12 +132,18 @@ export function AuthProvider({children}: {children: ReactNode}) {
       setGuildName(result.guildName);
 
       if (result.accessToken) {
-        await navigateToLaunchTarget(result, isConfigured, navigate, () => false);
+        void applyLaunchEventRedirect(result, {
+          isConfigured,
+          pathname,
+          navigate,
+          cancelled: () => false,
+          fetchIntent: fetchLaunchIntent,
+        });
       }
     } finally {
       setAuthRetrying(false);
     }
-  }, [authRetrying, isConfigured, navigate]);
+  }, [authRetrying, isConfigured, navigate, pathname]);
 
   const value = useMemo(
     () => ({

@@ -2,8 +2,8 @@ import {serve} from 'https://deno.land/std@0.224.0/http/server.ts';
 import {databaseErrorResponse, internalErrorResponse} from '../_shared/apiResponse.ts';
 import {jsonResponse, optionsResponse} from '../_shared/cors.ts';
 import {avatarUrl, discordUniqueUsername, exchangeCode, fetchDiscordUser} from '../_shared/discord.ts';
+import {deferGuildCatalogUpsert} from '../_shared/deferredGuildCatalog.ts';
 import {ensureDiscordUserRow} from '../_shared/discordUserRow.ts';
-import {resolveGuildNameForUser} from '../_shared/guildAccess.ts';
 import {resolveOAuthRedirectUri} from '../_shared/oauthRedirect.ts';
 import {rateLimitOAuthExchange} from '../_shared/rateLimitPresets.ts';
 import {adminClient} from '../_shared/supabase.ts';
@@ -46,17 +46,8 @@ serve(async (req) => {
       return databaseErrorResponse(req, 'token-exchange user load', userErr);
     }
 
-    if (guild_id) {
-      const canonicalName = await resolveGuildNameForUser(
-        tokens.access_token,
-        guild_id,
-      );
-      if (canonicalName) {
-        await supabase.from('discord_guilds').upsert(
-          {guild_id, guild_name: canonicalName},
-          {onConflict: 'guild_id'},
-        );
-      }
+    if (typeof guild_id === 'string' && guild_id.trim()) {
+      deferGuildCatalogUpsert(tokens.access_token, guild_id.trim());
     }
 
     return jsonResponse({
