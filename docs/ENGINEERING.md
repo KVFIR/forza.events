@@ -4,7 +4,7 @@ Practices that protect the frozen MVP during pilot releases.
 
 ## CI
 
-Every push/PR to `main` / `master` runs [`.github/workflows/ci.yml`](../.github/workflows/ci.yml):
+Every push/PR to `main` / `master` runs [`.github/workflows/ci.yml`](../.github/workflows/ci.yml) (Node **20** from [`.nvmrc`](../.nvmrc); duplicate runs on the same ref are cancelled):
 
 1. `npm run typecheck` (SPA + `supabase/functions` Edge shared code)
 2. `npm run test`
