@@ -183,6 +183,7 @@ export type EventResultDisplay = {
 export function resolveEventResultDisplay(
   event: ForzaEvent,
   rows: EventResultRow[],
+  unknownDriverLabel = 'Driver',
 ): EventResultDisplay[] {
   const labelById = new Map(
     event.participants.map((p) => [p.discordId, p.gamertag ?? p.username]),
@@ -191,7 +192,7 @@ export function resolveEventResultDisplay(
   return sortEventResultRows(rows).map((r) => ({
       discordId: r.discordId,
       position: r.position,
-      label: labelById.get(r.discordId) ?? 'Driver',
+      label: labelById.get(r.discordId) ?? unknownDriverLabel,
       dnf: r.dnf,
       dns: r.dns,
       points: r.points,
@@ -498,8 +499,15 @@ export async function fetchEventById(
   return fetchPublishedEventViaPostgrest(id);
 }
 
-export async function fetchEventResults(eventId: string): Promise<EventResultRow[]> {
-  if (!isSupabaseConfigured()) return [];
+export type EventResultsFetchError = 'fetch_failed';
+
+export type EventResultsFetchOutcome = {
+  rows: EventResultRow[];
+  error: EventResultsFetchError | null;
+};
+
+export async function fetchEventResults(eventId: string): Promise<EventResultsFetchOutcome> {
+  if (!isSupabaseConfigured()) return {rows: [], error: null};
 
   const supabase = (await getSupabase())!;
   const {data, error} = await supabase
@@ -510,16 +518,19 @@ export async function fetchEventResults(eventId: string): Promise<EventResultRow
 
   if (error) {
     console.error('fetchEventResults', error);
-    return [];
+    return {rows: [], error: 'fetch_failed'};
   }
 
-  return (data ?? []).map((r) => ({
-    discordId: r.discord_id,
-    position: r.position,
-    dnf: r.dnf ?? false,
-    dns: r.dns ?? false,
-    points: r.points,
-  }));
+  return {
+    rows: (data ?? []).map((r) => ({
+      discordId: r.discord_id,
+      position: r.position,
+      dnf: r.dnf ?? false,
+      dns: r.dns ?? false,
+      points: r.points,
+    })),
+    error: null,
+  };
 }
 
 export type CarSearchResult = {

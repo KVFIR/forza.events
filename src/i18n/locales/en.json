@@ -391,6 +391,16 @@
     "moveDown": "Move down",
     "submitTitle": "Submit results?",
     "submitDesc": "Submit these results? They cannot be changed after submission.",
+    "instructions": "Set finishing order. Mark DNF or DNS (host no-show) where needed. Results cannot be changed after submit.",
+    "signInRequired": "Sign in with Discord to submit results.",
+    "notConfigured": "This app is not configured for saving results.",
+    "loadFailed": "Could not load results. Check your connection and try again.",
+    "existingCheckFailed": "Could not verify whether results were already submitted. You can still submit, or try again.",
+    "pendingHost": "Results have not been posted yet.",
+    "noneRecorded": "No results recorded.",
+    "posHeader": "Pos",
+    "driverHeader": "Driver",
+    "unknownDriver": "Driver",
     "noParticipants": "Add drivers who joined the event, or set yourself as convoy leader on the event — the leader always races and can be ranked in results."
   },
   "confirm": {

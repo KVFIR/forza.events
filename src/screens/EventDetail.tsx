@@ -18,11 +18,10 @@ import type {ForzaEvent} from '../lib/types';
 import {
   canSubmitEventResults,
   fetchEventById,
-  fetchEventResults,
+  isEventSuccessfullyCompleted,
   resolveEventResultDisplay,
   shouldShowEventResults,
   userHasParticipantRow,
-  type EventResultRow,
 } from '../lib/events';
 import {EventResultsTable} from '../components/EventResultsTable';
 import {ParticipantDisplayNames} from '../components/ParticipantDisplayNames';
@@ -57,7 +56,9 @@ import {
   buildEventRichPresence,
   type EventRichPresenceRole,
 } from '../lib/discordRichPresence';
+import {useEventDetailResults} from '../hooks/useEventDetailResults';
 import {useEventLiveUpdates} from '../hooks/useEventLiveUpdates';
+import type {EventDetailLocationState} from '../lib/navigationState';
 import {useResolveEventDisplayStatus} from '../hooks/useResolveEventDisplayStatus';
 import {formatCarDisplayName} from '../lib/carDisplay';
 import {piClassColor, piToClass} from '../lib/pi';
@@ -72,18 +73,14 @@ import {cn} from '../lib/cn';
 const carRuleRowClass =
   'grid grid-cols-[minmax(0,1fr)_3.5rem] items-center gap-x-3 text-sm leading-tight';
 
-type EventDetailLocationState = {
-  event?: ForzaEvent;
-};
-
 export function EventDetail() {
   const {t} = useTranslation();
   const navigate = useNavigate();
   const location = useLocation();
   const {id} = useParams<{id: string}>();
-  const routeEvent = (location.state as EventDetailLocationState | null)?.event;
+  const routeState = location.state as EventDetailLocationState | null;
+  const routeEvent = routeState?.event;
   const [event, setEvent] = useState<ForzaEvent | undefined>();
-  const [resultRows, setResultRows] = useState<EventResultRow[]>([]);
   const [loading, setLoading] = useState(true);
   const loadedForIdRef = useRef<string | null>(null);
   const fetchSeqRef = useRef(0);
@@ -109,14 +106,20 @@ export function EventDetail() {
   const [actionError, setActionError] = useState<string | null>(null);
   const participationInFlightRef = useRef(false);
 
+  const {resultRows, resultsLoadFailed, retryResultsLoad} = useEventDetailResults({
+    eventId: id,
+    event,
+    routeState,
+    refreshKey,
+  });
+
   const reloadEvent = useCallback(() => {
     if (!id || participationInFlightRef.current) return;
-    void fetchEventById(id, {discordToken}).then(async (ev) => {
-      setEvent(ev);
-      if (ev && shouldShowEventResults(ev)) {
-        setResultRows(await fetchEventResults(id));
-      }
-    });
+    void fetchEventById(id, {discordToken})
+      .then((ev) => {
+        if (ev) setEvent(ev);
+      })
+      .catch((err) => console.error('reloadEvent', err));
   }, [id, discordToken]);
 
   useEventLiveUpdates(id, reloadEvent);
@@ -153,24 +156,19 @@ export function EventDetail() {
     if (idChanged) {
       loadedForIdRef.current = id;
       setEvent(routeEvent?.id === id ? routeEvent : undefined);
-      setResultRows([]);
       setLoading(true);
     }
 
     void fetchEventById(id, {discordToken})
-      .then(async (ev) => {
+      .then((ev) => {
         if (fetchSeqRef.current !== seq) return;
         if (ev) {
           setEvent(ev);
         } else if (!routeEvent || routeEvent.id !== id) {
           setEvent(undefined);
         }
-        if (ev && shouldShowEventResults(ev)) {
-          setResultRows(await fetchEventResults(id));
-        } else {
-          setResultRows([]);
-        }
       })
+      .catch((err) => console.error('fetchEventById', err))
       .finally(() => {
         if (fetchSeqRef.current === seq) setLoading(false);
       });
@@ -332,10 +330,19 @@ export function EventDetail() {
   const when = formatEventStart(ev.startsAt);
   const fillPct = Math.round((ev.currentPlayers / LOBBY_TOTAL_PLAYERS) * 100);
   const finalized = isEventFinalized(event);
-  const resultDisplay = resolveEventResultDisplay(event, resultRows);
+  const resultDisplay = resolveEventResultDisplay(
+    event,
+    resultRows,
+    t('results.unknownDriver'),
+  );
   const convoyLeader = resolveConvoyLeader(ev, user.discordId);
   const registeredDrivers = resolveRegisteredDrivers(ev.participants);
+  /** Lifecycle from server row — not `displayEvent` (lobby patch only). */
   const showResultsSection = shouldShowEventResults(event);
+  const resultsAwaitingHost =
+    showResultsSection &&
+    !isEventSuccessfullyCompleted(event) &&
+    resultDisplay.length === 0;
   const showParticipantActions = !isHost && !isDraft;
   const needsSignInToParticipate =
     showParticipantActions && !isSignedIn && !isStandalone && !authInitializing;
@@ -552,7 +559,9 @@ export function EventDetail() {
           <p className={cn(sectionLabelClass, 'mb-2')}>{t('eventDetail.results')}</p>
           <EventResultsTable
             rows={resultDisplay}
-            pending={resultDisplay.length === 0}
+            pending={resultsAwaitingHost}
+            loadFailed={resultsLoadFailed}
+            onRetryLoad={retryResultsLoad}
             viewerDiscordId={user.discordId}
           />
         </div>

@@ -2,29 +2,50 @@ import {useTranslation} from 'react-i18next';
 import {hasFinishingPosition} from '../lib/eventResults';
 import type {EventResultDisplay} from '../lib/events';
 import {cn} from '../lib/cn';
+import {TextButton} from './ui/TextButton';
 import {Panel} from './ui/Panel';
 import {panelDividedClass, sectionLabelClass} from './ui/formStyles';
 
 type Props = {
   rows: EventResultDisplay[];
   pending?: boolean;
+  loadFailed?: boolean;
+  onRetryLoad?: () => void;
   /** Highlight the signed-in participant's row. */
   viewerDiscordId?: string;
 };
 
-export function EventResultsTable({rows, pending, viewerDiscordId}: Props) {
+export function EventResultsTable({
+  rows,
+  pending,
+  loadFailed,
+  onRetryLoad,
+  viewerDiscordId,
+}: Props) {
   const {t} = useTranslation();
+
+  if (loadFailed) {
+    return (
+      <Panel className="flex flex-col gap-3 px-4 py-3 text-sm text-muted">
+        <p>{t('results.loadFailed')}</p>
+        {onRetryLoad ? (
+          <TextButton tone="emphasis" className="self-start text-xs" onClick={onRetryLoad}>
+            {t('common.tryAgain')}
+          </TextButton>
+        ) : null}
+      </Panel>
+    );
+  }
+
   if (pending) {
     return (
-      <Panel className="px-4 py-3 text-sm text-muted">
-        Results have not been posted yet.
-      </Panel>
+      <Panel className="px-4 py-3 text-sm text-muted">{t('results.pendingHost')}</Panel>
     );
   }
 
   if (rows.length === 0) {
     return (
-      <Panel className="px-4 py-3 text-sm text-muted">No results recorded.</Panel>
+      <Panel className="px-4 py-3 text-sm text-muted">{t('results.noneRecorded')}</Panel>
     );
   }
 
@@ -36,8 +57,8 @@ export function EventResultsTable({rows, pending, viewerDiscordId}: Props) {
           sectionLabelClass,
         )}
       >
-        <span>Pos</span>
-        <span>Driver</span>
+        <span>{t('results.posHeader')}</span>
+        <span>{t('results.driverHeader')}</span>
       </div>
       <ol className={panelDividedClass}>
         {rows.map((row) => {
@@ -49,7 +70,7 @@ export function EventResultsTable({rows, pending, viewerDiscordId}: Props) {
               ? t('results.dnf')
               : showPosition
                 ? String(row.position)
-                : '—';
+                : t('results.noPosition');
 
           return (
             <li

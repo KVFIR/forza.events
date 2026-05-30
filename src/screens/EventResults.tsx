@@ -1,4 +1,4 @@
-import {useEffect, useMemo, useState} from 'react';
+import {useCallback, useEffect, useMemo, useState} from 'react';
 import {useTranslation} from 'react-i18next';
 import {busyLabel} from '../i18n/busyLabels';
 import {useNavigate, useParams} from 'react-router-dom';
@@ -9,22 +9,23 @@ import {useJoinedEvents} from '../context/JoinedEventsContext';
 import {buildResultsRichPresence} from '../lib/discordRichPresence';
 import {mergeOptimisticEventPatch} from '../lib/eventParticipation';
 import type {ForzaEvent} from '../lib/types';
-import {isApiConfigured, submitEventResults} from '../lib/api';
+import {ApiRequestError, isApiConfigured, submitEventResults} from '../lib/api';
+import {API_ERROR_CODES} from '../lib/apiErrorCodes';
 import {buildResultSubmitRows} from '../lib/eventResults';
 import {resolveResultsRoster} from '../lib/eventRoster';
+import {fetchEventById, fetchEventResults} from '../lib/events';
 import {
-  canSubmitEventResults,
-  eventHasStarted,
-  fetchEventById,
-  fetchEventResults,
-} from '../lib/events';
+  savedCountFromResultsFetch,
+  shouldLeaveResultsScreen,
+} from '../lib/eventResultsScreen';
+import {buildEventDetailNavigateStateAfterSubmit} from '../lib/navigationState';
 import type {EventParticipant} from '../lib/types';
 import {Alert} from '../components/ui/Alert';
 import {Button} from '../components/ui/Button';
 import {CheckboxField} from '../components/ui/CheckboxField';
 import {Panel} from '../components/ui/Panel';
 import {UserAvatar} from '../components/UserAvatar';
-import {TextLink} from '../components/ui/TextButton';
+import {TextButton, TextLink} from '../components/ui/TextButton';
 import {ConfirmDialog} from '../components/ui/ConfirmDialog';
 import {ContentReveal} from '../components/ui/ContentReveal';
 import {PageLoading} from '../components/ui/PageLoading';
@@ -61,12 +62,13 @@ export function EventResults() {
   const {bumpRefresh, getLobbyPatch} = useJoinedEvents();
   const [placements, setPlacements] = useState<Placement[]>([]);
   const [loading, setLoading] = useState(true);
+  const [resultsCheckFailed, setResultsCheckFailed] = useState(false);
+  const [recheckingResults, setRecheckingResults] = useState(false);
   const showLoadingUI = useLoadingUI(loading);
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [title, setTitle] = useState('');
   const [event, setEvent] = useState<ForzaEvent | null>(null);
-  const [alreadySubmitted, setAlreadySubmitted] = useState(false);
   const [submitConfirmOpen, setSubmitConfirmOpen] = useState(false);
   const {setRichPresenceOverride} = useRichPresenceOverride();
 
@@ -81,37 +83,85 @@ export function EventResults() {
     return () => setRichPresenceOverride(null);
   }, [displayEvent, setRichPresenceOverride]);
 
+  const discordToken = getAccessToken();
+
+  const recheckExistingResults = useCallback(async () => {
+    if (!id || !event) return;
+    setRecheckingResults(true);
+    setResultsCheckFailed(false);
+    try {
+      const savedOutcome = await fetchEventResults(id);
+      const savedCount = savedCountFromResultsFetch(savedOutcome);
+
+      if (savedOutcome.error === 'fetch_failed') {
+        setResultsCheckFailed(true);
+        return;
+      }
+
+      if (shouldLeaveResultsScreen(event, savedCount, user)) {
+        navigate(`/event/${id}`, {replace: true});
+      }
+    } catch (err) {
+      console.error('EventResults recheck', err);
+      setResultsCheckFailed(true);
+    } finally {
+      setRecheckingResults(false);
+    }
+  }, [id, event, user, navigate]);
+
   useEffect(() => {
     if (!id) return;
     let cancelled = false;
     setLoading(true);
-    void Promise.all([fetchEventById(id), fetchEventResults(id)])
-      .then(([loaded, saved]) => {
-        if (cancelled || !loaded) return;
+    setResultsCheckFailed(false);
+
+    void (async () => {
+      try {
+        const loaded = await fetchEventById(id, {discordToken});
+        if (cancelled) return;
+
+        if (!loaded) {
+          navigate(`/event/${id}`, {replace: true});
+          return;
+        }
+
         setEvent(loaded);
         setTitle(loaded.title);
-        if (!canSubmitEventResults(loaded, user)) {
+
+        if (shouldLeaveResultsScreen(loaded, null, user)) {
           navigate(`/event/${id}`, {replace: true});
           return;
         }
-        if (!eventHasStarted(loaded)) {
+
+        const savedOutcome = await fetchEventResults(id);
+        if (cancelled) return;
+
+        const savedCount = savedCountFromResultsFetch(savedOutcome);
+
+        if (savedOutcome.error === 'fetch_failed') {
+          setResultsCheckFailed(true);
+        }
+
+        if (shouldLeaveResultsScreen(loaded, savedCount, user)) {
           navigate(`/event/${id}`, {replace: true});
           return;
         }
-        if (saved.length > 0) {
-          setAlreadySubmitted(true);
-          navigate(`/event/${id}`, {replace: true});
-          return;
-        }
+
         setPlacements(buildPlacements(resolveResultsRoster(loaded)));
-      })
-      .finally(() => {
+      } catch (err) {
+        if (!cancelled) {
+          console.error('EventResults load', err);
+          navigate(`/event/${id}`, {replace: true});
+        }
+      } finally {
         if (!cancelled) setLoading(false);
-      });
+      }
+    })();
+
     return () => {
       cancelled = true;
     };
-  }, [id, user, navigate]);
+  }, [id, user, navigate, discordToken]);
 
   function move(index: number, dir: -1 | 1) {
     const next = index + dir;
@@ -140,22 +190,22 @@ export function EventResults() {
   }
 
   async function handleSubmit() {
-    if (!id || placements.length === 0 || alreadySubmitted) return;
+    if (!id || placements.length === 0) return;
     setSaving(true);
     setError(null);
 
     try {
       const token = getAccessToken();
       if (!isSignedIn || !token) {
-        throw new Error('Sign in with Discord to submit results.');
+        throw new Error(t('results.signInRequired'));
       }
       if (!isApiConfigured()) {
-        throw new Error('App is not configured for saving results.');
+        throw new Error(t('results.notConfigured'));
       }
 
       const fresh = await fetchEventById(id, {discordToken: token});
       if (!fresh) {
-        throw new Error('Event not found.');
+        throw new Error(t('eventDetail.notFound'));
       }
       const allowedIds = new Set(
         resolveResultsRoster(fresh).map((p) => p.discordId),
@@ -169,9 +219,25 @@ export function EventResults() {
       }
 
       await submitEventResults(token, id, payload);
+      const [updated, savedOutcome] = await Promise.all([
+        fetchEventById(id, {discordToken: token}),
+        fetchEventResults(id),
+      ]);
       bumpRefresh();
-      navigate(`/event/${id}`);
+      const detailEvent = updated ?? fresh;
+      navigate(`/event/${id}`, {
+        replace: true,
+        state: buildEventDetailNavigateStateAfterSubmit(detailEvent, savedOutcome),
+      });
     } catch (e) {
+      if (
+        e instanceof ApiRequestError &&
+        e.code === API_ERROR_CODES.RESULTS_ALREADY_SUBMITTED &&
+        id
+      ) {
+        navigate(`/event/${id}`, {replace: true});
+        return;
+      }
       setError(e instanceof Error ? e.message : String(e));
     } finally {
       setSaving(false);
@@ -182,7 +248,7 @@ export function EventResults() {
     return <PageLoading label={t('loading.results')} className="pb-10 pt-5" />;
   }
 
-  if (loading) {
+  if (loading || !event) {
     return null;
   }
 
@@ -198,9 +264,21 @@ export function EventResults() {
       </TextLink>
 
       <p className="text-sm font-semibold text-white">{title}</p>
-      <p className="mt-1 text-xs text-muted">
-        Set finishing order. Mark DNF or DNS (host no-show) where needed. Results cannot be changed after submit.
-      </p>
+      <p className="mt-1 text-xs text-muted">{t('results.instructions')}</p>
+
+      {resultsCheckFailed && (
+        <Alert variant="info" className="mt-4 flex flex-col gap-2">
+          <p>{t('results.existingCheckFailed')}</p>
+          <TextButton
+            tone="emphasis"
+            className="self-start text-xs"
+            disabled={recheckingResults}
+            onClick={() => void recheckExistingResults()}
+          >
+            {recheckingResults ? busyLabel('working') : t('common.tryAgain')}
+          </TextButton>
+        </Alert>
+      )}
 
       {error && (
         <Alert variant="info" className="mt-4">
@@ -282,7 +360,7 @@ export function EventResults() {
         variant="primary"
         fullWidth
         className="mt-8"
-        disabled={saving || placements.length === 0 || alreadySubmitted}
+        disabled={saving || placements.length === 0}
         onClick={() => setSubmitConfirmOpen(true)}
       >
         {saving ? busyLabel('saving') : t('eventDetail.submitResults')}

@@ -5,6 +5,7 @@ import {
   isBrowseFeedEvent,
   isRegistrationOpen,
   resolveEventDisplayStatus,
+  shouldShowEventResults,
   validateDraftForm,
 } from './eventSpec';
 import {VALIDATION_CODES} from './validationCodes';
@@ -146,5 +147,67 @@ describe('resolveEventDisplayStatus', () => {
       startsAt: new Date(Date.now() - 60_000).toISOString(),
     });
     expect(resolveEventDisplayStatus(e)).toBe('live');
+  });
+});
+
+describe('shouldShowEventResults', () => {
+  it('shows for completed events', () => {
+    expect(
+      shouldShowEventResults(
+        event({
+          lifecycle: 'completed',
+          status: 'ended',
+          startsAt: new Date(Date.now() - 3_600_000).toISOString(),
+        }),
+      ),
+    ).toBe(true);
+  });
+
+  it('hides for cancelled events', () => {
+    expect(
+      shouldShowEventResults(
+        event({
+          lifecycle: 'cancelled',
+          status: 'ended',
+          startsAt: new Date(Date.now() - 3_600_000).toISOString(),
+        }),
+      ),
+    ).toBe(false);
+  });
+
+  it('shows pending section after start before host submit', () => {
+    expect(
+      shouldShowEventResults(
+        event({
+          lifecycle: 'open',
+          status: 'live',
+          startsAt: new Date(Date.now() - 60_000).toISOString(),
+        }),
+      ),
+    ).toBe(true);
+  });
+
+  it('hides before start', () => {
+    expect(
+      shouldShowEventResults(
+        event({
+          lifecycle: 'open',
+          status: 'open',
+          startsAt: new Date(Date.now() + 86_400_000).toISOString(),
+        }),
+      ),
+    ).toBe(false);
+  });
+
+  it('hides for archived events after start', () => {
+    expect(
+      shouldShowEventResults(
+        event({
+          lifecycle: 'archived',
+          status: 'ended',
+          startsAt: new Date(Date.now() - 3_600_000).toISOString(),
+        }),
+      ),
+    ).toBe(false);
   });
 });

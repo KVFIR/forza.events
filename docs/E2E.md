@@ -161,6 +161,9 @@ Manual QA matrix aligned with current code behavior (not an abstract checklist).
 - [ ] Field edit closed (`canEditEvent` false).
 - [ ] Cancel → confirm → `cancelled`; grey embed; button disabled.
 - [ ] Submit results → immutable (repeat → 409).
+- [ ] Submit results → **Event Detail** shows table immediately (navigation seed); no false “pending host” flash.
+- [ ] **Event Detail** results load error → **Try again** recovers table (Activity proxy / offline).
+- [ ] **Submit results** screen: if existing-results check fails, warning + **Try again** still allows submit; successful recheck redirects when rows exist.
 
 ### Post-results
 
