@@ -1,5 +1,5 @@
 /** Message component custom_id prefix for publish embed → Activity deep link. */
-export const OPEN_EVENT_BUTTON_PREFIX = 'open_event:';
+const OPEN_EVENT_BUTTON_PREFIX = 'open_event:';
 
 export function eventIdFromOpenEventCustomId(
   customId: string | null | undefined,

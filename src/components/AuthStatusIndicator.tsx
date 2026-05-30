@@ -1,6 +1,9 @@
+import {useTranslation} from 'react-i18next';
 import {useAuth} from '../context/AuthContext';
 import {resolveAuthStatus, type AuthStatusTone} from '../lib/authStatus';
 import {canRetryDiscordActivityAuth} from '../lib/discord';
+import {startDiscordBrowserSignIn} from '../lib/discordBrowserSignIn';
+import {isLocalDevHost} from '../lib/runtime';
 import {cn} from '../lib/cn';
 import {statusPillClass} from './ui/formStyles';
 
@@ -12,15 +15,18 @@ const dotTone: Record<AuthStatusTone, string> = {
 };
 
 export function AuthStatusIndicator({className}: {className?: string}) {
+  const {t} = useTranslation();
   const {isConfigured, isSignedIn, isStandalone, loading, authRetrying, retryDiscordAuth} = useAuth();
   const busy = loading || authRetrying;
-  const {label, tone, retryable} = resolveAuthStatus({
+  const {label, tone, retryable, browserSignIn} = resolveAuthStatus({
     isConfigured,
     loading: busy,
     isSignedIn,
     isStandalone,
+    isLocalDev: isLocalDevHost(),
   });
   const canRetry = Boolean(retryable && canRetryDiscordActivityAuth() && !busy);
+  const canBrowserSignIn = Boolean(browserSignIn && isConfigured && !busy);
 
   const content = (
     <>
@@ -30,6 +36,23 @@ export function AuthStatusIndicator({className}: {className?: string}) {
       <span className="text-[10px] font-medium tracking-wide text-muted-light">{label}</span>
     </>
   );
+
+  if (canBrowserSignIn) {
+    return (
+      <button
+        type="button"
+        onClick={() => startDiscordBrowserSignIn()}
+        className={cn(
+          statusPillClass,
+          'cursor-pointer transition-colors hover:border-white/20 hover:bg-white/[0.07] active:bg-white/[0.1]',
+          className,
+        )}
+        aria-label={t('auth.signInWithDiscord')}
+      >
+        {content}
+      </button>
+    );
+  }
 
   if (canRetry) {
     return (
@@ -41,7 +64,7 @@ export function AuthStatusIndicator({className}: {className?: string}) {
           'cursor-pointer transition-colors hover:border-white/20 hover:bg-white/[0.07] active:bg-white/[0.1]',
           className,
         )}
-        aria-label={`${label}. Tap to sign in again.`}
+        aria-label={t('auth.signInAgainAria', {label})}
       >
         {content}
       </button>

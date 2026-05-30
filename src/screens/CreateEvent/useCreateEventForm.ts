@@ -1,5 +1,6 @@
 import {useCallback, useEffect, useMemo, useState} from 'react';
 import {useNavigate, useSearchParams} from 'react-router-dom';
+import i18n from '../../i18n';
 import type {CarRuleMode, EventType} from '../../lib/types';
 import {useAuth} from '../../context/AuthContext';
 import {useJoinedEvents} from '../../context/JoinedEventsContext';
@@ -302,7 +303,7 @@ export function useCreateEventForm() {
 
   function buildPayload() {
     if (!isEventType(type)) {
-      throw new Error('Event type is required');
+      throw new Error(i18n.t('validation.typeRequired'));
     }
     const tz = defaultTimezone();
     return {

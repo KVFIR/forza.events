@@ -67,7 +67,7 @@ import {resolveOrganiserLabel} from '../lib/organiser';
 import {resolveConvoyLeader, resolveRegisteredDrivers} from '../lib/eventRoster';
 import {participationButtonLabel, participationButtonVariant} from '../lib/eventActions';
 import {mergeOptimisticEventPatch} from '../lib/eventParticipation';
-import {gamertagError, hasGamertag} from '../lib/gamertag';
+import {useEventDetailParticipation} from '../hooks/useEventDetailParticipation';
 import {cn} from '../lib/cn';
 
 const carRuleRowClass =
@@ -84,8 +84,7 @@ export function EventDetail() {
   const [loading, setLoading] = useState(true);
   const loadedForIdRef = useRef<string | null>(null);
   const fetchSeqRef = useRef(0);
-  const {isJoined, joinParticipation, leaveParticipation, bumpRefresh, refreshKey, getLobbyPatch} =
-    useJoinedEvents();
+  const {isJoined, bumpRefresh, refreshKey, getLobbyPatch} = useJoinedEvents();
   const {
     user,
     getAccessToken,
@@ -93,18 +92,12 @@ export function EventDetail() {
     isStandalone,
     loading: authInitializing,
     authRetrying,
-    retryDiscordAuth,
   } = useAuth();
   const discordToken = getAccessToken();
-  const [gamertagOpen, setGamertagOpen] = useState(false);
-  const [joining, setJoining] = useState(false);
-  const [leaving, setLeaving] = useState(false);
-  const [joinError, setJoinError] = useState<string | null>(null);
   const [cancelling, setCancelling] = useState(false);
   const [confirmAction, setConfirmAction] = useState<'delete' | 'cancel' | null>(null);
   const [deleting, setDeleting] = useState(false);
   const [actionError, setActionError] = useState<string | null>(null);
-  const participationInFlightRef = useRef(false);
 
   const {resultRows, resultsLoadFailed, retryResultsLoad} = useEventDetailResults({
     eventId: id,
@@ -113,14 +106,26 @@ export function EventDetail() {
     refreshKey,
   });
 
+  const participation = useEventDetailParticipation(event);
+  const {
+    gamertagOpen,
+    setGamertagOpen,
+    joining,
+    leaving,
+    joinError,
+    isParticipationInFlight,
+    handleJoinClick,
+    doJoin,
+  } = participation;
+
   const reloadEvent = useCallback(() => {
-    if (!id || participationInFlightRef.current) return;
+    if (!id || isParticipationInFlight()) return;
     void fetchEventById(id, {discordToken})
       .then((ev) => {
         if (ev) setEvent(ev);
       })
       .catch((err) => console.error('reloadEvent', err));
-  }, [id, discordToken]);
+  }, [id, discordToken, isParticipationInFlight]);
 
   useEventLiveUpdates(id, reloadEvent);
 
@@ -174,52 +179,6 @@ export function EventDetail() {
       });
   }, [id, refreshKey, discordToken, routeEvent]);
 
-  async function handleJoinClick() {
-    if (!event) return;
-    if (!isSignedIn) {
-      if (!isStandalone) void retryDiscordAuth();
-      return;
-    }
-    if (isCurrentConvoyLeader) {
-      setJoinError(t('errors.leaderCannotLeave'));
-      return;
-    }
-    if (isJoined(event)) {
-      if (!canLeaveRegistration(event)) {
-        setJoinError(t('participation.leaveLockedAfterStart'));
-        return;
-      }
-      await doLeave();
-      return;
-    }
-    if (!hasGamertag(user.xboxGamertag)) {
-      setGamertagOpen(true);
-      return;
-    }
-    await doJoin(user.xboxGamertag!.trim());
-  }
-
-  async function doLeave() {
-    if (!event) return;
-    const token = getAccessToken();
-    if (!isSignedIn || !token) {
-      setJoinError(t('auth.signInDiscordJoin'));
-      return;
-    }
-
-    setLeaving(true);
-    setJoinError(null);
-    participationInFlightRef.current = true;
-    try {
-      await leaveParticipation(event);
-    } catch (err) {
-      setJoinError(err instanceof Error ? err.message : t('eventDetail.leaveFailed'));
-    } finally {
-      participationInFlightRef.current = false;
-      setLeaving(false);
-    }
-  }
-
   async function handleCancelEvent() {
     if (!event) return;
     const token = getAccessToken();
@@ -262,34 +221,6 @@ export function EventDetail() {
       setActionError(err instanceof Error ? err.message : t('eventDetail.deleteFailed'));
     } finally {
       setDeleting(false);
-    }
-  }
-
-  async function doJoin(gamertag: string) {
-    if (!event) return;
-    const token = getAccessToken();
-    if (!isSignedIn || !token) {
-      setJoinError(t('auth.signInDiscordJoin'));
-      return;
-    }
-    const trimmed = gamertag.trim();
-    const tagErr = gamertagError(trimmed);
-    if (tagErr) {
-      setJoinError(tagErr);
-      setGamertagOpen(true);
-      return;
-    }
-    setJoining(true);
-    setJoinError(null);
-    participationInFlightRef.current = true;
-    try {
-      await joinParticipation(event, trimmed);
-    } catch (err) {
-      setJoinError(err instanceof Error ? err.message : t('eventDetail.joinFailed'));
-    } finally {
-      participationInFlightRef.current = false;
-      setJoining(false);
-      setGamertagOpen(false);
     }
   }
 
@@ -339,6 +270,8 @@ export function EventDetail() {
   const registeredDrivers = resolveRegisteredDrivers(ev.participants);
   /** Lifecycle from server row — not `displayEvent` (lobby patch only). */
   const showResultsSection = shouldShowEventResults(event);
+  const showRegistrationProgress =
+    !showResultsSection && event.lifecycle !== 'cancelled';
   const resultsAwaitingHost =
     showResultsSection &&
     !isEventSuccessfullyCompleted(event) &&
@@ -564,7 +497,7 @@ export function EventDetail() {
             viewerDiscordId={user.discordId}
           />
         </div>
-      ) : (
+      ) : showRegistrationProgress ? (
         <div className="mt-4">
           <div className="flex items-center gap-3">
             <div className="h-1.5 flex-1 overflow-hidden rounded-full bg-white/[0.06]">
@@ -583,7 +516,7 @@ export function EventDetail() {
             </span>
           </div>
         </div>
-      )}
+      ) : null}
 
       <Panel divided className="mt-5 overflow-hidden">
 

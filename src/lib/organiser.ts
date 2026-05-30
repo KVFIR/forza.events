@@ -14,8 +14,3 @@ export function resolveOrganiserLabel(event: OrganiserSource): string {
   const host = formatDiscordHandle(event.hostUsername);
   return host || 'Host';
 }
-
-/** True when UI falls back to the individual host (no real guild name on the event). */
-export function isHostOrganiser(event: OrganiserSource): boolean {
-  return isPlaceholderGuildName(event.guildName);
-}

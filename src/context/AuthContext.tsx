@@ -183,8 +183,3 @@ export function useAuth(): AuthState {
   if (!ctx) throw new Error('useAuth must be used within AuthProvider');
   return ctx;
 }
-
-export function useGuildContext() {
-  const {guildId, guildName} = useAuth();
-  return {guildId, guildName};
-}

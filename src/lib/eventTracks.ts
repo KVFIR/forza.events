@@ -41,14 +41,6 @@ export function tracksToRows(tracks: EventTrack[]): EventTrackRow[] {
   }));
 }
 
-export function rowsToTracks(rows: EventTrackRow[]): EventTrack[] {
-  return rows.map((r) => ({
-    name: r.name?.trim() ?? '',
-    shareCode: r.share_code?.trim() ? normalizeShareCode(r.share_code) : null,
-    format: r.format?.trim() || null,
-  }));
-}
-
 export function parseTracksJson(tracks: unknown): EventTrack[] {
   if (!Array.isArray(tracks)) return [];
   const result: EventTrack[] = [];

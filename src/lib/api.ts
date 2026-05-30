@@ -3,7 +3,7 @@ import {API_ERROR_CODES} from './apiErrorCodes';
 import {createSupabaseFetch, isDiscordActivityFrame} from './supabaseEnv';
 import {isSupabaseConfigured, resolveSupabaseUrl} from './supabase';
 
-export {ApiRequestError, mapApiError} from './apiErrors';
+export {ApiRequestError} from './apiErrors';
 
 function apiBase(): string {
   const explicit = import.meta.env.VITE_API_BASE_URL as string | undefined;

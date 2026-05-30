@@ -2,8 +2,6 @@ import type {ReactNode} from 'react';
 import {useTranslation} from 'react-i18next';
 import {cn} from '../../../lib/cn';
 import {
-  controlInvalidClass,
-  dividerClass,
   fieldErrorClass,
   fieldHintClass,
   fieldLabelClass,
@@ -68,12 +66,4 @@ export function FormSection({
       <div className="space-y-5">{children}</div>
     </section>
   );
-}
-
-export function Divider() {
-  return <div className={dividerClass} />;
-}
-
-export function fieldInputClass(hasError: boolean) {
-  return cn(hasError && controlInvalidClass);
 }

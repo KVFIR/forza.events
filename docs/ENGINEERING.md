@@ -39,6 +39,18 @@ When changing validation rules, update **both** `src/lib/eventSpec.ts` and `supa
 
 Automated Activity tests are not in CI. Before pilot sign-off, run [`E2E.md`](E2E.md) (P0 on deploy day, P1–P2 during pilot week).
 
+## Dead code (Knip)
+
+Optional audit on the SPA entry graph (informational — not a CI gate):
+
+```bash
+npx knip
+```
+
+Config: [`knip.json`](../knip.json) (`src/main.tsx` only — Edge Functions use separate Deno entry points).
+
+The report lists unused exports reachable from the entry graph. Many are intentional shared UI tokens, validation helpers used from tests, or symbols kept for parity with Edge/shared modules. Treat findings as a cleanup backlog; do not delete exports solely because Knip flags them without checking imports and test-only usage.
+
 ## Not in scope yet
 
 - ESLint across the full repo

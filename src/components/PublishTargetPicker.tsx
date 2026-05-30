@@ -12,6 +12,9 @@ import {InlineLoading} from './ui/InlineLoading';
 import {ModalBackdrop, ModalPanel} from './ui/ModalShell';
 import {TextButton} from './ui/TextButton';
 
+/** Internal option name when channel list has not loaded yet but `channelId` is set. */
+const SELECTED_CHANNEL_SENTINEL = '__forza_selected_channel__';
+
 type Props = {
   accessToken: string;
   guildId: string;
@@ -60,7 +63,7 @@ export function PublishTargetPicker({
 
   const channelOptions = useMemo(() => {
     if (channelId && !channels.some((c) => c.id === channelId)) {
-      return [{id: channelId, name: 'selected-channel'}, ...channels];
+      return [{id: channelId, name: SELECTED_CHANNEL_SENTINEL}, ...channels];
     }
     return channels;
   }, [channels, channelId]);
@@ -270,7 +273,9 @@ export function PublishTargetPicker({
               <option value="">{t('publish.selectChannel')}</option>
               {channelOptions.map((c) => (
                 <option key={c.id} value={c.id}>
-                  {c.name === 'selected-channel' ? 'Selected channel' : `#${c.name}`}
+                  {c.name === SELECTED_CHANNEL_SENTINEL
+                    ? t('create.selectedChannel')
+                    : `#${c.name}`}
                 </option>
               ))}
             </Select>

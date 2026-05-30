@@ -13,6 +13,7 @@ import {useParticipantResults} from '../hooks/useParticipantResults';
 import {isEventSuccessfullyCompleted} from '../lib/eventSpec';
 import {formatDiscordHandle} from '../lib/discordHandle';
 import {hasGamertag} from '../lib/gamertag';
+import {isLocalDevHost} from '../lib/runtime';
 import {SignInRequiredState} from '../components/SignInRequiredState';
 import {ContentReveal} from '../components/ui/ContentReveal';
 import {EmptyState} from '../components/ui/EmptyState';
@@ -52,15 +53,25 @@ export function Profile() {
   ).length;
   const participatedCount = participatedCompleted.length;
 
-  if (isConfigured && !isStandalone && !isSignedIn && !authInitializing) {
-    return (
-      <SignInRequiredState
-        description={t('auth.signInProfile')}
-        busy={authRetrying}
-        onRetry={() => void retryDiscordAuth()}
-        className="pb-10 pt-5"
-      />
-    );
+  if (isConfigured && !isSignedIn && !authInitializing) {
+    if (isStandalone && isLocalDevHost()) {
+      return (
+        <SignInRequiredState
+          description={t('auth.signInProfile')}
+          className="pb-10 pt-5"
+        />
+      );
+    }
+    if (!isStandalone) {
+      return (
+        <SignInRequiredState
+          description={t('auth.signInProfile')}
+          busy={authRetrying}
+          onRetry={() => void retryDiscordAuth()}
+          className="pb-10 pt-5"
+        />
+      );
+    }
   }
 
   if (isLoading) {

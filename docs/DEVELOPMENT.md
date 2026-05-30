@@ -25,7 +25,7 @@ npm run build
 
 GitHub Actions runs the same on every push/PR to `main` / `master`.
 
-Open http://localhost:5180 → **Sign in** (navbar) for create/join/profile → browse events.
+Open http://localhost:5180 → tap the auth status pill in the **navbar** (or Profile) to **Sign in with Discord** for create/join/publish → browse events without sign-in.
 
 ---
 

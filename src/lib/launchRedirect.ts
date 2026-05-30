@@ -3,7 +3,7 @@ import type {InitResult} from './discord';
 export type LaunchRedirectInput = Pick<InitResult, 'ready' | 'accessToken' | 'launchEventId' | 'guildId'>;
 
 /** Embed button set `custom_id` to `open_event:{id}`. */
-export function hasEmbedLaunchEventId(result: LaunchRedirectInput): boolean {
+function hasEmbedLaunchEventId(result: LaunchRedirectInput): boolean {
   return Boolean(result.ready && result.accessToken && result.launchEventId);
 }
 
@@ -25,7 +25,7 @@ export function shouldApplyLaunchRedirectAtPath(
   return pathname === '/' || pathname === '';
 }
 
-export async function resolveLaunchEventTarget(
+async function resolveLaunchEventTarget(
   result: LaunchRedirectInput,
   fetchIntent: (token: string, guildId: string | null) => Promise<string | null>,
 ): Promise<string | null> {

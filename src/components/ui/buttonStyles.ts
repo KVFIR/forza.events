@@ -35,13 +35,3 @@ export const segmentItemSelectedClass = 'bg-white/[0.1] text-white';
 
 export const templateChipClass =
   'rounded-md border border-white/[0.08] bg-white/[0.03] px-2 py-1 text-[10px] font-medium text-muted transition-colors hover:border-accent-purple/30 hover:text-slate-300';
-
-/** Busy / loading labels for disabled primary actions (i18n-ready strings). */
-export const BUSY_LABEL = {
-  working: 'Working…',
-  saving: 'Saving…',
-  deleting: 'Deleting…',
-  cancelling: 'Cancelling…',
-  publishing: 'Publishing…',
-  signingIn: 'Signing in…',
-} as const;

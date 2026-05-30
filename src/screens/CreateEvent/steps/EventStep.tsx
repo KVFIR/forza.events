@@ -2,11 +2,11 @@ import {useTranslation} from 'react-i18next';
 import {Input} from '../../../components/ui/Input';
 import {SegmentGroup} from '../../../components/ui/SegmentGroup';
 import {Textarea} from '../../../components/ui/Textarea';
-import {fileUploadLabelClass} from '../../../components/ui/formStyles';
+import {fieldLabelClass, fileUploadLabelClass, inputClass} from '../../../components/ui/formStyles';
 import {eventTypeLabel} from '../../../lib/eventTypes';
 import {COVER_ASPECT_CLASS, COVER_SOURCE_MAX_MB} from '../../../lib/coverImage';
 import {datetimeLocalInputBounds} from '../../../lib/datetime';
-import {TITLE_MAX_LENGTH, EVENT_TYPES, COVER_ACCEPT, formInput, formLabel} from '../constants';
+import {TITLE_MAX_LENGTH, EVENT_TYPES, COVER_ACCEPT} from '../constants';
 import {Field, FormSection} from '../components/Field';
 import {EventCover} from '../../../components/EventCover';
 import {EventTrackList} from '../../../components/EventTrackList';
@@ -16,6 +16,8 @@ import {cn} from '../../../lib/cn';
 import {fieldErrorClass} from '../../../components/ui/formStyles';
 import type {CreateEventFormValues, FieldErrors} from '../types';
 import type {CarRuleMode, EventType} from '../../../lib/types';
+
+const createFieldLabelClass = `${fieldLabelClass} mb-1.5`;
 
 type Props = {
   values: CreateEventFormValues;
@@ -155,8 +157,8 @@ export function EventStep({
         <EventTrackList
           tracks={values.tracks}
           onChange={onTracks}
-          inputClass={formInput}
-          labelClass={formLabel}
+          inputClass={inputClass}
+          labelClass={createFieldLabelClass}
           collapseAllKey={editSessionKey}
         />
       </FormSection>
@@ -183,7 +185,7 @@ export function EventStep({
                 value={values.maxPi}
                 onChange={onMaxPi}
                 error={Boolean(fieldErrors.maxPi)}
-                inputClass={formInput}
+                inputClass={inputClass}
               />
             </Field>
             <Field
@@ -210,8 +212,8 @@ export function EventStep({
             <EventCarList
               cars={values.eventCars}
               onChange={onEventCars}
-              inputClass={formInput}
-              labelClass={formLabel}
+              inputClass={inputClass}
+              labelClass={createFieldLabelClass}
               collapseAllKey={editSessionKey}
             />
           </div>

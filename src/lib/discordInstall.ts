@@ -1,5 +1,4 @@
 import {getDiscordSdk, isStandaloneBrowser} from './discord';
-import {isDiscordActivityFrame} from './supabaseEnv';
 
 /**
  * Bot permissions for guild install (publish embeds + read channels).
@@ -59,9 +58,4 @@ export async function openBotInstallUrl(options?: {guildId?: string}): Promise<b
 
   window.open(url, '_blank', 'noopener,noreferrer');
   return true;
-}
-
-/** True when the host should show copy about completing install in an external browser. */
-export function botInstallOpensExternally(): boolean {
-  return isDiscordActivityFrame();
 }

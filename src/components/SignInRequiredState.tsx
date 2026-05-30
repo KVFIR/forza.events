@@ -1,12 +1,19 @@
+import {useEffect} from 'react';
 import {useTranslation} from 'react-i18next';
 import {busyLabel} from '../i18n/busyLabels';
+import {startDiscordBrowserSignIn} from '../lib/discordBrowserSignIn';
+import {isLocalDevHost} from '../lib/runtime';
 import {EmptyState} from './ui/EmptyState';
 
 type Props = {
   description?: string;
   busy?: boolean;
-  onRetry: () => void;
   className?: string;
+  /**
+   * Discord Activity — retry embedded `authorize`.
+   * Omit on localhost only: the component starts browser OAuth via `startDiscordBrowserSignIn()`.
+   */
+  onRetry?: () => void;
 };
 
 export function SignInRequiredState({
@@ -16,13 +23,39 @@ export function SignInRequiredState({
   className,
 }: Props) {
   const {t} = useTranslation();
+  const useBrowserSignIn = isLocalDevHost() && !onRetry;
+
+  const action = useBrowserSignIn
+    ? {
+        label: t('auth.signInWithDiscord'),
+        onClick: () => startDiscordBrowserSignIn(),
+      }
+    : onRetry
+      ? {
+          label: busy ? busyLabel('signingIn') : t('common.tryAgain'),
+          onClick: onRetry,
+        }
+      : undefined;
+
+  const hasAction = Boolean(action);
+
+  useEffect(() => {
+    if (import.meta.env.DEV && !hasAction) {
+      console.warn(
+        'SignInRequiredState: no action. Pass onRetry in Activity, or render on localhost for browser OAuth.',
+      );
+    }
+  }, [hasAction]);
 
   return (
     <EmptyState
       icon="🔐"
       title={t('auth.signInRequired')}
-      description={description ?? t('auth.signInDefault')}
-      action={{label: busy ? busyLabel('signingIn') : t('common.tryAgain'), onClick: onRetry}}
+      description={
+        description ??
+        (useBrowserSignIn ? t('auth.browserSignInHint') : t('auth.signInDefault'))
+      }
+      action={action}
       className={className ?? 'min-h-[40vh] py-20'}
     />
   );

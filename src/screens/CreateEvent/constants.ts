@@ -1,31 +1,8 @@
 export {EVENT_TYPES} from '../../lib/eventTypes';
 
-export const STEPS = ['Event', 'Publish'] as const;
-export type CreateEventStep = (typeof STEPS)[number];
 export type CreateEventStepIndex = 0 | 1;
 export const PUBLISH_STEP_INDEX = 1 satisfies CreateEventStepIndex;
 
 export const TITLE_MAX_LENGTH = 100;
 export {COVER_SOURCE_MAX_BYTES as COVER_MAX_BYTES} from '../../lib/coverImage';
 export const COVER_ACCEPT = 'image/jpeg,image/png,image/webp';
-
-import {
-  controlInvalidClass,
-  fieldErrorClass,
-  fieldHintClass,
-  fieldLabelClass,
-  inputClass,
-} from '../../components/ui/formStyles';
-
-/** @deprecated Use `inputClass` from `components/ui/formStyles` or `<Input />`. */
-export const formInput = inputClass;
-
-/** @deprecated Use `controlInvalidClass` from `components/ui/formStyles`. */
-export const formInputError = controlInvalidClass;
-
-/** @deprecated Use `fieldLabelClass` from `components/ui/formStyles` or `<FieldLabel />`. */
-export const formLabel = `${fieldLabelClass} mb-1.5`;
-
-export const formHint = fieldHintClass;
-
-export const formFieldError = fieldErrorClass;

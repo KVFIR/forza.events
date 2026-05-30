@@ -8,6 +8,7 @@ import {
   segmentItemSelectedClass,
 } from '../../../components/ui/buttonStyles';
 import {Alert} from '../../../components/ui/Alert';
+import {isLocalDevHost} from '../../../lib/runtime';
 import type {CreateEventStepIndex} from '../constants';
 
 const STEP_KEYS = ['create.steps.event', 'create.steps.publish'] as const;
@@ -77,7 +78,7 @@ export function FormAlerts({
       )}
       {isConfigured && !isSignedIn && !authInitializing && (
         <Alert variant="neutral" className="mb-4">
-          {t('auth.openInDiscordSave')}
+          {isLocalDevHost() ? t('auth.browserSignInHint') : t('auth.openInDiscordSave')}
         </Alert>
       )}
       {globalError && (

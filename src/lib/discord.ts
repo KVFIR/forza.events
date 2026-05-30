@@ -36,10 +36,6 @@ export function isStandaloneBrowser(): boolean {
   }
 }
 
-export function getUser(): AppUser {
-  return resolvedUser;
-}
-
 export function getDiscordAccessToken(): string | null {
   return discordAccessToken;
 }

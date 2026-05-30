@@ -56,11 +56,6 @@ export function hasFieldErrors(errors: FieldErrors): boolean {
   return Object.keys(errors).length > 0;
 }
 
-export function firstFieldError(errors: FieldErrors): string | null {
-  const keys = Object.keys(errors);
-  return keys.length ? (errors[keys[0]] ?? null) : null;
-}
-
 function validateStartsInFuture(startsAtLocal: string): string | null {
   if (!startsAtLocal) return null;
   const utc = localInputToUtc(startsAtLocal, defaultTimezone());

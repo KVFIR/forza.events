@@ -6,6 +6,7 @@ import {
   useState,
   type ReactNode,
 } from 'react';
+import i18n from '../i18n';
 import {joinEvent, leaveEvent, isApiConfigured} from '../lib/api';
 import {
   patchEventAfterSelfJoin,
@@ -26,8 +27,6 @@ type Ctx = {
   isJoined: (event: ForzaEvent) => boolean;
   joinParticipation: (event: ForzaEvent, gamertag: string) => Promise<void>;
   leaveParticipation: (event: ForzaEvent) => Promise<void>;
-  /** @deprecated Prefer joinParticipation / leaveParticipation */
-  toggleJoin: (event: ForzaEvent, gamertag?: string) => Promise<void>;
   getLobbyPatch: (eventId: string) => EventLobbyPatch | undefined;
   clearLobbyPatch: (eventId: string) => void;
   refreshKey: number;
@@ -86,7 +85,7 @@ export function JoinedEventsProvider({children}: {children: ReactNode}) {
       const gt = gamertag.trim();
 
       if (isSignedIn && isApiConfigured() && token) {
-        if (!hasGamertag(gt)) throw new Error('Xbox gamertag is required to join events.');
+        if (!hasGamertag(gt)) throw new Error(i18n.t('participation.gamertagRequired'));
         setOverrides((prev) => ({...prev, [event.id]: true}));
         setLobbyPatch(patchEventAfterSelfJoin(event, user, gt));
         try {
@@ -104,7 +103,7 @@ export function JoinedEventsProvider({children}: {children: ReactNode}) {
       }
 
       if (!isStandaloneBrowser()) {
-        throw new Error('Sign in with Discord to join or leave events.');
+        throw new Error(i18n.t('auth.signInDiscordJoin'));
       }
 
       setOverrides((prev) => ({...prev, [event.id]: true}));
@@ -143,7 +142,7 @@ export function JoinedEventsProvider({children}: {children: ReactNode}) {
       }
 
       if (!isStandaloneBrowser()) {
-        throw new Error('Sign in with Discord to join or leave events.');
+        throw new Error(i18n.t('auth.signInDiscordJoin'));
       }
 
       setOverrides((prev) => ({...prev, [event.id]: false}));
@@ -160,25 +159,11 @@ export function JoinedEventsProvider({children}: {children: ReactNode}) {
     ],
   );
 
-  const toggleJoin = useCallback(
-    async (event: ForzaEvent, gamertag?: string) => {
-      if (isJoined(event)) {
-        await leaveParticipation(event);
-        return;
-      }
-      const gt = (gamertag ?? user.xboxGamertag)?.trim();
-      if (!hasGamertag(gt)) throw new Error('Xbox gamertag is required to join events.');
-      await joinParticipation(event, gt!);
-    },
-    [isJoined, leaveParticipation, joinParticipation, user.xboxGamertag],
-  );
-
   const value = useMemo(
     () => ({
       isJoined,
       joinParticipation,
       leaveParticipation,
-      toggleJoin,
       getLobbyPatch,
       clearLobbyPatch,
       refreshKey,
@@ -188,7 +173,6 @@ export function JoinedEventsProvider({children}: {children: ReactNode}) {
       isJoined,
       joinParticipation,
       leaveParticipation,
-      toggleJoin,
       getLobbyPatch,
       clearLobbyPatch,
       refreshKey,
