@@ -88,7 +88,7 @@ describe('buildEventDetailViewModel', () => {
   });
 
   it('treats unpublished events as draft without participant actions', () => {
-    const event = baseEvent({status: 'draft'});
+    const event = baseEvent({lifecycle: 'draft'});
     const view = buildView({event, displayEvent: event});
     expect(view.isDraft).toBe(true);
     expect(view.showParticipantActions).toBe(false);
