@@ -1,0 +1,36 @@
+import {COVER_HERO_BAND_CLASS, COVER_PAGE_BLEED_CLASS, coverDisplayUrl} from '../../../lib/coverImage';
+import {defaultCoverPath} from '../../../lib/eventCovers';
+import type {ForzaEvent} from '../../../lib/types';
+import {cn} from '../../../lib/cn';
+
+type Props = {
+  event: ForzaEvent;
+};
+
+export function EventDetailHero({event}: Props) {
+  return (
+    <div
+      className={cn(
+        'event-detail-hero relative mb-0 overflow-hidden rounded-t-xl bg-base bg-cover bg-center bg-no-repeat ring-1 ring-inset ring-white/[0.08] sm:rounded-t-2xl',
+        COVER_PAGE_BLEED_CLASS,
+        COVER_HERO_BAND_CLASS,
+      )}
+      style={{
+        backgroundImage: `url(${coverDisplayUrl(
+          event.coverImageUrl ?? defaultCoverPath(event.type),
+          'hero',
+        )})`,
+      }}
+      role="img"
+      aria-label={event.title}
+    >
+      <div
+        className="pointer-events-none absolute inset-x-0 bottom-0 h-16"
+        style={{
+          background:
+            'linear-gradient(to top, #06060e 0%, rgba(6, 6, 14, 0.82) 30%, rgba(6, 6, 14, 0.28) 60%, transparent 100%)',
+        }}
+      />
+    </div>
+  );
+}

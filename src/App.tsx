@@ -24,7 +24,7 @@ const CreateEvent = lazy(() =>
   import('./screens/CreateEvent/index').then((m) => ({default: m.CreateEvent})),
 );
 const EventDetail = lazy(() =>
-  import('./screens/EventDetail').then((m) => ({default: m.EventDetail})),
+  import('./screens/EventDetail/index').then((m) => ({default: m.EventDetail})),
 );
 const EventResults = lazy(() =>
   import('./screens/EventResults').then((m) => ({default: m.EventResults})),
