@@ -4,7 +4,7 @@ import type {EventResultDisplay} from '../lib/events';
 import {cn} from '../lib/cn';
 import {TextButton} from './ui/TextButton';
 import {Panel} from './ui/Panel';
-import {panelDividedClass, sectionLabelClass} from './ui/formStyles';
+import {panelDividedClass} from './ui/formStyles';
 
 type Props = {
   rows: EventResultDisplay[];
@@ -51,15 +51,6 @@ export function EventResultsTable({
 
   return (
     <Panel className="overflow-hidden">
-      <div
-        className={cn(
-          'grid grid-cols-[2.75rem_1fr] gap-x-3 border-b border-white/[0.06] px-4 py-2',
-          sectionLabelClass,
-        )}
-      >
-        <span>{t('results.posHeader')}</span>
-        <span>{t('results.driverHeader')}</span>
-      </div>
       <ol className={panelDividedClass}>
         {rows.map((row) => {
           const isViewer = Boolean(viewerDiscordId && row.discordId === viewerDiscordId);
@@ -97,8 +88,8 @@ export function EventResultsTable({
               <span
                 className={cn(
                   'truncate text-sm font-medium',
-                  row.dnf || row.dns ? 'text-muted line-through' : 'text-slate-200',
-                  isViewer && !row.dnf && !row.dns && 'text-white',
+                  row.dnf || row.dns ? 'text-muted' : 'text-slate-200',
+                  isViewer && 'text-white',
                 )}
               >
                 {row.label}

@@ -307,7 +307,7 @@ export function EventResults() {
             <span
               className={cn(
                 'min-w-0 flex-1 truncate text-sm',
-                (row.dnf || row.dns) && 'text-muted line-through',
+                (row.dnf || row.dns) && 'text-muted',
               )}
             >
               {row.label}

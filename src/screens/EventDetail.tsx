@@ -556,7 +556,6 @@ export function EventDetail() {
       />
       {showResultsSection ? (
         <div className="mt-4">
-          <p className={cn(sectionLabelClass, 'mb-2')}>{t('eventDetail.results')}</p>
           <EventResultsTable
             rows={resultDisplay}
             pending={resultsAwaitingHost}
