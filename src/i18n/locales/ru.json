@@ -137,8 +137,6 @@
   "eventTypes": {
     "road": "Шоссе",
     "dirt": "Грунт",
-    "touge": "Тогэ",
-    "drift": "Автосходка",
     "cruise": "Круиз"
   },
   "eventStatus": {

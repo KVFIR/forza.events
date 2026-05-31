@@ -97,7 +97,7 @@ supabase link --project-ref <ref>
 supabase db push
 ```
 
-Apply all migrations with `supabase db push` (`001`–`004` — see [`supabase/README.md`](../supabase/README.md)). After applying, seed the cars catalog and optionally sample events.
+Apply all migrations with `supabase db push` (`001`–`005` — see [`supabase/README.md`](../supabase/README.md)). After applying, seed the cars catalog and optionally sample events.
 
 After any schema change that affects security (RLS, storage policies), redeploy Edge Functions.
 
@@ -203,14 +203,14 @@ Quick smoke before a PR or local iteration:
 
 ### After deploy
 
-- [ ] `supabase db push` applied (`001`–`004`)
+- [ ] `supabase db push` applied (`001`–`005`)
 - [ ] `npm run deploy:functions` succeeded
 - [ ] Railway rebuild if `APP_ORIGIN` / client env changed
 
 ### Discord Activity (pilot)
 
 Full manual matrix (auth, embed deep links, publish target, embed sync, races, i18n): **[`E2E.md`](E2E.md)**.  
-Portal prerequisites: [`DISCORD_PLATFORM.md`](DISCORD_PLATFORM.md#operational-checklist).
+Portal prerequisites: [`DISCORD_PLATFORM.md`](DISCORD_PLATFORM.md#operational-checklist). **Application verification** in the Developer Portal is **approved** (2026-05-31); keep `/terms` and `/privacy` on `APP_ORIGIN` in sync with the portal.
 
 ---
 

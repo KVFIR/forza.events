@@ -1,8 +1,6 @@
 const DEFAULT_COVER_BY_TYPE: Record<string, string> = {
   road: '/covers/cover-road-2.webp',
   dirt: '/covers/cover-dirt-1.webp',
-  drift: '/covers/cover-drift-1.webp',
-  touge: '/covers/cover-touge-1.webp',
   cruise: '/covers/cover-cruise-1.webp',
 };
 

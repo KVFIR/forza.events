@@ -1,23 +1,24 @@
 # Implementation status
 
-Last updated: 2026-05-29
+Last updated: 2026-05-31
 
 ## Summary
 
 The frozen MVP is **implemented in code** and wired to a **live Supabase project** (`uoysqfczahqmctbrrizn`). The Activity reads and writes real data when `.env` is configured. There is **no mock-data fallback**.
 
-Remaining work is mostly **Discord portal validation in real guilds**, **Railway frontend redeploy after changes**, and **pilot feedback** — not greenfield implementation.
+Remaining work is mostly **Activity E2E in pilot guilds**, **Railway frontend redeploy after changes**, and **pilot feedback** — not greenfield implementation. **Discord application verification** (Developer Portal) is **approved**.
 
 | Layer | State |
 |-------|--------|
 | React Activity (UI) | Done — Browse, Detail, Create (wizard), My Events, Profile, i18n (EN + RU) |
-| Supabase schema | Done — migrations `001`–`004` |
+| Supabase schema | Done — migrations `001`–`005` |
 | Edge Functions | Done — 15 functions ([`supabase/README.md`](../supabase/README.md)) |
 | Security hardening | Done — storage, RLS scope, CORS, rate limits, publish validation |
 | Local browser dev | Done — Discord OAuth + Supabase (not mock mode) |
 | Sample content | Done — optional `sample-*` seed |
 | Production infra | Done — Supabase + Railway (`forzaevents.up.railway.app`) |
-| Production launch | Partial — Discord E2E in pilot guilds still open |
+| Discord app verification | Done — Developer Portal approved (2026-05-31) |
+| Production launch | Partial — Activity E2E in pilot guilds still open |
 
 **Docs map:** product [`PLAN.md`](PLAN.md) · Discord setup [`DISCORD_PLATFORM.md`](DISCORD_PLATFORM.md) · local dev [`DEVELOPMENT.md`](DEVELOPMENT.md) · manual QA [`E2E.md`](E2E.md) · agents [`AGENTS.md`](../AGENTS.md).
 
@@ -35,7 +36,7 @@ Remaining work is mostly **Discord portal validation in real guilds**, **Railway
 | Discord Activity auth | Done | SDK → `token-exchange` → `authenticate` |
 | Browser localhost auth | Done | `/auth/callback` + `sessionStorage` |
 | Production browser tab | Done | `DiscordOnlyGate` — Activity-only |
-| Supabase schema | Done | `001_baseline` + `002`–`004` |
+| Supabase schema | Done | `001_baseline` + `002`–`005` |
 | Edge Functions | Done | `npm run deploy:functions` |
 | Realtime lobby | Done | `events` + `event_participants` |
 | FH6 cars catalog | Done | Autocomplete; no client inserts into `cars` |
@@ -52,7 +53,7 @@ Remaining work is mostly **Discord portal validation in real guilds**, **Railway
 Confirmed in code and schema:
 
 - Publish requires server + channel; locked after publish (client + `assertTargetNotLocked`)
-- Event types: `road`, `dirt`, `touge`, `drift`, `cruise`; track codes optional
+- Event types: `road`, `dirt`, `cruise`; track codes optional
 - Car rules: `anything_goes` or `restricted_list`; optional tuning restriction templates
 - Published events editable only before start
 - After start: submit results or cancel only
@@ -85,9 +86,10 @@ Details: [`supabase/README.md`](../supabase/README.md).
 | Check | Result |
 |-------|--------|
 | Supabase project | `uoysqfczahqmctbrrizn` (FORZA.EVENTS) |
-| Migrations | `001`–`004` on remote |
+| Migrations | `001`–`005` on remote |
 | Edge Functions | 15 via `deploy:functions` |
 | Activity hosting | Railway `https://forzaevents.up.railway.app` |
+| Discord application verification | Approved — legal URLs on deploy origin |
 | Discord Activity OAuth | `https://127.0.0.1` + `token-exchange` allowlist |
 
 Set **`APP_ORIGIN`** on Railway to the deploy URL (embed cover URLs + Edge CORS). Redeploy frontend after changing env at build time.

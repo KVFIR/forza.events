@@ -88,7 +88,7 @@ Manual QA matrix aligned with current code behavior (not an abstract checklist).
 ### Load and filters
 
 - [ ] Browse feed = upcoming published events with registration open (`isBrowseFeedEvent`: not draft, not live/started, not completed/cancelled/archived).
-- [ ] Type filter: `road`, `dirt`, `touge`, `drift`, `cruise` + **All**.
+- [ ] Type filter: `road`, `dirt`, `cruise` + **All**.
 - [ ] Sort: event date / created / fill.
 - [ ] Empty filter → “no match” + clear filters.
 - [ ] Cards: type, date, organiser (`guildName` or host), fill, cover via **proxy URL**.

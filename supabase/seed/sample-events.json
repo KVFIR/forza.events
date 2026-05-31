@@ -7,7 +7,7 @@
     {
       "slug": "sample-90s-jdm-touge",
       "title": "90s JDM Touge Night",
-      "type": "touge",
+      "type": "road",
       "car_rule_mode": "restricted_list",
       "max_pi": 580,
       "starts_in_hours": 30,
@@ -118,7 +118,7 @@
     {
       "slug": "sample-drift-legends",
       "title": "Drift Legends",
-      "type": "drift",
+      "type": "cruise",
       "car_rule_mode": "restricted_list",
       "max_pi": 560,
       "starts_in_hours": 174,
@@ -167,7 +167,7 @@
     {
       "slug": "sample-touge-open-90s-b",
       "title": "90s Touge Open (Class B)",
-      "type": "touge",
+      "type": "road",
       "car_rule_mode": "anything_goes",
       "max_pi": 570,
       "starts_in_hours": 246,

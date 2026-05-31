@@ -29,6 +29,7 @@ supabase db push
 | `002_event_tracks_jsonb.sql` | `events.tracks` jsonb + legacy backfill |
 | `003_security_publish_results.sql` | `event_cars` RLS (no draft leak), `publish_started_at` lock, `submit_event_results` RPC |
 | `004_rpc_submit_hardening.sql` | `submit_event_results`: trim `discord_id`, explicit `RAISE` messages |
+| `005_remove_touge_drift_event_types.sql` | Drop `touge`/`drift` from `event_type` enum (remap to `road`/`cruise`) |
 
 Seeds are **not** included in the migration. Run separately after `db push`:
 

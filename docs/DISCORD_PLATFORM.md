@@ -1,6 +1,6 @@
 # Discord Activity reference
 
-Last updated: 2026-05-29
+Last updated: 2026-05-31
 
 ## What matters for FORZA.EVENTS
 
@@ -8,6 +8,10 @@ Last updated: 2026-05-29
 - The UI runs in an iframe; Discord talks to the app via `@discord/embedded-app-sdk`.
 - Server-side: Supabase Edge Functions + bot token for guild/channel APIs and embed posts.
 - Interactions Endpoint handles embed button → `LAUNCH_ACTIVITY`.
+
+## Application verification
+
+Discord **application verification** is **approved** (2026-05-31). Terms and Privacy URLs on the deploy origin (`APP_ORIGIN`) must stay reachable and match what is set in Developer Portal → **General Information** — see [Legal URLs](#legal-urls-app-verification) below.
 
 ## Entry paths
 
@@ -116,19 +120,19 @@ Host must be guild member with **Manage Server** (or Administrator). Server re-v
 
 - `npm run sync:secrets` — Discord secrets
 - `npm run deploy:functions` — all Edge functions (incl. `list-guild-members`), `--no-verify-jwt`
-- `supabase db push` — migrations `001`–`004`
+- `supabase db push` — migrations `001`–`005`
 - Railway: `APP_ORIGIN` = deploy URL; rebuild frontend after env changes
 
 ### Legal URLs (app verification)
 
-Set in Developer Portal → **General Information**:
+Configured in Developer Portal → **General Information** (verification **approved** 2026-05-31). Keep URLs in sync if `APP_ORIGIN` changes:
 
 | Field | URL |
 |-------|-----|
 | Terms of Service | `https://<APP_ORIGIN>/terms` |
 | Privacy Policy | `https://<APP_ORIGIN>/privacy` |
 
-Use your Railway deploy URL (same as `APP_ORIGIN`), e.g. `https://forzaevents.up.railway.app/terms`. These paths load in a normal browser tab without the Discord-only gate, and are linked from Profile inside the Activity. Optional build-time: `VITE_LEGAL_CONTACT_EMAIL` (default `rudolfs@oas.lv`), `VITE_LEGAL_OPERATOR_NAME` (individual controller in Latvia).
+Production example: `https://forzaevents.up.railway.app/terms` and `/privacy`. These paths load in a normal browser tab without the Discord-only gate (`publicLegalPaths` in `src/lib/publicLegalPaths.ts`) and are linked from Profile inside the Activity. Optional build-time: `VITE_LEGAL_CONTACT_EMAIL` (default `rudolfs@oas.lv`), `VITE_LEGAL_OPERATOR_NAME` (individual controller in Latvia).
 
 ### Validate in Discord
 

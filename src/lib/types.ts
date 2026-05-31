@@ -1,4 +1,4 @@
-export type EventType = 'road' | 'dirt' | 'drift' | 'touge' | 'cruise';
+export type EventType = 'road' | 'dirt' | 'cruise';
 
 export type VoicePolicy = 'required' | 'optional' | 'none';
 

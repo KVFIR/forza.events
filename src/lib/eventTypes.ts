@@ -4,8 +4,6 @@ import type {EventType} from './types';
 export const EVENT_TYPE_VALUES = [
   'road',
   'dirt',
-  'touge',
-  'drift',
   'cruise',
 ] as const satisfies readonly EventType[];
 
@@ -60,34 +58,6 @@ export const EVENT_TYPES: EventTypeOption[] = [
       glow: 'radial-gradient(ellipse at 50% 100%, rgba(249,115,22,0.25) 0%, transparent 70%)',
     },
     typeButtonSelected: 'bg-orange-500/20 text-orange-100 ring-1 ring-orange-500/40',
-  },
-  {
-    value: 'touge',
-    accentBar: 'bg-violet-500/25',
-    badge: {
-      border: 'border-violet-500/30',
-      text: 'text-violet-300',
-      bg: 'bg-violet-500/10',
-    },
-    detailVisual: {
-      gradient: 'from-violet-950 via-violet-900/50 to-base',
-      glow: 'radial-gradient(ellipse at 50% 100%, rgba(139,92,246,0.3) 0%, transparent 70%)',
-    },
-    typeButtonSelected: 'bg-violet-500/20 text-violet-100 ring-1 ring-violet-500/40',
-  },
-  {
-    value: 'drift',
-    accentBar: 'bg-red-500/25',
-    badge: {
-      border: 'border-red-500/30',
-      text: 'text-red-300',
-      bg: 'bg-red-500/10',
-    },
-    detailVisual: {
-      gradient: 'from-red-950 via-red-900/50 to-base',
-      glow: 'radial-gradient(ellipse at 50% 100%, rgba(239,68,68,0.25) 0%, transparent 70%)',
-    },
-    typeButtonSelected: 'bg-red-500/20 text-red-100 ring-1 ring-red-500/40',
   },
   {
     value: 'cruise',

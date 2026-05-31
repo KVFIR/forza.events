@@ -16,7 +16,7 @@ If any older note, prototype, or backlog item conflicts with this spec, the froz
 - **Tuning restrictions:** optional template chips and custom text (shown on embed as extra rules).
 - **Publish requirements:** title, **event type**, start time, host gamertag, cover image (or type default), target server, target channel, and a valid car rule mode are required. In `Restricted car list`, at least one car is mandatory.
 - **Track code model:** track share codes are **optional** (ordered list when provided).
-- **Event types:** `Road racing` (blue), `Dirt racing` (orange), `Touge` (purple), `Car/Drift Meet` (red), `Cruise` (green).
+- **Event types:** `Road racing` (blue), `Dirt racing` (orange), `Cruise` (green).
 - **Editing policy:** drafts are freely editable. Published events are editable only until the event starts.
 - **Post-start policy:** after start, the only **host** actions allowed are `submit results` and `cancel event` (permissions; not guild admins).
 - **Organiser (display):** browse/cards show the target Discord **server name** when `guild_id` is set; otherwise the **host** display name. The creating user remains **host** for all organizer permissions (`host_discord_id`).
@@ -99,9 +99,11 @@ The following items are intentionally deferred and must not block launch:
 
 ## Launch readiness
 
-**Shipped in code:** frozen MVP spec above, Activity UI, migrations `001`–`004`, 15 Edge Functions, launch-intent / deep-link flow, production Supabase + Railway wiring.
+**Shipped in code:** frozen MVP spec above, Activity UI, migrations `001`–`005`, 15 Edge Functions, launch-intent / deep-link flow, production Supabase + Railway wiring.
 
-**Still open:** Discord portal verification in pilot guilds, manual Activity E2E, pilot with real communities. Checklists: [`DISCORD_PLATFORM.md`](DISCORD_PLATFORM.md#operational-checklist), [`E2E.md`](E2E.md), [`STATUS.md`](STATUS.md#remaining-work-before-pilot-sign-off).
+**Done (platform):** Discord **application verification** in the Developer Portal (approved 2026-05-31).
+
+**Still open:** manual Activity E2E in pilot guilds, pilot with real communities. Checklists: [`DISCORD_PLATFORM.md`](DISCORD_PLATFORM.md#operational-checklist), [`E2E.md`](E2E.md), [`STATUS.md`](STATUS.md#remaining-work-before-pilot-sign-off).
 
 ## Environment variables
 

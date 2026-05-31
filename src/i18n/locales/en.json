@@ -137,8 +137,6 @@
   "eventTypes": {
     "road": "Road racing",
     "dirt": "Dirt racing",
-    "touge": "Touge",
-    "drift": "Car meet",
     "cruise": "Cruise"
   },
   "eventStatus": {
