@@ -17,9 +17,81 @@
       href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap"
       rel="stylesheet"
     />
+    <style>
+      #boot-splash {
+        box-sizing: border-box;
+        display: flex;
+        min-height: 100vh;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        padding: 1.5rem;
+        text-align: center;
+        color: #94a3b8;
+        font-family:
+          Inter,
+          system-ui,
+          -apple-system,
+          BlinkMacSystemFont,
+          'Segoe UI',
+          sans-serif;
+        background-color: #06060e;
+        background-image:
+          radial-gradient(ellipse 90% 45% at 50% -5%, rgba(139, 92, 246, 0.11) 0%, transparent 100%),
+          radial-gradient(ellipse 45% 35% at 95% 95%, rgba(34, 211, 238, 0.05) 0%, transparent 100%);
+      }
+
+      #boot-splash .boot-wordmark {
+        margin: 0;
+        font-size: 1.125rem;
+        font-weight: 800;
+        font-style: italic;
+        letter-spacing: -0.02em;
+        color: #fff;
+        transform: skewX(-10deg);
+      }
+
+      #boot-splash .boot-accent {
+        background: linear-gradient(90deg, #8b5cf6, #a78bfa);
+        -webkit-background-clip: text;
+        background-clip: text;
+        color: transparent;
+      }
+
+      #boot-splash .boot-spinner {
+        width: 2rem;
+        height: 2rem;
+        margin-top: 1.25rem;
+        border: 2px solid rgba(148, 163, 184, 0.2);
+        border-top-color: rgba(139, 92, 246, 0.75);
+        border-radius: 9999px;
+        animation: boot-spin 0.8s linear infinite;
+      }
+
+      #boot-splash .boot-label {
+        margin: 1rem 0 0;
+        font-size: 0.875rem;
+        font-weight: 500;
+        color: rgba(148, 163, 184, 0.8);
+      }
+
+      @keyframes boot-spin {
+        to {
+          transform: rotate(360deg);
+        }
+      }
+    </style>
   </head>
   <body>
-    <div id="root"></div>
+    <div id="root">
+      <div id="boot-splash" role="status" aria-live="polite" aria-busy="true">
+        <p class="boot-wordmark" aria-label="FORZA.EVENTS">
+          FORZA<span class="boot-accent">.EVENTS</span>
+        </p>
+        <div class="boot-spinner" aria-hidden="true"></div>
+        <p class="boot-label">Loading</p>
+      </div>
+    </div>
     <script type="module" src="/src/main.tsx"></script>
   </body>
 </html>

@@ -1,11 +1,15 @@
 import {exchangeToken, isApiConfigured} from './api';
 import {DISCORD_ACTIVITY_REDIRECT_URI} from './discordConstants';
 import {DISCORD_ACTIVITY_OAUTH_SCOPES} from './discordScopes';
+import {ensureDiscordSupabaseProxy} from './discordUrlProxy';
 import {resetRichPresenceSession} from './discordRichPresenceSession';
 import {eventIdFromOpenEventCustomId} from './eventLaunch';
 import {loadDiscordSession, saveDiscordSession} from './discordAuth';
 import {GUEST_USER} from './guestUser';
 import type {AppUser} from './types';
+
+const DISCORD_READY_TIMEOUT_MS = 15_000;
+const DISCORD_READY_RETRY_DELAY_MS = 400;
 
 type DiscordSDKInstance = import('@discord/embedded-app-sdk').DiscordSDK;
 
@@ -110,6 +114,26 @@ async function authenticateDiscordActivity(
   }
 }
 
+async function waitForDiscordReady(
+  sdk: DiscordSDKInstance,
+  attempt = 1,
+): Promise<void> {
+  try {
+    await Promise.race([
+      sdk.ready(),
+      new Promise<never>((_, reject) => {
+        window.setTimeout(() => reject(new Error('DISCORD_READY_TIMEOUT')), DISCORD_READY_TIMEOUT_MS);
+      }),
+    ]);
+  } catch (err) {
+    if (attempt < 2) {
+      await new Promise((resolve) => window.setTimeout(resolve, DISCORD_READY_RETRY_DELAY_MS));
+      return waitForDiscordReady(sdk, attempt + 1);
+    }
+    throw err;
+  }
+}
+
 export function canRetryDiscordActivityAuth(): boolean {
   return (
     !isStandaloneBrowser() &&
@@ -169,10 +193,26 @@ export async function initDiscordActivity(): Promise<InitResult> {
       };
     }
 
+    await ensureDiscordSupabaseProxy();
+
     const {DiscordSDK} = await import('@discord/embedded-app-sdk');
     const sdk = new DiscordSDK(clientId);
     sdkInstance = sdk;
-    await sdk.ready();
+
+    try {
+      await waitForDiscordReady(sdk);
+    } catch (err) {
+      console.error('Discord Activity SDK ready failed', err);
+      resolvedUser = {...GUEST_USER};
+      return {
+        user: resolvedUser,
+        ready: false,
+        accessToken: null,
+        guildId: null,
+        guildName: null,
+        launchEventId: null,
+      };
+    }
 
     const launchEventId = eventIdFromOpenEventCustomId(sdk.customId);
     const {user, accessToken} = await authenticateDiscordActivity(sdk, clientId);
