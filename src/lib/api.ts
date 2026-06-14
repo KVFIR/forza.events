@@ -1,5 +1,6 @@
 import {ApiRequestError, apiErrorFromPayload} from './apiErrors';
 import {API_ERROR_CODES} from './apiErrorCodes';
+import {ensureDiscordSupabaseProxy} from './discordUrlProxy';
 import {createSupabaseFetch, isDiscordActivityFrame} from './supabaseEnv';
 import {isSupabaseConfigured, resolveSupabaseUrl} from './supabase';
 
@@ -24,6 +25,10 @@ async function invoke<T>(
 ): Promise<T> {
   const base = apiBase();
   if (!base) throw new Error('API not configured');
+
+  if (isDiscordActivityFrame()) {
+    await ensureDiscordSupabaseProxy();
+  }
 
   const anonKey = (import.meta.env.VITE_SUPABASE_ANON_KEY as string) ?? '';
   const headers = new Headers({

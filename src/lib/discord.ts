@@ -9,7 +9,6 @@ import {GUEST_USER} from './guestUser';
 import type {AppUser} from './types';
 
 const DISCORD_READY_TIMEOUT_MS = 15_000;
-const DISCORD_READY_RETRY_DELAY_MS = 400;
 
 type DiscordSDKInstance = import('@discord/embedded-app-sdk').DiscordSDK;
 
@@ -114,23 +113,20 @@ async function authenticateDiscordActivity(
   }
 }
 
-async function waitForDiscordReady(
-  sdk: DiscordSDKInstance,
-  attempt = 1,
-): Promise<void> {
+async function waitForDiscordReady(sdk: DiscordSDKInstance): Promise<void> {
+  let timeoutId: number | undefined;
   try {
     await Promise.race([
       sdk.ready(),
       new Promise<never>((_, reject) => {
-        window.setTimeout(() => reject(new Error('DISCORD_READY_TIMEOUT')), DISCORD_READY_TIMEOUT_MS);
+        timeoutId = window.setTimeout(
+          () => reject(new Error('DISCORD_READY_TIMEOUT')),
+          DISCORD_READY_TIMEOUT_MS,
+        );
       }),
     ]);
-  } catch (err) {
-    if (attempt < 2) {
-      await new Promise((resolve) => window.setTimeout(resolve, DISCORD_READY_RETRY_DELAY_MS));
-      return waitForDiscordReady(sdk, attempt + 1);
-    }
-    throw err;
+  } finally {
+    if (timeoutId !== undefined) window.clearTimeout(timeoutId);
   }
 }
 
@@ -197,7 +193,6 @@ export async function initDiscordActivity(): Promise<InitResult> {
 
     const {DiscordSDK} = await import('@discord/embedded-app-sdk');
     const sdk = new DiscordSDK(clientId);
-    sdkInstance = sdk;
 
     try {
       await waitForDiscordReady(sdk);
@@ -213,6 +208,8 @@ export async function initDiscordActivity(): Promise<InitResult> {
         launchEventId: null,
       };
     }
+
+    sdkInstance = sdk;
 
     const launchEventId = eventIdFromOpenEventCustomId(sdk.customId);
     const {user, accessToken} = await authenticateDiscordActivity(sdk, clientId);
