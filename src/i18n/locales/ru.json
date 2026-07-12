@@ -74,6 +74,8 @@
     "signInDiscordDelete": "Войдите через Discord, чтобы удалить черновик.",
     "signInDiscordJoin": "Войдите через Discord, чтобы участвовать в событии.",
     "signInWithDiscord": "Войти через Discord",
+    "signOut": "Выйти",
+    "signOutAria": "Выйти и сменить аккаунт Discord",
     "browserSignIn": {
       "title": "Сообщество ивентов Forza Horizon",
       "subtitle": "Смотрите гонки, присоединяйтесь к конвоям и создавайте ивенты — в связке с вашими Discord-серверами.",

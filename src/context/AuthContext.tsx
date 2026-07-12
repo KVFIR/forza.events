@@ -20,7 +20,7 @@ import {
   type InitResult,
 } from '../lib/discord';
 import {applyLaunchEventRedirect} from '../lib/launchRedirect';
-import {loadDiscordSession, mergeSessionUser} from '../lib/discordAuth';
+import {clearDiscordSession, loadDiscordSession, mergeSessionUser} from '../lib/discordAuth';
 import {SESSION_EXPIRED_EVENT} from '../lib/sessionEvents';
 import {GUEST_USER} from '../lib/guestUser';
 import type {AppUser} from '../lib/types';
@@ -39,6 +39,8 @@ type AuthState = {
   getAccessToken: () => string | null;
   authRetrying: boolean;
   retryDiscordAuth: () => Promise<void>;
+  /** Clear browser OAuth session so the user can sign in with another Discord account. */
+  signOutBrowser: () => void;
 };
 
 const AuthContext = createContext<AuthState | null>(null);
@@ -132,6 +134,16 @@ export function AuthProvider({children}: {children: ReactNode}) {
     });
   }, []);
 
+  const signOutBrowser = useCallback(() => {
+    if (!isStandaloneBrowser()) return;
+    clearDiscordSession();
+    clearDiscordAuthState();
+    setUser(GUEST_USER);
+    setDiscordReady(false);
+    setGuildId(null);
+    setGuildName(null);
+  }, []);
+
   const retryDiscordAuth = useCallback(async () => {
     if (authRetrying || isStandaloneBrowser() || !isApiConfigured()) return;
 
@@ -173,6 +185,7 @@ export function AuthProvider({children}: {children: ReactNode}) {
       getAccessToken: getDiscordAccessToken,
       authRetrying,
       retryDiscordAuth,
+      signOutBrowser,
     }),
     [
       user,
@@ -186,6 +199,7 @@ export function AuthProvider({children}: {children: ReactNode}) {
       refreshUser,
       authRetrying,
       retryDiscordAuth,
+      signOutBrowser,
     ],
   );
 

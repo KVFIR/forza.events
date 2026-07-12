@@ -74,6 +74,8 @@
     "signInDiscordDelete": "Sign in with Discord to delete this draft.",
     "signInDiscordJoin": "Sign in with Discord to join this event.",
     "signInWithDiscord": "Sign in with Discord",
+    "signOut": "Sign out",
+    "signOutAria": "Sign out and switch Discord account",
     "browserSignIn": {
       "title": "Community events for Forza Horizon",
       "subtitle": "Browse races, join convoys, and host events — synced with your Discord servers.",
