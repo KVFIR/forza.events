@@ -4,9 +4,9 @@ Lessons from implementation work (keep in sync when behavior changes).
 
 ## Discord-only runtime (MVP)
 
-- **Production:** primary surface is still the **Discord Activity**. Opening the **raw Railway hostname** in a browser tab shows **`DiscordOnlyGate`**. **`https://forza.events`** is a supported browser web host: Discord OAuth sign-in is required before the app (`BrowserAuthGate` in `src/components/BrowserAuthGate.tsx`, `shouldRequireBrowserSignIn()` in `src/lib/runtime.ts`).
+- **Production:** primary surface is still the **Discord Activity**. Opening the **raw Railway hostname** in a browser tab shows **`DiscordOnlyGate`**. **`https://forza.events`** is a supported browser web host: Discord OAuth sign-in is required before the app — full-screen **`BrowserSignInScreen`** (no navbar) via **`useBrowserSignInGate()`** in `src/App.tsx` (`shouldRequireBrowserSignIn()` / `isPublicBrowserPath()` in `src/lib/runtime.ts`). Preview on localhost: **`/sign-in`**.
 - **Not supported in prod:** standalone web sign-in on Railway/production origin; browser OAuth there is intentionally blocked (`invalid_grant` / redirect mismatch). A future standalone web product needs a **separate Discord application** — see [`docs/PLAN.md`](docs/PLAN.md).
-- **Local dev exception:** `localhost` / `127.0.0.1` skip the gate so engineers can use `npm run dev` + `/auth/callback` browser OAuth in a tab (`docs/DEVELOPMENT.md`). **Sign in:** navbar auth pill or Profile → **Sign in with Discord** (`AuthStatusIndicator` / `SignInRequiredState` + `startDiscordBrowserSignIn()`).
+- **Local dev exception:** `localhost` / `127.0.0.1` skip the production sign-in gate so engineers can use `npm run dev` + `/auth/callback` browser OAuth in a tab (`docs/DEVELOPMENT.md`). **Sign in:** navbar auth pill or Profile → **Sign in with Discord** (`AuthStatusIndicator` / `SignInRequiredState` + `startDiscordBrowserSignIn()` when `supportsBrowserOAuth()`).
 - **Auth in Activity:** `initDiscordActivity()` → SDK `authorize` (scopes `identify`, `guilds`, `rpc.activities.write`) → `token-exchange` → `authenticate`. Guild context: `sdk.guildId` pre-fills create-event **target server** when the Activity was launched on a server. **Startup perf:** `preloadDiscordEmbeddedSdk()` in `main.tsx` (Activity iframe only); `AuthContext` clears `loading` before background `applyLaunchEventRedirect` (guild `launch-intent` only from `/`, embed `open_event:{id}` always); `token-exchange` defers `discord_guilds` upsert via `deferGuildCatalogUpsert` + `EdgeRuntime.waitUntil`. Event Detail does not block on auth except when the event is still loading or auth may be required to resolve a host draft deep link.
 - **Rich Presence:** `DiscordRichPresenceSync` + `setActivity()` — English-only copy; `VITE_APP_ORIGIN` for image URLs; host/joined/viewing + event status in `state` (with `n/12` when `isPublishedToDiscord`), same count in `party.size`. Overrides on Event Detail, Results, Create (title). `resetRichPresenceSession()` on Activity re-auth. See `src/lib/discordRichPresence.ts`.
 - **Implications for UI/UX** (design and copy should assume Activity, not a generic website):
@@ -80,7 +80,7 @@ Lessons from implementation work (keep in sync when behavior changes).
 
 - `isSignedIn` = `user.discordId` **and** `getDiscordAccessToken()`.
 - Saving drafts can work (token in module) while **My Events** stays empty if React `user` is still `GUEST_USER` — e.g. OAuth callback called `setDiscordSession` but not **`refreshUser`**.
-- `AuthCallback` should `refreshUser(result.user)` after token exchange.
+- `AuthCallback` should `refreshUser(result.user)` after token exchange; use **`exchangeTokenOnce()`** so React StrictMode does not double-exchange the OAuth `code`.
 - Optional: sync `loadDiscordSession()` into context on mount if session exists but state is stale.
 
 ## Deploy checklist (when touching events browse/drafts)
