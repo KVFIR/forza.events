@@ -93,6 +93,7 @@ export function JoinedEventsProvider({children}: {children: ReactNode}) {
           refreshUser((prev) => ({...prev, xboxGamertag: gt}));
           clearLobbyPatch(event.id);
           bumpRefresh();
+          clearOverride(event.id);
         } catch (err) {
           clearOverride(event.id);
           clearLobbyPatch(event.id);
@@ -132,6 +133,7 @@ export function JoinedEventsProvider({children}: {children: ReactNode}) {
           await leaveEvent(token, event.id);
           clearLobbyPatch(event.id);
           bumpRefresh();
+          clearOverride(event.id);
         } catch (err) {
           clearOverride(event.id);
           clearLobbyPatch(event.id);

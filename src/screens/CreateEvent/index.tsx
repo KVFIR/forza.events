@@ -8,7 +8,7 @@ import {PublishedTargetSummary} from './components/PublishedTargetSummary';
 import {CreateEventConvoySection} from './components/CreateEventConvoySection';
 import {PUBLISH_STEP_INDEX} from './constants';
 import {collectPublishGaps} from './publishGaps';
-import {useEffect, useState} from 'react';
+import {useEffect, useRef, useState} from 'react';
 import {useCreateEventForm} from './useCreateEventForm';
 import {EventStep} from './steps/EventStep';
 import {PublishStep} from './steps/PublishStep';
@@ -151,11 +151,19 @@ export function CreateEvent() {
     setPublishConfirmOpen(true);
   }
 
+  const publishingRef = useRef(false);
+
   async function executePublish() {
-    const id = await persistDraft();
-    if (!id || !token) return;
-    setEventId(id);
-    await confirmPublish(id);
+    if (publishingRef.current) return;
+    publishingRef.current = true;
+    try {
+      const id = await persistDraft();
+      if (!id || !token) return;
+      setEventId(id);
+      await confirmPublish(id);
+    } finally {
+      publishingRef.current = false;
+    }
   }
 
   function onPublishModalConfirm() {

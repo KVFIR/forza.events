@@ -10,6 +10,7 @@ import {
 import {useLocation, useNavigate} from 'react-router-dom';
 import {fetchLaunchIntent, isApiConfigured} from '../lib/api';
 import {
+  clearDiscordAuthState,
   getDiscordAccessToken,
   initDiscordActivity,
   isStandaloneBrowser,
@@ -20,6 +21,7 @@ import {
 } from '../lib/discord';
 import {applyLaunchEventRedirect} from '../lib/launchRedirect';
 import {loadDiscordSession, mergeSessionUser} from '../lib/discordAuth';
+import {SESSION_EXPIRED_EVENT} from '../lib/sessionEvents';
 import {GUEST_USER} from '../lib/guestUser';
 import type {AppUser} from '../lib/types';
 
@@ -109,6 +111,18 @@ export function AuthProvider({children}: {children: ReactNode}) {
     setDiscordSession(session.accessToken, session.user);
     setUser(session.user);
   }, [user.discordId, user.xboxGamertag, accessToken]);
+
+  // The API layer clears the stored session on a 401; reset in-memory auth to guest here.
+  useEffect(() => {
+    const onExpired = () => {
+      clearDiscordAuthState();
+      setUser(GUEST_USER);
+      setGuildId(null);
+      setGuildName(null);
+    };
+    window.addEventListener(SESSION_EXPIRED_EVENT, onExpired);
+    return () => window.removeEventListener(SESSION_EXPIRED_EVENT, onExpired);
+  }, []);
 
   const refreshUser = useCallback((next: AppUser | ((prev: AppUser) => AppUser)) => {
     setUser((prev) => {

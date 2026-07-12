@@ -1,5 +1,7 @@
 import {ApiRequestError, apiErrorFromPayload} from './apiErrors';
 import {API_ERROR_CODES} from './apiErrorCodes';
+import {clearDiscordSession} from './discordAuth';
+import {SESSION_EXPIRED_EVENT} from './sessionEvents';
 import {ensureDiscordSupabaseProxy} from './discordUrlProxy';
 import {createSupabaseFetch, isDiscordActivityFrame} from './supabaseEnv';
 import {isSupabaseConfigured, resolveSupabaseUrl} from './supabase';
@@ -72,6 +74,13 @@ async function invoke<T>(
   }
 
   if (!res.ok) {
+    // A stale Discord token surfaces as 401 from Edge Functions — clear it and reset to guest.
+    if (res.status === 401 && discordAccessToken) {
+      clearDiscordSession();
+      if (typeof window !== 'undefined') {
+        window.dispatchEvent(new Event(SESSION_EXPIRED_EVENT));
+      }
+    }
     throw apiErrorFromPayload(data, res.status);
   }
   return data as T;

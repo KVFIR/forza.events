@@ -176,6 +176,14 @@ serve(async (req) => {
     const cars: CarPayload[] =
       body.car_rule_mode === 'restricted_list' ? body.cars ?? [] : [];
 
+    // Resolve cars before touching the event row so CARS_UNRESOLVED never leaves an orphan draft.
+    const resolvedCars = await resolveEventCars(
+      supabase,
+      cars,
+      body.car_rule_mode ?? 'anything_goes',
+    );
+    if (typeof resolvedCars === 'string') return appErrorResponse(req, 400, resolvedCars);
+
     const coverUrl = resolveSaveCoverUrl(
       body.type ?? 'road',
       body.cover_image_url,
@@ -210,7 +218,7 @@ serve(async (req) => {
               avatar_url: body.lobby_leader_avatar_url,
             },
       );
-      const carErr = await syncEventCars(supabase, eventId, cars, body.car_rule_mode ?? 'anything_goes');
+      const carErr = await persistEventCars(supabase, eventId, resolvedCars);
       if (carErr) return appErrorResponse(req, 400, carErr);
       if (isPublishedStatus(data.status)) {
         const embedSync = await syncPublishedEmbedByEventId(supabase, eventId);
@@ -252,7 +260,7 @@ serve(async (req) => {
                 avatar_url: body.lobby_leader_avatar_url,
               },
         );
-        const carErr = await syncEventCars(supabase, data.id, cars, body.car_rule_mode ?? 'anything_goes');
+        const carErr = await persistEventCars(supabase, data.id, resolvedCars);
         if (carErr) return appErrorResponse(req, 400, carErr);
         return jsonResponse({id: data.id, slug: data.slug}, 200, req);
       }
@@ -300,38 +308,28 @@ async function resolveCarId(
   return resolveCarIdByNaturalKey(supabase, c);
 }
 
-async function syncEventCars(
+type ResolvedEventCar = {
+  car_id: string;
+  max_pi: number;
+  tune_share_code: string | null;
+  car_restrictions: string[];
+};
+
+/** Resolve car natural keys to ids up front, so unresolved cars fail before any event row is written. */
+async function resolveEventCars(
   supabase: ReturnType<typeof adminClient>,
-  eventId: string,
   cars: CarPayload[],
   mode: 'anything_goes' | 'restricted_list',
-): Promise<ValidationCode | null> {
-  if (mode !== 'restricted_list') {
-    await supabase.from('event_cars').delete().eq('event_id', eventId);
-    return null;
-  }
+): Promise<ResolvedEventCar[] | ValidationCode> {
+  if (mode !== 'restricted_list' || cars.length === 0) return [];
 
-  if (cars.length === 0) {
-    await supabase.from('event_cars').delete().eq('event_id', eventId);
-    return null;
-  }
-
-  type EventCarRow = {
-    event_id: string;
-    car_id: string;
-    max_pi: number;
-    tune_share_code: string | null;
-    car_restrictions: string[];
-  };
-
-  const rows: EventCarRow[] = [];
+  const rows: ResolvedEventCar[] = [];
   const seenCarIds = new Set<string>();
   for (const c of cars) {
     const carId = await resolveCarId(supabase, c);
     if (!carId || seenCarIds.has(carId)) continue;
     seenCarIds.add(carId);
     rows.push({
-      event_id: eventId,
       car_id: carId,
       max_pi: c.max_pi ?? PI_MAX,
       tune_share_code: c.tune_share_code?.trim() || null,
@@ -343,7 +341,6 @@ async function syncEventCars(
     console.error(
       JSON.stringify({
         msg: 'save-event unresolved cars',
-        eventId,
         requested: cars.length,
         resolved: rows.length,
       }),
@@ -351,11 +348,23 @@ async function syncEventCars(
     return VALIDATION_CODES.CARS_UNRESOLVED;
   }
 
-  await supabase.from('event_cars').delete().eq('event_id', eventId);
+  return rows;
+}
 
-  const {error} = await supabase.from('event_cars').insert(rows);
+/** Replace an event's car rows with the pre-resolved set (cars are validated by resolveEventCars). */
+async function persistEventCars(
+  supabase: ReturnType<typeof adminClient>,
+  eventId: string,
+  resolved: ResolvedEventCar[],
+): Promise<ValidationCode | null> {
+  await supabase.from('event_cars').delete().eq('event_id', eventId);
+  if (resolved.length === 0) return null;
+
+  const {error} = await supabase
+    .from('event_cars')
+    .insert(resolved.map((r) => ({...r, event_id: eventId})));
   if (error) {
-    console.error('syncEventCars insert', error);
+    console.error('persistEventCars insert', error);
     return VALIDATION_CODES.CARS_SYNC_FAILED;
   }
   return null;

@@ -56,6 +56,12 @@ export function setDiscordSession(accessToken: string, user: AppUser): void {
   resolvedUser = user;
 }
 
+/** Drop the in-memory Discord session (e.g. after the API rejects a stale token with 401). */
+export function clearDiscordAuthState(): void {
+  discordAccessToken = null;
+  resolvedUser = {...GUEST_USER};
+}
+
 function applyBrowserSession(): InitResult | null {
   const session = loadDiscordSession();
   if (!session) return null;

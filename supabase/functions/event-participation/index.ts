@@ -80,11 +80,7 @@ serve(async (req) => {
         return appErrorResponse(req, 404, API_ERROR_CODES.EVENT_NOT_FOUND);
       }
       if (!canLeaveEvent(event)) {
-        return jsonResponse(
-          {error: 'Cannot leave after the event has started. Contact the host if you cannot attend.'},
-          400,
-          req,
-        );
+        return appErrorResponse(req, 400, API_ERROR_CODES.REGISTRATION_AFTER_START);
       }
 
       const {data: removed, error} = await supabase
@@ -96,10 +92,21 @@ serve(async (req) => {
 
       if (error) return participationError(req, error, 'Could not leave event');
 
+      let embedSynced = true;
       if (removed?.length) {
-        await syncPublishedEmbedByEventId(supabase, event_id);
+        const embedSync = await syncPublishedEmbedByEventId(supabase, event_id);
+        embedSynced = embedSync.ok;
+        if (!embedSync.ok) {
+          console.error(
+            JSON.stringify({
+              msg: 'Left event but Discord embed sync failed',
+              eventId: event_id,
+              status: embedSync.status,
+            }),
+          );
+        }
       }
-      return jsonResponse({joined: false}, 200, req);
+      return jsonResponse({joined: false, embed_synced: embedSynced}, 200, req);
     }
 
     if (action === 'join') {
@@ -164,8 +171,17 @@ serve(async (req) => {
 
       if (error) return participationError(req, error, 'Could not join event');
 
-      await syncPublishedEmbedByEventId(supabase, event_id);
-      return jsonResponse({joined: true}, 200, req);
+      const embedSync = await syncPublishedEmbedByEventId(supabase, event_id);
+      if (!embedSync.ok) {
+        console.error(
+          JSON.stringify({
+            msg: 'Joined event but Discord embed sync failed',
+            eventId: event_id,
+            status: embedSync.status,
+          }),
+        );
+      }
+      return jsonResponse({joined: true, embed_synced: embedSync.ok}, 200, req);
     }
 
     return jsonResponse({error: 'Unknown action'}, 400, req);

@@ -102,15 +102,44 @@ export async function fetchDiscordUser(accessToken: string): Promise<DiscordUser
   return res.json();
 }
 
+/** Thrown when Discord rate-limits token verification, so callers can return 503 instead of 401. */
+export class DiscordRateLimitError extends Error {
+  constructor() {
+    super('DISCORD_RATE_LIMITED');
+    this.name = 'DiscordRateLimitError';
+  }
+}
+
+const VERIFY_TOKEN_TTL_MS = 30_000;
+const verifyTokenCache = new Map<string, {user: DiscordUser; expiresAt: number}>();
+
+/**
+ * Resolve the Discord user for an access token, with a short per-isolate cache.
+ * Returns null only for genuinely invalid tokens; throws {@link DiscordRateLimitError}
+ * on rate limits so a transient 429 is never mistaken for an expired session.
+ */
 export async function verifyDiscordToken(
   accessToken: string | null | undefined,
 ): Promise<DiscordUser | null> {
   if (!accessToken) return null;
-  try {
-    return await fetchDiscordUser(accessToken);
-  } catch {
+
+  const now = Date.now();
+  const cached = verifyTokenCache.get(accessToken);
+  if (cached && now < cached.expiresAt) return cached.user;
+
+  const res = await discordApiFetch('https://discord.com/api/users/@me', {
+    headers: {Authorization: `Bearer ${accessToken}`},
+  });
+  if (res.status === 429) {
+    throw new DiscordRateLimitError();
+  }
+  if (!res.ok) {
+    verifyTokenCache.delete(accessToken);
     return null;
   }
+  const user = (await res.json()) as DiscordUser;
+  verifyTokenCache.set(accessToken, {user, expiresAt: now + VERIFY_TOKEN_TTL_MS});
+  return user;
 }
 
 export function botHeaders(): HeadersInit {
