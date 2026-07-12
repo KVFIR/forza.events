@@ -37,22 +37,27 @@ const classColor: Record<string, string> = {
 const MAX_CARS_SHOWN = 4;
 
 function CarList({cars}: {cars: EventAllowedCar[]}) {
+  const {t} = useTranslation();
   const shown = cars.slice(0, MAX_CARS_SHOWN);
   const extra = cars.length - shown.length;
 
   return (
-    <div className="relative hidden min-[500px]:block shrink-0 text-left">
+    <div className="relative hidden min-[500px]:block min-w-0 max-w-[50%] text-left">
       <ul className="flex flex-col divide-y divide-white/[0.05]">
         {shown.map((car) => {
           const maxClass = piToClass(car.maxPi);
+          const carLabel = formatCarDisplayName(car);
 
           return (
             <li
               key={car.carId}
               className="grid grid-cols-[minmax(0,1fr)_2.75rem] items-center gap-x-2.5 py-1 text-[10px] leading-tight first:pt-0 last:pb-0"
             >
-              <span className="truncate font-medium text-slate-200">
-                {formatCarDisplayName(car)}
+              <span
+                className="truncate font-medium text-slate-200"
+                title={carLabel}
+              >
+                {carLabel}
               </span>
               <span
                 className={cn(
@@ -68,7 +73,7 @@ function CarList({cars}: {cars: EventAllowedCar[]}) {
       </ul>
       {extra > 0 && (
         <span className="pointer-events-none absolute left-0 top-full mt-1 text-[10px] leading-none text-muted">
-          +{extra} more
+          {t('eventCard.moreCars', {count: extra})}
         </span>
       )}
     </div>
@@ -76,14 +81,17 @@ function CarList({cars}: {cars: EventAllowedCar[]}) {
 }
 
 function OpenBuildSummary({event}: {event: ForzaEvent}) {
+  const {t} = useTranslation();
   const maxClass = piToClass(event.maxPi);
-  const label = event.additionalCarRestrictions?.trim() || 'Open build';
+  const label = event.additionalCarRestrictions?.trim() || t('common.openBuild');
 
   return (
-    <div className="hidden min-[500px]:block shrink-0 text-left">
+    <div className="hidden min-[500px]:block min-w-0 max-w-[50%] text-left">
       <ul className="flex flex-col gap-1">
         <li className="grid grid-cols-[minmax(0,1fr)_2.75rem] items-center gap-x-2.5 text-[10px] leading-tight">
-          <span className="truncate font-medium text-slate-200">{label}</span>
+          <span className="truncate font-medium text-slate-200" title={label}>
+            {label}
+          </span>
           <span
             className={cn(
               'text-right font-bold tabular-nums',
@@ -149,8 +157,11 @@ export function EventCard({event, participantResult}: Props) {
           <div className="absolute inset-0 bg-black/25 transition-colors duration-200 group-hover:bg-black/20" />
 
           <div className="relative flex items-center gap-3 px-4 pt-3 pb-4">
-            <div className="min-w-0 flex-1 text-left">
-              <h2 className="truncate text-lg font-semibold leading-tight text-white">
+            <div className="min-w-0 flex-1 shrink-0 text-left">
+              <h2
+                className="truncate text-lg font-semibold leading-tight text-white"
+                title={event.title}
+              >
                 {event.title}
               </h2>
               <p className="mt-0.5 truncate text-xs text-slate-400">

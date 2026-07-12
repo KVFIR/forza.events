@@ -431,6 +431,10 @@
   "confirm": {
     "defaultConfirm": "Confirm"
   },
+  "eventCard": {
+    "moreCars_one": "+{{count}} more",
+    "moreCars_other": "+{{count}} more"
+  },
   "eventList": {
     "none": "No events",
     "found_one": "{{count}} event found",

@@ -437,6 +437,12 @@
   "confirm": {
     "defaultConfirm": "Подтвердить"
   },
+  "eventCard": {
+    "moreCars_one": "+{{count}} ещё",
+    "moreCars_few": "+{{count}} ещё",
+    "moreCars_many": "+{{count}} ещё",
+    "moreCars_other": "+{{count}} ещё"
+  },
   "eventList": {
     "none": "Нет событий",
     "found_one": "Найдено {{count}} событие",
