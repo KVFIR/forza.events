@@ -13,7 +13,9 @@ import {
   type EventRichPresenceRole,
 } from '../../lib/discordRichPresence';
 import {useEventDetailResults} from '../../hooks/useEventDetailResults';
+import {usePageMeta} from '../../hooks/usePageMeta';
 import type {EventDetailLocationState} from '../../lib/navigationState';
+import {buildEventPageMeta} from '../../lib/eventPageMeta';
 import {eventDetailBackTo} from '../../lib/returnTo';
 import {useResolveEventDisplayStatus} from '../../hooks/useResolveEventDisplayStatus';
 import {useEventDetailParticipation} from '../../hooks/useEventDetailParticipation';
@@ -155,6 +157,15 @@ export function EventDetail() {
     hostActions.cancelling,
     t,
   ]);
+
+  const pageMeta = useMemo(() => {
+    if (!event) return null;
+    return buildEventPageMeta(event, {
+      siteOrigin: typeof window !== 'undefined' ? window.location.origin : undefined,
+      pageUrl: typeof window !== 'undefined' ? window.location.href : undefined,
+    });
+  }, [event]);
+  usePageMeta(pageMeta);
 
   if (!event) {
     const awaitingAuthForPossibleDraft =

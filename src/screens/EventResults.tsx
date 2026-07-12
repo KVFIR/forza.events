@@ -14,6 +14,8 @@ import {API_ERROR_CODES} from '../lib/apiErrorCodes';
 import {buildResultSubmitRows} from '../lib/eventResults';
 import {resolveResultsRoster} from '../lib/eventRoster';
 import {fetchEventById, fetchEventResults} from '../lib/events';
+import {buildEventPageMeta} from '../lib/eventPageMeta';
+import {usePageMeta} from '../hooks/usePageMeta';
 import {
   savedCountFromResultsFetch,
   shouldLeaveResultsScreen,
@@ -89,6 +91,16 @@ export function EventResults() {
     setRichPresenceOverride(buildResultsRichPresence(displayEvent));
     return () => setRichPresenceOverride(null);
   }, [displayEvent, setRichPresenceOverride]);
+
+  const pageMeta = useMemo(() => {
+    if (!event) return null;
+    return buildEventPageMeta(event, {
+      siteOrigin: typeof window !== 'undefined' ? window.location.origin : undefined,
+      pageUrl: typeof window !== 'undefined' ? window.location.href : undefined,
+      isResults: true,
+    });
+  }, [event]);
+  usePageMeta(pageMeta);
 
   const discordToken = getAccessToken();
 
