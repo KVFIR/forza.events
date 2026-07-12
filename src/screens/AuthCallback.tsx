@@ -1,6 +1,6 @@
 import {useEffect, useState} from 'react';
 import {useNavigate, useSearchParams} from 'react-router-dom';
-import {exchangeToken, isApiConfigured} from '../lib/api';
+import {exchangeTokenOnce, isApiConfigured} from '../lib/api';
 import {getDiscordRedirectUri, saveDiscordSession} from '../lib/discordAuth';
 import {setDiscordSession} from '../lib/discord';
 import {useAuth} from '../context/AuthContext';
@@ -35,7 +35,7 @@ export function AuthCallback() {
 
     (async () => {
       try {
-        const result = await exchangeToken(code, {redirectUri: getDiscordRedirectUri()});
+        const result = await exchangeTokenOnce(code, {redirectUri: getDiscordRedirectUri()});
         if (cancelled) return;
         saveDiscordSession({accessToken: result.access_token, user: result.user});
         setDiscordSession(result.access_token, result.user);

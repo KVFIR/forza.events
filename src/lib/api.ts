@@ -113,6 +113,27 @@ export async function exchangeToken(
   );
 }
 
+const pendingTokenExchanges = new Map<
+  string,
+  ReturnType<typeof exchangeToken>
+>();
+
+/** Dedupe OAuth code exchange (React StrictMode runs effects twice in dev). */
+export function exchangeTokenOnce(
+  code: string,
+  options?: {guildId?: string; guildName?: string; redirectUri?: string},
+) {
+  const key = `${code}\0${options?.redirectUri ?? ''}`;
+  let pending = pendingTokenExchanges.get(key);
+  if (!pending) {
+    pending = exchangeToken(code, options).finally(() => {
+      pendingTokenExchanges.delete(key);
+    });
+    pendingTokenExchanges.set(key, pending);
+  }
+  return pending;
+}
+
 export async function fetchLaunchIntent(
   discordToken: string,
   guildId: string | null,

@@ -1,10 +1,11 @@
 import {serve} from 'https://deno.land/std@0.224.0/http/server.ts';
-import {databaseErrorResponse, internalErrorResponse} from '../_shared/apiResponse.ts';
+import {databaseErrorResponse, internalErrorResponse, appErrorResponse} from '../_shared/apiResponse.ts';
 import {jsonResponse, optionsResponse} from '../_shared/cors.ts';
 import {avatarUrl, discordUniqueUsername, exchangeCode, fetchDiscordUser} from '../_shared/discord.ts';
 import {deferGuildCatalogUpsert} from '../_shared/deferredGuildCatalog.ts';
 import {ensureDiscordUserRow} from '../_shared/discordUserRow.ts';
 import {resolveOAuthRedirectUri} from '../_shared/oauthRedirect.ts';
+import {API_ERROR_CODES} from '../_shared/apiErrorCodes.ts';
 import {rateLimitOAuthExchange} from '../_shared/rateLimitPresets.ts';
 import {adminClient} from '../_shared/supabase.ts';
 
@@ -65,6 +66,16 @@ serve(async (req) => {
       },
     }, 200, req);
   } catch (e) {
+    const detail = e instanceof Error ? e.message : String(e);
+    if (detail.includes('Discord token exchange failed')) {
+      console.error(JSON.stringify({msg: 'token-exchange discord oauth', detail}));
+      return appErrorResponse(
+        req,
+        400,
+        API_ERROR_CODES.BAD_REQUEST,
+        'Discord sign-in failed. Try again.',
+      );
+    }
     return internalErrorResponse(req, e);
   }
 });
