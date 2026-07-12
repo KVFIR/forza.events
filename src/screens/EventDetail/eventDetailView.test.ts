@@ -1,4 +1,4 @@
-import {describe, expect, it} from 'vitest';
+import {describe, expect, it, vi} from 'vitest';
 import type {TFunction} from 'i18next';
 import {buildEventDetailViewModel} from './eventDetailView';
 import type {AppUser, EventParticipant, ForzaEvent} from '../../lib/types';
@@ -133,6 +133,23 @@ describe('buildEventDetailViewModel', () => {
   it('disables join when lobby is full and viewer is not joined', () => {
     const view = buildView({displayStatus: 'full'});
     expect(view.participationDisabled).toBe(true);
+  });
+
+  it('prompts browser sign-in for guests on forza.events', () => {
+    const win: {location: {hostname: string; pathname: string}; parent: unknown} = {
+      location: {hostname: 'forza.events', pathname: '/event/ev-1'},
+      parent: null,
+    };
+    win.parent = win;
+    vi.stubGlobal('window', win);
+    const view = buildView({isSignedIn: false, isStandalone: true});
+    expect(view.needsSignInToParticipate).toBe(true);
+    vi.unstubAllGlobals();
+  });
+
+  it('still prompts Activity retry when guest is in the iframe', () => {
+    const view = buildView({isSignedIn: false, isStandalone: false});
+    expect(view.needsSignInToParticipate).toBe(true);
   });
 
   it('shows Xbox hint for joined racer who is not convoy leader', () => {

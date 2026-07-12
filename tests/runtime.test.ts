@@ -48,10 +48,12 @@ describe('runtime browser web hosts', () => {
     expect(isBrowserWebHost()).toBe(true);
   });
 
-  it('allows auth callback and legal paths without sign-in', () => {
+  it('allows auth callback, legal paths, and event detail without sign-in', () => {
     expect(isPublicBrowserPath('/auth/callback')).toBe(true);
     expect(isPublicBrowserPath('/terms')).toBe(true);
     expect(isPublicBrowserPath('/privacy')).toBe(true);
+    expect(isPublicBrowserPath('/event/abc-123')).toBe(true);
+    expect(isPublicBrowserPath('/event/abc-123/results')).toBe(true);
     expect(isPublicBrowserPath('/')).toBe(false);
   });
 });

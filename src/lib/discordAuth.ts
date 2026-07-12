@@ -3,6 +3,44 @@ import type {AppUser} from './types';
 const TOKEN_KEY = 'forza_discord_access_token';
 const USER_KEY = 'forza_discord_user';
 
+function readPersistentItem(key: string): string | null {
+  try {
+    if (typeof localStorage !== 'undefined') {
+      const fromLocal = localStorage.getItem(key);
+      if (fromLocal) return fromLocal;
+    }
+    if (typeof sessionStorage !== 'undefined') {
+      const fromSession = sessionStorage.getItem(key);
+      if (fromSession) {
+        localStorage?.setItem(key, fromSession);
+        sessionStorage.removeItem(key);
+        return fromSession;
+      }
+    }
+  } catch {
+    return null;
+  }
+  return null;
+}
+
+function writePersistentItem(key: string, value: string): void {
+  try {
+    localStorage?.setItem(key, value);
+    sessionStorage?.removeItem(key);
+  } catch {
+    // ignore quota / privacy mode
+  }
+}
+
+function removePersistentItem(key: string): void {
+  try {
+    localStorage?.removeItem(key);
+    sessionStorage?.removeItem(key);
+  } catch {
+    // ignore
+  }
+}
+
 const BROWSER_OAUTH_SCOPES = ['identify', 'guilds'];
 
 /** Browser OAuth redirect — must match the origin the user opened and Discord portal entries. */
@@ -42,9 +80,8 @@ export type DiscordSession = {
 };
 
 export function loadDiscordSession(): DiscordSession | null {
-  if (typeof sessionStorage === 'undefined') return null;
-  const accessToken = sessionStorage.getItem(TOKEN_KEY);
-  const rawUser = sessionStorage.getItem(USER_KEY);
+  const accessToken = readPersistentItem(TOKEN_KEY);
+  const rawUser = readPersistentItem(USER_KEY);
   if (!accessToken || !rawUser) return null;
   try {
     return {accessToken, user: JSON.parse(rawUser) as AppUser};
@@ -55,13 +92,13 @@ export function loadDiscordSession(): DiscordSession | null {
 }
 
 export function saveDiscordSession(session: DiscordSession): void {
-  sessionStorage.setItem(TOKEN_KEY, session.accessToken);
-  sessionStorage.setItem(USER_KEY, JSON.stringify(session.user));
+  writePersistentItem(TOKEN_KEY, session.accessToken);
+  writePersistentItem(USER_KEY, JSON.stringify(session.user));
 }
 
 export function clearDiscordSession(): void {
-  sessionStorage.removeItem(TOKEN_KEY);
-  sessionStorage.removeItem(USER_KEY);
+  removePersistentItem(TOKEN_KEY);
+  removePersistentItem(USER_KEY);
 }
 
 /** Prefer session fields written after login (e.g. gamertag set on join) over stale auth payload. */

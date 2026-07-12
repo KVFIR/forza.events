@@ -53,7 +53,10 @@ export function isPublicBrowserPath(pathname?: string): boolean {
     pathname = window.location.pathname;
   }
   const normalized = pathname.replace(/\/+$/, '') || '/';
-  return normalized === '/auth/callback';
+  if (normalized === '/auth/callback') return true;
+  // Shared embed links — view without browser OAuth (join still requires sign-in).
+  if (normalized.startsWith('/event/')) return true;
+  return false;
 }
 
 /** Production SPA opened outside Discord on an unsupported host (e.g. raw Railway URL). */

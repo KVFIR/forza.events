@@ -19,6 +19,7 @@ import {
 } from '../../lib/eventSpec';
 import {formatEventStart} from '../../lib/datetime';
 import {LOBBY_TOTAL_PLAYERS} from '../../lib/constants';
+import {supportsBrowserOAuth} from '../../lib/runtime';
 import {resolveConvoyLeader, resolveRegisteredDrivers} from '../../lib/eventRoster';
 import type {RosterConvoyLeader} from '../../lib/eventRoster';
 import type {AppUser, EventStatus, ForzaEvent} from '../../lib/types';
@@ -115,14 +116,17 @@ export function buildEventDetailViewModel(input: {
   /** Lifecycle from server row — not `displayEvent` (lobby patch only). */
   const showResultsSection = shouldShowEventResults(event);
   const showRegistrationProgress =
-    !showResultsSection && event.lifecycle !== 'cancelled';
+    !showResultsSection && event.lifecycle !== 'cancelled' && isRegistrationOpen(ev);
   const resultsAwaitingHost =
     showResultsSection &&
     !isEventSuccessfullyCompleted(event) &&
     resultDisplay.length === 0;
   const showParticipantActions = !isHost && !isDraft;
   const needsSignInToParticipate =
-    showParticipantActions && !isSignedIn && !isStandalone && !authInitializing;
+    showParticipantActions &&
+    !isSignedIn &&
+    !authInitializing &&
+    (supportsBrowserOAuth() || !isStandalone);
   const participationBusy = joining || leaving;
   const participationAction = leaving ? 'leaving' : joining ? 'joining' : null;
   const isCurrentConvoyLeader = convoyLeader?.isYou ?? false;

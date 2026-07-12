@@ -4,10 +4,15 @@ import {useJoinedEvents} from '../context/JoinedEventsContext';
 import {useAuth} from '../context/AuthContext';
 import {canLeaveRegistration} from '../lib/eventSpec';
 import {resolveConvoyLeader} from '../lib/eventRoster';
+import {startDiscordBrowserSignIn} from '../lib/discordBrowserSignIn';
 import {hasGamertag, gamertagError} from '../lib/gamertag';
+import {supportsBrowserOAuth} from '../lib/runtime';
 import type {ForzaEvent} from '../lib/types';
 
-export function useEventDetailParticipation(event: ForzaEvent | undefined) {
+export function useEventDetailParticipation(
+  event: ForzaEvent | undefined,
+  onParticipationSynced?: () => void,
+) {
   const {t} = useTranslation();
   const {isJoined, joinParticipation, leaveParticipation} = useJoinedEvents();
   const {
@@ -37,13 +42,14 @@ export function useEventDetailParticipation(event: ForzaEvent | undefined) {
     participationInFlightRef.current = true;
     try {
       await leaveParticipation(event);
+      onParticipationSynced?.();
     } catch (err) {
       setJoinError(err instanceof Error ? err.message : t('eventDetail.leaveFailed'));
     } finally {
       participationInFlightRef.current = false;
       setLeaving(false);
     }
-  }, [event, getAccessToken, isSignedIn, leaveParticipation, t]);
+  }, [event, getAccessToken, isSignedIn, leaveParticipation, onParticipationSynced, t]);
 
   const doJoin = useCallback(
     async (gamertag: string) => {
@@ -65,6 +71,7 @@ export function useEventDetailParticipation(event: ForzaEvent | undefined) {
       participationInFlightRef.current = true;
       try {
         await joinParticipation(event, trimmed);
+        onParticipationSynced?.();
       } catch (err) {
         setJoinError(err instanceof Error ? err.message : t('eventDetail.joinFailed'));
       } finally {
@@ -73,12 +80,16 @@ export function useEventDetailParticipation(event: ForzaEvent | undefined) {
         setGamertagOpen(false);
       }
     },
-    [event, getAccessToken, isSignedIn, joinParticipation, t],
+    [event, getAccessToken, isSignedIn, joinParticipation, onParticipationSynced, t],
   );
 
   const handleJoinClick = useCallback(async () => {
     if (!event) return;
     if (!isSignedIn) {
+      if (isStandalone && supportsBrowserOAuth()) {
+        startDiscordBrowserSignIn();
+        return;
+      }
       if (!isStandalone) void retryDiscordAuth();
       return;
     }
