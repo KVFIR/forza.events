@@ -3,6 +3,7 @@ import {useNavigate} from 'react-router-dom';
 import {busyLabel} from '../../../i18n/busyLabels';
 import {Badge, DraftBadge, StatusBadge} from '../../../components/ui/Badge';
 import {Button} from '../../../components/ui/Button';
+import {Alert} from '../../../components/ui/Alert';
 import {resolveOrganiserLabel} from '../../../lib/organiser';
 import {
   participationButtonLabel,
@@ -38,6 +39,8 @@ type Props = {
     | 'ev'
     | 'fillPct'
     | 'showRegistrationProgress'
+    | 'showJoinXboxHint'
+    | 'convoyLeader'
   >;
   deleting: boolean;
   cancelling: boolean;
@@ -181,8 +184,16 @@ export function EventDetailTitleSection({
 
       <EventRegistrationProgress view={view} />
 
+      {view.showJoinXboxHint && view.convoyLeader ? (
+        <Alert variant="info" title={t('participation.xboxHintTitle')} className="mt-2 py-2.5 text-sm">
+          {t('participation.xboxHintBody', {leader: view.convoyLeader.gamertag})}
+        </Alert>
+      ) : null}
+
       {event.description ? (
-        <p className="mt-3 text-sm leading-relaxed text-slate-400">{event.description}</p>
+        <p className="mt-3 whitespace-pre-line text-sm leading-relaxed text-slate-400">
+          {event.description}
+        </p>
       ) : null}
       <p className="mt-1 text-xs text-muted">
         {t('common.by')} {resolveOrganiserLabel(event)}
