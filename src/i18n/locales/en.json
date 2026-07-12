@@ -73,6 +73,17 @@
     "signInDiscordDelete": "Sign in with Discord to delete this draft.",
     "signInDiscordJoin": "Sign in with Discord to join this event.",
     "signInWithDiscord": "Sign in with Discord",
+    "browserSignIn": {
+      "title": "Community events for Forza Horizon",
+      "subtitle": "Browse races, join convoys, and host events — synced with your Discord servers.",
+      "cta": "Continue with Discord",
+      "disclaimer": "We use Discord only to identify you and list your servers. No password is stored here.",
+      "features": [
+        "Browse upcoming events",
+        "Join with one click",
+        "Create and publish races"
+      ]
+    },
     "browserSignInHint": "Sign in with Discord to save drafts, join events, and publish.",
     "signInAgainAria": "{{label}}. Tap to sign in again.",
     "status": {

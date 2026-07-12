@@ -3,17 +3,19 @@ import {lazy, Suspense} from 'react';
 import {useTranslation} from 'react-i18next';
 import {BrowserRouter, Navigate, Route, Routes, useLocation} from 'react-router-dom';
 import {AppBootGate} from './components/AppBootGate';
-import {BrowserAuthGate} from './components/BrowserAuthGate';
+import {BrowserSignInScreen} from './components/BrowserSignInScreen';
 import {DiscordOnlyGate} from './components/DiscordOnlyGate';
 import {Navbar} from './components/Navbar';
 import {Logo} from './components/ui/Logo';
-import {AuthProvider} from './context/AuthContext';
+import {AuthProvider, useAuth} from './context/AuthContext';
 import {DiscordLayoutProvider, useDiscordLayout} from './context/DiscordLayoutContext';
 import {DiscordRichPresenceProvider} from './context/DiscordRichPresenceContext';
 import {JoinedEventsProvider} from './context/JoinedEventsContext';
 import {DiscordRichPresenceSync} from './components/DiscordRichPresenceSync';
 import type {ReactNode} from 'react';
 import {PageLoading} from './components/ui/PageLoading';
+import {Spinner} from './components/ui/Spinner';
+import {useBrowserSignInGate} from './hooks/useBrowserSignInGate';
 import {isPublicLegalBrowserPath} from './lib/publicLegalPaths';
 import {shouldShowDiscordOnlyGate} from './lib/runtime';
 
@@ -49,6 +51,22 @@ function RouteFallback() {
   return <PageLoading label={t('loading.page')} className="pb-8 pt-5" />;
 }
 
+function BrowserSignInLoading() {
+  const {t} = useTranslation();
+  return (
+    <div
+      className="flex min-h-screen flex-col items-center justify-center gap-4 px-6"
+      role="status"
+      aria-live="polite"
+      aria-busy="true"
+    >
+      <Logo size="lg" />
+      <Spinner size="lg" />
+      <p className="text-sm text-muted">{t('loading.page')}</p>
+    </div>
+  );
+}
+
 function AppShell({children}: {children: ReactNode}) {
   const {isCompact} = useDiscordLayout();
 
@@ -72,7 +90,17 @@ function AppShell({children}: {children: ReactNode}) {
 
 function AppRoutes() {
   const location = useLocation();
+  const {isSignedIn} = useAuth();
+  const signInGate = useBrowserSignInGate();
   const isLegalPage = isPublicLegalBrowserPath(location.pathname);
+
+  if (location.pathname === '/sign-in') {
+    if (isSignedIn) return <Navigate to="/" replace />;
+    return <BrowserSignInScreen />;
+  }
+
+  if (signInGate === 'loading') return <BrowserSignInLoading />;
+  if (signInGate === 'required') return <BrowserSignInScreen />;
 
   return (
     <AppShell>
@@ -86,7 +114,6 @@ function AppRoutes() {
       >
         <main className={isLegalPage ? 'min-w-0' : 'min-w-0 flex-1 pb-8'}>
           <AppBootGate>
-            <BrowserAuthGate>
             <Suspense fallback={<RouteFallback />}>
               <Routes>
                 <Route path="/" element={<BrowseEvents />} />
@@ -102,7 +129,6 @@ function AppRoutes() {
                 <Route path="*" element={<Navigate to="/" replace />} />
               </Routes>
             </Suspense>
-            </BrowserAuthGate>
           </AppBootGate>
         </main>
       </div>
