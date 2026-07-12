@@ -134,7 +134,7 @@ After any schema change that affects security (RLS, storage policies), redeploy 
 3. `token-exchange` → access token + `users` row
 4. `sessionStorage` until Sign out
 
-On **localhost**, Browse works without sign-in (engineering). On **forza.events**, the whole app is gated until Discord sign-in (`BrowserAuthGate`). Browse reads via PostgREST on standalone browser hosts (`shouldUseDirectSupabaseReads`). **My Events** / Profile use `include_completed` for past events. Join/create/publish always use Edge Functions + Discord token. In the Activity iframe, Browse uses the `browse-events` Edge Function (not raw PostgREST).
+On **localhost**, Browse reads via PostgREST (`shouldUseDirectSupabaseReads`). On **forza.events** and in the Activity iframe, Browse uses the **`browse-events`** Edge Function. **My Events** / Profile use `include_completed` for past events. Join/create/publish always use Edge Functions + Discord token.
 
 ### Discord Activity (iframe)
 
