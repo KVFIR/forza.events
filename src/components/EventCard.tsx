@@ -1,6 +1,6 @@
 import {useEffect, useState} from 'react';
 import {useTranslation} from 'react-i18next';
-import {Link} from 'react-router-dom';
+import {Link, useLocation} from 'react-router-dom';
 import {Users} from 'lucide-react';
 import type {ParticipantEventResult} from '../lib/participantResults';
 import {participantResultLabel} from '../lib/participantResultsLabel';
@@ -99,6 +99,7 @@ function OpenBuildSummary({event}: {event: ForzaEvent}) {
 }
 
 export function EventCard({event, participantResult}: Props) {
+  const {pathname} = useLocation();
   const {t} = useTranslation();
   const when = formatEventStart(event.startsAt);
   const draft = isDraftEvent(event);
@@ -212,7 +213,7 @@ export function EventCard({event, participantResult}: Props) {
 
   return (
     <article className="group relative">
-      <Link to={cardTo} state={{event}} className="block">
+      <Link to={cardTo} state={{event, from: pathname}} className="block">
         {cardInner}
       </Link>
     </article>

@@ -1,5 +1,6 @@
 import {describe, expect, it} from 'vitest';
 import {
+  buildEventDetailLocationState,
   buildEventDetailNavigateStateAfterSubmit,
   eventDetailRouteSeed,
 } from './navigationState';
@@ -46,6 +47,15 @@ describe('eventDetailRouteSeed', () => {
   });
 });
 
+describe('buildEventDetailLocationState', () => {
+  it('drops unsafe from values', () => {
+    expect(buildEventDetailLocationState({from: '/evil/path'}, '/my-events')).toEqual({
+      from: '/my-events',
+    });
+    expect(buildEventDetailLocationState({from: '/foo/bar'})).toEqual({});
+  });
+});
+
 describe('buildEventDetailNavigateStateAfterSubmit', () => {
   it('omits resultRows when PostgREST read failed', () => {
     const ev = event('ev-1');
@@ -60,5 +70,12 @@ describe('buildEventDetailNavigateStateAfterSubmit', () => {
     expect(
       buildEventDetailNavigateStateAfterSubmit(ev, {rows, error: null}),
     ).toEqual({event: ev, resultRows: rows});
+  });
+
+  it('preserves from referrer after submit', () => {
+    const ev = event('ev-1');
+    expect(
+      buildEventDetailNavigateStateAfterSubmit(ev, {rows: [], error: null}, '/my-events'),
+    ).toEqual({event: ev, resultRows: [], from: '/my-events'});
   });
 });

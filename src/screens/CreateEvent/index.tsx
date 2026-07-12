@@ -133,13 +133,16 @@ export function CreateEvent() {
 
   async function handleSaveDraft() {
     const id = await persistDraft();
-    if (id) navigate('/my-events');
+    if (id) navigate('/my-events', {replace: true});
   }
 
   async function handleSaveChanges() {
     const id = await persistDraft();
     if (!id) return;
-    navigate(isPublished ? `/event/${id}` : '/my-events');
+    navigate(isPublished ? `/event/${id}` : '/my-events', {
+      replace: true,
+      ...(isPublished ? {state: {from: '/my-events'}} : {}),
+    });
   }
 
   async function handlePublishClick() {

@@ -356,7 +356,7 @@ export function useCreateEventForm() {
       await publishEvent(token, id, targetGuildId, targetChannelId, targetGuildName);
       bumpRefresh();
       setShowPublishModal(false);
-      navigate(`/event/${id}`);
+      navigate(`/event/${id}`, {replace: true, state: {from: '/my-events'}});
     } catch (e) {
       setGlobalError(e instanceof Error ? e.message : String(e));
     } finally {
@@ -416,7 +416,7 @@ export function useCreateEventForm() {
       await cancelEvent(token, id);
       setCancelConfirmOpen(false);
       bumpRefresh();
-      navigate(`/event/${id}`, {replace: true});
+      navigate(`/event/${id}`, {replace: true, state: {from: '/my-events'}});
       return true;
     } catch (e) {
       setGlobalError(String(e));

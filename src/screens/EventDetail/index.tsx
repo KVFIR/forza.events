@@ -14,6 +14,7 @@ import {
 } from '../../lib/discordRichPresence';
 import {useEventDetailResults} from '../../hooks/useEventDetailResults';
 import type {EventDetailLocationState} from '../../lib/navigationState';
+import {eventDetailBackTo} from '../../lib/returnTo';
 import {useResolveEventDisplayStatus} from '../../hooks/useResolveEventDisplayStatus';
 import {useEventDetailParticipation} from '../../hooks/useEventDetailParticipation';
 import {useEventLiveUpdates} from '../../hooks/useEventLiveUpdates';
@@ -169,7 +170,10 @@ export function EventDetail() {
   return (
     <ContentReveal className="pb-10 pt-4">
       <TextLink
-        to={view.isDraft && view.isHost ? '/my-events' : '/'}
+        to={eventDetailBackTo(routeState?.from, {
+          isDraft: view.isDraft,
+          isHost: view.isHost,
+        })}
         tone="nav"
         className="mb-5 inline-flex items-center gap-1.5"
       >
@@ -183,6 +187,7 @@ export function EventDetail() {
         event={event}
         displayStatus={displayStatus}
         view={view}
+        detailFrom={routeState?.from}
         deleting={hostActions.deleting}
         cancelling={hostActions.cancelling}
         authRetrying={authRetrying}

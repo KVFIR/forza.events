@@ -42,6 +42,8 @@ type Props = {
   onConfirmDelete: () => void;
   onConfirmCancel: () => void;
   onJoinClick: () => void;
+  /** Original list referrer for nested navigation (e.g. results). */
+  detailFrom?: string;
 };
 
 export function EventDetailTitleSection({
@@ -55,6 +57,7 @@ export function EventDetailTitleSection({
   onConfirmDelete,
   onConfirmCancel,
   onJoinClick,
+  detailFrom,
 }: Props) {
   const {t} = useTranslation();
   const navigate = useNavigate();
@@ -103,7 +106,9 @@ export function EventDetailTitleSection({
               variant="primary"
               size="toolbar"
               className="shrink-0 whitespace-nowrap"
-              onClick={() => navigate(`/event/${event.id}/results`)}
+              onClick={() =>
+                navigate(`/event/${event.id}/results`, {state: {from: detailFrom}})
+              }
             >
               {t('eventDetail.submitResults')}
             </Button>

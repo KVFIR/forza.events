@@ -1,7 +1,7 @@
 import {useCallback, useEffect, useMemo, useState} from 'react';
 import {useTranslation} from 'react-i18next';
 import {busyLabel} from '../i18n/busyLabels';
-import {useNavigate, useParams} from 'react-router-dom';
+import {useNavigate, useParams, useLocation} from 'react-router-dom';
 import {ArrowLeft, ChevronDown, ChevronUp} from 'lucide-react';
 import {useAuth} from '../context/AuthContext';
 import {useRichPresenceOverride} from '../context/DiscordRichPresenceContext';
@@ -18,7 +18,11 @@ import {
   savedCountFromResultsFetch,
   shouldLeaveResultsScreen,
 } from '../lib/eventResultsScreen';
-import {buildEventDetailNavigateStateAfterSubmit} from '../lib/navigationState';
+import {
+  buildEventDetailLocationState,
+  buildEventDetailNavigateStateAfterSubmit,
+  type EventResultsLocationState,
+} from '../lib/navigationState';
 import type {EventParticipant} from '../lib/types';
 import {Alert} from '../components/ui/Alert';
 import {Button} from '../components/ui/Button';
@@ -58,6 +62,9 @@ export function EventResults() {
   const {t} = useTranslation();
   const {id} = useParams<{id: string}>();
   const navigate = useNavigate();
+  const location = useLocation();
+  const resultsState = location.state as EventResultsLocationState | null;
+  const detailFrom = resultsState?.from;
   const {user, getAccessToken, isSignedIn} = useAuth();
   const {bumpRefresh, getLobbyPatch} = useJoinedEvents();
   const [placements, setPlacements] = useState<Placement[]>([]);
@@ -85,6 +92,19 @@ export function EventResults() {
 
   const discordToken = getAccessToken();
 
+  const goToEventDetail = useCallback(
+    (
+      eventId: string,
+      options?: {replace?: boolean; state?: Parameters<typeof buildEventDetailLocationState>[0]},
+    ) => {
+      navigate(`/event/${eventId}`, {
+        replace: options?.replace ?? true,
+        state: buildEventDetailLocationState(options?.state, detailFrom),
+      });
+    },
+    [navigate, detailFrom],
+  );
+
   const recheckExistingResults = useCallback(async () => {
     if (!id || !event) return;
     setRecheckingResults(true);
@@ -99,7 +119,7 @@ export function EventResults() {
       }
 
       if (shouldLeaveResultsScreen(event, savedCount, user)) {
-        navigate(`/event/${id}`, {replace: true});
+        goToEventDetail(id);
       }
     } catch (err) {
       console.error('EventResults recheck', err);
@@ -107,7 +127,7 @@ export function EventResults() {
     } finally {
       setRecheckingResults(false);
     }
-  }, [id, event, user, navigate]);
+  }, [id, event, user, goToEventDetail]);
 
   useEffect(() => {
     if (!id) return;
@@ -121,7 +141,7 @@ export function EventResults() {
         if (cancelled) return;
 
         if (!loaded) {
-          navigate(`/event/${id}`, {replace: true});
+          goToEventDetail(id);
           return;
         }
 
@@ -129,7 +149,7 @@ export function EventResults() {
         setTitle(loaded.title);
 
         if (shouldLeaveResultsScreen(loaded, null, user)) {
-          navigate(`/event/${id}`, {replace: true});
+          goToEventDetail(id);
           return;
         }
 
@@ -143,7 +163,7 @@ export function EventResults() {
         }
 
         if (shouldLeaveResultsScreen(loaded, savedCount, user)) {
-          navigate(`/event/${id}`, {replace: true});
+          goToEventDetail(id);
           return;
         }
 
@@ -151,7 +171,7 @@ export function EventResults() {
       } catch (err) {
         if (!cancelled) {
           console.error('EventResults load', err);
-          navigate(`/event/${id}`, {replace: true});
+          goToEventDetail(id);
         }
       } finally {
         if (!cancelled) setLoading(false);
@@ -161,7 +181,7 @@ export function EventResults() {
     return () => {
       cancelled = true;
     };
-  }, [id, user, navigate, discordToken]);
+  }, [id, user, goToEventDetail, discordToken]);
 
   function move(index: number, dir: -1 | 1) {
     const next = index + dir;
@@ -225,9 +245,8 @@ export function EventResults() {
       ]);
       bumpRefresh();
       const detailEvent = updated ?? fresh;
-      navigate(`/event/${id}`, {
-        replace: true,
-        state: buildEventDetailNavigateStateAfterSubmit(detailEvent, savedOutcome),
+      goToEventDetail(id, {
+        state: buildEventDetailNavigateStateAfterSubmit(detailEvent, savedOutcome, detailFrom),
       });
     } catch (e) {
       if (
@@ -235,7 +254,7 @@ export function EventResults() {
         e.code === API_ERROR_CODES.RESULTS_ALREADY_SUBMITTED &&
         id
       ) {
-        navigate(`/event/${id}`, {replace: true});
+        goToEventDetail(id);
         return;
       }
       setError(e instanceof Error ? e.message : String(e));
@@ -256,6 +275,7 @@ export function EventResults() {
     <ContentReveal className="pb-10 pt-5">
       <TextLink
         to={id ? `/event/${id}` : '/'}
+        state={id ? buildEventDetailLocationState(undefined, detailFrom) : undefined}
         tone="nav"
         className="mb-5 inline-flex items-center gap-1.5"
       >

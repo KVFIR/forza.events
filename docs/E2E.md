@@ -130,6 +130,14 @@ Manual QA matrix aligned with current code behavior (not an abstract checklist).
 - [ ] Track codes, car rules, tuning restrictions, optional description text.
 - [ ] Realtime: second client join → roster and count update without F5.
 
+### Back navigation (`location.state.from`)
+
+- [ ] **My Events** → event → **Back** → My Events (not Browse).
+- [ ] **Browse** → event → **Back** → Browse.
+- [ ] **Profile** recent event → **Back** → Profile.
+- [ ] Host: list → event → **Submit results** → submit → **Back** → same list.
+- [ ] Hard refresh on event detail → **Back** uses fallback (Browse, or My Events for draft host).
+
 ### Negative
 
 - [ ] Join without auth → retry auth, not silent fail.

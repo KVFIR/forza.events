@@ -3,6 +3,7 @@ import {useNavigate, useSearchParams} from 'react-router-dom';
 import {exchangeTokenOnce, isApiConfigured} from '../lib/api';
 import {getDiscordRedirectUri, saveDiscordSession} from '../lib/discordAuth';
 import {setDiscordSession} from '../lib/discord';
+import {clearAuthReturnTo, consumeAuthReturnTo} from '../lib/returnTo';
 import {useAuth} from '../context/AuthContext';
 import {TextButton} from '../components/ui/TextButton';
 
@@ -17,16 +18,19 @@ export function AuthCallback() {
     const oauthError = params.get('error');
 
     if (oauthError) {
+      clearAuthReturnTo();
       setError(params.get('error_description') ?? oauthError);
       return;
     }
 
     if (!code) {
+      clearAuthReturnTo();
       setError('Missing authorization code from Discord.');
       return;
     }
 
     if (!isApiConfigured()) {
+      clearAuthReturnTo();
       setError('Supabase API is not configured. Set SUPABASE_URL and SUPABASE_ANON_KEY in .env.');
       return;
     }
@@ -40,23 +44,33 @@ export function AuthCallback() {
         saveDiscordSession({accessToken: result.access_token, user: result.user});
         setDiscordSession(result.access_token, result.user);
         refreshUser(result.user);
-        navigate('/my-events', {replace: true});
+        navigate(consumeAuthReturnTo('/'), {replace: true});
       } catch (e) {
-        if (!cancelled) setError(String(e));
+        if (!cancelled) {
+          clearAuthReturnTo();
+          setError(String(e));
+        }
       }
     })();
 
     return () => {
       cancelled = true;
     };
-  }, [params, navigate]);
+  }, [params, navigate, refreshUser]);
 
   return (
     <div className="flex min-h-[40vh] flex-col items-center justify-center gap-3 text-center">
       {error ? (
         <>
           <p className="text-sm text-red-300/90">{error}</p>
-          <TextButton type="button" tone="nav" onClick={() => navigate('/', {replace: true})}>
+          <TextButton
+            type="button"
+            tone="nav"
+            onClick={() => {
+              clearAuthReturnTo();
+              navigate('/', {replace: true});
+            }}
+          >
             Back to browse
           </TextButton>
         </>
