@@ -25,7 +25,7 @@ export function EventDetailHero({event}: Props) {
       aria-label={event.title}
     >
       <div
-        className="pointer-events-none absolute inset-x-0 bottom-0 h-16"
+        className="pointer-events-none absolute inset-x-0 bottom-0 h-20 sm:h-24"
         style={{
           background:
             'linear-gradient(to top, #06060e 0%, rgba(6, 6, 14, 0.82) 30%, rgba(6, 6, 14, 0.28) 60%, transparent 100%)',

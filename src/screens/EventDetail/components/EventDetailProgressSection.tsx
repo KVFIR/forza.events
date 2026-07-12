@@ -1,17 +1,54 @@
 import {EventResultsTable} from '../../../components/EventResultsTable';
-import {formatLobbyCount} from '../../../lib/constants';
+import {formatLobbyCount, LOBBY_TOTAL_PLAYERS} from '../../../lib/constants';
+import {eventTypeMeta, normalizeEventType} from '../../../lib/eventTypes';
 import type {EventDetailViewModel} from '../eventDetailView';
 import {cn} from '../../../lib/cn';
+
+type RegistrationProgressView = Pick<
+  EventDetailViewModel,
+  'ev' | 'fillPct' | 'showRegistrationProgress'
+>;
+
+export function EventRegistrationProgress({view}: {view: RegistrationProgressView}) {
+  if (!view.showRegistrationProgress) return null;
+
+  const full = view.fillPct >= 100;
+  const {badge, progressFill} = eventTypeMeta(normalizeEventType(view.ev.type));
+  const fillWidth = Math.min(view.fillPct, 100);
+
+  return (
+    <div className="mt-2 flex items-center gap-3">
+      <div
+        className="h-1.5 flex-1 overflow-hidden rounded-full bg-white/[0.06]"
+        role="progressbar"
+        aria-valuenow={view.ev.currentPlayers}
+        aria-valuemin={0}
+        aria-valuemax={LOBBY_TOTAL_PLAYERS}
+      >
+        <div
+          className={cn(
+            'h-full rounded-full transition-all duration-700',
+            full ? 'bg-amber-400' : progressFill,
+          )}
+          style={{width: `${fillWidth}%`}}
+        />
+      </div>
+      <span
+        className={cn(
+          'shrink-0 text-xs font-semibold tabular-nums',
+          full ? 'text-amber-400' : badge.text,
+        )}
+      >
+        {formatLobbyCount(view.ev.currentPlayers)}
+      </span>
+    </div>
+  );
+}
 
 type Props = {
   view: Pick<
     EventDetailViewModel,
-    | 'ev'
-    | 'fillPct'
-    | 'showResultsSection'
-    | 'showRegistrationProgress'
-    | 'resultsAwaitingHost'
-    | 'resultDisplay'
+    'showResultsSection' | 'resultsAwaitingHost' | 'resultDisplay'
   >;
   resultsLoadFailed: boolean;
   onRetryResultsLoad: () => void;
@@ -38,26 +75,5 @@ export function EventDetailProgressSection({
     );
   }
 
-  if (!view.showRegistrationProgress) return null;
-
-  return (
-    <div className="mt-4">
-      <div className="flex items-center gap-3">
-        <div className="h-1.5 flex-1 overflow-hidden rounded-full bg-white/[0.06]">
-          <div
-            className={cn(
-              'h-full rounded-full transition-all duration-700',
-              view.fillPct >= 100
-                ? 'bg-amber-400'
-                : 'bg-gradient-to-r from-accent-purple-dark to-accent-purple-light',
-            )}
-            style={{width: `${Math.min(view.fillPct, 100)}%`}}
-          />
-        </div>
-        <span className="shrink-0 text-xs font-semibold tabular-nums text-slate-300">
-          {formatLobbyCount(view.ev.currentPlayers)}
-        </span>
-      </div>
-    </div>
-  );
+  return null;
 }

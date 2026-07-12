@@ -24,6 +24,7 @@ export function eventTypeLabelEn(type: EventType): string {
 export type EventTypeOption = {
   value: EventType;
   accentBar: string;
+  progressFill: string;
   badge: {border: string; text: string; bg: string};
   detailVisual: {gradient: string; glow: string};
   typeButtonSelected: string;
@@ -34,6 +35,7 @@ export const EVENT_TYPES: EventTypeOption[] = [
   {
     value: 'road',
     accentBar: 'bg-blue-500/25',
+    progressFill: 'bg-blue-500',
     badge: {
       border: 'border-blue-500/30',
       text: 'text-blue-300',
@@ -48,6 +50,7 @@ export const EVENT_TYPES: EventTypeOption[] = [
   {
     value: 'dirt',
     accentBar: 'bg-orange-500/25',
+    progressFill: 'bg-orange-500',
     badge: {
       border: 'border-orange-500/30',
       text: 'text-orange-300',
@@ -62,6 +65,7 @@ export const EVENT_TYPES: EventTypeOption[] = [
   {
     value: 'cruise',
     accentBar: 'bg-emerald-500/25',
+    progressFill: 'bg-emerald-500',
     badge: {
       border: 'border-emerald-500/30',
       text: 'text-emerald-300',
