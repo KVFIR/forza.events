@@ -4,7 +4,7 @@ Lessons from implementation work (keep in sync when behavior changes).
 
 ## Discord-only runtime (MVP)
 
-- **Production:** primary surface is still the **Discord Activity**. Opening the **raw Railway hostname** in a browser tab shows **`DiscordOnlyGate`**. **`https://forza.events`** is a supported browser web host: Discord OAuth sign-in is required before the app — full-screen **`BrowserSignInScreen`** (no navbar) via **`useBrowserSignInGate()`** in `src/App.tsx` (`shouldRequireBrowserSignIn()` / `isPublicBrowserPath()` in `src/lib/runtime.ts`). Preview on localhost: **`/sign-in`**.
+- **Production:** primary surface is still the **Discord Activity**. Opening the **raw Railway hostname** in a browser tab shows **`DiscordOnlyGate`**. **`https://forza.events`** is a supported browser web host: Discord OAuth sign-in is required before the app — full-screen **`BrowserSignInScreen`** (no navbar) via **`useBrowserSignInGate()`** in `src/App.tsx` (`shouldRequireBrowserSignIn()` / `isPublicBrowserPath()` in `src/lib/runtime.ts`). **Public without sign-in on browser:** `/event/:id`, `/event/:id/results`, `/auth/callback`, `/terms`, `/privacy` (embed title links). Preview on localhost: **`/sign-in`**.
 - **Not supported in prod:** standalone web sign-in on Railway/production origin; browser OAuth there is intentionally blocked (`invalid_grant` / redirect mismatch). A future standalone web product needs a **separate Discord application** — see [`docs/PLAN.md`](docs/PLAN.md).
 - **Local dev exception:** `localhost` / `127.0.0.1` skip the production sign-in gate so engineers can use `npm run dev` + `/auth/callback` browser OAuth in a tab (`docs/DEVELOPMENT.md`). **Sign in:** navbar auth pill or Profile → **Sign in with Discord** (`AuthStatusIndicator` / `SignInRequiredState` + `startDiscordBrowserSignIn()` when `supportsBrowserOAuth()`).
 - **Auth in Activity:** `initDiscordActivity()` → SDK `authorize` (scopes `identify`, `guilds`, `rpc.activities.write`) → `token-exchange` → `authenticate`. Guild context: `sdk.guildId` pre-fills create-event **target server** when the Activity was launched on a server. **Startup perf:** `preloadDiscordEmbeddedSdk()` in `main.tsx` (Activity iframe only); `AuthContext` clears `loading` before background `applyLaunchEventRedirect` (guild `launch-intent` only from `/`, embed `open_event:{id}` always); `token-exchange` defers `discord_guilds` upsert via `deferGuildCatalogUpsert` + `EdgeRuntime.waitUntil`. Event Detail does not block on auth except when the event is still loading or auth may be required to resolve a host draft deep link.
@@ -12,12 +12,12 @@ Lessons from implementation work (keep in sync when behavior changes).
 - **Implications for UI/UX** (design and copy should assume Activity, not a generic website):
   - Activity iframe sandbox blocks native `window.confirm` / `alert` / `prompt` (no `allow-modals`). Use in-app `ConfirmDialog` (`src/components/ui/ConfirmDialog.tsx`) for destructive confirmations.
   - Users always have a Discord access token when using the real product path; avoid dead-end copy like “open in Discord” on screens that only render inside Activity (e.g. Create **Target** step — `TargetStep` still shows that message when `token` is null; treat as dev/edge only).
-  - **Publish target** (server + channel) is Discord-native: `list-guilds` = user guilds ∩ servers where the **bot is installed**; `list-channels` = text channels where the bot has **View Channel**, **Send Messages**, and **Embed Links**; `validate-channel` re-checks on channel select (and restored draft channel). Empty server list → **Add to server** CTA (`buildBotInstallUrl` / `openBotInstallUrl` in `src/lib/discordInstall.ts`) — callback-less bot OAuth (`scope=bot`); Activity uses `openExternalLink` → browser, then **Refresh list**. **Bot → Requires OAuth2 Code Grant must be OFF** in the Developer Portal. User-install in App Launcher does **not** add a publish target.
+  - **Publish target** (server + channel) is Discord-native: `list-guilds` = user guilds with **Manage Server** (or Administrator) ∩ servers where the **bot is installed** (empty manageable list falls back to all user guilds with bot, but publish still requires Manage Server); `list-channels` = text channels where the bot has **View Channel**, **Send Messages**, and **Embed Links**; `validate-channel` re-checks on channel select (and restored draft channel). **Draft save** needs guild **membership** only (`resolveGuildNameForUser` on `save-event`); **publish** and channel pick require **Manage Server** / Administrator (`requireManageGuildAccess` on `list-channels`, `validate-channel`, `publish-event`). Empty server list → **Add to server** CTA (`buildBotInstallUrl` / `openBotInstallUrl` in `src/lib/discordInstall.ts`) — callback-less bot OAuth (`scope=bot`); Activity uses `openExternalLink` → browser, then **Refresh list**. **Bot → Requires OAuth2 Code Grant must be OFF** in the Developer Portal. User-install in App Launcher does **not** add a publish target.
   - **Draft** requires `guild_id`; **publish** requires `guild_id` + `channel_id`. Channel can be chosen on Target or in the publish modal on Review — both are valid because publish always happens in Discord context.
 - **Delete draft:** `save-event` with `{ delete: true }` (draft + host only). UI: Event Detail + Create Review step.
 - **Save published edits:** `save-event` update uses `buildEventFields` only — never overwrites `status` (avoids reverting `open` → `draft`).
 - **Post-start host:** Event Detail shows separate **Submit results** + **Cancel event** buttons; cancel syncs Discord embed via `syncPublishedEmbed`.
-- **Join/leave:** `event-participation` validates gamertag server-side, ensures `users` row exists, DB trigger `enforce_event_participant_capacity` prevents over-capacity races; **leave locked after event start** (`canLeaveEvent` / `canLeaveRegistration`). Join/leave/cancel/results sync published embed via `syncPublishedEmbedByEventId`. Profile `events_joined` synced via DB trigger (baseline).
+- **Join/leave:** `event-participation` validates gamertag server-side, ensures `users` row exists, DB trigger `enforce_event_participant_capacity` prevents over-capacity races; **leave locked after event start** (`canLeaveEvent` / `canLeaveRegistration`). Join/leave/cancel/results sync published embed via `syncPublishedEmbedByEventId` (response includes `embed_synced`; failures logged as structured JSON). `JoinedEventsContext` clears optimistic overrides after successful join/leave. Profile `events_joined` synced via DB trigger (baseline).
   - After publish, server and channel are **locked** in the form (`lockGuild` / `lockChannel`).
   - **Publish embed:** `buildEventEmbed` — date, tracks (`name` + optional `share_code` + optional `format` in `events.tracks` jsonb), cars, participants `current/12`, optional restrictions (plain text). Legacy `event_share_code` / `track_codes` still read for old rows. **Status on embed:** `cancelled` / `completed` / `archived` show a Status field, title prefix, grey/green color, and disabled or relabelled button. Sync on join/leave, save/cancel, submit-results. Failed PATCH logs structured JSON (`embedSync` returns `{ok:false}`). Button `open_event:{id}` → `interactions-endpoint` stores `launch_intents` (nullable `guild_id` for DMs) → navigate from `sdk.customId` or `launch-intent` fallback. Browse loads immediately and does not wait on auth.
   - Browse/join/create/publish all depend on Edge Functions + Discord token headers; test in Discord after API/proxy changes, not only localhost. Interactions Endpoint URL must be set in Discord Developer Portal.
@@ -37,6 +37,7 @@ Lessons from implementation work (keep in sync when behavior changes).
 - **My Events** merges host drafts **on top** for scopes `all` and `hosted`; **Joined** has no drafts.
 - Draft cards link to `/create?edit={id}`, not `/event/{id}`. After first save, navigate to `/my-events`.
 - Do not treat `draftsLoadError` as `loadError` for the whole list — published events can load while drafts fail.
+- **Create flow:** form state lives in `useCreateEventForm` only (no Context, no `localStorage`); drafts persist on explicit **Save** / before publish via `persistDraft()` → `save-event`; navigating away from `/create` without save drops unsaved data.
 
 ## Supabase Edge Functions
 
@@ -44,6 +45,7 @@ Lessons from implementation work (keep in sync when behavior changes).
 
 - New functions default to **`verify_jwt = true`** unless configured otherwise.
 - Activity-first functions (`token-exchange`, `save-event`, `browse-events`, `host-drafts`, etc.) use **`verify_jwt = false`** because auth is **`x-discord-access-token`** + `verifyDiscordToken()`, not Supabase user JWT.
+- **`verifyDiscordToken`:** 30s per-isolate cache; Discord **429** throws `DiscordRateLimitError` (callers return 503), not `null`/401.
 - **Always deploy** public/browse/draft functions with:
   ```bash
   npx supabase functions deploy browse-events host-drafts --no-verify-jwt
@@ -79,8 +81,10 @@ Lessons from implementation work (keep in sync when behavior changes).
 ## Auth / session
 
 - `isSignedIn` = `user.discordId` **and** `getDiscordAccessToken()`.
+- **Browser OAuth session** (`discordAuth.ts`): token + user in **`localStorage`** (migrates legacy `sessionStorage` on read) so sign-in survives new tabs from Discord embed links; Activity iframe auth stays in-memory + same keys on the Activity origin only.
 - Saving drafts can work (token in module) while **My Events** stays empty if React `user` is still `GUEST_USER` — e.g. OAuth callback called `setDiscordSession` but not **`refreshUser`**.
 - `AuthCallback` should `refreshUser(result.user)` after token exchange; use **`exchangeTokenOnce()`** so React StrictMode does not double-exchange the OAuth `code`.
+- **Stale token:** `api.ts` `invoke()` on Edge **401** dispatches `SESSION_EXPIRED_EVENT` (`src/lib/sessionEvents.ts`); `AuthContext` clears session and resets to guest — no `refresh_token` flow.
 - Optional: sync `loadDiscordSession()` into context on mount if session exists but state is stale.
 
 ## Deploy checklist (when touching events browse/drafts)
@@ -89,6 +93,14 @@ Lessons from implementation work (keep in sync when behavior changes).
 2. Ship frontend (Railway) after any `api.ts` / proxy fetch changes
 3. Hard refresh in Discord Activity
 4. Run P0 checks in [`docs/E2E.md`](docs/E2E.md) when changing auth, browse, publish, or embed sync
+
+## Navigation / redirects
+
+- **Helpers:** `src/lib/returnTo.ts` (browser OAuth `auth_return_to` in `sessionStorage`, allowlist via `isSafeReturnPath`) and `src/lib/navigationState.ts` (`location.state.from` for Event Detail back). **`ALLOWED_EXACT` in `returnTo.ts` must stay aligned with `App.tsx` routes** when adding new top-level pages.
+- **Browser OAuth:** `startDiscordBrowserSignIn()` saves current path → `AuthCallback` uses `consumeAuthReturnTo('/')`; errors call `clearAuthReturnTo()`.
+- **Event Detail back:** `EventCard` sets `state.from` (list pathname). Propagated Detail → Results → Detail and after host submit. Fallback: draft host → `/my-events`, else `/`. Create publish/save-published sets `from: '/my-events'`.
+- **Post-commit:** use `navigate(..., {replace: true})` after login, publish, delete, and deep-link launch (`launchRedirect.ts`).
+- **Limitation:** `from` lives in `location.state` only — **hard refresh drops referrer** (back falls back to Browse / My Events). Not stored in `sessionStorage`.
 
 ## Internationalization (i18n)
 
@@ -104,7 +116,7 @@ Lessons from implementation work (keep in sync when behavior changes).
 - **Cover uploads:** `upload-cover` only (host + matching `guild_id`/`event_id`); baseline schema drops anon storage write policies on `event-covers`.
 - **Publish target:** `publish-event` and `validate-channel` call `validatePublishChannelTarget`; user must be guild member with Manage Server (`guildAccess.ts`).
 - **OAuth:** `token-exchange` whitelists `redirect_uri` via `oauthRedirect.ts` (+ optional `DISCORD_REDIRECT_URI_ALLOWLIST`).
-- **Cars catalog:** `save-event` resolves cars by id or `(make, model, year, pi)` on active rows only — no client-driven inserts into `cars`. Refresh prod: `npm run data:fh6:scrape` then `npm run seed:cars` (upsert via `006_cars_catalog_sync`; never `DELETE FROM cars` / `event_cars`).
+- **Cars catalog:** `save-event` resolves cars via `resolveEventCars()` **before** insert/update (avoids orphan drafts on `CARS_UNRESOLVED`); matches by id or `(make, model, year, pi)` on active rows only — no client-driven inserts into `cars`. Refresh prod: `npm run data:fh6:scrape` then `npm run seed:cars` (upsert via `006_cars_catalog_sync`; never `DELETE FROM cars` / `event_cars`).
 - **Results:** `submit-results` requires `discord_id` in `event_participants`.
 - After publish, `assertTargetNotLocked` blocks changing `guild_id` and `channel_id` on save.
 - **Anon PostgREST reads (baseline RLS + `003_security_publish_results`):** `users` / `event_participants` / `event_results` / `event_cars` only for non-draft events (or tied rows) — not full-table scraping.
