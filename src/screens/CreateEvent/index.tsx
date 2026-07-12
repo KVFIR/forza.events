@@ -26,7 +26,6 @@ import {formatDiscordHandle} from '../../lib/discordHandle';
 import {isLocalDevHost} from '../../lib/runtime';
 import {useCreateEventLeaveGuard} from './useCreateEventLeaveGuard';
 import {Alert} from '../../components/ui/Alert';
-import {cn} from '../../lib/cn';
 
 export function CreateEvent() {
   const {t} = useTranslation();
@@ -106,7 +105,7 @@ export function CreateEvent() {
 
   const hasUnsavedProgress = !isPublished && draftSyncStatus === 'dirty';
 
-  useCreateEventLeaveGuard(hasUnsavedProgress);
+  const leaveBlocker = useCreateEventLeaveGuard(hasUnsavedProgress);
 
   const missingForPublish = collectPublishGaps({
     channelId: values.targetChannelId,
@@ -309,40 +308,35 @@ export function CreateEvent() {
           />
           {token ? <CreateEventConvoySection {...convoySectionProps} /> : null}
         </>
+      ) : step === 0 ? (
+        <EventStep {...eventStepProps} />
       ) : (
-        <>
-          <div className={cn(step !== 0 && 'hidden')}>
-            <EventStep {...eventStepProps} />
-          </div>
-          <div className={cn(step !== PUBLISH_STEP_INDEX && 'hidden')}>
-            <PublishStep
-              token={token}
-              accessToken={token ?? ''}
-              title={values.title}
-              type={values.type}
-              description={values.description}
-              coverPreview={values.coverPreview}
-              startsAtLocal={values.startsAtLocal}
-              carRuleMode={values.carRuleMode}
-              maxPi={values.maxPi}
-              additionalCarRestrictions={values.additionalCarRestrictions}
-              eventCars={values.eventCars}
-              tracks={normalizedTracks}
-              lobbyLeaderLabel={lobbyLeaderLabel}
-              guildId={values.targetGuildId}
-              guildName={values.targetGuildName}
-              channelId={values.targetChannelId}
-              lockGuild={false}
-              lockChannel={false}
-              fieldErrors={fieldErrors}
-              missingForPublish={missingForPublish}
-              convoy={convoySectionProps}
-              onGuildChange={onGuildChange}
-              onChannelChange={setTargetChannelId}
-              onJumpToStep={setStep}
-            />
-          </div>
-        </>
+        <PublishStep
+          token={token}
+          accessToken={token ?? ''}
+          title={values.title}
+          type={values.type}
+          description={values.description}
+          coverPreview={values.coverPreview}
+          startsAtLocal={values.startsAtLocal}
+          carRuleMode={values.carRuleMode}
+          maxPi={values.maxPi}
+          additionalCarRestrictions={values.additionalCarRestrictions}
+          eventCars={values.eventCars}
+          tracks={normalizedTracks}
+          lobbyLeaderLabel={lobbyLeaderLabel}
+          guildId={values.targetGuildId}
+          guildName={values.targetGuildName}
+          channelId={values.targetChannelId}
+          lockGuild={false}
+          lockChannel={false}
+          fieldErrors={fieldErrors}
+          missingForPublish={missingForPublish}
+          convoy={convoySectionProps}
+          onGuildChange={onGuildChange}
+          onChannelChange={setTargetChannelId}
+          onJumpToStep={setStep}
+        />
       )}
 
       <div className="mt-8 flex flex-col gap-2">
@@ -431,6 +425,16 @@ export function CreateEvent() {
           </>
         )}
       </div>
+
+      <ConfirmDialog
+        open={leaveBlocker.state === 'blocked'}
+        title={t('create.leaveUnsavedTitle')}
+        description={t('create.leaveUnsavedDesc')}
+        confirmLabel={t('create.leaveUnsavedConfirm')}
+        variant="danger"
+        onCancel={() => leaveBlocker.reset?.()}
+        onConfirm={() => leaveBlocker.proceed?.()}
+      />
 
       <ConfirmDialog
         open={deleteConfirmOpen}
