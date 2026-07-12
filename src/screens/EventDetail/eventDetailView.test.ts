@@ -107,6 +107,17 @@ describe('buildEventDetailViewModel', () => {
     expect(view.showRegistrationProgress).toBe(false);
   });
 
+  it('hides registration progress after the event has started', () => {
+    const event = baseEvent({
+      discordMessageId: 'msg-1',
+      lifecycle: 'open',
+      status: 'live',
+      startsAt: new Date(Date.now() - 60_000).toISOString(),
+    });
+    const view = buildView({event, displayEvent: event});
+    expect(view.showRegistrationProgress).toBe(false);
+  });
+
   it('disables participation when viewer is convoy leader', () => {
     const event = baseEvent({
       discordMessageId: 'msg-1',
