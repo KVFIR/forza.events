@@ -7,6 +7,8 @@ import type {CarRuleMode} from './eventSpec.ts';
 import {formatTrackEmbedLine, resolveTrackRows} from './eventTracks.ts';
 import {formatMaxPi} from './pi.ts';
 
+const DEFAULT_APP_ORIGIN = 'https://forza.events';
+
 const LOBBY_TOTAL_PLAYERS = 12;
 const EMBED_FIELD_VALUE_MAX = 1024;
 const EMBED_FIELD_NAME_MAX = 256;
@@ -86,6 +88,11 @@ export function mapEventCarsForEmbed(eventCars: EventCarJoinRow[]): EmbedAllowed
     });
   }
   return mapped;
+}
+
+export function eventDetailUrl(eventId: string, origin: string): string {
+  const base = origin.trim().replace(/\/$/, '');
+  return `${base}/event/${eventId}`;
 }
 
 function discordTimestamp(iso: string, style: 'F' | 'R' = 'F'): string {
@@ -296,18 +303,32 @@ type EmbedLifecycleUi = {
   buttonStyle: 1 | 2 | 3 | 4;
 };
 
+/** Drop host copy that repeats the embed title (common when title is pasted into description). */
+export function stripEmbedAboutText(
+  title: string,
+  raw: string | null | undefined,
+): string | null {
+  const body = raw?.trim();
+  if (!body) return null;
+  const normalizedTitle = title.trim();
+  if (!normalizedTitle || body === normalizedTitle) return null;
+  const lines = body.split(/\r?\n/);
+  if (lines[0]?.trim() === normalizedTitle) {
+    const rest = lines.slice(1).join('\n').trim();
+    return rest || null;
+  }
+  return body;
+}
+
 function buildEmbedDescription(
   statusSubtitle: string,
   statusDetail: string | null,
-  eventDescription: string | null | undefined,
 ): string | undefined {
   const parts: string[] = [];
   const subtitle = statusSubtitle.trim();
   if (subtitle) parts.push(subtitle);
   const detail = statusDetail?.trim();
   if (detail) parts.push(detail);
-  const body = eventDescription?.trim();
-  if (body) parts.push(body);
   if (!parts.length) return undefined;
   return parts.join('\n\n').slice(0, EMBED_DESCRIPTION_MAX);
 }
@@ -371,7 +392,7 @@ export function buildEventEmbed(event: EmbedEventInput) {
   const siteOrigin =
     (globalThis as {Deno?: {env: {get: (name: string) => string | undefined}}}).Deno?.env.get(
       'APP_ORIGIN',
-    ) ?? 'https://forzaevents.up.railway.app';
+    ) ?? DEFAULT_APP_ORIGIN;
   const coverUrl = resolveCoverAbsolute(event.type, event.cover_image_url, siteOrigin);
   const isOpenBuild = event.car_rule_mode !== 'restricted_list';
   const lobbyCount = formatLobbyCount(event.current_players);
@@ -382,8 +403,15 @@ export function buildEventEmbed(event: EmbedEventInput) {
   const description = buildEmbedDescription(
     lifecycle.statusSubtitle,
     lifecycle.statusDetail,
-    event.description,
   );
+  const aboutText = stripEmbedAboutText(title, event.description);
+  const aboutField: EmbedField | null = aboutText
+    ? {
+        name: embedFieldName('📝 About'),
+        value: truncateFieldValue(aboutText),
+        inline: false,
+      }
+    : null;
   const participantsField: EmbedField = {
     name: embedFieldName(`👤 Participants (${lobbyCount})`),
     value: truncateFieldValue(`Convoy leader: ${event.lobby_leader_gamertag.trim() || 'TBD'}`),
@@ -399,6 +427,7 @@ export function buildEventEmbed(event: EmbedEventInput) {
   const fixedFields: EmbedField[] = [
     {name: embedFieldName('📅 Date & Time'), value: discordTimestamp(event.starts_at), inline: false},
     ...(trackField ? [trackField] : []),
+    ...(aboutField ? [aboutField] : []),
   ];
 
   const skeletonFields = [...fixedFields, participantsField];
@@ -449,6 +478,7 @@ export function buildEventEmbed(event: EmbedEventInput) {
 
   const embed = {
     title,
+    url: eventDetailUrl(event.id, siteOrigin),
     description,
     color: lifecycle.color,
     image: {url: coverUrl},

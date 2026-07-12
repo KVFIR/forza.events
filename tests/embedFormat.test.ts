@@ -1,6 +1,7 @@
 import {describe, expect, it} from 'vitest';
 import {
   buildEventEmbed,
+  stripEmbedAboutText,
   type EmbedEventInput,
 } from '../supabase/functions/_shared/events.ts';
 
@@ -95,5 +96,60 @@ describe('buildEventEmbed', () => {
     expect(carField?.value).toContain('`extra rules`');
     expect(carField?.value).not.toContain('No engine swap');
     expect(carField?.value).not.toContain('No drivetrain swap');
+  });
+
+  it('links embed title to the public event detail URL', () => {
+    const embed = buildEventEmbed(event({id: 'evt-42'})).embeds[0];
+    expect(embed.url).toBe('https://forza.events/event/evt-42');
+  });
+
+  it('puts host description in About field, not embed description', () => {
+    const embed = buildEventEmbed(
+      event({
+        title: 'Friday Night Sprint',
+        description: 'Friday Night Sprint\n\nBring your best A-class car.',
+      }),
+    ).embeds[0];
+
+    expect(embed.title).toBe('Friday Night Sprint');
+    expect(embed.description).toBeUndefined();
+    const aboutField = embed.fields.find((field) => field.name === '📝 About');
+    expect(aboutField?.value).toBe('Bring your best A-class car.');
+    expect(aboutField?.value).not.toContain('Friday Night Sprint');
+  });
+
+  it('keeps long host copy in About field up to field limit', () => {
+    const longBody = 'x'.repeat(500);
+    const embed = buildEventEmbed(event({description: longBody})).embeds[0];
+    const aboutField = embed.fields.find((field) => field.name === '📝 About');
+    expect(aboutField?.value).toBe(longBody);
+    expect(embed.description).toBeUndefined();
+  });
+
+  it('uses embed description only for lifecycle status', () => {
+    const embed = buildEventEmbed(
+      event({
+        status: 'cancelled',
+        description: 'Original host notes',
+      }),
+    ).embeds[0];
+
+    expect(embed.description).toContain('CANCELLED');
+    expect(embed.description).not.toContain('Original host notes');
+    expect(embed.fields.find((field) => field.name === '📝 About')?.value).toBe(
+      'Original host notes',
+    );
+  });
+});
+
+describe('stripEmbedAboutText', () => {
+  it('drops body that only repeats the title', () => {
+    expect(stripEmbedAboutText('Night Race', 'Night Race')).toBeNull();
+  });
+
+  it('drops first line when it repeats the title', () => {
+    expect(stripEmbedAboutText('Night Race', 'Night Race\n\nDetails here')).toBe(
+      'Details here',
+    );
   });
 });
