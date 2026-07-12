@@ -8,6 +8,9 @@ export const EVENT_LIST_SELECT = `
     gamertag_snapshot,
     is_convoy_leader,
     participation_source,
+    group_index,
+    waitlisted,
+    joined_at,
     users!event_participants_discord_id_fkey(username, avatar_url)
   ),
   event_cars(max_pi, tune_share_code, car_restrictions, cars(id, make, model, year, pi))
@@ -15,4 +18,4 @@ export const EVENT_LIST_SELECT = `
 
 /** Event detail by id — includes results (service role in browse-events). */
 export const EVENT_DETAIL_SELECT = `${EVENT_LIST_SELECT},
-  event_results(discord_id, position, dnf, dns, points)`;
+  event_results(discord_id, position, dnf, dns, points, group_index)`;

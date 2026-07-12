@@ -61,11 +61,15 @@ serve(async (req) => {
 
     const {data: participants} = await supabase
       .from('event_participants')
-      .select('discord_id, gamertag_snapshot')
+      .select('discord_id, gamertag_snapshot, group_index, waitlisted')
       .eq('event_id', eventId);
     const allowedIds = allowedResultDiscordIds(participants ?? []);
+    // Positions are unique per group — derive each racer's group from their roster row.
+    const groupById = new Map(
+      (participants ?? []).map((p) => [String(p.discord_id), p.group_index ?? 1]),
+    );
 
-    const finisherPositions = new Set<number>();
+    const finisherPositionsByGroup = new Map<number, Set<number>>();
 
     for (const r of results) {
       if (!allowedIds.has(String(r.discord_id))) {
@@ -74,10 +78,16 @@ serve(async (req) => {
       const rowErr = validateResultSubmitRow(r);
       if (rowErr) return jsonResponse({error: rowErr}, 400, req);
       if (r.position != null) {
-        if (finisherPositions.has(r.position)) {
+        const group = groupById.get(String(r.discord_id)) ?? 1;
+        let seen = finisherPositionsByGroup.get(group);
+        if (!seen) {
+          seen = new Set<number>();
+          finisherPositionsByGroup.set(group, seen);
+        }
+        if (seen.has(r.position)) {
           return jsonResponse({error: 'Duplicate finishing position'}, 400, req);
         }
-        finisherPositions.add(r.position);
+        seen.add(r.position);
       }
     }
 
@@ -86,6 +96,7 @@ serve(async (req) => {
       position: r.position,
       dnf: r.dnf ?? false,
       dns: r.dns ?? false,
+      group_index: groupById.get(String(r.discord_id)) ?? 1,
     }));
 
     const {error: rpcError} = await supabase.rpc('submit_event_results', {

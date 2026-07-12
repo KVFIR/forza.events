@@ -3,9 +3,43 @@ import {
   buildEventEmbed,
   mapEventCarsForEmbed,
   type EmbedEventInput,
+  type EmbedGroupSummary,
 } from './events.ts';
 import {normalizeGuildName} from './guildDisplay.ts';
 import type {adminClient} from './supabase.ts';
+
+type EmbedParticipantRow = {
+  group_index: number | null;
+  waitlisted: boolean | null;
+  is_convoy_leader: boolean | null;
+  gamertag_snapshot: string | null;
+};
+
+/** Summarize active groups (leader + count) and the waitlist size for the embed. */
+export function summarizeEmbedGroups(
+  rows: EmbedParticipantRow[],
+  groupCount: number,
+): {groups: EmbedGroupSummary[]; waitlist_count: number} {
+  let waitlist_count = 0;
+  const counts = new Map<number, number>();
+  const leaders = new Map<number, string>();
+  for (const r of rows) {
+    if (r.waitlisted) {
+      waitlist_count += 1;
+      continue;
+    }
+    const g = r.group_index ?? 1;
+    counts.set(g, (counts.get(g) ?? 0) + 1);
+    if (r.is_convoy_leader && r.gamertag_snapshot?.trim()) {
+      leaders.set(g, r.gamertag_snapshot.trim());
+    }
+  }
+  const groups: EmbedGroupSummary[] = [];
+  for (let g = 1; g <= Math.max(1, groupCount); g++) {
+    groups.push({group_index: g, leader_gamertag: leaders.get(g) ?? null, count: counts.get(g) ?? 0});
+  }
+  return {groups, waitlist_count};
+}
 
 type PublishedEvent = {
   id: string;
@@ -47,7 +81,13 @@ export async function enrichEmbedEvent(
     allowed_cars = mapEventCarsForEmbed(eventCars ?? []);
   }
 
-  return {...event, guild_name, allowed_cars, status: event.status};
+  const {data: parts} = await supabase
+    .from('event_participants')
+    .select('group_index, waitlisted, is_convoy_leader, gamertag_snapshot')
+    .eq('event_id', event.id);
+  const {groups, waitlist_count} = summarizeEmbedGroups(parts ?? [], event.group_count ?? 1);
+
+  return {...event, guild_name, allowed_cars, groups, waitlist_count, status: event.status};
 }
 
 export async function syncPublishedEmbed(

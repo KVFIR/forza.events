@@ -37,6 +37,10 @@ const API_MESSAGES_EN: Partial<Record<ApiErrorCode, string>> = {
     'Complete sign-in before joining events.',
   [API_ERROR_CODES.GUILD_MEMBER_SEARCH_DISABLED]:
     'Convoy leader search is unavailable. Enable the Server Members intent for the bot in the Discord Developer Portal.',
+  [API_ERROR_CODES.GROUPS_MAXED]: 'This event already has the maximum number of groups.',
+  [API_ERROR_CODES.WAITLIST_EMPTY]: 'There is nobody on the waitlist to move into a new group.',
+  [API_ERROR_CODES.LEADER_ALREADY_IN_LOBBY]:
+    'This driver is already in the lobby. Pick someone from the waitlist or a server member who has not joined yet.',
 };
 
 export function apiErrorMessage(code: ApiErrorCode | ValidationCode, fallback?: string): string {

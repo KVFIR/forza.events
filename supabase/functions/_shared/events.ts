@@ -50,6 +50,18 @@ export type EmbedEventInput = {
   description?: string | null;
   guild_name?: string | null;
   allowed_cars?: EmbedAllowedCar[];
+  /** Number of active lobbies (1..5); `max_players` is the capacity per group. */
+  group_count?: number | null;
+  /** Per-group summary (leader + active count); populated by enrichEmbedEvent. */
+  groups?: EmbedGroupSummary[];
+  /** Racers waiting because every active group is full. */
+  waitlist_count?: number | null;
+};
+
+export type EmbedGroupSummary = {
+  group_index: number;
+  leader_gamertag: string | null;
+  count: number;
 };
 
 type EventCarJoinRow = {
@@ -101,9 +113,9 @@ function discordTimestamp(iso: string, style: 'F' | 'R' = 'F'): string {
   return `<t:${unix}:${style}>`;
 }
 
-function formatLobbyCount(currentPlayers: number): string {
+function formatLobbyCount(currentPlayers: number, maxPlayers = LOBBY_TOTAL_PLAYERS): string {
   const filled = Math.max(0, currentPlayers);
-  return `${filled}/${LOBBY_TOTAL_PLAYERS}`;
+  return `${filled}/${maxPlayers || LOBBY_TOTAL_PLAYERS}`;
 }
 
 function truncateFieldValue(value: string, max = EMBED_FIELD_VALUE_MAX): string {
@@ -286,6 +298,63 @@ function formatOpenBuildCarField(event: EmbedEventInput): string {
 }
 
 
+function waitlistEmbedField(count: number): EmbedField {
+  return {
+    name: embedFieldName('⏳ Waitlist'),
+    value: truncateFieldValue(count === 1 ? '1 racer waiting' : `${count} racers waiting`),
+    inline: false,
+  };
+}
+
+/** One participants field per active group (leader + n/max); a single field when ungrouped. */
+function buildParticipantsFields(event: EmbedEventInput): EmbedField[] {
+  const maxPlayers = event.max_players || LOBBY_TOTAL_PLAYERS;
+  const groupCount = event.group_count ?? 1;
+  const groups = event.groups ?? [];
+  const waitlist = event.waitlist_count ?? 0;
+
+  if (groupCount <= 1 || groups.length <= 1) {
+    const leader =
+      groups[0]?.leader_gamertag?.trim() || event.lobby_leader_gamertag.trim() || 'TBD';
+    const fields: EmbedField[] = [
+      {
+        name: embedFieldName(`👤 Participants (${formatLobbyCount(event.current_players, maxPlayers)})`),
+        value: truncateFieldValue(`Convoy leader: ${leader}`),
+        inline: false,
+      },
+    ];
+    if (waitlist > 0) fields.push(waitlistEmbedField(waitlist));
+    return fields;
+  }
+
+  // ponytail: 3+ groups share one field to stay under Discord's 25-field embed cap with cars/tracks.
+  if (groups.length >= 3) {
+    const lines = groups.map(
+      (g) =>
+        `Group ${g.group_index}: ${g.leader_gamertag?.trim() || 'TBD'} (${formatLobbyCount(g.count, maxPlayers)})`,
+    );
+    const fields: EmbedField[] = [
+      {
+        name: embedFieldName(
+          `👤 Groups (${formatLobbyCount(event.current_players, maxPlayers * groupCount)})`,
+        ),
+        value: truncateFieldValue(lines.join('\n')),
+        inline: false,
+      },
+    ];
+    if (waitlist > 0) fields.push(waitlistEmbedField(waitlist));
+    return fields;
+  }
+
+  const fields: EmbedField[] = groups.map((g) => ({
+    name: embedFieldName(`👤 Group ${g.group_index} (${formatLobbyCount(g.count, maxPlayers)})`),
+    value: truncateFieldValue(`Convoy leader: ${g.leader_gamertag?.trim() || 'TBD'}`),
+    inline: false,
+  }));
+  if (waitlist > 0) fields.push(waitlistEmbedField(waitlist));
+  return fields;
+}
+
 const EMBED_STATUS_COLORS: Record<string, number> = {
   cancelled: 0x6b7280,
   completed: 0x374151,
@@ -378,7 +447,6 @@ export function buildEventEmbed(event: EmbedEventInput) {
     ) ?? DEFAULT_APP_ORIGIN;
   const coverUrl = resolveCoverAbsolute(event.type, event.cover_image_url, siteOrigin);
   const isOpenBuild = event.car_rule_mode !== 'restricted_list';
-  const lobbyCount = formatLobbyCount(event.current_players);
   const typeColor = eventTypeEmbedColor(event.type);
   const lifecycle = resolveEmbedLifecycleUi(event.status, event.starts_at, typeColor);
 
@@ -395,11 +463,7 @@ export function buildEventEmbed(event: EmbedEventInput) {
         inline: false,
       }
     : null;
-  const participantsField: EmbedField = {
-    name: embedFieldName(`👤 Participants (${lobbyCount})`),
-    value: truncateFieldValue(`Convoy leader: ${event.lobby_leader_gamertag.trim() || 'TBD'}`),
-    inline: false,
-  };
+  const participantsFields = buildParticipantsFields(event);
 
   const eventTracks = listEventTracks(event);
   const trackField: EmbedField | null =
@@ -413,7 +477,7 @@ export function buildEventEmbed(event: EmbedEventInput) {
     ...(aboutField ? [aboutField] : []),
   ];
 
-  const skeletonFields = [...fixedFields, participantsField];
+  const skeletonFields = [...fixedFields, ...participantsFields];
   const skeletonChars = measureEmbedChars({
     title,
     description,
@@ -442,7 +506,7 @@ export function buildEventEmbed(event: EmbedEventInput) {
     } else {
       list.push(...carFields);
     }
-    list.push(participantsField);
+    list.push(...participantsFields);
     return list.slice(0, EMBED_FIELDS_MAX);
   }
 

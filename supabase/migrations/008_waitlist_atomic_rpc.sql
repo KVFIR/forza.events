@@ -1,0 +1,211 @@
+-- Atomic waitlist promotion and add-group (avoids partial group_count / double-promote races).
+
+-- Promote the earliest waitlisted racer into an open seat in group G (returns discord_id or null).
+create or replace function promote_waitlist_to_group(
+  p_event_id uuid,
+  p_group_index smallint
+)
+returns text
+language plpgsql
+security definer
+set search_path = public
+as $$
+declare
+  v_max    int;
+  v_active int;
+  v_next   text;
+begin
+  select max_players into v_max
+  from events
+  where id = p_event_id
+  for update;
+
+  if v_max is null then
+    raise exception 'EVENT_NOT_FOUND';
+  end if;
+
+  select count(*)::int into v_active
+  from event_participants
+  where event_id = p_event_id
+    and group_index = p_group_index
+    and not coalesce(waitlisted, false);
+
+  if v_active >= v_max then
+    return null;
+  end if;
+
+  select discord_id into v_next
+  from event_participants
+  where event_id = p_event_id
+    and coalesce(waitlisted, false)
+  order by joined_at asc
+  limit 1
+  for update skip locked;
+
+  if v_next is null then
+    return null;
+  end if;
+
+  update event_participants
+  set waitlisted = false,
+      group_index = p_group_index
+  where event_id = p_event_id
+    and discord_id = v_next;
+
+  return v_next;
+end;
+$$;
+
+-- Host adds a group: bump group_count, place leader, auto-fill from waitlist (single transaction).
+create or replace function add_event_group(
+  p_event_id uuid,
+  p_leader_discord_id text,
+  p_leader_gamertag text,
+  p_participation_source text default 'host_assigned'
+)
+returns smallint
+language plpgsql
+security definer
+set search_path = public
+as $$
+declare
+  v_event      events%rowtype;
+  v_new_group  smallint;
+  v_waitlisted int;
+  v_fill_ids   text[];
+begin
+  if p_leader_discord_id is null or trim(p_leader_discord_id) = '' then
+    raise exception 'BAD_REQUEST';
+  end if;
+  if p_leader_gamertag is null or trim(p_leader_gamertag) = '' then
+    raise exception 'BAD_REQUEST';
+  end if;
+
+  select * into v_event
+  from events
+  where id = p_event_id
+  for update;
+
+  if not found or v_event.status = 'draft' then
+    raise exception 'EVENT_NOT_FOUND';
+  end if;
+
+  if coalesce(v_event.group_count, 1) >= 5 then
+    raise exception 'GROUPS_MAXED';
+  end if;
+
+  select count(*)::int into v_waitlisted
+  from event_participants
+  where event_id = p_event_id
+    and coalesce(waitlisted, false);
+
+  if v_waitlisted < 1 then
+    raise exception 'WAITLIST_EMPTY';
+  end if;
+
+  v_new_group := coalesce(v_event.group_count, 1) + 1;
+
+  update events
+  set group_count = v_new_group
+  where id = p_event_id;
+
+  insert into event_participants (
+    event_id,
+    discord_id,
+    gamertag_snapshot,
+    waitlisted,
+    group_index,
+    is_convoy_leader,
+    participation_source
+  )
+  values (
+    p_event_id,
+    trim(p_leader_discord_id),
+    trim(p_leader_gamertag),
+    false,
+    v_new_group,
+    true,
+    coalesce(nullif(trim(p_participation_source), ''), 'host_assigned')
+  )
+  on conflict (event_id, discord_id) do update set
+    gamertag_snapshot = excluded.gamertag_snapshot,
+    waitlisted = false,
+    group_index = v_new_group,
+    is_convoy_leader = true,
+    participation_source = excluded.participation_source;
+
+  select array_agg(discord_id order by joined_at asc) into v_fill_ids
+  from (
+    select discord_id, joined_at
+    from event_participants
+    where event_id = p_event_id
+      and coalesce(waitlisted, false)
+      and discord_id is distinct from trim(p_leader_discord_id)
+    order by joined_at asc
+    limit greatest(0, v_event.max_players - 1)
+  ) q;
+
+  if v_fill_ids is not null and array_length(v_fill_ids, 1) > 0 then
+    update event_participants
+    set waitlisted = false,
+        group_index = v_new_group,
+        is_convoy_leader = false
+    where event_id = p_event_id
+      and discord_id = any (v_fill_ids);
+  end if;
+
+  return v_new_group;
+end;
+$$;
+
+-- Leave + optional waitlist promotion in one transaction (avoids empty seat after failed promote).
+create or replace function leave_event_participant(
+  p_event_id uuid,
+  p_discord_id text
+)
+returns boolean
+language plpgsql
+security definer
+set search_path = public
+as $$
+declare
+  v_group_index smallint;
+  v_waitlisted  boolean;
+  v_is_leader   boolean;
+begin
+  select group_index, coalesce(waitlisted, false), coalesce(is_convoy_leader, false)
+  into v_group_index, v_waitlisted, v_is_leader
+  from event_participants
+  where event_id = p_event_id
+    and discord_id = p_discord_id
+  for update;
+
+  if not found then
+    return false;
+  end if;
+
+  if v_is_leader then
+    raise exception 'LEADER_CANNOT_LEAVE';
+  end if;
+
+  delete from event_participants
+  where event_id = p_event_id
+    and discord_id = p_discord_id;
+
+  if not v_waitlisted then
+    perform promote_waitlist_to_group(p_event_id, coalesce(v_group_index, 1));
+  end if;
+
+  return true;
+end;
+$$;
+
+-- Edge-only RPCs (service role); same pattern as submit_event_results in 003.
+revoke all on function promote_waitlist_to_group(uuid, smallint) from public;
+grant execute on function promote_waitlist_to_group(uuid, smallint) to service_role;
+
+revoke all on function add_event_group(uuid, text, text, text) from public;
+grant execute on function add_event_group(uuid, text, text, text) to service_role;
+
+revoke all on function leave_event_participant(uuid, text) from public;
+grant execute on function leave_event_participant(uuid, text) to service_role;

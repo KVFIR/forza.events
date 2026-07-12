@@ -69,7 +69,7 @@ export async function ensureConvoyLeaderParticipantForEvent(
   await recalculateEventPlayerCount(supabase, event.id);
 }
 
-/** Clear leader flag on all rows, then upsert the designated leader participant. */
+/** Clear group-1 leader flag, then upsert the designated group-1 convoy leader. */
 export async function syncConvoyLeaderParticipant(
   supabase: ReturnType<typeof adminClient>,
   eventId: string,
@@ -79,6 +79,7 @@ export async function syncConvoyLeaderParticipant(
     .from('event_participants')
     .update({is_convoy_leader: false})
     .eq('event_id', eventId)
+    .eq('group_index', 1)
     .eq('is_convoy_leader', true);
 
   const {data: existing} = await supabase
@@ -100,6 +101,7 @@ export async function syncConvoyLeaderParticipant(
       event_id: eventId,
       discord_id: leader.lobby_leader_discord_id,
       gamertag_snapshot: leader.lobby_leader_gamertag,
+      group_index: 1,
       is_convoy_leader: true,
       participation_source: participationSource,
       waitlisted: false,

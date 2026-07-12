@@ -24,7 +24,7 @@ supabase migration list   # local vs remote must match before push
 supabase db push
 ```
 
-**Version names:** use the same numeric prefix as existing files (`001` … `006`), not CLI timestamps. If remote history drifts (e.g. `20260601234442` applied but repo has `006`), repair without re-running SQL when the schema is already correct:
+**Version names:** use the same numeric prefix as existing files (`001` … `007`), not CLI timestamps. If remote history drifts (e.g. `20260601234442` applied but repo has `006`), repair without re-running SQL when the schema is already correct:
 
 ```bash
 npx supabase migration repair --linked --status reverted <orphan-version> --yes
@@ -39,6 +39,10 @@ npx supabase migration repair --linked --status applied 006 --yes
 | `004_rpc_submit_hardening.sql` | `submit_event_results`: trim `discord_id`, explicit `RAISE` messages |
 | `005_remove_touge_drift_event_types.sql` | Drop `touge`/`drift` from `event_type` enum (remap to `road`/`cruise`) |
 | `006_cars_catalog_sync.sql` | Unique `(make, model, year, pi)` for catalog upsert (preserves `event_cars`) |
+| `007_event_groups_waitlist.sql` | `events.group_count`, `event_participants.group_index`, `event_results.group_index`; per-group leader/position indexes; per-group capacity trigger; count triggers fire on UPDATE (waitlist promotion); `submit_event_results` accepts `group_index` |
+| `008_waitlist_atomic_rpc.sql` | Atomic RPCs: `promote_waitlist_to_group`, `add_event_group`, `leave_event_participant` (leave + promotion in one transaction) |
+| `009_add_group_lobby_full_guard.sql` | `add_event_group`: raise `LOBBY_NOT_FULL` when active groups still have open seats |
+| `010_participant_group_index_guard.sql` | Trigger: active `group_index` must be within `1..events.group_count` |
 
 Seeds are **not** included in the migration. Run separately after `db push`:
 
@@ -49,7 +53,7 @@ npm run seed:events   # sample events (dev only)
 
 ## Edge Functions
 
-**15 functions** — canonical list in [`scripts/deploy-edge-functions.sh`](../scripts/deploy-edge-functions.sh). Deploy all:
+**16 functions** — canonical list in [`scripts/deploy-edge-functions.sh`](../scripts/deploy-edge-functions.sh). Deploy all:
 
 ```bash
 npm run deploy:functions
@@ -66,7 +70,8 @@ npm run deploy:functions
 | `validate-channel` | Discord token | Channel validation |
 | `publish-event` | Discord token | Post Discord embed |
 | `save-event` | Discord token | CRUD draft / edit / cancel |
-| `event-participation` | Discord token | Join / leave |
+| `event-participation` | Discord token | Join (first open group / waitlist) / leave (auto-promote queue) |
+| `add-group` | Discord token | Host adds a lobby group (leader + auto-fill from waitlist) |
 | `submit-results` | Discord token | Results + complete |
 | `user-profile` | Discord token | Profile updates |
 | `launch-intent` | Discord token | Embed deep-link fallback |
@@ -122,7 +127,7 @@ Host: `000000000000000001`, guild `000000000000000001`.
 ```bash
 npm run data:fh6:scrape    # scrape → fh6_fandom_cars.json + fh6cars.json
 npm run data:fh6:xlsx      # optional spreadsheet from fh6_fandom_cars.json
-supabase db push           # apply 006+ if needed
+supabase db push           # apply 007+ if needed
 npm run seed:cars          # upsert catalog (linked CLI); does not delete event_cars
 ```
 

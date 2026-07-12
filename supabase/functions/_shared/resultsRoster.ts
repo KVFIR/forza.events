@@ -2,8 +2,13 @@
 
 type ParticipantRow = {
   discord_id: string;
+  waitlisted?: boolean | null;
 };
 
 export function allowedResultDiscordIds(participants: ParticipantRow[]): Set<string> {
-  return new Set(participants.map((p) => String(p.discord_id)));
+  return new Set(
+    participants
+      .filter((p) => !p.waitlisted)
+      .map((p) => String(p.discord_id)),
+  );
 }

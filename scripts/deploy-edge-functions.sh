@@ -16,6 +16,7 @@ FUNCTIONS=(
   interactions-endpoint
   save-event
   event-participation
+  add-group
   submit-results
   user-profile
   launch-intent

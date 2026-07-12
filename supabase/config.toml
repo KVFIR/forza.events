@@ -47,6 +47,9 @@ verify_jwt = false
 [functions.event-participation]
 verify_jwt = false
 
+[functions.add-group]
+verify_jwt = false
+
 [functions.submit-results]
 verify_jwt = false
 

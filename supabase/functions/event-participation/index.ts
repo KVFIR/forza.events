@@ -6,6 +6,7 @@ import {verifyDiscordToken} from '../_shared/discord.ts';
 import {ensureDiscordUserRow} from '../_shared/discordUserRow.ts';
 import {syncPublishedEmbedByEventId} from '../_shared/embedSync.ts';
 import {canLeaveEvent, eventHasStarted} from '../_shared/eventSpec.ts';
+import {firstOpenGroup} from '../_shared/eventGroups.ts';
 import {validateGamertag} from '../_shared/gamertag.ts';
 import {rateLimitMutation} from '../_shared/rateLimitPresets.ts';
 import {adminClient} from '../_shared/supabase.ts';
@@ -26,6 +27,9 @@ function participationError(
   }
   if (msg.includes('EVENT_NOT_FOUND')) {
     return appErrorResponse(req, 404, API_ERROR_CODES.EVENT_NOT_FOUND);
+  }
+  if (msg.includes('LEADER_CANNOT_LEAVE')) {
+    return appErrorResponse(req, 400, API_ERROR_CODES.LEADER_CANNOT_LEAVE);
   }
   if (msg.includes('foreign key') && msg.includes('users')) {
     return appErrorResponse(req, 400, API_ERROR_CODES.PROFILE_INCOMPLETE);
@@ -83,17 +87,15 @@ serve(async (req) => {
         return appErrorResponse(req, 400, API_ERROR_CODES.REGISTRATION_AFTER_START);
       }
 
-      const {data: removed, error} = await supabase
-        .from('event_participants')
-        .delete()
-        .eq('event_id', event_id)
-        .eq('discord_id', discordUser.id)
-        .select('discord_id');
+      const {data: removed, error} = await supabase.rpc('leave_event_participant', {
+        p_event_id: event_id,
+        p_discord_id: discordUser.id,
+      });
 
       if (error) return participationError(req, error, 'Could not leave event');
 
       let embedSynced = true;
-      if (removed?.length) {
+      if (removed) {
         const embedSync = await syncPublishedEmbedByEventId(supabase, event_id);
         embedSynced = embedSync.ok;
         if (!embedSync.ok) {
@@ -115,7 +117,7 @@ serve(async (req) => {
 
       const {data: event} = await supabase
         .from('events')
-        .select('max_players, current_players, status, starts_at, host_discord_id')
+        .select('max_players, group_count, current_players, status, starts_at, host_discord_id')
         .eq('id', event_id)
         .single();
 
@@ -131,9 +133,6 @@ serve(async (req) => {
       if (eventHasStarted(event)) {
         return appErrorResponse(req, 400, API_ERROR_CODES.REGISTRATION_AFTER_START);
       }
-      if (event.current_players >= event.max_players) {
-        return appErrorResponse(req, 409, API_ERROR_CODES.EVENT_FULL);
-      }
 
       await ensureDiscordUserRow(supabase, discordUser);
 
@@ -143,12 +142,26 @@ serve(async (req) => {
         .eq('discord_id', discordUser.id);
       if (profileErr) return databaseErrorResponse(req, 'event-participation profile', profileErr);
 
-      const {data: existing} = await supabase
+      const {data: roster} = await supabase
         .from('event_participants')
-        .select('is_convoy_leader, participation_source')
-        .eq('event_id', event_id)
-        .eq('discord_id', discordUser.id)
-        .maybeSingle();
+        .select('discord_id, group_index, waitlisted, is_convoy_leader, participation_source')
+        .eq('event_id', event_id);
+      const existing = roster?.find((r) => r.discord_id === discordUser.id);
+
+      // Route into the first open group; waitlist when every group is full.
+      let groupIndex = existing?.group_index ?? 1;
+      let waitlisted: boolean;
+      if (existing && !existing.waitlisted) {
+        waitlisted = false;
+      } else {
+        const open = firstOpenGroup(roster ?? [], event.group_count ?? 1, event.max_players);
+        if (open != null) {
+          waitlisted = false;
+          groupIndex = open;
+        } else {
+          waitlisted = true;
+        }
+      }
 
       // Preserve host-managed sources; a voluntary join from a non-leader row becomes self_join.
       const participationSource: string =
@@ -157,17 +170,26 @@ serve(async (req) => {
           ? existing.participation_source
           : 'self_join';
 
-      const {error} = await supabase.from('event_participants').upsert(
-        {
-          event_id,
-          discord_id: discordUser.id,
-          gamertag_snapshot: tag.gamertag,
-          waitlisted: false,
-          is_convoy_leader: existing?.is_convoy_leader ?? false,
-          participation_source: participationSource,
-        },
-        {onConflict: 'event_id,discord_id'},
-      );
+      const upsertRow = (wl: boolean) =>
+        supabase.from('event_participants').upsert(
+          {
+            event_id,
+            discord_id: discordUser.id,
+            gamertag_snapshot: tag.gamertag,
+            waitlisted: wl,
+            group_index: groupIndex,
+            is_convoy_leader: existing?.is_convoy_leader ?? false,
+            participation_source: participationSource,
+          },
+          {onConflict: 'event_id,discord_id'},
+        );
+
+      let {error} = await upsertRow(waitlisted);
+      // Lost the last seat to a concurrent joiner — fall back to the waitlist.
+      if (error && !waitlisted && (error.message ?? '').includes('EVENT_FULL')) {
+        waitlisted = true;
+        ({error} = await upsertRow(true));
+      }
 
       if (error) return participationError(req, error, 'Could not join event');
 
@@ -181,7 +203,11 @@ serve(async (req) => {
           }),
         );
       }
-      return jsonResponse({joined: true, embed_synced: embedSync.ok}, 200, req);
+      return jsonResponse(
+        {joined: !waitlisted, waitlisted, group_index: groupIndex, embed_synced: embedSync.ok},
+        200,
+        req,
+      );
     }
 
     return jsonResponse({error: 'Unknown action'}, 400, req);
