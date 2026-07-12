@@ -571,6 +571,22 @@ function sanitizeCarSearchQuery(query: string): string {
   return query.trim().replace(/[%_,]/g, ' ').slice(0, 80);
 }
 
+function carSearchIlikePattern(query: string): string {
+  return `%${query.replace(/"/g, '').trim()}%`;
+}
+
+function mapCarSearchRows(
+  data: {id: string; make: string; model: string; year: number | null; pi: number}[],
+): CarSearchResult[] {
+  return data.map((c) => ({
+    id: c.id,
+    make: c.make,
+    model: c.model,
+    year: c.year,
+    pi: c.pi,
+  }));
+}
+
 export async function searchCars(query: string): Promise<CarSearchResult[]> {
   const q = sanitizeCarSearchQuery(query);
   if (!q) return [];
@@ -579,27 +595,32 @@ export async function searchCars(query: string): Promise<CarSearchResult[]> {
     return await searchCarCatalog(q);
   }
 
-  const supabase = (await getSupabase())!;
-  const pattern = `%${q}%`;
-  const {data, error} = await supabase
-    .from('cars')
-    .select('id, make, model, year, pi')
-    .eq('active', true)
-    .or(`search_text.ilike.${pattern},make.ilike.${pattern},model.ilike.${pattern}`)
-    .limit(20);
+  try {
+    const supabase = (await getSupabase())!;
+    const pattern = carSearchIlikePattern(q);
+    const {data, error} = await supabase
+      .from('cars')
+      .select('id, make, model, year, pi')
+      .eq('active', true)
+      .or(
+        `search_text.ilike."${pattern}",make.ilike."${pattern}",model.ilike."${pattern}"`,
+      )
+      .limit(20);
 
-  if (error) {
-    console.error('searchCars', error);
-    return [];
+    if (error) {
+      console.error('searchCars', error);
+      return await searchCarCatalog(q);
+    }
+
+    if (data?.length) {
+      return mapCarSearchRows(data);
+    }
+
+    return await searchCarCatalog(q);
+  } catch (err) {
+    console.error('searchCars', err);
+    return await searchCarCatalog(q);
   }
-
-  return (data ?? []).map((c) => ({
-    id: c.id,
-    make: c.make,
-    model: c.model,
-    year: c.year,
-    pi: c.pi,
-  }));
 }
 
 /** True when the user has a self_join participant row — used for My Events "Joined" tab. */

@@ -306,8 +306,15 @@ async function syncEventCars(
   cars: CarPayload[],
   mode: 'anything_goes' | 'restricted_list',
 ): Promise<ValidationCode | null> {
-  await supabase.from('event_cars').delete().eq('event_id', eventId);
-  if (mode !== 'restricted_list' || cars.length === 0) return null;
+  if (mode !== 'restricted_list') {
+    await supabase.from('event_cars').delete().eq('event_id', eventId);
+    return null;
+  }
+
+  if (cars.length === 0) {
+    await supabase.from('event_cars').delete().eq('event_id', eventId);
+    return null;
+  }
 
   type EventCarRow = {
     event_id: string;
@@ -332,7 +339,7 @@ async function syncEventCars(
     });
   }
 
-  if (cars.length > 0 && rows.length < cars.length) {
+  if (rows.length < cars.length) {
     console.error(
       JSON.stringify({
         msg: 'save-event unresolved cars',
@@ -344,12 +351,12 @@ async function syncEventCars(
     return VALIDATION_CODES.CARS_UNRESOLVED;
   }
 
-  if (rows.length) {
-    const {error} = await supabase.from('event_cars').insert(rows);
-    if (error) {
-      console.error('syncEventCars insert', error);
-      return VALIDATION_CODES.CARS_SYNC_FAILED;
-    }
+  await supabase.from('event_cars').delete().eq('event_id', eventId);
+
+  const {error} = await supabase.from('event_cars').insert(rows);
+  if (error) {
+    console.error('syncEventCars insert', error);
+    return VALIDATION_CODES.CARS_SYNC_FAILED;
   }
   return null;
 }
