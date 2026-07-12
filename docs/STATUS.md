@@ -11,7 +11,7 @@ Remaining work is mostly **Activity E2E in pilot guilds**, **Railway frontend re
 | Layer | State |
 |-------|--------|
 | React Activity (UI) | Done — Browse, Detail, Create (wizard), My Events, Profile, i18n (EN + RU) |
-| Supabase schema | Done — migrations `001`–`005` |
+| Supabase schema | Done — migrations `001`–`006` |
 | Edge Functions | Done — 15 functions ([`supabase/README.md`](../supabase/README.md)) |
 | Security hardening | Done — storage, RLS scope, CORS, rate limits, publish validation |
 | Local browser dev | Done — Discord OAuth + Supabase (not mock mode) |
@@ -20,7 +20,7 @@ Remaining work is mostly **Activity E2E in pilot guilds**, **Railway frontend re
 | Discord app verification | Done — Developer Portal approved (2026-05-31) |
 | Production launch | Partial — Activity E2E in pilot guilds still open |
 
-**Docs map:** product [`PLAN.md`](PLAN.md) · Discord setup [`DISCORD_PLATFORM.md`](DISCORD_PLATFORM.md) · local dev [`DEVELOPMENT.md`](DEVELOPMENT.md) · manual QA [`E2E.md`](E2E.md) · agents [`AGENTS.md`](../AGENTS.md).
+**Docs map:** product [`PLAN.md`](PLAN.md) · Discord setup [`DISCORD_PLATFORM.md`](DISCORD_PLATFORM.md) · pilot community server [`PILOT_COMMUNITY.md`](PILOT_COMMUNITY.md) · local dev [`DEVELOPMENT.md`](DEVELOPMENT.md) · manual QA [`E2E.md`](E2E.md) · agents [`AGENTS.md`](../AGENTS.md).
 
 ---
 
@@ -36,7 +36,7 @@ Remaining work is mostly **Activity E2E in pilot guilds**, **Railway frontend re
 | Discord Activity auth | Done | SDK → `token-exchange` → `authenticate` |
 | Browser localhost auth | Done | `/auth/callback` + `sessionStorage` |
 | Production browser tab | Done | `DiscordOnlyGate` — Activity-only |
-| Supabase schema | Done | `001_baseline` + `002`–`005` |
+| Supabase schema | Done | `001_baseline` + `002`–`006` |
 | Edge Functions | Done | `npm run deploy:functions` |
 | Realtime lobby | Done | `events` + `event_participants` |
 | FH6 cars catalog | Done | Autocomplete; no client inserts into `cars` |
@@ -86,7 +86,7 @@ Details: [`supabase/README.md`](../supabase/README.md).
 | Check | Result |
 |-------|--------|
 | Supabase project | `uoysqfczahqmctbrrizn` (FORZA.EVENTS) |
-| Migrations | `001`–`005` on remote |
+| Migrations | `001`–`006` on remote |
 | Edge Functions | 15 via `deploy:functions` |
 | Activity hosting | Railway `https://forzaevents.up.railway.app` |
 | Discord application verification | Approved — legal URLs on deploy origin |

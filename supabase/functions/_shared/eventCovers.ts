@@ -27,6 +27,20 @@ export function resolveCoverUrl(type: string, coverImageUrl?: string | null): st
   return defaultCoverPath(type);
 }
 
+/** Resolve cover for save: preserve existing custom upload when the client omits the field. */
+export function resolveSaveCoverUrl(
+  type: string,
+  incoming: string | null | undefined,
+  existing: string | null | undefined,
+): string {
+  if (incoming !== undefined) {
+    return resolveCoverUrl(type, incoming);
+  }
+  const kept = existing?.trim();
+  if (kept && !isBundledDefaultCover(kept)) return kept;
+  return resolveCoverUrl(type, null);
+}
+
 export function resolveCoverAbsolute(
   type: string,
   coverImageUrl: string | null | undefined,

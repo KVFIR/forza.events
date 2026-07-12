@@ -41,6 +41,17 @@ const DISPLAY_SIZE: Record<CoverDisplayVariant, {width: number; height: number}>
 const SUPABASE_OBJECT = '/storage/v1/object/public/';
 const SUPABASE_RENDER = '/storage/v1/render/image/public/';
 
+/** Pass through blob/data URLs and bundled repo covers unchanged. */
+function isNonStorageCoverUrl(url: string): boolean {
+  const lower = url.toLowerCase();
+  return (
+    lower.startsWith('blob:') ||
+    lower.startsWith('data:') ||
+    url.startsWith('/covers/') ||
+    (!lower.includes('supabase.co') && !url.startsWith(DISCORD_SUPABASE_PROXY_PREFIX))
+  );
+}
+
 /**
  * Discord Activity CSP allows img-src 'self' and Discord CDNs only — not *.supabase.co.
  * Route Storage through the Activity URL mapping prefix (same as API proxy).
@@ -103,24 +114,23 @@ export function coverDisplaySize(variant: CoverDisplayVariant = 'card'): {
   return DISPLAY_SIZE[variant];
 }
 
-/** Resize Supabase Storage URLs via the image renderer; pass through other URLs unchanged. */
-export function coverDisplayUrl(src: string, variant: CoverDisplayVariant = 'card'): string {
+/**
+ * Display URL for event covers.
+ * Uses Storage object URLs (uploads are pre-sized); avoids Supabase Image Render, which often
+ * fails in Discord Activity and on projects without image transformation enabled.
+ */
+export function coverDisplayUrl(src: string, _variant: CoverDisplayVariant = 'card'): string {
   const trimmed = src.trim();
   if (!trimmed) return trimmed;
+  if (isNonStorageCoverUrl(trimmed)) return trimmed;
 
-  const {width, height} = DISPLAY_SIZE[variant];
-  const idx = trimmed.indexOf(SUPABASE_OBJECT);
+  // Normalize legacy render URLs back to object/public for reliable img loading.
   let display = trimmed;
-  if (idx !== -1) {
-    const renderBase =
-      trimmed.slice(0, idx) + SUPABASE_RENDER + trimmed.slice(idx + SUPABASE_OBJECT.length);
-    const params = new URLSearchParams({
-      width: String(width),
-      height: String(height),
-      quality: variant === 'hero' ? '85' : '80',
-      resize: 'cover',
-    });
-    display = `${renderBase}?${params}`;
+  const renderIdx = trimmed.indexOf(SUPABASE_RENDER);
+  if (renderIdx !== -1) {
+    const objectBase =
+      trimmed.slice(0, renderIdx) + SUPABASE_OBJECT + trimmed.slice(renderIdx + SUPABASE_RENDER.length);
+    display = objectBase.split('?')[0] ?? objectBase;
   }
 
   return discordProxiedStorageUrl(display);

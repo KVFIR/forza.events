@@ -120,7 +120,7 @@ Host must be guild member with **Manage Server** (or Administrator). Server re-v
 
 - `npm run sync:secrets` — Discord secrets
 - `npm run deploy:functions` — all Edge functions (incl. `list-guild-members`), `--no-verify-jwt`
-- `supabase db push` — migrations `001`–`005`
+- `supabase db push` — migrations `001`–`006`
 - Railway: `APP_ORIGIN` = deploy URL; rebuild frontend after env changes
 
 ### Legal URLs (app verification)
@@ -145,6 +145,7 @@ Reminders, threads, participant roles, scheduled bot jobs — see [`PLAN.md`](PL
 ## Links
 
 - [`PLAN.md`](PLAN.md) — product contract
+- [`PILOT_COMMUNITY.md`](PILOT_COMMUNITY.md) — pilot Discord server setup (channels, roles, onboarding)
 - [`STATUS.md`](STATUS.md) — implementation state
 - [`DEVELOPMENT.md`](DEVELOPMENT.md) — local workflow
 - [`E2E.md`](E2E.md) — Activity manual QA matrix

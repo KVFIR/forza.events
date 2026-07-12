@@ -137,7 +137,7 @@
   "eventTypes": {
     "road": "Road racing",
     "dirt": "Dirt racing",
-    "cruise": "Cruise"
+    "cruise": "Meet & cruise"
   },
   "eventStatus": {
     "open": "Open",
@@ -275,7 +275,7 @@
     "routeAndCars": "Route & cars",
     "tracksLabel": "Tracks",
     "trackList": "Track list",
-    "addTrackPlaceholder": "Add track…",
+    "addTrackPlaceholder": "Track name…",
     "trackUntitled": "Untitled track",
     "trackShareCode": "Share code",
     "tracksLimit": "Up to {{max}} tracks per event.",
@@ -378,6 +378,8 @@
     "dateRequired": "Date and time are required.",
     "convoyLeaderProfile": "Add your Xbox gamertag in Profile, or uncheck “I am the convoy leader” and enter another player.",
     "carsRequired": "Add at least one car for a restricted list.",
+    "carsUnresolved": "One or more cars could not be matched to the catalog. Remove and re-add them.",
+    "carsSyncFailed": "Could not save the car list. Try again.",
     "piRange": "Set a PI cap from {{minClass}} {{minPi}} to {{maxClass}} {{maxPi}}.",
     "guildRequired": "Choose a Discord server for this event.",
     "channelRequired": "Choose a channel before publishing.",

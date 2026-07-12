@@ -17,7 +17,11 @@
     "deploy:functions": "bash scripts/deploy-edge-functions.sh",
     "sync:secrets": "node scripts/sync-secrets.mjs",
     "optimize:covers": "node scripts/optimize-covers.mjs",
-    "seed:events": "node scripts/seed-events.mjs"
+    "seed:events": "node scripts/seed-events.mjs",
+    "seed:cars": "node scripts/seed-cars.mjs",
+    "data:fh6:scrape": "python3 scripts/scrape_fh6_fandom_cars.py",
+    "data:fh6:xlsx": "python3 scripts/build_fh6_fandom_xlsx.py",
+    "data:fh6:catalog": "node scripts/build-fh6-app-catalog.mjs"
   },
   "dependencies": {
     "@discord/embedded-app-sdk": "^2.5.0",

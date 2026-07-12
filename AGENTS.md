@@ -104,7 +104,7 @@ Lessons from implementation work (keep in sync when behavior changes).
 - **Cover uploads:** `upload-cover` only (host + matching `guild_id`/`event_id`); baseline schema drops anon storage write policies on `event-covers`.
 - **Publish target:** `publish-event` and `validate-channel` call `validatePublishChannelTarget`; user must be guild member with Manage Server (`guildAccess.ts`).
 - **OAuth:** `token-exchange` whitelists `redirect_uri` via `oauthRedirect.ts` (+ optional `DISCORD_REDIRECT_URI_ALLOWLIST`).
-- **Cars catalog:** `save-event` resolves cars by id/lookup only — no client-driven inserts into `cars`.
+- **Cars catalog:** `save-event` resolves cars by id or `(make, model, year, pi)` on active rows only — no client-driven inserts into `cars`. Refresh prod: `npm run data:fh6:scrape` then `npm run seed:cars` (upsert via `006_cars_catalog_sync`; never `DELETE FROM cars` / `event_cars`).
 - **Results:** `submit-results` requires `discord_id` in `event_participants`.
 - After publish, `assertTargetNotLocked` blocks changing `guild_id` and `channel_id` on save.
 - **Anon PostgREST reads (baseline RLS + `003_security_publish_results`):** `users` / `event_participants` / `event_results` / `event_cars` only for non-draft events (or tied rows) — not full-table scraping.
@@ -116,7 +116,7 @@ Lessons from implementation work (keep in sync when behavior changes).
 - **Convoy leader:** non-host leaders must be guild members (`isUserMemberOfGuild` bot API) when `guild_id` is set on save; Discord lookup failures return `CONVOY_LEADER_GUILD_CHECK_FAILED` (not `NOT_IN_GUILD`).
 - **Host drafts:** `host-drafts` / `browse-events?host_drafts` filter `status = draft` only.
 - **SPA:** CSP + `frame-ancestors` for Discord embed in `index.html`; `npm overrides` pins `esbuild` ≥ 0.25.
-- Deploy **`upload-cover`** with other functions (`npm run deploy:functions`). Apply migrations with `supabase db push` after linking the project (`001`–`005`; see [`supabase/README.md`](supabase/README.md)).
+- Deploy **`upload-cover`** with other functions (`npm run deploy:functions`). Apply migrations with `supabase db push` after linking the project (`001`–`006`; see [`supabase/README.md`](supabase/README.md)).
 - **Docs:** keep [`docs/STATUS.md`](docs/STATUS.md), [`docs/DEVELOPMENT.md`](docs/DEVELOPMENT.md), [`docs/E2E.md`](docs/E2E.md), [`supabase/README.md`](supabase/README.md) in sync when migrations, function list, or Activity flows change.
 
 ## Policy / UI / browse changes (keep in sync)
@@ -144,6 +144,6 @@ Also align **`browse-events`** / **`src/lib/events.ts`** if the server list quer
 - [`docs/DISCORD_PLATFORM.md`](docs/DISCORD_PLATFORM.md) — proxy mapping, portal checklist
 - [`docs/DEVELOPMENT.md`](docs/DEVELOPMENT.md) — local OAuth, quick testing checklist
 - [`docs/E2E.md`](docs/E2E.md) — manual Discord Activity QA matrix
-- [`supabase/README.md`](supabase/README.md) — migrations `001`–`005`, Edge Functions
+- [`supabase/README.md`](supabase/README.md) — migrations `001`–`006`, Edge Functions
 - [`scripts/deploy-edge-functions.sh`](scripts/deploy-edge-functions.sh) — canonical function list (15)
 - **Convoy leader:** `events.lobby_leader_discord_id` + `event_participants.is_convoy_leader` / `participation_source` (in baseline `001`); pick via `list-guild-members` on Create → Target; host leader uses `host_discord_id`; results roster includes leader without Join when id is set.

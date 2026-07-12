@@ -25,7 +25,7 @@ Works in server channels, voice, DMs, and App Launcher (desktop and mobile).
 | Browse, Detail, Create, My Events, Profile | Pilot validation in real Discord servers |
 | Discord application verification (Developer Portal) | Optional custom domain DNS |
 | Discord Activity auth + localhost dev OAuth | Post-MVP bot automation |
-| Schema migrations `001`–`005` + 15 Edge Functions | |
+| Schema migrations `001`–`006` + 15 Edge Functions | |
 | Security: scoped RLS, CORS, rate limits, host-only covers | |
 | i18n (English + Russian) | |
 
@@ -49,7 +49,7 @@ Works in server channels, voice, DMs, and App Launcher (desktop and mobile).
 forza.events/
 ├── src/                 # React Activity (Vite)
 ├── supabase/
-│   ├── migrations/      # 001–005
+│   ├── migrations/      # 001–006
 │   └── functions/       # 15 Edge Functions
 ├── scripts/             # deploy, seed, optimize-covers
 ├── docs/

@@ -16,6 +16,9 @@ const VALIDATION_MESSAGES_EN: Record<ValidationCode, string> = {
   CONVOY_LEADER_GUILD_CHECK_FAILED:
     'Could not verify convoy leader membership. Try again in a moment.',
   CARS_REQUIRED: 'Add at least one car for a restricted car list.',
+  CARS_UNRESOLVED:
+    'One or more cars could not be matched to the catalog. Remove and re-add them, or refresh the car list.',
+  CARS_SYNC_FAILED: 'Could not save the car list. Try again.',
   PI_RANGE: `Set a PI cap from ${piRangeLabelEn()}.`,
   TARGET_GUILD_LOCKED: 'Server cannot be changed after publish.',
   TARGET_CHANNEL_LOCKED: 'Channel cannot be changed after publish.',

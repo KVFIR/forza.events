@@ -97,7 +97,7 @@ supabase link --project-ref <ref>
 supabase db push
 ```
 
-Apply all migrations with `supabase db push` (`001`–`005` — see [`supabase/README.md`](../supabase/README.md)). After applying, seed the cars catalog and optionally sample events.
+Apply all migrations with `supabase db push` (`001`–`006` — see [`supabase/README.md`](../supabase/README.md)). After applying, seed the cars catalog and optionally sample events.
 
 After any schema change that affects security (RLS, storage policies), redeploy Edge Functions.
 
@@ -203,7 +203,7 @@ Quick smoke before a PR or local iteration:
 
 ### After deploy
 
-- [ ] `supabase db push` applied (`001`–`005`)
+- [ ] `supabase db push` applied (`001`–`006`)
 - [ ] `npm run deploy:functions` succeeded
 - [ ] Railway rebuild if `APP_ORIGIN` / client env changed
 

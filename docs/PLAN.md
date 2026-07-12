@@ -91,7 +91,7 @@ The following items are intentionally deferred and must not block launch:
 - Tournament brackets
 - Automatic in-game results import
 - Club/community pages
-- Global leaderboards
+- Global leaderboards and **ranked events / driver skill rating** — see [`BACKLOG.md`](BACKLOG.md) §5 (global pairwise ELO; ranked hosting limited by guild allowlist; any joiner can be rated)
 - Monetization / Discord IAP
 - Native mobile app
 - Livery / build database
@@ -99,7 +99,7 @@ The following items are intentionally deferred and must not block launch:
 
 ## Launch readiness
 
-**Shipped in code:** frozen MVP spec above, Activity UI, migrations `001`–`005`, 15 Edge Functions, launch-intent / deep-link flow, production Supabase + Railway wiring.
+**Shipped in code:** frozen MVP spec above, Activity UI, migrations `001`–`006`, 15 Edge Functions, launch-intent / deep-link flow, production Supabase + Railway wiring.
 
 **Done (platform):** Discord **application verification** in the Developer Portal (approved 2026-05-31).
 

@@ -317,7 +317,7 @@ export function useCreateEventForm() {
       timezone_hint: tz,
       max_players: EVENT_PLAYER_SLOTS,
       description,
-      cover_image_url: coverUrl,
+      cover_image_url: coverFile ? undefined : coverUrl,
       tracks: tracksToRows(normalizedTracks),
       car_rule_mode: carRuleMode,
       max_pi: carRuleMode === 'anything_goes' ? maxPi : undefined,
@@ -449,6 +449,8 @@ export function useCreateEventForm() {
         const compressed = await compressCoverForUpload(coverFile);
         const url = await uploadCoverImage(token, targetGuildId, id, compressed);
         setCoverUrl(url);
+        setCoverPreview(url);
+        setCoverFile(null);
         await saveEvent(token, {...buildPayload(), id, cover_image_url: url});
       }
       setEventId(id);

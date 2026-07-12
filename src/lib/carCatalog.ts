@@ -11,6 +11,7 @@ let catalogCache: CatalogCar[] | null = null;
 async function loadCatalog(): Promise<CatalogCar[]> {
   if (catalogCache) return catalogCache;
 
+  // Generated from Fandom scrape: npm run data:fh6:scrape (see supabase/README.md)
   const {default: catalog} = await import('../../supabase/seed/fh6cars.json');
   catalogCache = (
     catalog as {make: string; model: string; year: number | null; pi: number}[]

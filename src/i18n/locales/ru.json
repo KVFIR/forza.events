@@ -137,7 +137,7 @@
   "eventTypes": {
     "road": "Шоссе",
     "dirt": "Грунт",
-    "cruise": "Круиз"
+    "cruise": "Встреча и круиз"
   },
   "eventStatus": {
     "open": "Открыто",
@@ -279,7 +279,7 @@
     "routeAndCars": "Маршрут и машины",
     "tracksLabel": "Трассы",
     "trackList": "Список трасс",
-    "addTrackPlaceholder": "Добавить трассу…",
+    "addTrackPlaceholder": "Название трассы…",
     "trackUntitled": "Без названия",
     "trackShareCode": "Share-код",
     "tracksLimit": "Не больше {{max}} трасс на событие.",
@@ -384,6 +384,8 @@
     "dateRequired": "Укажите дату и время.",
     "convoyLeaderProfile": "Добавьте Xbox gamertag в профиле или снимите «Я лидер конвоя» и укажите другого игрока.",
     "carsRequired": "Добавьте хотя бы одну машину для ограниченного списка.",
+    "carsUnresolved": "Не удалось сопоставить одну или несколько машин с каталогом. Удалите и добавьте их снова.",
+    "carsSyncFailed": "Не удалось сохранить список машин. Попробуйте ещё раз.",
     "piRange": "PI — от {{minClass}} {{minPi}} до {{maxClass}} {{maxPi}}.",
     "guildRequired": "Выберите сервер Discord для события.",
     "channelRequired": "Выберите канал перед публикацией.",

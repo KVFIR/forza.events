@@ -20,7 +20,15 @@ See [`docs/PLAN.md`](../docs/PLAN.md), [`docs/STATUS.md`](../docs/STATUS.md), [`
 ```bash
 supabase login
 supabase link --project-ref <your-project-ref>
+supabase migration list   # local vs remote must match before push
 supabase db push
+```
+
+**Version names:** use the same numeric prefix as existing files (`001` … `006`), not CLI timestamps. If remote history drifts (e.g. `20260601234442` applied but repo has `006`), repair without re-running SQL when the schema is already correct:
+
+```bash
+npx supabase migration repair --linked --status reverted <orphan-version> --yes
+npx supabase migration repair --linked --status applied 006 --yes
 ```
 
 | Migration | Purpose |
@@ -30,6 +38,7 @@ supabase db push
 | `003_security_publish_results.sql` | `event_cars` RLS (no draft leak), `publish_started_at` lock, `submit_event_results` RPC |
 | `004_rpc_submit_hardening.sql` | `submit_event_results`: trim `discord_id`, explicit `RAISE` messages |
 | `005_remove_touge_drift_event_types.sql` | Drop `touge`/`drift` from `event_type` enum (remap to `road`/`cruise`) |
+| `006_cars_catalog_sync.sql` | Unique `(make, model, year, pi)` for catalog upsert (preserves `event_cars`) |
 
 Seeds are **not** included in the migration. Run separately after `db push`:
 
@@ -106,5 +115,14 @@ Host: `000000000000000001`, guild `000000000000000001`.
 
 ## Cars catalog
 
-- `supabase/seed/fh6cars.json` (source data)
+- `supabase/seed/fh6cars.json` — app + offline search (`src/lib/carCatalog.ts`); generated from Fandom scrape
+- `data/fh6_fandom_cars.json` — full wiki scrape; `data/Forza_Horizon_6_Cars_Fandom.xlsx` — spreadsheet export
 - `save-event` resolves cars by id/lookup only (no arbitrary catalog inserts)
+
+```bash
+npm run data:fh6:scrape    # scrape → JSON + XLSX + fh6cars.json
+supabase db push           # apply 006+ if needed
+npm run seed:cars          # upsert catalog (linked CLI); does not delete event_cars
+```
+
+`seed:cars` upserts on `(make, model, year, pi)`, keeps existing `cars.id`, and sets `active=false` for removed entries. Use `node scripts/seed-cars.mjs --service-role` when `SUPABASE_SERVICE_ROLE_KEY` is set.

@@ -567,8 +567,12 @@ export type CarSearchResult = {
   pi: number;
 };
 
+function sanitizeCarSearchQuery(query: string): string {
+  return query.trim().replace(/[%_,]/g, ' ').slice(0, 80);
+}
+
 export async function searchCars(query: string): Promise<CarSearchResult[]> {
-  const q = query.trim();
+  const q = sanitizeCarSearchQuery(query);
   if (!q) return [];
 
   if (!isSupabaseConfigured()) {
@@ -576,23 +580,20 @@ export async function searchCars(query: string): Promise<CarSearchResult[]> {
   }
 
   const supabase = (await getSupabase())!;
+  const pattern = `%${q}%`;
   const {data, error} = await supabase
     .from('cars')
     .select('id, make, model, year, pi')
     .eq('active', true)
-    .ilike('search_text', `%${q}%`)
+    .or(`search_text.ilike.${pattern},make.ilike.${pattern},model.ilike.${pattern}`)
     .limit(20);
 
   if (error) {
     console.error('searchCars', error);
-    return await searchCarCatalog(q);
+    return [];
   }
 
-  if (!data?.length) {
-    return await searchCarCatalog(q);
-  }
-
-  return data.map((c) => ({
+  return (data ?? []).map((c) => ({
     id: c.id,
     make: c.make,
     model: c.model,

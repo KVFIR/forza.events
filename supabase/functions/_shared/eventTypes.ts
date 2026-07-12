@@ -1,7 +1,7 @@
 const EVENT_TYPE_LABELS: Record<string, string> = {
   road: 'Road racing',
   dirt: 'Dirt racing',
-  cruise: 'Cruise',
+  cruise: 'Meet & cruise',
 };
 
 /** Discord embed color (decimal). */

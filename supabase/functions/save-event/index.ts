@@ -18,7 +18,7 @@ import {jsonResponse, optionsResponse} from '../_shared/cors.ts';
 import {verifyDiscordToken} from '../_shared/discord.ts';
 import {ensureDiscordUserRow} from '../_shared/discordUserRow.ts';
 import {resolveGuildNameForUser} from '../_shared/guildAccess.ts';
-import {resolveCoverUrl} from '../_shared/eventCovers.ts';
+import {resolveSaveCoverUrl} from '../_shared/eventCovers.ts';
 import {slugify} from '../_shared/events.ts';
 import {normalizeGuildName} from '../_shared/guildDisplay.ts';
 import {resolveLobbyLeaderFields} from '../_shared/lobbyLeader.ts';
@@ -26,7 +26,7 @@ import {ensureConvoyLeaderParticipantForEvent} from '../_shared/participantLeade
 import {PI_MAX} from '../_shared/pi.ts';
 import {rateLimitMutation} from '../_shared/rateLimitPresets.ts';
 import {adminClient} from '../_shared/supabase.ts';
-import {VALIDATION_CODES} from '../_shared/validationCodes.ts';
+import {VALIDATION_CODES, type ValidationCode} from '../_shared/validationCodes.ts';
 
 const UUID_RE =
   /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
@@ -176,7 +176,11 @@ serve(async (req) => {
     const cars: CarPayload[] =
       body.car_rule_mode === 'restricted_list' ? body.cars ?? [] : [];
 
-    const coverUrl = resolveCoverUrl(body.type ?? 'road', body.cover_image_url);
+    const coverUrl = resolveSaveCoverUrl(
+      body.type ?? 'road',
+      body.cover_image_url,
+      existing?.cover_image_url,
+    );
     const fields = buildEventFields(body, discordUser.id, coverUrl, lobbyResolved);
     const insertRow = buildEventRow(body, discordUser.id, coverUrl, lobbyResolved);
 
@@ -206,7 +210,8 @@ serve(async (req) => {
               avatar_url: body.lobby_leader_avatar_url,
             },
       );
-      await syncEventCars(supabase, eventId, cars, body.car_rule_mode ?? 'anything_goes');
+      const carErr = await syncEventCars(supabase, eventId, cars, body.car_rule_mode ?? 'anything_goes');
+      if (carErr) return appErrorResponse(req, 400, carErr);
       if (isPublishedStatus(data.status)) {
         const embedSync = await syncPublishedEmbedByEventId(supabase, eventId);
         if (!embedSync.ok) {
@@ -247,7 +252,8 @@ serve(async (req) => {
                 avatar_url: body.lobby_leader_avatar_url,
               },
         );
-        await syncEventCars(supabase, data.id, cars, body.car_rule_mode ?? 'anything_goes');
+        const carErr = await syncEventCars(supabase, data.id, cars, body.car_rule_mode ?? 'anything_goes');
+        if (carErr) return appErrorResponse(req, 400, carErr);
         return jsonResponse({id: data.id, slug: data.slug}, 200, req);
       }
       if (error?.code !== '23505') {
@@ -262,19 +268,36 @@ serve(async (req) => {
   }
 });
 
+async function resolveCarIdByNaturalKey(
+  supabase: ReturnType<typeof adminClient>,
+  c: CarPayload,
+): Promise<string | null> {
+  let q = supabase
+    .from('cars')
+    .select('id')
+    .eq('make', c.make)
+    .eq('model', c.model)
+    .eq('pi', c.pi)
+    .eq('active', true);
+  if (c.year != null) q = q.eq('year', c.year);
+  else q = q.is('year', null);
+  const {data: existing, error} = await q.limit(1).maybeSingle();
+  if (error) {
+    console.error('resolveCarIdByNaturalKey', error, c);
+    return null;
+  }
+  return existing?.id ?? null;
+}
+
 async function resolveCarId(
   supabase: ReturnType<typeof adminClient>,
   c: CarPayload,
 ): Promise<string | null> {
   if (UUID_RE.test(c.id)) {
     const {data} = await supabase.from('cars').select('id').eq('id', c.id).maybeSingle();
-    return data?.id ?? null;
+    if (data?.id) return data.id;
   }
-
-  let q = supabase.from('cars').select('id').eq('make', c.make).eq('model', c.model);
-  if (c.year != null) q = q.eq('year', c.year);
-  const {data: existing} = await q.maybeSingle();
-  return existing?.id ?? null;
+  return resolveCarIdByNaturalKey(supabase, c);
 }
 
 async function syncEventCars(
@@ -282,9 +305,9 @@ async function syncEventCars(
   eventId: string,
   cars: CarPayload[],
   mode: 'anything_goes' | 'restricted_list',
-) {
+): Promise<ValidationCode | null> {
   await supabase.from('event_cars').delete().eq('event_id', eventId);
-  if (mode !== 'restricted_list' || cars.length === 0) return;
+  if (mode !== 'restricted_list' || cars.length === 0) return null;
 
   type EventCarRow = {
     event_id: string;
@@ -295,9 +318,11 @@ async function syncEventCars(
   };
 
   const rows: EventCarRow[] = [];
+  const seenCarIds = new Set<string>();
   for (const c of cars) {
     const carId = await resolveCarId(supabase, c);
-    if (!carId) continue;
+    if (!carId || seenCarIds.has(carId)) continue;
+    seenCarIds.add(carId);
     rows.push({
       event_id: eventId,
       car_id: carId,
@@ -307,7 +332,24 @@ async function syncEventCars(
     });
   }
 
-  if (rows.length) {
-    await supabase.from('event_cars').insert(rows);
+  if (cars.length > 0 && rows.length < cars.length) {
+    console.error(
+      JSON.stringify({
+        msg: 'save-event unresolved cars',
+        eventId,
+        requested: cars.length,
+        resolved: rows.length,
+      }),
+    );
+    return VALIDATION_CODES.CARS_UNRESOLVED;
   }
+
+  if (rows.length) {
+    const {error} = await supabase.from('event_cars').insert(rows);
+    if (error) {
+      console.error('syncEventCars insert', error);
+      return VALIDATION_CODES.CARS_SYNC_FAILED;
+    }
+  }
+  return null;
 }
