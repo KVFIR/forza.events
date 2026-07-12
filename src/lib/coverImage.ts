@@ -119,7 +119,8 @@ export function coverDisplaySize(variant: CoverDisplayVariant = 'card'): {
  * Uses Storage object URLs (uploads are pre-sized); avoids Supabase Image Render, which often
  * fails in Discord Activity and on projects without image transformation enabled.
  */
-export function coverDisplayUrl(src: string, _variant: CoverDisplayVariant = 'card'): string {
+export function coverDisplayUrl(src: string, variant: CoverDisplayVariant = 'card'): string {
+  void variant;
   const trimmed = src.trim();
   if (!trimmed) return trimmed;
   if (isNonStorageCoverUrl(trimmed)) return trimmed;
