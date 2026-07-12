@@ -1,7 +1,14 @@
 import './App.css';
 import {lazy, Suspense} from 'react';
 import {useTranslation} from 'react-i18next';
-import {BrowserRouter, Navigate, Route, Routes, useLocation} from 'react-router-dom';
+import {
+  createBrowserRouter,
+  Navigate,
+  Route,
+  RouterProvider,
+  Routes,
+  useLocation,
+} from 'react-router-dom';
 import {AppBootGate} from './components/AppBootGate';
 import {BrowserSignInScreen} from './components/BrowserSignInScreen';
 import {DiscordOnlyGate} from './components/DiscordOnlyGate';
@@ -137,25 +144,30 @@ function AppRoutes() {
   );
 }
 
+function AppWithProviders() {
+  return (
+    <AuthProvider>
+      <DiscordLayoutProvider>
+        <DiscordRichPresenceProvider>
+          <JoinedEventsProvider>
+            <CreateEventDraftProvider>
+              <DiscordRichPresenceSync />
+              <AppRoutes />
+            </CreateEventDraftProvider>
+          </JoinedEventsProvider>
+        </DiscordRichPresenceProvider>
+      </DiscordLayoutProvider>
+    </AuthProvider>
+  );
+}
+
+/** Data router — required for `useBlocker` on the create-event leave guard. */
+const appRouter = createBrowserRouter([{path: '*', element: <AppWithProviders />}]);
+
 export default function App() {
   if (shouldShowDiscordOnlyGate()) {
     return <DiscordOnlyGate />;
   }
 
-  return (
-    <BrowserRouter>
-      <AuthProvider>
-        <DiscordLayoutProvider>
-          <DiscordRichPresenceProvider>
-            <JoinedEventsProvider>
-              <CreateEventDraftProvider>
-                <DiscordRichPresenceSync />
-                <AppRoutes />
-              </CreateEventDraftProvider>
-            </JoinedEventsProvider>
-          </DiscordRichPresenceProvider>
-        </DiscordLayoutProvider>
-      </AuthProvider>
-    </BrowserRouter>
-  );
+  return <RouterProvider router={appRouter} />;
 }

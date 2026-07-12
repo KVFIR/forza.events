@@ -33,7 +33,9 @@ export function useUpcomingEventsTick(events: Pick<ForzaEvent, 'startsAt'>[]): n
     () => events.map((event) => event.startsAt).join('\0'),
     [events],
   );
-  const nearestStartMs = useMemo(() => {
+
+  useEffect(() => {
+    const bump = () => setTick((n) => n + 1);
     const now = Date.now();
     let nearest = Infinity;
     for (const part of startsAtKey.split('\0')) {
@@ -41,14 +43,9 @@ export function useUpcomingEventsTick(events: Pick<ForzaEvent, 'startsAt'>[]): n
       const target = new Date(part).getTime();
       if (!Number.isNaN(target) && target > now) nearest = Math.min(nearest, target);
     }
-    return nearest === Infinity ? null : nearest;
-  }, [startsAtKey]);
+    if (nearest === Infinity) return;
 
-  useEffect(() => {
-    if (nearestStartMs === null) return;
-
-    const bump = () => setTick((n) => n + 1);
-    const delay = nearestStartMs - Date.now();
+    const delay = nearest - Date.now();
     if (delay <= 0) {
       bump();
       return;
@@ -56,7 +53,7 @@ export function useUpcomingEventsTick(events: Pick<ForzaEvent, 'startsAt'>[]): n
 
     const timer = window.setTimeout(bump, Math.min(delay, 2_147_483_647));
     return () => window.clearTimeout(timer);
-  }, [nearestStartMs]);
+  }, [startsAtKey, tick]);
 
   return tick;
 }

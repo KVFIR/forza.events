@@ -103,7 +103,11 @@ export function CreateEvent() {
     pendingCoverRestore,
   } = form;
 
-  const hasUnsavedProgress = !isPublished && draftSyncStatus === 'dirty';
+  const hasUnsavedProgress =
+    !isPublished &&
+    (draftSyncStatus === 'dirty' ||
+      draftSyncStatus === 'saving' ||
+      draftSyncStatus === 'error');
 
   const leaveBlocker = useCreateEventLeaveGuard(hasUnsavedProgress);
 

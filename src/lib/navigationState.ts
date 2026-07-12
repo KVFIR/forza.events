@@ -34,7 +34,8 @@ export function buildEventDetailLocationState(
   const referrer = sanitizeReferrer(from ?? partial.from);
   if (!referrer) {
     if (!partial.from) return partial;
-    const {from: _drop, ...rest} = partial;
+    const rest = {...partial};
+    delete rest.from;
     return rest;
   }
   return {...partial, from: referrer};

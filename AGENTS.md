@@ -37,7 +37,7 @@ Lessons from implementation work (keep in sync when behavior changes).
 - **My Events** merges host drafts **on top** for scopes `all` and `hosted`; **Joined** has no drafts.
 - Draft cards link to `/create?edit={id}`, not `/event/{id}`. After first save, navigate to `/my-events`.
 - Do not treat `draftsLoadError` as `loadError` for the whole list — published events can load while drafts fail.
-- **Create flow:** form state lives in `useCreateEventForm` only (no Context, no `localStorage`); drafts persist on explicit **Save** / before publish via `persistDraft()` → `save-event`; navigating away from `/create` without save drops unsaved data.
+- **Create flow:** form state lives in `useCreateEventForm`; `CreateEventDraftContext` parks in-memory snapshots when leaving `/create`. **WIP** (`sessionStorage`, `forza.create.wip`) survives refresh; server drafts via debounced **autosave** + explicit **Save** (`persistDraft()` → `save-event`). Leave guard (`useBlocker` + `ConfirmDialog`) warns on unsaved/dirty/saving/error navigation; requires data router (`RouterProvider` in `App.tsx`).
 
 ## Supabase Edge Functions
 

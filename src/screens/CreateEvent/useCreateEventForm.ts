@@ -202,8 +202,8 @@ export function useCreateEventForm() {
     setTargetGuildId(snapshot.targetGuildId);
     setTargetGuildName(snapshot.targetGuildName);
     setTargetChannelId(snapshot.targetChannelId);
-    lastSavedSnapshotRef.current = snapshot;
-    setDraftSyncStatus('saved');
+    lastSavedSnapshotRef.current = null;
+    setDraftSyncStatus('dirty');
   }, []);
 
   const lobbyLeaderSelection = useMemo((): ConvoyLeaderSelection | null => {

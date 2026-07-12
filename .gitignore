@@ -29,3 +29,6 @@ yarn-error.log*
 
 # Supabase CLI local state
 supabase/.temp/
+
+# Python
+__pycache__/
