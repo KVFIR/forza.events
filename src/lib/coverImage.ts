@@ -1,7 +1,8 @@
 import {
   DISCORD_SUPABASE_PROXY_PREFIX,
   isDiscordActivityFrame,
-  resolveSupabaseUrl,
+  shouldProxySupabaseThroughOrigin,
+  supabaseProjectHost,
 } from './supabaseEnv';
 
 /** Standard event cover aspect (16:9) — cards, detail hero, Discord embed image. */
@@ -53,26 +54,21 @@ function isNonStorageCoverUrl(url: string): boolean {
 }
 
 /**
- * Discord Activity CSP allows img-src 'self' and Discord CDNs only — not *.supabase.co.
- * Route Storage through the Activity URL mapping prefix (same as API proxy).
+ * CSP may block *.supabase.co (Activity + browser web). Route Storage through /supabase proxy.
  */
-function discordProxiedStorageUrl(url: string): string {
-  if (!isDiscordActivityFrame()) return url;
-  const projectBase = resolveSupabaseUrl();
-  if (!projectBase) return url;
+function proxiedStorageUrl(url: string): string {
+  if (!isDiscordActivityFrame() && !shouldProxySupabaseThroughOrigin()) return url;
+
   let parsed: URL;
   try {
     parsed = new URL(url);
   } catch {
     return url;
   }
-  let projectHost: string;
-  try {
-    projectHost = new URL(projectBase).host;
-  } catch {
-    return url;
-  }
-  if (parsed.host !== projectHost) return url;
+
+  const projectHost = supabaseProjectHost();
+  if (!projectHost || parsed.host !== projectHost) return url;
+
   return `${DISCORD_SUPABASE_PROXY_PREFIX}${parsed.pathname}${parsed.search}`;
 }
 
@@ -134,7 +130,7 @@ export function coverDisplayUrl(src: string, variant: CoverDisplayVariant = 'car
     display = objectBase.split('?')[0] ?? objectBase;
   }
 
-  return discordProxiedStorageUrl(display);
+  return proxiedStorageUrl(display);
 }
 
 function loadImageElement(file: File): Promise<HTMLImageElement> {

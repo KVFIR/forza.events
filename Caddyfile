@@ -1,0 +1,33 @@
+{
+	admin off
+	persist_config off
+	auto_https off
+	log {
+		format json
+	}
+	servers {
+		trusted_proxies static private_ranges 100.0.0.0/8
+	}
+}
+
+:{$PORT:3000} {
+	log {
+		format json
+	}
+
+	handle /health {
+		respond 200
+	}
+
+	# Same-origin proxy for browser web (and localhost dev) — avoids blocked *.supabase.co in some regions.
+	handle_path /supabase/* {
+		reverse_proxy {$SUPABASE_URL}
+	}
+
+	handle {
+		root * dist
+		encode gzip
+		file_server
+		try_files {path} /index.html
+	}
+}

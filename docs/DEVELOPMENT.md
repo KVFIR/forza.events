@@ -108,6 +108,12 @@ railway variable set APP_ORIGIN=https://forza.events
 5. Discord Activities **URL Mapping** prefix stays pointed at the same Railway service (custom domain or `*.up.railway.app` — keep mapping in sync with where the Activity loads).
 6. Update Developer Portal **Terms** / **Privacy** URLs to `https://forza.events/terms` and `/privacy`.
 
+#### Regional access (e.g. Russia without VPN)
+
+`*.supabase.co` is often blocked. Production browser web on **forza.events** routes API and Storage through the same origin (`https://forza.events/supabase/...`) via the root `Caddyfile` reverse proxy. Railway must have **`SUPABASE_URL` at runtime** (not only build time) so Caddy can forward `/supabase/*`.
+
+**Discord OAuth** (`discord.com`) may still be unreachable without VPN — the proxy fixes browse, profile, and covers after sign-in, not the login redirect itself.
+
 ---
 
 ## Database migrations

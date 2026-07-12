@@ -1,5 +1,12 @@
-/** Discord Activity URL mapping prefix (must match Developer Portal). */
+import {isBrowserWebHost} from './runtime';
+
+/** Discord Activity URL mapping prefix (must match Developer Portal + Caddyfile). */
 export const DISCORD_SUPABASE_PROXY_PREFIX = '/supabase';
+
+/** Route API/Storage through the app origin (Vite dev proxy or production Caddy). */
+export function shouldProxySupabaseThroughOrigin(): boolean {
+  return isBrowserWebHost();
+}
 
 /** Local Vite dev only — read PostgREST directly (skip Edge) so Browse works without function deploy. */
 export function shouldUseDirectSupabaseReads(): boolean {
@@ -17,11 +24,33 @@ export function isDiscordActivityFrame(): boolean {
   }
 }
 
-/** Canonical Supabase project URL (always *.supabase.co — never discordsays.com). */
-export function resolveSupabaseUrl(): string | null {
+function directSupabaseUrl(): string | null {
   const raw = import.meta.env.VITE_SUPABASE_URL as string | undefined;
   if (!raw?.trim()) return null;
   return raw.trim().replace(/\/$/, '');
+}
+
+/** Client Supabase/API base — proxied on browser web hosts, direct in Discord Activity iframe. */
+export function resolveSupabaseUrl(): string | null {
+  const direct = directSupabaseUrl();
+  if (!direct) return null;
+
+  if (typeof window !== 'undefined' && shouldProxySupabaseThroughOrigin()) {
+    return `${window.location.origin}${DISCORD_SUPABASE_PROXY_PREFIX}`;
+  }
+
+  return direct;
+}
+
+/** Project host from env (for rewriting Storage URLs to the origin proxy). */
+export function supabaseProjectHost(): string | null {
+  const direct = directSupabaseUrl();
+  if (!direct) return null;
+  try {
+    return new URL(direct).host;
+  } catch {
+    return null;
+  }
 }
 
 /** Ensure apikey headers survive Discord proxy; URL rewrite is handled by patchUrlMappings. */
