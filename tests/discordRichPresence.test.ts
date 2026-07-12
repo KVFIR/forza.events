@@ -113,6 +113,9 @@ describe('discordRichPresence', () => {
   it('formats lobby count for presence', () => {
     expect(formatEventLobbyPresenceCount({currentPlayers: 4, maxPlayers: 12})).toBe('4/12');
     expect(formatEventLobbyPresenceCount({currentPlayers: 0, maxPlayers: 0})).toBe('0/12');
+    expect(
+      formatEventLobbyPresenceCount({currentPlayers: 18, maxPlayers: 12, groupCount: 2}),
+    ).toBe('18/24');
   });
 
   it('builds host presence with lobby count in state and party', () => {

@@ -5,6 +5,7 @@ import {
   isEventFinalized,
   isPublishedToDiscord,
   resolveEventDisplayStatus,
+  totalCapacity,
 } from './eventSpec';
 import {eventTypeLabelEn, normalizeEventType} from './eventTypes';
 import {getDiscordSdk, isStandaloneBrowser} from './discord';
@@ -209,8 +210,11 @@ export function buildResultsRichPresence(event: ForzaEvent): RichPresenceActivit
   });
 }
 
-function eventLobbyMaxPlayers(event: Pick<ForzaEvent, 'maxPlayers'>): number {
-  return event.maxPlayers > 0 ? event.maxPlayers : LOBBY_TOTAL_PLAYERS;
+function eventLobbyMaxPlayers(
+  event: Pick<ForzaEvent, 'maxPlayers' | 'groupCount'>,
+): number {
+  const cap = totalCapacity(event);
+  return cap > 0 ? cap : LOBBY_TOTAL_PLAYERS;
 }
 
 function eventShowsLobbyCount(event: Pick<ForzaEvent, 'discordMessageId'>): boolean {
@@ -219,14 +223,14 @@ function eventShowsLobbyCount(event: Pick<ForzaEvent, 'discordMessageId'>): bool
 
 /** Exported for unit tests. */
 export function formatEventLobbyPresenceCount(
-  event: Pick<ForzaEvent, 'currentPlayers' | 'maxPlayers'>,
+  event: Pick<ForzaEvent, 'currentPlayers' | 'maxPlayers' | 'groupCount'>,
 ): string {
   return formatLobbyCount(event.currentPlayers, eventLobbyMaxPlayers(event));
 }
 
 function withEventLobbyCount(
   state: string,
-  event: Pick<ForzaEvent, 'discordMessageId' | 'currentPlayers' | 'maxPlayers'>,
+  event: Pick<ForzaEvent, 'discordMessageId' | 'currentPlayers' | 'maxPlayers' | 'groupCount'>,
 ): string {
   if (!eventShowsLobbyCount(event)) return state;
   return truncateRichPresenceField(
@@ -235,7 +239,7 @@ function withEventLobbyCount(
 }
 
 function eventLobbyParty(
-  event: Pick<ForzaEvent, 'discordMessageId' | 'currentPlayers' | 'maxPlayers'>,
+  event: Pick<ForzaEvent, 'discordMessageId' | 'currentPlayers' | 'maxPlayers' | 'groupCount'>,
 ): RichPresenceActivity['party'] {
   if (!eventShowsLobbyCount(event)) return null;
   const max = eventLobbyMaxPlayers(event);

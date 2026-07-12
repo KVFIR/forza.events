@@ -145,6 +145,19 @@
     box-shadow: 0 6px 36px rgba(0, 0, 0, 0.65), 0 0 0 1px rgba(139, 92, 246, 0.18);
   }
 
+  /* Event detail cover → content fade. Use base-color alpha stops, not `transparent`
+     (Chrome/Edge on Windows interpolate `transparent` as black and drop the soft edge). */
+  .event-detail-hero-fade {
+    background: linear-gradient(
+      to top,
+      rgb(6 6 14) 0%,
+      rgb(6 6 14 / 0.82) 30%,
+      rgb(6 6 14 / 0.28) 60%,
+      rgb(6 6 14 / 0) 100%
+    );
+    transform: translateZ(0);
+  }
+
   /* Viewport-centered main column; on lg+ clears fixed left sidebar when needed */
   .app-main-column {
     @apply mx-auto w-full max-w-2xl;

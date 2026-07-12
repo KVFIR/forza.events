@@ -1,12 +1,12 @@
 import {EventResultsTable} from '../../../components/EventResultsTable';
-import {formatLobbyCount, LOBBY_TOTAL_PLAYERS} from '../../../lib/constants';
+import {formatLobbyCount} from '../../../lib/constants';
 import {eventTypeMeta, normalizeEventType} from '../../../lib/eventTypes';
 import type {EventDetailViewModel} from '../eventDetailView';
 import {cn} from '../../../lib/cn';
 
 type RegistrationProgressView = Pick<
   EventDetailViewModel,
-  'ev' | 'fillPct' | 'showRegistrationProgress'
+  'ev' | 'fillPct' | 'showRegistrationProgress' | 'totalCapacity'
 >;
 
 export function EventRegistrationProgress({view}: {view: RegistrationProgressView}) {
@@ -23,7 +23,7 @@ export function EventRegistrationProgress({view}: {view: RegistrationProgressVie
         role="progressbar"
         aria-valuenow={view.ev.currentPlayers}
         aria-valuemin={0}
-        aria-valuemax={LOBBY_TOTAL_PLAYERS}
+        aria-valuemax={view.totalCapacity}
       >
         <div
           className={cn(
@@ -39,7 +39,7 @@ export function EventRegistrationProgress({view}: {view: RegistrationProgressVie
           full ? 'text-amber-400' : badge.text,
         )}
       >
-        {formatLobbyCount(view.ev.currentPlayers)}
+        {formatLobbyCount(view.ev.currentPlayers, view.totalCapacity)}
       </span>
     </div>
   );

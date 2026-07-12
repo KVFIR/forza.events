@@ -1,4 +1,4 @@
-import type {CarRuleMode, EventStatus, ForzaEvent} from './types';
+import type {CarRuleMode, EventParticipant, EventStatus, ForzaEvent} from './types';
 import type {AppUser} from './types';
 import {isEventType} from './eventTypes';
 import {isPiInRange} from './pi';
@@ -70,13 +70,81 @@ export function eventHasStarted(
   return new Date(event.startsAt).getTime() <= Date.now();
 }
 
+/** Multi-group lobbies: base group is 12 seats; a host may add up to MAX_GROUPS groups. */
+export const MAX_GROUPS = 5;
+
+/** Total lobby seats across every active group. */
+export function totalCapacity(
+  event: Pick<ForzaEvent, 'groupCount' | 'maxPlayers'>,
+): number {
+  return Math.max(1, event.groupCount || 1) * event.maxPlayers;
+}
+
+export function waitlistParticipants(participants: EventParticipant[]): EventParticipant[] {
+  return participants.filter((p) => p.waitlisted);
+}
+
+export function waitlistCount(event: Pick<ForzaEvent, 'participants'>): number {
+  return event.participants.reduce((n, p) => (p.waitlisted ? n + 1 : n), 0);
+}
+
+/** Active (non-waitlisted) racers in a given group. */
+export function groupParticipants(
+  participants: EventParticipant[],
+  groupIndex: number,
+): EventParticipant[] {
+  return participants.filter((p) => !p.waitlisted && (p.groupIndex ?? 1) === groupIndex);
+}
+
+export function groupIsFull(
+  event: Pick<ForzaEvent, 'maxPlayers'>,
+  groupIndex: number,
+  participants: EventParticipant[],
+): boolean {
+  return groupParticipants(participants, groupIndex).length >= event.maxPlayers;
+}
+
+/** First group with a free seat, or null when every active group is full. */
+export function firstOpenGroupIndex(
+  event: Pick<ForzaEvent, 'groupCount' | 'maxPlayers' | 'participants'>,
+): number | null {
+  for (let g = 1; g <= (event.groupCount || 1); g++) {
+    if (!groupIsFull(event, g, event.participants)) return g;
+  }
+  return null;
+}
+
+/** True when every active group is full — the next join goes to the waitlist. */
+export function lobbyIsFull(
+  event: Pick<ForzaEvent, 'groupCount' | 'maxPlayers' | 'participants' | 'currentPlayers'>,
+): boolean {
+  if (event.currentPlayers >= totalCapacity(event)) return true;
+  return firstOpenGroupIndex(event) === null;
+}
+
+/** Host may add another group when the lobby is full and the waitlist has someone. */
+export function canAddGroup(event: ForzaEvent, user: AppUser): boolean {
+  return (
+    event.hostDiscordId === user.discordId &&
+    isPublishedToDiscord(event) &&
+    !isEventFinalized(event) &&
+    !eventHasStarted(event) &&
+    (event.groupCount ?? 1) < MAX_GROUPS &&
+    lobbyIsFull(event) &&
+    waitlistCount(event) >= 1
+  );
+}
+
 /** UI status badge / card styling — accounts for start time, not only DB `status`. */
 export function resolveEventDisplayStatus(
-  event: Pick<ForzaEvent, 'status' | 'lifecycle' | 'startsAt' | 'currentPlayers' | 'maxPlayers'>,
+  event: Pick<
+    ForzaEvent,
+    'status' | 'lifecycle' | 'startsAt' | 'currentPlayers' | 'maxPlayers' | 'groupCount'
+  >,
 ): EventStatus {
   if (isEventFinalized(event)) return 'ended';
   if (eventHasStarted(event)) return 'live';
-  if (event.status === 'full' || event.currentPlayers >= event.maxPlayers) return 'full';
+  if (event.status === 'full' || event.currentPlayers >= totalCapacity(event)) return 'full';
   return 'open';
 }
 

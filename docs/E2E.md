@@ -117,16 +117,27 @@ Manual QA matrix aligned with current code behavior (not an abstract checklist).
 | Successful join | Leave button; count up; Discord embed updated |
 | Leave before start | Slot freed; embed updated |
 | **After `starts_at`** | Leave disabled; “Registered” / closed |
-| **Full (12/12)** | Join disabled; 13th gets `EVENT_FULL` |
+| **All groups full** | Button shows **Join waitlist**; 13th joins waitlist (`waitlisted`), not `EVENT_FULL` |
 | **Host** | No Join; Edit / post-start actions only |
 | **Convoy leader** (host-assigned) | Leader UI; **cannot leave** (`LEADER_CANNOT_LEAVE`) |
 | Join updates profile | `xbox_gamertag` written to `users` |
+
+### Waitlist & groups
+
+| Condition | Expected |
+|-----------|----------|
+| Full group 1, then join | Row goes to **Waitlist** section; button = **Leave waitlist** |
+| Active racer leaves before start | Earliest waitlisted racer auto-promoted into freed group; count steady |
+| Host, lobby full + waitlist ≥ 1 | **Add group N** button; picker lists waitlist + guild search |
+| Add group confirmed | `group_count++`; leader + oldest queued racers fill the new group; embed gains a per-group field |
+| `group_count = 5` | Add group hidden (`GROUPS_MAXED` if forced); total capacity 60 |
+| Empty waitlist | Add group hidden (`WAITLIST_EMPTY` if forced) |
 
 ### Display
 
 - [ ] Hero cover (16:9 band); default by event type.
 - [ ] Organiser: real server name, not placeholder `Server`.
-- [ ] Roster: convoy leader + registered drivers; Xbox lobby hint when not leader.
+- [ ] Roster: per-group sections (leader + drivers) with `n/12`, then a Waitlist section with queue positions; Xbox lobby hint when not leader.
 - [ ] Track codes, car rules, tuning restrictions, optional description text.
 - [ ] Realtime: second client join → roster and count update without F5.
 
@@ -170,6 +181,7 @@ Manual QA matrix aligned with current code behavior (not an abstract checklist).
 - [ ] Cancel → confirm → `cancelled`; grey embed; button disabled.
 - [ ] Submit results → immutable (repeat → 409).
 - [ ] Submit results → **Event Detail** shows table immediately (navigation seed); no false “pending host” flash.
+- [ ] **Multi-group:** submit screen shows a block per group; positions restart at 1 per group; standings table renders per-group headers. Waitlisted racers are excluded from results.
 - [ ] **Event Detail** results load error → **Try again** recovers table (Activity proxy / offline).
 - [ ] **Submit results** screen: if existing-results check fails, warning + **Try again** still allows submit; successful recheck redirects when rows exist.
 

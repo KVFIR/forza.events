@@ -30,10 +30,13 @@ describe('runtime browser web hosts', () => {
     expect(shouldRequireBrowserSignIn()).toBe(true);
   });
 
-  it('treats localhost as web host without mandatory sign-in', () => {
+  it('requires browser sign-in on localhost and forza.events', () => {
     stubLocation('localhost');
     expect(isBrowserWebHost()).toBe(true);
-    expect(shouldRequireBrowserSignIn()).toBe(false);
+    expect(shouldRequireBrowserSignIn()).toBe(true);
+
+    stubLocation('forza.events');
+    expect(shouldRequireBrowserSignIn()).toBe(true);
   });
 
   it('shows Discord-only gate on unsupported standalone hosts', () => {
@@ -48,12 +51,13 @@ describe('runtime browser web hosts', () => {
     expect(isBrowserWebHost()).toBe(true);
   });
 
-  it('allows auth callback, legal paths, and event detail without sign-in', () => {
+  it('allows only auth callback and legal paths without sign-in', () => {
+    stubLocation('forza.events');
     expect(isPublicBrowserPath('/auth/callback')).toBe(true);
     expect(isPublicBrowserPath('/terms')).toBe(true);
     expect(isPublicBrowserPath('/privacy')).toBe(true);
-    expect(isPublicBrowserPath('/event/abc-123')).toBe(true);
-    expect(isPublicBrowserPath('/event/abc-123/results')).toBe(true);
     expect(isPublicBrowserPath('/')).toBe(false);
+    expect(isPublicBrowserPath('/event/abc-123')).toBe(false);
+    expect(isPublicBrowserPath('/event/abc-123/results')).toBe(false);
   });
 });

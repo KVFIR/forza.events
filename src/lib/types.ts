@@ -34,6 +34,12 @@ export interface EventParticipant {
   gamertag?: string;
   isConvoyLeader?: boolean;
   participationSource?: ParticipationSource;
+  /** Lobby group (1..groupCount); meaningful only when not waitlisted. */
+  groupIndex?: number;
+  /** True while queued because every active group is full. */
+  waitlisted?: boolean;
+  /** Queue ordering — oldest first when waitlisted. */
+  joinedAt?: string;
 }
 
 export interface ForzaEvent {
@@ -55,7 +61,10 @@ export interface ForzaEvent {
   maxPi: number;
   allowedCars: EventAllowedCar[];
   voicePolicy: VoicePolicy;
+  /** Capacity **per group**; total lobby capacity = groupCount * maxPlayers. */
   maxPlayers: number;
+  /** Number of active lobbies (1..MAX_GROUPS). Defaults to 1 when absent. */
+  groupCount?: number;
   currentPlayers: number;
   hostDiscordId: string;
   hostUsername: string;
@@ -84,6 +93,7 @@ export type PublishedEventResultRow = {
   dnf: boolean;
   dns: boolean;
   points?: number | null;
+  groupIndex?: number;
 };
 
 export interface AppUser {

@@ -46,18 +46,34 @@ type Placement = {
   dns: boolean;
 };
 
+type PlacementGroup = {
+  groupIndex: number;
+  rows: Placement[];
+};
+
 function participantLabel(p: EventParticipant): string {
   return p.gamertag ?? p.username;
 }
 
-function buildPlacements(participants: EventParticipant[]): Placement[] {
-  return participants.map((p) => ({
-    discordId: p.discordId,
-    label: participantLabel(p),
-    avatarUrl: p.avatarUrl,
-    dnf: false,
-    dns: false,
-  }));
+/** One ordered block per lobby group (results positions restart per group). */
+function buildPlacementGroups(participants: EventParticipant[]): PlacementGroup[] {
+  const byGroup = new Map<number, Placement[]>();
+  for (const p of participants) {
+    const g = p.groupIndex ?? 1;
+    const row: Placement = {
+      discordId: p.discordId,
+      label: participantLabel(p),
+      avatarUrl: p.avatarUrl,
+      dnf: false,
+      dns: false,
+    };
+    const list = byGroup.get(g);
+    if (list) list.push(row);
+    else byGroup.set(g, [row]);
+  }
+  return [...byGroup.keys()]
+    .sort((a, b) => a - b)
+    .map((groupIndex) => ({groupIndex, rows: byGroup.get(groupIndex)!}));
 }
 
 export function EventResults() {
@@ -69,7 +85,7 @@ export function EventResults() {
   const detailFrom = resultsState?.from;
   const {user, getAccessToken, isSignedIn} = useAuth();
   const {bumpRefresh, getLobbyPatch} = useJoinedEvents();
-  const [placements, setPlacements] = useState<Placement[]>([]);
+  const [placementGroups, setPlacementGroups] = useState<PlacementGroup[]>([]);
   const [loading, setLoading] = useState(true);
   const [resultsCheckFailed, setResultsCheckFailed] = useState(false);
   const [recheckingResults, setRecheckingResults] = useState(false);
@@ -179,7 +195,7 @@ export function EventResults() {
           return;
         }
 
-        setPlacements(buildPlacements(resolveResultsRoster(loaded)));
+        setPlacementGroups(buildPlacementGroups(resolveResultsRoster(loaded)));
       } catch (err) {
         if (!cancelled) {
           console.error('EventResults load', err);
@@ -195,34 +211,40 @@ export function EventResults() {
     };
   }, [id, user, goToEventDetail, discordToken]);
 
-  function move(index: number, dir: -1 | 1) {
-    const next = index + dir;
-    if (next < 0 || next >= placements.length) return;
-    setPlacements((list) => {
-      const copy = [...list];
+  function updateGroup(groupIndex: number, updater: (rows: Placement[]) => Placement[]) {
+    setPlacementGroups((groups) =>
+      groups.map((g) => (g.groupIndex === groupIndex ? {...g, rows: updater(g.rows)} : g)),
+    );
+  }
+
+  function move(groupIndex: number, index: number, dir: -1 | 1) {
+    updateGroup(groupIndex, (rows) => {
+      const next = index + dir;
+      if (next < 0 || next >= rows.length) return rows;
+      const copy = [...rows];
       [copy[index], copy[next]] = [copy[next], copy[index]];
       return copy;
     });
   }
 
-  function toggleDnf(index: number) {
-    setPlacements((list) =>
-      list.map((row, i) =>
-        i === index ? {...row, dnf: !row.dnf, dns: false} : row,
-      ),
+  function toggleDnf(groupIndex: number, index: number) {
+    updateGroup(groupIndex, (rows) =>
+      rows.map((row, i) => (i === index ? {...row, dnf: !row.dnf, dns: false} : row)),
     );
   }
 
-  function toggleDns(index: number) {
-    setPlacements((list) =>
-      list.map((row, i) =>
-        i === index ? {...row, dns: !row.dns, dnf: false} : row,
-      ),
+  function toggleDns(groupIndex: number, index: number) {
+    updateGroup(groupIndex, (rows) =>
+      rows.map((row, i) => (i === index ? {...row, dns: !row.dns, dnf: false} : row)),
     );
   }
+
+  const allPlacements = placementGroups.flatMap((g) =>
+    g.rows.map((row) => ({...row, groupIndex: g.groupIndex})),
+  );
 
   async function handleSubmit() {
-    if (!id || placements.length === 0) return;
+    if (!id || allPlacements.length === 0) return;
     setSaving(true);
     setError(null);
 
@@ -243,7 +265,7 @@ export function EventResults() {
         resolveResultsRoster(fresh).map((p) => p.discordId),
       );
       const payload = buildResultSubmitRows(
-        placements.filter((p) => allowedIds.has(p.discordId)),
+        allPlacements.filter((p) => allowedIds.has(p.discordId)),
       );
 
       if (payload.length === 0) {
@@ -318,73 +340,82 @@ export function EventResults() {
         </Alert>
       )}
 
-      <ol className="mt-5 space-y-2">
-        {placements.map((row, index) => {
-          const finisherIndex = placements
-            .slice(0, index + 1)
-            .filter((p) => !p.dnf && !p.dns).length;
-          const positionLabel = row.dns
-            ? t('results.dns')
-            : row.dnf
-              ? t('results.dnf')
-              : String(finisherIndex);
+      {placementGroups.map((group) => (
+        <div key={group.groupIndex} className="mt-5">
+          {placementGroups.length > 1 ? (
+            <p className="mb-2 text-xs font-bold uppercase tracking-widest text-muted">
+              {t('eventDetail.group', {n: group.groupIndex})}
+            </p>
+          ) : null}
+          <ol className="space-y-2">
+            {group.rows.map((row, index) => {
+              const finisherIndex = group.rows
+                .slice(0, index + 1)
+                .filter((p) => !p.dnf && !p.dns).length;
+              const positionLabel = row.dns
+                ? t('results.dns')
+                : row.dnf
+                  ? t('results.dnf')
+                  : String(finisherIndex);
 
-          return (
-          <li key={row.discordId}>
-            <Panel variant="soft" className="flex items-center gap-2 px-3 py-2.5">
-            <span className="w-6 shrink-0 text-center text-sm font-bold tabular-nums text-muted">
-              {positionLabel}
-            </span>
-            <UserAvatar src={row.avatarUrl} name={row.label} size="xs" variant="neutral" />
-            <span
-              className={cn(
-                'min-w-0 flex-1 truncate text-sm',
-                (row.dnf || row.dns) && 'text-muted',
-              )}
-            >
-              {row.label}
-            </span>
-            <CheckboxField
-              label={t('results.dnf')}
-              checked={row.dnf}
-              onChange={() => toggleDnf(index)}
-            />
-            <CheckboxField
-              label={t('results.dns')}
-              checked={row.dns}
-              onChange={() => toggleDns(index)}
-            />
-            <div className="flex shrink-0 flex-col">
-              <Button
-                type="button"
-                variant="ghost"
-                size="icon"
-                className="p-0.5 text-muted hover:text-white disabled:opacity-30"
-                disabled={index === 0}
-                onClick={() => move(index, -1)}
-                aria-label={t('results.moveUp')}
-              >
-                <ChevronUp className="h-4 w-4" />
-              </Button>
-              <Button
-                type="button"
-                variant="ghost"
-                size="icon"
-                className="p-0.5 text-muted hover:text-white disabled:opacity-30"
-                disabled={index === placements.length - 1}
-                onClick={() => move(index, 1)}
-                aria-label={t('results.moveDown')}
-              >
-                <ChevronDown className="h-4 w-4" />
-              </Button>
-            </div>
-            </Panel>
-          </li>
-          );
-        })}
-      </ol>
+              return (
+                <li key={row.discordId}>
+                  <Panel variant="soft" className="flex items-center gap-2 px-3 py-2.5">
+                    <span className="w-6 shrink-0 text-center text-sm font-bold tabular-nums text-muted">
+                      {positionLabel}
+                    </span>
+                    <UserAvatar src={row.avatarUrl} name={row.label} size="xs" variant="neutral" />
+                    <span
+                      className={cn(
+                        'min-w-0 flex-1 truncate text-sm',
+                        (row.dnf || row.dns) && 'text-muted',
+                      )}
+                    >
+                      {row.label}
+                    </span>
+                    <CheckboxField
+                      label={t('results.dnf')}
+                      checked={row.dnf}
+                      onChange={() => toggleDnf(group.groupIndex, index)}
+                    />
+                    <CheckboxField
+                      label={t('results.dns')}
+                      checked={row.dns}
+                      onChange={() => toggleDns(group.groupIndex, index)}
+                    />
+                    <div className="flex shrink-0 flex-col">
+                      <Button
+                        type="button"
+                        variant="ghost"
+                        size="icon"
+                        className="p-0.5 text-muted hover:text-white disabled:opacity-30"
+                        disabled={index === 0}
+                        onClick={() => move(group.groupIndex, index, -1)}
+                        aria-label={t('results.moveUp')}
+                      >
+                        <ChevronUp className="h-4 w-4" />
+                      </Button>
+                      <Button
+                        type="button"
+                        variant="ghost"
+                        size="icon"
+                        className="p-0.5 text-muted hover:text-white disabled:opacity-30"
+                        disabled={index === group.rows.length - 1}
+                        onClick={() => move(group.groupIndex, index, 1)}
+                        aria-label={t('results.moveDown')}
+                      >
+                        <ChevronDown className="h-4 w-4" />
+                      </Button>
+                    </div>
+                  </Panel>
+                </li>
+              );
+            })}
+          </ol>
+        </div>
+      ))}
 
-      {placements.length === 0 && (
+      {allPlacements.length === 0 && (
         <p className="mt-8 text-center text-sm text-muted">{t('results.noParticipants')}</p>
       )}
 
@@ -392,7 +423,7 @@ export function EventResults() {
         variant="primary"
         fullWidth
         className="mt-8"
-        disabled={saving || placements.length === 0}
+        disabled={saving || allPlacements.length === 0}
         onClick={() => setSubmitConfirmOpen(true)}
       >
         {saving ? busyLabel('saving') : t('eventDetail.submitResults')}

@@ -1,7 +1,7 @@
 import {useCallback, useEffect, useMemo} from 'react';
 import {useTranslation} from 'react-i18next';
 import {ArrowLeft} from 'lucide-react';
-import {useLocation, useParams} from 'react-router-dom';
+import {useLocation, useParams, Navigate} from 'react-router-dom';
 import {ContentReveal} from '../../components/ui/ContentReveal';
 import {PageLoading} from '../../components/ui/PageLoading';
 import {TextLink} from '../../components/ui/TextButton';
@@ -16,7 +16,8 @@ import {useEventDetailResults} from '../../hooks/useEventDetailResults';
 import {usePageMeta} from '../../hooks/usePageMeta';
 import type {EventDetailLocationState} from '../../lib/navigationState';
 import {buildEventPageMeta} from '../../lib/eventPageMeta';
-import {eventDetailBackTo} from '../../lib/returnTo';
+import {eventDetailBackTo, saveAuthReturnTo} from '../../lib/returnTo';
+import {supportsBrowserOAuth} from '../../lib/runtime';
 import {useResolveEventDisplayStatus} from '../../hooks/useResolveEventDisplayStatus';
 import {useEventDetailParticipation} from '../../hooks/useEventDetailParticipation';
 import {useDebouncedCallback} from '../../hooks/useDebouncedCallback';
@@ -31,6 +32,7 @@ import {EventDetailStatusSection} from './components/EventDetailStatusSection';
 import {EventDetailProgressSection} from './components/EventDetailProgressSection';
 import {EventDetailInfoPanel} from './components/EventDetailInfoPanel';
 import {EventDetailParticipants} from './components/EventDetailParticipants';
+import {EventDetailAddGroup} from './components/EventDetailAddGroup';
 import {EventDetailDialogs} from './components/EventDetailDialogs';
 
 export function EventDetail() {
@@ -79,7 +81,7 @@ export function EventDetail() {
     isParticipationInFlight,
     handleJoinClick,
     doJoin,
-  } = useEventDetailParticipation(event, syncEventFromServer);
+  } = useEventDetailParticipation(displayEvent ?? event, syncEventFromServer);
 
   const reloadEvent = useCallback(() => {
     if (isParticipationInFlight()) return;
@@ -174,6 +176,12 @@ export function EventDetail() {
       return <PageLoading label={t('loading.event')} className="pb-10 pt-4" />;
     }
 
+    // Localhost: event may be a host draft — send guests to sign-in instead of "not found".
+    if (!isSignedIn && !authInitializing && supportsBrowserOAuth()) {
+      saveAuthReturnTo(`${location.pathname}${location.search}`);
+      return <Navigate to="/sign-in" replace />;
+    }
+
     return (
       <div className="flex flex-col items-center gap-4 py-20 text-center">
         <p className="text-sm font-medium text-slate-200">{t('eventDetail.notFound')}</p>
@@ -256,6 +264,13 @@ export function EventDetail() {
       <EventDetailInfoPanel event={event} when={view.when} />
 
       <EventDetailParticipants view={view} viewerDiscordId={user.discordId} />
+
+      <EventDetailAddGroup
+        event={event}
+        view={view}
+        accessToken={discordToken}
+        onAdded={syncEventFromServer}
+      />
     </ContentReveal>
   );
 }

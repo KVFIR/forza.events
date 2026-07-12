@@ -49,10 +49,20 @@ export function EventResultsTable({
     );
   }
 
-  return (
-    <Panel className="overflow-hidden">
-      <ol className={panelDividedClass}>
-        {rows.map((row) => {
+  // Positions restart per group — split standings into per-group blocks when there are 2+.
+  const groupOrder: number[] = [];
+  const rowsByGroup = new Map<number, EventResultDisplay[]>();
+  for (const row of rows) {
+    const g = row.groupIndex ?? 1;
+    if (!rowsByGroup.has(g)) {
+      rowsByGroup.set(g, []);
+      groupOrder.push(g);
+    }
+    rowsByGroup.get(g)!.push(row);
+  }
+  const multiGroup = groupOrder.length > 1;
+
+  const renderRow = (row: EventResultDisplay) => {
           const isViewer = Boolean(viewerDiscordId && row.discordId === viewerDiscordId);
           const showPosition = hasFinishingPosition(row);
           const posLabel = row.dns
@@ -103,9 +113,29 @@ export function EventResultsTable({
                 ) : null}
               </span>
             </li>
-          );
-        })}
-      </ol>
-    </Panel>
+    );
+  };
+
+  if (!multiGroup) {
+    return (
+      <Panel className="overflow-hidden">
+        <ol className={panelDividedClass}>{rows.map(renderRow)}</ol>
+      </Panel>
+    );
+  }
+
+  return (
+    <div className="space-y-3">
+      {groupOrder.map((g) => (
+        <div key={g}>
+          <p className="mb-1.5 text-xs font-bold uppercase tracking-widest text-muted">
+            {t('eventDetail.group', {n: g})}
+          </p>
+          <Panel className="overflow-hidden">
+            <ol className={panelDividedClass}>{rowsByGroup.get(g)!.map(renderRow)}</ol>
+          </Panel>
+        </div>
+      ))}
+    </div>
   );
 }

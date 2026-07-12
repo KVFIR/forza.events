@@ -25,7 +25,7 @@ npm run build
 
 GitHub Actions runs the same on every push/PR to `main` / `master`.
 
-Open http://localhost:5180 → tap the auth status pill in the **navbar** (or Profile) to **Sign in with Discord** for create/join/publish → browse events without sign-in.
+Open http://localhost:5180 → tap the auth status pill in the **navbar** (or Profile) to **Sign in with Discord** before using the app (Browse, Event Detail, join/create/publish).
 
 ---
 
@@ -93,7 +93,7 @@ Discord Developer Portal → OAuth2 → Redirects — add **both**:
 - `https://forza.events/auth/callback` (browser web)
 - `https://www.forza.events/auth/callback` (if you serve `www`)
 
-Activity OAuth still uses `https://127.0.0.1` — not `APP_ORIGIN`. Browser tabs on **forza.events** use Discord OAuth and require sign-in before the app (`BrowserAuthGate`). The raw Railway hostname (`*.up.railway.app`) still shows **Open in Discord** unless you add it to `VITE_APP_ORIGIN` at build time.
+Activity OAuth still uses `https://127.0.0.1` — not `APP_ORIGIN`. Browser tabs on **forza.events** and **localhost** use Discord OAuth and require sign-in before the app (`BrowserSignInScreen` via `useBrowserSignInGate()`). The raw Railway hostname (`*.up.railway.app`) still shows **Open in Discord** unless you add it to `VITE_APP_ORIGIN` at build time.
 
 ```bash
 railway variable set APP_ORIGIN=https://forza.events

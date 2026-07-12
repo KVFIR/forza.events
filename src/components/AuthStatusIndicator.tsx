@@ -76,28 +76,20 @@ export function AuthStatusIndicator({className}: {className?: string}) {
     );
   }
 
-  const statusPill = (
-    <div className={statusPillClass} role="status" aria-live="polite" aria-label={label}>
-      {content}
-    </div>
-  );
-
   if (showBrowserSignOut) {
     return (
-      <div className={cn('inline-flex items-center gap-1.5', className)}>
-        {statusPill}
-        <button
-          type="button"
-          onClick={signOutBrowser}
-          className={cn(
-            statusPillClass,
-            'cursor-pointer transition-colors hover:border-white/20 hover:bg-white/[0.07] active:bg-white/[0.1]',
-          )}
-          aria-label={t('auth.signOutAria')}
-        >
-          <span className="text-[10px] font-medium tracking-wide text-muted-light">{t('auth.signOut')}</span>
-        </button>
-      </div>
+      <button
+        type="button"
+        onClick={signOutBrowser}
+        className={cn(
+          statusPillClass,
+          'cursor-pointer transition-colors hover:border-white/20 hover:bg-white/[0.07] active:bg-white/[0.1]',
+          className,
+        )}
+        aria-label={t('auth.signOutAria')}
+      >
+        <span className="text-[10px] font-medium tracking-wide text-muted-light">{t('auth.signOut')}</span>
+      </button>
     );
   }
 

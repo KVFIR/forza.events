@@ -9,6 +9,7 @@ import {eventTypeMeta} from '../lib/eventTypes';
 import {cn} from '../lib/cn';
 import {isDraftEvent} from '../lib/eventList';
 import {formatLobbyCount} from '../lib/constants';
+import {totalCapacity} from '../lib/eventSpec';
 import {resolveOrganiserLabel} from '../lib/organiser';
 import {formatEventStart} from '../lib/datetime';
 import {defaultCoverPath} from '../lib/eventCovers';
@@ -180,7 +181,7 @@ export function EventCard({event, participantResult}: Props) {
               ) : (
                 <p className="mt-1.5 flex items-center gap-1 text-xs text-slate-400">
                   <Users className="h-3 w-3 shrink-0" />
-                  {formatLobbyCount(event.currentPlayers)}
+                  {formatLobbyCount(event.currentPlayers, totalCapacity(event))}
                   {ended && (
                     <span className="ml-1 text-[9px] font-bold uppercase tracking-widest text-muted">
                       · {t('eventStatus.ended')}

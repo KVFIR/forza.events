@@ -124,6 +124,28 @@ describe('buildEventEmbed', () => {
     expect(embed.description).toBeUndefined();
   });
 
+  it('collapses 3+ groups into one Participants field', () => {
+    const embed = buildEventEmbed(
+      event({
+        group_count: 3,
+        current_players: 30,
+        groups: [
+          {group_index: 1, leader_gamertag: 'L1', count: 10},
+          {group_index: 2, leader_gamertag: 'L2', count: 12},
+          {group_index: 3, leader_gamertag: 'L3', count: 8},
+        ],
+        waitlist_count: 2,
+      }),
+    ).embeds[0];
+
+    const perGroupFields = embed.fields.filter((f) => /^👤 Group \d/.test(f.name));
+    expect(perGroupFields).toHaveLength(0);
+    const groupsField = embed.fields.find((f) => f.name.startsWith('👤 Groups'));
+    expect(groupsField?.value).toContain('Group 1: L1');
+    expect(groupsField?.value).toContain('Group 3: L3');
+    expect(embed.fields.find((f) => f.name === '⏳ Waitlist')).toBeDefined();
+  });
+
   it('uses embed description only for lifecycle status', () => {
     const embed = buildEventEmbed(
       event({

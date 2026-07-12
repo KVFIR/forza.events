@@ -1,5 +1,6 @@
 import {describe, expect, it} from 'vitest';
 import {
+  applyJoinServerResponse,
   mergeOptimisticEventPatch,
   patchEventAfterSelfJoin,
   patchEventAfterSelfLeave,
@@ -90,6 +91,64 @@ describe('patchEventAfterSelfLeave', () => {
     expect(next.participants).toHaveLength(1);
     expect(next.currentPlayers).toBe(1);
   });
+
+  it('promotes the earliest waitlisted racer when an active seat opens', () => {
+    const ev = {
+      ...base,
+      currentPlayers: 12,
+      participants: [
+        ...Array.from({length: 11}, (_, i) => ({
+          discordId: `a${i}`,
+          username: 'A',
+          gamertag: `GT${i}`,
+          participationSource: 'self_join' as const,
+          groupIndex: 1,
+        })),
+        {
+          discordId: 'u1',
+          username: 'A',
+          gamertag: 'GT1',
+          participationSource: 'self_join' as const,
+          groupIndex: 1,
+        },
+        {
+          discordId: 'q2',
+          username: 'Q2',
+          gamertag: 'Q2',
+          participationSource: 'self_join' as const,
+          waitlisted: true,
+          joinedAt: '2030-02-01T00:00:00Z',
+        },
+        {
+          discordId: 'q1',
+          username: 'Q1',
+          gamertag: 'Q1',
+          participationSource: 'self_join' as const,
+          waitlisted: true,
+          joinedAt: '2030-01-01T00:00:00Z',
+        },
+      ],
+    };
+    const next = patchEventAfterSelfLeave(ev, 'u1');
+    const promoted = next.participants.find((p) => p.discordId === 'q1');
+    expect(promoted?.waitlisted).toBe(false);
+    expect(promoted?.groupIndex).toBe(1);
+    expect(next.currentPlayers).toBe(12);
+  });
+
+  it('leaving the waitlist does not promote anyone', () => {
+    const ev = {
+      ...base,
+      currentPlayers: 12,
+      participants: [
+        {discordId: 'u1', username: 'A', gamertag: 'GT1', participationSource: 'self_join' as const, waitlisted: true},
+        {discordId: 'q1', username: 'Q1', gamertag: 'Q1', participationSource: 'self_join' as const, waitlisted: true},
+      ],
+    };
+    const next = patchEventAfterSelfLeave(ev, 'u1');
+    expect(next.participants).toHaveLength(1);
+    expect(next.currentPlayers).toBe(12);
+  });
 });
 
 describe('patchEventAfterSelfJoin', () => {
@@ -135,6 +194,31 @@ describe('patchEventAfterSelfJoin', () => {
     const full = {...base, currentPlayers: 12, maxPlayers: 12, participants: []};
     const next = patchEventAfterSelfJoin(full, user, 'GT');
     expect(next.currentPlayers).toBe(12);
+    expect(next.participants[0]?.waitlisted).toBe(true);
+  });
+
+  it('waitlists when currentPlayers is full but participants list is empty', () => {
+    const full = {...base, currentPlayers: 12, maxPlayers: 12, groupCount: 1, participants: []};
+    const next = patchEventAfterSelfJoin(full, user, 'GT');
+    expect(next.participants[0]?.waitlisted).toBe(true);
+    expect(next.currentPlayers).toBe(12);
+  });
+});
+
+describe('applyJoinServerResponse', () => {
+  it('reconciles waitlist and group from the server', () => {
+    const optimistic = patchEventAfterSelfJoin(
+      {...base, currentPlayers: 12, maxPlayers: 12, participants: []},
+      user,
+      'GT',
+    );
+    const refined = applyJoinServerResponse(optimistic, 'u1', {
+      joined: false,
+      waitlisted: true,
+      group_index: 1,
+    });
+    expect(refined.participants[0]?.waitlisted).toBe(true);
+    expect(refined.participants[0]?.groupIndex).toBe(1);
   });
 });
 

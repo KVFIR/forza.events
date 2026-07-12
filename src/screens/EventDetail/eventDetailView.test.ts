@@ -141,9 +141,48 @@ describe('buildEventDetailViewModel', () => {
     expect(view.participationDisabled).toBe(true);
   });
 
-  it('disables join when lobby is full and viewer is not joined', () => {
-    const view = buildView({displayStatus: 'full'});
-    expect(view.participationDisabled).toBe(true);
+  it('routes a fresh join to the waitlist when every group is full', () => {
+    const participants = Array.from({length: 12}, (_, i) =>
+      participant({discordId: `d${i}`, gamertag: `GT${i}`}),
+    );
+    const event = baseEvent({
+      discordMessageId: 'msg-1',
+      participants,
+      currentPlayers: 12,
+    });
+    const view = buildView({event, displayEvent: event, displayStatus: 'full'});
+    // A full lobby no longer blocks joining — it queues the racer instead.
+    expect(view.participationDisabled).toBe(false);
+    expect(view.willWaitlist).toBe(true);
+  });
+
+  it('enables leave-waitlist for a queued viewer (not counted as joined)', () => {
+    const event = baseEvent({
+      discordMessageId: 'msg-1',
+      participants: [
+        participant({discordId: 'viewer-1', gamertag: 'ViewerTag', waitlisted: true}),
+      ],
+    });
+    const view = buildView({event, displayEvent: event, isJoined: () => false});
+    expect(view.onWaitlist).toBe(true);
+    expect(view.joined).toBe(false);
+    expect(view.participationDisabled).toBe(false);
+  });
+
+  it('offers Add group to the host when the lobby is full with a waitlist', () => {
+    const participants = Array.from({length: 12}, (_, i) =>
+      participant({discordId: `d${i}`, gamertag: `GT${i}`}),
+    );
+    participants.push(participant({discordId: 'q1', gamertag: 'Q1', waitlisted: true}));
+    const event = baseEvent({
+      hostDiscordId: 'viewer-1',
+      discordMessageId: 'msg-1',
+      participants,
+      currentPlayers: 12,
+    });
+    const view = buildView({event, displayEvent: event});
+    expect(view.canAddGroup).toBe(true);
+    expect(view.waitlistCount).toBe(1);
   });
 
   it('prompts browser sign-in for guests on forza.events', () => {
@@ -180,6 +219,65 @@ describe('buildEventDetailViewModel', () => {
       isJoined: () => true,
     });
     expect(view.showJoinXboxHint).toBe(true);
-    expect(view.convoyLeader?.gamertag).toBe('LeaderGT');
+    expect(view.viewerConvoyLeader?.gamertag).toBe('LeaderGT');
+  });
+
+  it('hides Xbox hint for waitlisted racers', () => {
+    const event = baseEvent({
+      discordMessageId: 'msg-1',
+      lobbyLeaderGamertag: 'LeaderGT',
+      lobbyLeaderDiscordId: 'leader-1',
+      participants: [
+        participant({discordId: 'leader-1', gamertag: 'LeaderGT', isConvoyLeader: true}),
+        participant({discordId: 'viewer-1', gamertag: 'ViewerTag', waitlisted: true}),
+      ],
+      currentPlayers: 12,
+    });
+    const view = buildView({
+      event,
+      displayEvent: event,
+      isJoined: () => false,
+    });
+    expect(view.showJoinXboxHint).toBe(false);
+  });
+
+  it('disables join for host_assigned passive roster rows', () => {
+    const event = baseEvent({
+      discordMessageId: 'msg-1',
+      participants: [
+        participant({
+          discordId: 'viewer-1',
+          gamertag: 'ViewerTag',
+          participationSource: 'host_assigned',
+        }),
+      ],
+      currentPlayers: 1,
+    });
+    const view = buildView({
+      event,
+      displayEvent: event,
+      isJoined: () => false,
+    });
+    expect(view.participationDisabled).toBe(true);
+  });
+
+  it('uses the viewer group leader for multi-group Xbox hints', () => {
+    const event = baseEvent({
+      discordMessageId: 'msg-1',
+      groupCount: 2,
+      participants: [
+        participant({discordId: 'g1-leader', gamertag: 'G1', isConvoyLeader: true, groupIndex: 1}),
+        participant({discordId: 'g2-leader', gamertag: 'G2', isConvoyLeader: true, groupIndex: 2}),
+        participant({discordId: 'viewer-1', gamertag: 'ViewerTag', groupIndex: 2}),
+      ],
+      currentPlayers: 3,
+    });
+    const view = buildView({
+      event,
+      displayEvent: event,
+      isJoined: () => true,
+    });
+    expect(view.viewerConvoyLeader?.gamertag).toBe('G2');
+    expect(view.showJoinXboxHint).toBe(true);
   });
 });

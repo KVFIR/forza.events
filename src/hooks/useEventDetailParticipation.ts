@@ -3,10 +3,11 @@ import {useTranslation} from 'react-i18next';
 import {useJoinedEvents} from '../context/JoinedEventsContext';
 import {useAuth} from '../context/AuthContext';
 import {canLeaveRegistration} from '../lib/eventSpec';
-import {resolveConvoyLeader} from '../lib/eventRoster';
+import {viewerIsConvoyLeader} from '../lib/eventRoster';
 import {startDiscordBrowserSignIn} from '../lib/discordBrowserSignIn';
 import {hasGamertag, gamertagError} from '../lib/gamertag';
 import {supportsBrowserOAuth} from '../lib/runtime';
+import {userHasParticipantRow} from '../lib/events';
 import type {ForzaEvent} from '../lib/types';
 
 export function useEventDetailParticipation(
@@ -93,16 +94,21 @@ export function useEventDetailParticipation(
       if (!isStandalone) void retryDiscordAuth();
       return;
     }
-    if (resolveConvoyLeader(event, user.discordId)?.isYou) {
+    if (viewerIsConvoyLeader(event, user.discordId)) {
       setJoinError(t('errors.leaderCannotLeave'));
       return;
     }
-    if (isJoined(event)) {
+    const onWaitlist =
+      event.participants.find((p) => p.discordId === user.discordId)?.waitlisted ?? false;
+    if (isJoined(event) || onWaitlist) {
       if (!canLeaveRegistration(event)) {
         setJoinError(t('participation.leaveLockedAfterStart'));
         return;
       }
       await doLeave();
+      return;
+    }
+    if (userHasParticipantRow(event, user)) {
       return;
     }
     if (!hasGamertag(user.xboxGamertag)) {

@@ -34,6 +34,10 @@ const API_I18N_KEYS: Partial<Record<ApiErrorCode, string>> = {
   [API_ERROR_CODES.RESULTS_ALREADY_SUBMITTED]: 'errors.resultsAlreadySubmitted',
   [API_ERROR_CODES.PROFILE_INCOMPLETE]: 'errors.profileIncomplete',
   [API_ERROR_CODES.GUILD_MEMBER_SEARCH_DISABLED]: 'errors.guildMemberSearchDisabled',
+  [API_ERROR_CODES.GROUPS_MAXED]: 'errors.groupsMaxed',
+  [API_ERROR_CODES.WAITLIST_EMPTY]: 'errors.waitlistEmpty',
+  [API_ERROR_CODES.LEADER_ALREADY_IN_LOBBY]: 'errors.leaderAlreadyInLobby',
+  [API_ERROR_CODES.LOBBY_NOT_FULL]: 'errors.lobbyNotFull',
 };
 
 export class ApiRequestError extends Error {

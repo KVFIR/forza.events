@@ -7,6 +7,7 @@ import {
   userHasParticipantRow,
 } from '../../lib/events';
 import {
+  canAddGroup,
   canCancelEvent,
   canDeleteDraft,
   canEditEvent,
@@ -16,13 +17,22 @@ import {
   isEventFinalized,
   isPublishedToDiscord,
   isRegistrationOpen,
+  lobbyIsFull,
+  totalCapacity,
+  waitlistCount,
 } from '../../lib/eventSpec';
 import {formatEventStart} from '../../lib/datetime';
-import {LOBBY_TOTAL_PLAYERS} from '../../lib/constants';
 import {supportsBrowserOAuth} from '../../lib/runtime';
-import {resolveConvoyLeader, resolveRegisteredDrivers} from '../../lib/eventRoster';
-import type {RosterConvoyLeader} from '../../lib/eventRoster';
-import type {AppUser, EventStatus, ForzaEvent} from '../../lib/types';
+import {
+  resolveConvoyLeader,
+  resolveEventGroups,
+  resolveRegisteredDrivers,
+  resolveViewerConvoyLeader,
+  resolveWaitlist,
+  viewerIsConvoyLeader,
+} from '../../lib/eventRoster';
+import type {RosterConvoyLeader, RosterGroup} from '../../lib/eventRoster';
+import type {AppUser, EventParticipant, EventStatus, ForzaEvent} from '../../lib/types';
 
 export type EventDetailViewModel = {
   ev: ForzaEvent;
@@ -45,7 +55,15 @@ export type EventDetailViewModel = {
   finalized: boolean;
   resultDisplay: ReturnType<typeof resolveEventResultDisplay>;
   convoyLeader: RosterConvoyLeader | null;
+  viewerConvoyLeader: RosterConvoyLeader | null;
   registeredDrivers: ReturnType<typeof resolveRegisteredDrivers>;
+  groups: RosterGroup[];
+  waitlist: EventParticipant[];
+  waitlistCount: number;
+  totalCapacity: number;
+  canAddGroup: boolean;
+  onWaitlist: boolean;
+  willWaitlist: boolean;
   showResultsSection: boolean;
   showRegistrationProgress: boolean;
   resultsAwaitingHost: boolean;
@@ -104,7 +122,8 @@ export function buildEventDetailViewModel(input: {
   const showDraftActions = isDraft && isHost;
   const showHostPostStartActions = isHost && started && (canEnterResults || canCancel);
   const when = formatEventStart(ev.startsAt);
-  const fillPct = Math.round((ev.currentPlayers / LOBBY_TOTAL_PLAYERS) * 100);
+  const capacity = totalCapacity(ev);
+  const fillPct = Math.round((ev.currentPlayers / capacity) * 100);
   const finalized = isEventFinalized(event);
   const resultDisplay = resolveEventResultDisplay(
     event,
@@ -112,7 +131,13 @@ export function buildEventDetailViewModel(input: {
     t('results.unknownDriver'),
   );
   const convoyLeader = resolveConvoyLeader(ev, user.discordId);
+  const viewerConvoyLeader = resolveViewerConvoyLeader(ev, user.discordId);
   const registeredDrivers = resolveRegisteredDrivers(ev.participants);
+  const groups = resolveEventGroups(ev, user.discordId);
+  const waitlist = resolveWaitlist(ev.participants);
+  const viewerRow = ev.participants.find((p) => p.discordId === user.discordId);
+  const onWaitlist = viewerRow?.waitlisted ?? false;
+  const willWaitlist = !isInParticipants && lobbyIsFull(ev);
   /** Lifecycle from server row — not `displayEvent` (lobby patch only). */
   const showResultsSection = shouldShowEventResults(event);
   const showRegistrationProgress =
@@ -129,21 +154,24 @@ export function buildEventDetailViewModel(input: {
     (supportsBrowserOAuth() || !isStandalone);
   const participationBusy = joining || leaving;
   const participationAction = leaving ? 'leaving' : joining ? 'joining' : null;
-  const isCurrentConvoyLeader = convoyLeader?.isYou ?? false;
+  const isCurrentConvoyLeader = viewerIsConvoyLeader(ev, user.discordId);
   const participationDisabled =
     !isSignedIn ||
     participationBusy ||
     cancelling ||
     isCurrentConvoyLeader ||
-    (joined ? !canLeave : isInParticipants || !registrationOpen || full);
+    (isInParticipants && !joined && !onWaitlist) ||
+    // Active seat or waitlist → leave; otherwise join (or join-waitlist when full).
+    (joined || onWaitlist ? !canLeave : !registrationOpen);
   const showJoinXboxHint =
-    (joined || isInParticipants) &&
+    joined &&
+    !onWaitlist &&
     !isHost &&
     !isDraft &&
     !finalized &&
     !started &&
-    convoyLeader != null &&
-    !convoyLeader.isYou;
+    viewerConvoyLeader != null &&
+    !viewerConvoyLeader.isYou;
 
   return {
     ev,
@@ -166,7 +194,15 @@ export function buildEventDetailViewModel(input: {
     finalized,
     resultDisplay,
     convoyLeader,
+    viewerConvoyLeader,
     registeredDrivers,
+    groups,
+    waitlist,
+    waitlistCount: waitlistCount(ev),
+    totalCapacity: capacity,
+    canAddGroup: canAddGroup(ev, user),
+    onWaitlist,
+    willWaitlist,
     showResultsSection,
     showRegistrationProgress,
     resultsAwaitingHost,

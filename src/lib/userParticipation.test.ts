@@ -50,6 +50,22 @@ describe('userIsJoined', () => {
     ).toBe(true);
   });
 
+  it('returns false for waitlisted self_join rows', () => {
+    expect(
+      userIsJoined(
+        event([
+          {
+            discordId: 'u1',
+            username: 'A',
+            participationSource: 'self_join',
+            waitlisted: true,
+          },
+        ]),
+        user,
+      ),
+    ).toBe(false);
+  });
+
   it('returns false for host-assigned convoy leader without self join', () => {
     expect(
       userIsJoined(

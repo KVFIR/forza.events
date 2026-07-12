@@ -42,4 +42,15 @@ describe('patchEventLobby', () => {
     expect(patched.lifecycle).toBe('live');
     expect(patched.status).toBe('live');
   });
+
+  it('updates group count from realtime patches', () => {
+    const patched = patchEventLobby({...baseEvent, groupCount: 1} as ForzaEvent, {
+      current_players: 12,
+      max_players: 12,
+      group_count: 2,
+      status: 'open',
+    });
+    expect(patched.groupCount).toBe(2);
+    expect(patched.status).toBe('open');
+  });
 });

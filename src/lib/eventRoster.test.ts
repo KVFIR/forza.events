@@ -3,6 +3,9 @@ import {
   resolveConvoyLeader,
   resolveRegisteredDrivers,
   resolveResultsRoster,
+  resolveViewerConvoyLeader,
+  resolveWaitlist,
+  viewerIsConvoyLeader,
 } from './eventRoster';
 import type {EventParticipant, ForzaEvent} from './types';
 
@@ -139,5 +142,62 @@ describe('resolveResultsRoster', () => {
     ];
     const roster = resolveResultsRoster(event({hostDiscordId: 'host-1', participants}));
     expect(roster.map((p) => p.discordId)).toEqual(['leader-9', 'p2']);
+  });
+
+  it('excludes waitlisted racers', () => {
+    const participants = [
+      participant({discordId: 'p2', gamertag: 'BGT'}),
+      participant({discordId: 'q1', gamertag: 'Q1', waitlisted: true}),
+    ];
+    const roster = resolveResultsRoster(event({hostDiscordId: 'host-1', participants}));
+    expect(roster.map((p) => p.discordId)).toEqual(['p2']);
+  });
+});
+
+describe('resolveWaitlist', () => {
+  it('orders by joinedAt oldest first', () => {
+    const list = resolveWaitlist([
+      participant({discordId: 'q2', gamertag: 'Q2', waitlisted: true, joinedAt: '2030-02-02T00:00:00Z'}),
+      participant({discordId: 'q1', gamertag: 'Q1', waitlisted: true, joinedAt: '2030-01-01T00:00:00Z'}),
+    ]);
+    expect(list.map((p) => p.discordId)).toEqual(['q1', 'q2']);
+  });
+});
+
+describe('viewer convoy leader helpers', () => {
+  it('detects convoy leaders in any group', () => {
+    const participants = [
+      participant({discordId: 'g1-leader', gamertag: 'G1', isConvoyLeader: true, groupIndex: 1}),
+      participant({
+        discordId: 'viewer-1',
+        gamertag: 'V1',
+        isConvoyLeader: true,
+        groupIndex: 2,
+      }),
+    ];
+    const ev = event({hostDiscordId: 'host-1', groupCount: 2, participants});
+    expect(viewerIsConvoyLeader(ev, 'viewer-1')).toBe(true);
+    expect(viewerIsConvoyLeader(ev, 'g1-leader')).toBe(true);
+    expect(viewerIsConvoyLeader(ev, 'nobody')).toBe(false);
+  });
+
+  it('resolves the viewer group leader for Xbox hints', () => {
+    const participants = [
+      participant({discordId: 'g1-leader', gamertag: 'G1', isConvoyLeader: true, groupIndex: 1}),
+      participant({discordId: 'g2-leader', gamertag: 'G2', isConvoyLeader: true, groupIndex: 2}),
+      participant({discordId: 'viewer-1', gamertag: 'V1', groupIndex: 2}),
+    ];
+    const ev = event({hostDiscordId: 'host-1', groupCount: 2, participants});
+    expect(resolveViewerConvoyLeader(ev, 'viewer-1')?.gamertag).toBe('G2');
+    expect(resolveViewerConvoyLeader(ev, 'viewer-1')?.isYou).toBe(false);
+  });
+
+  it('returns null for waitlisted viewers', () => {
+    const participants = [
+      participant({discordId: 'g1-leader', gamertag: 'G1', isConvoyLeader: true, groupIndex: 1}),
+      participant({discordId: 'viewer-1', gamertag: 'V1', waitlisted: true}),
+    ];
+    const ev = event({hostDiscordId: 'host-1', participants});
+    expect(resolveViewerConvoyLeader(ev, 'viewer-1')).toBeNull();
   });
 });

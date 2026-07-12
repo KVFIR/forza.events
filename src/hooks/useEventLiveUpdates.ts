@@ -53,6 +53,7 @@ export function usePublishedEventsLiveUpdates(
     id: string;
     current_players: number;
     max_players: number;
+    group_count?: number | null;
     status: string;
   }) => void,
   onCatalogChange: () => void,
@@ -97,6 +98,8 @@ export function usePublishedEventsLiveUpdates(
               id: newRow.id,
               current_players: Number(newRow.current_players),
               max_players: Number(newRow.max_players),
+              group_count:
+                newRow.group_count != null ? Number(newRow.group_count) : undefined,
               status: newStatus,
             });
           },

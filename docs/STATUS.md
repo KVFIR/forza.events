@@ -11,8 +11,8 @@ Remaining work is mostly **Activity E2E in pilot guilds**, **Railway frontend re
 | Layer | State |
 |-------|--------|
 | React Activity (UI) | Done — Browse, Detail, Create (wizard), My Events, Profile, i18n (EN + RU) |
-| Supabase schema | Done — migrations `001`–`006` |
-| Edge Functions | Done — 15 functions ([`supabase/README.md`](../supabase/README.md)) |
+| Supabase schema | Done — migrations `001`–`010` |
+| Edge Functions | Done — 16 functions ([`supabase/README.md`](../supabase/README.md)) |
 | Security hardening | Done — storage, RLS scope, CORS, rate limits, publish validation |
 | Local browser dev | Done — Discord OAuth + Supabase (not mock mode) |
 | Sample content | Done — optional `sample-*` seed |
@@ -36,7 +36,7 @@ Remaining work is mostly **Activity E2E in pilot guilds**, **Railway frontend re
 | Discord Activity auth | Done | SDK → `token-exchange` → `authenticate` |
 | Browser localhost auth | Done | `/auth/callback` + `sessionStorage` |
 | Production browser tab (`forza.events`) | Done | Discord OAuth required (`BrowserAuthGate`); raw `*.up.railway.app` still Activity-only gate |
-| Supabase schema | Done | `001_baseline` + `002`–`006` |
+| Supabase schema | Done | `001_baseline` + `002`–`010` |
 | Edge Functions | Done | `npm run deploy:functions` |
 | Realtime lobby | Done | `events` + `event_participants` |
 | FH6 cars catalog | Done | Autocomplete; no client inserts into `cars` |
@@ -86,8 +86,8 @@ Details: [`supabase/README.md`](../supabase/README.md).
 | Check | Result |
 |-------|--------|
 | Supabase project | `uoysqfczahqmctbrrizn` (FORZA.EVENTS) |
-| Migrations | `001`–`006` on remote |
-| Edge Functions | 15 via `deploy:functions` |
+| Migrations | `001`–`010` on remote |
+| Edge Functions | 16 via `deploy:functions` |
 | Activity hosting | Railway `https://forzaevents.up.railway.app` |
 | Discord application verification | Approved — legal URLs on deploy origin |
 | Discord Activity OAuth | `https://127.0.0.1` + `token-exchange` allowlist |

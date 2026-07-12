@@ -243,7 +243,7 @@ export async function joinEvent(
   eventId: string,
   gamertag: string,
 ) {
-  return invoke<{joined: boolean}>(
+  return invoke<{joined: boolean; waitlisted?: boolean; group_index?: number}>(
     'event-participation',
     {event_id: eventId, action: 'join', gamertag},
     discordToken,
@@ -254,6 +254,32 @@ export async function leaveEvent(discordToken: string, eventId: string) {
   return invoke<{joined: boolean}>(
     'event-participation',
     {event_id: eventId, action: 'leave'},
+    discordToken,
+  );
+}
+
+export type AddGroupLeader = {
+  discordId: string;
+  gamertag?: string;
+  /** Discord unique handle (`user.username`) — only needed for guild-member leaders. */
+  username?: string;
+  avatarUrl?: string | null;
+};
+
+export async function addGroup(
+  discordToken: string,
+  eventId: string,
+  leader: AddGroupLeader,
+) {
+  return invoke<{ok: boolean; group_count: number}>(
+    'add-group',
+    {
+      event_id: eventId,
+      leader_discord_id: leader.discordId,
+      leader_gamertag: leader.gamertag,
+      leader_username: leader.username,
+      leader_avatar_url: leader.avatarUrl,
+    },
     discordToken,
   );
 }

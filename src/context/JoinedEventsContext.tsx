@@ -9,6 +9,7 @@ import {
 import i18n from '../i18n';
 import {joinEvent, leaveEvent, isApiConfigured} from '../lib/api';
 import {
+  applyJoinServerResponse,
   patchEventAfterSelfJoin,
   patchEventAfterSelfLeave,
   mergeOptimisticEventPatch,
@@ -88,10 +89,15 @@ export function JoinedEventsProvider({children}: {children: ReactNode}) {
 
       if (isSignedIn && isApiConfigured() && token) {
         if (!hasGamertag(gt)) throw new Error(i18n.t('participation.gamertagRequired'));
-        setOverrides((prev) => ({...prev, [event.id]: true}));
-        setLobbyPatch(patchEventAfterSelfJoin(event, user, gt));
+        const optimistic = patchEventAfterSelfJoin(event, user, gt);
+        setLobbyPatch(optimistic);
+        const row = optimistic.participants.find((p) => p.discordId === user.discordId);
+        if (row && !row.waitlisted && row.participationSource === 'self_join') {
+          setOverrides((prev) => ({...prev, [event.id]: true}));
+        }
         try {
-          await joinEvent(token, event.id, gt);
+          const res = await joinEvent(token, event.id, gt);
+          setLobbyPatch(applyJoinServerResponse(optimistic, user.discordId, res));
           refreshUser((prev) => ({...prev, xboxGamertag: gt}));
           clearOverride(event.id);
         } catch (err) {

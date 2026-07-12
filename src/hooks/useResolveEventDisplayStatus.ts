@@ -5,7 +5,7 @@ import {useEventTimeTick} from './useEventTimeTick';
 
 type EventDisplaySlice = Pick<
   ForzaEvent,
-  'status' | 'lifecycle' | 'startsAt' | 'currentPlayers' | 'maxPlayers'
+  'status' | 'lifecycle' | 'startsAt' | 'currentPlayers' | 'maxPlayers' | 'groupCount'
 >;
 
 export function useResolveEventDisplayStatus(event: EventDisplaySlice | undefined): EventStatus {

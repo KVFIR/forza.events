@@ -51,6 +51,7 @@ type DbEventRow = {
   discord_message_id?: string | null;
   voice_policy: ForzaEvent['voicePolicy'];
   max_players: number;
+  group_count?: number | null;
   current_players: number;
   max_pi?: number | null;
   car_rule_mode?: CarRuleMode | null;
@@ -73,6 +74,9 @@ type DbEventRow = {
     gamertag_snapshot?: string | null;
     is_convoy_leader?: boolean | null;
     participation_source?: string | null;
+    group_index?: number | null;
+    waitlisted?: boolean | null;
+    joined_at?: string | null;
     users?: {username: string; avatar_url?: string | null} | null;
   }[];
   event_cars?: DbEventCarRow[];
@@ -85,6 +89,7 @@ type DbEventResultRow = {
   dnf?: boolean | null;
   dns?: boolean | null;
   points?: number | null;
+  group_index?: number | null;
 };
 
 type DbEventCarRow = {
@@ -118,6 +123,9 @@ const EVENT_LIST_SELECT = `
     gamertag_snapshot,
     is_convoy_leader,
     participation_source,
+    group_index,
+    waitlisted,
+    joined_at,
     users!event_participants_discord_id_fkey(username, avatar_url)
   ),
   event_cars(max_pi, tune_share_code, car_restrictions, cars(id, make, model, year, pi))
@@ -125,7 +133,7 @@ const EVENT_LIST_SELECT = `
 
 /** Event detail by id — includes published results rows. */
 const EVENT_DETAIL_SELECT = `${EVENT_LIST_SELECT},
-  event_results(discord_id, position, dnf, dns, points)`;
+  event_results(discord_id, position, dnf, dns, points, group_index)`;
 
 export function mapDbEventResultRows(rows: DbEventResultRow[] | null | undefined): EventResultRow[] {
   return (rows ?? []).map((r) => ({
@@ -134,6 +142,7 @@ export function mapDbEventResultRows(rows: DbEventResultRow[] | null | undefined
     dnf: r.dnf ?? false,
     dns: r.dns ?? false,
     points: r.points,
+    groupIndex: r.group_index ?? 1,
   }));
 }
 
@@ -195,6 +204,7 @@ export type EventResultRow = {
   dnf: boolean;
   dns: boolean;
   points?: number | null;
+  groupIndex?: number;
 };
 
 export type EventResultDisplay = {
@@ -204,6 +214,7 @@ export type EventResultDisplay = {
   dnf: boolean;
   dns: boolean;
   points?: number | null;
+  groupIndex?: number;
 };
 
 export function resolveEventResultDisplay(
@@ -222,6 +233,7 @@ export function resolveEventResultDisplay(
       dnf: r.dnf,
       dns: r.dns,
       points: r.points,
+      groupIndex: r.groupIndex ?? 1,
     }));
 }
 
@@ -229,7 +241,7 @@ function mapStatus(row: DbEventRow): EventStatus {
   if (row.status === 'live' || row.status === 'checkin') return 'live';
   if (['completed', 'cancelled', 'archived'].includes(row.status)) return 'ended';
   if (new Date(row.starts_at).getTime() <= Date.now()) return 'live';
-  if (row.current_players >= row.max_players) return 'full';
+  if (row.current_players >= (row.group_count ?? 1) * row.max_players) return 'full';
   return 'open';
 }
 
@@ -245,13 +257,14 @@ function mapLifecycle(status: string): EventLifecycle {
 /** Apply a realtime `events` row patch (lobby count / status) without refetching relations. */
 export function patchEventLobby(
   event: ForzaEvent,
-  row: Pick<DbEventRow, 'current_players' | 'max_players' | 'status'>,
+  row: Pick<DbEventRow, 'current_players' | 'max_players' | 'status' | 'group_count'>,
 ): ForzaEvent {
   const lifecycle = mapLifecycle(row.status);
   const patched = {
     ...event,
     currentPlayers: row.current_players,
     maxPlayers: row.max_players,
+    groupCount: row.group_count ?? event.groupCount,
     lifecycle,
   };
   return {
@@ -276,9 +289,14 @@ export function mapDbEvent(row: DbEventRow): ForzaEvent {
       isConvoyLeader: p.is_convoy_leader ?? false,
       participationSource: (p.participation_source as EventParticipant['participationSource']) ??
         undefined,
+      groupIndex: p.group_index ?? 1,
+      waitlisted: p.waitlisted ?? false,
+      joinedAt: p.joined_at ?? undefined,
     })) ?? [];
 
-  const leaderParticipant = participants.find((p) => p.isConvoyLeader);
+  const leaderParticipant = participants.find(
+    (p) => p.isConvoyLeader && (p.groupIndex ?? 1) === 1,
+  );
 
   return {
     id: row.id,
@@ -299,6 +317,7 @@ export function mapDbEvent(row: DbEventRow): ForzaEvent {
     allowedCars: [],
     voicePolicy: row.voice_policy,
     maxPlayers: row.max_players,
+    groupCount: row.group_count ?? 1,
     currentPlayers: row.current_players,
     hostDiscordId: row.host_discord_id,
     hostUsername: host?.username ?? 'Host',
@@ -530,7 +549,7 @@ export async function fetchEventResults(eventId: string): Promise<EventResultsFe
   const supabase = (await getSupabase())!;
   const {data, error} = await supabase
     .from('event_results')
-    .select('discord_id, position, dnf, dns, points')
+    .select('discord_id, position, dnf, dns, points, group_index')
     .eq('event_id', eventId)
     .order('position', {ascending: true});
 
@@ -546,6 +565,7 @@ export async function fetchEventResults(eventId: string): Promise<EventResultsFe
       dnf: r.dnf ?? false,
       dns: r.dns ?? false,
       points: r.points,
+      groupIndex: r.group_index ?? 1,
     })),
     error: null,
   };
@@ -618,7 +638,7 @@ export async function searchCars(query: string): Promise<CarSearchResult[]> {
 /** True when the user has a self_join participant row — used for My Events "Joined" tab. */
 export function userIsJoined(event: ForzaEvent, user: AppUser): boolean {
   const row = event.participants.find((p) => p.discordId === user.discordId);
-  return row?.participationSource === 'self_join';
+  return row?.participationSource === 'self_join' && !row.waitlisted;
 }
 
 /** True when the user has any participant row (any source) — used for Join/Leave button visibility. */

@@ -91,6 +91,8 @@ export function buildEventPageMeta(event, {siteOrigin, pageUrl, isResults = fals
     1,
     Number(event.max_players ?? event.maxPlayers ?? LOBBY_TOTAL_PLAYERS),
   );
+  const groupCount = Math.max(1, Number(event.group_count ?? event.groupCount ?? 1));
+  const cap = maxPlayers * groupCount;
   const status = event.status ?? event.lifecycle ?? 'open';
   const suffix = lifecycleSuffix(status);
 
@@ -101,7 +103,7 @@ export function buildEventPageMeta(event, {siteOrigin, pageUrl, isResults = fals
 
   const parts = [typeLabel];
   if (when) parts.push(when);
-  parts.push(`${players}/${maxPlayers} participants`);
+  parts.push(`${players}/${cap} participants`);
   const description = `${parts.join(' · ')}${suffix}`;
 
   const image = resolveEventCoverAbsolute(

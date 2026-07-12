@@ -171,8 +171,20 @@
     "gamertagRequired": "Для участия в ивентах нужен Xbox gamertag.",
     "closed": "Закрыто",
     "full": "Мест нет",
+    "joinWaitlist": "В лист ожидания",
+    "leaveWaitlist": "Выйти из очереди",
+    "waitlisted": "В очереди",
     "xboxHintTitle": "Вы зарегистрированы",
-    "xboxHintBody": "В Xbox добавьте лидера конвоя {{leader}} в друзья и зайдите в его сессию Forza незадолго до начала ивента."
+    "xboxHintBody": "В Xbox добавьте лидера конвоя {{leader}} в друзья и зайдите в его конвой незадолго до начала ивента."
+  },
+  "addGroup": {
+    "button": "Добавить группу {{n}}",
+    "title": "Добавить группу {{n}}",
+    "description": "Выберите лидера конвоя для новой группы. Первые в очереди займут в ней места.",
+    "waitlistCandidates": "Из очереди",
+    "confirm": "Добавить группу",
+    "pickLeader": "Выберите лидера конвоя для новой группы.",
+    "gamertagRequired": "Для этого лидера нужен Xbox gamertag."
   },
   "statusBanner": {
     "draftTitle": "Черновик",
@@ -203,6 +215,8 @@
     "convoyLeaderBadge": "Лидер конвоя",
     "youSuffix": " · Вы",
     "hostSuffix": " · Организатор",
+    "group": "Группа {{n}}",
+    "waitlist": "Лист ожидания",
     "noDriversYet": "Пока никто не присоединился.",
     "noParticipantsYet": "Пока нет участников.",
     "cancelFailed": "Не удалось отменить событие",
@@ -398,7 +412,11 @@
     "publishInProgress": "Событие уже публикуется. Подождите немного и попробуйте снова.",
     "resultsAlreadySubmitted": "Результаты нельзя изменить после отправки.",
     "profileIncomplete": "Завершите вход, прежде чем присоединяться к событиям.",
-    "guildMemberSearchDisabled": "Поиск лидера конвоя недоступен. Включите Server Members intent для бота в Discord Developer Portal."
+    "guildMemberSearchDisabled": "Поиск лидера конвоя недоступен. Включите Server Members intent для бота в Discord Developer Portal.",
+    "groupsMaxed": "У этого события уже максимальное количество групп.",
+    "waitlistEmpty": "В очереди нет никого, кого можно перевести в новую группу.",
+    "leaderAlreadyInLobby": "Этот гонщик уже в лобби. Выберите кого-то из очереди или участника сервера, который ещё не присоединился.",
+    "lobbyNotFull": "В текущих группах ещё есть свободные места. Добавляйте группу только когда все группы заполнены и есть очередь."
   },
   "validation": {
     "futureDate": "Укажите дату и время в будущем.",

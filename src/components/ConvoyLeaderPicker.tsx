@@ -24,6 +24,13 @@ type GuildMemberHit = {
   xbox_gamertag: string | null;
 };
 
+export type ConvoyLeaderCandidate = {
+  discordId: string;
+  username: string;
+  gamertag: string | null;
+  avatarUrl?: string | null;
+};
+
 type Props = {
   accessToken: string;
   guildId: string;
@@ -35,6 +42,9 @@ type Props = {
   onGamertagChange: (tag: string) => void;
   invalid?: boolean;
   error?: string | null;
+  /** Quick-pick candidates shown above search (e.g. the event waitlist). */
+  candidates?: ConvoyLeaderCandidate[];
+  candidatesLabel?: string;
 };
 
 export function ConvoyLeaderPicker({
@@ -48,6 +58,8 @@ export function ConvoyLeaderPicker({
   onGamertagChange,
   invalid,
   error,
+  candidates,
+  candidatesLabel,
 }: Props) {
   const {t} = useTranslation();
   const [query, setQuery] = useState('');
@@ -136,6 +148,50 @@ export function ConvoyLeaderPicker({
             </div>
           ) : (
             <>
+              {candidates && candidates.length > 0 && (
+                <div className="space-y-1">
+                  {candidatesLabel ? (
+                    <p className="text-xs text-muted">{candidatesLabel}</p>
+                  ) : null}
+                  <ul
+                    className="max-h-40 overflow-y-auto rounded-lg border border-white/[0.08] bg-card"
+                    role="listbox"
+                  >
+                    {candidates
+                      .filter((c) => c.discordId !== hostDiscordId)
+                      .map((c) => (
+                        <li key={c.discordId}>
+                          <button
+                            type="button"
+                            role="option"
+                            className="flex w-full items-center gap-2 px-3 py-2 text-left text-sm text-slate-200 hover:bg-white/[0.06]"
+                            onClick={() => {
+                              onSelect({
+                                discordId: c.discordId,
+                                username: c.username,
+                                xboxGamertag: c.gamertag,
+                              });
+                              onGamertagChange(c.gamertag?.trim() ?? '');
+                            }}
+                          >
+                            <UserAvatar
+                              src={c.avatarUrl ?? undefined}
+                              name={c.username || (c.gamertag ?? '')}
+                              size="sm"
+                              variant="neutral"
+                            />
+                            <span className="min-w-0 flex-1 truncate">
+                              <span className="font-medium">{formatDiscordHandle(c.username)}</span>
+                              {c.gamertag && (
+                                <span className="ml-1 text-xs text-muted">{c.gamertag}</span>
+                              )}
+                            </span>
+                          </button>
+                        </li>
+                      ))}
+                  </ul>
+                </div>
+              )}
               <Input
                 id="create-convoyLeaderSearch"
                 placeholder={t('create.convoyLeaderSearchPlaceholder')}

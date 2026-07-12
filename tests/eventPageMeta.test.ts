@@ -46,6 +46,20 @@ describe('eventPageMeta parity', () => {
     parity('open', 'open');
   });
 
+  it('client and shared match for multi-group capacity', () => {
+    const opts = {
+      siteOrigin: 'https://forza.events',
+      pageUrl: `https://forza.events/event/${baseEvent.id}`,
+    };
+    const client = buildClientMeta({...baseEvent, groupCount: 2, currentPlayers: 18}, opts);
+    const shared = buildSharedMeta(
+      {...baseDbEvent, group_count: 2, current_players: 18},
+      opts,
+    );
+    expect(shared).toEqual(client);
+    expect(client.description).toContain('18/24 participants');
+  });
+
   it('client and shared match for completed', () => {
     parity('completed', 'completed');
   });

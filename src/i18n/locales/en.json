@@ -171,8 +171,20 @@
     "gamertagRequired": "Xbox gamertag is required to join events.",
     "closed": "Closed",
     "full": "Full",
+    "joinWaitlist": "Join waitlist",
+    "leaveWaitlist": "Leave waitlist",
+    "waitlisted": "Waitlisted",
     "xboxHintTitle": "You're registered",
-    "xboxHintBody": "On Xbox, add convoy leader {{leader}} as a friend and join their Forza session shortly before the event starts."
+    "xboxHintBody": "On Xbox, add convoy leader {{leader}} as a friend and join their convoy shortly before the event starts."
+  },
+  "addGroup": {
+    "button": "Add group {{n}}",
+    "title": "Add group {{n}}",
+    "description": "Pick a convoy leader for the new group. The oldest racers on the waitlist move up to fill it.",
+    "waitlistCandidates": "From the waitlist",
+    "confirm": "Add group",
+    "pickLeader": "Pick a convoy leader for the new group.",
+    "gamertagRequired": "This leader needs an Xbox gamertag."
   },
   "statusBanner": {
     "draftTitle": "Draft",
@@ -203,6 +215,8 @@
     "convoyLeaderBadge": "Convoy leader",
     "youSuffix": " · You",
     "hostSuffix": " · Host",
+    "group": "Group {{n}}",
+    "waitlist": "Waitlist",
     "noDriversYet": "No drivers joined yet.",
     "noParticipantsYet": "No participants yet.",
     "cancelFailed": "Could not cancel event",
@@ -392,7 +406,11 @@
     "publishInProgress": "This event is already being published. Wait a moment and try again.",
     "resultsAlreadySubmitted": "Results cannot be changed after submission.",
     "profileIncomplete": "Complete sign-in before joining events.",
-    "guildMemberSearchDisabled": "Convoy leader search is unavailable. Enable the Server Members intent for the bot in the Discord Developer Portal."
+    "guildMemberSearchDisabled": "Convoy leader search is unavailable. Enable the Server Members intent for the bot in the Discord Developer Portal.",
+    "groupsMaxed": "This event already has the maximum number of groups.",
+    "waitlistEmpty": "There is nobody on the waitlist to move into a new group.",
+    "leaderAlreadyInLobby": "This driver is already in the lobby. Pick someone from the waitlist or a server member who has not joined yet.",
+    "lobbyNotFull": "There are still open seats in the current groups. Add a group only when every group is full and racers are waiting."
   },
   "validation": {
     "futureDate": "Choose a date and time in the future.",

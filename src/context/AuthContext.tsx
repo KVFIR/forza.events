@@ -21,6 +21,8 @@ import {
 } from '../lib/discord';
 import {applyLaunchEventRedirect} from '../lib/launchRedirect';
 import {clearDiscordSession, loadDiscordSession, mergeSessionUser} from '../lib/discordAuth';
+import {saveAuthReturnTo} from '../lib/returnTo';
+import {supportsBrowserOAuth} from '../lib/runtime';
 import {SESSION_EXPIRED_EVENT} from '../lib/sessionEvents';
 import {GUEST_USER} from '../lib/guestUser';
 import type {AppUser} from '../lib/types';
@@ -47,7 +49,7 @@ const AuthContext = createContext<AuthState | null>(null);
 
 export function AuthProvider({children}: {children: ReactNode}) {
   const navigate = useNavigate();
-  const {pathname} = useLocation();
+  const {pathname, search} = useLocation();
   const [user, setUser] = useState<AppUser>(GUEST_USER);
   const [loading, setLoading] = useState(true);
   const [discordReady, setDiscordReady] = useState(false);
@@ -142,7 +144,11 @@ export function AuthProvider({children}: {children: ReactNode}) {
     setDiscordReady(false);
     setGuildId(null);
     setGuildName(null);
-  }, []);
+    if (supportsBrowserOAuth()) {
+      saveAuthReturnTo(`${pathname}${search}`);
+      navigate('/sign-in', {replace: true});
+    }
+  }, [navigate, pathname, search]);
 
   const retryDiscordAuth = useCallback(async () => {
     if (authRetrying || isStandaloneBrowser() || !isApiConfigured()) return;

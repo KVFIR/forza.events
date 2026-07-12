@@ -1,4 +1,5 @@
-import {formatLobbyCount, LOBBY_TOTAL_PLAYERS} from './constants';
+import {formatLobbyCount} from './constants';
+import {totalCapacity} from './eventSpec';
 import type {EventType, ForzaEvent} from './types';
 
 export const SITE_NAME = 'FORZA.EVENTS';
@@ -33,6 +34,7 @@ type EventMetaInput = Pick<
   | 'startsAt'
   | 'currentPlayers'
   | 'maxPlayers'
+  | 'groupCount'
   | 'coverImageUrl'
   | 'lifecycle'
 >;
@@ -105,8 +107,8 @@ export function buildEventPageMeta(
 
   const parts = [typeLabel];
   if (when) parts.push(when);
-  const maxPlayers = event.maxPlayers > 0 ? event.maxPlayers : LOBBY_TOTAL_PLAYERS;
-  parts.push(`${formatLobbyCount(players, maxPlayers)} participants`);
+  const cap = totalCapacity(event);
+  parts.push(`${formatLobbyCount(players, cap)} participants`);
   const description = `${parts.join(' · ')}${suffix}`;
 
   return {

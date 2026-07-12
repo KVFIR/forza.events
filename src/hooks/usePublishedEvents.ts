@@ -58,7 +58,13 @@ export function usePublishedEvents(options: FetchEventsOptions = {}) {
   }, [runFetch]);
 
   const onLobbyPatch = useCallback(
-    (row: {id: string; current_players: number; max_players: number; status: string}) => {
+    (row: {
+      id: string;
+      current_players: number;
+      max_players: number;
+      group_count?: number | null;
+      status: string;
+    }) => {
       clearLobbyPatch(row.id);
       setEvents((prev) =>
         prev.map((event) =>
@@ -66,6 +72,7 @@ export function usePublishedEvents(options: FetchEventsOptions = {}) {
             ? patchEventLobby(event, {
                 current_players: row.current_players,
                 max_players: row.max_players,
+                group_count: row.group_count,
                 status: row.status,
               })
             : event,

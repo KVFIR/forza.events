@@ -40,7 +40,10 @@ type Props = {
     | 'fillPct'
     | 'showRegistrationProgress'
     | 'showJoinXboxHint'
-    | 'convoyLeader'
+    | 'viewerConvoyLeader'
+    | 'totalCapacity'
+    | 'onWaitlist'
+    | 'willWaitlist'
   >;
   deleting: boolean;
   cancelling: boolean;
@@ -81,6 +84,7 @@ export function EventDetailTitleSection({
               view.canLeave,
               view.participationAction,
               view.isCurrentConvoyLeader,
+              {onWaitlist: view.onWaitlist, willWaitlist: view.willWaitlist},
             )
       }
       size="toolbar"
@@ -102,6 +106,7 @@ export function EventDetailTitleSection({
               view.full,
               view.canLeave,
               view.isCurrentConvoyLeader,
+              {onWaitlist: view.onWaitlist, willWaitlist: view.willWaitlist},
             )}
     </Button>
   ) : null;
@@ -184,9 +189,9 @@ export function EventDetailTitleSection({
 
       <EventRegistrationProgress view={view} />
 
-      {view.showJoinXboxHint && view.convoyLeader ? (
+      {view.showJoinXboxHint && view.viewerConvoyLeader ? (
         <Alert variant="info" title={t('participation.xboxHintTitle')} className="mt-2 py-2.5 text-sm">
-          {t('participation.xboxHintBody', {leader: view.convoyLeader.gamertag})}
+          {t('participation.xboxHintBody', {leader: view.viewerConvoyLeader.gamertag})}
         </Alert>
       ) : null}
 

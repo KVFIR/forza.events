@@ -36,16 +36,15 @@ export function supportsBrowserOAuth(): boolean {
 }
 
 /**
- * Production browser tab — require Discord sign-in before the app (engineering localhost exempt).
+ * Browser tab on a supported web host — require Discord sign-in before the app.
  * Discord Activity iframe uses embedded SDK auth instead.
  */
 export function shouldRequireBrowserSignIn(): boolean {
   if (!isStandaloneBrowser()) return false;
-  if (!isBrowserWebHost()) return false;
-  return !isLocalDevHost();
+  return isBrowserWebHost();
 }
 
-/** Paths reachable without signing in on a production browser tab. */
+/** Paths reachable without signing in in a browser tab (OAuth return + legal only). */
 export function isPublicBrowserPath(pathname?: string): boolean {
   if (isPublicLegalBrowserPath(pathname)) return true;
   if (typeof pathname !== 'string') {
@@ -54,8 +53,6 @@ export function isPublicBrowserPath(pathname?: string): boolean {
   }
   const normalized = pathname.replace(/\/+$/, '') || '/';
   if (normalized === '/auth/callback') return true;
-  // Shared embed links — view without browser OAuth (join still requires sign-in).
-  if (normalized.startsWith('/event/')) return true;
   return false;
 }
 
