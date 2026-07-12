@@ -7,8 +7,10 @@ import {
   type PublishedEventsLoadError,
 } from '../lib/events';
 import {mergeOptimisticEventPatch} from '../lib/eventParticipation';
+import {isBrowseFeedEvent} from '../lib/eventSpec';
 import {applyDevLoadingDelay} from '../lib/devLoadingDelay';
 import {usePublishedEventsLiveUpdates} from './useEventLiveUpdates';
+import {useUpcomingEventsTick} from './useEventTimeTick';
 import type {ForzaEvent} from '../lib/types';
 
 async function fetchWithDevDelay(includeCompleted: boolean) {
@@ -108,5 +110,13 @@ export function usePublishedEvents(options: FetchEventsOptions = {}) {
     [events, getLobbyPatch],
   );
 
-  return {events: eventsWithOptimistic, isLoading, isRefreshing, loadError, refetch};
+  const catalogTick = useUpcomingEventsTick(eventsWithOptimistic);
+
+  const visibleEvents = useMemo(() => {
+    if (includeCompleted) return eventsWithOptimistic;
+    void catalogTick;
+    return eventsWithOptimistic.filter(isBrowseFeedEvent);
+  }, [eventsWithOptimistic, includeCompleted, catalogTick]);
+
+  return {events: visibleEvents, isLoading, isRefreshing, loadError, refetch};
 }

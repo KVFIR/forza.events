@@ -11,6 +11,7 @@ import {joinEvent, leaveEvent, isApiConfigured} from '../lib/api';
 import {
   patchEventAfterSelfJoin,
   patchEventAfterSelfLeave,
+  mergeOptimisticEventPatch,
   toEventLobbyPatch,
   type EventLobbyPatch,
 } from '../lib/eventParticipation';
@@ -65,9 +66,10 @@ export function JoinedEventsProvider({children}: {children: ReactNode}) {
     (event: ForzaEvent) => {
       const o = overrides[event.id];
       if (o !== undefined) return o;
-      return userIsJoined(event, user);
+      const patched = mergeOptimisticEventPatch(event, getLobbyPatch(event.id));
+      return userIsJoined(patched, user);
     },
-    [overrides, user],
+    [overrides, user, getLobbyPatch],
   );
 
   const clearOverride = useCallback((eventId: string) => {
@@ -91,8 +93,6 @@ export function JoinedEventsProvider({children}: {children: ReactNode}) {
         try {
           await joinEvent(token, event.id, gt);
           refreshUser((prev) => ({...prev, xboxGamertag: gt}));
-          clearLobbyPatch(event.id);
-          bumpRefresh();
           clearOverride(event.id);
         } catch (err) {
           clearOverride(event.id);
@@ -131,8 +131,6 @@ export function JoinedEventsProvider({children}: {children: ReactNode}) {
         setLobbyPatch(patchEventAfterSelfLeave(event, user.discordId));
         try {
           await leaveEvent(token, event.id);
-          clearLobbyPatch(event.id);
-          bumpRefresh();
           clearOverride(event.id);
         } catch (err) {
           clearOverride(event.id);

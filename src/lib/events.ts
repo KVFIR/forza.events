@@ -8,7 +8,7 @@ import {resolveEventCoverUrl} from './eventCovers';
 import {parseTracksFromRow} from './eventTracks';
 import {normalizeEventType} from './eventTypes';
 import {isHostDraftLifecycle} from './draftEvents';
-import {isBrowseFeedEvent} from './eventSpec';
+import {isBrowseFeedEvent, resolveEventDisplayStatus} from './eventSpec';
 import {PI_MAX} from './pi';
 import type {
   AppUser,
@@ -247,24 +247,16 @@ export function patchEventLobby(
   event: ForzaEvent,
   row: Pick<DbEventRow, 'current_players' | 'max_players' | 'status'>,
 ): ForzaEvent {
-  const merged: DbEventRow = {
-    id: event.id,
-    slug: event.slug,
-    title: event.title,
-    type: event.type,
-    status: row.status,
-    starts_at: event.startsAt,
-    max_players: row.max_players,
-    current_players: row.current_players,
-    host_discord_id: event.hostDiscordId,
-    voice_policy: event.voicePolicy,
-  };
-  return {
+  const lifecycle = mapLifecycle(row.status);
+  const patched = {
     ...event,
     currentPlayers: row.current_players,
     maxPlayers: row.max_players,
-    status: mapStatus(merged),
-    lifecycle: mapLifecycle(row.status),
+    lifecycle,
+  };
+  return {
+    ...patched,
+    status: resolveEventDisplayStatus(patched),
   };
 }
 

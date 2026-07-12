@@ -17,6 +17,7 @@ import type {EventDetailLocationState} from '../../lib/navigationState';
 import {eventDetailBackTo} from '../../lib/returnTo';
 import {useResolveEventDisplayStatus} from '../../hooks/useResolveEventDisplayStatus';
 import {useEventDetailParticipation} from '../../hooks/useEventDetailParticipation';
+import {useDebouncedCallback} from '../../hooks/useDebouncedCallback';
 import {useEventLiveUpdates} from '../../hooks/useEventLiveUpdates';
 import {fetchEventById} from '../../lib/events';
 import {buildEventDetailViewModel} from './eventDetailView';
@@ -36,7 +37,7 @@ export function EventDetail() {
   const {id} = useParams<{id: string}>();
   const routeState = location.state as EventDetailLocationState | null;
   const routeEvent = routeState?.event;
-  const {isJoined, bumpRefresh, refreshKey, getLobbyPatch} = useJoinedEvents();
+  const {isJoined, bumpRefresh, refreshKey, getLobbyPatch, clearLobbyPatch} = useJoinedEvents();
   const {
     user,
     getAccessToken,
@@ -55,6 +56,18 @@ export function EventDetail() {
     getLobbyPatch,
   });
 
+  const syncEventFromServer = useCallback(() => {
+    if (!id) return;
+    void fetchEventById(id, {discordToken})
+      .then((ev) => {
+        if (ev) {
+          setEvent(ev);
+          clearLobbyPatch(id);
+        }
+      })
+      .catch((err) => console.error('syncEventFromServer', err));
+  }, [id, discordToken, setEvent, clearLobbyPatch]);
+
   const {
     gamertagOpen,
     setGamertagOpen,
@@ -64,18 +77,16 @@ export function EventDetail() {
     isParticipationInFlight,
     handleJoinClick,
     doJoin,
-  } = useEventDetailParticipation(event);
+  } = useEventDetailParticipation(event, syncEventFromServer);
 
   const reloadEvent = useCallback(() => {
-    if (!id || isParticipationInFlight()) return;
-    void fetchEventById(id, {discordToken})
-      .then((ev) => {
-        if (ev) setEvent(ev);
-      })
-      .catch((err) => console.error('reloadEvent', err));
-  }, [id, discordToken, isParticipationInFlight, setEvent]);
+    if (isParticipationInFlight()) return;
+    syncEventFromServer();
+  }, [isParticipationInFlight, syncEventFromServer]);
 
-  useEventLiveUpdates(id, reloadEvent);
+  const debouncedReloadEvent = useDebouncedCallback(reloadEvent, 400);
+
+  useEventLiveUpdates(id, debouncedReloadEvent);
 
   const {resultRows, resultsLoadFailed, retryResultsLoad} = useEventDetailResults({
     eventId: id,
