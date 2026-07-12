@@ -312,7 +312,7 @@ At least one mapped message per screen:
 ## Out of scope
 
 - Playwright in CI — see [`ENGINEERING.md`](ENGINEERING.md).
-- Standalone OAuth on Railway production URL — by design (`DiscordOnlyGate`).
+- Standalone OAuth on the raw Railway hostname (`*.up.railway.app`) — by design (`DiscordOnlyGate`). Use **forza.events** for browser web.
 - Always-on bot worker — [`bot/README.md`](../bot/README.md).
 
 ---

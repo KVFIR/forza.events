@@ -35,7 +35,7 @@ Remaining work is mostly **Activity E2E in pilot guilds**, **Railway frontend re
 | Profile | Done | Gamertag via `user-profile` |
 | Discord Activity auth | Done | SDK → `token-exchange` → `authenticate` |
 | Browser localhost auth | Done | `/auth/callback` + `sessionStorage` |
-| Production browser tab | Done | `DiscordOnlyGate` — Activity-only |
+| Production browser tab (`forza.events`) | Done | Discord OAuth required (`BrowserAuthGate`); raw `*.up.railway.app` still Activity-only gate |
 | Supabase schema | Done | `001_baseline` + `002`–`006` |
 | Edge Functions | Done | `npm run deploy:functions` |
 | Realtime lobby | Done | `events` + `event_participants` |

@@ -69,22 +69,44 @@ Add the same URL under Discord → OAuth2 → Redirects.
 | `VITE_API_BASE_URL` | Override Edge Functions base URL |
 | `VITE_DEV_LOADING_DELAY_MS` | Artificial loading delay for UI testing |
 
-### Railway (production Activity)
+### Railway + forza.events (production)
 
-Set at **build time** (redeploy after changes):
+Set at **build time** on Railway (redeploy after changes):
 
 ```env
 DISCORD_CLIENT_ID=...
 SUPABASE_URL=...
 SUPABASE_ANON_KEY=...
-APP_ORIGIN=https://forzaevents.up.railway.app
+APP_ORIGIN=https://forza.events
 ```
 
-Discord OAuth for Activity uses `https://127.0.0.1` — not the Railway origin. Production browser tabs show **Open in Discord** (`DiscordOnlyGate`).
+On **Supabase** secrets (via `npm run sync:secrets` or dashboard):
+
+```env
+APP_ORIGIN=https://forza.events
+DISCORD_REDIRECT_URI=https://forza.events/auth/callback
+```
+
+Discord Developer Portal → OAuth2 → Redirects — add **both**:
+
+- `https://127.0.0.1` (Activity iframe)
+- `https://forza.events/auth/callback` (browser web)
+- `https://www.forza.events/auth/callback` (if you serve `www`)
+
+Activity OAuth still uses `https://127.0.0.1` — not `APP_ORIGIN`. Browser tabs on **forza.events** use Discord OAuth and require sign-in before the app (`BrowserAuthGate`). The raw Railway hostname (`*.up.railway.app`) still shows **Open in Discord** unless you add it to `VITE_APP_ORIGIN` at build time.
 
 ```bash
-railway variable set APP_ORIGIN=https://forzaevents.up.railway.app
+railway variable set APP_ORIGIN=https://forza.events
 ```
+
+#### Cloudflare DNS (forza.events)
+
+1. Railway → service → **Settings** → **Networking** → **Custom Domain** → add `forza.events` (and optionally `www.forza.events`).
+2. Cloudflare → DNS → **CNAME** `forza.events` → Railway target hostname (proxy **on** is fine).
+3. SSL/TLS → **Full** (Railway terminates HTTPS on the custom domain).
+4. Optional: redirect `www` → apex in Cloudflare **Redirect Rules**.
+5. Discord Activities **URL Mapping** prefix stays pointed at the same Railway service (custom domain or `*.up.railway.app` — keep mapping in sync with where the Activity loads).
+6. Update Developer Portal **Terms** / **Privacy** URLs to `https://forza.events/terms` and `/privacy`.
 
 ---
 
@@ -105,14 +127,14 @@ After any schema change that affects security (RLS, storage policies), redeploy 
 
 ## Auth flows
 
-### Browser (localhost)
+### Browser (localhost + forza.events)
 
 1. **Sign in** → Discord OAuth
 2. `/auth/callback` with `code`
 3. `token-exchange` → access token + `users` row
 4. `sessionStorage` until Sign out
 
-On **localhost**, Browse reads via PostgREST with the same filters as Activity (`status = open`, future `starts_at`, then client `isBrowseFeedEvent` — upcoming published events with registration open). **My Events** / Profile use `include_completed` for past events. Join/create/publish always use Edge Functions + Discord token. In the Activity iframe, Browse uses the `browse-events` Edge Function (not raw PostgREST).
+On **localhost**, Browse works without sign-in (engineering). On **forza.events**, the whole app is gated until Discord sign-in (`BrowserAuthGate`). Browse reads via PostgREST on standalone browser hosts (`shouldUseDirectSupabaseReads`). **My Events** / Profile use `include_completed` for past events. Join/create/publish always use Edge Functions + Discord token. In the Activity iframe, Browse uses the `browse-events` Edge Function (not raw PostgREST).
 
 ### Discord Activity (iframe)
 

@@ -45,7 +45,7 @@ After deploying a scope change, users may need to **re-open** the Activity (or u
 
 Activity redirect URI in portal: **`https://127.0.0.1`** (not the Railway deploy URL).
 
-Local browser dev only: `http://localhost:5180/auth/callback`.
+Local browser dev: `http://localhost:5180/auth/callback`. Production browser web: `https://forza.events/auth/callback` (requires `DISCORD_REDIRECT_URI` or `APP_ORIGIN` on Supabase — see `oauthRedirect.ts`).
 
 ## Layout modes (focused / PIP / grid)
 
