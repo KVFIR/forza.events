@@ -2,7 +2,7 @@ import {useEffect} from 'react';
 import {useTranslation} from 'react-i18next';
 import {busyLabel} from '../i18n/busyLabels';
 import {startDiscordBrowserSignIn} from '../lib/discordBrowserSignIn';
-import {isLocalDevHost} from '../lib/runtime';
+import {supportsBrowserOAuth} from '../lib/runtime';
 import {EmptyState} from './ui/EmptyState';
 
 type Props = {
@@ -23,7 +23,7 @@ export function SignInRequiredState({
   className,
 }: Props) {
   const {t} = useTranslation();
-  const useBrowserSignIn = isLocalDevHost() && !onRetry;
+  const useBrowserSignIn = supportsBrowserOAuth() && !onRetry;
 
   const action = useBrowserSignIn
     ? {

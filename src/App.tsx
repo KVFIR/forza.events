@@ -3,6 +3,7 @@ import {lazy, Suspense} from 'react';
 import {useTranslation} from 'react-i18next';
 import {BrowserRouter, Navigate, Route, Routes, useLocation} from 'react-router-dom';
 import {AppBootGate} from './components/AppBootGate';
+import {BrowserAuthGate} from './components/BrowserAuthGate';
 import {DiscordOnlyGate} from './components/DiscordOnlyGate';
 import {Navbar} from './components/Navbar';
 import {Logo} from './components/ui/Logo';
@@ -85,6 +86,7 @@ function AppRoutes() {
       >
         <main className={isLegalPage ? 'min-w-0' : 'min-w-0 flex-1 pb-8'}>
           <AppBootGate>
+            <BrowserAuthGate>
             <Suspense fallback={<RouteFallback />}>
               <Routes>
                 <Route path="/" element={<BrowseEvents />} />
@@ -100,6 +102,7 @@ function AppRoutes() {
                 <Route path="*" element={<Navigate to="/" replace />} />
               </Routes>
             </Suspense>
+            </BrowserAuthGate>
           </AppBootGate>
         </main>
       </div>

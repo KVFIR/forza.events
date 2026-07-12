@@ -5,6 +5,24 @@ export function resolveOAuthRedirectUri(override?: string | null): string {
 
   if (fromEnv) allowlist.add(fromEnv);
 
+  const appOrigin = Deno.env.get('APP_ORIGIN')?.trim().replace(/\/$/, '');
+  if (appOrigin) {
+    allowlist.add(`${appOrigin}/auth/callback`);
+    try {
+      const {hostname} = new URL(appOrigin);
+      if (hostname.startsWith('www.')) {
+        allowlist.add(`https://${hostname.slice(4)}/auth/callback`);
+      } else {
+        allowlist.add(`https://www.${hostname}/auth/callback`);
+      }
+    } catch {
+      // ignore malformed APP_ORIGIN
+    }
+  }
+
+  allowlist.add('https://forza.events/auth/callback');
+  allowlist.add('https://www.forza.events/auth/callback');
+
   allowlist.add('https://127.0.0.1');
   allowlist.add('http://localhost:5173/auth/callback');
   allowlist.add('http://127.0.0.1:5173/auth/callback');

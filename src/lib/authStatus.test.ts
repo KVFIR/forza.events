@@ -9,7 +9,7 @@ describe('resolveAuthStatus', () => {
       loading: false,
       isSignedIn: false,
       isStandalone: true,
-      isLocalDev: true,
+      supportsBrowserOAuth: true,
     });
     expect(status.label).toBe(i18n.t('auth.status.setupRequired'));
     expect(status.tone).toBe('warning');
@@ -23,7 +23,7 @@ describe('resolveAuthStatus', () => {
       loading: false,
       isSignedIn: true,
       isStandalone: true,
-      isLocalDev: true,
+      supportsBrowserOAuth: true,
     });
     expect(status.label).toBe(i18n.t('auth.status.local'));
     expect(status.tone).toBe('online');
@@ -35,31 +35,31 @@ describe('resolveAuthStatus', () => {
       loading: false,
       isSignedIn: true,
       isStandalone: false,
-      isLocalDev: false,
+      supportsBrowserOAuth: false,
     });
     expect(status.label).toBe(i18n.t('auth.status.online'));
     expect(status.tone).toBe('online');
   });
 
-  it('offers browser sign-in on localhost when not signed in', () => {
+  it('offers browser sign-in on web hosts when not signed in', () => {
     const status = resolveAuthStatus({
       isConfigured: true,
       loading: false,
       isSignedIn: false,
       isStandalone: true,
-      isLocalDev: true,
+      supportsBrowserOAuth: true,
     });
     expect(status.browserSignIn).toBe(true);
     expect(status.retryable).toBeUndefined();
   });
 
-  it('shows muted not signed in on production browser without sign-in action', () => {
+  it('shows muted not signed in on unsupported production browser without sign-in action', () => {
     const status = resolveAuthStatus({
       isConfigured: true,
       loading: false,
       isSignedIn: false,
       isStandalone: true,
-      isLocalDev: false,
+      supportsBrowserOAuth: false,
     });
     expect(status.label).toBe(i18n.t('auth.status.notSignedIn'));
     expect(status.tone).toBe('muted');
@@ -73,7 +73,7 @@ describe('resolveAuthStatus', () => {
       loading: false,
       isSignedIn: false,
       isStandalone: false,
-      isLocalDev: false,
+      supportsBrowserOAuth: false,
     });
     expect(status.retryable).toBe(true);
     expect(status.browserSignIn).toBeUndefined();

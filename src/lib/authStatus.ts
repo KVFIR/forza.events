@@ -16,7 +16,8 @@ type AuthStatusInput = {
   loading: boolean;
   isSignedIn: boolean;
   isStandalone: boolean;
-  isLocalDev: boolean;
+  /** Browser OAuth available (localhost engineering or production web host). */
+  supportsBrowserOAuth: boolean;
 };
 
 export function resolveAuthStatus({
@@ -24,7 +25,7 @@ export function resolveAuthStatus({
   loading,
   isSignedIn,
   isStandalone,
-  isLocalDev,
+  supportsBrowserOAuth,
 }: AuthStatusInput): AuthStatusDisplay {
   if (!isConfigured) {
     return {label: i18n.t('auth.status.setupRequired'), tone: 'warning'};
@@ -50,7 +51,7 @@ export function resolveAuthStatus({
     };
   }
 
-  if (isLocalDev) {
+  if (supportsBrowserOAuth) {
     return {
       label: i18n.t('auth.status.notSignedIn'),
       tone: 'muted',
