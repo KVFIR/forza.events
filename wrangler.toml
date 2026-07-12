@@ -1,0 +1,11 @@
+name = "forza-events-supabase-proxy"
+main = "cloudflare/supabase-proxy.js"
+compatibility_date = "2024-07-01"
+
+# Route intercepts /supabase before traffic reaches Railway (avoids CF dns_loop via Caddy).
+[[routes]]
+pattern = "forza.events/supabase/*"
+zone_name = "forza.events"
+
+[vars]
+SUPABASE_ORIGIN = "https://uoysqfczahqmctbrrizn.supabase.co"

@@ -110,7 +110,16 @@ railway variable set APP_ORIGIN=https://forza.events
 
 #### Regional access (e.g. Russia without VPN)
 
-`*.supabase.co` is often blocked. Production browser web on **forza.events** routes API and Storage through the same origin (`https://forza.events/supabase/...`) via the root `Caddyfile` reverse proxy. Railway must have **`SUPABASE_URL` at runtime** (not only build time) so Caddy can forward `/supabase/*`.
+`*.supabase.co` is often blocked. Production browser web on **forza.events** routes API and Storage through the same origin (`https://forza.events/supabase/...`).
+
+**Do not** reverse-proxy Supabase from Railway Caddy when forza.events is Cloudflare-proxied — Cloudflare returns **Error 1000 (dns_loop)**. Use the **Cloudflare Worker** in `cloudflare/supabase-proxy.js` instead:
+
+```bash
+npx wrangler login
+npm run deploy:cf-worker
+```
+
+The Worker route `forza.events/supabase*` intercepts before Railway. Redeploy the Worker if you change Supabase project ref (`wrangler.toml` → `SUPABASE_ORIGIN`).
 
 **Discord OAuth** (`discord.com`) may still be unreachable without VPN — the proxy fixes browse, profile, and covers after sign-in, not the login redirect itself.
 

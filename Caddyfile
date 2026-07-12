@@ -19,11 +19,9 @@
 		respond 200
 	}
 
-	# Same-origin proxy for browser web (and localhost dev) — avoids blocked *.supabase.co in some regions.
-	handle_path /supabase/* {
-		reverse_proxy {$SUPABASE_URL}
-	}
-
+	# /supabase on forza.events is proxied by Cloudflare Worker (wrangler.toml), not Caddy.
+	# Caddy → *.supabase.co fails with Cloudflare Error 1000 when forza.events is CF-proxied.
+	# Vite dev uses vite.config.ts proxy; production requires: npm run deploy:cf-worker
 	handle {
 		root * dist
 		encode gzip

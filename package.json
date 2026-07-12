@@ -15,6 +15,7 @@
     "test:watch": "vitest",
     "preview": "vite preview",
     "deploy:functions": "bash scripts/deploy-edge-functions.sh",
+    "deploy:cf-worker": "wrangler deploy",
     "sync:secrets": "node scripts/sync-secrets.mjs",
     "optimize:covers": "node scripts/optimize-covers.mjs",
     "seed:events": "node scripts/seed-events.mjs",
