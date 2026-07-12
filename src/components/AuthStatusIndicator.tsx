@@ -3,7 +3,7 @@ import {useAuth} from '../context/AuthContext';
 import {resolveAuthStatus, type AuthStatusTone} from '../lib/authStatus';
 import {canRetryDiscordActivityAuth} from '../lib/discord';
 import {startDiscordBrowserSignIn} from '../lib/discordBrowserSignIn';
-import {supportsBrowserOAuth} from '../lib/runtime';
+import {isLocalDevHost, supportsBrowserOAuth} from '../lib/runtime';
 import {cn} from '../lib/cn';
 import {statusPillClass} from './ui/formStyles';
 
@@ -24,6 +24,7 @@ export function AuthStatusIndicator({className}: {className?: string}) {
     isSignedIn,
     isStandalone,
     supportsBrowserOAuth: supportsBrowserOAuth(),
+    isLocalDev: isLocalDevHost(),
   });
   const canRetry = Boolean(retryable && canRetryDiscordActivityAuth() && !busy);
   const canBrowserSignIn = Boolean(browserSignIn && isConfigured && !busy);

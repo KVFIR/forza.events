@@ -10,6 +10,7 @@ describe('resolveAuthStatus', () => {
       isSignedIn: false,
       isStandalone: true,
       supportsBrowserOAuth: true,
+      isLocalDev: true,
     });
     expect(status.label).toBe(i18n.t('auth.status.setupRequired'));
     expect(status.tone).toBe('warning');
@@ -24,8 +25,22 @@ describe('resolveAuthStatus', () => {
       isSignedIn: true,
       isStandalone: true,
       supportsBrowserOAuth: true,
+      isLocalDev: true,
     });
     expect(status.label).toBe(i18n.t('auth.status.local'));
+    expect(status.tone).toBe('online');
+  });
+
+  it('shows Online when signed in on production browser web', () => {
+    const status = resolveAuthStatus({
+      isConfigured: true,
+      loading: false,
+      isSignedIn: true,
+      isStandalone: true,
+      supportsBrowserOAuth: true,
+      isLocalDev: false,
+    });
+    expect(status.label).toBe(i18n.t('auth.status.online'));
     expect(status.tone).toBe('online');
   });
 
@@ -36,6 +51,7 @@ describe('resolveAuthStatus', () => {
       isSignedIn: true,
       isStandalone: false,
       supportsBrowserOAuth: false,
+      isLocalDev: false,
     });
     expect(status.label).toBe(i18n.t('auth.status.online'));
     expect(status.tone).toBe('online');
@@ -48,6 +64,7 @@ describe('resolveAuthStatus', () => {
       isSignedIn: false,
       isStandalone: true,
       supportsBrowserOAuth: true,
+      isLocalDev: false,
     });
     expect(status.browserSignIn).toBe(true);
     expect(status.retryable).toBeUndefined();
@@ -60,6 +77,7 @@ describe('resolveAuthStatus', () => {
       isSignedIn: false,
       isStandalone: true,
       supportsBrowserOAuth: false,
+      isLocalDev: false,
     });
     expect(status.label).toBe(i18n.t('auth.status.notSignedIn'));
     expect(status.tone).toBe('muted');
@@ -74,6 +92,7 @@ describe('resolveAuthStatus', () => {
       isSignedIn: false,
       isStandalone: false,
       supportsBrowserOAuth: false,
+      isLocalDev: false,
     });
     expect(status.retryable).toBe(true);
     expect(status.browserSignIn).toBeUndefined();

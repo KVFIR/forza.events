@@ -18,6 +18,8 @@ type AuthStatusInput = {
   isStandalone: boolean;
   /** Browser OAuth available (localhost engineering or production web host). */
   supportsBrowserOAuth: boolean;
+  /** localhost / 127.0.0.1 engineering tab — not forza.events production web. */
+  isLocalDev: boolean;
 };
 
 export function resolveAuthStatus({
@@ -26,6 +28,7 @@ export function resolveAuthStatus({
   isSignedIn,
   isStandalone,
   supportsBrowserOAuth,
+  isLocalDev,
 }: AuthStatusInput): AuthStatusDisplay {
   if (!isConfigured) {
     return {label: i18n.t('auth.status.setupRequired'), tone: 'warning'};
@@ -38,9 +41,11 @@ export function resolveAuthStatus({
   }
 
   if (isSignedIn) {
-    return isStandalone
-      ? {label: i18n.t('auth.status.local'), tone: 'online'}
-      : {label: i18n.t('auth.status.online'), tone: 'online'};
+    const showLocalLabel = isStandalone && isLocalDev;
+    return {
+      label: i18n.t(showLocalLabel ? 'auth.status.local' : 'auth.status.online'),
+      tone: 'online',
+    };
   }
 
   if (!isStandalone) {
