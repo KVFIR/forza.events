@@ -1,5 +1,9 @@
 #!/usr/bin/env python3
-"""Scrape Forza Horizon 6 car data from forza.fandom.com via MediaWiki API."""
+"""Scrape Forza Horizon 6 car data from forza.fandom.com via MediaWiki API.
+
+Writes data/fh6_fandom_cars.json and regenerates supabase/seed/fh6cars.json.
+Excel export: npm run data:fh6:xlsx (separate; needs xlsxwriter).
+"""
 
 from __future__ import annotations
 
@@ -417,16 +421,6 @@ def main() -> None:
             indent=2,
         )
     print(f"Wrote {len(rows)} cars to {out_path}")
-
-    # Excel export + app catalog (supabase/seed/fh6cars.json).
-    sys.path.insert(0, str(Path(__file__).resolve().parent))
-    from build_fh6_fandom_xlsx import build_xlsx, validate_xlsx, XLSX_PATH
-
-    build_xlsx(out_path)
-    problems = validate_xlsx(XLSX_PATH)
-    if problems:
-        raise RuntimeError("XLSX validation failed:\n  " + "\n  ".join(problems))
-    print(f"Wrote {XLSX_PATH}")
 
     import subprocess
 

@@ -120,7 +120,8 @@ Host: `000000000000000001`, guild `000000000000000001`.
 - `save-event` resolves cars by id/lookup only (no arbitrary catalog inserts)
 
 ```bash
-npm run data:fh6:scrape    # scrape → JSON + XLSX + fh6cars.json
+npm run data:fh6:scrape    # scrape → fh6_fandom_cars.json + fh6cars.json
+npm run data:fh6:xlsx      # optional spreadsheet from fh6_fandom_cars.json
 supabase db push           # apply 006+ if needed
 npm run seed:cars          # upsert catalog (linked CLI); does not delete event_cars
 ```

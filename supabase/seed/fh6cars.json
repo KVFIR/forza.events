@@ -883,7 +883,7 @@
   },
   {
     "make": "Datsun",
-    "model": "Datsun #269 Attacking the Clock Racing 240Z 'All Carbon Hillclimb Beast'",
+    "model": "Datsun #269 Attacking the Clock Racing 240Z 'All Carbon Hill Climb Beast'",
     "year": 1972,
     "pi": 951,
     "class": "R"
@@ -918,17 +918,17 @@
   },
   {
     "make": "DeBerti",
+    "model": "DeBerti Jeep Wrangler Unlimited",
+    "year": 2018,
+    "pi": 645,
+    "class": "A"
+  },
+  {
+    "make": "DeBerti",
     "model": "DeBerti Toyota Tacoma TRD 'The Performance Truck'",
     "year": 2019,
     "pi": 717,
     "class": "S1"
-  },
-  {
-    "make": "DeBerti",
-    "model": "DeBerti Wrangler Unlimited",
-    "year": 2013,
-    "pi": 645,
-    "class": "A"
   },
   {
     "make": "DeLorean",
