@@ -1,7 +1,6 @@
 import {describe, expect, it} from 'vitest';
 import {
   buildEventEmbed,
-  stripEmbedAboutText,
   type EmbedEventInput,
 } from '../supabase/functions/_shared/events.ts';
 
@@ -114,8 +113,7 @@ describe('buildEventEmbed', () => {
     expect(embed.title).toBe('Friday Night Sprint');
     expect(embed.description).toBeUndefined();
     const aboutField = embed.fields.find((field) => field.name === '📝 About');
-    expect(aboutField?.value).toBe('Bring your best A-class car.');
-    expect(aboutField?.value).not.toContain('Friday Night Sprint');
+    expect(aboutField?.value).toBe('Friday Night Sprint\n\nBring your best A-class car.');
   });
 
   it('keeps long host copy in About field up to field limit', () => {
@@ -138,18 +136,6 @@ describe('buildEventEmbed', () => {
     expect(embed.description).not.toContain('Original host notes');
     expect(embed.fields.find((field) => field.name === '📝 About')?.value).toBe(
       'Original host notes',
-    );
-  });
-});
-
-describe('stripEmbedAboutText', () => {
-  it('drops body that only repeats the title', () => {
-    expect(stripEmbedAboutText('Night Race', 'Night Race')).toBeNull();
-  });
-
-  it('drops first line when it repeats the title', () => {
-    expect(stripEmbedAboutText('Night Race', 'Night Race\n\nDetails here')).toBe(
-      'Details here',
     );
   });
 });

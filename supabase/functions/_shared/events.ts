@@ -303,23 +303,6 @@ type EmbedLifecycleUi = {
   buttonStyle: 1 | 2 | 3 | 4;
 };
 
-/** Drop host copy that repeats the embed title (common when title is pasted into description). */
-export function stripEmbedAboutText(
-  title: string,
-  raw: string | null | undefined,
-): string | null {
-  const body = raw?.trim();
-  if (!body) return null;
-  const normalizedTitle = title.trim();
-  if (!normalizedTitle || body === normalizedTitle) return null;
-  const lines = body.split(/\r?\n/);
-  if (lines[0]?.trim() === normalizedTitle) {
-    const rest = lines.slice(1).join('\n').trim();
-    return rest || null;
-  }
-  return body;
-}
-
 function buildEmbedDescription(
   statusSubtitle: string,
   statusDetail: string | null,
@@ -404,7 +387,7 @@ export function buildEventEmbed(event: EmbedEventInput) {
     lifecycle.statusSubtitle,
     lifecycle.statusDetail,
   );
-  const aboutText = stripEmbedAboutText(title, event.description);
+  const aboutText = event.description?.trim() || null;
   const aboutField: EmbedField | null = aboutText
     ? {
         name: embedFieldName('📝 About'),
