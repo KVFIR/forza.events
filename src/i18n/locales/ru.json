@@ -24,7 +24,8 @@
     "host": "Организатор",
     "dash": "—",
     "optional": "Необязательно",
-    "openBuild": "Любая сборка"
+    "openBuild": "Любая сборка",
+    "dismiss": "Скрыть"
   },
   "busy": {
     "working": "Выполняется…",
@@ -305,6 +306,15 @@
     "publishEvent": "Опубликовать",
     "saveChanges": "Сохранить",
     "saveAsDraft": "Сохранить черновик",
+    "draftStatusUnsaved": "Есть несохранённые изменения",
+    "draftStatusSaving": "Сохранение черновика…",
+    "draftStatusSaved": "Черновик сохранён",
+    "draftStatusError": "Не удалось сохранить черновик",
+    "wipRestoreBody": "Есть несохранённая работа с прошлого сеанса.",
+    "wipRestoreAction": "Восстановить",
+    "wipDiscardAction": "Отменить",
+    "restoredNotice": "Черновик восстановлен.",
+    "restoredWithCoverNote": "Черновик восстановлен. При необходимости загрузите обложку снова.",
     "publishEventTitle": "Опубликовать событие?",
     "publishEventDesc": "Будет создано объявление в Discord. Сервер и канал потом изменить нельзя.",
     "publish": "Опубликовать",

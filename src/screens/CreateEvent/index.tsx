@@ -4,6 +4,7 @@ import {Button} from '../../components/ui/Button';
 import {ConfirmDialog} from '../../components/ui/ConfirmDialog';
 import {PublishTargetModal} from '../../components/PublishTargetPicker';
 import {FormAlerts, StepIndicator} from './components/StepIndicator';
+import {DraftSaveStatus} from './components/DraftSaveStatus';
 import {PublishedTargetSummary} from './components/PublishedTargetSummary';
 import {CreateEventConvoySection} from './components/CreateEventConvoySection';
 import {PUBLISH_STEP_INDEX} from './constants';
@@ -23,6 +24,9 @@ import {buildCreateRichPresence} from '../../lib/discordRichPresence';
 import {useLoadingUI} from '../../hooks/useLoadingUI';
 import {formatDiscordHandle} from '../../lib/discordHandle';
 import {isLocalDevHost} from '../../lib/runtime';
+import {useCreateEventLeaveGuard} from './useCreateEventLeaveGuard';
+import {Alert} from '../../components/ui/Alert';
+import {cn} from '../../lib/cn';
 
 export function CreateEvent() {
   const {t} = useTranslation();
@@ -91,7 +95,18 @@ export function CreateEvent() {
     onGuildChange,
     setTargetChannelId,
     clearFieldError,
+    draftSyncStatus,
+    wipRestoreOffer,
+    restoreWipSnapshot,
+    discardWipSnapshot,
+    showRestoredNotice,
+    dismissRestoredNotice,
+    pendingCoverRestore,
   } = form;
+
+  const hasUnsavedProgress = !isPublished && draftSyncStatus === 'dirty';
+
+  useCreateEventLeaveGuard(hasUnsavedProgress);
 
   const missingForPublish = collectPublishGaps({
     channelId: values.targetChannelId,
@@ -243,6 +258,41 @@ export function CreateEvent() {
         />
       )}
 
+      {!isPublished ? <DraftSaveStatus status={draftSyncStatus} /> : null}
+
+      {wipRestoreOffer ? (
+        <Alert variant="sky" className="mb-4">
+          <p className="text-sm">{t('create.wipRestoreBody')}</p>
+          <div className="mt-3 flex flex-wrap gap-2">
+            <Button variant="primary" emphasis="solid" onClick={restoreWipSnapshot}>
+              {t('create.wipRestoreAction')}
+            </Button>
+            <Button variant="secondary" onClick={discardWipSnapshot}>
+              {t('create.wipDiscardAction')}
+            </Button>
+          </div>
+        </Alert>
+      ) : null}
+
+      {showRestoredNotice ? (
+        <Alert variant="neutral" className="mb-4">
+          <div className="flex items-start justify-between gap-3">
+            <p className="text-sm">
+              {pendingCoverRestore
+                ? t('create.restoredWithCoverNote')
+                : t('create.restoredNotice')}
+            </p>
+            <button
+              type="button"
+              className="shrink-0 text-xs text-muted underline"
+              onClick={dismissRestoredNotice}
+            >
+              {t('common.dismiss')}
+            </button>
+          </div>
+        </Alert>
+      ) : null}
+
       <FormAlerts
         isConfigured={isConfigured}
         isSignedIn={isSignedIn}
@@ -259,35 +309,40 @@ export function CreateEvent() {
           />
           {token ? <CreateEventConvoySection {...convoySectionProps} /> : null}
         </>
-      ) : step === 0 ? (
-        <EventStep {...eventStepProps} />
       ) : (
-        <PublishStep
-          token={token}
-          accessToken={token ?? ''}
-          title={values.title}
-          type={values.type}
-          description={values.description}
-          coverPreview={values.coverPreview}
-          startsAtLocal={values.startsAtLocal}
-          carRuleMode={values.carRuleMode}
-          maxPi={values.maxPi}
-          additionalCarRestrictions={values.additionalCarRestrictions}
-          eventCars={values.eventCars}
-          tracks={normalizedTracks}
-          lobbyLeaderLabel={lobbyLeaderLabel}
-          guildId={values.targetGuildId}
-          guildName={values.targetGuildName}
-          channelId={values.targetChannelId}
-          lockGuild={false}
-          lockChannel={false}
-          fieldErrors={fieldErrors}
-          missingForPublish={missingForPublish}
-          convoy={convoySectionProps}
-          onGuildChange={onGuildChange}
-          onChannelChange={setTargetChannelId}
-          onJumpToStep={setStep}
-        />
+        <>
+          <div className={cn(step !== 0 && 'hidden')}>
+            <EventStep {...eventStepProps} />
+          </div>
+          <div className={cn(step !== PUBLISH_STEP_INDEX && 'hidden')}>
+            <PublishStep
+              token={token}
+              accessToken={token ?? ''}
+              title={values.title}
+              type={values.type}
+              description={values.description}
+              coverPreview={values.coverPreview}
+              startsAtLocal={values.startsAtLocal}
+              carRuleMode={values.carRuleMode}
+              maxPi={values.maxPi}
+              additionalCarRestrictions={values.additionalCarRestrictions}
+              eventCars={values.eventCars}
+              tracks={normalizedTracks}
+              lobbyLeaderLabel={lobbyLeaderLabel}
+              guildId={values.targetGuildId}
+              guildName={values.targetGuildName}
+              channelId={values.targetChannelId}
+              lockGuild={false}
+              lockChannel={false}
+              fieldErrors={fieldErrors}
+              missingForPublish={missingForPublish}
+              convoy={convoySectionProps}
+              onGuildChange={onGuildChange}
+              onChannelChange={setTargetChannelId}
+              onJumpToStep={setStep}
+            />
+          </div>
+        </>
       )}
 
       <div className="mt-8 flex flex-col gap-2">

@@ -11,6 +11,7 @@ import {AuthProvider, useAuth} from './context/AuthContext';
 import {DiscordLayoutProvider, useDiscordLayout} from './context/DiscordLayoutContext';
 import {DiscordRichPresenceProvider} from './context/DiscordRichPresenceContext';
 import {JoinedEventsProvider} from './context/JoinedEventsContext';
+import {CreateEventDraftProvider} from './context/CreateEventDraftContext';
 import {DiscordRichPresenceSync} from './components/DiscordRichPresenceSync';
 import type {ReactNode} from 'react';
 import {PageLoading} from './components/ui/PageLoading';
@@ -147,8 +148,10 @@ export default function App() {
         <DiscordLayoutProvider>
           <DiscordRichPresenceProvider>
             <JoinedEventsProvider>
-              <DiscordRichPresenceSync />
-              <AppRoutes />
+              <CreateEventDraftProvider>
+                <DiscordRichPresenceSync />
+                <AppRoutes />
+              </CreateEventDraftProvider>
             </JoinedEventsProvider>
           </DiscordRichPresenceProvider>
         </DiscordLayoutProvider>

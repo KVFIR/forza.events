@@ -24,7 +24,8 @@
     "host": "Host",
     "dash": "—",
     "optional": "Optional",
-    "openBuild": "Open build"
+    "openBuild": "Open build",
+    "dismiss": "Dismiss"
   },
   "busy": {
     "working": "Working…",
@@ -301,6 +302,15 @@
     "publishEvent": "Publish event",
     "saveChanges": "Save changes",
     "saveAsDraft": "Save as draft",
+    "draftStatusUnsaved": "Unsaved changes",
+    "draftStatusSaving": "Saving draft…",
+    "draftStatusSaved": "Draft saved",
+    "draftStatusError": "Could not save draft",
+    "wipRestoreBody": "You have unsaved work from a previous session.",
+    "wipRestoreAction": "Restore",
+    "wipDiscardAction": "Discard",
+    "restoredNotice": "Your draft was restored.",
+    "restoredWithCoverNote": "Your draft was restored. Re-upload the cover image if needed.",
     "publishEventTitle": "Publish event?",
     "publishEventDesc": "This posts an announcement in Discord. Server and channel cannot be changed afterward.",
     "publish": "Publish",
