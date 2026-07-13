@@ -45,7 +45,7 @@ Manual QA matrix aligned with current code behavior (not an abstract checklist).
 | 0.6 | Edge Functions deployed with `--no-verify-jwt` | Invalid Discord token → app `401`; **not** gateway `UNAUTHORIZED_NO_AUTH_HEADER` |
 | 0.7 | Hard refresh Activity after deploy | Old bundle does not mask fixes |
 | 0.8 | `supabase db push` includes `017`–`019` + `npm run deploy:functions` (`process-notifications`) | DM outbox + claim RPC live; cron can deliver |
-| 0.9 | `NOTIFICATION_CRON_SECRET` set + minute cron (`scripts/invoke-process-notifications.sh`) | 2h reminders + outbox drain |
+| 0.9 | GitHub Actions `process-notifications` workflow + repo secrets (or minute cron via `scripts/invoke-process-notifications.sh`) | 2h reminders + outbox drain |
 
 ---
 

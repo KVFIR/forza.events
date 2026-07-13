@@ -85,7 +85,18 @@ On **Supabase** secrets (via `npm run sync:secrets` or dashboard):
 ```env
 APP_ORIGIN=https://forza.events
 DISCORD_REDIRECT_URI=https://forza.events/auth/callback
+NOTIFICATION_CRON_SECRET=<random hex>   # same value as GitHub secret below
 ```
+
+On **GitHub** → repo → **Settings → Secrets and variables → Actions** (for `.github/workflows/process-notifications.yml`):
+
+```env
+VITE_SUPABASE_URL=https://<project-ref>.supabase.co
+VITE_SUPABASE_ANON_KEY=<anon key>
+NOTIFICATION_CRON_SECRET=<same as Supabase>
+```
+
+Scheduled workflow runs every **5 minutes** (GitHub minimum). Mutations also trigger immediate delivery via `deferNotificationDelivery` on Edge. Manual run: **Actions → Process notifications → Run workflow**.
 
 Discord Developer Portal → OAuth2 → Redirects — add **both**:
 

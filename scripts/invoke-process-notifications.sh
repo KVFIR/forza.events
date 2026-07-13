@@ -1,7 +1,8 @@
 #!/usr/bin/env bash
 # Invoke process-notifications (outbox delivery + 2h reminder scan).
-# Schedule every minute in production, e.g. cron or GitHub Actions:
-#   * * * * * /path/to/scripts/invoke-process-notifications.sh
+# Production schedulers:
+#   GitHub Actions: .github/workflows/process-notifications.yml (every 5 min — GH minimum)
+#   VPS cron:       * * * * * /path/to/scripts/invoke-process-notifications.sh
 set -euo pipefail
 
 ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"

@@ -127,7 +127,7 @@ Set **`APP_ORIGIN`** on Railway to the deploy URL (embed cover URLs + Edge CORS)
 | `seed:events` fails | No service role | `SUPABASE_SERVICE_ROLE_KEY` in `.env` |
 | Publish stuck / 409 `PUBLISH_IN_PROGRESS` | Crashed mid-publish | Wait 5 min (lock TTL) or clear `publish_started_at` on draft row |
 | Double Discord embed after publish | Old code / race before `003` | `db push` + redeploy `publish-event`; delete duplicate message manually |
-| DMs not delivered | Cron not scheduled or missing `NOTIFICATION_CRON_SECRET` | Set secret on Supabase; schedule `scripts/invoke-process-notifications.sh` every minute |
+| DMs not delivered | Cron not scheduled or missing `NOTIFICATION_CRON_SECRET` | Supabase secret + GitHub Actions secrets (see `.github/workflows/process-notifications.yml`) |
 
 ---
 
