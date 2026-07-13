@@ -1,8 +1,9 @@
 import {describe, expect, it} from 'vitest';
-import {publishedTracksOrCarsChanged} from '../src/lib/publishedEventNotifyDiff';
+import {publishedNotifyFieldsChanged} from '../src/lib/publishedEventNotifyDiff';
 
-describe('publishedTracksOrCarsChanged', () => {
+describe('publishedNotifyFieldsChanged', () => {
   const baseline = {
+    startsAt: '2030-06-15T18:00:00.000Z',
     tracks: [{name: 'Laguna', shareCode: '', format: ''}],
     carRuleMode: 'anything_goes' as const,
     maxPi: 800,
@@ -11,12 +12,21 @@ describe('publishedTracksOrCarsChanged', () => {
   };
 
   it('returns false when nothing changed', () => {
-    expect(publishedTracksOrCarsChanged(baseline, baseline)).toBe(false);
+    expect(publishedNotifyFieldsChanged(baseline, baseline)).toBe(false);
+  });
+
+  it('detects schedule edits', () => {
+    expect(
+      publishedNotifyFieldsChanged(
+        {...baseline, startsAt: '2030-06-16T18:00:00.000Z'},
+        baseline,
+      ),
+    ).toBe(true);
   });
 
   it('detects track edits', () => {
     expect(
-      publishedTracksOrCarsChanged(
+      publishedNotifyFieldsChanged(
         {...baseline, tracks: [{name: 'Road Atlanta', shareCode: '', format: ''}]},
         baseline,
       ),
@@ -24,6 +34,15 @@ describe('publishedTracksOrCarsChanged', () => {
   });
 
   it('detects car rule edits', () => {
-    expect(publishedTracksOrCarsChanged({...baseline, maxPi: 900}, baseline)).toBe(true);
+    expect(publishedNotifyFieldsChanged({...baseline, maxPi: 900}, baseline)).toBe(true);
+  });
+
+  it('ignores sub-minute drift', () => {
+    expect(
+      publishedNotifyFieldsChanged(
+        {...baseline, startsAt: '2030-06-15T18:00:30.000Z'},
+        baseline,
+      ),
+    ).toBe(false);
   });
 });

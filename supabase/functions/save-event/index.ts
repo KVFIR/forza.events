@@ -27,7 +27,7 @@ import {PI_MAX} from '../_shared/pi.ts';
 import {rateLimitMutation} from '../_shared/rateLimitPresets.ts';
 import {adminClient} from '../_shared/supabase.ts';
 import {VALIDATION_CODES, type ValidationCode} from '../_shared/validationCodes.ts';
-import {deferNotificationDelivery} from '../_shared/notifications.ts';
+import {cancelPendingStartingSoonForEvent, deferNotificationDelivery} from '../_shared/notifications.ts';
 import {
   enqueueConvoyLeaderChanged,
   enqueueEventCancelled,
@@ -36,6 +36,7 @@ import {
 import {
   eventUpdateContentHash,
   normalizeCarsForDiff,
+  scheduleChanged,
   tracksOrCarsChanged,
 } from '../_shared/notificationDiff.ts';
 
@@ -337,12 +338,18 @@ serve(async (req) => {
             {tracks: existing.tracks, carFingerprint: existingCarFingerprint},
             {tracks: body.tracks ?? data.tracks, carFingerprint: afterCarFingerprint},
           );
-          if (diff.tracks || diff.cars) {
+          const scheduleDiff = scheduleChanged(existing.starts_at, data.starts_at);
+          if (scheduleDiff) {
+            await cancelPendingStartingSoonForEvent(supabase, eventId);
+          }
+          if (diff.tracks || diff.cars || scheduleDiff) {
             const contentHash = eventUpdateContentHash(
               diff.tracks,
               diff.cars,
+              scheduleDiff,
               body.tracks ?? data.tracks,
               afterCarFingerprint,
+              data.starts_at,
             );
             await enqueueEventUpdated(
               supabase,
@@ -355,6 +362,7 @@ serve(async (req) => {
               resolvedCars.length,
               diff.tracks,
               diff.cars,
+              scheduleDiff,
             );
           }
 

@@ -1,5 +1,5 @@
 import {describe, expect, it} from 'vitest';
-import {normalizeCarsForDiff, normalizeTracksForDiff, tracksOrCarsChanged} from '../supabase/functions/_shared/notificationDiff.ts';
+import {normalizeCarsForDiff, normalizeTracksForDiff, eventUpdateContentHash, scheduleChanged, tracksOrCarsChanged} from '../supabase/functions/_shared/notificationDiff.ts';
 
 describe('notificationDiff', () => {
   it('detects track name changes', () => {
@@ -18,5 +18,20 @@ describe('notificationDiff', () => {
 
   it('normalizes tracks consistently', () => {
     expect(normalizeTracksForDiff([{name: ' A '}])).toBe(normalizeTracksForDiff([{name: 'A'}]));
+  });
+
+  it('detects schedule changes by instant', () => {
+    expect(scheduleChanged('2030-01-01T12:00:00.000Z', '2030-01-01T13:00:00.000Z')).toBe(true);
+    expect(scheduleChanged('2030-01-01T12:00:00.000Z', '2030-01-01T12:00:00.000Z')).toBe(false);
+  });
+
+  it('ignores sub-minute drift', () => {
+    expect(scheduleChanged('2030-01-01T12:00:30.000Z', '2030-01-01T12:00:00.000Z')).toBe(false);
+  });
+
+  it('includes schedule in content hash', () => {
+    const withSchedule = eventUpdateContentHash(false, false, true, [], '{}', '2030-01-01T12:00:00.000Z');
+    const without = eventUpdateContentHash(false, false, false, [], '{}', '2030-01-01T12:00:00.000Z');
+    expect(withSchedule).not.toBe(without);
   });
 });

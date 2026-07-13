@@ -124,6 +124,9 @@ const COPY: Record<NotificationKind, Record<NotificationLocale, CopyBuilder>> = 
       title: 'Event updated',
       description: `The host updated **${str(p.eventTitle)}**. Check the latest details before the race.`,
       fields: [
+        ...(str(p.scheduleSummary)
+          ? [{name: 'Date & time', value: `${str(p.scheduleSummary)} (${str(p.timezone) || 'UTC'})`}]
+          : []),
         ...(str(p.tracksSummary) ? [{name: 'Tracks', value: str(p.tracksSummary)}] : []),
         ...(str(p.carsSummary) ? [{name: 'Car rules', value: str(p.carsSummary)}] : []),
       ],
@@ -132,6 +135,9 @@ const COPY: Record<NotificationKind, Record<NotificationLocale, CopyBuilder>> = 
       title: 'Ивент обновлён',
       description: `Организатор обновил **${str(p.eventTitle)}**. Проверьте актуальные детали перед заездом.`,
       fields: [
+        ...(str(p.scheduleSummary)
+          ? [{name: 'Дата и время', value: `${str(p.scheduleSummary)} (${str(p.timezone) || 'UTC'})`}]
+          : []),
         ...(str(p.tracksSummary) ? [{name: 'Трассы', value: str(p.tracksSummary)}] : []),
         ...(str(p.carsSummary) ? [{name: 'Правила по машинам', value: str(p.carsSummary)}] : []),
       ],

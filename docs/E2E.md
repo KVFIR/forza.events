@@ -348,7 +348,7 @@ At least one mapped message per screen:
 | Waitlist promote | Fill group; user on waitlist; active racer leaves | Promoted user gets **seat opened** DM (even if bell off) |
 | Host group full | Promote fills last seat in group | Host gets **group filled** DM |
 | Cancel | Host cancels published event | Active + waitlist get cancel DM; **host does not** |
-| Published edit | Host changes tracks/cars → **Save & notify** | Active racers get update DM |
+| Published edit | Host changes date/time, tracks, and/or cars → **Save & notify** | Active racers get update DM |
 | DM button | Open DM → **Open event** | Link opens `forza.events/event/{id}` (or Activity origin) |
 | 2h reminder | Event starts in ~2h (cron running) | Active racers + host get soon DM; reschedule changes dedupe |
 

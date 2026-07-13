@@ -58,6 +58,25 @@ export async function enqueueNotifications(
   }
 }
 
+export async function cancelPendingStartingSoonForEvent(
+  supabase: ReturnType<typeof adminClient>,
+  eventId: string,
+): Promise<void> {
+  const {error} = await supabase
+    .from('notification_outbox')
+    .update({status: 'skipped', last_error: 'schedule_changed'})
+    .eq('event_id', eventId)
+    .in('kind', ['event_starting_soon', 'host_event_starting_soon'])
+    .in('status', ['pending', 'processing']);
+  if (error) {
+    console.error(JSON.stringify({
+      msg: 'cancelPendingStartingSoonForEvent failed',
+      eventId,
+      detail: error.message,
+    }));
+  }
+}
+
 export function deferNotificationDelivery(supabase: ReturnType<typeof adminClient>, limit = 25): void {
   const work = () => processNotificationBatch(supabase, limit);
   if (typeof EdgeRuntime !== 'undefined' && typeof EdgeRuntime.waitUntil === 'function') {
@@ -155,7 +174,7 @@ function sleep(ms: number): Promise<void> {
   return new Promise((r) => setTimeout(r, ms));
 }
 
-function enrichPayloadForSend(
+export function enrichPayloadForSend(
   kind: NotificationKind,
   payload: Record<string, unknown>,
   locale: string | null | undefined,
@@ -173,6 +192,9 @@ function enrichPayloadForSend(
   }
   if (kind === 'event_updated') {
     const lng = locale === 'ru' ? 'ru' : 'en';
+    if (out.scheduleChanged === '1' && out.startsAt) {
+      out.scheduleSummary = formatStartsAtForNotify(out.startsAt, out.timezone, locale);
+    }
     if (out.tracksChanged === '1') {
       try {
         const names = JSON.parse(out.trackNames || '[]') as string[];

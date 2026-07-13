@@ -183,6 +183,7 @@ export async function enqueueEventUpdated(
   carCount: number,
   tracksChanged: boolean,
   carsChanged: boolean,
+  scheduleChangedFlag: boolean,
 ): Promise<void> {
   const rows: OutboxInsert[] = activeRacers(participants).map((p) => ({
     kind: 'event_updated',
@@ -193,6 +194,9 @@ export async function enqueueEventUpdated(
       eventTitle: event.title,
       tracksChanged: tracksChanged ? '1' : '',
       carsChanged: carsChanged ? '1' : '',
+      scheduleChanged: scheduleChangedFlag ? '1' : '',
+      startsAt: scheduleChangedFlag ? event.starts_at : '',
+      timezone: scheduleChangedFlag ? (event.timezone ?? 'UTC') : '',
       trackNames: JSON.stringify(
         (Array.isArray(tracks) ? tracks as {name?: string}[] : []).map((t) => (t.name ?? '').trim()).filter(Boolean),
       ),

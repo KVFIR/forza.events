@@ -35,7 +35,7 @@ import type {EventTrack} from '../../lib/types';
 import type {EventCarEntry} from '../../components/EventCarList';
 import type {ConvoyLeaderSelection} from '../../components/ConvoyLeaderPicker';
 import {
-  publishedTracksOrCarsChanged,
+  publishedNotifyFieldsChanged,
   type PublishedNotifyBaseline,
 } from '../../lib/publishedEventNotifyDiff';
 import {PUBLISH_STEP_INDEX, type CreateEventStepIndex} from './constants';
@@ -259,6 +259,7 @@ export function useCreateEventForm() {
         setCanCancelPublished(canCancelPublishedEvent(ev, user));
         if (published) {
           setNotifyBaseline({
+            startsAt: ev.startsAt,
             tracks: ev.tracks ?? [],
             carRuleMode: ev.carRuleMode,
             maxPi: ev.maxPi,
@@ -628,8 +629,9 @@ export function useCreateEventForm() {
     notifyBaseline,
     wouldNotifyRacersOnSave:
       isPublished &&
-      publishedTracksOrCarsChanged(
+      publishedNotifyFieldsChanged(
         {
+          startsAt: localInputToUtc(startsAtLocal, defaultTimezone()),
           tracks,
           carRuleMode,
           maxPi,

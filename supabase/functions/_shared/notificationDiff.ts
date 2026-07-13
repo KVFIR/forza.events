@@ -54,10 +54,32 @@ export function tracksOrCarsChanged(
   };
 }
 
-export function eventUpdateContentHash(tracksChanged: boolean, carsChanged: boolean, tracks: unknown, carFingerprint: string): string {
+export function startsAtMinuteEpoch(startsAt: string): number | null {
+  const ms = new Date(startsAt).getTime();
+  if (!Number.isFinite(ms)) return null;
+  return Math.floor(ms / 60_000);
+}
+
+/** Compare schedule at minute precision (datetime-local / embed display granularity). */
+export function scheduleChanged(beforeStartsAt: string, afterStartsAt: string): boolean {
+  const before = startsAtMinuteEpoch(beforeStartsAt);
+  const after = startsAtMinuteEpoch(afterStartsAt);
+  if (before == null || after == null) return false;
+  return before !== after;
+}
+
+export function eventUpdateContentHash(
+  tracksChanged: boolean,
+  carsChanged: boolean,
+  scheduleChangedFlag: boolean,
+  tracks: unknown,
+  carFingerprint: string,
+  startsAt?: string,
+): string {
   const parts = [
     tracksChanged ? normalizeTracksForDiff(tracks) : '',
     carsChanged ? carFingerprint : '',
+    scheduleChangedFlag ? String(startsAtMinuteEpoch(startsAt ?? '') ?? '') : '',
   ];
   let hash = 0;
   const s = parts.join('|');
