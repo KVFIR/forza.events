@@ -113,6 +113,22 @@ describe('resolveRegisteredDrivers', () => {
     ];
     expect(resolveRegisteredDrivers(participants).map((p) => p.discordId)).toEqual(['p2']);
   });
+
+  it('orders by joinedAt oldest first', () => {
+    const participants = [
+      participant({
+        discordId: 'p2',
+        gamertag: 'B',
+        joinedAt: '2030-02-02T00:00:00Z',
+      }),
+      participant({
+        discordId: 'p1',
+        gamertag: 'A',
+        joinedAt: '2030-01-01T00:00:00Z',
+      }),
+    ];
+    expect(resolveRegisteredDrivers(participants).map((p) => p.discordId)).toEqual(['p1', 'p2']);
+  });
 });
 
 describe('resolveResultsRoster', () => {

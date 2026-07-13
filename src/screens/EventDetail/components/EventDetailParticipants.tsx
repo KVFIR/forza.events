@@ -8,38 +8,45 @@ import type {EventDetailViewModel} from '../eventDetailView';
 import {cn} from '../../../lib/cn';
 
 type Props = {
-  view: Pick<EventDetailViewModel, 'ev' | 'groups' | 'waitlist' | 'isHost'>;
+  view: Pick<EventDetailViewModel, 'ev' | 'groups' | 'waitlist'>;
   viewerDiscordId: string;
 };
+
+function SeatNumber({n}: {n: number}) {
+  return (
+    <span className="w-5 shrink-0 text-center text-xs font-bold tabular-nums text-muted">{n}</span>
+  );
+}
 
 function LeaderCard({
   leader,
   hostDiscordId,
+  position,
 }: {
   leader: RosterConvoyLeader;
   hostDiscordId: string;
+  position: number;
 }) {
   const {t} = useTranslation();
+  const isHost = leader.discordId === hostDiscordId;
+  const badgeClass =
+    'shrink-0 text-right text-[9px] font-bold uppercase leading-tight tracking-wide text-accent-green/90';
+
   return (
-    <div
-      className={cn(
-        'flex items-center gap-2 rounded-lg border px-3 py-2',
-        leader.isYou ? 'border-accent-green/25 bg-accent-green/10' : 'border-white/[0.06] bg-card',
-      )}
-    >
+    <div className="flex items-center gap-2 rounded-lg border border-accent-green/25 bg-accent-green/10 px-3 py-2">
+      <SeatNumber n={position} />
       <UserAvatar
         src={leader.avatarUrl}
         name={leader.username ?? leader.gamertag}
         size="xs"
         variant="green"
       />
-      <div className="min-w-0">
+      <div className="min-w-0 flex-1">
         <ParticipantDisplayNames gamertag={leader.gamertag} username={leader.username ?? ''} />
-        <p className="text-[9px] font-bold uppercase tracking-widest text-accent-green/90">
-          {t('eventDetail.convoyLeaderBadge')}
-          {leader.isYou ? t('eventDetail.youSuffix') : ''}
-          {leader.discordId === hostDiscordId ? t('eventDetail.hostSuffix') : ''}
-        </p>
+      </div>
+      <div className={cn(badgeClass, isHost && 'flex flex-col gap-0.5')}>
+        <span>{t('eventDetail.convoyLeaderBadgeShort')}</span>
+        {isHost ? <span>{t('eventDetail.hostBadgeShort')}</span> : null}
       </div>
     </div>
   );
@@ -48,15 +55,12 @@ function LeaderCard({
 function DriverCard({
   p,
   viewerDiscordId,
-  isHost,
-  hostDiscordId,
+  position,
 }: {
   p: EventParticipant;
   viewerDiscordId: string;
-  isHost: boolean;
-  hostDiscordId: string;
+  position: number;
 }) {
-  const {t} = useTranslation();
   return (
     <div
       className={cn(
@@ -66,18 +70,10 @@ function DriverCard({
           : 'border-white/[0.06] bg-card',
       )}
     >
+      <SeatNumber n={position} />
       <UserAvatar src={p.avatarUrl} name={p.gamertag ?? p.username} size="xs" variant="purple" />
       <div className="min-w-0">
-        <ParticipantDisplayNames
-          gamertag={p.gamertag}
-          username={p.username}
-          showDiscordUsername={isHost && p.discordId !== hostDiscordId}
-        />
-        {p.discordId === viewerDiscordId ? (
-          <p className="text-[9px] font-bold uppercase tracking-widest text-accent-purple-light">
-            {t('common.you')}
-          </p>
-        ) : null}
+        <ParticipantDisplayNames gamertag={p.gamertag} username={p.username} />
       </div>
     </div>
   );
@@ -85,7 +81,7 @@ function DriverCard({
 
 export function EventDetailParticipants({view, viewerDiscordId}: Props) {
   const {t} = useTranslation();
-  const {ev, groups, waitlist, isHost} = view;
+  const {ev, groups, waitlist} = view;
   const multiGroup = groups.length > 1;
 
   function groupCount(group: RosterGroup): number {
@@ -96,12 +92,7 @@ export function EventDetailParticipants({view, viewerDiscordId}: Props) {
 
   return (
     <div className="mt-6">
-      <div className="mb-3 flex items-center justify-between">
-        <p className="text-sm font-semibold text-white">{t('eventDetail.participants')}</p>
-        <span className="text-xs tabular-nums text-muted">
-          {formatLobbyCount(ev.currentPlayers, view.ev.maxPlayers * groups.length)}
-        </span>
-      </div>
+      <p className="mb-3 text-sm font-semibold text-white">{t('eventDetail.participants')}</p>
 
       <div className="space-y-4">
         {groups.map((group) => (
@@ -117,26 +108,31 @@ export function EventDetailParticipants({view, viewerDiscordId}: Props) {
               </div>
             ) : null}
 
-            {group.leader ? (
-              <LeaderCard leader={group.leader} hostDiscordId={ev.hostDiscordId} />
-            ) : null}
-
-            {group.drivers.length === 0 ? (
-              <p className="text-sm text-muted">
-                {group.leader ? t('eventDetail.noDriversYet') : t('eventDetail.noParticipantsYet')}
-              </p>
+            {group.leader || group.drivers.length > 0 ? (
+              <>
+                <div className="grid grid-cols-2 gap-2">
+                  {group.leader ? (
+                    <LeaderCard
+                      leader={group.leader}
+                      hostDiscordId={ev.hostDiscordId}
+                      position={1}
+                    />
+                  ) : null}
+                  {group.drivers.map((p, i) => (
+                    <DriverCard
+                      key={p.discordId}
+                      p={p}
+                      viewerDiscordId={viewerDiscordId}
+                      position={(group.leader ? 1 : 0) + i + 1}
+                    />
+                  ))}
+                </div>
+                {group.leader && group.drivers.length === 0 ? (
+                  <p className="text-sm text-muted">{t('eventDetail.noDriversYet')}</p>
+                ) : null}
+              </>
             ) : (
-              <div className="grid grid-cols-2 gap-2">
-                {group.drivers.map((p) => (
-                  <DriverCard
-                    key={p.discordId}
-                    p={p}
-                    viewerDiscordId={viewerDiscordId}
-                    isHost={isHost}
-                    hostDiscordId={ev.hostDiscordId}
-                  />
-                ))}
-              </div>
+              <p className="text-sm text-muted">{t('eventDetail.noParticipantsYet')}</p>
             )}
           </div>
         ))}
@@ -160,9 +156,7 @@ export function EventDetailParticipants({view, viewerDiscordId}: Props) {
                       : 'border-white/[0.06] bg-card',
                   )}
                 >
-                  <span className="w-5 shrink-0 text-center text-xs font-bold tabular-nums text-muted">
-                    {i + 1}
-                  </span>
+                  <SeatNumber n={i + 1} />
                   <UserAvatar
                     src={p.avatarUrl}
                     name={p.gamertag ?? p.username}
@@ -170,16 +164,7 @@ export function EventDetailParticipants({view, viewerDiscordId}: Props) {
                     variant="neutral"
                   />
                   <div className="min-w-0">
-                    <ParticipantDisplayNames
-                      gamertag={p.gamertag}
-                      username={p.username}
-                      showDiscordUsername={isHost && p.discordId !== ev.hostDiscordId}
-                    />
-                    {p.discordId === viewerDiscordId ? (
-                      <p className="text-[9px] font-bold uppercase tracking-widest text-accent-purple-light">
-                        {t('common.you')}
-                      </p>
-                    ) : null}
+                    <ParticipantDisplayNames gamertag={p.gamertag} username={p.username} />
                   </div>
                 </div>
               ))}

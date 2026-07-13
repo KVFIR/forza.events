@@ -8,6 +8,7 @@ import {resolveEventCoverUrl} from './eventCovers';
 import {parseTracksFromRow} from './eventTracks';
 import {normalizeEventType} from './eventTypes';
 import {isHostDraftLifecycle} from './draftEvents';
+import {sortParticipantsByJoinedAt} from './eventRoster';
 import {isBrowseFeedEvent, resolveEventDisplayStatus} from './eventSpec';
 import {PI_MAX} from './pi';
 import type {
@@ -119,6 +120,7 @@ const EVENT_LIST_SELECT = `
   users!events_host_discord_id_fkey(username, avatar_url),
   discord_guilds(guild_name),
   event_participants(
+    order: joined_at,
     discord_id,
     gamertag_snapshot,
     is_convoy_leader,
@@ -280,7 +282,7 @@ function rulesFromRow(row: DbEventRow): string {
 export function mapDbEvent(row: DbEventRow): ForzaEvent {
   const host = row.users;
   const guild = row.discord_guilds;
-  const participants =
+  const participants = sortParticipantsByJoinedAt(
     row.event_participants?.map((p) => ({
       discordId: p.discord_id,
       username: p.users?.username?.trim() ?? '',
@@ -292,7 +294,8 @@ export function mapDbEvent(row: DbEventRow): ForzaEvent {
       groupIndex: p.group_index ?? 1,
       waitlisted: p.waitlisted ?? false,
       joinedAt: p.joined_at ?? undefined,
-    })) ?? [];
+    })) ?? [],
+  );
 
   const leaderParticipant = participants.find(
     (p) => p.isConvoyLeader && (p.groupIndex ?? 1) === 1,

@@ -89,7 +89,9 @@ export function resolveConvoyLeader(
 export function resolveRegisteredDrivers(
   participants: EventParticipant[],
 ): EventParticipant[] {
-  return participants.filter((p) => !p.isConvoyLeader && !p.waitlisted);
+  return sortParticipantsByJoinedAt(
+    participants.filter((p) => !p.isConvoyLeader && !p.waitlisted),
+  );
 }
 
 export type RosterGroup = {
@@ -113,32 +115,46 @@ export function resolveEventGroups(
         : leaderPart
           ? rosterLeaderFromParticipant(event, leaderPart, viewerDiscordId)
           : null;
-    const drivers = event.participants.filter(
-      (p) => !p.waitlisted && !p.isConvoyLeader && (p.groupIndex ?? 1) === g,
+    const drivers = sortParticipantsByJoinedAt(
+      event.participants.filter(
+        (p) => !p.waitlisted && !p.isConvoyLeader && (p.groupIndex ?? 1) === g,
+      ),
     );
     groups.push({groupIndex: g, leader, drivers});
   }
   return groups;
 }
 
-/** Waitlist ordering — matches server promotion (`joined_at`, then `discord_id`). */
-export function compareWaitlistParticipants(a: EventParticipant, b: EventParticipant): number {
+/** Registration order — matches server waitlist promotion (`joined_at`, then `discord_id`). */
+export function compareParticipantsByJoinedAt(
+  a: EventParticipant,
+  b: EventParticipant,
+): number {
   const ta = a.joinedAt ?? '';
   const tb = b.joinedAt ?? '';
   if (ta !== tb) return ta.localeCompare(tb);
   return a.discordId.localeCompare(b.discordId);
 }
 
+/** @deprecated Use compareParticipantsByJoinedAt */
+export const compareWaitlistParticipants = compareParticipantsByJoinedAt;
+
+export function sortParticipantsByJoinedAt(
+  participants: EventParticipant[],
+): EventParticipant[] {
+  return [...participants].sort(compareParticipantsByJoinedAt);
+}
+
 /** Queue of waitlisted racers, oldest first (matches server promotion order). */
 export function resolveWaitlist(participants: EventParticipant[]): EventParticipant[] {
-  return participants.filter((p) => p.waitlisted).sort(compareWaitlistParticipants);
+  return sortParticipantsByJoinedAt(participants.filter((p) => p.waitlisted));
 }
 
 /** All participants eligible for results (one row per racer; waitlisted never raced). */
 export function resolveResultsRoster(
   event: Pick<ForzaEvent, 'participants'>,
 ): EventParticipant[] {
-  return event.participants.filter((p) => !p.waitlisted);
+  return sortParticipantsByJoinedAt(event.participants.filter((p) => !p.waitlisted));
 }
 
 /** Convoy leader for a specific lobby group (group 1 keeps denormalized host fallback). */

@@ -4,6 +4,7 @@ export const EVENT_LIST_SELECT = `
   users!events_host_discord_id_fkey(username, avatar_url),
   discord_guilds(guild_name),
   event_participants(
+    order: joined_at,
     discord_id,
     gamertag_snapshot,
     is_convoy_leader,

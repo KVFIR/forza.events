@@ -4,20 +4,14 @@ type Props = {
   gamertag?: string;
   /** Discord unique handle from `users.username`. */
   username: string;
-  /** When true, show Discord handle under the Xbox gamertag (host view). */
-  showDiscordUsername?: boolean;
 };
 
-/** Primary line: Xbox gamertag; optional second line: Discord handle for hosts. */
-export function ParticipantDisplayNames({
-  gamertag,
-  username,
-  showDiscordUsername = false,
-}: Props) {
+/** Primary line: Xbox gamertag (or Discord handle); second line: Discord when gamertag is set. */
+export function ParticipantDisplayNames({gamertag, username}: Props) {
   const gt = gamertag?.trim();
   const handle = formatDiscordHandle(username);
   const primary = gt || handle || '—';
-  const showDiscordLine = showDiscordUsername && !!handle && !!gt;
+  const showDiscordLine = Boolean(handle && gt);
 
   return (
     <>
