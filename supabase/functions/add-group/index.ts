@@ -47,7 +47,7 @@ serve(async (req) => {
     const {data: event} = await supabase
       .from('events')
       .select(
-        'host_discord_id, guild_id, status, starts_at, group_count, max_players, lobby_leader_discord_id, lobby_leader_is_host, lobby_leader_gamertag, title, timezone',
+        'host_discord_id, guild_id, status, starts_at, group_count, max_players, lobby_leader_discord_id, lobby_leader_is_host, lobby_leader_gamertag, title, timezone_hint',
       )
       .eq('id', eventId)
       .single();
@@ -173,7 +173,7 @@ serve(async (req) => {
           max_players: event.max_players,
           group_count: newGroupIndex,
           starts_at: event.starts_at,
-          timezone: event.timezone,
+          timezone: event.timezone_hint,
         },
         newGroupIndex,
         promotedIds,

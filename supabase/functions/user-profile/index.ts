@@ -44,6 +44,31 @@ serve(async (req) => {
       const loc = String(notification_locale).split('-')[0];
       if (loc === 'en' || loc === 'ru') updates.notification_locale = loc;
     }
+
+    if (Object.keys(updates).length === 0) {
+      const {data, error} = await supabase
+        .from('users')
+        .select()
+        .eq('discord_id', discordUser.id)
+        .single();
+      if (error) return databaseErrorResponse(req, 'user-profile', error);
+      return jsonResponse({
+        user: {
+          discordId: data.discord_id,
+          username: discordUniqueUsername(discordUser),
+          avatarUrl: avatarUrl(discordUser),
+          xboxGamertag: data.xbox_gamertag,
+          eventsJoined: data.events_joined,
+          eventsHosted: data.events_hosted,
+          attendanceRate: Number(data.attendance_rate),
+          noShows: data.no_shows,
+          hostRatingAvg: 0,
+          dmNotificationsEnabled: data.dm_notifications_enabled ?? true,
+          notificationLocale: data.notification_locale === 'ru' ? 'ru' : 'en',
+        },
+      }, 200, req);
+    }
+
     const {data, error} = await supabase
       .from('users')
       .update(updates)

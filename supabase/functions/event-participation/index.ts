@@ -105,7 +105,7 @@ serve(async (req) => {
         if (promotedId) {
           const {data: eventRow} = await supabase
             .from('events')
-            .select('id, title, host_discord_id, max_players, group_count, starts_at, timezone')
+            .select('id, title, host_discord_id, max_players, group_count, starts_at, timezone_hint')
             .eq('id', event_id)
             .single();
           const {data: participants} = await supabase
@@ -148,7 +148,7 @@ serve(async (req) => {
 
       const {data: event} = await supabase
         .from('events')
-        .select('max_players, group_count, current_players, status, starts_at, host_discord_id, title, timezone')
+        .select('max_players, group_count, current_players, status, starts_at, host_discord_id, title, timezone_hint')
         .eq('id', event_id)
         .single();
 
@@ -232,7 +232,7 @@ serve(async (req) => {
         max_players: event.max_players,
         group_count: event.group_count,
         starts_at: event.starts_at,
-        timezone: event.timezone,
+        timezone: event.timezone_hint,
       };
 
       if (waitlisted) {

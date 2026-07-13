@@ -233,7 +233,7 @@ export async function scanStartingSoonReminders(
 
   const {data: events} = await supabase
     .from('events')
-    .select('id, title, host_discord_id, max_players, group_count, starts_at, timezone, status, discord_message_id')
+    .select('id, title, host_discord_id, max_players, group_count, starts_at, timezone_hint, status, discord_message_id')
     .not('discord_message_id', 'is', null)
     .in('status', ['open', 'live'])
     .gte('starts_at', windowStart)
@@ -248,7 +248,7 @@ export async function scanStartingSoonReminders(
       .eq('event_id', event.id);
 
     const roster = participants ?? [];
-    const tz = event.timezone ?? 'UTC';
+    const tz = event.timezone_hint ?? 'UTC';
     const groupCount = event.group_count ?? 1;
     const totalCapacity = groupCount * event.max_players;
     const activeCount = activeRacers(roster).length;

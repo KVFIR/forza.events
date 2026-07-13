@@ -117,7 +117,7 @@ serve(async (req) => {
           max_players: updated.max_players,
           group_count: updated.group_count,
           starts_at: updated.starts_at,
-          timezone: updated.timezone,
+          timezone: updated.timezone_hint,
         }, participants);
         deferNotificationDelivery(supabase);
       }
@@ -293,7 +293,7 @@ serve(async (req) => {
             max_players: data.max_players,
             group_count: data.group_count,
             starts_at: data.starts_at,
-            timezone: data.timezone,
+            timezone: data.timezone_hint,
           };
 
           const leaderChanged = existing.lobby_leader_discord_id !== lobbyResolved.lobby_leader_discord_id ||
