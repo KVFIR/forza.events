@@ -68,6 +68,16 @@
     color-scheme: dark;
   }
 
+  /* Form selects: custom chevron with right inset (native arrow sits flush on the border). */
+  select.form-select {
+    appearance: none;
+    -webkit-appearance: none;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 20 20' fill='none'%3E%3Cpath stroke='%2394a3b8' stroke-linecap='round' stroke-linejoin='round' stroke-width='1.5' d='M6 8l4 4 4-4'/%3E%3C/svg%3E");
+    background-repeat: no-repeat;
+    background-position: right 0.875rem center;
+    background-size: 1rem;
+  }
+
   select option {
     background-color: #0e1020;
     color: #e2e8f0;

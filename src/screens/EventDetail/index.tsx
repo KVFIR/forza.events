@@ -220,11 +220,9 @@ export function EventDetail() {
         displayStatus={displayStatus}
         view={view}
         detailFrom={routeState?.from}
-        deleting={hostActions.deleting}
         cancelling={hostActions.cancelling}
         authRetrying={authRetrying}
         leaving={leaving}
-        onConfirmDelete={() => hostActions.setConfirmAction('delete')}
         onConfirmCancel={() => hostActions.setConfirmAction('cancel')}
         onJoinClick={() => void handleJoinClick()}
       />
@@ -243,13 +241,8 @@ export function EventDetail() {
         onGamertagSave={(gt) => void doJoin(gt)}
         onGamertagClose={() => setGamertagOpen(false)}
         confirmAction={hostActions.confirmAction}
-        deleting={hostActions.deleting}
         cancelling={hostActions.cancelling}
         onConfirmDismiss={() => hostActions.setConfirmAction(null)}
-        onDeleteConfirm={() => {
-          hostActions.setConfirmAction(null);
-          void hostActions.handleDeleteDraft();
-        }}
         onCancelConfirm={() => {
           hostActions.setConfirmAction(null);
           void hostActions.handleCancelEvent();

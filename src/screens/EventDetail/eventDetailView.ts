@@ -9,7 +9,6 @@ import {
 import {
   canAddGroup,
   canCancelEvent,
-  canDeleteDraft,
   canEditEvent,
   canLeaveRegistration,
   canSubmitEventResults,
@@ -41,7 +40,6 @@ export type EventDetailViewModel = {
   canEnterResults: boolean;
   canEdit: boolean;
   canCancel: boolean;
-  canDelete: boolean;
   joined: boolean;
   isInParticipants: boolean;
   registrationOpen: boolean;
@@ -112,7 +110,6 @@ export function buildEventDetailViewModel(input: {
   const canEnterResults = canSubmitEventResults(event, user);
   const canEdit = canEditEvent(event, user);
   const canCancel = canCancelEvent(event, user);
-  const canDelete = canDeleteDraft(event, user);
   const joined = isJoined(event);
   const isInParticipants = userHasParticipantRow(ev, user);
   const registrationOpen = isRegistrationOpen(ev);
@@ -180,7 +177,6 @@ export function buildEventDetailViewModel(input: {
     canEnterResults,
     canEdit,
     canCancel,
-    canDelete,
     joined,
     isInParticipants,
     registrationOpen,

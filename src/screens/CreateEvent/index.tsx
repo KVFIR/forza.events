@@ -7,7 +7,6 @@ import {FormAlerts, StepIndicator} from './components/StepIndicator';
 import {PublishedTargetSummary} from './components/PublishedTargetSummary';
 import {CreateEventConvoySection} from './components/CreateEventConvoySection';
 import {PUBLISH_STEP_INDEX} from './constants';
-import {collectPublishGaps} from './publishGaps';
 import {useEffect, useRef, useState} from 'react';
 import {useCreateEventForm} from './useCreateEventForm';
 import {EventStep} from './steps/EventStep';
@@ -91,16 +90,6 @@ export function CreateEvent() {
     clearFieldError,
   } = form;
 
-  const missingForPublish = collectPublishGaps({
-    guildId: values.targetGuildId,
-    channelId: values.targetChannelId,
-    carRuleMode: values.carRuleMode,
-    carCount: values.eventCars.length,
-    lobbyLeaderIsHost: values.lobbyLeaderIsHost,
-    lobbyLeaderDiscordId: values.lobbyLeaderDiscordId,
-    hostGamertag: user.xboxGamertag,
-  });
-
   const hasDraftId = Boolean(eventId);
   const draftFlow = !isPublished;
 
@@ -124,9 +113,10 @@ export function CreateEvent() {
     }
   }
 
-  async function handleSaveDraft(stayOnPage = false) {
+  async function handleSaveDraft() {
     const id = await persistDraft();
-    if (id && !stayOnPage) navigate('/my-events', {replace: true});
+    if (!id) return;
+    navigate(`/event/${id}`, {replace: true, state: {from: '/my-events'}});
   }
 
   async function handleSaveChanges() {
@@ -264,11 +254,9 @@ export function CreateEvent() {
           lockGuild={false}
           lockChannel={false}
           fieldErrors={fieldErrors}
-          missingForPublish={missingForPublish}
           convoy={convoySectionProps}
           onGuildChange={onGuildChange}
           onChannelChange={setTargetChannelId}
-          onJumpToStep={setStep}
         />
       )}
 
@@ -328,7 +316,7 @@ export function CreateEvent() {
               variant="secondary"
               fullWidth
               disabled={saving || !canPersist}
-              onClick={() => void handleSaveDraft(true)}
+              onClick={() => void handleSaveDraft()}
             >
               {saving ? busyLabel('saving') : t('create.saveAsDraft')}
             </Button>

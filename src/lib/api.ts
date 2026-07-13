@@ -1,3 +1,4 @@
+import {coalesceInflight, dedupCacheKey} from './apiDedup';
 import {ApiRequestError, apiErrorFromPayload} from './apiErrors';
 import {API_ERROR_CODES} from './apiErrorCodes';
 import {clearDiscordSession} from './discordAuth';
@@ -155,11 +156,19 @@ export async function fetchLaunchIntent(
   return data.event_id;
 }
 
-export async function listGuilds(discordToken: string) {
-  return invoke<{
-    guilds: {id: string; name: string; icon_url?: string | null}[];
-    hint?: string | null;
-  }>('list-guilds', {}, discordToken);
+export async function listGuilds(
+  discordToken: string,
+  options?: {fresh?: boolean},
+) {
+  return coalesceInflight(
+    dedupCacheKey('list-guilds', discordToken),
+    () =>
+      invoke<{
+        guilds: {id: string; name: string; icon_url?: string | null}[];
+        hint?: string | null;
+      }>('list-guilds', {}, discordToken),
+    {cacheMs: 30_000, fresh: options?.fresh},
+  );
 }
 
 export async function listGuildMembers(
@@ -177,11 +186,20 @@ export async function listGuildMembers(
   }>('list-guild-members', {guild_id: guildId, query}, discordToken);
 }
 
-export async function listChannels(discordToken: string, guildId: string) {
-  return invoke<{
-    channels: {id: string; name: string; position: number}[];
-    hint?: string | null;
-  }>('list-channels', {guild_id: guildId}, discordToken);
+export async function listChannels(
+  discordToken: string,
+  guildId: string,
+  options?: {fresh?: boolean},
+) {
+  return coalesceInflight(
+    dedupCacheKey('list-channels', discordToken, guildId),
+    () =>
+      invoke<{
+        channels: {id: string; name: string; position: number}[];
+        hint?: string | null;
+      }>('list-channels', {guild_id: guildId}, discordToken),
+    {cacheMs: 30_000, fresh: options?.fresh},
+  );
 }
 
 export async function validatePublishChannel(

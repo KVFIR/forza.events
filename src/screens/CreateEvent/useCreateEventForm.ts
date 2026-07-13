@@ -550,6 +550,35 @@ export function useCreateEventForm() {
     setCoverPreview(file ? URL.createObjectURL(file) : coverUrl);
   }
 
+  const onGuildChange = useCallback(
+    (id: string, name: string) => {
+      clearFieldError('targetGuildId');
+      const guildChanged = id !== targetGuildId;
+      if (guildChanged && !lobbyLeaderIsHost && lobbyLeaderDiscordId) {
+        clearLobbyLeaderSelection();
+      }
+      setTargetGuildId(id);
+      setTargetGuildName(name);
+      if (!isPublished && guildChanged) setTargetChannelId('');
+    },
+    [
+      clearFieldError,
+      targetGuildId,
+      lobbyLeaderIsHost,
+      lobbyLeaderDiscordId,
+      clearLobbyLeaderSelection,
+      isPublished,
+    ],
+  );
+
+  const onTargetChannelChange = useCallback(
+    (id: string) => {
+      clearFieldError('targetChannelId');
+      setTargetChannelId(id);
+    },
+    [clearFieldError],
+  );
+
   return {
     editId,
     user,
@@ -647,19 +676,7 @@ export function useCreateEventForm() {
     },
     setTargetGuildId,
     setTargetGuildName,
-    setTargetChannelId: (id: string) => {
-      clearFieldError('targetChannelId');
-      setTargetChannelId(id);
-    },
-    onGuildChange: (id: string, name: string) => {
-      clearFieldError('targetGuildId');
-      const guildChanged = id !== targetGuildId;
-      if (guildChanged && !lobbyLeaderIsHost && lobbyLeaderDiscordId) {
-        clearLobbyLeaderSelection();
-      }
-      setTargetGuildId(id);
-      setTargetGuildName(name);
-      if (!isPublished && guildChanged) setTargetChannelId('');
-    },
+    setTargetChannelId: onTargetChannelChange,
+    onGuildChange,
   };
 }

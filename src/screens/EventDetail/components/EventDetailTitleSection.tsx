@@ -22,7 +22,6 @@ type Props = {
     | 'showHostPostStartActions'
     | 'canEnterResults'
     | 'canCancel'
-    | 'canDelete'
     | 'canEdit'
     | 'isHost'
     | 'showParticipantActions'
@@ -44,11 +43,9 @@ type Props = {
     | 'onWaitlist'
     | 'willWaitlist'
   >;
-  deleting: boolean;
   cancelling: boolean;
   authRetrying: boolean;
   leaving: boolean;
-  onConfirmDelete: () => void;
   onConfirmCancel: () => void;
   onJoinClick: () => void;
   /** Original list referrer for nested navigation (e.g. results). */
@@ -59,11 +56,9 @@ export function EventDetailTitleSection({
   event,
   displayStatus,
   view,
-  deleting,
   cancelling,
   authRetrying,
   leaving,
-  onConfirmDelete,
   onConfirmCancel,
   onJoinClick,
   detailFrom,
@@ -111,27 +106,14 @@ export function EventDetailTitleSection({
   ) : null;
 
   const titleRowAction = view.showDraftActions ? (
-    <div className="flex shrink-0 flex-col gap-2">
-      <Button
-        variant="primary"
-        size="toolbar"
-        className="shrink-0 whitespace-nowrap"
-        onClick={() => navigate(`/create?edit=${event.id}`)}
-      >
-        {t('eventDetail.continueEditing')}
-      </Button>
-      {view.canDelete ? (
-        <Button
-          variant="danger"
-          size="toolbar"
-          className="shrink-0 whitespace-nowrap"
-          disabled={deleting}
-          onClick={onConfirmDelete}
-        >
-          {deleting ? busyLabel('deleting') : t('eventDetail.deleteDraft')}
-        </Button>
-      ) : null}
-    </div>
+    <Button
+      variant="primary"
+      size="toolbar"
+      className="shrink-0 whitespace-nowrap"
+      onClick={() => navigate(`/create?edit=${event.id}`)}
+    >
+      {t('eventDetail.continueEditing')}
+    </Button>
   ) : view.showHostPostStartActions ? (
     <div className="flex shrink-0 flex-col gap-2">
       {view.canEnterResults ? (

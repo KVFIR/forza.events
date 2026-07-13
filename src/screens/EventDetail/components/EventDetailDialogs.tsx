@@ -8,11 +8,9 @@ type Props = {
   joining: boolean;
   onGamertagSave: (gamertag: string) => void;
   onGamertagClose: () => void;
-  confirmAction: 'delete' | 'cancel' | null;
-  deleting: boolean;
+  confirmAction: 'cancel' | null;
   cancelling: boolean;
   onConfirmDismiss: () => void;
-  onDeleteConfirm: () => void;
   onCancelConfirm: () => void;
 };
 
@@ -23,10 +21,8 @@ export function EventDetailDialogs({
   onGamertagSave,
   onGamertagClose,
   confirmAction,
-  deleting,
   cancelling,
   onConfirmDismiss,
-  onDeleteConfirm,
   onCancelConfirm,
 }: Props) {
   const {t} = useTranslation();
@@ -41,16 +37,6 @@ export function EventDetailDialogs({
         onClose={onGamertagClose}
       />
 
-      <ConfirmDialog
-        open={confirmAction === 'delete'}
-        title={t('eventDetail.deleteDraftTitle')}
-        description={t('eventDetail.deleteDraftDesc')}
-        confirmLabel={t('common.delete')}
-        variant="danger"
-        busy={deleting}
-        onCancel={onConfirmDismiss}
-        onConfirm={onDeleteConfirm}
-      />
       <ConfirmDialog
         open={confirmAction === 'cancel'}
         title={t('eventDetail.cancelEventTitle')}

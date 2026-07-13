@@ -58,7 +58,11 @@ export function isNativePickerInputType(type: string | undefined): boolean {
 }
 
 /** Native &lt;select&gt; in forms (publish target, channel picker). */
-export const selectClass = [controlClass, controlFocusClass, 'min-w-0 max-w-full'].join(' ');
+export const selectClass = [
+  controlClass,
+  controlFocusClass,
+  'form-select min-w-0 max-w-full pr-10',
+].join(' ');
 
 /** Compact filter/sort controls in list headers (Browse, My Events). */
 export const selectMetaClass = [

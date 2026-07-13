@@ -1,15 +1,13 @@
 import {useCallback, useEffect, useMemo, useRef, useState} from 'react';
 import {useTranslation} from 'react-i18next';
 import {busyLabel} from '../i18n/busyLabels';
-import {listChannels, listGuilds, validatePublishChannel} from '../lib/api';
-import {shouldClearChannelAfterValidationFailure} from '../lib/apiErrors';
+import {listChannels, listGuilds} from '../lib/api';
 import {getGuildContext} from '../lib/discord';
 import {buildBotInstallUrl, openBotInstallUrl} from '../lib/discordInstall';
 import {isPlaceholderGuildName} from '../lib/guildDisplay';
 import {Button} from './ui/Button';
 import {FieldLabel} from './ui/FieldLabel';
 import {Select} from './ui/Select';
-import {InlineLoading} from './ui/InlineLoading';
 import {ModalBackdrop, ModalPanel} from './ui/ModalShell';
 import {TextButton} from './ui/TextButton';
 
@@ -43,15 +41,20 @@ export function PublishTargetPicker({
   const [guildHint, setGuildHint] = useState<string | null>(null);
   const [loadingGuilds, setLoadingGuilds] = useState(true);
   const [loadingChannels, setLoadingChannels] = useState(false);
-  const [validatingChannel, setValidatingChannel] = useState(false);
   const [channelHint, setChannelHint] = useState<string | null>(null);
   const [guildError, setGuildError] = useState<string | null>(null);
   const [channelsError, setChannelsError] = useState<string | null>(null);
-  const [channelError, setChannelError] = useState<string | null>(null);
   const guildRequestRef = useRef(0);
   const channelRequestRef = useRef(0);
-  const channelValidateRef = useRef(0);
-  const validatedChannelKeyRef = useRef('');
+  const guildIdRef = useRef(guildId);
+  const channelIdRef = useRef(channelId);
+  const onGuildChangeRef = useRef(onGuildChange);
+  const autoSelectAttemptedRef = useRef(false);
+  const channelsGuildRef = useRef<string | null>(null);
+  const guildNameSyncedRef = useRef<string | null>(null);
+  guildIdRef.current = guildId;
+  channelIdRef.current = channelId;
+  onGuildChangeRef.current = onGuildChange;
   const canAddBot = Boolean(buildBotInstallUrl());
   const activityGuildId = getGuildContext().guildId;
 
@@ -69,21 +72,28 @@ export function PublishTargetPicker({
     return channels;
   }, [channels, channelId]);
 
-  const loadGuilds = useCallback(() => {
+  const loadGuilds = useCallback((options?: {background?: boolean; fresh?: boolean}) => {
     const requestId = ++guildRequestRef.current;
-    setLoadingGuilds(true);
+    if (!options?.background) setLoadingGuilds(true);
     setGuildError(null);
-    void listGuilds(accessToken)
+    void listGuilds(accessToken, {fresh: options?.fresh})
       .then((r) => {
         if (requestId !== guildRequestRef.current) return;
         setGuilds(r.guilds);
         setGuildHint(r.hint ?? null);
-        if (!lockGuild && !guildId) {
+        if (
+          !lockGuild &&
+          !guildIdRef.current &&
+          !autoSelectAttemptedRef.current
+        ) {
           const preferred =
             (activityGuildId
               ? r.guilds.find((g) => g.id === activityGuildId)
               : undefined) ?? (r.guilds.length === 1 ? r.guilds[0] : undefined);
-          if (preferred) onGuildChange(preferred.id, preferred.name);
+          if (preferred) {
+            autoSelectAttemptedRef.current = true;
+            onGuildChangeRef.current(preferred.id, preferred.name);
+          }
         }
       })
       .catch((e) => {
@@ -93,27 +103,39 @@ export function PublishTargetPicker({
       .finally(() => {
         if (requestId === guildRequestRef.current) setLoadingGuilds(false);
       });
-  }, [accessToken, activityGuildId, guildId, lockGuild, onGuildChange]);
+  }, [accessToken, activityGuildId, lockGuild]);
 
-  const loadChannels = useCallback(() => {
+  const loadChannels = useCallback((options?: {background?: boolean; fresh?: boolean}) => {
     if (!guildId) {
       channelRequestRef.current += 1;
+      channelsGuildRef.current = null;
       setChannels([]);
       setLoadingChannels(false);
       return;
     }
     const requestGuildId = guildId;
+    const guildChanged = channelsGuildRef.current !== requestGuildId;
+    channelsGuildRef.current = requestGuildId;
     const requestId = ++channelRequestRef.current;
-    setChannels([]);
-    setChannelHint(null);
-    setChannelError(null);
-    setChannelsError(null);
-    setLoadingChannels(true);
-    void listChannels(accessToken, requestGuildId)
+    if (guildChanged) {
+      setChannels([]);
+      setChannelHint(null);
+      setChannelsError(null);
+    }
+    if (!options?.background || guildChanged) setLoadingChannels(true);
+    void listChannels(accessToken, requestGuildId, {fresh: options?.fresh})
       .then((r) => {
         if (requestId !== channelRequestRef.current) return;
         setChannels(r.channels);
         setChannelHint(r.hint ?? null);
+        const savedChannelId = channelIdRef.current;
+        if (
+          !lockChannel &&
+          savedChannelId &&
+          !r.channels.some((c) => c.id === savedChannelId)
+        ) {
+          onChannelChange('');
+        }
       })
       .catch((e) => {
         if (requestId !== channelRequestRef.current) return;
@@ -122,80 +144,28 @@ export function PublishTargetPicker({
       .finally(() => {
         if (requestId === channelRequestRef.current) setLoadingChannels(false);
       });
-  }, [accessToken, guildId]);
+  }, [accessToken, guildId, lockChannel, onChannelChange]);
 
   useEffect(() => {
     loadGuilds();
-  }, [loadGuilds]);
+  }, [accessToken, loadGuilds]);
 
   useEffect(() => {
     if (!guildId || lockGuild || guilds.length === 0) return;
     const match = guilds.find((g) => g.id === guildId);
     if (!match) return;
+    const syncKey = `${guildId}:${match.name}`;
+    if (guildNameSyncedRef.current === syncKey) return;
     if (isPlaceholderGuildName(guildName) || guildName !== match.name) {
-      onGuildChange(guildId, match.name);
+      guildNameSyncedRef.current = syncKey;
+      onGuildChangeRef.current(guildId, match.name);
     }
-  }, [guildId, guildName, guilds, lockGuild, onGuildChange]);
+  }, [guildId, guildName, guilds, lockGuild]);
 
   useEffect(() => {
     if (!guildId || loadingGuilds) return;
     loadChannels();
   }, [guildId, loadingGuilds, loadChannels]);
-
-  const validateChannelSelection = useCallback(
-    async (
-      nextChannelId: string,
-      requestGuildId: string,
-      source: 'revalidate' | 'user',
-    ) => {
-      if (!nextChannelId) {
-        validatedChannelKeyRef.current = '';
-        setChannelError(null);
-        onChannelChange('');
-        return;
-      }
-      const requestId = ++channelValidateRef.current;
-      setValidatingChannel(true);
-      setChannelError(null);
-      try {
-        const result = await validatePublishChannel(
-          accessToken,
-          requestGuildId,
-          nextChannelId,
-        );
-        if (requestId !== channelValidateRef.current) return;
-        if (!result.ok) {
-          validatedChannelKeyRef.current = '';
-          setChannelError(result.error ?? 'FORZA.EVENTS cannot post in this channel.');
-          if (
-            shouldClearChannelAfterValidationFailure(source, null, result.code)
-          ) {
-            onChannelChange('');
-          }
-          return;
-        }
-        validatedChannelKeyRef.current = `${requestGuildId}:${nextChannelId}`;
-        onChannelChange(nextChannelId);
-      } catch (e) {
-        if (requestId !== channelValidateRef.current) return;
-        validatedChannelKeyRef.current = '';
-        setChannelError(e instanceof Error ? e.message : String(e));
-        if (shouldClearChannelAfterValidationFailure(source, e)) {
-          onChannelChange('');
-        }
-      } finally {
-        if (requestId === channelValidateRef.current) setValidatingChannel(false);
-      }
-    },
-    [accessToken, onChannelChange],
-  );
-
-  useEffect(() => {
-    if (!guildId || !channelId || lockChannel || loadingChannels) return;
-    const key = `${guildId}:${channelId}`;
-    if (validatedChannelKeyRef.current === key) return;
-    void validateChannelSelection(channelId, guildId, 'revalidate');
-  }, [guildId, channelId, lockChannel, loadingChannels, validateChannelSelection]);
 
   function handleAddBot() {
     const prefillCurrentServer =
@@ -223,21 +193,59 @@ export function PublishTargetPicker({
           type="button"
           variant="ghost"
           size="toolbar"
-          onClick={loadGuilds}
+          onClick={() => loadGuilds({background: true, fresh: true})}
           disabled={loadingGuilds}
         >
-          Refresh list
+          {t('publish.refreshList')}
         </Button>
       </div>
-    ) : null;
+    ) : (
+      <div className="mt-2">
+        <Button
+          type="button"
+          variant="ghost"
+          size="toolbar"
+          onClick={() => loadGuilds({background: true, fresh: true})}
+          disabled={loadingGuilds}
+        >
+          {t('publish.refreshList')}
+        </Button>
+      </div>
+    );
+
+  const channelSelectDisabled =
+    lockChannel ||
+    !guildId ||
+    (loadingChannels && channels.length === 0);
+  const channelPlaceholderKey = !guildId
+    ? 'publish.selectServerFirst'
+    : loadingChannels && channels.length === 0
+      ? 'publish.refreshingChannels'
+      : 'publish.selectChannel';
+
+  const channelRefreshActions = guildId ? (
+    <div className="mt-2">
+      <Button
+        type="button"
+        variant="ghost"
+        size="toolbar"
+        onClick={() => loadChannels({background: true, fresh: true})}
+        disabled={loadingChannels}
+      >
+        {t('publish.refreshChannels')}
+      </Button>
+    </div>
+  ) : null;
 
   return (
     <div className="space-y-4">
       <div>
         <FieldLabel className="mb-1.5 block">{t('publish.discordServer')}</FieldLabel>
-        {loadingGuilds ? (
-          <InlineLoading label={t('loading.servers')} />
-        ) : guilds.length === 0 ? (
+        {loadingGuilds && guilds.length === 0 ? (
+          <Select disabled value="" aria-busy>
+            <option value="">{t('loading.servers')}</option>
+          </Select>
+        ) : guilds.length === 0 && !loadingGuilds ? (
           <div className="space-y-3">
             <p className="text-sm text-muted">
               {guildHint ?? t('publish.noServersHint')}
@@ -250,10 +258,7 @@ export function PublishTargetPicker({
               value={guildId}
               disabled={lockGuild}
               onChange={(e) => {
-                channelValidateRef.current += 1;
-                validatedChannelKeyRef.current = '';
-                setChannelError(null);
-                setChannelHint(null);
+                guildNameSyncedRef.current = null;
                 const next = guildOptions.find((g) => g.id === e.target.value);
                 onGuildChange(e.target.value, next?.name ?? '');
               }}
@@ -275,60 +280,44 @@ export function PublishTargetPicker({
 
       <div>
         <FieldLabel className="mb-1.5 block">{t('publish.announcementChannel')}</FieldLabel>
-        {!guildId ? (
-          <p className="text-sm text-muted">{t('publish.selectServerFirst')}</p>
-        ) : (
-          <>
-            <Select
-              key={guildId}
-              value={channelId}
-              disabled={lockChannel || !guildId || loadingChannels || validatingChannel}
-              className="disabled:opacity-60"
-              onChange={(e) => {
-                void validateChannelSelection(e.target.value, guildId, 'user');
-              }}
+        <Select
+          value={guildId ? channelId : ''}
+          disabled={channelSelectDisabled}
+          aria-busy={loadingChannels && channels.length === 0}
+          className="disabled:opacity-60"
+          onChange={(e) => {
+            if (!guildId) return;
+            onChannelChange(e.target.value);
+          }}
+        >
+          <option value="">{t(channelPlaceholderKey)}</option>
+          {guildId &&
+            !(loadingChannels && channels.length === 0) &&
+            channelOptions.map((c) => (
+              <option key={c.id} value={c.id}>
+                {c.name === SELECTED_CHANNEL_SENTINEL
+                  ? t('create.selectedChannel')
+                  : `#${c.name}`}
+              </option>
+            ))}
+        </Select>
+        {channelRefreshActions}
+        {channelsError && (
+          <div className="mt-2 space-y-2">
+            <p role="alert" className="text-xs text-accent-red">
+              {channelsError}
+            </p>
+            <TextButton
+              type="button"
+              onClick={() => loadChannels({background: true, fresh: true})}
+              disabled={loadingChannels}
             >
-              <option value="">{t('publish.selectChannel')}</option>
-              {channelOptions.map((c) => (
-                <option key={c.id} value={c.id}>
-                  {c.name === SELECTED_CHANNEL_SENTINEL
-                    ? t('create.selectedChannel')
-                    : `#${c.name}`}
-                </option>
-              ))}
-            </Select>
-            {loadingChannels && (
-              <p className="mt-1.5 text-xs text-muted">{t('publish.refreshingChannels')}</p>
-            )}
-            {validatingChannel && (
-              <p className="mt-1.5 text-xs text-muted">{t('publish.checkingChannel')}</p>
-            )}
-            {channelsError && (
-              <div className="mt-2 space-y-2">
-                <p role="alert" className="text-xs text-accent-red">
-                  {channelsError}
-                </p>
-                <TextButton type="button" onClick={loadChannels} disabled={loadingChannels}>
-                  {t('common.tryAgain')}
-                </TextButton>
-              </div>
-            )}
-            {channelHint && !channelError && !channelsError && (
-              <p className="mt-1.5 text-[10px] text-amber-200/90">{channelHint}</p>
-            )}
-            {channelError && (
-              <p role="alert" className="mt-1.5 text-xs text-red-300/90">
-                {channelError}
-              </p>
-            )}
-            {!channelsError &&
-              !loadingChannels &&
-              channels.length > 0 && (
-                <TextButton type="button" className="mt-1.5" onClick={loadChannels}>
-                  {t('publish.refreshChannels')}
-                </TextButton>
-              )}
-          </>
+              {t('common.tryAgain')}
+            </TextButton>
+          </div>
+        )}
+        {channelHint && !channelsError && (
+          <p className="mt-1.5 text-[10px] text-amber-200/90">{channelHint}</p>
         )}
         {lockChannel && (
           <p className="mt-1.5 text-xs text-muted">{t('create.channelLocked')}</p>
@@ -338,7 +327,7 @@ export function PublishTargetPicker({
       {guildError && (
         <div className="space-y-2">
           <p className="text-xs text-accent-red">{guildError}</p>
-          <TextButton type="button" onClick={loadGuilds} disabled={loadingGuilds}>
+          <TextButton type="button" onClick={() => loadGuilds({background: true, fresh: true})} disabled={loadingGuilds}>
             {t('common.tryAgain')}
           </TextButton>
         </div>

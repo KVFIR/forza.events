@@ -4,6 +4,7 @@ import {useJoinedEvents} from '../context/JoinedEventsContext';
 import {
   buildScopedMyEventsList,
   filterMyEvents,
+  resolveMyEventsCatalogLoading,
   sortHostDrafts,
   sortMyEventsList,
   type MyEventsScope,
@@ -13,7 +14,7 @@ import {useHostDrafts} from './useHostDrafts';
 import {usePublishedEvents} from './usePublishedEvents';
 
 export function useMyEventsCatalog(scope: MyEventsScope = 'all') {
-  const {user, isSignedIn} = useAuth();
+  const {user, isSignedIn, loading: authLoading} = useAuth();
   const {isJoined} = useJoinedEvents();
   const {events, isLoading, isRefreshing, loadError, refetch} = usePublishedEvents({
     includeCompleted: true,
@@ -27,6 +28,13 @@ export function useMyEventsCatalog(scope: MyEventsScope = 'all') {
   } = useHostDrafts();
 
   const waitsForDrafts = scope !== 'joined' && isSignedIn;
+  const catalogLoading = resolveMyEventsCatalogLoading({
+    scope,
+    authLoading,
+    publishedLoading: isLoading,
+    isSignedIn,
+    draftsLoading,
+  });
 
   const sortedDrafts = useMemo(() => sortHostDrafts(drafts), [drafts]);
 
@@ -43,29 +51,26 @@ export function useMyEventsCatalog(scope: MyEventsScope = 'all') {
   const listOptions = useMemo(
     () => ({
       includeDrafts: waitsForDrafts,
-      draftsLoading,
       drafts: sortedDrafts,
     }),
-    [waitsForDrafts, draftsLoading, sortedDrafts],
+    [waitsForDrafts, sortedDrafts],
   );
 
-  const allMine = useMemo(
-    () =>
-      buildScopedMyEventsList('all', {
-        ...listOptions,
-        published: publishedAll,
-      }),
-    [listOptions, publishedAll],
-  );
+  const allMine = useMemo(() => {
+    if (catalogLoading) return [];
+    return buildScopedMyEventsList('all', {
+      ...listOptions,
+      published: publishedAll,
+    });
+  }, [catalogLoading, listOptions, publishedAll]);
 
-  const filtered = useMemo(
-    () =>
-      buildScopedMyEventsList(scope, {
-        ...listOptions,
-        published: publishedFiltered,
-      }),
-    [scope, listOptions, publishedFiltered],
-  );
+  const filtered = useMemo(() => {
+    if (catalogLoading) return [];
+    return buildScopedMyEventsList(scope, {
+      ...listOptions,
+      published: publishedFiltered,
+    });
+  }, [catalogLoading, scope, listOptions, publishedFiltered]);
 
   const active = useMemo(() => allMine.filter((e) => e.status !== 'ended'), [allMine]);
   const completed = useMemo(
@@ -84,9 +89,9 @@ export function useMyEventsCatalog(scope: MyEventsScope = 'all') {
     drafts: sortedDrafts,
     active,
     completed,
-    isLoading,
+    isLoading: catalogLoading,
     isRefreshing:
-      isRefreshing || (waitsForDrafts && (draftsRefreshing || draftsLoading)),
+      !catalogLoading && (isRefreshing || (waitsForDrafts && draftsRefreshing)),
     loadError,
     draftsLoadError,
     refetch: refetchAll,

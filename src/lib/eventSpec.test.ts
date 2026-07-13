@@ -41,7 +41,6 @@ describe('validateDraftForm', () => {
         title: '  ',
         type: 'road',
         startsAtLocal: '2030-01-01T12:00',
-        guildId: 'g1',
       }),
     ).toBe(VALIDATION_CODES.TITLE_REQUIRED);
   });

@@ -5,6 +5,21 @@ export type EventSortKey = 'event_date' | 'created' | 'fill';
 
 export type MyEventsScope = 'all' | 'hosted' | 'joined';
 
+/** Gate My Events list until auth resolves and optional host drafts are ready. */
+export function resolveMyEventsCatalogLoading(input: {
+  scope: MyEventsScope;
+  authLoading: boolean;
+  publishedLoading: boolean;
+  isSignedIn: boolean;
+  draftsLoading: boolean;
+}): boolean {
+  const mightNeedDrafts = input.scope !== 'joined';
+  if (mightNeedDrafts && input.authLoading) return true;
+  if (input.publishedLoading) return true;
+  if (mightNeedDrafts && input.isSignedIn && input.draftsLoading) return true;
+  return false;
+}
+
 export function eventFillRatio(event: ForzaEvent): number {
   if (event.maxPlayers <= 0) return 0;
   return event.currentPlayers / event.maxPlayers;
@@ -57,20 +72,19 @@ export function mergeHostDraftsFirst(
 }
 
 /**
- * My Events list: show published while drafts load (no empty flash), then prepend drafts once ready.
+ * My Events list: drafts first, then published (deduped by id).
+ * Caller should keep the list in a loading state until drafts are fetched when `includeDrafts`.
  */
 export function buildScopedMyEventsList(
   scope: MyEventsScope,
   options: {
     includeDrafts: boolean;
-    draftsLoading: boolean;
     drafts: ForzaEvent[];
     published: ForzaEvent[];
   },
 ): ForzaEvent[] {
-  const {includeDrafts, draftsLoading, drafts, published} = options;
+  const {includeDrafts, drafts, published} = options;
   if (scope === 'joined' || !includeDrafts) return published;
-  if (draftsLoading) return published;
   return mergeHostDraftsFirst(drafts, published);
 }
 
