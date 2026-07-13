@@ -157,13 +157,7 @@ export function Profile() {
     <ContentReveal className="pb-10 pt-5">
       <div className="relative overflow-hidden rounded-2xl border border-white/[0.08] bg-card">
         <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_80%_20%,rgba(139,92,246,0.12)_0%,transparent_70%)]" />
-        <div className="absolute right-3 top-3 z-10 flex flex-col items-end gap-1.5">
-          <LanguageToggle
-            onLanguageSelect={(lng) => {
-              if (!isSignedIn) return;
-              void syncProfilePrefs({notification_locale: lng});
-            }}
-          />
+        <div className="absolute right-3 top-1/2 z-10 flex -translate-y-1/2 flex-col items-end gap-3">
           {isSignedIn ? (
             <NotificationBellToggle
               enabled={user.dmNotificationsEnabled !== false}
@@ -173,6 +167,12 @@ export function Profile() {
               }}
             />
           ) : null}
+          <LanguageToggle
+            onLanguageSelect={(lng) => {
+              if (!isSignedIn) return;
+              void syncProfilePrefs({notification_locale: lng});
+            }}
+          />
         </div>
         <div className="relative flex items-center gap-4 p-5 pr-20">
           <UserAvatar
