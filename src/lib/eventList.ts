@@ -56,6 +56,24 @@ export function mergeHostDraftsFirst(
   return [...drafts, ...published.filter((e) => !draftIds.has(e.id))];
 }
 
+/**
+ * My Events list: show published while drafts load (no empty flash), then prepend drafts once ready.
+ */
+export function buildScopedMyEventsList(
+  scope: MyEventsScope,
+  options: {
+    includeDrafts: boolean;
+    draftsLoading: boolean;
+    drafts: ForzaEvent[];
+    published: ForzaEvent[];
+  },
+): ForzaEvent[] {
+  const {includeDrafts, draftsLoading, drafts, published} = options;
+  if (scope === 'joined' || !includeDrafts) return published;
+  if (draftsLoading) return published;
+  return mergeHostDraftsFirst(drafts, published);
+}
+
 /** Active events first, then completed (newest start date first within each group). */
 export function sortMyEventsList(events: ForzaEvent[]): ForzaEvent[] {
   const active = events.filter((e) => e.status !== 'ended');

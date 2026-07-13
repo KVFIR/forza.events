@@ -8,37 +8,53 @@ import {
 import {applyDevLoadingDelay} from '../lib/devLoadingDelay';
 import type {ForzaEvent} from '../lib/types';
 
+async function fetchWithDevDelay(token: string) {
+  await applyDevLoadingDelay();
+  return fetchHostDraftEvents(token);
+}
+
 export function useHostDrafts() {
   const {getAccessToken, isSignedIn} = useAuth();
   const {refreshKey} = useJoinedEvents();
   const [drafts, setDrafts] = useState<ForzaEvent[]>([]);
-  const [isLoading, setIsLoading] = useState(false);
+  const [isLoading, setIsLoading] = useState(true);
+  const [isRefreshing, setIsRefreshing] = useState(false);
   const [loadError, setLoadError] = useState<HostDraftsLoadError | null>(null);
   const loadedOnceRef = useRef(false);
 
-  const runFetch = useCallback(() => {
-    const token = getAccessToken();
-    if (!isSignedIn || !token) {
-      setDrafts([]);
-      setLoadError(null);
-      return Promise.resolve();
-    }
-
-    setIsLoading(true);
-    return applyDevLoadingDelay()
-      .then(() => fetchHostDraftEvents(token))
-      .then(({events, error}) => {
-        setDrafts(events);
-        setLoadError(error);
-      })
-      .finally(() => {
-        loadedOnceRef.current = true;
+  const runFetch = useCallback(
+    (silent: boolean) => {
+      const token = getAccessToken();
+      if (!isSignedIn || !token) {
+        setDrafts([]);
+        setLoadError(null);
         setIsLoading(false);
-      });
-  }, [getAccessToken, isSignedIn]);
+        setIsRefreshing(false);
+        return Promise.resolve();
+      }
+
+      if (silent) {
+        setIsRefreshing(true);
+      } else {
+        setIsLoading(true);
+      }
+
+      return fetchWithDevDelay(token)
+        .then(({events, error}) => {
+          setDrafts(events);
+          setLoadError(error);
+        })
+        .finally(() => {
+          loadedOnceRef.current = true;
+          setIsLoading(false);
+          setIsRefreshing(false);
+        });
+    },
+    [getAccessToken, isSignedIn],
+  );
 
   const refetch = useCallback(() => {
-    void runFetch();
+    void runFetch(loadedOnceRef.current);
   }, [runFetch]);
 
   useEffect(() => {
@@ -47,14 +63,19 @@ export function useHostDrafts() {
       setDrafts([]);
       setLoadError(null);
       setIsLoading(false);
+      setIsRefreshing(false);
       return;
     }
 
     let cancelled = false;
-    if (!loadedOnceRef.current) setIsLoading(true);
+    const silent = loadedOnceRef.current;
+    if (!silent) {
+      setIsLoading(true);
+    } else {
+      setIsRefreshing(true);
+    }
 
-    void applyDevLoadingDelay()
-      .then(() => fetchHostDraftEvents(token))
+    void fetchWithDevDelay(token)
       .then(({events, error}) => {
         if (!cancelled) {
           setDrafts(events);
@@ -65,6 +86,7 @@ export function useHostDrafts() {
         if (!cancelled) {
           loadedOnceRef.current = true;
           setIsLoading(false);
+          setIsRefreshing(false);
         }
       });
 
@@ -73,5 +95,5 @@ export function useHostDrafts() {
     };
   }, [refreshKey, isSignedIn, getAccessToken]);
 
-  return {drafts, isLoading, loadError, refetch};
+  return {drafts, isLoading, isRefreshing, loadError, refetch};
 }

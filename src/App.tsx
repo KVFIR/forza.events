@@ -18,7 +18,6 @@ import {AuthProvider, useAuth} from './context/AuthContext';
 import {DiscordLayoutProvider, useDiscordLayout} from './context/DiscordLayoutContext';
 import {DiscordRichPresenceProvider} from './context/DiscordRichPresenceContext';
 import {JoinedEventsProvider} from './context/JoinedEventsContext';
-import {CreateEventDraftProvider} from './context/CreateEventDraftContext';
 import {DiscordRichPresenceSync} from './components/DiscordRichPresenceSync';
 import type {ReactNode} from 'react';
 import {PageLoading} from './components/ui/PageLoading';
@@ -150,10 +149,8 @@ function AppWithProviders() {
       <DiscordLayoutProvider>
         <DiscordRichPresenceProvider>
           <JoinedEventsProvider>
-            <CreateEventDraftProvider>
               <DiscordRichPresenceSync />
               <AppRoutes />
-            </CreateEventDraftProvider>
           </JoinedEventsProvider>
         </DiscordRichPresenceProvider>
       </DiscordLayoutProvider>
@@ -161,7 +158,7 @@ function AppWithProviders() {
   );
 }
 
-/** Data router — required for `useBlocker` on the create-event leave guard. */
+/** Data router for SPA navigation. */
 const appRouter = createBrowserRouter([{path: '*', element: <AppWithProviders />}]);
 
 export default function App() {

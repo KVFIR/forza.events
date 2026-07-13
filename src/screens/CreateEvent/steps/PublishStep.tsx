@@ -2,34 +2,19 @@ import {Trans, useTranslation} from 'react-i18next';
 import {PublishTargetPicker} from '../../../components/PublishTargetPicker';
 import {Alert} from '../../../components/ui/Alert';
 import {TextButton} from '../../../components/ui/TextButton';
-import {EventPublishPreviewCard} from '../components/EventPublishPreviewCard';
 import {
   CreateEventConvoySection,
   type CreateEventConvoySectionProps,
 } from '../components/CreateEventConvoySection';
-import type {EventCarEntry} from '../../../components/EventCarList';
 import {FormSection} from '../components/Field';
 import {isLocalDevHost} from '../../../lib/runtime';
 import type {PublishGap} from '../publishGaps';
 import {PUBLISH_STEP_INDEX, type CreateEventStepIndex} from '../constants';
 import type {FieldErrors} from '../types';
-import type {CreateEventType} from '../types';
-import type {CarRuleMode, EventTrack} from '../../../lib/types';
 
 type Props = {
   token: string | null;
   accessToken: string;
-  title: string;
-  type: CreateEventType;
-  description: string;
-  coverPreview: string | null;
-  startsAtLocal: string;
-  carRuleMode: CarRuleMode;
-  maxPi: number;
-  additionalCarRestrictions: string;
-  eventCars: EventCarEntry[];
-  tracks: EventTrack[];
-  lobbyLeaderLabel: string;
   guildId: string;
   guildName: string;
   channelId: string;
@@ -46,17 +31,6 @@ type Props = {
 export function PublishStep({
   token,
   accessToken,
-  title,
-  type,
-  description,
-  coverPreview,
-  startsAtLocal,
-  carRuleMode,
-  maxPi,
-  additionalCarRestrictions,
-  eventCars,
-  tracks,
-  lobbyLeaderLabel,
   guildId,
   guildName,
   channelId,
@@ -78,25 +52,6 @@ export function PublishStep({
 
   return (
     <div className="space-y-3">
-      <div className="space-y-2">
-        <h2 className="text-sm font-semibold tracking-tight text-slate-100">
-          {t('create.publishPreview')}
-        </h2>
-        <EventPublishPreviewCard
-          title={title}
-          type={type}
-          description={description}
-          coverPreview={coverPreview}
-          startsAtLocal={startsAtLocal}
-          carRuleMode={carRuleMode}
-          maxPi={maxPi}
-          additionalCarRestrictions={additionalCarRestrictions}
-          eventCars={eventCars}
-          tracks={tracks}
-          lobbyLeaderLabel={lobbyLeaderLabel}
-        />
-      </div>
-
       {missingForPublish.length > 0 && (
         <Alert variant="sky" title={t('create.beforePublish')} className="py-2.5">
           <ul className="space-y-2">

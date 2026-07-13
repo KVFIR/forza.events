@@ -2,6 +2,7 @@ import {useCallback, useEffect, useMemo, useRef, useState} from 'react';
 import {useTranslation} from 'react-i18next';
 import {busyLabel} from '../i18n/busyLabels';
 import {listChannels, listGuilds, validatePublishChannel} from '../lib/api';
+import {shouldClearChannelAfterValidationFailure} from '../lib/apiErrors';
 import {getGuildContext} from '../lib/discord';
 import {buildBotInstallUrl, openBotInstallUrl} from '../lib/discordInstall';
 import {isPlaceholderGuildName} from '../lib/guildDisplay';
@@ -135,7 +136,11 @@ export function PublishTargetPicker({
   }, [guildId, loadingGuilds, loadChannels]);
 
   const validateChannelSelection = useCallback(
-    async (nextChannelId: string, requestGuildId: string) => {
+    async (
+      nextChannelId: string,
+      requestGuildId: string,
+      source: 'revalidate' | 'user',
+    ) => {
       if (!nextChannelId) {
         validatedChannelKeyRef.current = '';
         setChannelError(null);
@@ -155,7 +160,11 @@ export function PublishTargetPicker({
         if (!result.ok) {
           validatedChannelKeyRef.current = '';
           setChannelError(result.error ?? 'FORZA.EVENTS cannot post in this channel.');
-          onChannelChange('');
+          if (
+            shouldClearChannelAfterValidationFailure(source, null, result.code)
+          ) {
+            onChannelChange('');
+          }
           return;
         }
         validatedChannelKeyRef.current = `${requestGuildId}:${nextChannelId}`;
@@ -164,7 +173,9 @@ export function PublishTargetPicker({
         if (requestId !== channelValidateRef.current) return;
         validatedChannelKeyRef.current = '';
         setChannelError(e instanceof Error ? e.message : String(e));
-        onChannelChange('');
+        if (shouldClearChannelAfterValidationFailure(source, e)) {
+          onChannelChange('');
+        }
       } finally {
         if (requestId === channelValidateRef.current) setValidatingChannel(false);
       }
@@ -176,7 +187,7 @@ export function PublishTargetPicker({
     if (!guildId || !channelId || lockChannel || loadingChannels) return;
     const key = `${guildId}:${channelId}`;
     if (validatedChannelKeyRef.current === key) return;
-    void validateChannelSelection(channelId, guildId);
+    void validateChannelSelection(channelId, guildId, 'revalidate');
   }, [guildId, channelId, lockChannel, loadingChannels, validateChannelSelection]);
 
   function handleAddBot() {
@@ -267,7 +278,7 @@ export function PublishTargetPicker({
               disabled={lockChannel || !guildId || loadingChannels || validatingChannel}
               className="disabled:opacity-60"
               onChange={(e) => {
-                void validateChannelSelection(e.target.value, guildId);
+                void validateChannelSelection(e.target.value, guildId, 'user');
               }}
             >
               <option value="">{t('publish.selectChannel')}</option>

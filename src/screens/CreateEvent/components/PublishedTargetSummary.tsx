@@ -10,7 +10,7 @@ export function PublishedTargetSummary({guildName, hasChannel}: Props) {
   const {t} = useTranslation();
 
   return (
-    <FormSection title={t('create.publishTarget')} className="mt-3">
+    <FormSection title={t('create.publishTarget')}>
       <dl className="space-y-2 text-sm">
         <div className="flex justify-between gap-3">
           <dt className="text-muted">{t('create.server')}</dt>

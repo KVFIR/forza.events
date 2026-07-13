@@ -3,7 +3,6 @@ import {useNavigate, useSearchParams} from 'react-router-dom';
 import i18n from '../../i18n';
 import type {CarRuleMode, EventType} from '../../lib/types';
 import {useAuth} from '../../context/AuthContext';
-import {useCreateEventDraftContext} from '../../context/CreateEventDraftContext';
 import {useJoinedEvents} from '../../context/JoinedEventsContext';
 import {
   cancelEvent,
@@ -22,7 +21,7 @@ import {
   normalizeDatetimeLocalInput,
   utcToLocalInput,
 } from '../../lib/datetime';
-import {isLocalDevHost} from '../../lib/runtime';
+import {isLocalDevHost, supportsBrowserOAuth} from '../../lib/runtime';
 import {isEventType} from '../../lib/eventTypes';
 import {clampPi} from '../../lib/pi';
 import {EVENT_PLAYER_SLOTS} from '../../lib/constants';
@@ -38,16 +37,6 @@ import type {ConvoyLeaderSelection} from '../../components/ConvoyLeaderPicker';
 import {PUBLISH_STEP_INDEX, type CreateEventStepIndex} from './constants';
 import type {CreateEventFormValues, CreateEventType, FieldErrors} from './types';
 import {
-  clearCreateEventWip,
-  hasMeaningfulCreateProgress,
-  readCreateEventWip,
-  snapshotFromForm,
-  snapshotsEqual,
-  writeCreateEventWip,
-  type CreateEventFormSnapshot,
-  type DraftSyncStatus,
-} from '../../lib/createEventPersistence';
-import {
   validateCoverFile,
   validateDraftFormOutcome,
   validatePublishFormOutcome,
@@ -58,15 +47,14 @@ import {
   scrollToFirstFieldErrorAfterPaint,
 } from './validation';
 
-const AUTO_SAVE_DEBOUNCE_MS = 2500;
-const WIP_SAVE_DEBOUNCE_MS = 400;
+/** Legacy sessionStorage key from removed WIP autosave — cleared on mount. */
+const LEGACY_CREATE_WIP_KEY = 'forza.create.wip';
 
 export function useCreateEventForm() {
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
   const editId = searchParams.get('edit');
   const {bumpRefresh} = useJoinedEvents();
-  const {parkedSession, parkSession, clearParkedSession} = useCreateEventDraftContext();
   const {
     user,
     guildId: contextGuildId,
@@ -74,6 +62,7 @@ export function useCreateEventForm() {
     getAccessToken,
     isSignedIn,
     isConfigured,
+    loading: authLoading,
   } = useAuth();
 
   const [step, setStep] = useState<CreateEventStepIndex>(editId ? PUBLISH_STEP_INDEX : 0);
@@ -87,15 +76,8 @@ export function useCreateEventForm() {
   const [cancelConfirmOpen, setCancelConfirmOpen] = useState(false);
   const [isPublished, setIsPublished] = useState(false);
   const [canCancelPublished, setCanCancelPublished] = useState(false);
-  const [draftSyncStatus, setDraftSyncStatus] = useState<DraftSyncStatus>('idle');
-  const [wipRestoreOffer, setWipRestoreOffer] = useState<CreateEventFormSnapshot | null>(null);
-  const [showRestoredNotice, setShowRestoredNotice] = useState(false);
 
-  const loadedEditRef = useRef<string | null>(editId);
-  const lastSavedSnapshotRef = useRef<CreateEventFormSnapshot | null>(null);
-  const autoSaveInFlightRef = useRef(false);
-  const isPublishedRef = useRef(false);
-  const restoredOnMountRef = useRef(false);
+  const loadedEditRef = useRef<string | null>(null);
 
   const [title, setTitle] = useState('');
   const [type, setType] = useState<CreateEventType>('');
@@ -113,7 +95,6 @@ export function useCreateEventForm() {
   const [lobbyLeaderGamertag, setLobbyLeaderGamertag] = useState(user.xboxGamertag ?? '');
   const [lobbyLeaderDiscordId, setLobbyLeaderDiscordId] = useState<string | null>(null);
   const [lobbyLeaderUsername, setLobbyLeaderUsername] = useState('');
-  /** Gamertag from profile/DB when the member was picked — not the live input value. */
   const [lobbyLeaderProfileGamertag, setLobbyLeaderProfileGamertag] = useState<string | null>(
     null,
   );
@@ -121,90 +102,17 @@ export function useCreateEventForm() {
   const [targetGuildName, setTargetGuildName] = useState(contextGuildName ?? '');
   const [targetChannelId, setTargetChannelId] = useState('');
 
+  useEffect(() => {
+    try {
+      sessionStorage.removeItem(LEGACY_CREATE_WIP_KEY);
+    } catch {
+      // ponytail: private browsing may block storage
+    }
+  }, []);
+
   const token = getAccessToken();
   const canPersist = isApiConfigured() && token && isSignedIn;
   const normalizedTracks = useMemo(() => normalizeTracks(tracks), [tracks]);
-
-  isPublishedRef.current = isPublished;
-
-  const formSnapshot = useMemo(
-    () =>
-      snapshotFromForm({
-        step,
-        eventId,
-        title,
-        type,
-        startsAtLocal,
-        description,
-        coverFile,
-        coverPreview,
-        coverUrl,
-        tracks,
-        carRuleMode,
-        maxPi,
-        additionalCarRestrictions,
-        eventCars,
-        lobbyLeaderIsHost,
-        lobbyLeaderGamertag,
-        lobbyLeaderDiscordId,
-        lobbyLeaderUsername,
-        lobbyLeaderProfileGamertag,
-        targetGuildId,
-        targetGuildName,
-        targetChannelId,
-      }),
-    [
-      step,
-      eventId,
-      title,
-      type,
-      startsAtLocal,
-      description,
-      coverFile,
-      coverPreview,
-      coverUrl,
-      tracks,
-      carRuleMode,
-      maxPi,
-      additionalCarRestrictions,
-      eventCars,
-      lobbyLeaderIsHost,
-      lobbyLeaderGamertag,
-      lobbyLeaderDiscordId,
-      lobbyLeaderUsername,
-      lobbyLeaderProfileGamertag,
-      targetGuildId,
-      targetGuildName,
-      targetChannelId,
-    ],
-  );
-
-  const applySnapshot = useCallback((snapshot: CreateEventFormSnapshot) => {
-    setStep(snapshot.step);
-    setEventId(snapshot.eventId);
-    setTitle(snapshot.title);
-    setType(snapshot.type);
-    setStartsAtLocal(snapshot.startsAtLocal);
-    setDescription(snapshot.description);
-    setCoverFile(null);
-    setCoverUrl(snapshot.coverUrl);
-    setCoverPreview(snapshot.coverPreview);
-    setTracks(snapshot.tracks);
-    setCarRuleMode(snapshot.carRuleMode);
-    setMaxPi(snapshot.maxPi);
-    setAdditionalCarRestrictions(snapshot.additionalCarRestrictions);
-    setEventCars(snapshot.eventCars);
-    setLobbyLeaderIsHost(snapshot.lobbyLeaderIsHost);
-    setLobbyLeaderGamertag(snapshot.lobbyLeaderGamertag);
-    setLobbyLeaderDiscordId(snapshot.lobbyLeaderDiscordId);
-    setLobbyLeaderUsername(snapshot.lobbyLeaderUsername);
-    setLobbyLeaderProfileGamertag(snapshot.lobbyLeaderProfileGamertag);
-    setTargetGuildId(snapshot.targetGuildId);
-    setTargetGuildName(snapshot.targetGuildName);
-    setTargetChannelId(snapshot.targetChannelId);
-    lastSavedSnapshotRef.current = null;
-    setDraftSyncStatus('dirty');
-  }, []);
 
   const lobbyLeaderSelection = useMemo((): ConvoyLeaderSelection | null => {
     if (!lobbyLeaderDiscordId) return null;
@@ -309,80 +217,6 @@ export function useCreateEventForm() {
   );
 
   useEffect(() => {
-    if (editId || loadingEdit || restoredOnMountRef.current || isPublished) return;
-    if (parkedSession && hasMeaningfulCreateProgress(parkedSession)) {
-      applySnapshot(parkedSession);
-      clearParkedSession();
-      restoredOnMountRef.current = true;
-      setShowRestoredNotice(true);
-      return;
-    }
-    const wip = readCreateEventWip();
-    if (wip && hasMeaningfulCreateProgress(wip)) {
-      setWipRestoreOffer(wip);
-    }
-    restoredOnMountRef.current = true;
-  }, [
-    applySnapshot,
-    clearParkedSession,
-    editId,
-    isPublished,
-    loadingEdit,
-    parkedSession,
-  ]);
-
-  useEffect(() => {
-    if (isPublished || loadingEdit) return;
-    const timer = window.setTimeout(() => {
-      writeCreateEventWip(formSnapshot);
-    }, WIP_SAVE_DEBOUNCE_MS);
-    return () => window.clearTimeout(timer);
-  }, [formSnapshot, isPublished, loadingEdit]);
-
-  useEffect(() => {
-    if (isPublished || loadingEdit) return;
-    if (!hasMeaningfulCreateProgress(formSnapshot)) {
-      setDraftSyncStatus('idle');
-      return;
-    }
-    const lastSaved = lastSavedSnapshotRef.current;
-    if (lastSaved && snapshotsEqual(formSnapshot, lastSaved)) {
-      setDraftSyncStatus('saved');
-      return;
-    }
-    setDraftSyncStatus((prev) => (prev === 'saving' ? prev : 'dirty'));
-  }, [formSnapshot, isPublished, loadingEdit]);
-
-  useEffect(() => {
-    if (isPublished || !canPersist || loadingEdit || autoSaveInFlightRef.current) return;
-    const outcome = validateDraftFormOutcome(
-      values,
-      user.xboxGamertag,
-      validationOptions,
-    );
-    if (!outcome.ok) return;
-    const lastSaved = lastSavedSnapshotRef.current;
-    if (lastSaved && snapshotsEqual(formSnapshot, lastSaved)) return;
-
-    const timer = window.setTimeout(() => {
-      void persistDraft({silent: true, source: 'auto'});
-    }, AUTO_SAVE_DEBOUNCE_MS);
-
-    return () => window.clearTimeout(timer);
-    // persistDraft is stable enough for autosave scheduling.
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [formSnapshot, canPersist, isPublished, loadingEdit, values, user.xboxGamertag, validationOptions]);
-
-  useEffect(() => {
-    return () => {
-      if (isPublishedRef.current) return;
-      if (!hasMeaningfulCreateProgress(formSnapshot)) return;
-      parkSession(formSnapshot);
-      writeCreateEventWip(formSnapshot);
-    };
-  }, [formSnapshot, parkSession]);
-
-  useEffect(() => {
     if (!editId) {
       setCanCancelPublished(false);
       setIsPublished(false);
@@ -393,13 +227,25 @@ export function useCreateEventForm() {
       }
       return;
     }
-    if (loadedEditRef.current === editId) return;
-    loadedEditRef.current = editId;
+    if (loadedEditRef.current === editId) {
+      setLoadingEdit(false);
+      return;
+    }
+    if (!token) {
+      setLoadingEdit(authLoading || (Boolean(editId) && isSignedIn));
+      return;
+    }
     let cancelled = false;
     setLoadingEdit(true);
     void fetchEventById(editId, {discordToken: token})
       .then((ev) => {
-        if (cancelled || !ev) return;
+        if (cancelled) return;
+        if (!ev) {
+          loadedEditRef.current = null;
+          navigate('/my-events', {replace: true});
+          return;
+        }
+        loadedEditRef.current = editId;
         if (ev.hostDiscordId !== user.discordId) {
           navigate(`/event/${editId}`, {replace: true});
           return;
@@ -436,6 +282,7 @@ export function useCreateEventForm() {
         setTargetGuildId(ev.guildId ?? '');
         setTargetGuildName(ev.guildName ?? '');
         setTargetChannelId(ev.channelId ?? '');
+
         if (ev.lobbyLeaderIsHost === false && ev.lobbyLeaderDiscordId) {
           const leaderParticipant = ev.participants.find(
             (p) => p.discordId === ev.lobbyLeaderDiscordId,
@@ -459,55 +306,18 @@ export function useCreateEventForm() {
             setLobbyLeaderUsername('');
           }
         }
-        if (ev.coverImageUrl && !isBundledDefaultCover(ev.coverImageUrl)) {
-          setCoverPreview(ev.coverImageUrl);
-          setCoverUrl(ev.coverImageUrl);
-        } else {
-          setCoverPreview(defaultCoverPath(ev.type));
-          setCoverUrl(null);
-        }
-        lastSavedSnapshotRef.current = snapshotFromForm({
-          step: published ? 0 : PUBLISH_STEP_INDEX,
-          eventId: ev.id,
-          title: ev.title,
-          type: ev.type,
-          startsAtLocal: utcToLocalInput(ev.startsAt, defaultTimezone()),
-          description: ev.description ?? '',
-          coverFile: null,
-          coverPreview:
-            ev.coverImageUrl && !isBundledDefaultCover(ev.coverImageUrl)
-              ? ev.coverImageUrl
-              : defaultCoverPath(ev.type),
-          coverUrl:
-            ev.coverImageUrl && !isBundledDefaultCover(ev.coverImageUrl)
-              ? ev.coverImageUrl
-              : null,
-          tracks: ev.tracks ?? [],
-          carRuleMode: ev.carRuleMode,
-          maxPi: ev.maxPi,
-          additionalCarRestrictions: ev.additionalCarRestrictions ?? '',
-          eventCars: ev.allowedCars.map((c) => ({
-            id: c.carId,
-            make: c.make,
-            model: c.model,
-            year: c.year ?? null,
-            pi: c.pi,
-            maxPi: c.maxPi,
-            tuneShareCode: c.tuneShareCode ?? '',
-            restrictions: c.restrictions,
-          })),
-          lobbyLeaderIsHost: ev.lobbyLeaderIsHost !== false,
-          lobbyLeaderGamertag: ev.lobbyLeaderGamertag ?? '',
-          lobbyLeaderDiscordId: ev.lobbyLeaderDiscordId ?? null,
-          lobbyLeaderUsername: '',
-          lobbyLeaderProfileGamertag: null,
-          targetGuildId: ev.guildId ?? '',
-          targetGuildName: ev.guildName ?? '',
-          targetChannelId: ev.channelId ?? '',
-        });
-        setDraftSyncStatus('saved');
-        clearParkedSession();
-        clearCreateEventWip();
+
+        const coverPreviewValue =
+          ev.coverImageUrl && !isBundledDefaultCover(ev.coverImageUrl)
+            ? ev.coverImageUrl
+            : defaultCoverPath(ev.type);
+        const coverUrlValue =
+          ev.coverImageUrl && !isBundledDefaultCover(ev.coverImageUrl)
+            ? ev.coverImageUrl
+            : null;
+
+        setCoverPreview(coverPreviewValue);
+        setCoverUrl(coverUrlValue);
       })
       .finally(() => {
         if (!cancelled) setLoadingEdit(false);
@@ -518,12 +328,14 @@ export function useCreateEventForm() {
   }, [
     editId,
     token,
+    authLoading,
+    isSignedIn,
     user.discordId,
     user.xboxGamertag,
     navigate,
     contextGuildId,
     contextGuildName,
-    clearParkedSession,
+    targetGuildId,
   ]);
 
   function buildPayload() {
@@ -579,9 +391,6 @@ export function useCreateEventForm() {
     setGlobalError(null);
     try {
       await publishEvent(token, id, targetGuildId, targetChannelId, targetGuildName);
-      clearParkedSession();
-      clearCreateEventWip();
-      lastSavedSnapshotRef.current = null;
       bumpRefresh();
       setShowPublishModal(false);
       navigate(`/event/${id}`, {replace: true, state: {from: '/my-events'}});
@@ -595,11 +404,11 @@ export function useCreateEventForm() {
   function requestDeleteDraft(): void {
     const id = eventId ?? editId;
     if (!id) {
-      setGlobalError('Nothing to delete yet. Save as draft first.');
+      setGlobalError(i18n.t('create.nothingToDeleteYet'));
       return;
     }
     if (!token || !canPersist) {
-      setGlobalError('Open this app in Discord to delete drafts.');
+      setGlobalError(i18n.t('auth.signInDiscordDelete'));
       return;
     }
     setDeleteConfirmOpen(true);
@@ -613,9 +422,6 @@ export function useCreateEventForm() {
     try {
       await deleteDraftEvent(token, id);
       setDeleteConfirmOpen(false);
-      clearParkedSession();
-      clearCreateEventWip();
-      lastSavedSnapshotRef.current = null;
       bumpRefresh();
       navigate('/my-events', {replace: true});
       return true;
@@ -632,7 +438,7 @@ export function useCreateEventForm() {
     if (!id) return;
     if (!canCancelPublished) return;
     if (!token || !canPersist) {
-      setGlobalError('Open this app in Discord to cancel events.');
+      setGlobalError(i18n.t('auth.signInDiscordCancel'));
       return;
     }
     setCancelConfirmOpen(true);
@@ -657,45 +463,32 @@ export function useCreateEventForm() {
     }
   }
 
-  async function persistDraft(
-    options?: {silent?: boolean; source?: 'manual' | 'auto'},
-  ): Promise<string | null> {
-    const silent = options?.silent ?? false;
-    const source = options?.source ?? 'manual';
+  async function persistDraft(): Promise<string | null> {
     const outcome = validateDraftFormOutcome(
       values,
       user.xboxGamertag,
       validationOptions,
     );
     if (!outcome.ok) {
-      if (!silent) applyValidationFailure(outcome.fieldErrors, outcome.globalError);
+      applyValidationFailure(outcome.fieldErrors, outcome.globalError);
       return null;
     }
     if (!canPersist || !token) {
-      if (!silent) {
-        setGlobalError('Connect Discord and configure Supabase to save events.');
-      }
+      setGlobalError(
+        supportsBrowserOAuth()
+          ? i18n.t('auth.browserSignInHint')
+          : i18n.t('auth.openInDiscordSave'),
+      );
       return null;
     }
-    if (source === 'auto') {
-      autoSaveInFlightRef.current = true;
-      setDraftSyncStatus('saving');
-    } else {
-      setSaving(true);
-      setDraftSyncStatus('saving');
-    }
+    setSaving(true);
     setGlobalError(null);
     try {
       const result = await saveEvent(token, buildPayload());
       const id = result.id;
-      let savedCoverUrl = coverUrl;
-      let savedCoverPreview =
-        coverPreview && !coverPreview.startsWith('blob:') ? coverPreview : coverUrl;
       if (coverFile && targetGuildId) {
         const compressed = await compressCoverForUpload(coverFile);
         const url = await uploadCoverImage(token, targetGuildId, id, compressed);
-        savedCoverUrl = url;
-        savedCoverPreview = url;
         setCoverUrl(url);
         setCoverPreview(url);
         setCoverFile(null);
@@ -703,49 +496,14 @@ export function useCreateEventForm() {
       }
       setEventId(id);
       loadedEditRef.current = id;
-      lastSavedSnapshotRef.current = {
-        ...formSnapshot,
-        eventId: id,
-        pendingCover: false,
-        coverUrl: savedCoverUrl,
-        coverPreview: savedCoverPreview,
-      };
-      clearParkedSession();
-      clearCreateEventWip();
-      setDraftSyncStatus('saved');
       bumpRefresh();
-      if (source === 'auto' && !editId) {
-        navigate(`/create?edit=${id}`, {replace: true});
-      }
       return id;
     } catch (e) {
-      setDraftSyncStatus('error');
-      if (!silent) setGlobalError(String(e));
+      setGlobalError(String(e));
       return null;
     } finally {
-      if (source === 'auto') {
-        autoSaveInFlightRef.current = false;
-      } else {
-        setSaving(false);
-      }
+      setSaving(false);
     }
-  }
-
-  function restoreWipSnapshot() {
-    if (!wipRestoreOffer) return;
-    applySnapshot(wipRestoreOffer);
-    setWipRestoreOffer(null);
-    clearCreateEventWip();
-    setShowRestoredNotice(true);
-  }
-
-  function discardWipSnapshot() {
-    setWipRestoreOffer(null);
-    clearCreateEventWip();
-  }
-
-  function dismissRestoredNotice() {
-    setShowRestoredNotice(false);
   }
 
   function goToStep(next: CreateEventStepIndex) {
@@ -838,14 +596,6 @@ export function useCreateEventForm() {
     confirmPublish,
     validateBeforePublish,
     navigate,
-    draftSyncStatus,
-    wipRestoreOffer,
-    restoreWipSnapshot,
-    discardWipSnapshot,
-    showRestoredNotice,
-    dismissRestoredNotice,
-    pendingCoverRestore: formSnapshot.pendingCover,
-    // setters
     setTitle: (v: string) => {
       clearFieldError('title');
       setTitle(v);
@@ -912,12 +662,13 @@ export function useCreateEventForm() {
     },
     onGuildChange: (id: string, name: string) => {
       clearFieldError('targetGuildId');
-      if (targetGuildId && id !== targetGuildId && !lobbyLeaderIsHost && lobbyLeaderDiscordId) {
+      const guildChanged = id !== targetGuildId;
+      if (guildChanged && !lobbyLeaderIsHost && lobbyLeaderDiscordId) {
         clearLobbyLeaderSelection();
       }
       setTargetGuildId(id);
       setTargetGuildName(name);
-      if (!isPublished) setTargetChannelId('');
+      if (!isPublished && guildChanged) setTargetChannelId('');
     },
   };
 }

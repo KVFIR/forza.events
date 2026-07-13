@@ -4,7 +4,6 @@ import {Button} from '../../components/ui/Button';
 import {ConfirmDialog} from '../../components/ui/ConfirmDialog';
 import {PublishTargetModal} from '../../components/PublishTargetPicker';
 import {FormAlerts, StepIndicator} from './components/StepIndicator';
-import {DraftSaveStatus} from './components/DraftSaveStatus';
 import {PublishedTargetSummary} from './components/PublishedTargetSummary';
 import {CreateEventConvoySection} from './components/CreateEventConvoySection';
 import {PUBLISH_STEP_INDEX} from './constants';
@@ -22,10 +21,7 @@ import {useAuth} from '../../context/AuthContext';
 import {useRichPresenceOverride} from '../../context/DiscordRichPresenceContext';
 import {buildCreateRichPresence} from '../../lib/discordRichPresence';
 import {useLoadingUI} from '../../hooks/useLoadingUI';
-import {formatDiscordHandle} from '../../lib/discordHandle';
 import {isLocalDevHost} from '../../lib/runtime';
-import {useCreateEventLeaveGuard} from './useCreateEventLeaveGuard';
-import {Alert} from '../../components/ui/Alert';
 
 export function CreateEvent() {
   const {t} = useTranslation();
@@ -62,7 +58,6 @@ export function CreateEvent() {
     setShowPublishModal,
     isPublished,
     values,
-    normalizedTracks,
     tryContinue,
     onCoverChange,
     persistDraft,
@@ -94,22 +89,7 @@ export function CreateEvent() {
     onGuildChange,
     setTargetChannelId,
     clearFieldError,
-    draftSyncStatus,
-    wipRestoreOffer,
-    restoreWipSnapshot,
-    discardWipSnapshot,
-    showRestoredNotice,
-    dismissRestoredNotice,
-    pendingCoverRestore,
   } = form;
-
-  const hasUnsavedProgress =
-    !isPublished &&
-    (draftSyncStatus === 'dirty' ||
-      draftSyncStatus === 'saving' ||
-      draftSyncStatus === 'error');
-
-  const leaveBlocker = useCreateEventLeaveGuard(hasUnsavedProgress);
 
   const missingForPublish = collectPublishGaps({
     channelId: values.targetChannelId,
@@ -143,15 +123,9 @@ export function CreateEvent() {
     }
   }
 
-  const lobbyLeaderLabel = values.lobbyLeaderIsHost
-    ? (user.xboxGamertag?.trim() || t('create.youHost'))
-    : formatDiscordHandle(values.lobbyLeaderUsername) ||
-      values.lobbyLeaderGamertag.trim() ||
-      t('common.dash');
-
-  async function handleSaveDraft() {
+  async function handleSaveDraft(stayOnPage = false) {
     const id = await persistDraft();
-    if (id) navigate('/my-events', {replace: true});
+    if (id && !stayOnPage) navigate('/my-events', {replace: true});
   }
 
   async function handleSaveChanges() {
@@ -208,7 +182,7 @@ export function CreateEvent() {
     return <PageLoading label={t('loading.event')} className="pb-10 pt-5" />;
   }
 
-  if (isConfigured && !isStandalone && !isSignedIn && !authInitializing) {
+  if (isConfigured && !isSignedIn && !authInitializing && (!isStandalone || editId)) {
     return (
       <SignInRequiredState
         description={t('auth.signInCreate')}
@@ -261,41 +235,6 @@ export function CreateEvent() {
         />
       )}
 
-      {!isPublished ? <DraftSaveStatus status={draftSyncStatus} /> : null}
-
-      {wipRestoreOffer ? (
-        <Alert variant="sky" className="mb-4">
-          <p className="text-sm">{t('create.wipRestoreBody')}</p>
-          <div className="mt-3 flex flex-wrap gap-2">
-            <Button variant="primary" emphasis="solid" onClick={restoreWipSnapshot}>
-              {t('create.wipRestoreAction')}
-            </Button>
-            <Button variant="secondary" onClick={discardWipSnapshot}>
-              {t('create.wipDiscardAction')}
-            </Button>
-          </div>
-        </Alert>
-      ) : null}
-
-      {showRestoredNotice ? (
-        <Alert variant="neutral" className="mb-4">
-          <div className="flex items-start justify-between gap-3">
-            <p className="text-sm">
-              {pendingCoverRestore
-                ? t('create.restoredWithCoverNote')
-                : t('create.restoredNotice')}
-            </p>
-            <button
-              type="button"
-              className="shrink-0 text-xs text-muted underline"
-              onClick={dismissRestoredNotice}
-            >
-              {t('common.dismiss')}
-            </button>
-          </div>
-        </Alert>
-      ) : null}
-
       <FormAlerts
         isConfigured={isConfigured}
         isSignedIn={isSignedIn}
@@ -304,31 +243,20 @@ export function CreateEvent() {
       />
 
       {isPublished ? (
-        <>
+        <div className="space-y-3">
           <EventStep {...eventStepProps} />
           <PublishedTargetSummary
             guildName={values.targetGuildName}
             hasChannel={Boolean(values.targetChannelId)}
           />
           {token ? <CreateEventConvoySection {...convoySectionProps} /> : null}
-        </>
+        </div>
       ) : step === 0 ? (
         <EventStep {...eventStepProps} />
       ) : (
         <PublishStep
           token={token}
           accessToken={token ?? ''}
-          title={values.title}
-          type={values.type}
-          description={values.description}
-          coverPreview={values.coverPreview}
-          startsAtLocal={values.startsAtLocal}
-          carRuleMode={values.carRuleMode}
-          maxPi={values.maxPi}
-          additionalCarRestrictions={values.additionalCarRestrictions}
-          eventCars={values.eventCars}
-          tracks={normalizedTracks}
-          lobbyLeaderLabel={lobbyLeaderLabel}
           guildId={values.targetGuildId}
           guildName={values.targetGuildName}
           channelId={values.targetChannelId}
@@ -399,22 +327,9 @@ export function CreateEvent() {
               variant="secondary"
               fullWidth
               disabled={saving || !canPersist}
-              onClick={() =>
-                void (hasDraftId ? handleSaveChanges() : handleSaveDraft())
-              }
+              onClick={() => void handleSaveDraft(true)}
             >
-              {saving
-                ? busyLabel('saving')
-                : hasDraftId
-                  ? t('create.saveChanges')
-                  : t('create.saveAsDraft')}
-            </Button>
-            <Button
-              variant="secondary"
-              fullWidth
-              onClick={() => setStep(0)}
-            >
-              {t('common.back')}
+              {saving ? busyLabel('saving') : t('create.saveAsDraft')}
             </Button>
             {hasDraftId && (
               <Button
@@ -429,16 +344,6 @@ export function CreateEvent() {
           </>
         )}
       </div>
-
-      <ConfirmDialog
-        open={leaveBlocker.state === 'blocked'}
-        title={t('create.leaveUnsavedTitle')}
-        description={t('create.leaveUnsavedDesc')}
-        confirmLabel={t('create.leaveUnsavedConfirm')}
-        variant="danger"
-        onCancel={() => leaveBlocker.reset?.()}
-        onConfirm={() => leaveBlocker.proceed?.()}
-      />
 
       <ConfirmDialog
         open={deleteConfirmOpen}

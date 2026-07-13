@@ -68,3 +68,33 @@ export function apiErrorFromPayload(
   const message = mapApiError(payload.code, fallback);
   return new ApiRequestError(message, {code: payload.code, status});
 }
+
+const TRANSIENT_API_ERROR_CODES = new Set<string>([API_ERROR_CODES.TOO_MANY_REQUESTS]);
+
+/** Network blips, rate limits, and gateway errors — safe to retry without discarding form state. */
+export function isTransientApiError(error: unknown): boolean {
+  if (error instanceof ApiRequestError) {
+    if (error.status === 429 || error.status === 502 || error.status === 503 || error.status === 504) {
+      return true;
+    }
+    if (error.code && TRANSIENT_API_ERROR_CODES.has(error.code)) return true;
+  }
+  if (error instanceof TypeError) return true;
+  const message = error instanceof Error ? error.message : String(error);
+  return /rate limit|failed to fetch|network|load failed|timeout/i.test(message);
+}
+
+export function isTransientApiErrorCode(code: string | undefined): boolean {
+  return Boolean(code && TRANSIENT_API_ERROR_CODES.has(code));
+}
+
+/** Clear channel only when the user picked a new invalid channel — not when re-checking a saved one. */
+export function shouldClearChannelAfterValidationFailure(
+  source: 'revalidate' | 'user',
+  error: unknown,
+  resultCode?: string,
+): boolean {
+  if (source === 'revalidate') return false;
+  if (isTransientApiError(error) || isTransientApiErrorCode(resultCode)) return false;
+  return true;
+}
