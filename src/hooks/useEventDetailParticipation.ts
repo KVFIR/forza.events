@@ -2,7 +2,7 @@ import {useCallback, useRef, useState} from 'react';
 import {useTranslation} from 'react-i18next';
 import {useJoinedEvents} from '../context/JoinedEventsContext';
 import {useAuth} from '../context/AuthContext';
-import {canLeaveRegistration} from '../lib/eventSpec';
+import {canLeaveRegistration, lobbyIsFull} from '../lib/eventSpec';
 import {viewerIsConvoyLeader} from '../lib/eventRoster';
 import {startDiscordBrowserSignIn} from '../lib/discordBrowserSignIn';
 import {hasGamertag, gamertagError} from '../lib/gamertag';
@@ -25,6 +25,8 @@ export function useEventDetailParticipation(
   } = useAuth();
 
   const [gamertagOpen, setGamertagOpen] = useState(false);
+  const [waitlistConfirmOpen, setWaitlistConfirmOpen] = useState(false);
+  const [pendingJoinGamertag, setPendingJoinGamertag] = useState<string | null>(null);
   const [joining, setJoining] = useState(false);
   const [leaving, setLeaving] = useState(false);
   const [joinError, setJoinError] = useState<string | null>(null);
@@ -115,6 +117,11 @@ export function useEventDetailParticipation(
       setGamertagOpen(true);
       return;
     }
+    if (lobbyIsFull(event)) {
+      setPendingJoinGamertag(user.xboxGamertag!.trim());
+      setWaitlistConfirmOpen(true);
+      return;
+    }
     await doJoin(user.xboxGamertag!.trim());
   }, [
     event,
@@ -129,6 +136,37 @@ export function useEventDetailParticipation(
     t,
   ]);
 
+  const joinWithGamertag = useCallback(
+    async (gamertag: string) => {
+      if (!event) return;
+      if (lobbyIsFull(event)) {
+        setPendingJoinGamertag(gamertag.trim());
+        setGamertagOpen(false);
+        setWaitlistConfirmOpen(true);
+        return;
+      }
+      await doJoin(gamertag);
+    },
+    [event, doJoin],
+  );
+
+  const dismissWaitlistConfirm = useCallback(() => {
+    setWaitlistConfirmOpen(false);
+    setPendingJoinGamertag(null);
+  }, []);
+
+  const confirmWaitlistJoin = useCallback(async () => {
+    if (!event) return;
+    const tag = pendingJoinGamertag ?? user.xboxGamertag?.trim();
+    if (!tag) {
+      setGamertagOpen(true);
+      return;
+    }
+    setWaitlistConfirmOpen(false);
+    setPendingJoinGamertag(null);
+    await doJoin(tag);
+  }, [event, pendingJoinGamertag, user.xboxGamertag, doJoin]);
+
   const isParticipationInFlight = useCallback(
     () => participationInFlightRef.current,
     [],
@@ -137,6 +175,10 @@ export function useEventDetailParticipation(
   return {
     gamertagOpen,
     setGamertagOpen,
+    waitlistConfirmOpen,
+    dismissWaitlistConfirm,
+    confirmWaitlistJoin,
+    joinWithGamertag,
     joining,
     leaving,
     joinError,

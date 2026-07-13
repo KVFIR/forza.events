@@ -25,6 +25,7 @@ import {isLocalDevHost} from '../../lib/runtime';
 export function CreateEvent() {
   const {t} = useTranslation();
   const [publishConfirmOpen, setPublishConfirmOpen] = useState(false);
+  const [editNotifyConfirmOpen, setEditNotifyConfirmOpen] = useState(false);
   const [gamertagModalOpen, setGamertagModalOpen] = useState(false);
   const [savingGamertag, setSavingGamertag] = useState(false);
   const {refreshUser, isStandalone, loading: authInitializing, authRetrying, retryDiscordAuth} =
@@ -56,6 +57,7 @@ export function CreateEvent() {
     showPublishModal,
     setShowPublishModal,
     isPublished,
+    wouldNotifyRacersOnSave,
     values,
     tryContinue,
     onCoverChange,
@@ -117,6 +119,14 @@ export function CreateEvent() {
     const id = await persistDraft();
     if (!id) return;
     navigate(`/event/${id}`, {replace: true, state: {from: '/my-events'}});
+  }
+
+  function requestSaveChanges() {
+    if (wouldNotifyRacersOnSave) {
+      setEditNotifyConfirmOpen(true);
+      return;
+    }
+    void handleSaveChanges();
   }
 
   async function handleSaveChanges() {
@@ -267,7 +277,7 @@ export function CreateEvent() {
               variant="primary"
               fullWidth
               disabled={saving || !canPersist}
-              onClick={() => void handleSaveChanges()}
+              onClick={() => void requestSaveChanges()}
             >
               {saving ? busyLabel('saving') : t('create.saveChanges')}
             </Button>
@@ -333,6 +343,20 @@ export function CreateEvent() {
           </>
         )}
       </div>
+
+      <ConfirmDialog
+        open={editNotifyConfirmOpen}
+        title={t('notifications.editNotifyTitle')}
+        description={t('notifications.editNotifyBody')}
+        confirmLabel={t('notifications.editNotifyConfirm')}
+        cancelLabel={t('notifications.editNotifyCancel')}
+        busy={saving}
+        onCancel={() => setEditNotifyConfirmOpen(false)}
+        onConfirm={() => {
+          setEditNotifyConfirmOpen(false);
+          void handleSaveChanges();
+        }}
+      />
 
       <ConfirmDialog
         open={deleteConfirmOpen}

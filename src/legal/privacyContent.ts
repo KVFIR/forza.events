@@ -3,7 +3,7 @@ import type {LegalDocument} from './types';
 /** English privacy policy — authoritative for Discord verification and compliance. */
 export const privacyPolicyEn: LegalDocument = {
   title: 'Privacy Policy',
-  lastUpdated: '2026-05-28',
+  lastUpdated: '2026-07-13',
   intro:
     'This Privacy Policy describes how FORZA.EVENTS ("we", "us", "our") collects, uses, stores, and shares information when you use our Discord Application, embedded Activity, and related services (collectively, the "Service"). The Service helps Forza Horizon community members discover, create, join, and run racing events through Discord.',
   sections: [
@@ -48,7 +48,7 @@ export const privacyPolicyEn: LegalDocument = {
           items: [
             'Discord account data (via OAuth scopes identify, guilds, and rpc.activities.write): Discord user ID, unique username (handle), avatar URL, and related profile fields — used to sign you in and show your profile; rpc.activities.write is used only to show what you are doing inside the Activity on your Discord profile (Rich Presence, in English) while the app is open, including event titles you view or host.',
             'Discord server (guild) access via API: when you pick or refresh a publish target, we call Discord’s API with the guilds scope to list servers your account can access that also have our bot installed. We do not store a full snapshot of every server on your account. We store guild ID and display name for servers you use with the Service (for example when you publish an event, or when the Activity passes a guild context at sign-in), and guild_id on events you create.',
-            'Profile and gameplay preferences you provide: Xbox gamertag, region, timezone, language preferences, and preferred event types — stored in our database to run events and show your participation.',
+            'Profile and gameplay preferences you provide: Xbox gamertag, region, timezone, language preferences, preferred event types, and Discord DM notification preferences — stored in our database to run events and show your participation.',
             'Event and participation data: event titles, types, schedules, tracks, cars, restrictions, cover images you upload, server and channel IDs for publishing, join/leave actions, convoy leader assignments, race results, and related metadata created when you host or join events.',
             'Discord channel and embed metadata: channel IDs, message IDs for published embeds, and launch-intent records when you open the Activity from a button on an embed.',
             'Technical and security data: API request metadata (such as client IP address and timestamps) used for rate limiting and abuse prevention; browser language preference stored locally; optional locale choice stored in your browser’s local storage.',
@@ -87,6 +87,7 @@ export const privacyPolicyEn: LegalDocument = {
           type: 'ul',
           items: [
             'Provide, operate, and improve the Service (browse events, create and publish events, join or leave events, submit results, sync Discord embeds).',
+            'Send transactional Discord direct messages you opt into (or that are required for waitlist promotions), such as event cancellations, track or car rule updates, convoy leader changes, lobby status for hosts, and reminders before start.',
             'Authenticate you and enforce permissions (for example, only the event host can edit or cancel their event).',
             'Validate publish targets (confirm you can manage the server and the bot can post in the chosen channel).',
             'Display public event and participant information to other users of the Service.',

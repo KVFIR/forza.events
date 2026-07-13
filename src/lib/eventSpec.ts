@@ -120,7 +120,7 @@ export function lobbyIsFull(
   return firstOpenGroupIndex(event) === null;
 }
 
-/** Host may add another group when the lobby is full and the waitlist has someone. */
+/** Host may add another group when every active group is full (12/24/36…). */
 export function canAddGroup(event: ForzaEvent, user: AppUser): boolean {
   return (
     event.hostDiscordId === user.discordId &&
@@ -128,8 +128,7 @@ export function canAddGroup(event: ForzaEvent, user: AppUser): boolean {
     !isEventFinalized(event) &&
     !eventHasStarted(event) &&
     (event.groupCount ?? 1) < MAX_GROUPS &&
-    lobbyIsFull(event) &&
-    waitlistCount(event) >= 1
+    lobbyIsFull(event)
   );
 }
 

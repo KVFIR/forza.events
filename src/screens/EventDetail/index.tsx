@@ -77,12 +77,15 @@ export function EventDetail() {
   const {
     gamertagOpen,
     setGamertagOpen,
+    waitlistConfirmOpen,
+    dismissWaitlistConfirm,
     joining,
     leaving,
     joinError,
     isParticipationInFlight,
     handleJoinClick,
-    doJoin,
+    joinWithGamertag,
+    confirmWaitlistJoin,
   } = useEventDetailParticipation(displayEvent ?? event, syncEventFromServer);
 
   const reloadEvent = useCallback(() => {
@@ -238,8 +241,11 @@ export function EventDetail() {
         gamertagOpen={gamertagOpen}
         gamertagInitial={user.xboxGamertag ?? ''}
         joining={joining}
-        onGamertagSave={(gt) => void doJoin(gt)}
+        onGamertagSave={(gt) => void joinWithGamertag(gt)}
         onGamertagClose={() => setGamertagOpen(false)}
+        waitlistConfirmOpen={waitlistConfirmOpen}
+        onWaitlistConfirm={() => void confirmWaitlistJoin()}
+        onWaitlistDismiss={dismissWaitlistConfirm}
         confirmAction={hostActions.confirmAction}
         cancelling={hostActions.cancelling}
         onConfirmDismiss={() => hostActions.setConfirmAction(null)}

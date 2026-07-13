@@ -1,6 +1,7 @@
-import {useState} from 'react';
+import {useState, useEffect, useRef, useCallback} from 'react';
 import {useTranslation} from 'react-i18next';
 import {LanguageToggle} from '../components/LanguageToggle';
+import {NotificationBellToggle} from '../components/NotificationBellToggle';
 import {ProfileLegalLinks} from '../components/legal/ProfileLegalLinks';
 import {TextButton, TextLink} from '../components/ui/TextButton';
 import {useAuth} from '../context/AuthContext';
@@ -14,6 +15,8 @@ import {isEventSuccessfullyCompleted} from '../lib/eventSpec';
 import {formatDiscordHandle} from '../lib/discordHandle';
 import {hasGamertag} from '../lib/gamertag';
 import {isLocalDevHost} from '../lib/runtime';
+import {isStandaloneBrowser} from '../lib/discord';
+import {saveDiscordSession} from '../lib/discordAuth';
 import {SignInRequiredState} from '../components/SignInRequiredState';
 import {ContentReveal} from '../components/ui/ContentReveal';
 import {EmptyState} from '../components/ui/EmptyState';
@@ -21,10 +24,11 @@ import {PageLoading} from '../components/ui/PageLoading';
 import {Alert} from '../components/ui/Alert';
 import {StatCard} from '../components/ui/StatCard';
 import {UserAvatar} from '../components/UserAvatar';
+import type {AppLanguage} from '../i18n';
 import {cn} from '../lib/cn';
 
 export function Profile() {
-  const {t} = useTranslation();
+  const {t, i18n} = useTranslation();
   const {
     user,
     refreshUser,
@@ -40,6 +44,8 @@ export function Profile() {
   const {allMine, active, isLoading, loadError, refetch} = useMyEventsCatalog('all');
   const [editGamertag, setEditGamertag] = useState(false);
   const [saving, setSaving] = useState(false);
+  const [savingNotifications, setSavingNotifications] = useState(false);
+  const localeSyncedRef = useRef(false);
   const token = getAccessToken();
   const needsGamertag = !hasGamertag(user.xboxGamertag);
   const participatedCompleted = allMine.filter(
@@ -52,6 +58,45 @@ export function Profile() {
     (e) => e.hostDiscordId === user.discordId && isEventSuccessfullyCompleted(e),
   ).length;
   const participatedCount = participatedCompleted.length;
+
+  const syncProfilePrefs = useCallback(async (
+    updates: {dm_notifications_enabled?: boolean; notification_locale?: AppLanguage},
+  ) => {
+    if (!token || !isApiConfigured()) {
+      refreshUser({
+        ...user,
+        ...(updates.dm_notifications_enabled !== undefined
+          ? {dmNotificationsEnabled: updates.dm_notifications_enabled}
+          : {}),
+        ...(updates.notification_locale !== undefined
+          ? {notificationLocale: updates.notification_locale}
+          : {}),
+      });
+      return;
+    }
+    setSavingNotifications(true);
+    try {
+      const {user: updated} = await updateProfile(token, updates);
+      refreshUser(updated);
+      if (isStandaloneBrowser()) {
+        saveDiscordSession({accessToken: token, user: updated});
+      }
+    } finally {
+      setSavingNotifications(false);
+    }
+  }, [token, user, refreshUser]);
+
+  useEffect(() => {
+    if (!isSignedIn || !token || localeSyncedRef.current) return;
+    const uiLng = (i18n.language.split('-')[0] === 'ru' ? 'ru' : 'en') as AppLanguage;
+    if (user.notificationLocale === uiLng) {
+      localeSyncedRef.current = true;
+      return;
+    }
+    void syncProfilePrefs({notification_locale: uiLng}).finally(() => {
+      localeSyncedRef.current = true;
+    });
+  }, [isSignedIn, token, i18n.language, user.notificationLocale, syncProfilePrefs]);
 
   if (isConfigured && !isSignedIn && !authInitializing) {
     if (isStandalone && isLocalDevHost()) {
@@ -112,7 +157,23 @@ export function Profile() {
     <ContentReveal className="pb-10 pt-5">
       <div className="relative overflow-hidden rounded-2xl border border-white/[0.08] bg-card">
         <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_80%_20%,rgba(139,92,246,0.12)_0%,transparent_70%)]" />
-        <LanguageToggle className="absolute right-3 top-3 z-10" />
+        <div className="absolute right-3 top-3 z-10 flex flex-col items-end gap-1.5">
+          <LanguageToggle
+            onLanguageSelect={(lng) => {
+              if (!isSignedIn) return;
+              void syncProfilePrefs({notification_locale: lng});
+            }}
+          />
+          {isSignedIn ? (
+            <NotificationBellToggle
+              enabled={user.dmNotificationsEnabled !== false}
+              disabled={savingNotifications}
+              onChange={(next) => {
+                void syncProfilePrefs({dm_notifications_enabled: next});
+              }}
+            />
+          ) : null}
+        </div>
         <div className="relative flex items-center gap-4 p-5 pr-20">
           <UserAvatar
             src={user.avatarUrl}

@@ -34,6 +34,10 @@ import {normalizeTracks, tracksToRows} from '../../lib/eventTracks';
 import type {EventTrack} from '../../lib/types';
 import type {EventCarEntry} from '../../components/EventCarList';
 import type {ConvoyLeaderSelection} from '../../components/ConvoyLeaderPicker';
+import {
+  publishedTracksOrCarsChanged,
+  type PublishedNotifyBaseline,
+} from '../../lib/publishedEventNotifyDiff';
 import {PUBLISH_STEP_INDEX, type CreateEventStepIndex} from './constants';
 import type {CreateEventFormValues, CreateEventType, FieldErrors} from './types';
 import {
@@ -74,6 +78,7 @@ export function useCreateEventForm() {
   const [cancelConfirmOpen, setCancelConfirmOpen] = useState(false);
   const [isPublished, setIsPublished] = useState(false);
   const [canCancelPublished, setCanCancelPublished] = useState(false);
+  const [notifyBaseline, setNotifyBaseline] = useState<PublishedNotifyBaseline | null>(null);
 
   const loadedEditRef = useRef<string | null>(null);
 
@@ -252,6 +257,22 @@ export function useCreateEventForm() {
         const published = isPublishedToDiscord(ev);
         setIsPublished(published);
         setCanCancelPublished(canCancelPublishedEvent(ev, user));
+        if (published) {
+          setNotifyBaseline({
+            tracks: ev.tracks ?? [],
+            carRuleMode: ev.carRuleMode,
+            maxPi: ev.maxPi,
+            additionalCarRestrictions: ev.additionalCarRestrictions ?? '',
+            cars: ev.allowedCars.map((c) => ({
+              id: c.carId,
+              maxPi: c.maxPi,
+              tuneShareCode: c.tuneShareCode,
+              restrictions: c.restrictions,
+            })),
+          });
+        } else {
+          setNotifyBaseline(null);
+        }
         if (published) setStep(0);
         setTitle(ev.title);
         setType(ev.type);
@@ -599,6 +620,24 @@ export function useCreateEventForm() {
     showPublishModal,
     setShowPublishModal,
     isPublished,
+    notifyBaseline,
+    wouldNotifyRacersOnSave:
+      isPublished &&
+      publishedTracksOrCarsChanged(
+        {
+          tracks,
+          carRuleMode,
+          maxPi,
+          additionalCarRestrictions,
+          cars: eventCars.map((c) => ({
+            id: c.id,
+            maxPi: c.maxPi,
+            tuneShareCode: c.tuneShareCode,
+            restrictions: c.restrictions,
+          })),
+        },
+        notifyBaseline,
+      ),
     values,
     normalizedTracks,
     tryContinue,

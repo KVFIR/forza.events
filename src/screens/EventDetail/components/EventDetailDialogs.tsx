@@ -8,6 +8,9 @@ type Props = {
   joining: boolean;
   onGamertagSave: (gamertag: string) => void;
   onGamertagClose: () => void;
+  waitlistConfirmOpen: boolean;
+  onWaitlistConfirm: () => void;
+  onWaitlistDismiss: () => void;
   confirmAction: 'cancel' | null;
   cancelling: boolean;
   onConfirmDismiss: () => void;
@@ -20,6 +23,9 @@ export function EventDetailDialogs({
   joining,
   onGamertagSave,
   onGamertagClose,
+  waitlistConfirmOpen,
+  onWaitlistConfirm,
+  onWaitlistDismiss,
   confirmAction,
   cancelling,
   onConfirmDismiss,
@@ -35,6 +41,16 @@ export function EventDetailDialogs({
         saving={joining}
         onSave={onGamertagSave}
         onClose={onGamertagClose}
+      />
+
+      <ConfirmDialog
+        open={waitlistConfirmOpen}
+        title={t('notifications.joinWaitlistTitle')}
+        description={t('notifications.joinWaitlistBody')}
+        confirmLabel={t('notifications.joinWaitlistConfirm')}
+        busy={joining}
+        onCancel={onWaitlistDismiss}
+        onConfirm={onWaitlistConfirm}
       />
 
       <ConfirmDialog

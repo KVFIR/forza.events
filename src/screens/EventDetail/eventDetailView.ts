@@ -72,6 +72,7 @@ export type EventDetailViewModel = {
   isCurrentConvoyLeader: boolean;
   participationDisabled: boolean;
   showJoinXboxHint: boolean;
+  showJoinNotifyHint: boolean;
   showConvoyLeaderXboxHint: boolean;
 };
 
@@ -161,6 +162,13 @@ export function buildEventDetailViewModel(input: {
     (isInParticipants && !joined && !onWaitlist) ||
     // Active seat or waitlist → leave; otherwise join (or join-waitlist when full).
     (joined || onWaitlist ? !canLeave : !registrationOpen);
+  const showJoinNotifyHint =
+    showParticipantActions &&
+    registrationOpen &&
+    !joined &&
+    !onWaitlist &&
+    !willWaitlist &&
+    !needsSignInToParticipate;
   const showJoinXboxHint =
     joined &&
     !onWaitlist &&
@@ -216,6 +224,7 @@ export function buildEventDetailViewModel(input: {
     isCurrentConvoyLeader,
     participationDisabled,
     showJoinXboxHint,
+    showJoinNotifyHint,
     showConvoyLeaderXboxHint,
   };
 }

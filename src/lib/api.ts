@@ -319,7 +319,13 @@ export async function submitEventResults(
 
 export async function updateProfile(
   discordToken: string,
-  updates: {xbox_gamertag?: string; region?: string; timezone?: string},
+  updates: {
+    xbox_gamertag?: string;
+    region?: string;
+    timezone?: string;
+    dm_notifications_enabled?: boolean;
+    notification_locale?: string;
+  },
 ) {
   return invoke<{user: import('./types').AppUser}>(
     'user-profile',

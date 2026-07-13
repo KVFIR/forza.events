@@ -10,6 +10,18 @@
     "en": "English",
     "ru": "Русский"
   },
+  "notifications": {
+    "toggleOn": "Discord notifications",
+    "toggleOff": "Discord notifications off",
+    "joinHint": "You'll get Discord DMs about this event. Turn off in Profile.",
+    "joinWaitlistTitle": "Join the waitlist?",
+    "joinWaitlistBody": "The lobby is full. You'll be queued in order.\n\nIf a seat opens, you'll be moved in automatically. The host may also open another group when every group is full.\n\nWe'll send you a Discord DM when you get a seat.",
+    "joinWaitlistConfirm": "Join waitlist",
+    "editNotifyTitle": "Notify registered racers?",
+    "editNotifyBody": "Saving will send Discord DMs to registered racers about changes to tracks and/or car rules. Racers on the waitlist will not be notified.",
+    "editNotifyConfirm": "Save & notify",
+    "editNotifyCancel": "Keep editing"
+  },
   "common": {
     "back": "Back",
     "cancel": "Cancel",
@@ -182,7 +194,7 @@
   "addGroup": {
     "button": "Add group {{n}}",
     "title": "Add group {{n}}",
-    "description": "Pick a convoy leader for the new group. Racers from the waitlist, other groups (not convoy leaders), or the host (if not already a convoy leader) can be chosen. Vacated seats are filled from the waitlist.",
+    "description": "Pick a convoy leader for the new group. Racers from the waitlist, other groups (not convoy leaders), or the host (if not already a convoy leader) can be chosen. Anyone on the waitlist is moved into the new group; vacated seats are backfilled from the waitlist.",
     "leaderCandidates": "Suggested leaders",
     "confirm": "Add group",
     "pickLeader": "Pick a convoy leader for the new group.",
@@ -397,10 +409,10 @@
     "profileIncomplete": "Complete sign-in before joining events.",
     "guildMemberSearchDisabled": "Convoy leader search is unavailable. Enable the Server Members intent for the bot in the Discord Developer Portal.",
     "groupsMaxed": "This event already has the maximum number of groups.",
-    "waitlistEmpty": "There is nobody on the waitlist to move into a new group.",
+    "waitlistEmpty": "Could not add a group. Refresh the page and try again.",
     "leaderAlreadyInLobby": "This driver is already in the lobby. Pick someone from the waitlist or a server member who has not joined yet.",
     "leaderAlreadyConvoyLeader": "This driver is already a convoy leader in another group.",
-    "lobbyNotFull": "There are still open seats in the current groups. Add a group only when every group is full and racers are waiting."
+    "lobbyNotFull": "There are still open seats in the current groups. Add a group only when every active group is full."
   },
   "validation": {
     "futureDate": "Choose a date and time in the future.",

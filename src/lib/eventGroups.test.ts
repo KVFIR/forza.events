@@ -102,15 +102,15 @@ describe('group fullness / routing', () => {
 describe('canAddGroup', () => {
   const fullGroup = fill(12, 1);
 
+  it('is allowed for host when every active group is full', () => {
+    const ev = event({participants: fullGroup, currentPlayers: 12});
+    expect(canAddGroup(ev, host)).toBe(true);
+  });
+
   it('is allowed for host of a full lobby with a waitlist', () => {
     const ev = event({participants: [...fullGroup, ...fill(1, 1, true)], currentPlayers: 12});
     expect(waitlistCount(ev)).toBe(1);
     expect(canAddGroup(ev, host)).toBe(true);
-  });
-
-  it('is blocked with an empty waitlist', () => {
-    const ev = event({participants: fullGroup, currentPlayers: 12});
-    expect(canAddGroup(ev, host)).toBe(false);
   });
 
   it('is blocked when active groups still have open seats', () => {

@@ -171,6 +171,21 @@ describe('buildEventDetailViewModel', () => {
     expect(view.participationDisabled).toBe(false);
   });
 
+  it('offers Add group to the host when every active group is full', () => {
+    const participants = Array.from({length: 12}, (_, i) =>
+      participant({discordId: `d${i}`, gamertag: `GT${i}`}),
+    );
+    const event = baseEvent({
+      hostDiscordId: 'viewer-1',
+      discordMessageId: 'msg-1',
+      participants,
+      currentPlayers: 12,
+    });
+    const view = buildView({event, displayEvent: event});
+    expect(view.canAddGroup).toBe(true);
+    expect(view.waitlistCount).toBe(0);
+  });
+
   it('offers Add group to the host when the lobby is full with a waitlist', () => {
     const participants = Array.from({length: 12}, (_, i) =>
       participant({discordId: `d${i}`, gamertag: `GT${i}`}),

@@ -106,6 +106,10 @@ export interface AppUser {
   attendanceRate: number;
   noShows: number;
   hostRatingAvg: number;
+  /** Discord DM notifications (default on). */
+  dmNotificationsEnabled?: boolean;
+  /** Locale for bot DM copy (`en` | `ru`). */
+  notificationLocale?: 'en' | 'ru';
 }
 
 export type DiscordGuildOption = {

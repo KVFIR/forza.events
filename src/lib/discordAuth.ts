@@ -110,5 +110,8 @@ export function mergeSessionUser(fresh: AppUser): AppUser {
   return {
     ...fresh,
     xboxGamertag: session.user.xboxGamertag ?? fresh.xboxGamertag,
+    dmNotificationsEnabled:
+      session.user.dmNotificationsEnabled ?? fresh.dmNotificationsEnabled,
+    notificationLocale: session.user.notificationLocale ?? fresh.notificationLocale,
   };
 }

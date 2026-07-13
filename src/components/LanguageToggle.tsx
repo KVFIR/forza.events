@@ -9,10 +9,11 @@ const OPTIONS: {value: AppLanguage; short: string}[] = [
 
 type Props = {
   className?: string;
+  onLanguageSelect?: (lng: AppLanguage) => void;
 };
 
 /** Minimal EN/RU pill — e.g. profile card corner. */
-export function LanguageToggle({className}: Props) {
+export function LanguageToggle({className, onLanguageSelect}: Props) {
   const {t, i18n} = useTranslation();
   const current = (i18n.language.split('-')[0] === 'ru' ? 'ru' : 'en') as AppLanguage;
 
@@ -34,7 +35,10 @@ export function LanguageToggle({className}: Props) {
             aria-pressed={active}
             aria-label={t(`language.${opt.value}`)}
             onClick={() => {
-              if (!active) void i18n.changeLanguage(opt.value);
+              if (!active) {
+                void i18n.changeLanguage(opt.value);
+                onLanguageSelect?.(opt.value);
+              }
             }}
             className={cn(
               'min-w-[2rem] rounded-md px-2 py-1 text-[10px] font-bold uppercase tracking-wider transition-all duration-200',
