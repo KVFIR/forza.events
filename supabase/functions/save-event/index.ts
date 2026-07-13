@@ -27,6 +27,17 @@ import {PI_MAX} from '../_shared/pi.ts';
 import {rateLimitMutation} from '../_shared/rateLimitPresets.ts';
 import {adminClient} from '../_shared/supabase.ts';
 import {VALIDATION_CODES, type ValidationCode} from '../_shared/validationCodes.ts';
+import {deferNotificationDelivery} from '../_shared/notifications.ts';
+import {
+  enqueueConvoyLeaderChanged,
+  enqueueEventCancelled,
+  enqueueEventUpdated,
+} from '../_shared/notificationTriggers.ts';
+import {
+  eventUpdateContentHash,
+  normalizeCarsForDiff,
+  tracksOrCarsChanged,
+} from '../_shared/notificationDiff.ts';
 
 const UUID_RE =
   /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
@@ -94,6 +105,22 @@ serve(async (req) => {
         .select('*')
         .single();
       if (error) return databaseErrorResponse(req, 'save-event cancel', error);
+      const {data: participants} = await supabase
+        .from('event_participants')
+        .select('discord_id, group_index, waitlisted, is_convoy_leader, gamertag_snapshot')
+        .eq('event_id', body.id);
+      if (updated && participants?.length) {
+        await enqueueEventCancelled(supabase, {
+          id: updated.id,
+          title: updated.title,
+          host_discord_id: updated.host_discord_id,
+          max_players: updated.max_players,
+          group_count: updated.group_count,
+          starts_at: updated.starts_at,
+          timezone: updated.timezone,
+        }, participants);
+        deferNotificationDelivery(supabase);
+      }
       if (updated?.channel_id && updated.discord_message_id) {
         const embedSync = await syncPublishedEmbed(supabase, updated);
         if (!embedSync.ok) {
@@ -135,17 +162,38 @@ serve(async (req) => {
       discord_message_id: string | null;
       starts_at: string;
       cover_image_url: string | null;
+      title: string;
+      tracks: unknown;
+      car_rule_mode: string;
+      max_pi: number | null;
+      additional_car_restrictions: string | null;
+      lobby_leader_discord_id: string | null;
+      lobby_leader_is_host: boolean | null;
+      lobby_leader_gamertag: string | null;
     } | null = null;
+    let existingCarFingerprint = '';
 
     if (body.id) {
       const {data} = await supabase
         .from('events')
         .select(
-          'id, host_discord_id, status, guild_id, channel_id, discord_message_id, starts_at, cover_image_url',
+          'id, host_discord_id, status, guild_id, channel_id, discord_message_id, starts_at, cover_image_url, title, tracks, car_rule_mode, max_pi, additional_car_restrictions, lobby_leader_discord_id, lobby_leader_is_host, lobby_leader_gamertag',
         )
         .eq('id', body.id)
         .single();
       existing = data;
+      if (existing?.discord_message_id) {
+        const {data: eventCars} = await supabase
+          .from('event_cars')
+          .select('car_id, max_pi, tune_share_code, car_restrictions')
+          .eq('event_id', body.id);
+        existingCarFingerprint = normalizeCarsForDiff(
+          existing.car_rule_mode,
+          existing.max_pi,
+          existing.additional_car_restrictions,
+          eventCars ?? [],
+        );
+      }
       if (!existing || existing.host_discord_id !== discordUser.id) {
         return jsonResponse({error: 'Forbidden'}, 403, req);
       }
@@ -231,6 +279,70 @@ serve(async (req) => {
               status: embedSync.status,
             }),
           );
+        }
+        if (existing?.discord_message_id) {
+          const {data: participants} = await supabase
+            .from('event_participants')
+            .select('discord_id, group_index, waitlisted, is_convoy_leader, gamertag_snapshot')
+            .eq('event_id', eventId);
+
+          const eventRow = {
+            id: data.id,
+            title: data.title,
+            host_discord_id: data.host_discord_id,
+            max_players: data.max_players,
+            group_count: data.group_count,
+            starts_at: data.starts_at,
+            timezone: data.timezone,
+          };
+
+          const leaderChanged = existing.lobby_leader_discord_id !== lobbyResolved.lobby_leader_discord_id ||
+            existing.lobby_leader_is_host !== lobbyResolved.lobby_leader_is_host ||
+            (existing.lobby_leader_gamertag ?? '').trim() !== lobbyResolved.lobby_leader_gamertag.trim();
+
+          if (leaderChanged) {
+            await enqueueConvoyLeaderChanged(
+              supabase,
+              eventRow,
+              participants ?? [],
+              1,
+              lobbyResolved.lobby_leader_gamertag,
+              body.lobby_leader_username,
+            );
+          }
+
+          const afterCarFingerprint = normalizeCarsForDiff(
+            body.car_rule_mode ?? data.car_rule_mode,
+            body.max_pi ?? data.max_pi,
+            body.additional_car_restrictions ?? data.additional_car_restrictions,
+            resolvedCars,
+          );
+          const diff = tracksOrCarsChanged(
+            {tracks: existing.tracks, carFingerprint: existingCarFingerprint},
+            {tracks: body.tracks ?? data.tracks, carFingerprint: afterCarFingerprint},
+          );
+          if (diff.tracks || diff.cars) {
+            const contentHash = eventUpdateContentHash(
+              diff.tracks,
+              diff.cars,
+              body.tracks ?? data.tracks,
+              afterCarFingerprint,
+            );
+            await enqueueEventUpdated(
+              supabase,
+              eventRow,
+              participants ?? [],
+              contentHash,
+              body.tracks ?? data.tracks,
+              body.car_rule_mode ?? data.car_rule_mode,
+              body.max_pi ?? data.max_pi,
+              resolvedCars.length,
+              diff.tracks,
+              diff.cars,
+            );
+          }
+
+          deferNotificationDelivery(supabase);
         }
       }
       return jsonResponse({id: eventId, slug: data.slug}, 200, req);

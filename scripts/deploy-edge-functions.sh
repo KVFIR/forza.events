@@ -21,6 +21,7 @@ FUNCTIONS=(
   user-profile
   launch-intent
   upload-cover
+  process-notifications
 )
 
 echo "Deploying ${#FUNCTIONS[@]} Supabase Edge Functions..."

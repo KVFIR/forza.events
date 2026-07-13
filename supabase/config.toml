@@ -67,3 +67,6 @@ verify_jwt = false
 
 [functions.upload-cover]
 verify_jwt = false
+
+[functions.process-notifications]
+verify_jwt = false

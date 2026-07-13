@@ -10,6 +10,13 @@ import {firstOpenGroup} from '../_shared/eventGroups.ts';
 import {validateGamertag} from '../_shared/gamertag.ts';
 import {rateLimitMutation} from '../_shared/rateLimitPresets.ts';
 import {responseForRpcError} from '../_shared/rpcErrors.ts';
+import {deferNotificationDelivery} from '../_shared/notifications.ts';
+import {groupFillsOnJoin, groupFillsOnPromote} from '../_shared/notificationParticipation.ts';
+import {
+  enqueueHostGroupFilled,
+  enqueueHostLobbyFull,
+  enqueueWaitlistSeatOpened,
+} from '../_shared/notificationTriggers.ts';
 import {adminClient} from '../_shared/supabase.ts';
 
 const UUID_RE =
@@ -78,15 +85,48 @@ serve(async (req) => {
         return appErrorResponse(req, 400, API_ERROR_CODES.REGISTRATION_AFTER_START);
       }
 
-      const {data: removed, error} = await supabase.rpc('leave_event_participant', {
+      const {data: leaveResult, error} = await supabase.rpc('leave_event_participant', {
         p_event_id: event_id,
         p_discord_id: discordUser.id,
       });
 
       if (error) return participationError(req, error, 'Could not leave event');
 
+      const removed = Boolean(
+        leaveResult && typeof leaveResult === 'object' && (leaveResult as {removed?: boolean}).removed,
+      );
+      const promotedId =
+        leaveResult && typeof leaveResult === 'object'
+          ? ((leaveResult as {promoted_discord_id?: string | null}).promoted_discord_id ?? null)
+          : null;
+
       let embedSynced = true;
       if (removed) {
+        if (promotedId) {
+          const {data: eventRow} = await supabase
+            .from('events')
+            .select('id, title, host_discord_id, max_players, group_count, starts_at, timezone')
+            .eq('id', event_id)
+            .single();
+          const {data: participants} = await supabase
+            .from('event_participants')
+            .select('discord_id, group_index, waitlisted, is_convoy_leader, gamertag_snapshot')
+            .eq('event_id', event_id);
+          if (eventRow && participants) {
+            const groupIndex = participants.find((p) => p.discord_id === promotedId)?.group_index ?? 1;
+            await enqueueWaitlistSeatOpened(
+              supabase,
+              eventRow,
+              promotedId,
+              groupIndex,
+              participants,
+            );
+            if (groupFillsOnPromote(participants, groupIndex, eventRow.max_players)) {
+              await enqueueHostGroupFilled(supabase, eventRow, groupIndex);
+            }
+            deferNotificationDelivery(supabase);
+          }
+        }
         const embedSync = await syncPublishedEmbedByEventId(supabase, event_id);
         embedSynced = embedSync.ok;
         if (!embedSync.ok) {
@@ -108,7 +148,7 @@ serve(async (req) => {
 
       const {data: event} = await supabase
         .from('events')
-        .select('max_players, group_count, current_players, status, starts_at, host_discord_id')
+        .select('max_players, group_count, current_players, status, starts_at, host_discord_id, title, timezone')
         .eq('id', event_id)
         .single();
 
@@ -154,6 +194,7 @@ serve(async (req) => {
         }
       }
 
+
       // Preserve host-managed sources; a voluntary join from a non-leader row becomes self_join.
       const participationSource: string =
         existing?.participation_source === 'host_assigned' ||
@@ -183,6 +224,35 @@ serve(async (req) => {
       }
 
       if (error) return participationError(req, error, 'Could not join event');
+
+      const eventRow = {
+        id: event_id,
+        title: event.title,
+        host_discord_id: event.host_discord_id,
+        max_players: event.max_players,
+        group_count: event.group_count,
+        starts_at: event.starts_at,
+        timezone: event.timezone,
+      };
+
+      if (waitlisted) {
+        const priorWaitlistCount = (roster ?? []).filter((r) => r.waitlisted).length;
+        const waitlistCount = priorWaitlistCount + (existing?.waitlisted ? 0 : 1);
+        await enqueueHostLobbyFull(supabase, eventRow, waitlistCount);
+        deferNotificationDelivery(supabase);
+      } else if (
+        groupFillsOnJoin(
+          existing,
+          waitlisted,
+          roster ?? [],
+          groupIndex,
+          discordUser.id,
+          event.max_players,
+        )
+      ) {
+        await enqueueHostGroupFilled(supabase, eventRow, groupIndex);
+        deferNotificationDelivery(supabase);
+      }
 
       const embedSync = await syncPublishedEmbedByEventId(supabase, event_id);
       if (!embedSync.ok) {

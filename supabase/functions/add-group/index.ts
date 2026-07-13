@@ -10,6 +10,8 @@ import {canPickAsNewGroupLeader, firstOpenGroup, resolveAddGroupParticipationSou
 import {responseForRpcError} from '../_shared/rpcErrors.ts';
 import {validateGamertag} from '../_shared/gamertag.ts';
 import {rateLimitMutation} from '../_shared/rateLimitPresets.ts';
+import {deferNotificationDelivery} from '../_shared/notifications.ts';
+import {enqueueWaitlistNewGroup} from '../_shared/notificationTriggers.ts';
 import {adminClient} from '../_shared/supabase.ts';
 import {VALIDATION_CODES} from '../_shared/validationCodes.ts';
 
@@ -45,7 +47,7 @@ serve(async (req) => {
     const {data: event} = await supabase
       .from('events')
       .select(
-        'host_discord_id, guild_id, status, starts_at, group_count, max_players, lobby_leader_discord_id, lobby_leader_is_host, lobby_leader_gamertag',
+        'host_discord_id, guild_id, status, starts_at, group_count, max_players, lobby_leader_discord_id, lobby_leader_is_host, lobby_leader_gamertag, title, timezone',
       )
       .eq('id', eventId)
       .single();
@@ -87,6 +89,10 @@ serve(async (req) => {
     }
 
     const existingLeaderRow = (roster ?? []).find((r) => r.discord_id === leaderId);
+    const waitlistedBefore = new Set(
+      (roster ?? []).filter((r) => r.waitlisted).map((r) => r.discord_id),
+    );
+    const leaderFromWaitlist = Boolean(existingLeaderRow?.waitlisted);
 
     let leaderGamertag = String(body.leader_gamertag ?? '').trim();
     if (!leaderGamertag) leaderGamertag = existingLeaderRow?.gamertag_snapshot?.trim() ?? '';
@@ -141,6 +147,42 @@ serve(async (req) => {
       p_participation_source: participationSource,
     });
     if (rpcErr) return responseForRpcError(req, rpcErr);
+
+    const newGroupIndex = Number(newGroup);
+    const {data: rosterAfter} = await supabase
+      .from('event_participants')
+      .select('discord_id, group_index, waitlisted, is_convoy_leader, gamertag_snapshot')
+      .eq('event_id', eventId);
+
+    const promotedIds = (rosterAfter ?? [])
+      .filter(
+        (r) =>
+          !r.waitlisted &&
+          (r.group_index ?? 1) === newGroupIndex &&
+          waitlistedBefore.has(r.discord_id),
+      )
+      .map((r) => r.discord_id);
+
+    if (promotedIds.length) {
+      await enqueueWaitlistNewGroup(
+        supabase,
+        {
+          id: eventId,
+          title: event.title,
+          host_discord_id: event.host_discord_id,
+          max_players: event.max_players,
+          group_count: newGroupIndex,
+          starts_at: event.starts_at,
+          timezone: event.timezone,
+        },
+        newGroupIndex,
+        promotedIds,
+        leaderFromWaitlist,
+        leaderId,
+        rosterAfter ?? [],
+      );
+      deferNotificationDelivery(supabase);
+    }
 
     const embedSync = await syncPublishedEmbedByEventId(supabase, eventId);
     if (!embedSync.ok) {

@@ -21,7 +21,7 @@ serve(async (req) => {
   if (authLimited) return authLimited;
 
   try {
-    const {xbox_gamertag, region, timezone} = await req.json();
+    const {xbox_gamertag, region, timezone, dm_notifications_enabled, notification_locale} = await req.json();
     const supabase = adminClient();
 
     let validatedGamertag: string | undefined;
@@ -37,6 +37,13 @@ serve(async (req) => {
     if (validatedGamertag !== undefined) updates.xbox_gamertag = validatedGamertag;
     if (region !== undefined) updates.region = region;
     if (timezone !== undefined) updates.timezone = timezone;
+    if (dm_notifications_enabled !== undefined) {
+      updates.dm_notifications_enabled = Boolean(dm_notifications_enabled);
+    }
+    if (notification_locale !== undefined) {
+      const loc = String(notification_locale).split('-')[0];
+      if (loc === 'en' || loc === 'ru') updates.notification_locale = loc;
+    }
     const {data, error} = await supabase
       .from('users')
       .update(updates)
@@ -57,6 +64,8 @@ serve(async (req) => {
         attendanceRate: Number(data.attendance_rate),
         noShows: data.no_shows,
         hostRatingAvg: 0,
+        dmNotificationsEnabled: data.dm_notifications_enabled ?? true,
+        notificationLocale: data.notification_locale === 'ru' ? 'ru' : 'en',
       },
     }, 200, req);
   } catch (e) {

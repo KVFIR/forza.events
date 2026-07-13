@@ -63,6 +63,8 @@ serve(async (req) => {
         attendanceRate: Number(user.attendance_rate),
         noShows: user.no_shows,
         hostRatingAvg: 0,
+        dmNotificationsEnabled: user.dm_notifications_enabled ?? true,
+        notificationLocale: user.notification_locale === 'ru' ? 'ru' : 'en',
       },
     }, 200, req);
   } catch (e) {
