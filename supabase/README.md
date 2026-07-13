@@ -43,6 +43,9 @@ npx supabase migration repair --linked --status applied 006 --yes
 | `008_waitlist_atomic_rpc.sql` | Atomic RPCs: `promote_waitlist_to_group`, `add_event_group`, `leave_event_participant` (leave + promotion in one transaction) |
 | `009_add_group_lobby_full_guard.sql` | `add_event_group`: raise `LOBBY_NOT_FULL` when active groups still have open seats |
 | `010_participant_group_index_guard.sql` | Trigger: active `group_index` must be within `1..events.group_count` |
+| `011_leave_promote_smallint_cast.sql` | Fix `leave_event_participant` → `promote_waitlist_to_group` smallint cast (leave + waitlist promotion) |
+| `012_smallint_rpc_hardening.sql` | Integer overload for `promote_waitlist_to_group`; `1::smallint` in `add_event_group` / group_index guard; self-check |
+| `013_submit_results_group_index_cast.sql` | `submit_event_results`: `coalesce(group_index, 1::smallint)` |
 
 Seeds are **not** included in the migration. Run separately after `db push`:
 

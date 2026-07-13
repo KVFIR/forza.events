@@ -9,6 +9,7 @@ import {canLeaveEvent, eventHasStarted} from '../_shared/eventSpec.ts';
 import {firstOpenGroup} from '../_shared/eventGroups.ts';
 import {validateGamertag} from '../_shared/gamertag.ts';
 import {rateLimitMutation} from '../_shared/rateLimitPresets.ts';
+import {responseForRpcError} from '../_shared/rpcErrors.ts';
 import {adminClient} from '../_shared/supabase.ts';
 
 const UUID_RE =
@@ -22,20 +23,10 @@ function participationError(
   fallback: string,
 ): Response {
   const msg = error.message ?? fallback;
-  if (msg.includes('EVENT_FULL')) {
-    return appErrorResponse(req, 409, API_ERROR_CODES.EVENT_FULL);
-  }
-  if (msg.includes('EVENT_NOT_FOUND')) {
-    return appErrorResponse(req, 404, API_ERROR_CODES.EVENT_NOT_FOUND);
-  }
-  if (msg.includes('LEADER_CANNOT_LEAVE')) {
-    return appErrorResponse(req, 400, API_ERROR_CODES.LEADER_CANNOT_LEAVE);
-  }
   if (msg.includes('foreign key') && msg.includes('users')) {
     return appErrorResponse(req, 400, API_ERROR_CODES.PROFILE_INCOMPLETE);
   }
-  console.error(JSON.stringify({msg: 'event-participation db error', detail: msg}));
-  return appErrorResponse(req, 500, API_ERROR_CODES.INTERNAL);
+  return responseForRpcError(req, {message: msg});
 }
 
 serve(async (req) => {
