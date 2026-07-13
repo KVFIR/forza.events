@@ -244,6 +244,7 @@
     "trackCount_other": "{{count}} tracks",
     "continueToPublish": "Continue to publish",
     "fixIssue": "Fix",
+    "gapGuild": "Choose a Discord server for this event.",
     "gapChannel": "Select an announcement channel.",
     "gapCars": "Add at least one allowed car.",
     "gapConvoyLeader": "Choose a convoy leader from the publish server.",

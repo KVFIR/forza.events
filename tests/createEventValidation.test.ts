@@ -61,15 +61,12 @@ describe('create event validation', () => {
     }
   });
 
-  it('draft form outcome returns field errors before global message', () => {
+  it('draft form outcome allows missing publish server', () => {
     const outcome = validateDraftFormOutcome(
       {...baseValues, targetGuildId: '', lobbyLeaderIsHost: true},
       'HostTag1',
     );
-    expect(outcome.ok).toBe(false);
-    if (!outcome.ok) {
-      expect(outcome.fieldErrors.targetGuildId).toBeTruthy();
-    }
+    expect(outcome.ok).toBe(true);
   });
 
   it('routes convoy field errors to publish step', () => {
@@ -81,6 +78,7 @@ describe('create event validation', () => {
 describe('collectPublishGaps', () => {
   it('includes convoy leader gap when another leader is not chosen', () => {
     const gaps = collectPublishGaps({
+      guildId: 'guild-1',
       channelId: 'ch-1',
       carRuleMode: 'anything_goes',
       carCount: 0,
@@ -93,6 +91,7 @@ describe('collectPublishGaps', () => {
 
   it('includes host gamertag gap when host is convoy leader without profile tag', () => {
     const gaps = collectPublishGaps({
+      guildId: 'guild-1',
       channelId: 'ch-1',
       carRuleMode: 'anything_goes',
       carCount: 0,

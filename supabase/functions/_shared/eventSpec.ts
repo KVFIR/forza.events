@@ -69,7 +69,6 @@ export function validateDraft(body: SaveEventBody): ValidationCode | null {
   if (!body.title?.trim()) return VALIDATION_CODES.TITLE_REQUIRED;
   if (!isValidEventType(body.type)) return VALIDATION_CODES.TYPE_REQUIRED;
   if (!body.starts_at) return VALIDATION_CODES.STARTS_AT_REQUIRED;
-  if (!body.guild_id) return VALIDATION_CODES.GUILD_REQUIRED;
   const trackErr = validateTrackRows(resolveSaveTracks(body));
   if (trackErr) return trackErr;
   return null;
@@ -78,6 +77,7 @@ export function validateDraft(body: SaveEventBody): ValidationCode | null {
 export function validatePublishReady(body: SaveEventBody): ValidationCode | null {
   const draftErr = validateDraft(body);
   if (draftErr) return draftErr;
+  if (!body.guild_id?.trim()) return VALIDATION_CODES.GUILD_REQUIRED;
   if (!body.channel_id?.trim()) return VALIDATION_CODES.CHANNEL_REQUIRED;
 
   const leader = body.lobby_leader_gamertag?.trim();
@@ -143,7 +143,7 @@ export function buildEventFields(
     title: body.title?.trim(),
     type: body.type,
     host_discord_id: hostDiscordId,
-    guild_id: body.guild_id,
+    guild_id: body.guild_id?.trim() || null,
     channel_id: body.channel_id?.trim() || null,
     starts_at: body.starts_at,
     timezone_hint: body.timezone_hint,

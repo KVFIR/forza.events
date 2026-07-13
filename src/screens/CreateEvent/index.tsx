@@ -92,6 +92,7 @@ export function CreateEvent() {
   } = form;
 
   const missingForPublish = collectPublishGaps({
+    guildId: values.targetGuildId,
     channelId: values.targetChannelId,
     carRuleMode: values.carRuleMode,
     carCount: values.eventCars.length,

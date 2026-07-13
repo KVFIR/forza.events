@@ -149,10 +149,12 @@ export function validateTargetStep(
     | 'lobbyLeaderGamertag'
     | 'lobbyLeaderDiscordId'
   >,
-  options?: {requireChannel?: boolean; hostGamertag?: string},
+  options?: {requireChannel?: boolean; requireGuild?: boolean; hostGamertag?: string},
 ): FieldErrors {
   const errors: FieldErrors = {};
-  if (!values.targetGuildId) errors.targetGuildId = i18n.t('validation.guildRequired');
+  if (options?.requireGuild !== false && !values.targetGuildId.trim()) {
+    errors.targetGuildId = i18n.t('validation.guildRequired');
+  }
   if (options?.requireChannel && !values.targetChannelId) {
     errors.targetChannelId = i18n.t('validation.channelRequired');
   }
@@ -199,7 +201,7 @@ function mergeDraftFieldErrors(
   return {
     ...validateBasicsStep(values, {allowPastStart: options?.allowPastStart}),
     ...validateDetailsStep(values),
-    ...validateTargetStep(values, {hostGamertag, requireChannel: false}),
+    ...validateTargetStep(values, {hostGamertag, requireChannel: false, requireGuild: false}),
   };
 }
 
@@ -228,7 +230,6 @@ export function validateDraftFormOutcome(
     title: values.title,
     type: isEventType(values.type) ? values.type : '',
     startsAtLocal: values.startsAtLocal,
-    guildId: values.targetGuildId,
   });
   if (globalError) return {ok: false, fieldErrors: {}, globalError};
   return {ok: true};

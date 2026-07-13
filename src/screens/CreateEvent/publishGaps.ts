@@ -8,6 +8,7 @@ export type PublishGap = {
 };
 
 export function collectPublishGaps(input: {
+  guildId: string;
   channelId: string;
   carRuleMode: CarRuleMode;
   carCount: number;
@@ -16,6 +17,9 @@ export function collectPublishGaps(input: {
   hostGamertag?: string;
 }): PublishGap[] {
   const gaps: PublishGap[] = [];
+  if (!input.guildId.trim()) {
+    gaps.push({message: 'create.gapGuild', step: 1});
+  }
   if (!input.channelId) {
     gaps.push({message: 'create.gapChannel', step: 1});
   }

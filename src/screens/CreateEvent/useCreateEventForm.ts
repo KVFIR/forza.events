@@ -57,8 +57,6 @@ export function useCreateEventForm() {
   const {bumpRefresh} = useJoinedEvents();
   const {
     user,
-    guildId: contextGuildId,
-    guildName: contextGuildName,
     getAccessToken,
     isSignedIn,
     isConfigured,
@@ -98,8 +96,8 @@ export function useCreateEventForm() {
   const [lobbyLeaderProfileGamertag, setLobbyLeaderProfileGamertag] = useState<string | null>(
     null,
   );
-  const [targetGuildId, setTargetGuildId] = useState(contextGuildId ?? '');
-  const [targetGuildName, setTargetGuildName] = useState(contextGuildName ?? '');
+  const [targetGuildId, setTargetGuildId] = useState('');
+  const [targetGuildName, setTargetGuildName] = useState('');
   const [targetChannelId, setTargetChannelId] = useState('');
 
   useEffect(() => {
@@ -221,10 +219,6 @@ export function useCreateEventForm() {
       setCanCancelPublished(false);
       setIsPublished(false);
       loadedEditRef.current = null;
-      if (contextGuildId && !targetGuildId) {
-        setTargetGuildId(contextGuildId);
-        setTargetGuildName(contextGuildName ?? '');
-      }
       return;
     }
     if (loadedEditRef.current === editId) {
@@ -333,9 +327,6 @@ export function useCreateEventForm() {
     user.discordId,
     user.xboxGamertag,
     navigate,
-    contextGuildId,
-    contextGuildName,
-    targetGuildId,
   ]);
 
   function buildPayload() {
@@ -345,8 +336,8 @@ export function useCreateEventForm() {
     const tz = defaultTimezone();
     return {
       id: eventId ?? undefined,
-      guild_id: targetGuildId,
-      guild_name: targetGuildName,
+      guild_id: targetGuildId.trim() || undefined,
+      guild_name: targetGuildId.trim() ? targetGuildName : undefined,
       channel_id: targetChannelId || null,
       title,
       type,

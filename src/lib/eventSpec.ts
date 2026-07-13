@@ -9,12 +9,10 @@ export function validateDraftForm(input: {
   title: string;
   type: string;
   startsAtLocal: string;
-  guildId: string | null;
 }): ValidationCode | null {
   if (!input.title.trim()) return VALIDATION_CODES.TITLE_REQUIRED;
   if (!isEventType(input.type)) return VALIDATION_CODES.TYPE_REQUIRED;
   if (!input.startsAtLocal) return VALIDATION_CODES.STARTS_AT_REQUIRED;
-  if (!input.guildId) return VALIDATION_CODES.GUILD_REQUIRED;
   return null;
 }
 
@@ -33,9 +31,9 @@ export function validatePublishForm(input: {
     title: input.title,
     type: input.type,
     startsAtLocal: input.startsAtLocal,
-    guildId: input.guildId,
   });
   if (draftErr) return draftErr;
+  if (!input.guildId?.trim()) return VALIDATION_CODES.GUILD_REQUIRED;
   if (!input.channelId) return VALIDATION_CODES.CHANNEL_REQUIRED;
   if (!input.lobbyLeaderGamertag.trim()) return VALIDATION_CODES.CONVOY_LEADER_REQUIRED;
   if (input.carRuleMode === 'restricted_list' && input.carCount === 0) {

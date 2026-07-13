@@ -59,14 +59,19 @@ describe('resolveLobbyLeaderFields', () => {
     expect(isUserMemberOfGuild).not.toHaveBeenCalled();
   });
 
-  it('returns GUILD_REQUIRED when guild is missing', async () => {
+  it('skips guild membership check when guild is missing', async () => {
+    isUserMemberOfGuild.mockResolvedValue(false);
     const {resolveLobbyLeaderFields} = await import('@edge/lobbyLeader.ts');
     const result = await resolveLobbyLeaderFields(
       {...baseBody, guild_id: undefined},
       'host-1',
       mockSupabase() as never,
     );
-    expect(result).toBe(VALIDATION_CODES.GUILD_REQUIRED);
+    expect(result).toMatchObject({
+      lobby_leader_discord_id: 'leader-1',
+      lobby_leader_is_host: false,
+      lobby_leader_gamertag: 'LeaderTag',
+    });
     expect(isUserMemberOfGuild).not.toHaveBeenCalled();
   });
 

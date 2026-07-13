@@ -112,15 +112,16 @@ serve(async (req) => {
     const draftErr = validateDraft(body);
     if (draftErr) return appErrorResponse(req, 400, draftErr);
 
-    if (body.guild_id) {
+    const draftGuildId = body.guild_id?.trim();
+    if (draftGuildId) {
       const guildName = normalizeGuildName(
-        await resolveGuildNameForUser(token!, body.guild_id),
+        await resolveGuildNameForUser(token!, draftGuildId),
       );
       if (!guildName) {
         return appErrorResponse(req, 400, VALIDATION_CODES.GUILD_REQUIRED);
       }
       await supabase.from('discord_guilds').upsert(
-        {guild_id: body.guild_id, guild_name: guildName},
+        {guild_id: draftGuildId, guild_name: guildName},
         {onConflict: 'guild_id'},
       );
     }

@@ -78,6 +78,13 @@ export function PublishTargetPicker({
         if (requestId !== guildRequestRef.current) return;
         setGuilds(r.guilds);
         setGuildHint(r.hint ?? null);
+        if (!lockGuild && !guildId) {
+          const preferred =
+            (activityGuildId
+              ? r.guilds.find((g) => g.id === activityGuildId)
+              : undefined) ?? (r.guilds.length === 1 ? r.guilds[0] : undefined);
+          if (preferred) onGuildChange(preferred.id, preferred.name);
+        }
       })
       .catch((e) => {
         if (requestId !== guildRequestRef.current) return;
@@ -86,7 +93,7 @@ export function PublishTargetPicker({
       .finally(() => {
         if (requestId === guildRequestRef.current) setLoadingGuilds(false);
       });
-  }, [accessToken]);
+  }, [accessToken, activityGuildId, guildId, lockGuild, onGuildChange]);
 
   const loadChannels = useCallback(() => {
     if (!guildId) {

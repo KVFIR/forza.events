@@ -37,21 +37,21 @@ export async function resolveLobbyLeaderFields(
   if (leaderId === hostDiscordId) return VALIDATION_CODES.CONVOY_LEADER_DISCORD_REQUIRED;
 
   const guildId = options.guildId?.trim() || body.guild_id?.trim();
-  if (!guildId) return VALIDATION_CODES.GUILD_REQUIRED;
-
-  try {
-    const inGuild = await isUserMemberOfGuild(guildId, leaderId);
-    if (!inGuild) return VALIDATION_CODES.CONVOY_LEADER_NOT_IN_GUILD;
-  } catch (e) {
-    console.error(
-      JSON.stringify({
-        msg: 'Convoy leader guild membership check failed',
-        guildId,
-        leaderId,
-        error: e instanceof Error ? e.message : String(e),
-      }),
-    );
-    return VALIDATION_CODES.CONVOY_LEADER_GUILD_CHECK_FAILED;
+  if (guildId) {
+    try {
+      const inGuild = await isUserMemberOfGuild(guildId, leaderId);
+      if (!inGuild) return VALIDATION_CODES.CONVOY_LEADER_NOT_IN_GUILD;
+    } catch (e) {
+      console.error(
+        JSON.stringify({
+          msg: 'Convoy leader guild membership check failed',
+          guildId,
+          leaderId,
+          error: e instanceof Error ? e.message : String(e),
+        }),
+      );
+      return VALIDATION_CODES.CONVOY_LEADER_GUILD_CHECK_FAILED;
+    }
   }
 
   const {data: existingUser} = await supabase
