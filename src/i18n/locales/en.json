@@ -13,7 +13,6 @@
   "notifications": {
     "toggleOn": "Discord notifications",
     "toggleOff": "Discord notifications off",
-    "joinHint": "You'll get Discord DMs about this event. Turn off in Profile.",
     "joinWaitlistTitle": "Join the waitlist?",
     "joinWaitlistBody": "The lobby is full. You'll be queued in order.\n\nIf a seat opens, you'll be moved in automatically. The host may also open another group when every group is full.\n\nWe'll send you a Discord DM when you get a seat.",
     "joinWaitlistConfirm": "Join waitlist",
