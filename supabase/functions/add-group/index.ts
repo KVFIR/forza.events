@@ -11,7 +11,7 @@ import {responseForRpcError} from '../_shared/rpcErrors.ts';
 import {validateGamertag} from '../_shared/gamertag.ts';
 import {rateLimitMutation} from '../_shared/rateLimitPresets.ts';
 import {deferNotificationDelivery} from '../_shared/notifications.ts';
-import {enqueueWaitlistNewGroup} from '../_shared/notificationTriggers.ts';
+import {enqueueWaitlistNewGroup, enqueueConvoyLeaderAssigned} from '../_shared/notificationTriggers.ts';
 import {adminClient} from '../_shared/supabase.ts';
 import {VALIDATION_CODES} from '../_shared/validationCodes.ts';
 
@@ -163,26 +163,43 @@ serve(async (req) => {
       )
       .map((r) => r.discord_id);
 
+    const eventRow = {
+      id: eventId,
+      title: event.title,
+      host_discord_id: event.host_discord_id,
+      max_players: event.max_players,
+      group_count: newGroupIndex,
+      starts_at: event.starts_at,
+      timezone: event.timezone_hint,
+    };
+
+    let notify = false;
     if (promotedIds.length) {
       await enqueueWaitlistNewGroup(
         supabase,
-        {
-          id: eventId,
-          title: event.title,
-          host_discord_id: event.host_discord_id,
-          max_players: event.max_players,
-          group_count: newGroupIndex,
-          starts_at: event.starts_at,
-          timezone: event.timezone_hint,
-        },
+        eventRow,
         newGroupIndex,
         promotedIds,
         leaderFromWaitlist,
         leaderId,
         rosterAfter ?? [],
       );
-      deferNotificationDelivery(supabase);
+      notify = true;
     }
+
+    const leaderAlreadyNotified = leaderFromWaitlist && promotedIds.includes(leaderId);
+    if (!leaderAlreadyNotified) {
+      await enqueueConvoyLeaderAssigned(
+        supabase,
+        eventRow,
+        newGroupIndex,
+        leaderId,
+        tag.gamertag,
+      );
+      notify = true;
+    }
+
+    if (notify) deferNotificationDelivery(supabase);
 
     const embedSync = await syncPublishedEmbedByEventId(supabase, eventId);
     if (!embedSync.ok) {

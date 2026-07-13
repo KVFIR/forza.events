@@ -17,7 +17,7 @@
     "joinWaitlistBody": "The lobby is full. You'll be queued in order.\n\nIf a seat opens, you'll be moved in automatically. The host may also open another group when every group is full.\n\nWe'll send you a Discord DM when you get a seat.",
     "joinWaitlistConfirm": "Join waitlist",
     "editNotifyTitle": "Notify registered racers?",
-    "editNotifyBody": "Saving will send Discord DMs to registered racers about changes to the date/time, tracks, and/or car rules. Racers on the waitlist will not be notified.",
+    "editNotifyBody": "Saving will send Discord DMs about changes to the date/time, tracks, and/or car rules. Waitlisted racers are notified only when the date or time changes.",
     "editNotifyConfirm": "Save & notify",
     "editNotifyCancel": "Keep editing"
   },

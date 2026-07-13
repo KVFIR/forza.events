@@ -344,11 +344,12 @@ At least one mapped message per screen:
 
 | Case | Steps | Expected |
 |------|--------|----------|
-| Opt-out | Profile → bell off | No cancel / leader / 2h / host-fill DMs |
+| Opt-out | Profile → bell off | No cancel / leader / 2h / host-fill / tracks-only edit DMs; **reschedule** DM still sent |
 | Waitlist promote | Fill group; user on waitlist; active racer leaves | Promoted user gets **seat opened** DM (even if bell off) |
 | Host group full | Promote fills last seat in group | Host gets **group filled** DM |
-| Cancel | Host cancels published event | Active + waitlist get cancel DM; **host does not** |
-| Published edit | Host changes date/time, tracks, and/or cars → **Save & notify** | Active racers get update DM |
+| Cancel | Host cancels published event | Active + waitlist get cancel DM; pending 2h reminders skipped; **host does not** |
+| Published edit | Host changes date/time, tracks, and/or cars → **Save & notify** | Active racers get update DM; waitlist too when **date/time** changes |
+| Add group (empty waitlist) | Host adds group with guild leader | New leader gets **convoy leader assigned** DM |
 | DM button | Open DM → **Open event** | Link opens `forza.events/event/{id}` (or Activity origin) |
 | 2h reminder | Event starts in ~2h (cron running) | Active racers + host get soon DM; reschedule changes dedupe |
 

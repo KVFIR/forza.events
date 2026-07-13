@@ -86,6 +86,12 @@ export function deferNotificationDelivery(supabase: ReturnType<typeof adminClien
   }
 }
 
+export function bypassesDmOptOut(kind: NotificationKind, payload: Record<string, unknown>): boolean {
+  if (WAITLIST_NOTIFICATION_KINDS.has(kind)) return true;
+  // Reschedule affects everyone registered or queued — send even when bell is off.
+  return kind === 'event_updated' && payload.scheduleChanged === '1';
+}
+
 export async function processNotificationBatch(
   supabase: ReturnType<typeof adminClient>,
   limit: number,
@@ -120,7 +126,7 @@ export async function processNotificationBatch(
       continue;
     }
 
-    if (!user.dm_notifications_enabled && !WAITLIST_NOTIFICATION_KINDS.has(kind)) {
+    if (!user.dm_notifications_enabled && !bypassesDmOptOut(kind, row.payload as Record<string, unknown>)) {
       await markOutbox(supabase, row.id, 'skipped', row.attempts, 'notifications_disabled');
       skipped += 1;
       continue;

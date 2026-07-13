@@ -110,17 +110,20 @@ serve(async (req) => {
         .from('event_participants')
         .select('discord_id, group_index, waitlisted, is_convoy_leader, gamertag_snapshot')
         .eq('event_id', body.id);
-      if (updated && participants?.length) {
-        await enqueueEventCancelled(supabase, {
-          id: updated.id,
-          title: updated.title,
-          host_discord_id: updated.host_discord_id,
-          max_players: updated.max_players,
-          group_count: updated.group_count,
-          starts_at: updated.starts_at,
-          timezone: updated.timezone_hint,
-        }, participants);
-        deferNotificationDelivery(supabase);
+      if (updated) {
+        await cancelPendingStartingSoonForEvent(supabase, body.id);
+        if (participants?.length) {
+          await enqueueEventCancelled(supabase, {
+            id: updated.id,
+            title: updated.title,
+            host_discord_id: updated.host_discord_id,
+            max_players: updated.max_players,
+            group_count: updated.group_count,
+            starts_at: updated.starts_at,
+            timezone: updated.timezone_hint,
+          }, participants);
+          deferNotificationDelivery(supabase);
+        }
       }
       if (updated?.channel_id && updated.discord_message_id) {
         const embedSync = await syncPublishedEmbed(supabase, updated);

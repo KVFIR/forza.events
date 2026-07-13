@@ -172,6 +172,13 @@ export async function enqueueWaitlistNewGroup(
   await enqueueNotifications(supabase, rows);
 }
 
+export function eventUpdateRecipients(
+  participants: ParticipantRow[],
+  scheduleChangedFlag: boolean,
+): ParticipantRow[] {
+  return scheduleChangedFlag ? participants : activeRacers(participants);
+}
+
 export async function enqueueEventUpdated(
   supabase: ReturnType<typeof adminClient>,
   event: EventNotifyRow,
@@ -185,7 +192,7 @@ export async function enqueueEventUpdated(
   carsChanged: boolean,
   scheduleChangedFlag: boolean,
 ): Promise<void> {
-  const rows: OutboxInsert[] = activeRacers(participants).map((p) => ({
+  const rows: OutboxInsert[] = eventUpdateRecipients(participants, scheduleChangedFlag).map((p) => ({
     kind: 'event_updated',
     event_id: event.id,
     recipient_discord_id: p.discord_id,
