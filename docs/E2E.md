@@ -44,6 +44,8 @@ Manual QA matrix aligned with current code behavior (not an abstract checklist).
 | 0.5 | Railway `APP_ORIGIN` | Cover images in embed + `<img>` via proxy |
 | 0.6 | Edge Functions deployed with `--no-verify-jwt` | Invalid Discord token → app `401`; **not** gateway `UNAUTHORIZED_NO_AUTH_HEADER` |
 | 0.7 | Hard refresh Activity after deploy | Old bundle does not mask fixes |
+| 0.8 | `supabase db push` includes `017`–`019` + `npm run deploy:functions` (`process-notifications`) | DM outbox + claim RPC live; cron can deliver |
+| 0.9 | `NOTIFICATION_CRON_SECRET` set + minute cron (`scripts/invoke-process-notifications.sh`) | 2h reminders + outbox drain |
 
 ---
 
@@ -128,10 +130,11 @@ Manual QA matrix aligned with current code behavior (not an abstract checklist).
 |-----------|----------|
 | Full group 1, then join | Row goes to **Waitlist** section; button = **Leave waitlist** |
 | Active racer leaves before start | Earliest waitlisted racer auto-promoted into freed group; count steady |
-| Host, lobby full + waitlist ≥ 1 | **Add group N** button; picker lists waitlist, active non-leaders from other groups, host (if not already a convoy leader), plus guild search |
-| Add group confirmed | `group_count++`; leader + oldest queued racers fill the new group; vacated seat in the source group backfills from waitlist; embed gains a per-group field |
+| Host, every active group full (12/24/36…) | **Add group N** button; picker lists waitlist (if any), active non-leaders from other groups, host (if not already a convoy leader), plus guild search |
+| 12/12, waitlist empty, host adds group 2 (guild pick leader) | `group_count = 2`; new group has leader only; group 1 still full; next **Join** lands in **group 2**; embed shows second group field |
+| Add group confirmed | `group_count++`; leader + oldest queued racers fill the new group (leader-only when waitlist empty); vacated seat in the source group backfills from waitlist; embed gains a per-group field |
 | `group_count = 5` | Add group hidden (`GROUPS_MAXED` if forced); total capacity 60 |
-| Empty waitlist | Add group hidden (`WAITLIST_EMPTY` if forced) |
+| Open seat in any active group | Add group hidden (`LOBBY_NOT_FULL` if forced) |
 
 ### Display
 
@@ -318,6 +321,25 @@ At least one mapped message per screen:
 4. Second user join → embed count  
 5. My Events hosted + joined  
 6. RU toggle on one screen  
+7. Profile bell off → no opt-out DMs; waitlist promote DM still arrives  
+
+---
+
+## 14. Discord DM notifications
+
+**Prereq:** §0.8–0.9 deployed.
+
+| Case | Steps | Expected |
+|------|--------|----------|
+| Opt-out | Profile → bell off | No cancel / leader / 2h / host-fill DMs |
+| Waitlist promote | Fill group; user on waitlist; active racer leaves | Promoted user gets **seat opened** DM (even if bell off) |
+| Host group full | Promote fills last seat in group | Host gets **group filled** DM |
+| Cancel | Host cancels published event | Active + waitlist get cancel DM; **host does not** |
+| Published edit | Host changes tracks/cars → **Save & notify** | Active racers get update DM |
+| DM button | Open DM → **Open event** | Link opens `forza.events/event/{id}` (or Activity origin) |
+| 2h reminder | Event starts in ~2h (cron running) | Active racers + host get soon DM; reschedule changes dedupe |
+
+**Negative:** `process-notifications` without `x-cron-secret` → 401 in prod.
 
 ---
 
@@ -334,7 +356,7 @@ At least one mapped message per screen:
 | Priority | Sections |
 |----------|----------|
 | **P0** (launch blocker) | 0, 1, 2, 6 (publish target + bot install), 9, 4 (join/full/leave) |
-| **P1** (trust) | 3 realtime, 5 host cancel/results, 10 races, 7 drafts |
+| **P1** (trust) | 3 realtime, 5 host cancel/results, 10 races, 7 drafts, **14 notifications** |
 | **P2** (polish) | i18n, PIP layout, all event types, car-rule combinations |
 
 **Suggested runs:** **Day 0** (P0) after deploy; **Pilot week** (P1–P2).

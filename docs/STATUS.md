@@ -1,6 +1,6 @@
 # Implementation status
 
-Last updated: 2026-05-31
+Last updated: 2026-07-13
 
 ## Summary
 
@@ -11,8 +11,8 @@ Remaining work is mostly **Activity E2E in pilot guilds**, **Railway frontend re
 | Layer | State |
 |-------|--------|
 | React Activity (UI) | Done — Browse, Detail, Create (wizard), My Events, Profile, i18n (EN + RU) |
-| Supabase schema | Done — migrations `001`–`010` |
-| Edge Functions | Done — 16 functions ([`supabase/README.md`](../supabase/README.md)) |
+| Supabase schema | Done — migrations `001`–`019` |
+| Edge Functions | Done — 17 functions ([`supabase/README.md`](../supabase/README.md)) |
 | Security hardening | Done — storage, RLS scope, CORS, rate limits, publish validation |
 | Local browser dev | Done — Discord OAuth + Supabase (not mock mode) |
 | Sample content | Done — optional `sample-*` seed |
@@ -32,7 +32,7 @@ Remaining work is mostly **Activity E2E in pilot guilds**, **Railway frontend re
 | Event Detail | Done | Join/leave, host actions, results, live updates |
 | Create Event | Done | 4 steps; cover via `upload-cover`; convoy leader via `list-guild-members` |
 | My Events | Done | Hosted/joined + host drafts merge |
-| Profile | Done | Gamertag via `user-profile` |
+| Profile | Done | Gamertag + DM notification prefs (`user-profile`) |
 | Discord Activity auth | Done | SDK → `token-exchange` → `authenticate` |
 | Browser localhost auth | Done | `/auth/callback` + `sessionStorage` |
 | Production browser tab (`forza.events`) | Done | Discord OAuth required (`BrowserAuthGate`); raw `*.up.railway.app` still Activity-only gate |
@@ -43,7 +43,8 @@ Remaining work is mostly **Activity E2E in pilot guilds**, **Railway frontend re
 | Cover storage | Done | Host-only upload; public read |
 | Security (RLS/CORS/rate) | Done | Baseline + `003`/`004` migrations + Edge shared modules |
 | Sample seed | Done | `npm run seed:events` |
-| i18n | Done | EN default; RU toggle on profile |
+| i18n | Done | EN default; RU toggle on profile; notification copy follows `notification_locale` |
+| Discord DM notifications | Done | Outbox + `process-notifications` cron; Profile bell opt-out |
 | Bot process | Deferred | [`bot/README.md`](../bot/README.md) |
 
 ---
@@ -86,8 +87,8 @@ Details: [`supabase/README.md`](../supabase/README.md).
 | Check | Result |
 |-------|--------|
 | Supabase project | `uoysqfczahqmctbrrizn` (FORZA.EVENTS) |
-| Migrations | `001`–`010` on remote |
-| Edge Functions | 16 via `deploy:functions` |
+| Migrations | `001`–`019` on remote |
+| Edge Functions | 17 via `deploy:functions` |
 | Activity hosting | Railway `https://forzaevents.up.railway.app` |
 | Discord application verification | Approved — legal URLs on deploy origin |
 | Discord Activity OAuth | `https://127.0.0.1` + `token-exchange` allowlist |
@@ -126,6 +127,7 @@ Set **`APP_ORIGIN`** on Railway to the deploy URL (embed cover URLs + Edge CORS)
 | `seed:events` fails | No service role | `SUPABASE_SERVICE_ROLE_KEY` in `.env` |
 | Publish stuck / 409 `PUBLISH_IN_PROGRESS` | Crashed mid-publish | Wait 5 min (lock TTL) or clear `publish_started_at` on draft row |
 | Double Discord embed after publish | Old code / race before `003` | `db push` + redeploy `publish-event`; delete duplicate message manually |
+| DMs not delivered | Cron not scheduled or missing `NOTIFICATION_CRON_SECRET` | Set secret on Supabase; schedule `scripts/invoke-process-notifications.sh` every minute |
 
 ---
 

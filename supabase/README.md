@@ -46,6 +46,12 @@ npx supabase migration repair --linked --status applied 006 --yes
 | `011_leave_promote_smallint_cast.sql` | Fix `leave_event_participant` → `promote_waitlist_to_group` smallint cast (leave + waitlist promotion) |
 | `012_smallint_rpc_hardening.sql` | Integer overload for `promote_waitlist_to_group`; `1::smallint` in `add_event_group` / group_index guard; self-check |
 | `013_submit_results_group_index_cast.sql` | `submit_event_results`: `coalesce(group_index, 1::smallint)` |
+| `014_nullable_draft_guild.sql` | Draft events may omit `guild_id` until publish target is chosen |
+| `015_add_group_leader_from_roster.sql` | `add_event_group`: leader may be picked from active roster (not only waitlist) |
+| `016_add_group_preserve_self_join.sql` | `add_event_group`: preserve `self_join` participation source on promotion |
+| `017_discord_notifications.sql` | DM notification outbox, user prefs (`dm_notifications_enabled`, `notification_locale`); `leave_event_participant` returns `promoted_discord_id` |
+| `018_add_group_without_waitlist.sql` | `add_event_group`: allow add group when every active group is full, without requiring waitlist |
+| `019_notification_outbox_claim.sql` | Outbox `processing` status + `claim_notification_outbox_batch` (`FOR UPDATE SKIP LOCKED`) |
 
 Seeds are **not** included in the migration. Run separately after `db push`:
 
