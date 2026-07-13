@@ -24,6 +24,7 @@ import {PageLoading} from './components/ui/PageLoading';
 import {Spinner} from './components/ui/Spinner';
 import {useBrowserSignInGate} from './hooks/useBrowserSignInGate';
 import {isPublicLegalBrowserPath} from './lib/publicLegalPaths';
+import {isLocalAnalyticsDashboardPath} from './lib/localAnalyticsDashboard';
 import {shouldShowDiscordOnlyGate} from './lib/runtime';
 
 const BrowseEvents = lazy(() =>
@@ -51,6 +52,9 @@ const TermsOfService = lazy(() =>
 );
 const PrivacyPolicy = lazy(() =>
   import('./screens/PrivacyPolicy').then((m) => ({default: m.PrivacyPolicy})),
+);
+const AnalyticsDashboard = lazy(() =>
+  import('./screens/AnalyticsDashboard').then((m) => ({default: m.AnalyticsDashboard})),
 );
 
 function RouteFallback() {
@@ -100,6 +104,7 @@ function AppRoutes() {
   const {isSignedIn} = useAuth();
   const signInGate = useBrowserSignInGate();
   const isLegalPage = isPublicLegalBrowserPath(location.pathname);
+  const isAnalyticsPage = isLocalAnalyticsDashboardPath(location.pathname);
 
   if (location.pathname === '/sign-in') {
     if (isSignedIn) return <Navigate to="/" replace />;
@@ -109,17 +114,19 @@ function AppRoutes() {
   if (signInGate === 'loading') return <BrowserSignInLoading />;
   if (signInGate === 'required') return <BrowserSignInScreen />;
 
+  const hideNavbar = isLegalPage || isAnalyticsPage;
+
   return (
     <AppShell>
-      {!isLegalPage ? <Navbar /> : null}
+      {!hideNavbar ? <Navbar /> : null}
       <div
         className={
-          isLegalPage
+          hideNavbar
             ? 'min-w-0 flex-1'
             : 'app-main-column flex min-h-screen flex-col px-3 sm:px-5 md:px-8 lg:px-10'
         }
       >
-        <main className={isLegalPage ? 'min-w-0' : 'min-w-0 flex-1 pb-8'}>
+        <main className={hideNavbar ? 'min-w-0' : 'min-w-0 flex-1 pb-8'}>
           <AppBootGate>
             <Suspense fallback={<RouteFallback />}>
               <Routes>
@@ -133,6 +140,7 @@ function AppRoutes() {
                 <Route path="/bot-installed" element={<BotInstalled />} />
                 <Route path="/terms" element={<TermsOfService />} />
                 <Route path="/privacy" element={<PrivacyPolicy />} />
+                <Route path="/analytics" element={<AnalyticsDashboard />} />
                 <Route path="*" element={<Navigate to="/" replace />} />
               </Routes>
             </Suspense>

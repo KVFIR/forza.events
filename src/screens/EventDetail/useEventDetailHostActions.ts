@@ -1,6 +1,7 @@
 import {useState} from 'react';
 import {useTranslation} from 'react-i18next';
 import {cancelEvent, isApiConfigured} from '../../lib/api';
+import {track} from '../../lib/analytics';
 import {fetchEventById} from '../../lib/events';
 import type {ForzaEvent} from '../../lib/types';
 
@@ -28,9 +29,12 @@ export function useEventDetailHostActions(input: {
     setCancelling(true);
     setActionError(null);
     try {
-      if (isApiConfigured()) {
-        await cancelEvent(token, event.id);
+      if (!isApiConfigured()) {
+        setActionError(t('browse.errorNotConfiguredDesc'));
+        return;
       }
+      await cancelEvent(token, event.id);
+      track('cancel_event', {outcome: 'success', event_id: event.id});
       bumpRefresh();
       const next = await fetchEventById(event.id, {discordToken});
       setEvent(next);

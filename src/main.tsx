@@ -2,6 +2,7 @@ import {StrictMode} from 'react';
 import {createRoot} from 'react-dom/client';
 import './i18n';
 import App from './App';
+import {trackSessionStart} from './lib/analytics';
 import {getSupabase, isSupabaseConfigured, isDiscordActivityFrame} from './lib/supabase';
 import './index.css';
 
@@ -22,3 +23,5 @@ if (isSupabaseConfigured()) {
 }
 
 void import('./lib/discordBoot').then(({runDiscordBootTasks}) => runDiscordBootTasks());
+
+trackSessionStart();

@@ -20,6 +20,7 @@ import {useRichPresenceOverride} from '../../context/DiscordRichPresenceContext'
 import {buildCreateRichPresence} from '../../lib/discordRichPresence';
 import {useLoadingUI} from '../../hooks/useLoadingUI';
 import {isLocalDevHost} from '../../lib/runtime';
+import {trackOncePerSession} from '../../lib/analytics';
 
 export function CreateEvent() {
   const {t} = useTranslation();
@@ -39,6 +40,11 @@ export function CreateEvent() {
     );
     return () => setRichPresenceOverride(null);
   }, [form.values.title, form.editId, setRichPresenceOverride]);
+
+  useEffect(() => {
+    trackOncePerSession('create_open');
+  }, []);
+
   const {
     user,
     token,

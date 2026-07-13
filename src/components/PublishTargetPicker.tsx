@@ -2,6 +2,7 @@ import {useCallback, useEffect, useMemo, useRef, useState} from 'react';
 import {useTranslation} from 'react-i18next';
 import {busyLabel} from '../i18n/busyLabels';
 import {listChannels, listGuilds} from '../lib/api';
+import {track} from '../lib/analytics';
 import {getGuildContext} from '../lib/discord';
 import {buildBotInstallUrl, openBotInstallUrl} from '../lib/discordInstall';
 import {isPlaceholderGuildName} from '../lib/guildDisplay';
@@ -52,6 +53,7 @@ export function PublishTargetPicker({
   const autoSelectAttemptedRef = useRef(false);
   const channelsGuildRef = useRef<string | null>(null);
   const guildNameSyncedRef = useRef<string | null>(null);
+  const emptyGuildTrackedRef = useRef(false);
   guildIdRef.current = guildId;
   channelIdRef.current = channelId;
   onGuildChangeRef.current = onGuildChange;
@@ -81,6 +83,10 @@ export function PublishTargetPicker({
         if (requestId !== guildRequestRef.current) return;
         setGuilds(r.guilds);
         setGuildHint(r.hint ?? null);
+        if (r.guilds.length === 0 && !emptyGuildTrackedRef.current) {
+          emptyGuildTrackedRef.current = true;
+          track('empty_guild_list', {meta: {has_hint: Boolean(r.hint)}});
+        }
         if (
           !lockGuild &&
           !guildIdRef.current &&
@@ -168,6 +174,9 @@ export function PublishTargetPicker({
   }, [guildId, loadingGuilds, loadChannels]);
 
   function handleAddBot() {
+    track('bot_install_click', {
+      meta: {empty_guild_list: guilds.length === 0},
+    });
     const prefillCurrentServer =
       guilds.length === 0 && activityGuildId ? {guildId: activityGuildId} : undefined;
     void openBotInstallUrl(prefillCurrentServer);

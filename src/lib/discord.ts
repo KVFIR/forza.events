@@ -76,6 +76,15 @@ function applyBrowserSession(): InitResult | null {
   };
 }
 
+async function trackActivityAuthFailed(apiCode: string): Promise<void> {
+  const {track} = await import('./analytics');
+  track('auth_failed', {
+    outcome: 'error',
+    api_code: apiCode,
+    meta: {source: 'activity'},
+  });
+}
+
 async function authenticateDiscordActivity(
   sdk: DiscordSDKInstance,
   clientId: string,
@@ -84,13 +93,23 @@ async function authenticateDiscordActivity(
   guildId = sdk.guildId ?? null;
   guildName = null;
 
-  const {code} = await sdk.commands.authorize({
-    client_id: clientId,
-    response_type: 'code',
-    state: '',
-    prompt: 'none',
-    scope: [...DISCORD_ACTIVITY_OAUTH_SCOPES],
-  });
+  let code: string;
+  try {
+    ({code} = await sdk.commands.authorize({
+      client_id: clientId,
+      response_type: 'code',
+      state: '',
+      prompt: 'none',
+      scope: [...DISCORD_ACTIVITY_OAUTH_SCOPES],
+    }));
+  } catch (err) {
+    console.error('Discord Activity authorize failed', err);
+    void trackActivityAuthFailed('DISCORD_AUTHORIZE_FAILED');
+    const user = {...GUEST_USER, username: 'Discord'};
+    resolvedUser = user;
+    discordAccessToken = null;
+    return {user, accessToken: null};
+  }
 
   if (!isApiConfigured()) {
     const user = {...GUEST_USER, username: 'Discord'};
@@ -155,7 +174,7 @@ export async function retryDiscordActivityAuth(): Promise<InitResult | null> {
 
   return {
     user,
-    ready: true,
+    ready: Boolean(accessToken),
     accessToken,
     guildId,
     guildName,
@@ -204,6 +223,16 @@ export async function initDiscordActivity(): Promise<InitResult> {
       await waitForDiscordReady(sdk);
     } catch (err) {
       console.error('Discord Activity SDK ready failed', err);
+      const apiCode = err instanceof Error && err.message === 'DISCORD_READY_TIMEOUT'
+        ? 'DISCORD_READY_TIMEOUT'
+        : 'DISCORD_SDK_READY_FAILED';
+      void import('./analytics').then(({track}) => {
+        track('auth_failed', {
+          outcome: 'error',
+          api_code: apiCode,
+          meta: {source: 'activity'},
+        });
+      });
       resolvedUser = {...GUEST_USER};
       return {
         user: resolvedUser,
@@ -222,7 +251,7 @@ export async function initDiscordActivity(): Promise<InitResult> {
 
     return {
       user,
-      ready: true,
+      ready: Boolean(accessToken),
       accessToken,
       guildId,
       guildName,

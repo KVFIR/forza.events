@@ -2,6 +2,7 @@ import {useMemo, useState} from 'react';
 import {useTranslation} from 'react-i18next';
 import {busyLabel} from '../../../i18n/busyLabels';
 import {changeGroupLeader} from '../../../lib/api';
+import {track} from '../../../lib/analytics';
 import {ApiRequestError} from '../../../lib/apiErrors';
 import {buildChangeGroupLeaderCandidates, groupHasSeatForIncomingLeader} from '../../../lib/eventRoster';
 import {Button} from '../../../components/ui/Button';
@@ -92,6 +93,11 @@ export function EventDetailChangeGroupLeader({
         discordId: selected.discordId,
         gamertag: gt,
         username: selected.username,
+      });
+      track('change_group_leader', {
+        outcome: 'success',
+        event_id: event.id,
+        meta: {group_index: groupIndex},
       });
       setSelected(null);
       setGamertag('');

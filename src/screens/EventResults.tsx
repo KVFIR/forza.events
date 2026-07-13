@@ -10,6 +10,7 @@ import {buildResultsRichPresence} from '../lib/discordRichPresence';
 import {mergeOptimisticEventPatch} from '../lib/eventParticipation';
 import type {ForzaEvent} from '../lib/types';
 import {ApiRequestError, isApiConfigured, submitEventResults} from '../lib/api';
+import {track} from '../lib/analytics';
 import {API_ERROR_CODES} from '../lib/apiErrorCodes';
 import {buildResultSubmitRows} from '../lib/eventResults';
 import {resolveResultsRoster} from '../lib/eventRoster';
@@ -273,6 +274,7 @@ export function EventResults() {
       }
 
       await submitEventResults(token, id, payload);
+      track('submit_results', {outcome: 'success', event_id: id});
       const [updated, savedOutcome] = await Promise.all([
         fetchEventById(id, {discordToken: token}),
         fetchEventResults(id),

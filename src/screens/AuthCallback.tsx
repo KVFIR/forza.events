@@ -1,6 +1,7 @@
 import {useEffect, useState} from 'react';
 import {useNavigate, useSearchParams} from 'react-router-dom';
 import {exchangeTokenOnce, isApiConfigured} from '../lib/api';
+import {track, trackAuthSuccessOnce} from '../lib/analytics';
 import {getDiscordRedirectUri, saveDiscordSession} from '../lib/discordAuth';
 import {setDiscordSession} from '../lib/discord';
 import {clearAuthReturnTo, consumeAuthReturnTo} from '../lib/returnTo';
@@ -19,12 +20,22 @@ export function AuthCallback() {
 
     if (oauthError) {
       clearAuthReturnTo();
+      track('auth_failed', {
+        outcome: 'error',
+        api_code: oauthError,
+        meta: {source: 'oauth_callback'},
+      });
       setError(params.get('error_description') ?? oauthError);
       return;
     }
 
     if (!code) {
       clearAuthReturnTo();
+      track('auth_failed', {
+        outcome: 'error',
+        api_code: 'MISSING_OAUTH_CODE',
+        meta: {source: 'oauth_callback'},
+      });
       setError('Missing authorization code from Discord.');
       return;
     }
@@ -44,6 +55,7 @@ export function AuthCallback() {
         saveDiscordSession({accessToken: result.access_token, user: result.user});
         setDiscordSession(result.access_token, result.user);
         refreshUser(result.user);
+        trackAuthSuccessOnce();
         navigate(consumeAuthReturnTo('/'), {replace: true});
       } catch (e) {
         if (!cancelled) {

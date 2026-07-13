@@ -25,6 +25,7 @@ import {useDebouncedCallback} from '../../hooks/useDebouncedCallback';
 import {useEventLiveUpdates} from '../../hooks/useEventLiveUpdates';
 import {fetchEventById} from '../../lib/events';
 import {buildEventDetailViewModel} from './eventDetailView';
+import {trackOnce} from '../../lib/analytics';
 import {useEventDetailLoad} from './useEventDetailLoad';
 import {useEventDetailHostActions} from './useEventDetailHostActions';
 import {EventDetailHero} from './components/EventDetailHero';
@@ -123,6 +124,13 @@ export function EventDetail() {
         ? 'joined'
         : 'viewing'
     : undefined;
+
+  useEffect(() => {
+    if (!displayEvent?.id) return;
+    trackOnce(`forza.analytics.event_view.${displayEvent.id}`, 'event_view', {
+      event_id: displayEvent.id,
+    });
+  }, [displayEvent?.id]);
 
   useEffect(() => {
     if (!displayEvent || !richPresenceRole) return;

@@ -1,6 +1,7 @@
-import {useMemo, useState} from 'react';
+import {useMemo, useState, useEffect} from 'react';
 import {useTranslation} from 'react-i18next';
 import type {EventType} from '../lib/types';
+import {trackOncePerSession} from '../lib/analytics';
 import {EVENT_TYPES, eventTypeLabel} from '../lib/eventTypes';
 import {EventList} from '../components/EventList';
 import {EventListMetaSelect} from '../components/EventListMetaSelect';
@@ -28,6 +29,10 @@ export function BrowseEvents() {
   const {events, isLoading, isRefreshing, loadError, refetch} = usePublishedEvents();
   const [typeFilter, setTypeFilter] = useState<TypeFilter>('all');
   const [sort, setSort] = useState<EventSortKey>('event_date');
+
+  useEffect(() => {
+    trackOncePerSession('browse_view');
+  }, []);
 
   const filtered = useMemo(() => {
     const byType = filterByEventType(events, typeFilter);

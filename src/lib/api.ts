@@ -1,9 +1,11 @@
 import {coalesceInflight, dedupCacheKey} from './apiDedup';
 import {ApiRequestError, apiErrorFromPayload} from './apiErrors';
+import {trackApiError, trackNetworkError} from './analytics';
 import {API_ERROR_CODES} from './apiErrorCodes';
 import {clearDiscordSession} from './discordAuth';
 import {SESSION_EXPIRED_EVENT} from './sessionEvents';
 import {ensureDiscordSupabaseProxy} from './discordUrlProxy';
+import {CLIENT_SURFACE_HEADER, resolveClientSurface} from './clientSurface';
 import {createSupabaseFetch, isDiscordActivityFrame} from './supabaseEnv';
 import {isSupabaseConfigured, resolveSupabaseUrl} from './supabase';
 
@@ -19,6 +21,17 @@ function apiBase(): string {
 
 export function isApiConfigured(): boolean {
   return isSupabaseConfigured() || Boolean(import.meta.env.VITE_API_BASE_URL);
+}
+
+function invokeErrorMeta(
+  body: Record<string, unknown>,
+): Record<string, string | number | boolean> | undefined {
+  const meta: Record<string, string | number | boolean> = {};
+  if (typeof body.action === 'string') meta.action = body.action;
+  if (body.cancel === true) meta.cancel = true;
+  if (body.delete === true) meta.delete = true;
+  if (body.host_drafts === true) meta.host_drafts = true;
+  return Object.keys(meta).length > 0 ? meta : undefined;
 }
 
 async function invoke<T>(
@@ -38,6 +51,7 @@ async function invoke<T>(
     'Content-Type': 'application/json',
     apikey: anonKey,
     Authorization: `Bearer ${anonKey}`,
+    [CLIENT_SURFACE_HEADER]: resolveClientSurface(),
   });
   if (discordAccessToken) {
     headers.set('x-discord-access-token', discordAccessToken);
@@ -48,11 +62,23 @@ async function invoke<T>(
     ? (createSupabaseFetch(anonKey) ?? fetch)
     : fetch;
 
-  const res = await doFetch(`${base}/${name}`, {
-    method: 'POST',
-    headers,
-    body: JSON.stringify(body),
-  });
+  const eventId = typeof body.event_id === 'string' ? body.event_id : undefined;
+  const errorMeta = invokeErrorMeta(body);
+
+  let res: Response;
+  try {
+    res = await doFetch(`${base}/${name}`, {
+      method: 'POST',
+      headers,
+      body: JSON.stringify(body),
+    });
+  } catch {
+    trackNetworkError(name, {eventId, meta: errorMeta});
+    throw new ApiRequestError('Network request failed', {
+      code: API_ERROR_CODES.INVALID_RESPONSE,
+      status: 0,
+    });
+  }
 
   const contentType = res.headers.get('content-type') ?? '';
   let data: {error?: string; message?: string; code?: string};
@@ -60,18 +86,22 @@ async function invoke<T>(
     try {
       data = (await res.json()) as typeof data;
     } catch {
-      throw new ApiRequestError('Invalid server response', {
+      const apiError = new ApiRequestError('Invalid server response', {
         code: API_ERROR_CODES.INVALID_RESPONSE,
         status: res.status,
       });
+      trackApiError(name, apiError, {eventId, meta: errorMeta});
+      throw apiError;
     }
   } else {
     const text = await res.text();
     console.error('invoke non-json', {name, status: res.status, snippet: text.slice(0, 200)});
-    throw new ApiRequestError('Invalid server response', {
+    const apiError = new ApiRequestError('Invalid server response', {
       code: API_ERROR_CODES.INVALID_RESPONSE,
       status: res.status,
     });
+    trackApiError(name, apiError, {eventId, meta: errorMeta});
+    throw apiError;
   }
 
   if (!res.ok) {
@@ -82,7 +112,9 @@ async function invoke<T>(
         window.dispatchEvent(new Event(SESSION_EXPIRED_EVENT));
       }
     }
-    throw apiErrorFromPayload(data, res.status);
+    const apiError = apiErrorFromPayload(data, res.status);
+    trackApiError(name, apiError, {eventId, meta: errorMeta});
+    throw apiError;
   }
   return data as T;
 }

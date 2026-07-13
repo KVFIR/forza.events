@@ -14,6 +14,10 @@ function clientEnv(env: Record<string, string>) {
     VITE_APP_ORIGIN: env.VITE_APP_ORIGIN || env.APP_ORIGIN || '',
     VITE_BOT_INSTALL_REDIRECT_URI:
       env.VITE_BOT_INSTALL_REDIRECT_URI || env.BOT_INSTALL_REDIRECT_URI || '',
+    VITE_ANALYTICS_DASHBOARD_SECRET:
+      env.VITE_ANALYTICS_DASHBOARD_SECRET || env.ANALYTICS_DASHBOARD_SECRET || '',
+    VITE_ANALYTICS_TRACK_SECRET:
+      env.VITE_ANALYTICS_TRACK_SECRET || env.ANALYTICS_TRACK_SECRET || '',
   };
 }
 
@@ -32,6 +36,7 @@ function vendorChunk(id: string): string | undefined {
 export default defineConfig(({mode}) => {
   const env = loadEnv(mode, process.cwd(), '');
   const client = clientEnv(env);
+  const isDev = mode === 'development';
 
   return {
     plugins: [react()],
@@ -46,6 +51,12 @@ export default defineConfig(({mode}) => {
       'import.meta.env.VITE_APP_ORIGIN': JSON.stringify(client.VITE_APP_ORIGIN),
       'import.meta.env.VITE_BOT_INSTALL_REDIRECT_URI': JSON.stringify(
         client.VITE_BOT_INSTALL_REDIRECT_URI,
+      ),
+      'import.meta.env.VITE_ANALYTICS_TRACK_SECRET': JSON.stringify(
+        client.VITE_ANALYTICS_TRACK_SECRET,
+      ),
+      'import.meta.env.VITE_ANALYTICS_DASHBOARD_SECRET': JSON.stringify(
+        isDev ? client.VITE_ANALYTICS_DASHBOARD_SECRET : '',
       ),
     },
     build: {

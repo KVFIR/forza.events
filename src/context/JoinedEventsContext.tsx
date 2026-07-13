@@ -8,6 +8,7 @@ import {
 } from 'react';
 import i18n from '../i18n';
 import {joinEvent, leaveEvent, isApiConfigured} from '../lib/api';
+import {track} from '../lib/analytics';
 import {
   applyJoinServerResponse,
   patchEventAfterSelfJoin,
@@ -100,6 +101,14 @@ export function JoinedEventsProvider({children}: {children: ReactNode}) {
           setLobbyPatch(applyJoinServerResponse(optimistic, user.discordId, res));
           refreshUser((prev) => ({...prev, xboxGamertag: gt}));
           clearOverride(event.id);
+          track('join', {
+            outcome: 'success',
+            event_id: event.id,
+            meta: {
+              waitlisted: Boolean(res.waitlisted),
+              group_index: res.group_index ?? 0,
+            },
+          });
         } catch (err) {
           clearOverride(event.id);
           clearLobbyPatch(event.id);
@@ -138,6 +147,7 @@ export function JoinedEventsProvider({children}: {children: ReactNode}) {
         try {
           await leaveEvent(token, event.id);
           clearOverride(event.id);
+          track('leave', {outcome: 'success', event_id: event.id});
         } catch (err) {
           clearOverride(event.id);
           clearLobbyPatch(event.id);

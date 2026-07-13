@@ -9,6 +9,7 @@ import {
 } from 'react';
 import {useLocation, useNavigate} from 'react-router-dom';
 import {fetchLaunchIntent, isApiConfigured} from '../lib/api';
+import {track, trackAuthSuccessOnce} from '../lib/analytics';
 import {
   clearDiscordAuthState,
   getDiscordAccessToken,
@@ -98,6 +99,11 @@ export function AuthProvider({children}: {children: ReactNode}) {
   }, [navigate, isConfigured]);
 
   useEffect(() => {
+    if (loading || !isSignedIn) return;
+    trackAuthSuccessOnce();
+  }, [loading, isSignedIn]);
+
+  useEffect(() => {
     const session = loadDiscordSession();
     if (!session?.accessToken || !session.user.discordId) return;
 
@@ -119,6 +125,7 @@ export function AuthProvider({children}: {children: ReactNode}) {
   // The API layer clears the stored session on a 401; reset in-memory auth to guest here.
   useEffect(() => {
     const onExpired = () => {
+      track('session_expired', {outcome: 'error', api_code: 'UNAUTHORIZED'});
       clearDiscordAuthState();
       setUser(GUEST_USER);
       setGuildId(null);

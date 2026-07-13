@@ -12,6 +12,7 @@ import {
   saveEvent,
   uploadCoverImage,
 } from '../../lib/api';
+import {track} from '../../lib/analytics';
 import {compressCoverForUpload} from '../../lib/coverImage';
 import {defaultCoverPath, isBundledDefaultCover} from '../../lib/eventCovers';
 import {fetchEventById} from '../../lib/events';
@@ -409,6 +410,7 @@ export function useCreateEventForm() {
     setGlobalError(null);
     try {
       await publishEvent(token, id, targetGuildId, targetChannelId, targetGuildName);
+      track('publish', {outcome: 'success', event_id: id});
       bumpRefresh();
       setShowPublishModal(false);
       navigate(`/event/${id}`, {replace: true, state: {from: '/my-events'}});
@@ -464,11 +466,16 @@ export function useCreateEventForm() {
 
   async function confirmCancelPublished(): Promise<boolean> {
     const id = eventId ?? editId;
-    if (!id || !token || !canPersist || !canCancelPublished) return false;
+    if (!id || !canPersist || !token || !canCancelPublished) return false;
+    if (!isApiConfigured()) {
+      setGlobalError(i18n.t('browse.errorNotConfiguredDesc'));
+      return false;
+    }
     setSaving(true);
     setGlobalError(null);
     try {
       await cancelEvent(token, id);
+      track('cancel_event', {outcome: 'success', event_id: id});
       setCancelConfirmOpen(false);
       bumpRefresh();
       navigate(`/event/${id}`, {replace: true, state: {from: '/my-events'}});
@@ -515,6 +522,7 @@ export function useCreateEventForm() {
       setEventId(id);
       loadedEditRef.current = id;
       bumpRefresh();
+      track('draft_save', {outcome: 'success', event_id: id});
       return id;
     } catch (e) {
       setGlobalError(String(e));

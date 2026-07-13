@@ -1,6 +1,7 @@
 import {useLocation} from 'react-router-dom';
 import {useAuth} from '../context/AuthContext';
 import {isPublicBrowserPath, shouldRequireBrowserSignIn} from '../lib/runtime';
+import {isLocalAnalyticsDashboardPath} from '../lib/localAnalyticsDashboard';
 
 export type BrowserSignInGateState = 'loading' | 'required' | null;
 
@@ -11,6 +12,7 @@ export function useBrowserSignInGate(): BrowserSignInGateState {
 
   if (!shouldRequireBrowserSignIn()) return null;
   if (isPublicBrowserPath(pathname)) return null;
+  if (isLocalAnalyticsDashboardPath(pathname)) return null;
 
   if (loading) return 'loading';
   if (!isConfigured) return null;

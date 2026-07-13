@@ -2,6 +2,7 @@ import {useMemo, useState} from 'react';
 import {useTranslation} from 'react-i18next';
 import {busyLabel} from '../../../i18n/busyLabels';
 import {addGroup} from '../../../lib/api';
+import {track} from '../../../lib/analytics';
 import {ApiRequestError} from '../../../lib/apiErrors';
 import {buildAddGroupLeaderCandidates} from '../../../lib/eventRoster';
 import {Button} from '../../../components/ui/Button';
@@ -72,6 +73,7 @@ export function EventDetailAddGroup({event, view, accessToken, onAdded}: Props) 
         gamertag: gt,
         username: selected.username,
       });
+      track('add_group', {outcome: 'success', event_id: event.id, meta: {group: nextGroup}});
       close();
       onAdded();
     } catch (e) {
