@@ -28,7 +28,7 @@ export function EventRegistrationProgress({view}: {view: RegistrationProgressVie
         <div
           className={cn(
             'h-full rounded-full transition-all duration-700',
-            full ? 'bg-amber-400' : progressFill,
+            full ? 'bg-white/25' : progressFill,
           )}
           style={{width: `${fillWidth}%`}}
         />
@@ -36,7 +36,7 @@ export function EventRegistrationProgress({view}: {view: RegistrationProgressVie
       <span
         className={cn(
           'shrink-0 text-xs font-semibold tabular-nums',
-          full ? 'text-amber-400' : badge.text,
+          full ? 'text-white/50' : badge.text,
         )}
       >
         {formatLobbyCount(view.ev.currentPlayers, view.totalCapacity)}
