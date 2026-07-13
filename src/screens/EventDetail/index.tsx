@@ -17,6 +17,7 @@ import {usePageMeta} from '../../hooks/usePageMeta';
 import type {EventDetailLocationState} from '../../lib/navigationState';
 import {buildEventPageMeta} from '../../lib/eventPageMeta';
 import {eventDetailBackTo, saveAuthReturnTo} from '../../lib/returnTo';
+import {resolveOrganiserLabel} from '../../lib/organiser';
 import {supportsBrowserOAuth} from '../../lib/runtime';
 import {useResolveEventDisplayStatus} from '../../hooks/useResolveEventDisplayStatus';
 import {useEventDetailParticipation} from '../../hooks/useEventDetailParticipation';
@@ -30,6 +31,7 @@ import {EventDetailHero} from './components/EventDetailHero';
 import {EventDetailTitleSection} from './components/EventDetailTitleSection';
 import {EventDetailStatusSection} from './components/EventDetailStatusSection';
 import {EventDetailProgressSection} from './components/EventDetailProgressSection';
+import {EventDetailDescription} from './components/EventDetailDescription';
 import {EventDetailInfoPanel} from './components/EventDetailInfoPanel';
 import {EventDetailParticipants} from './components/EventDetailParticipants';
 import {EventDetailAddGroup} from './components/EventDetailAddGroup';
@@ -263,6 +265,8 @@ export function EventDetail() {
 
       <EventDetailInfoPanel event={event} when={view.when} />
 
+      <EventDetailDescription description={event.description ?? ''} />
+
       <EventDetailParticipants view={view} viewerDiscordId={user.discordId} />
 
       <EventDetailAddGroup
@@ -271,6 +275,10 @@ export function EventDetail() {
         accessToken={discordToken}
         onAdded={syncEventFromServer}
       />
+
+      <p className="mt-8 text-xs text-muted">
+        {t('common.by')} {resolveOrganiserLabel(event)}
+      </p>
     </ContentReveal>
   );
 }

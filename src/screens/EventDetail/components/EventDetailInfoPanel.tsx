@@ -4,13 +4,15 @@ import {RoadIcon} from '../../../components/icons/RoadIcon';
 import {formatTrackDisplayLine} from '../../../lib/eventTracks';
 import {formatCarDisplayName} from '../../../lib/carDisplay';
 import {piClassColor, piToClass} from '../../../lib/pi';
-import {iconTileClass, sectionLabelClass} from '../../../components/ui/formStyles';
-import {Panel} from '../../../components/ui/Panel';
+import {sectionLabelClass} from '../../../components/ui/formStyles';
 import type {ForzaEvent} from '../../../lib/types';
 import {cn} from '../../../lib/cn';
 
 const carRuleRowClass =
   'grid grid-cols-[minmax(0,1fr)_3.5rem] items-center gap-x-3 text-sm leading-tight';
+
+const rowClass = 'flex gap-3 py-2 first:pt-0';
+const iconClass = 'mt-0.5 h-4 w-4 shrink-0 text-muted';
 
 type Props = {
   event: ForzaEvent;
@@ -21,11 +23,9 @@ export function EventDetailInfoPanel({event, when}: Props) {
   const {t} = useTranslation();
 
   return (
-    <Panel divided className="mt-5 overflow-hidden">
-      <div className="flex items-center gap-3 px-4 py-3">
-        <div className={iconTileClass}>
-          <Calendar className="h-3.5 w-3.5 text-accent-purple-light" />
-        </div>
+    <div className="mt-5 divide-y divide-white/[0.05]">
+      <div className={rowClass}>
+        <Calendar className={cn(iconClass, 'text-accent-purple-light/80')} />
         <div>
           <p className={sectionLabelClass}>{t('eventDetail.dateTime')}</p>
           <p className="mt-0.5 text-sm text-slate-200">{when}</p>
@@ -33,10 +33,8 @@ export function EventDetailInfoPanel({event, when}: Props) {
       </div>
 
       {event.lobbyLeaderGamertag ? (
-        <div className="flex items-center gap-3 px-4 py-3">
-          <div className={iconTileClass}>
-            <Users className="h-3.5 w-3.5 text-accent-green" />
-          </div>
+        <div className={rowClass}>
+          <Users className={cn(iconClass, 'text-accent-green/80')} />
           <div>
             <p className={sectionLabelClass}>{t('eventDetail.convoyLeader')}</p>
             <p className="mt-0.5 text-sm font-medium text-slate-200">{event.lobbyLeaderGamertag}</p>
@@ -45,10 +43,8 @@ export function EventDetailInfoPanel({event, when}: Props) {
       ) : null}
 
       {(event.tracks?.length ?? 0) > 0 ? (
-        <div className="flex items-start gap-3 px-4 py-3">
-          <div className={iconTileClass}>
-            <RoadIcon className="text-muted-light" />
-          </div>
+        <div className={rowClass}>
+          <RoadIcon className={iconClass} />
           <div className="min-w-0">
             <p className={sectionLabelClass}>{t('eventDetail.tracks')}</p>
             {event.tracks!.length === 1 ? (
@@ -72,7 +68,7 @@ export function EventDetailInfoPanel({event, when}: Props) {
                     key={`${track.name}-${track.shareCode ?? ''}-${i}`}
                     className="flex items-start gap-2 text-sm text-slate-200"
                   >
-                    <span className="inline-flex h-5 min-w-5 shrink-0 items-center justify-center rounded-full border border-white/[0.08] bg-white/[0.03] px-1.5 text-[10px] font-bold text-muted">
+                    <span className="inline-flex h-5 min-w-5 shrink-0 items-center justify-center text-[10px] font-bold tabular-nums text-muted">
                       {i + 1}
                     </span>
                     <span
@@ -90,14 +86,12 @@ export function EventDetailInfoPanel({event, when}: Props) {
         </div>
       ) : null}
 
-      <div className="flex items-start gap-3 px-4 py-3">
-        <div className={iconTileClass}>
-          <Car className="h-3.5 w-3.5 text-muted-light" />
-        </div>
+      <div className={rowClass}>
+        <Car className={iconClass} />
         <div className="min-w-0 flex-1">
           <p className={sectionLabelClass}>{t('eventDetail.carRules')}</p>
           {event.carRuleMode === 'anything_goes' ? (
-            <ul className="mt-2 flex flex-col gap-1">
+            <ul className="mt-1.5 flex flex-col gap-1">
               <li className={carRuleRowClass}>
                 <span className="truncate font-medium text-slate-200">
                   {event.additionalCarRestrictions?.trim() || t('common.openBuild')}
@@ -115,11 +109,11 @@ export function EventDetailInfoPanel({event, when}: Props) {
           ) : event.allowedCars.length === 0 ? (
             <p className="mt-1 text-sm text-muted">{t('eventDetail.restrictedSoon')}</p>
           ) : (
-            <ul className="mt-2 divide-y divide-white/[0.05]">
+            <ul className="mt-1.5 space-y-2">
               {event.allowedCars.map((c) => {
                 const maxClass = piToClass(c.maxPi);
                 return (
-                  <li key={c.carId} className="py-2.5 first:pt-0 last:pb-0">
+                  <li key={c.carId}>
                     <div className={carRuleRowClass}>
                       <span className="truncate font-medium text-slate-200">
                         {formatCarDisplayName(c)}
@@ -159,6 +153,6 @@ export function EventDetailInfoPanel({event, when}: Props) {
           )}
         </div>
       </div>
-    </Panel>
+    </div>
   );
 }

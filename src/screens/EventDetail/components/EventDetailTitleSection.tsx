@@ -4,7 +4,6 @@ import {busyLabel} from '../../../i18n/busyLabels';
 import {Badge, DraftBadge, StatusBadge} from '../../../components/ui/Badge';
 import {Button} from '../../../components/ui/Button';
 import {Alert} from '../../../components/ui/Alert';
-import {resolveOrganiserLabel} from '../../../lib/organiser';
 import {
   participationButtonLabel,
   participationButtonVariant,
@@ -194,15 +193,6 @@ export function EventDetailTitleSection({
           {t('participation.xboxHintBody', {leader: view.viewerConvoyLeader.gamertag})}
         </Alert>
       ) : null}
-
-      {event.description ? (
-        <p className="mt-3 whitespace-pre-line text-sm leading-relaxed text-slate-400">
-          {event.description}
-        </p>
-      ) : null}
-      <p className="mt-1 text-xs text-muted">
-        {t('common.by')} {resolveOrganiserLabel(event)}
-      </p>
     </div>
   );
 }
