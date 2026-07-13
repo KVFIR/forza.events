@@ -1,4 +1,5 @@
 import {describe, expect, it} from 'vitest';
+import {resolveEventGroups} from './eventRoster';
 import {
   applyJoinServerResponse,
   mergeOptimisticEventPatch,
@@ -202,6 +203,48 @@ describe('patchEventAfterSelfJoin', () => {
     const next = patchEventAfterSelfJoin(full, user, 'GT');
     expect(next.participants[0]?.waitlisted).toBe(true);
     expect(next.currentPlayers).toBe(12);
+  });
+
+  it('sets joinedAt so optimistic roster order is last among drivers', () => {
+    const joiner = {discordId: 'u3', username: 'C', avatarUrl: 'https://a.test/c.png'};
+    const ev = {
+      ...base,
+      currentPlayers: 2,
+      participants: [
+        {
+          discordId: 'leader',
+          username: 'L',
+          gamertag: 'LGT',
+          isConvoyLeader: true,
+          participationSource: 'host_assigned' as const,
+          groupIndex: 1,
+          joinedAt: '2020-01-01T00:00:00Z',
+        },
+        {
+          discordId: 'u2',
+          username: 'B',
+          gamertag: 'GT2',
+          participationSource: 'self_join' as const,
+          groupIndex: 1,
+          joinedAt: '2020-01-02T00:00:00Z',
+        },
+      ],
+    };
+    const next = patchEventAfterSelfJoin(ev, joiner, 'NewGT');
+    const joined = next.participants.find((p) => p.discordId === 'u3');
+    expect(joined?.joinedAt).toBeTruthy();
+    const groups = resolveEventGroups(
+      {
+        ...next,
+        groupCount: 1,
+        hostDiscordId: 'leader',
+        hostUsername: 'L',
+        lobbyLeaderGamertag: 'LGT',
+        lobbyLeaderDiscordId: 'leader',
+      },
+      'u3',
+    );
+    expect(groups[0]?.drivers.map((p) => p.discordId)).toEqual(['u2', 'u3']);
   });
 });
 
