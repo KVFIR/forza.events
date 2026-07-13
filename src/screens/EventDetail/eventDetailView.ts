@@ -159,7 +159,6 @@ export function buildEventDetailViewModel(input: {
     participationBusy ||
     cancelling ||
     isCurrentConvoyLeader ||
-    (isInParticipants && !joined && !onWaitlist) ||
     // Active seat or waitlist → leave; otherwise join (or join-waitlist when full).
     (joined || onWaitlist ? !canLeave : !registrationOpen);
   const showJoinXboxHint =

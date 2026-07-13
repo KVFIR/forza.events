@@ -101,19 +101,19 @@ export function filterMyEvents(
   events: ForzaEvent[],
   user: AppUser,
   scope: MyEventsScope,
-  isJoined: (event: ForzaEvent) => boolean,
+  isParticipating: (event: ForzaEvent) => boolean,
 ): ForzaEvent[] {
   return events.filter((e) => {
     const hosted = e.hostDiscordId === user.discordId;
-    const joined = isJoined(e);
+    const participating = isParticipating(e);
     switch (scope) {
       case 'hosted':
         return hosted;
       case 'joined':
-        return joined;
+        return participating;
       case 'all':
       default:
-        return hosted || joined;
+        return hosted || participating;
     }
   });
 }

@@ -1,5 +1,6 @@
 import {describe, expect, it} from 'vitest';
-import {userIsJoined} from './events';
+import {filterMyEvents} from './eventList';
+import {userIsJoined, userIsParticipating} from './events';
 import type {AppUser, ForzaEvent} from './types';
 
 const user: AppUser = {
@@ -34,8 +35,58 @@ function event(participants: ForzaEvent['participants']): ForzaEvent {
   };
 }
 
+describe('userIsParticipating', () => {
+  it('returns true for waitlisted rows', () => {
+    expect(
+      userIsParticipating(
+        event([
+          {
+            discordId: 'u1',
+            username: 'A',
+            participationSource: 'self_join',
+            waitlisted: true,
+          },
+        ]),
+        user,
+      ),
+    ).toBe(true);
+  });
+
+  it('returns true for host-assigned convoy leader', () => {
+    expect(
+      userIsParticipating(
+        event([
+          {
+            discordId: 'u1',
+            username: 'A',
+            isConvoyLeader: true,
+            participationSource: 'host_assigned',
+          },
+        ]),
+        user,
+      ),
+    ).toBe(true);
+  });
+
+  it('returns false for the event host', () => {
+    expect(
+      userIsParticipating(
+        event([
+          {
+            discordId: 'host',
+            username: 'Host',
+            isConvoyLeader: true,
+            participationSource: 'host_self_assigned',
+          },
+        ]),
+        {...user, discordId: 'host'},
+      ),
+    ).toBe(false);
+  });
+});
+
 describe('userIsJoined', () => {
-  it('returns true only for self_join rows', () => {
+  it('returns true for active self_join rows', () => {
     expect(
       userIsJoined(
         event([
@@ -50,7 +101,23 @@ describe('userIsJoined', () => {
     ).toBe(true);
   });
 
-  it('returns false for waitlisted self_join rows', () => {
+  it('returns true for host-assigned convoy leader', () => {
+    expect(
+      userIsJoined(
+        event([
+          {
+            discordId: 'u1',
+            username: 'A',
+            isConvoyLeader: true,
+            participationSource: 'host_assigned',
+          },
+        ]),
+        user,
+      ),
+    ).toBe(true);
+  });
+
+  it('returns false for waitlisted rows', () => {
     expect(
       userIsJoined(
         event([
@@ -66,23 +133,7 @@ describe('userIsJoined', () => {
     ).toBe(false);
   });
 
-  it('returns false for host-assigned convoy leader without self join', () => {
-    expect(
-      userIsJoined(
-        event([
-          {
-            discordId: 'u1',
-            username: 'A',
-            isConvoyLeader: true,
-            participationSource: 'host_assigned',
-          },
-        ]),
-        user,
-      ),
-    ).toBe(false);
-  });
-
-  it('returns false for host self-assigned leader row', () => {
+  it('returns false for the event host even with a leader row', () => {
     expect(
       userIsJoined(
         event([
@@ -93,8 +144,23 @@ describe('userIsJoined', () => {
             participationSource: 'host_self_assigned',
           },
         ]),
-        { ...user, discordId: 'host' },
+        {...user, discordId: 'host'},
       ),
     ).toBe(false);
+  });
+});
+
+describe('filterMyEvents', () => {
+  const ev = event([
+    {discordId: 'u1', username: 'A', participationSource: 'self_join', waitlisted: true},
+  ]);
+  const participating = (e: ForzaEvent) => userIsParticipating(e, user);
+
+  it('includes waitlisted racers in joined scope', () => {
+    expect(filterMyEvents([ev], user, 'joined', participating)).toHaveLength(1);
+  });
+
+  it('excludes waitlisted racers from active joined checks', () => {
+    expect(userIsJoined(ev, user)).toBe(false);
   });
 });

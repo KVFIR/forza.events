@@ -7,7 +7,6 @@ import {viewerIsConvoyLeader} from '../lib/eventRoster';
 import {startDiscordBrowserSignIn} from '../lib/discordBrowserSignIn';
 import {hasGamertag, gamertagError} from '../lib/gamertag';
 import {supportsBrowserOAuth} from '../lib/runtime';
-import {userHasParticipantRow} from '../lib/events';
 import type {ForzaEvent} from '../lib/types';
 
 export function useEventDetailParticipation(
@@ -108,9 +107,6 @@ export function useEventDetailParticipation(
         return;
       }
       await doLeave();
-      return;
-    }
-    if (userHasParticipantRow(event, user)) {
       return;
     }
     if (!hasGamertag(user.xboxGamertag)) {

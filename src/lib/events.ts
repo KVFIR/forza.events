@@ -638,10 +638,25 @@ export async function searchCars(query: string): Promise<CarSearchResult[]> {
   }
 }
 
-/** True when the user has a self_join participant row — used for My Events "Joined" tab. */
-export function userIsJoined(event: ForzaEvent, user: AppUser): boolean {
+function viewerParticipantRow(
+  event: ForzaEvent,
+  user: AppUser,
+): ForzaEvent['participants'][number] | undefined {
+  if (!user.discordId) return undefined;
   const row = event.participants.find((p) => p.discordId === user.discordId);
-  return row?.participationSource === 'self_join' && !row.waitlisted;
+  if (!row || row.discordId === event.hostDiscordId) return undefined;
+  return row;
+}
+
+/** Any roster row (incl. waitlist) — My Events Joined/All; host uses Hosted tab. */
+export function userIsParticipating(event: ForzaEvent, user: AppUser): boolean {
+  return viewerParticipantRow(event, user) !== undefined;
+}
+
+/** Active roster seat — Rich Presence, Profile results, Event Detail "joined". */
+export function userIsJoined(event: ForzaEvent, user: AppUser): boolean {
+  const row = viewerParticipantRow(event, user);
+  return row !== undefined && !row.waitlisted;
 }
 
 /** True when the user has any participant row (any source) — used for Join/Leave button visibility. */

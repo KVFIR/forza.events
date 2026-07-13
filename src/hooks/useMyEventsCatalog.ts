@@ -15,7 +15,7 @@ import {usePublishedEvents} from './usePublishedEvents';
 
 export function useMyEventsCatalog(scope: MyEventsScope = 'all') {
   const {user, isSignedIn, loading: authLoading} = useAuth();
-  const {isJoined} = useJoinedEvents();
+  const {isParticipating} = useJoinedEvents();
   const {events, isLoading, isRefreshing, loadError, refetch} = usePublishedEvents({
     includeCompleted: true,
   });
@@ -39,13 +39,13 @@ export function useMyEventsCatalog(scope: MyEventsScope = 'all') {
   const sortedDrafts = useMemo(() => sortHostDrafts(drafts), [drafts]);
 
   const publishedAll = useMemo(
-    () => sortMyEventsList(filterMyEvents(events, user, 'all', isJoined)),
-    [events, user, isJoined],
+    () => sortMyEventsList(filterMyEvents(events, user, 'all', isParticipating)),
+    [events, user, isParticipating],
   );
 
   const publishedFiltered = useMemo(
-    () => sortMyEventsList(filterMyEvents(events, user, scope, isJoined)),
-    [events, user, scope, isJoined],
+    () => sortMyEventsList(filterMyEvents(events, user, scope, isParticipating)),
+    [events, user, scope, isParticipating],
   );
 
   const listOptions = useMemo(

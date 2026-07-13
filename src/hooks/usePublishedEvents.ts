@@ -1,4 +1,5 @@
 import {useCallback, useEffect, useMemo, useRef, useState} from 'react';
+import {useAuth} from '../context/AuthContext';
 import {useJoinedEvents} from '../context/JoinedEventsContext';
 import {
   fetchPublishedEventsResult,
@@ -20,6 +21,7 @@ async function fetchWithDevDelay(includeCompleted: boolean) {
 
 /** Global public browse feed (frozen MVP spec). Does not wait on Discord auth. */
 export function usePublishedEvents(options: FetchEventsOptions = {}) {
+  const {user} = useAuth();
   const {refreshKey, getLobbyPatch, clearLobbyPatch} = useJoinedEvents();
   const includeCompleted = options.includeCompleted ?? false;
   const [events, setEvents] = useState<ForzaEvent[]>([]);
@@ -82,7 +84,12 @@ export function usePublishedEvents(options: FetchEventsOptions = {}) {
     [clearLobbyPatch],
   );
 
-  usePublishedEventsLiveUpdates(includeCompleted, onLobbyPatch, silentRefetch);
+  usePublishedEventsLiveUpdates(
+    includeCompleted,
+    user.discordId || undefined,
+    onLobbyPatch,
+    silentRefetch,
+  );
 
   useEffect(() => {
     let cancelled = false;

@@ -3,6 +3,8 @@ import type {RealtimeChannel} from '@supabase/supabase-js';
 import {isSupabaseConfigured} from '../lib/supabase';
 import {subscribePostgresChanges, unsubscribeChannel} from '../lib/realtime';
 
+type PostgresChangeBinding = Parameters<typeof subscribePostgresChanges>[1][number];
+
 /** Refetch when lobby rows change for a single event (participants + counts). */
 export function useEventLiveUpdates(eventId: string | undefined, onChange: () => void) {
   useEffect(() => {
@@ -46,9 +48,15 @@ export function useEventLiveUpdates(eventId: string | undefined, onChange: () =>
   }, [eventId, onChange]);
 }
 
+/** Realtime filter for the signed-in viewer's roster rows (My Events catalog refresh). */
+export function viewerParticipantRealtimeFilter(discordId: string): string {
+  return `discord_id=eq.${discordId}`;
+}
+
 /** Patch browse feed counts; refetch when new events are published. */
 export function usePublishedEventsLiveUpdates(
   includeCompleted: boolean,
+  viewerDiscordId: string | undefined,
   onLobbyPatch: (row: {
     id: string;
     current_players: number;
@@ -65,9 +73,7 @@ export function usePublishedEventsLiveUpdates(
     let cancelled = false;
 
     const channelName = `published-events:${crypto.randomUUID()}`;
-
-    void (async () => {
-      const ch = await subscribePostgresChanges(channelName, [
+    const bindings: PostgresChangeBinding[] = [
         {
           event: 'UPDATE',
           table: 'events',
@@ -121,7 +127,21 @@ export function usePublishedEventsLiveUpdates(
             if (!cancelled) onCatalogChange();
           },
         },
-      ]);
+    ];
+
+    if (viewerDiscordId) {
+      bindings.push({
+        event: '*',
+        table: 'event_participants',
+        filter: viewerParticipantRealtimeFilter(viewerDiscordId),
+        callback: () => {
+          if (!cancelled) onCatalogChange();
+        },
+      });
+    }
+
+    void (async () => {
+      const ch = await subscribePostgresChanges(channelName, bindings);
       if (cancelled) {
         await unsubscribeChannel(ch);
         return;
@@ -133,5 +153,5 @@ export function usePublishedEventsLiveUpdates(
       cancelled = true;
       void unsubscribeChannel(channel);
     };
-  }, [includeCompleted, onLobbyPatch, onCatalogChange]);
+  }, [includeCompleted, viewerDiscordId, onLobbyPatch, onCatalogChange]);
 }

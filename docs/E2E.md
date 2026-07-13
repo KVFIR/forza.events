@@ -262,7 +262,9 @@ Manual QA matrix aligned with current code behavior (not an abstract checklist).
 |-------|--------|
 | **All** | Hosted + joined + **drafts on top** (published may render first; refresh while drafts load) |
 | **Hosted** | Own events + drafts |
-| **Joined** | `participation_source === 'self_join'` only; **no drafts** |
+| **Joined** | Any roster row (incl. waitlist + host-assigned leader); not host; **no drafts** |
+| **Joined — host-assigned leader** | Host picks viewer as convoy leader → event appears in **Joined** / **All** without manual refresh (realtime refetch); **Leave** blocked; convoy-leader Xbox hint on Detail |
+| **Joined — waitlist** | Full lobby join → event in **Joined**; card shows **Waitlisted** badge; **Leave waitlist** works |
 | Drafts API fail | Warning; published list still loads |
 | Completed | Placement badges where applicable |
 | Not signed in | Copy + retry auth |

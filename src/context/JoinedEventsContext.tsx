@@ -17,7 +17,7 @@ import {
   toEventLobbyPatch,
   type EventLobbyPatch,
 } from '../lib/eventParticipation';
-import {userIsJoined} from '../lib/events';
+import {userIsJoined, userIsParticipating} from '../lib/events';
 import {isStandaloneBrowser} from '../lib/discord';
 import {hasGamertag} from '../lib/gamertag';
 import {useAuth} from './AuthContext';
@@ -28,6 +28,7 @@ type LobbyPatches = Record<string, EventLobbyPatch>;
 
 type Ctx = {
   isJoined: (event: ForzaEvent) => boolean;
+  isParticipating: (event: ForzaEvent) => boolean;
   joinParticipation: (event: ForzaEvent, gamertag: string) => Promise<void>;
   leaveParticipation: (event: ForzaEvent) => Promise<void>;
   getLobbyPatch: (eventId: string) => EventLobbyPatch | undefined;
@@ -74,6 +75,14 @@ export function JoinedEventsProvider({children}: {children: ReactNode}) {
     [overrides, user, getLobbyPatch],
   );
 
+  const isParticipating = useCallback(
+    (event: ForzaEvent) => {
+      const patched = mergeOptimisticEventPatch(event, getLobbyPatch(event.id));
+      return userIsParticipating(patched, user);
+    },
+    [user, getLobbyPatch],
+  );
+
   const clearOverride = useCallback((eventId: string) => {
     setOverrides((prev) => {
       if (prev[eventId] === undefined) return prev;
@@ -92,8 +101,7 @@ export function JoinedEventsProvider({children}: {children: ReactNode}) {
         if (!hasGamertag(gt)) throw new Error(i18n.t('participation.gamertagRequired'));
         const optimistic = patchEventAfterSelfJoin(event, user, gt);
         setLobbyPatch(optimistic);
-        const row = optimistic.participants.find((p) => p.discordId === user.discordId);
-        if (row && !row.waitlisted && row.participationSource === 'self_join') {
+        if (userIsJoined(optimistic, user)) {
           setOverrides((prev) => ({...prev, [event.id]: true}));
         }
         try {
@@ -178,6 +186,7 @@ export function JoinedEventsProvider({children}: {children: ReactNode}) {
   const value = useMemo(
     () => ({
       isJoined,
+      isParticipating,
       joinParticipation,
       leaveParticipation,
       getLobbyPatch,
@@ -187,6 +196,7 @@ export function JoinedEventsProvider({children}: {children: ReactNode}) {
     }),
     [
       isJoined,
+      isParticipating,
       joinParticipation,
       leaveParticipation,
       getLobbyPatch,

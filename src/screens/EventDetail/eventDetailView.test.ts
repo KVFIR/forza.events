@@ -1,5 +1,6 @@
 import {describe, expect, it, vi} from 'vitest';
 import type {TFunction} from 'i18next';
+import {userIsJoined} from '../../lib/events';
 import {buildEventDetailViewModel} from './eventDetailView';
 import type {AppUser, EventParticipant, ForzaEvent} from '../../lib/types';
 
@@ -283,13 +284,14 @@ describe('buildEventDetailViewModel', () => {
     expect(view.showJoinXboxHint).toBe(false);
   });
 
-  it('disables join for host_assigned passive roster rows', () => {
+  it('counts host_assigned convoy leader as joined but blocks leave', () => {
     const event = baseEvent({
       discordMessageId: 'msg-1',
       participants: [
         participant({
           discordId: 'viewer-1',
           gamertag: 'ViewerTag',
+          isConvoyLeader: true,
           participationSource: 'host_assigned',
         }),
       ],
@@ -298,9 +300,10 @@ describe('buildEventDetailViewModel', () => {
     const view = buildView({
       event,
       displayEvent: event,
-      isJoined: () => false,
+      isJoined: (e) => userIsJoined(e, baseUser),
     });
     expect(view.participationDisabled).toBe(true);
+    expect(view.showConvoyLeaderXboxHint).toBe(true);
   });
 
   it('uses the viewer group leader for multi-group Xbox hints', () => {
