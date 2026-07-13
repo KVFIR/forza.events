@@ -175,3 +175,6 @@ Also align **`browse-events`** / **`src/lib/events.ts`** if the server list quer
 
 - Seeding test events for publish flow: use `status = draft` — `status = open` without `discord_message_id` blocks `publish-event` (`NOT_DRAFT`) while UI still treats the row as a draft.
 - Local one-off SQL seeds with real Discord IDs (e.g. `scripts/seed-test-waitlist-13.sql`) are dev-only and typically excluded from commits.
+- PostgreSQL `coalesce(smallint_col, 1)` infers as `integer`, not `smallint` — passing the result to a `smallint` RPC arg causes runtime `42883` (function not found). Use `1::smallint` or add an `integer` overload that casts to `smallint`.
+- Migrations `011`–`013` hardened group/waitlist RPCs for this pattern (`leave_event_participant`, `promote_waitlist_to_group`, `add_event_group`, `submit_event_results`).
+- `event-participation` routes RPC failures through shared `responseForRpcError` (`rpcErrors.ts`); known Postgres `RAISE EXCEPTION` codes (`EVENT_FULL`, `LEADER_CANNOT_LEAVE`, `INVALID_GROUP_INDEX`, etc.) map to client API codes — unmapped codes still become generic internal errors.
