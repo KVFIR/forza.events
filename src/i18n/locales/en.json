@@ -216,7 +216,6 @@
     "hostBadgeShort": "Host",
     "group": "Group {{n}}",
     "waitlist": "Waitlist",
-    "noDriversYet": "No drivers joined yet.",
     "noParticipantsYet": "No participants yet.",
     "cancelFailed": "Could not cancel event",
     "deleteFailed": "Could not delete draft",

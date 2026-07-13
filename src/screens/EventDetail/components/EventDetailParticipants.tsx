@@ -1,3 +1,4 @@
+import {useLayoutEffect, useRef, useState} from 'react';
 import {useTranslation} from 'react-i18next';
 import {ParticipantDisplayNames} from '../../../components/ParticipantDisplayNames';
 import {UserAvatar} from '../../../components/UserAvatar';
@@ -18,6 +19,16 @@ function SeatNumber({n}: {n: number}) {
   );
 }
 
+function primaryTextWidth(primary: HTMLElement): number {
+  const node = primary.firstChild;
+  if (node instanceof Text && node.textContent) {
+    const range = document.createRange();
+    range.selectNodeContents(node);
+    return range.getBoundingClientRect().width;
+  }
+  return primary.scrollWidth;
+}
+
 function LeaderCard({
   leader,
   hostDiscordId,
@@ -31,9 +42,51 @@ function LeaderCard({
   const isHost = leader.discordId === hostDiscordId;
   const badgeClass =
     'shrink-0 text-right text-[9px] font-bold uppercase leading-tight tracking-wide text-accent-green/90';
+  const cardRef = useRef<HTMLDivElement>(null);
+  const badgeRef = useRef<HTMLDivElement>(null);
+  const badgeWidthRef = useRef(0);
+  const hideBadgesRef = useRef(false);
+  const [hideBadges, setHideBadges] = useState(false);
+
+  useLayoutEffect(() => {
+    const card = cardRef.current;
+    if (!card) return;
+
+    const sync = () => {
+      const primary = card.querySelector<HTMLElement>('.min-w-0.flex-1 > p');
+      if (!primary) return;
+
+      const measuredBadgeW = badgeRef.current?.offsetWidth ?? 0;
+      if (measuredBadgeW > 0) {
+        badgeWidthRef.current = measuredBadgeW;
+      }
+
+      const textW = primaryTextWidth(primary);
+      const slotW = primary.clientWidth;
+      const badgeW = badgeWidthRef.current;
+      const gap = 8;
+      const showBadges = hideBadgesRef.current
+        ? badgeW > 0 && textW <= slotW - badgeW - gap + 1
+        : textW <= slotW + 1;
+      const nextHidden = !showBadges;
+
+      if (hideBadgesRef.current === nextHidden) return;
+
+      hideBadgesRef.current = nextHidden;
+      setHideBadges(nextHidden);
+    };
+
+    const ro = new ResizeObserver(sync);
+    ro.observe(card);
+    sync();
+    return () => ro.disconnect();
+  }, [leader.gamertag, leader.username, isHost, t]);
 
   return (
-    <div className="flex items-center gap-2 rounded-lg border border-accent-green/25 bg-accent-green/10 px-3 py-2">
+    <div
+      ref={cardRef}
+      className="flex items-center gap-2 rounded-lg border border-accent-green/25 bg-accent-green/10 px-3 py-2"
+    >
       <SeatNumber n={position} />
       <UserAvatar
         src={leader.avatarUrl}
@@ -44,10 +97,12 @@ function LeaderCard({
       <div className="min-w-0 flex-1">
         <ParticipantDisplayNames gamertag={leader.gamertag} username={leader.username ?? ''} />
       </div>
-      <div className={cn(badgeClass, isHost && 'flex flex-col gap-0.5')}>
-        <span>{t('eventDetail.convoyLeaderBadgeShort')}</span>
-        {isHost ? <span>{t('eventDetail.hostBadgeShort')}</span> : null}
-      </div>
+      {hideBadges ? null : (
+        <div ref={badgeRef} className={cn(badgeClass, isHost && 'flex flex-col gap-0.5')}>
+          <span>{t('eventDetail.convoyLeaderBadgeShort')}</span>
+          {isHost ? <span>{t('eventDetail.hostBadgeShort')}</span> : null}
+        </div>
+      )}
     </div>
   );
 }
@@ -127,9 +182,6 @@ export function EventDetailParticipants({view, viewerDiscordId}: Props) {
                     />
                   ))}
                 </div>
-                {group.leader && group.drivers.length === 0 ? (
-                  <p className="text-sm text-muted">{t('eventDetail.noDriversYet')}</p>
-                ) : null}
               </>
             ) : (
               <p className="text-sm text-muted">{t('eventDetail.noParticipantsYet')}</p>
