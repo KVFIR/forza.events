@@ -11,8 +11,8 @@ Remaining work is mostly **Activity E2E in pilot guilds**, **Railway frontend re
 | Layer | State |
 |-------|--------|
 | React Activity (UI) | Done — Browse, Detail, Create (wizard), My Events, Profile, i18n (EN + RU) |
-| Supabase schema | Done — migrations `001`–`019` |
-| Edge Functions | Done — 17 functions ([`supabase/README.md`](../supabase/README.md)) |
+| Supabase schema | Done — migrations `001`–`020` |
+| Edge Functions | Done — 18 functions ([`supabase/README.md`](../supabase/README.md)) |
 | Security hardening | Done — storage, RLS scope, CORS, rate limits, publish validation |
 | Local browser dev | Done — Discord OAuth + Supabase (not mock mode) |
 | Sample content | Done — optional `sample-*` seed |
@@ -87,7 +87,7 @@ Details: [`supabase/README.md`](../supabase/README.md).
 | Check | Result |
 |-------|--------|
 | Supabase project | `uoysqfczahqmctbrrizn` (FORZA.EVENTS) |
-| Migrations | `001`–`019` on remote |
+| Migrations | `001`–`020` on remote |
 | Edge Functions | 17 via `deploy:functions` |
 | Activity hosting | Railway `https://forzaevents.up.railway.app` |
 | Discord application verification | Approved — legal URLs on deploy origin |

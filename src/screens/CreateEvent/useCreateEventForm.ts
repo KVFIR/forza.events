@@ -355,6 +355,18 @@ export function useCreateEventForm() {
       throw new Error(i18n.t('validation.typeRequired'));
     }
     const tz = defaultTimezone();
+    const leaderFields = isPublished
+      ? {}
+      : {
+          lobby_leader_gamertag: lobbyLeaderIsHost
+            ? (user.xboxGamertag?.trim() || lobbyLeaderGamertag.trim())
+            : lobbyLeaderGamertag.trim(),
+          lobby_leader_is_host: lobbyLeaderIsHost,
+          lobby_leader_discord_id: lobbyLeaderIsHost ? null : lobbyLeaderDiscordId,
+          lobby_leader_username: lobbyLeaderIsHost
+            ? null
+            : lobbyLeaderUsername.trim() || null,
+        };
     return {
       id: eventId ?? undefined,
       guild_id: targetGuildId.trim() || undefined,
@@ -372,14 +384,7 @@ export function useCreateEventForm() {
       max_pi: carRuleMode === 'anything_goes' ? maxPi : undefined,
       additional_car_restrictions:
         carRuleMode === 'anything_goes' ? additionalCarRestrictions.trim() || null : null,
-      lobby_leader_gamertag: lobbyLeaderIsHost
-        ? (user.xboxGamertag?.trim() || lobbyLeaderGamertag.trim())
-        : lobbyLeaderGamertag.trim(),
-      lobby_leader_is_host: lobbyLeaderIsHost,
-      lobby_leader_discord_id: lobbyLeaderIsHost ? null : lobbyLeaderDiscordId,
-      lobby_leader_username: lobbyLeaderIsHost
-        ? null
-        : lobbyLeaderUsername.trim() || null,
+      ...leaderFields,
       voice_policy: 'optional' as const,
       cars:
         carRuleMode === 'restricted_list'

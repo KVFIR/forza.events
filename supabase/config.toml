@@ -50,6 +50,9 @@ verify_jwt = false
 [functions.add-group]
 verify_jwt = false
 
+[functions.change-group-leader]
+verify_jwt = false
+
 [functions.submit-results]
 verify_jwt = false
 

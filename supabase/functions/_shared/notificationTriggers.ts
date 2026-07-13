@@ -101,6 +101,22 @@ export async function enqueueConvoyLeaderChanged(
   await enqueueNotifications(supabase, rows);
 }
 
+export async function enqueueConvoyLeaderAssigned(
+  supabase: ReturnType<typeof adminClient>,
+  event: Pick<EventNotifyRow, 'id' | 'title'>,
+  groupIndex: number,
+  leaderDiscordId: string,
+  leaderGamertag: string,
+): Promise<void> {
+  await enqueueNotifications(supabase, [{
+    kind: 'convoy_leader_assigned',
+    event_id: event.id,
+    recipient_discord_id: leaderDiscordId,
+    dedupe_key: `assigned:${event.id}:${groupIndex}:${leaderDiscordId}:${leaderGamertag}`,
+    payload: {eventTitle: event.title, groupIndex},
+  }]);
+}
+
 export async function enqueueWaitlistSeatOpened(
   supabase: ReturnType<typeof adminClient>,
   event: EventNotifyRow,

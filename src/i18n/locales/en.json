@@ -199,6 +199,16 @@
     "pickLeader": "Pick a convoy leader for the new group.",
     "gamertagRequired": "This leader needs an Xbox gamertag."
   },
+  "changeGroupLeader": {
+    "button": "Change leader",
+    "title": "Change convoy leader — Group {{n}}",
+    "description": "Pick a new convoy leader for this group. Racers from the waitlist, other groups (not convoy leaders), or you (if not already a convoy leader) can be chosen.",
+    "leaderCandidates": "Suggested leaders",
+    "confirm": "Save",
+    "pickLeader": "Pick a convoy leader for this group.",
+    "gamertagRequired": "This leader needs an Xbox gamertag.",
+    "guildSearchDisabled": "This group is full — pick a driver from the list above."
+  },
   "statusBanner": {
     "draftTitle": "Draft",
     "draftBody": "Only you can see this event until you publish it.",

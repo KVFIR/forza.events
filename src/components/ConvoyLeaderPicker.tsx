@@ -49,6 +49,8 @@ type Props = {
   allowHostCandidate?: boolean;
   /** Active convoy leaders blocked from guild search (Add group flow). */
   excludeDiscordIds?: readonly string[];
+  /** Hide guild search when only in-group driver swaps are valid (change-leader, full group). */
+  disableGuildSearch?: boolean;
 };
 
 export function ConvoyLeaderPicker({
@@ -66,6 +68,7 @@ export function ConvoyLeaderPicker({
   candidatesLabel,
   allowHostCandidate = false,
   excludeDiscordIds = [],
+  disableGuildSearch = false,
 }: Props) {
   const {t} = useTranslation();
   const excludedIds = useMemo(
@@ -205,62 +208,68 @@ export function ConvoyLeaderPicker({
                   </ul>
                 </div>
               )}
-              <Input
-                id="create-convoyLeaderSearch"
-                placeholder={t('create.convoyLeaderSearchPlaceholder')}
-                value={query}
-                onChange={(e) => setQuery(e.target.value)}
-                invalid={invalid}
-                autoComplete="off"
-              />
-              {searchError && (
-                <Alert variant="warning">{searchError}</Alert>
-              )}
-              {searching && (
-                <p className="text-xs text-muted">{t('create.convoyLeaderSearching')}</p>
-              )}
-              {!searching && query.trim().length >= 2 && hits.length === 0 && !searchError && (
-                <p className="text-xs text-muted">{t('create.convoyLeaderNoResults')}</p>
-              )}
-              {hits.length > 0 && (
-                <ul
-                  className="max-h-40 overflow-y-auto rounded-lg border border-white/[0.08] bg-card"
-                  role="listbox"
-                >
-                  {hits.map((m) => (
-                    <li key={m.discord_id}>
-                      <button
-                        type="button"
-                        role="option"
-                        className="flex w-full items-center gap-2 px-3 py-2 text-left text-sm text-slate-200 hover:bg-white/[0.06]"
-                        onClick={() => {
-                          const tag = m.xbox_gamertag?.trim() ?? '';
-                          onSelect({
-                            discordId: m.discord_id,
-                            username: m.username,
-                            xboxGamertag: m.xbox_gamertag,
-                          });
-                          onGamertagChange(tag);
-                          setQuery('');
-                          setHits([]);
-                        }}
-                      >
-                        <UserAvatar
-                          src={m.avatar_url}
-                          name={m.username}
-                          size="sm"
-                          variant="neutral"
-                        />
-                        <span className="min-w-0 flex-1 truncate">
-                          <span className="font-medium">{formatDiscordHandle(m.username)}</span>
-                          {m.xbox_gamertag && (
-                            <span className="ml-1 text-xs text-muted">{m.xbox_gamertag}</span>
-                          )}
-                        </span>
-                      </button>
-                    </li>
-                  ))}
-                </ul>
+              {disableGuildSearch ? (
+                <p className="text-xs text-muted">{t('changeGroupLeader.guildSearchDisabled')}</p>
+              ) : (
+                <>
+                  <Input
+                    id="create-convoyLeaderSearch"
+                    placeholder={t('create.convoyLeaderSearchPlaceholder')}
+                    value={query}
+                    onChange={(e) => setQuery(e.target.value)}
+                    invalid={invalid}
+                    autoComplete="off"
+                  />
+                  {searchError && (
+                    <Alert variant="warning">{searchError}</Alert>
+                  )}
+                  {searching && (
+                    <p className="text-xs text-muted">{t('create.convoyLeaderSearching')}</p>
+                  )}
+                  {!searching && query.trim().length >= 2 && hits.length === 0 && !searchError && (
+                    <p className="text-xs text-muted">{t('create.convoyLeaderNoResults')}</p>
+                  )}
+                  {hits.length > 0 && (
+                    <ul
+                      className="max-h-40 overflow-y-auto rounded-lg border border-white/[0.08] bg-card"
+                      role="listbox"
+                    >
+                      {hits.map((m) => (
+                        <li key={m.discord_id}>
+                          <button
+                            type="button"
+                            role="option"
+                            className="flex w-full items-center gap-2 px-3 py-2 text-left text-sm text-slate-200 hover:bg-white/[0.06]"
+                            onClick={() => {
+                              const tag = m.xbox_gamertag?.trim() ?? '';
+                              onSelect({
+                                discordId: m.discord_id,
+                                username: m.username,
+                                xboxGamertag: m.xbox_gamertag,
+                              });
+                              onGamertagChange(tag);
+                              setQuery('');
+                              setHits([]);
+                            }}
+                          >
+                            <UserAvatar
+                              src={m.avatar_url}
+                              name={m.username}
+                              size="sm"
+                              variant="neutral"
+                            />
+                            <span className="min-w-0 flex-1 truncate">
+                              <span className="font-medium">{formatDiscordHandle(m.username)}</span>
+                              {m.xbox_gamertag && (
+                                <span className="ml-1 text-xs text-muted">{m.xbox_gamertag}</span>
+                              )}
+                            </span>
+                          </button>
+                        </li>
+                      ))}
+                    </ul>
+                  )}
+                </>
               )}
             </>
           )}

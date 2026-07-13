@@ -10,6 +10,7 @@ export type GroupMemberRow = {
 
 export type NewGroupLeaderRow = {
   discord_id?: string;
+  group_index?: number | null;
   is_convoy_leader?: boolean | null;
   waitlisted?: boolean | null;
 };
@@ -36,6 +37,28 @@ export function isHostDenormalizedConvoyLeader(projection: HostLeaderProjection)
   if (projection.lobbyLeaderIsHost === false) return false;
   const leaderId = projection.lobbyLeaderDiscordId?.trim() || projection.hostDiscordId;
   return leaderId === projection.hostDiscordId;
+}
+
+/** Active convoy leader discord id for a group (group 1 falls back to denormalized host fields). */
+export function resolveActiveGroupLeaderId(
+  roster: NewGroupLeaderRow[],
+  groupIndex: number,
+  hostProjection?: HostLeaderProjection,
+): string | null {
+  const row = roster.find(
+    (r) =>
+      r.discord_id &&
+      isActiveConvoyLeaderRow(r) &&
+      (r.group_index ?? 1) === groupIndex,
+  );
+  if (row?.discord_id) return row.discord_id;
+  if (groupIndex !== 1 || !hostProjection) return null;
+  const gt = hostProjection.lobbyLeaderGamertag?.trim();
+  if (!gt) return null;
+  if (hostProjection.lobbyLeaderIsHost === false) {
+    return hostProjection.lobbyLeaderDiscordId?.trim() ?? null;
+  }
+  return hostProjection.lobbyLeaderDiscordId?.trim() || hostProjection.hostDiscordId;
 }
 
 /** Host-assigned leader for a new group: waitlist, guild member, active non-leader, or host without a leader row. */

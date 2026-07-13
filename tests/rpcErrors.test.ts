@@ -31,6 +31,9 @@ describe('parseRpcExceptionCode', () => {
       API_ERROR_CODES.LEADER_ALREADY_CONVOY_LEADER,
     );
     expect(parseRpcExceptionCode('INVALID_GROUP_INDEX')).toBe(API_ERROR_CODES.BAD_REQUEST);
+    expect(parseRpcExceptionCode('REGISTRATION_AFTER_START')).toBe(
+      API_ERROR_CODES.REGISTRATION_AFTER_START,
+    );
   });
 
   it('returns null for unknown messages', () => {

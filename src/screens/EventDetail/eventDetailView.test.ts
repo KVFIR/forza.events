@@ -202,6 +202,31 @@ describe('buildEventDetailViewModel', () => {
     expect(view.waitlistCount).toBe(1);
   });
 
+  it('lets the host change convoy leaders on a published event before start', () => {
+    const event = baseEvent({
+      hostDiscordId: 'viewer-1',
+      discordMessageId: 'msg-1',
+      participants: [
+        participant({discordId: 'viewer-1', gamertag: 'HostGT', isConvoyLeader: true}),
+      ],
+    });
+    const view = buildView({event, displayEvent: event});
+    expect(view.canChangeGroupLeader).toBe(true);
+  });
+
+  it('blocks convoy leader changes after the event starts', () => {
+    const event = baseEvent({
+      hostDiscordId: 'viewer-1',
+      discordMessageId: 'msg-1',
+      startsAt: new Date(Date.now() - 60_000).toISOString(),
+      participants: [
+        participant({discordId: 'viewer-1', gamertag: 'HostGT', isConvoyLeader: true}),
+      ],
+    });
+    const view = buildView({event, displayEvent: event});
+    expect(view.canChangeGroupLeader).toBe(false);
+  });
+
   it('prompts browser sign-in for guests on forza.events', () => {
     const win: {location: {hostname: string; pathname: string}; parent: unknown} = {
       location: {hostname: 'forza.events', pathname: '/event/ev-1'},

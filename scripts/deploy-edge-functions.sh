@@ -17,6 +17,7 @@ FUNCTIONS=(
   save-event
   event-participation
   add-group
+  change-group-leader
   submit-results
   user-profile
   launch-intent

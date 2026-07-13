@@ -52,6 +52,7 @@ npx supabase migration repair --linked --status applied 006 --yes
 | `017_discord_notifications.sql` | DM notification outbox, user prefs (`dm_notifications_enabled`, `notification_locale`); `leave_event_participant` returns `promoted_discord_id` |
 | `018_add_group_without_waitlist.sql` | `add_event_group`: allow add group when every active group is full, without requiring waitlist |
 | `019_notification_outbox_claim.sql` | Outbox `processing` status + `claim_notification_outbox_batch` (`FOR UPDATE SKIP LOCKED`) |
+| `020_change_event_group_leader.sql` | `change_event_group_leader` RPC — host reassigns convoy leader per group (published, before start) |
 
 Seeds are **not** included in the migration. Run separately after `db push`:
 
@@ -62,7 +63,7 @@ npm run seed:events   # sample events (dev only)
 
 ## Edge Functions
 
-**16 functions** — canonical list in [`scripts/deploy-edge-functions.sh`](../scripts/deploy-edge-functions.sh). Deploy all:
+**18 functions** — canonical list in [`scripts/deploy-edge-functions.sh`](../scripts/deploy-edge-functions.sh). Deploy all:
 
 ```bash
 npm run deploy:functions
@@ -81,6 +82,7 @@ npm run deploy:functions
 | `save-event` | Discord token | CRUD draft / edit / cancel |
 | `event-participation` | Discord token | Join (first open group / waitlist) / leave (auto-promote queue) |
 | `add-group` | Discord token | Host adds a lobby group (leader + auto-fill from waitlist) |
+| `change-group-leader` | Discord token | Host reassigns convoy leader for a published group (before start) |
 | `submit-results` | Discord token | Results + complete |
 | `user-profile` | Discord token | Profile updates |
 | `launch-intent` | Discord token | Embed deep-link fallback |

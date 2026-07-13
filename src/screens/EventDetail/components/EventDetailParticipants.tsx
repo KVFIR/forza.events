@@ -2,15 +2,19 @@ import {useLayoutEffect, useRef, useState} from 'react';
 import {useTranslation} from 'react-i18next';
 import {ParticipantDisplayNames} from '../../../components/ParticipantDisplayNames';
 import {UserAvatar} from '../../../components/UserAvatar';
+import {TextButton} from '../../../components/ui/TextButton';
 import {formatLobbyCount} from '../../../lib/constants';
 import type {EventParticipant} from '../../../lib/types';
 import type {RosterConvoyLeader, RosterGroup} from '../../../lib/eventRoster';
 import type {EventDetailViewModel} from '../eventDetailView';
+import {EventDetailChangeGroupLeader} from './EventDetailChangeGroupLeader';
 import {cn} from '../../../lib/cn';
 
 type Props = {
-  view: Pick<EventDetailViewModel, 'ev' | 'groups' | 'waitlist'>;
+  view: Pick<EventDetailViewModel, 'ev' | 'groups' | 'waitlist' | 'canChangeGroupLeader'>;
   viewerDiscordId: string;
+  accessToken: string | null;
+  onLeaderChanged: () => void;
 };
 
 function SeatNumber({n}: {n: number}) {
@@ -134,10 +138,16 @@ function DriverCard({
   );
 }
 
-export function EventDetailParticipants({view, viewerDiscordId}: Props) {
+export function EventDetailParticipants({
+  view,
+  viewerDiscordId,
+  accessToken,
+  onLeaderChanged,
+}: Props) {
   const {t} = useTranslation();
-  const {ev, groups, waitlist} = view;
+  const {ev, groups, waitlist, canChangeGroupLeader} = view;
   const multiGroup = groups.length > 1;
+  const [changingGroupIndex, setChangingGroupIndex] = useState<number | null>(null);
 
   function groupCount(group: RosterGroup): number {
     return ev.participants.filter(
@@ -152,14 +162,29 @@ export function EventDetailParticipants({view, viewerDiscordId}: Props) {
       <div className="space-y-4">
         {groups.map((group) => (
           <div key={group.groupIndex} className="space-y-2">
-            {multiGroup ? (
-              <div className="flex items-center justify-between">
-                <p className="text-xs font-bold uppercase tracking-widest text-muted">
-                  {t('eventDetail.group', {n: group.groupIndex})}
-                </p>
-                <span className="text-xs tabular-nums text-muted">
-                  {formatLobbyCount(groupCount(group), ev.maxPlayers)}
-                </span>
+            {multiGroup || canChangeGroupLeader ? (
+              <div className="flex items-center justify-between gap-2">
+                {multiGroup ? (
+                  <p className="text-xs font-bold uppercase tracking-widest text-muted">
+                    {t('eventDetail.group', {n: group.groupIndex})}
+                  </p>
+                ) : (
+                  <span />
+                )}
+                <div className="ml-auto flex items-center gap-3">
+                  <span className="text-xs tabular-nums text-muted">
+                    {formatLobbyCount(groupCount(group), ev.maxPlayers)}
+                  </span>
+                  {canChangeGroupLeader && accessToken ? (
+                    <TextButton
+                      type="button"
+                      className="text-xs"
+                      onClick={() => setChangingGroupIndex(group.groupIndex)}
+                    >
+                      {t('changeGroupLeader.button')}
+                    </TextButton>
+                  ) : null}
+                </div>
               </div>
             ) : null}
 
@@ -224,6 +249,18 @@ export function EventDetailParticipants({view, viewerDiscordId}: Props) {
           </div>
         ) : null}
       </div>
+
+      {changingGroupIndex != null && accessToken ? (
+        <EventDetailChangeGroupLeader
+          event={ev}
+          waitlist={waitlist}
+          groupIndex={changingGroupIndex}
+          accessToken={accessToken}
+          open
+          onClose={() => setChangingGroupIndex(null)}
+          onChanged={onLeaderChanged}
+        />
+      ) : null}
     </div>
   );
 }

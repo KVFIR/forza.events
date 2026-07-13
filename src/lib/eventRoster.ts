@@ -183,6 +183,41 @@ export function hostCanLeadNewGroup(
   return leaderId !== event.hostDiscordId;
 }
 
+/** Free seat after swap when host-assigned leader row is removed; self_join demote keeps count. */
+export function groupHasSeatForIncomingLeader(
+  event: Pick<ForzaEvent, 'participants' | 'maxPlayers'>,
+  groupIndex: number,
+): boolean {
+  const inGroup = event.participants.filter(
+    (p) => !p.waitlisted && (p.groupIndex ?? 1) === groupIndex,
+  );
+  let count = inGroup.length;
+  const leader = inGroup.find((p) => p.isConvoyLeader);
+  if (leader && leader.participationSource !== 'self_join') {
+    count -= 1;
+  }
+  return count < event.maxPlayers;
+}
+
+/** Change-leader picker: same pool as add-group, minus waitlist / outsiders when the group has no seat. */
+export function buildChangeGroupLeaderCandidates(
+  event: Pick<
+    ForzaEvent,
+    'hostDiscordId' | 'hostUsername' | 'hostAvatarUrl' | 'participants' | 'maxPlayers'
+  >,
+  waitlist: EventParticipant[],
+  groupIndex: number,
+): AddGroupLeaderCandidate[] {
+  const hasSeat = groupHasSeatForIncomingLeader(event, groupIndex);
+  return buildAddGroupLeaderCandidates(event, waitlist).filter((c) => {
+    const row = event.participants.find((p) => p.discordId === c.discordId);
+    if (row && !row.waitlisted && (row.groupIndex ?? 1) === groupIndex) {
+      return true;
+    }
+    return hasSeat;
+  });
+}
+
 /** Quick-pick list for Add group: waitlist, active non-leaders, then host when eligible. */
 export function buildAddGroupLeaderCandidates(
   event: Pick<

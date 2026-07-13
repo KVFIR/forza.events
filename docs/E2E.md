@@ -136,6 +136,19 @@ Manual QA matrix aligned with current code behavior (not an abstract checklist).
 | `group_count = 5` | Add group hidden (`GROUPS_MAXED` if forced); total capacity 60 |
 | Open seat in any active group | Add group hidden (`LOBBY_NOT_FULL` if forced) |
 
+### Change convoy leader (published, host)
+
+| Condition | Expected |
+|-----------|----------|
+| Host, before `starts_at` | **Change leader** in each group header (`n/12` row); not in published **Edit** |
+| Single group | Same **Change leader** control (no “Group 1” label required) |
+| Pick another driver in the same full group | Swap leader ↔ driver; roster count unchanged |
+| Full group, `self_join` leader | Waitlist / guild outsiders hidden; guild search disabled; only in-group drivers in quick-pick |
+| Full group, `host_assigned` leader removed | Free seat → waitlist or guild pick allowed; embed + `convoy_leader_changed` DMs to group racers |
+| New leader assigned | Leader gets **convoy leader assigned** DM (transactional); racers get **convoy leader changed** |
+| Same leader picked again | `unchanged: true`; no DMs, no embed churn |
+| After `starts_at` | **Change leader** hidden; API `REGISTRATION_AFTER_START` |
+
 ### Display
 
 - [ ] Hero cover (16:9 band); default by event type.

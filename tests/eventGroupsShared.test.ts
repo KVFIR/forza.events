@@ -3,6 +3,7 @@ import {
   canPickAsNewGroupLeader,
   isActiveConvoyLeaderRow,
   isHostDenormalizedConvoyLeader,
+  resolveActiveGroupLeaderId,
   resolveAddGroupParticipationSource,
 } from '../supabase/functions/_shared/eventGroups.ts';
 
@@ -65,6 +66,25 @@ describe('canPickAsNewGroupLeader', () => {
 
   it('rejects host when denormalized as group-1 convoy leader without a row', () => {
     expect(canPickAsNewGroupLeader(roster, 'host-1', hostProjection)).toBe(false);
+  });
+});
+
+describe('resolveActiveGroupLeaderId', () => {
+  it('reads the active leader row for a group', () => {
+    const roster = [
+      {discord_id: 'g2-leader', group_index: 2, is_convoy_leader: true, waitlisted: false},
+    ];
+    expect(resolveActiveGroupLeaderId(roster, 2)).toBe('g2-leader');
+  });
+
+  it('falls back to denormalized group-1 host leader', () => {
+    expect(
+      resolveActiveGroupLeaderId([], 1, {
+        hostDiscordId: 'host-1',
+        lobbyLeaderGamertag: 'HostGT',
+        lobbyLeaderIsHost: true,
+      }),
+    ).toBe('host-1');
   });
 });
 

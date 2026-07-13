@@ -60,6 +60,7 @@ export type EventDetailViewModel = {
   waitlistCount: number;
   totalCapacity: number;
   canAddGroup: boolean;
+  canChangeGroupLeader: boolean;
   onWaitlist: boolean;
   willWaitlist: boolean;
   showResultsSection: boolean;
@@ -204,6 +205,7 @@ export function buildEventDetailViewModel(input: {
     waitlistCount: waitlistCount(ev),
     totalCapacity: capacity,
     canAddGroup: canAddGroup(ev, user),
+    canChangeGroupLeader: isHost && canEdit && !isDraft,
     onWaitlist,
     willWaitlist,
     showResultsSection,

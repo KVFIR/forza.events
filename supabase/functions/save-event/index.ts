@@ -22,7 +22,7 @@ import {resolveSaveCoverUrl} from '../_shared/eventCovers.ts';
 import {slugify} from '../_shared/events.ts';
 import {normalizeGuildName} from '../_shared/guildDisplay.ts';
 import {resolveLobbyLeaderFields} from '../_shared/lobbyLeader.ts';
-import {ensureConvoyLeaderParticipantForEvent} from '../_shared/participantLeader.ts';
+import {ensureConvoyLeaderParticipantForEvent, leaderFromEventRow} from '../_shared/participantLeader.ts';
 import {PI_MAX} from '../_shared/pi.ts';
 import {rateLimitMutation} from '../_shared/rateLimitPresets.ts';
 import {adminClient} from '../_shared/supabase.ts';
@@ -204,9 +204,21 @@ serve(async (req) => {
       if (lockErr) return appErrorResponse(req, 400, lockErr);
     }
 
-    const lobbyResolved = await resolveLobbyLeaderFields(body, discordUser.id, supabase, {
-      guildId: body.guild_id ?? existing?.guild_id,
-    });
+    const isPublishedEdit = Boolean(existing && isPublishedStatus(existing.status));
+
+    let lobbyResolved = isPublishedEdit && existing
+      ? leaderFromEventRow({
+        host_discord_id: discordUser.id,
+        lobby_leader_discord_id: existing.lobby_leader_discord_id,
+        lobby_leader_is_host: existing.lobby_leader_is_host,
+        lobby_leader_gamertag: existing.lobby_leader_gamertag,
+      })
+      : await resolveLobbyLeaderFields(body, discordUser.id, supabase, {
+        guildId: body.guild_id ?? existing?.guild_id,
+      });
+    if (!lobbyResolved) {
+      return appErrorResponse(req, 400, VALIDATION_CODES.CONVOY_LEADER_REQUIRED);
+    }
     if (typeof lobbyResolved === 'string') {
       return appErrorResponse(req, 400, lobbyResolved);
     }
@@ -251,22 +263,24 @@ serve(async (req) => {
         .select('*')
         .single();
       if (error) return databaseErrorResponse(req, 'save-event update', error);
-      await ensureConvoyLeaderParticipantForEvent(
-        supabase,
-        {
-          id: eventId,
-          host_discord_id: discordUser.id,
-          lobby_leader_discord_id: lobbyResolved.lobby_leader_discord_id,
-          lobby_leader_is_host: lobbyResolved.lobby_leader_is_host,
-          lobby_leader_gamertag: lobbyResolved.lobby_leader_gamertag,
-        },
-        lobbyResolved.lobby_leader_is_host
-          ? undefined
-          : {
-              username: body.lobby_leader_username,
-              avatar_url: body.lobby_leader_avatar_url,
-            },
-      );
+      if (!isPublishedEdit) {
+        await ensureConvoyLeaderParticipantForEvent(
+          supabase,
+          {
+            id: eventId,
+            host_discord_id: discordUser.id,
+            lobby_leader_discord_id: lobbyResolved.lobby_leader_discord_id,
+            lobby_leader_is_host: lobbyResolved.lobby_leader_is_host,
+            lobby_leader_gamertag: lobbyResolved.lobby_leader_gamertag,
+          },
+          lobbyResolved.lobby_leader_is_host
+            ? undefined
+            : {
+                username: body.lobby_leader_username,
+                avatar_url: body.lobby_leader_avatar_url,
+              },
+        );
+      }
       const carErr = await persistEventCars(supabase, eventId, resolvedCars);
       if (carErr) return appErrorResponse(req, 400, carErr);
       if (isPublishedStatus(data.status)) {
@@ -296,9 +310,11 @@ serve(async (req) => {
             timezone: data.timezone_hint,
           };
 
-          const leaderChanged = existing.lobby_leader_discord_id !== lobbyResolved.lobby_leader_discord_id ||
+          const leaderChanged = !isPublishedEdit && (
+            existing.lobby_leader_discord_id !== lobbyResolved.lobby_leader_discord_id ||
             existing.lobby_leader_is_host !== lobbyResolved.lobby_leader_is_host ||
-            (existing.lobby_leader_gamertag ?? '').trim() !== lobbyResolved.lobby_leader_gamertag.trim();
+            (existing.lobby_leader_gamertag ?? '').trim() !== lobbyResolved.lobby_leader_gamertag.trim()
+          );
 
           if (leaderChanged) {
             await enqueueConvoyLeaderChanged(

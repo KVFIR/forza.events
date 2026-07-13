@@ -266,7 +266,12 @@ export function EventDetail() {
 
       <EventDetailDescription description={event.description ?? ''} />
 
-      <EventDetailParticipants view={view} viewerDiscordId={user.discordId} />
+      <EventDetailParticipants
+        view={view}
+        viewerDiscordId={user.discordId}
+        accessToken={discordToken}
+        onLeaderChanged={syncEventFromServer}
+      />
 
       <EventDetailAddGroup
         event={event}

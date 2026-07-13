@@ -5,7 +5,6 @@ import {ConfirmDialog} from '../../components/ui/ConfirmDialog';
 import {PublishTargetModal} from '../../components/PublishTargetPicker';
 import {FormAlerts, StepIndicator} from './components/StepIndicator';
 import {PublishedTargetSummary} from './components/PublishedTargetSummary';
-import {CreateEventConvoySection} from './components/CreateEventConvoySection';
 import {PUBLISH_STEP_INDEX} from './constants';
 import {useEffect, useRef, useState} from 'react';
 import {useCreateEventForm} from './useCreateEventForm';
@@ -250,7 +249,6 @@ export function CreateEvent() {
             guildName={values.targetGuildName}
             hasChannel={Boolean(values.targetChannelId)}
           />
-          {token ? <CreateEventConvoySection {...convoySectionProps} /> : null}
         </div>
       ) : step === 0 ? (
         <EventStep {...eventStepProps} />

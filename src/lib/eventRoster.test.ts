@@ -1,6 +1,8 @@
 import {describe, expect, it} from 'vitest';
 import {
   buildAddGroupLeaderCandidates,
+  buildChangeGroupLeaderCandidates,
+  groupHasSeatForIncomingLeader,
   hostCanLeadNewGroup,
   resolveConvoyLeader,
   resolveRegisteredDrivers,
@@ -268,5 +270,76 @@ describe('buildAddGroupLeaderCandidates', () => {
     });
     expect(hostCanLeadNewGroup(ev)).toBe(false);
     expect(buildAddGroupLeaderCandidates(ev, []).map((c) => c.discordId)).toEqual([]);
+  });
+});
+
+describe('groupHasSeatForIncomingLeader', () => {
+  it('is false when group is full and the current leader will stay as a driver', () => {
+    const drivers = Array.from({length: 11}, (_, i) =>
+      participant({discordId: `d${i}`, gamertag: `GT${i}`, groupIndex: 1}),
+    );
+    const ev = event({
+      hostDiscordId: 'host-1',
+      participants: [
+        participant({
+          discordId: 'leader-1',
+          gamertag: 'Leader',
+          isConvoyLeader: true,
+          groupIndex: 1,
+          participationSource: 'self_join',
+        }),
+        ...drivers,
+      ],
+    });
+    expect(groupHasSeatForIncomingLeader(ev, 1)).toBe(false);
+  });
+
+  it('is true when a host-assigned leader row will be removed', () => {
+    const drivers = Array.from({length: 11}, (_, i) =>
+      participant({discordId: `d${i}`, gamertag: `GT${i}`, groupIndex: 1}),
+    );
+    const ev = event({
+      hostDiscordId: 'host-1',
+      participants: [
+        participant({
+          discordId: 'leader-1',
+          gamertag: 'Leader',
+          isConvoyLeader: true,
+          groupIndex: 1,
+          participationSource: 'host_assigned',
+        }),
+        ...drivers,
+      ],
+    });
+    expect(groupHasSeatForIncomingLeader(ev, 1)).toBe(true);
+  });
+});
+
+describe('buildChangeGroupLeaderCandidates', () => {
+  it('drops waitlist when the group has no seat for an incoming leader', () => {
+    const drivers = Array.from({length: 11}, (_, i) =>
+      participant({discordId: `d${i}`, gamertag: `GT${i}`, groupIndex: 1}),
+    );
+    const ev = event({
+      hostDiscordId: 'host-1',
+      participants: [
+        participant({
+          discordId: 'leader-1',
+          gamertag: 'Leader',
+          isConvoyLeader: true,
+          groupIndex: 1,
+          participationSource: 'self_join',
+        }),
+        ...drivers,
+        participant({discordId: 'queued-1', gamertag: 'Q1', waitlisted: true}),
+      ],
+    });
+    const ids = buildChangeGroupLeaderCandidates(
+      ev,
+      resolveWaitlist(ev.participants),
+      1,
+    ).map((c) => c.discordId);
+    expect(ids).not.toContain('queued-1');
+    expect(ids).toContain('d0');
   });
 });

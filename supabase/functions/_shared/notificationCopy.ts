@@ -3,6 +3,7 @@ export type NotificationLocale = 'en' | 'ru';
 export type NotificationKind =
   | 'event_cancelled'
   | 'convoy_leader_changed'
+  | 'convoy_leader_assigned'
   | 'waitlist_seat_opened'
   | 'waitlist_new_group'
   | 'waitlist_new_group_leader'
@@ -17,6 +18,7 @@ export const WAITLIST_NOTIFICATION_KINDS = new Set<NotificationKind>([
   'waitlist_seat_opened',
   'waitlist_new_group',
   'waitlist_new_group_leader',
+  'convoy_leader_assigned',
 ]);
 
 type CopyParams = Record<string, string | number | undefined | null>;
@@ -71,6 +73,16 @@ const COPY: Record<NotificationKind, Record<NotificationLocale, CopyBuilder>> = 
           value: `${str(p.leaderGamertag)}${str(p.leaderHandle) ? ` (@${str(p.leaderHandle)})` : ''}`,
         },
       ],
+    }),
+  },
+  convoy_leader_assigned: {
+    en: (p) => ({
+      title: "You're the convoy leader",
+      description: `The host assigned you as **convoy leader** for **Group ${str(p.groupIndex)}** in **${str(p.eventTitle)}**.`,
+    }),
+    ru: (p) => ({
+      title: 'Вы лидер конвоя',
+      description: `Организатор назначил вас **лидером конвоя** **группы ${str(p.groupIndex)}** в **${str(p.eventTitle)}**.`,
     }),
   },
   waitlist_seat_opened: {

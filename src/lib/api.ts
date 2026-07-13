@@ -302,6 +302,26 @@ export async function addGroup(
   );
 }
 
+export async function changeGroupLeader(
+  discordToken: string,
+  eventId: string,
+  groupIndex: number,
+  leader: AddGroupLeader,
+) {
+  return invoke<{ok: boolean; group_index: number}>(
+    'change-group-leader',
+    {
+      event_id: eventId,
+      group_index: groupIndex,
+      leader_discord_id: leader.discordId,
+      leader_gamertag: leader.gamertag,
+      leader_username: leader.username,
+      leader_avatar_url: leader.avatarUrl,
+    },
+    discordToken,
+  );
+}
+
 export type SubmitResultEntry = {
   discord_id: string;
   position: number | null;
