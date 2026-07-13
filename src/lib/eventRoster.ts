@@ -150,6 +150,87 @@ export function resolveWaitlist(participants: EventParticipant[]): EventParticip
   return sortParticipantsByJoinedAt(participants.filter((p) => p.waitlisted));
 }
 
+export type AddGroupLeaderCandidate = {
+  discordId: string;
+  username: string;
+  gamertag: string | null;
+  avatarUrl?: string | null;
+};
+
+/** Host is eligible when they are not an active convoy leader in any group. */
+export function hostCanLeadNewGroup(
+  event: Pick<
+    ForzaEvent,
+    | 'hostDiscordId'
+    | 'participants'
+    | 'lobbyLeaderGamertag'
+    | 'lobbyLeaderDiscordId'
+    | 'lobbyLeaderIsHost'
+  >,
+): boolean {
+  if (!event.hostDiscordId) return false;
+  if (
+    event.participants.some(
+      (p) =>
+        p.discordId === event.hostDiscordId && p.isConvoyLeader && !p.waitlisted,
+    )
+  ) {
+    return false;
+  }
+  const gt = event.lobbyLeaderGamertag?.trim();
+  if (!gt || event.lobbyLeaderIsHost === false) return true;
+  const leaderId = event.lobbyLeaderDiscordId?.trim() || event.hostDiscordId;
+  return leaderId !== event.hostDiscordId;
+}
+
+/** Quick-pick list for Add group: waitlist, active non-leaders, then host when eligible. */
+export function buildAddGroupLeaderCandidates(
+  event: Pick<
+    ForzaEvent,
+    'hostDiscordId' | 'hostUsername' | 'hostAvatarUrl' | 'participants'
+  >,
+  waitlist: EventParticipant[],
+): AddGroupLeaderCandidate[] {
+  const seen = new Set<string>();
+  const out: AddGroupLeaderCandidate[] = [];
+  const push = (candidate: AddGroupLeaderCandidate) => {
+    if (seen.has(candidate.discordId)) return;
+    seen.add(candidate.discordId);
+    out.push(candidate);
+  };
+
+  for (const p of waitlist) {
+    push({
+      discordId: p.discordId,
+      username: p.username,
+      gamertag: p.gamertag ?? null,
+      avatarUrl: p.avatarUrl,
+    });
+  }
+
+  for (const p of sortParticipantsByJoinedAt(
+    event.participants.filter((row) => !row.waitlisted && !row.isConvoyLeader),
+  )) {
+    push({
+      discordId: p.discordId,
+      username: p.username,
+      gamertag: p.gamertag ?? null,
+      avatarUrl: p.avatarUrl,
+    });
+  }
+
+  if (hostCanLeadNewGroup(event)) {
+    push({
+      discordId: event.hostDiscordId,
+      username: event.hostUsername,
+      gamertag: null,
+      avatarUrl: event.hostAvatarUrl,
+    });
+  }
+
+  return out;
+}
+
 /** All participants eligible for results (one row per racer; waitlisted never raced). */
 export function resolveResultsRoster(
   event: Pick<ForzaEvent, 'participants'>,

@@ -72,6 +72,7 @@ export type EventDetailViewModel = {
   isCurrentConvoyLeader: boolean;
   participationDisabled: boolean;
   showJoinXboxHint: boolean;
+  showConvoyLeaderXboxHint: boolean;
 };
 
 export function buildEventDetailViewModel(input: {
@@ -169,6 +170,12 @@ export function buildEventDetailViewModel(input: {
     !started &&
     viewerConvoyLeader != null &&
     !viewerConvoyLeader.isYou;
+  const showConvoyLeaderXboxHint =
+    isCurrentConvoyLeader &&
+    !onWaitlist &&
+    !isDraft &&
+    !finalized &&
+    !started;
 
   return {
     ev,
@@ -209,5 +216,6 @@ export function buildEventDetailViewModel(input: {
     isCurrentConvoyLeader,
     participationDisabled,
     showJoinXboxHint,
+    showConvoyLeaderXboxHint,
   };
 }

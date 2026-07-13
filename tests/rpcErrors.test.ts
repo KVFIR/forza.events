@@ -27,6 +27,9 @@ describe('parseRpcExceptionCode', () => {
     expect(parseRpcExceptionCode('LEADER_CANNOT_LEAVE')).toBe(
       API_ERROR_CODES.LEADER_CANNOT_LEAVE,
     );
+    expect(parseRpcExceptionCode('LEADER_ALREADY_CONVOY_LEADER')).toBe(
+      API_ERROR_CODES.LEADER_ALREADY_CONVOY_LEADER,
+    );
     expect(parseRpcExceptionCode('INVALID_GROUP_INDEX')).toBe(API_ERROR_CODES.BAD_REQUEST);
   });
 

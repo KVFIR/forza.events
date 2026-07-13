@@ -6,7 +6,7 @@ import {fetchDiscordUserById, isUserMemberOfGuild, verifyDiscordToken} from '../
 import {ensureUserRowForDiscordId, resolveDiscordHandleForUserId} from '../_shared/discordUserRow.ts';
 import {syncPublishedEmbedByEventId} from '../_shared/embedSync.ts';
 import {eventHasStarted} from '../_shared/eventSpec.ts';
-import {firstOpenGroup} from '../_shared/eventGroups.ts';
+import {canPickAsNewGroupLeader, firstOpenGroup, resolveAddGroupParticipationSource} from '../_shared/eventGroups.ts';
 import {responseForRpcError} from '../_shared/rpcErrors.ts';
 import {validateGamertag} from '../_shared/gamertag.ts';
 import {rateLimitMutation} from '../_shared/rateLimitPresets.ts';
@@ -44,7 +44,9 @@ serve(async (req) => {
     const supabase = adminClient();
     const {data: event} = await supabase
       .from('events')
-      .select('host_discord_id, guild_id, status, starts_at, group_count, max_players')
+      .select(
+        'host_discord_id, guild_id, status, starts_at, group_count, max_players, lobby_leader_discord_id, lobby_leader_is_host, lobby_leader_gamertag',
+      )
       .eq('id', eventId)
       .single();
 
@@ -63,7 +65,9 @@ serve(async (req) => {
 
     const {data: roster} = await supabase
       .from('event_participants')
-      .select('discord_id, group_index, waitlisted, gamertag_snapshot')
+      .select(
+        'discord_id, group_index, waitlisted, is_convoy_leader, gamertag_snapshot, participation_source',
+      )
       .eq('event_id', eventId);
 
     const open = firstOpenGroup(roster ?? [], event.group_count ?? 1, event.max_players);
@@ -71,10 +75,18 @@ serve(async (req) => {
       return appErrorResponse(req, 400, API_ERROR_CODES.LOBBY_NOT_FULL);
     }
 
-    const existingLeaderRow = (roster ?? []).find((r) => r.discord_id === leaderId);
-    if (existingLeaderRow && !existingLeaderRow.waitlisted) {
-      return appErrorResponse(req, 400, API_ERROR_CODES.LEADER_ALREADY_IN_LOBBY);
+    if (
+      !canPickAsNewGroupLeader(roster ?? [], leaderId, {
+        hostDiscordId: event.host_discord_id,
+        lobbyLeaderGamertag: event.lobby_leader_gamertag,
+        lobbyLeaderDiscordId: event.lobby_leader_discord_id,
+        lobbyLeaderIsHost: event.lobby_leader_is_host,
+      })
+    ) {
+      return appErrorResponse(req, 400, API_ERROR_CODES.LEADER_ALREADY_CONVOY_LEADER);
     }
+
+    const existingLeaderRow = (roster ?? []).find((r) => r.discord_id === leaderId);
 
     let leaderGamertag = String(body.leader_gamertag ?? '').trim();
     if (!leaderGamertag) leaderGamertag = existingLeaderRow?.gamertag_snapshot?.trim() ?? '';
@@ -116,11 +128,17 @@ serve(async (req) => {
     const tag = validateGamertag(leaderGamertag);
     if (!tag.ok) return appErrorResponse(req, 400, VALIDATION_CODES.CONVOY_LEADER_REQUIRED);
 
+    const participationSource = resolveAddGroupParticipationSource(
+      leaderId,
+      event.host_discord_id,
+      existingLeaderRow?.participation_source,
+    );
+
     const {data: newGroup, error: rpcErr} = await supabase.rpc('add_event_group', {
       p_event_id: eventId,
       p_leader_discord_id: leaderId,
       p_leader_gamertag: tag.gamertag,
-      p_participation_source: 'host_assigned',
+      p_participation_source: participationSource,
     });
     if (rpcErr) return responseForRpcError(req, rpcErr);
 

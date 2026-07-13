@@ -139,6 +139,8 @@ describe('buildEventDetailViewModel', () => {
     });
     expect(view.isCurrentConvoyLeader).toBe(true);
     expect(view.participationDisabled).toBe(true);
+    expect(view.showConvoyLeaderXboxHint).toBe(true);
+    expect(view.showJoinXboxHint).toBe(false);
   });
 
   it('routes a fresh join to the waitlist when every group is full', () => {
@@ -279,5 +281,29 @@ describe('buildEventDetailViewModel', () => {
     });
     expect(view.viewerConvoyLeader?.gamertag).toBe('G2');
     expect(view.showJoinXboxHint).toBe(true);
+  });
+
+  it('shows Xbox hint for convoy leader in a multi-group lobby', () => {
+    const event = baseEvent({
+      discordMessageId: 'msg-1',
+      groupCount: 2,
+      participants: [
+        participant({discordId: 'g1-leader', gamertag: 'G1', isConvoyLeader: true, groupIndex: 1}),
+        participant({
+          discordId: 'viewer-1',
+          gamertag: 'ViewerTag',
+          isConvoyLeader: true,
+          groupIndex: 2,
+        }),
+      ],
+      currentPlayers: 2,
+    });
+    const view = buildView({
+      event,
+      displayEvent: event,
+      isJoined: () => false,
+    });
+    expect(view.showConvoyLeaderXboxHint).toBe(true);
+    expect(view.showJoinXboxHint).toBe(false);
   });
 });

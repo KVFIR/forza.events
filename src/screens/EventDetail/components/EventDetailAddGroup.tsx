@@ -3,12 +3,12 @@ import {useTranslation} from 'react-i18next';
 import {busyLabel} from '../../../i18n/busyLabels';
 import {addGroup} from '../../../lib/api';
 import {ApiRequestError} from '../../../lib/apiErrors';
+import {buildAddGroupLeaderCandidates} from '../../../lib/eventRoster';
 import {Button} from '../../../components/ui/Button';
 import {Alert} from '../../../components/ui/Alert';
 import {ModalBackdrop, ModalPanel} from '../../../components/ui/ModalShell';
 import {
   ConvoyLeaderPicker,
-  type ConvoyLeaderCandidate,
   type ConvoyLeaderSelection,
 } from '../../../components/ConvoyLeaderPicker';
 import type {EventDetailViewModel} from '../eventDetailView';
@@ -29,15 +29,17 @@ export function EventDetailAddGroup({event, view, accessToken, onAdded}: Props) 
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  const candidates = useMemo<ConvoyLeaderCandidate[]>(
+  const candidates = useMemo(
+    () => buildAddGroupLeaderCandidates(event, view.waitlist),
+    [event, view.waitlist],
+  );
+
+  const excludeDiscordIds = useMemo(
     () =>
-      view.waitlist.map((p) => ({
-        discordId: p.discordId,
-        username: p.username,
-        gamertag: p.gamertag ?? null,
-        avatarUrl: p.avatarUrl,
-      })),
-    [view.waitlist],
+      event.participants
+        .filter((p) => p.isConvoyLeader && !p.waitlisted)
+        .map((p) => p.discordId),
+    [event.participants],
   );
 
   if (!view.canAddGroup || !accessToken) return null;
@@ -108,7 +110,9 @@ export function EventDetailAddGroup({event, view, accessToken, onAdded}: Props) 
               onSelect={setSelected}
               onGamertagChange={setGamertag}
               candidates={candidates}
-              candidatesLabel={t('addGroup.waitlistCandidates')}
+              candidatesLabel={t('addGroup.leaderCandidates')}
+              allowHostCandidate
+              excludeDiscordIds={excludeDiscordIds}
             />
 
             {error ? (

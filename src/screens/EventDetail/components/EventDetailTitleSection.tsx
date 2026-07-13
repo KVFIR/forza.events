@@ -38,6 +38,7 @@ type Props = {
     | 'fillPct'
     | 'showRegistrationProgress'
     | 'showJoinXboxHint'
+    | 'showConvoyLeaderXboxHint'
     | 'viewerConvoyLeader'
     | 'totalCapacity'
     | 'onWaitlist'
@@ -173,6 +174,14 @@ export function EventDetailTitleSection({
       {view.showJoinXboxHint && view.viewerConvoyLeader ? (
         <Alert variant="info" title={t('participation.xboxHintTitle')} className="mt-2 py-2.5 text-sm">
           {t('participation.xboxHintBody', {leader: view.viewerConvoyLeader.gamertag})}
+        </Alert>
+      ) : view.showConvoyLeaderXboxHint ? (
+        <Alert
+          variant="info"
+          title={t('participation.convoyLeaderXboxHintTitle')}
+          className="mt-2 py-2.5 text-sm"
+        >
+          {t('participation.convoyLeaderXboxHintBody')}
         </Alert>
       ) : null}
     </div>

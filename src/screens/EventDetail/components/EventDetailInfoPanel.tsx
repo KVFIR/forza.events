@@ -1,5 +1,6 @@
 import {useTranslation} from 'react-i18next';
-import {Calendar, Users, Car, Shield, Wrench} from 'lucide-react';
+import {Calendar, User, Users, Car, Shield, Wrench} from 'lucide-react';
+import {formatDiscordHandle} from '../../../lib/discordHandle';
 import {RoadIcon} from '../../../components/icons/RoadIcon';
 import {formatTrackDisplayLine} from '../../../lib/eventTracks';
 import {formatCarDisplayName} from '../../../lib/carDisplay';
@@ -29,6 +30,16 @@ export function EventDetailInfoPanel({event, when}: Props) {
         <div>
           <p className={sectionLabelClass}>{t('eventDetail.dateTime')}</p>
           <p className="mt-0.5 text-sm text-slate-200">{when}</p>
+        </div>
+      </div>
+
+      <div className={rowClass}>
+        <User className={cn(iconClass, 'text-accent-purple-light/80')} />
+        <div>
+          <p className={sectionLabelClass}>{t('eventDetail.host')}</p>
+          <p className="mt-0.5 text-sm font-medium text-slate-200">
+            {formatDiscordHandle(event.hostUsername)}
+          </p>
         </div>
       </div>
 

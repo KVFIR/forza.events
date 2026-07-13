@@ -128,8 +128,8 @@ Manual QA matrix aligned with current code behavior (not an abstract checklist).
 |-----------|----------|
 | Full group 1, then join | Row goes to **Waitlist** section; button = **Leave waitlist** |
 | Active racer leaves before start | Earliest waitlisted racer auto-promoted into freed group; count steady |
-| Host, lobby full + waitlist ≥ 1 | **Add group N** button; picker lists waitlist + guild search |
-| Add group confirmed | `group_count++`; leader + oldest queued racers fill the new group; embed gains a per-group field |
+| Host, lobby full + waitlist ≥ 1 | **Add group N** button; picker lists waitlist, active non-leaders from other groups, host (if not already a convoy leader), plus guild search |
+| Add group confirmed | `group_count++`; leader + oldest queued racers fill the new group; vacated seat in the source group backfills from waitlist; embed gains a per-group field |
 | `group_count = 5` | Add group hidden (`GROUPS_MAXED` if forced); total capacity 60 |
 | Empty waitlist | Add group hidden (`WAITLIST_EMPTY` if forced) |
 

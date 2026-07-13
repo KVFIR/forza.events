@@ -41,6 +41,8 @@ const API_MESSAGES_EN: Partial<Record<ApiErrorCode, string>> = {
   [API_ERROR_CODES.WAITLIST_EMPTY]: 'There is nobody on the waitlist to move into a new group.',
   [API_ERROR_CODES.LEADER_ALREADY_IN_LOBBY]:
     'This driver is already in the lobby. Pick someone from the waitlist or a server member who has not joined yet.',
+  [API_ERROR_CODES.LEADER_ALREADY_CONVOY_LEADER]:
+    'This driver is already a convoy leader in another group.',
 };
 
 export function apiErrorMessage(code: ApiErrorCode | ValidationCode, fallback?: string): string {

@@ -175,13 +175,15 @@
     "leaveWaitlist": "Leave waitlist",
     "waitlisted": "Waitlisted",
     "xboxHintTitle": "You're registered",
-    "xboxHintBody": "On Xbox, add convoy leader {{leader}} as a friend and join their convoy shortly before the event starts."
+    "xboxHintBody": "On Xbox, add convoy leader {{leader}} as a friend and join their convoy shortly before the event starts.",
+    "convoyLeaderXboxHintTitle": "You're the convoy leader",
+    "convoyLeaderXboxHintBody": "On Xbox, accept friend requests from racers. Make your profile visible and set Forza convoy privacy to Friends so they can join."
   },
   "addGroup": {
     "button": "Add group {{n}}",
     "title": "Add group {{n}}",
-    "description": "Pick a convoy leader for the new group. The oldest racers on the waitlist move up to fill it.",
-    "waitlistCandidates": "From the waitlist",
+    "description": "Pick a convoy leader for the new group. Racers from the waitlist, other groups (not convoy leaders), or the host (if not already a convoy leader) can be chosen. Vacated seats are filled from the waitlist.",
+    "leaderCandidates": "Suggested leaders",
     "confirm": "Add group",
     "pickLeader": "Pick a convoy leader for the new group.",
     "gamertagRequired": "This leader needs an Xbox gamertag."
@@ -207,6 +209,7 @@
     "edit": "Edit",
     "results": "Results",
     "dateTime": "Date & Time",
+    "host": "Host",
     "convoyLeader": "Convoy Leader",
     "tracks": "Tracks",
     "carRules": "Car rules",
@@ -395,6 +398,7 @@
     "groupsMaxed": "This event already has the maximum number of groups.",
     "waitlistEmpty": "There is nobody on the waitlist to move into a new group.",
     "leaderAlreadyInLobby": "This driver is already in the lobby. Pick someone from the waitlist or a server member who has not joined yet.",
+    "leaderAlreadyConvoyLeader": "This driver is already a convoy leader in another group.",
     "lobbyNotFull": "There are still open seats in the current groups. Add a group only when every group is full and racers are waiting."
   },
   "validation": {

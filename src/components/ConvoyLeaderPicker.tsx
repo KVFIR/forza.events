@@ -1,4 +1,4 @@
-import {useEffect, useRef, useState} from 'react';
+import {useEffect, useMemo, useRef, useState} from 'react';
 import {useTranslation} from 'react-i18next';
 import {listGuildMembers} from '../lib/api';
 import {ApiRequestError} from '../lib/apiErrors';
@@ -45,6 +45,10 @@ type Props = {
   /** Quick-pick candidates shown above search (e.g. the event waitlist). */
   candidates?: ConvoyLeaderCandidate[];
   candidatesLabel?: string;
+  /** When true, the host may appear in quick-pick and guild search (Add group flow). */
+  allowHostCandidate?: boolean;
+  /** Active convoy leaders blocked from guild search (Add group flow). */
+  excludeDiscordIds?: readonly string[];
 };
 
 export function ConvoyLeaderPicker({
@@ -60,8 +64,14 @@ export function ConvoyLeaderPicker({
   error,
   candidates,
   candidatesLabel,
+  allowHostCandidate = false,
+  excludeDiscordIds = [],
 }: Props) {
   const {t} = useTranslation();
+  const excludedIds = useMemo(
+    () => new Set(excludeDiscordIds),
+    [excludeDiscordIds],
+  );
   const [query, setQuery] = useState('');
   const [hits, setHits] = useState<GuildMemberHit[]>([]);
   const [searching, setSearching] = useState(false);
@@ -91,7 +101,10 @@ export function ConvoyLeaderPicker({
         .then((res) => {
           if (serial !== searchSerialRef.current) return;
           setHits(
-            res.members.filter((m) => m.discord_id !== hostDiscordId),
+            res.members.filter((m) => {
+              if (excludedIds.has(m.discord_id)) return false;
+              return allowHostCandidate || m.discord_id !== hostDiscordId;
+            }),
           );
         })
         .catch((e) => {
@@ -111,7 +124,7 @@ export function ConvoyLeaderPicker({
     return () => {
       if (debounceRef.current) clearTimeout(debounceRef.current);
     };
-  }, [accessToken, guildId, hostDiscordId, query]);
+  }, [accessToken, guildId, hostDiscordId, query, allowHostCandidate, excludedIds]);
 
   /** Profile tag at pick time only — do not fold in `gamertag` while typing or the field unmounts. */
   const needsGamertag = Boolean(selected && !hasGamertag(selected.xboxGamertag));
@@ -158,7 +171,7 @@ export function ConvoyLeaderPicker({
                     role="listbox"
                   >
                     {candidates
-                      .filter((c) => c.discordId !== hostDiscordId)
+                      .filter((c) => allowHostCandidate || c.discordId !== hostDiscordId)
                       .map((c) => (
                         <li key={c.discordId}>
                           <button

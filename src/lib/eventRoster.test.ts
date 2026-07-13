@@ -1,5 +1,7 @@
 import {describe, expect, it} from 'vitest';
 import {
+  buildAddGroupLeaderCandidates,
+  hostCanLeadNewGroup,
   resolveConvoyLeader,
   resolveRegisteredDrivers,
   resolveResultsRoster,
@@ -215,5 +217,56 @@ describe('viewer convoy leader helpers', () => {
     ];
     const ev = event({hostDiscordId: 'host-1', participants});
     expect(resolveViewerConvoyLeader(ev, 'viewer-1')).toBeNull();
+  });
+});
+
+describe('buildAddGroupLeaderCandidates', () => {
+  it('includes waitlist, active non-leaders, and host when host is not a convoy leader', () => {
+    const ev = event({
+      hostDiscordId: 'host-1',
+      hostUsername: 'HostUser',
+      participants: [
+        participant({
+          discordId: 'g1-leader',
+          gamertag: 'L1',
+          isConvoyLeader: true,
+          groupIndex: 1,
+        }),
+        participant({discordId: 'driver-1', gamertag: 'D1', groupIndex: 1}),
+        participant({discordId: 'queued-1', gamertag: 'Q1', waitlisted: true}),
+      ],
+    });
+    const ids = buildAddGroupLeaderCandidates(ev, resolveWaitlist(ev.participants)).map(
+      (c) => c.discordId,
+    );
+    expect(ids).toEqual(['queued-1', 'driver-1', 'host-1']);
+    expect(ids).not.toContain('g1-leader');
+  });
+
+  it('omits host when they already lead a group', () => {
+    const ev = event({
+      hostDiscordId: 'host-1',
+      participants: [
+        participant({
+          discordId: 'host-1',
+          gamertag: 'HostGT',
+          isConvoyLeader: true,
+          participationSource: 'host_self_assigned',
+        }),
+      ],
+    });
+    expect(hostCanLeadNewGroup(ev)).toBe(false);
+    expect(buildAddGroupLeaderCandidates(ev, []).map((c) => c.discordId)).toEqual([]);
+  });
+
+  it('omits host when denormalized as group-1 convoy leader without a row', () => {
+    const ev = event({
+      hostDiscordId: 'host-1',
+      lobbyLeaderGamertag: 'HostGT',
+      lobbyLeaderIsHost: true,
+      participants: [],
+    });
+    expect(hostCanLeadNewGroup(ev)).toBe(false);
+    expect(buildAddGroupLeaderCandidates(ev, []).map((c) => c.discordId)).toEqual([]);
   });
 });
