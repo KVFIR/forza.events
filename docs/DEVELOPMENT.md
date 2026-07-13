@@ -27,6 +27,8 @@ GitHub Actions runs the same on every push/PR to `main` / `master`.
 
 Open http://localhost:5180 → tap the auth status pill in the **navbar** (or Profile) to **Sign in with Discord** before using the app (Browse, Event Detail, join/create/publish).
 
+**Analytics dashboard (local only):** set `ANALYTICS_DASHBOARD_SECRET` in `.env`, run `npm run sync:secrets`, `supabase db push` (migrations `021`–`024`), deploy functions, then open http://localhost:5180/analytics — no Discord sign-in required. Set `ANALYTICS_TRACK_SECRET` in `.env` / Railway build env so prod ingest is not rejected. Retention: daily GitHub Action `.github/workflows/prune-client-analytics.yml` (or `bash scripts/invoke-prune-client-analytics.sh`).
+
 ---
 
 ## Environment

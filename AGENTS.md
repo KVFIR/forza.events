@@ -91,6 +91,14 @@ Lessons from implementation work (keep in sync when behavior changes).
 - **Browser sign-out:** standalone browser (`isStandaloneBrowser()`) shows **Sign out only** in `AuthStatusIndicator` when signed in (no paired Online/Local status pill — either/or). `signOutBrowser` clears session, `saveAuthReturnTo` current path, then `navigate('/sign-in', {replace: true})`; Activity auth path unchanged.
 - Optional: sync `loadDiscordSession()` into context on mount if session exists but state is stale.
 
+## Client analytics
+
+- **Table:** `client_events` (migration `021`) — `surface` (`activity` / `browser_web` / `browser_blocked`), funnel `event_name`, optional `outcome`, `api_code`, `function_name`, `event_id`, `meta`.
+- **Client:** `src/lib/analytics.ts` batches to Edge `track-event` (`ANALYTICS_TRACK_SECRET` when set on Edge; dev `console.warn` on ingest failure). `api.ts` sends `x-client-surface` and records `api_error` + `NETWORK_ERROR`. Dashboard secret is **dev-only** in Vite (`mode === 'development'`). Disable with `VITE_ANALYTICS=false`.
+- **Retention:** `prune_client_events(90)` via Edge `prune-client-analytics` + GitHub Actions `.github/workflows/prune-client-analytics.yml` (daily; same `NOTIFICATION_CRON_SECRET` as notifications cron).
+- **Local dashboard:** `http://localhost:5180/analytics` — conversion rates, funnel by surface, recent errors (RPC `023`/`024`).
+- **Example queries:** DAU by surface — `select surface, count(distinct discord_id) from client_events where created_at > now() - interval '1 day' group by 1`; top errors — `select api_code, count(*) from client_events where event_name = 'api_error' and created_at > now() - interval '7 days' group by 1 order by 2 desc`.
+
 ## Deploy checklist (when touching events browse/drafts)
 
 1. `supabase db push` when migrations changed
@@ -98,11 +106,12 @@ Lessons from implementation work (keep in sync when behavior changes).
 3. **`020` before frontend** when shipping change-group-leader — RPC missing until `020` is applied ([`docs/E2E.md`](docs/E2E.md) Change convoy leader)
 4. **`017` RPC return-type changes:** `CREATE OR REPLACE` cannot change `leave_event_participant` boolean → jsonb (`42P13`) — migration must `DROP FUNCTION IF EXISTS leave_event_participant(uuid, text)` then `CREATE` + `revoke`/`grant` (match `008` pattern)
 5. **Discord notifications:** after `017` db push, `npm run deploy:functions` (includes `process-notifications`), `NOTIFICATION_CRON_SECRET` on Supabase, GitHub Actions secrets + `.github/workflows/process-notifications.yml` enabled — outbox rows alone do not deliver DMs
-6. `npm run deploy:functions` or deploy `browse-events` + `host-drafts` with **`--no-verify-jwt`**
-7. `npx wrangler deploy` when Cloudflare Worker changes (`cloudflare/supabaseProxy.js`, `eventOgHandler.js`)
-8. Ship frontend (Railway) after any `api.ts` / proxy fetch changes
-9. Hard refresh in Discord Activity
-10. Run P0 checks in [`docs/E2E.md`](docs/E2E.md) when changing auth, browse, publish, embed sync, add-group, change-group-leader, or notifications
+6. **Client analytics:** after `021`–`024` db push, `npm run deploy:functions` (includes `track-event`, `analytics-dashboard`, `prune-client-analytics`), `npm run sync:secrets` (`ANALYTICS_TRACK_SECRET` + `ANALYTICS_DASHBOARD_SECRET`), Railway build env **`ANALYTICS_TRACK_SECRET`**, enable `.github/workflows/prune-client-analytics.yml`
+7. `npm run deploy:functions` or deploy `browse-events` + `host-drafts` with **`--no-verify-jwt`**
+8. `npx wrangler deploy` when Cloudflare Worker changes (`cloudflare/supabaseProxy.js`, `eventOgHandler.js`)
+9. Ship frontend (Railway) after any `api.ts` / proxy fetch changes
+10. Hard refresh in Discord Activity
+11. Run P0 checks in [`docs/E2E.md`](docs/E2E.md) when changing auth, browse, publish, embed sync, add-group, change-group-leader, or notifications
 
 ## Navigation / redirects
 
@@ -167,7 +176,7 @@ Also align **`browse-events`** / **`src/lib/events.ts`** if the server list quer
 - [`docs/DEVELOPMENT.md`](docs/DEVELOPMENT.md) — local OAuth, quick testing checklist
 - [`docs/E2E.md`](docs/E2E.md) — manual Discord Activity QA matrix
 - [`supabase/README.md`](supabase/README.md) — migrations `001`–`020`, Edge Functions
-- [`scripts/deploy-edge-functions.sh`](scripts/deploy-edge-functions.sh) — canonical function list (18; includes `add-group`, `change-group-leader`, `process-notifications`)
+- [`scripts/deploy-edge-functions.sh`](scripts/deploy-edge-functions.sh) — canonical function list (21; includes `add-group`, `change-group-leader`, `process-notifications`, `prune-client-analytics`, `track-event`, `analytics-dashboard`)
 - **Convoy leader:** `events.lobby_leader_discord_id` + `event_participants.is_convoy_leader` / `participation_source` (in baseline `001`); draft pick via `list-guild-members` on Create → Target; published reassignment via `change-group-leader` on Event Detail; results roster includes leader without Join when id is set.
 
 ## Learned User Preferences

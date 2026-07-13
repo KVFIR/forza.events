@@ -53,6 +53,10 @@ npx supabase migration repair --linked --status applied 006 --yes
 | `018_add_group_without_waitlist.sql` | `add_event_group`: allow add group when every active group is full, without requiring waitlist |
 | `019_notification_outbox_claim.sql` | Outbox `processing` status + `claim_notification_outbox_batch` (`FOR UPDATE SKIP LOCKED`) |
 | `020_change_event_group_leader.sql` | `change_event_group_leader` RPC — host reassigns convoy leader per group (published, before start) |
+| `021_client_analytics.sql` | `client_events` table + `prune_client_events` — surface/funnel/API error analytics |
+| `022_analytics_dashboard_rpc.sql` | `analytics_dashboard_summary` RPC for localhost dashboard |
+| `023_analytics_dashboard_enriched.sql` | Enriched dashboard RPC: conversion, funnel by surface, recent errors |
+| `024_analytics_dashboard_fixes.sql` | Join conversion uses join-only errors; event views per session metric |
 
 Seeds are **not** included in the migration. Run separately after `db push`:
 
@@ -63,7 +67,7 @@ npm run seed:events   # sample events (dev only)
 
 ## Edge Functions
 
-**18 functions** — canonical list in [`scripts/deploy-edge-functions.sh`](../scripts/deploy-edge-functions.sh). Deploy all:
+**20 functions** — canonical list in [`scripts/deploy-edge-functions.sh`](../scripts/deploy-edge-functions.sh). Deploy all:
 
 ```bash
 npm run deploy:functions
@@ -88,6 +92,10 @@ npm run deploy:functions
 | `launch-intent` | Discord token | Embed deep-link fallback |
 | `upload-cover` | Discord token | Cover image upload |
 | `interactions-endpoint` | Ed25519 signature | `LAUNCH_ACTIVITY` button |
+| `process-notifications` | Cron secret | DM outbox delivery |
+| `prune-client-analytics` | Cron secret | `prune_client_events(90)` retention |
+| `track-event` | Optional Discord token + track secret | Client analytics batch insert (`client_events`) |
+| `analytics-dashboard` | Localhost + secret | Aggregated analytics for dev dashboard |
 
 All Activity-facing functions use **`verify_jwt = false`** in `config.toml` and **`--no-verify-jwt`** on deploy. Gateway auth is **`apikey`** + **`Authorization: Bearer <anon>`**; user auth is **`x-discord-access-token`**.
 

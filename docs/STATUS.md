@@ -1,6 +1,6 @@
 # Implementation status
 
-Last updated: 2026-07-13
+Last updated: 2026-07-14
 
 ## Summary
 
@@ -11,8 +11,8 @@ Remaining work is mostly **Activity E2E in pilot guilds**, **Railway frontend re
 | Layer | State |
 |-------|--------|
 | React Activity (UI) | Done — Browse, Detail, Create (wizard), My Events, Profile, i18n (EN + RU) |
-| Supabase schema | Done — migrations `001`–`020` |
-| Edge Functions | Done — 18 functions ([`supabase/README.md`](../supabase/README.md)) |
+| Supabase schema | Done — migrations `001`–`024` |
+| Edge Functions | Done — 21 functions ([`supabase/README.md`](../supabase/README.md)) |
 | Security hardening | Done — storage, RLS scope, CORS, rate limits, publish validation |
 | Local browser dev | Done — Discord OAuth + Supabase (not mock mode) |
 | Sample content | Done — optional `sample-*` seed |
@@ -45,6 +45,7 @@ Remaining work is mostly **Activity E2E in pilot guilds**, **Railway frontend re
 | Sample seed | Done | `npm run seed:events` |
 | i18n | Done | EN default; RU toggle on profile; notification copy follows `notification_locale` |
 | Discord DM notifications | Done | Outbox + `process-notifications` cron; Profile bell opt-out |
+| Client analytics | Done | `client_events` + `track-event`; local `/analytics` dashboard; daily `prune-client-analytics` cron |
 | Bot process | Deferred | [`bot/README.md`](../bot/README.md) |
 
 ---
@@ -87,8 +88,8 @@ Details: [`supabase/README.md`](../supabase/README.md).
 | Check | Result |
 |-------|--------|
 | Supabase project | `uoysqfczahqmctbrrizn` (FORZA.EVENTS) |
-| Migrations | `001`–`020` on remote |
-| Edge Functions | 17 via `deploy:functions` |
+| Migrations | `001`–`024` on remote |
+| Edge Functions | 21 via `deploy:functions` |
 | Activity hosting | Railway `https://forzaevents.up.railway.app` |
 | Discord application verification | Approved — legal URLs on deploy origin |
 | Discord Activity OAuth | `https://127.0.0.1` + `token-exchange` allowlist |
@@ -128,6 +129,8 @@ Set **`APP_ORIGIN`** on Railway to the deploy URL (embed cover URLs + Edge CORS)
 | Publish stuck / 409 `PUBLISH_IN_PROGRESS` | Crashed mid-publish | Wait 5 min (lock TTL) or clear `publish_started_at` on draft row |
 | Double Discord embed after publish | Old code / race before `003` | `db push` + redeploy `publish-event`; delete duplicate message manually |
 | DMs not delivered | Cron not scheduled or missing `NOTIFICATION_CRON_SECRET` | Supabase secret + GitHub Actions secrets (see `.github/workflows/process-notifications.yml`) |
+| Analytics empty / 403 ingest | Missing `ANALYTICS_TRACK_SECRET` on Railway build or Supabase | Set in `.env`, `npm run sync:secrets`, redeploy frontend; check `/analytics` ingest banner locally |
+| `client_events` table missing | Migrations `021`–`024` not pushed | `supabase db push` |
 
 ---
 
