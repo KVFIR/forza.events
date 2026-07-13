@@ -57,7 +57,7 @@ describe('eventPageMeta parity', () => {
       opts,
     );
     expect(shared).toEqual(client);
-    expect(client.description).toContain('18/24 participants');
+    expect(client.description).not.toContain('participants');
   });
 
   it('client and shared match for completed', () => {
@@ -108,9 +108,9 @@ describe('eventPageMeta shared', () => {
       pageUrl: 'https://forza.events/event/94d86ab7-ce55-49f8-84e3-91f3b9a7b39c',
     });
 
-    expect(meta.title).toBe('Sunset Sprint · FORZA.EVENTS');
+    expect(meta.title).toBe('Sunset Sprint');
     expect(meta.description).toContain('Road racing');
-    expect(meta.description).toContain('4/12 participants');
+    expect(meta.description).not.toContain('participants');
     expect(meta.image).toBe('https://forza.events/covers/cover-road-2.webp');
   });
 
@@ -129,7 +129,7 @@ describe('eventPageMeta shared', () => {
       {siteOrigin: 'https://forza.events'},
     );
     const html = buildEventOgHtml(meta);
-    expect(html).toContain('A &amp; B &lt;test&gt; · FORZA.EVENTS');
+    expect(html).toContain('A &amp; B &lt;test&gt;');
     expect(html).toContain('property="og:image"');
     expect(html).toContain('name="twitter:card"');
     expect(escapeHtml('a "b"')).toBe('a &quot;b&quot;');

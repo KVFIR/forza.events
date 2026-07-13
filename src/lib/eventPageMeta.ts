@@ -1,5 +1,3 @@
-import {formatLobbyCount} from './constants';
-import {totalCapacity} from './eventSpec';
 import type {EventType, ForzaEvent} from './types';
 
 export const SITE_NAME = 'FORZA.EVENTS';
@@ -32,9 +30,6 @@ type EventMetaInput = Pick<
   | 'title'
   | 'type'
   | 'startsAt'
-  | 'currentPlayers'
-  | 'maxPlayers'
-  | 'groupCount'
   | 'coverImageUrl'
   | 'lifecycle'
 >;
@@ -97,18 +92,13 @@ export function buildEventPageMeta(
     options?.pageUrl ?? `${origin}/event/${event.id}${options?.isResults ? '/results' : ''}`;
   const typeLabel = EVENT_TYPE_LABEL_EN[normalizeEventType(event.type)];
   const when = formatEventOgDate(event.startsAt);
-  const players = Math.max(0, event.currentPlayers);
   const suffix = lifecycleSuffix(event.lifecycle);
 
   const titleBase = event.title.trim() || 'Event';
-  const title = options?.isResults
-    ? `${titleBase} · Results · ${SITE_NAME}`
-    : `${titleBase} · ${SITE_NAME}`;
+  const title = options?.isResults ? `${titleBase} · Results` : titleBase;
 
   const parts = [typeLabel];
   if (when) parts.push(when);
-  const cap = totalCapacity(event);
-  parts.push(`${formatLobbyCount(players, cap)} participants`);
   const description = `${parts.join(' · ')}${suffix}`;
 
   return {

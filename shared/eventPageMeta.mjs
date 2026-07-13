@@ -86,24 +86,14 @@ export function buildEventPageMeta(event, {siteOrigin, pageUrl, isResults = fals
   const url = pageUrl ?? `${origin}/event/${event.id}${isResults ? '/results' : ''}`;
   const typeLabel = EVENT_TYPE_LABEL_EN[normalizeEventType(event.type)] ?? 'Road racing';
   const when = formatEventOgDate(event.starts_at ?? event.startsAt);
-  const players = Math.max(0, Number(event.current_players ?? event.currentPlayers ?? 0));
-  const maxPlayers = Math.max(
-    1,
-    Number(event.max_players ?? event.maxPlayers ?? LOBBY_TOTAL_PLAYERS),
-  );
-  const groupCount = Math.max(1, Number(event.group_count ?? event.groupCount ?? 1));
-  const cap = maxPlayers * groupCount;
   const status = event.status ?? event.lifecycle ?? 'open';
   const suffix = lifecycleSuffix(status);
 
   const titleBase = String(event.title ?? 'Event').trim() || 'Event';
-  const pageTitle = isResults
-    ? `${titleBase} · Results · ${SITE_NAME}`
-    : `${titleBase} · ${SITE_NAME}`;
+  const pageTitle = isResults ? `${titleBase} · Results` : titleBase;
 
   const parts = [typeLabel];
   if (when) parts.push(when);
-  parts.push(`${players}/${cap} participants`);
   const description = `${parts.join(' · ')}${suffix}`;
 
   const image = resolveEventCoverAbsolute(
