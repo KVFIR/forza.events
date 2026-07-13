@@ -51,7 +51,7 @@ type DbEvent = {
   id: string;
   status: string;
   host_discord_id: string;
-  guild_id: string;
+  guild_id: string | null;
   channel_id: string | null;
   discord_message_id: string | null;
   starts_at: string;
