@@ -1,3 +1,4 @@
+import {useMemo} from 'react';
 import {useTranslation} from 'react-i18next';
 import {Calendar, User, Users, Car, Shield, Wrench} from 'lucide-react';
 import {formatDiscordHandle} from '../../../lib/discordHandle';
@@ -6,6 +7,7 @@ import {formatTrackDisplayLine} from '../../../lib/eventTracks';
 import {formatCarDisplayName} from '../../../lib/carDisplay';
 import {piClassColor, piToClass} from '../../../lib/pi';
 import {sectionLabelClass} from '../../../components/ui/formStyles';
+import {resolveEventGroups} from '../../../lib/eventRoster';
 import type {ForzaEvent} from '../../../lib/types';
 import {cn} from '../../../lib/cn';
 
@@ -22,6 +24,15 @@ type Props = {
 
 export function EventDetailInfoPanel({event, when}: Props) {
   const {t} = useTranslation();
+  const multiGroup = (event.groupCount ?? 1) > 1;
+  const convoyLeaderGroups = useMemo(
+    () =>
+      resolveEventGroups(event, '')
+        .filter((g) => g.leader?.gamertag)
+        .map((g) => ({groupIndex: g.groupIndex, gamertag: g.leader!.gamertag})),
+    [event],
+  );
+  const showConvoyLeaderList = convoyLeaderGroups.length > 1 || multiGroup;
 
   return (
     <div className="mt-5 divide-y divide-white/[0.05]">
@@ -43,12 +54,34 @@ export function EventDetailInfoPanel({event, when}: Props) {
         </div>
       </div>
 
-      {event.lobbyLeaderGamertag ? (
+      {convoyLeaderGroups.length > 0 ? (
         <div className={rowClass}>
           <Users className={cn(iconClass, 'text-accent-green/80')} />
-          <div>
-            <p className={sectionLabelClass}>{t('eventDetail.convoyLeader')}</p>
-            <p className="mt-0.5 text-sm font-medium text-slate-200">{event.lobbyLeaderGamertag}</p>
+          <div className="min-w-0">
+            <p className={sectionLabelClass}>
+              {showConvoyLeaderList
+                ? t('eventDetail.convoyLeaders')
+                : t('eventDetail.convoyLeader')}
+            </p>
+            {showConvoyLeaderList ? (
+              <ul className="mt-1 space-y-0.5">
+                {convoyLeaderGroups.map(({groupIndex, gamertag}) => (
+                  <li
+                    key={groupIndex}
+                    className="flex items-baseline gap-2 text-sm text-slate-200"
+                  >
+                    <span className="shrink-0 text-xs font-medium text-muted">
+                      {t('eventDetail.group', {n: groupIndex})}
+                    </span>
+                    <span className="font-medium">{gamertag}</span>
+                  </li>
+                ))}
+              </ul>
+            ) : (
+              <p className="mt-0.5 text-sm font-medium text-slate-200">
+                {convoyLeaderGroups[0].gamertag}
+              </p>
+            )}
           </div>
         </div>
       ) : null}

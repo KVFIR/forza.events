@@ -211,6 +211,7 @@
     "dateTime": "Date & Time",
     "host": "Host",
     "convoyLeader": "Convoy Leader",
+    "convoyLeaders": "Convoy leaders",
     "tracks": "Tracks",
     "carRules": "Car rules",
     "restrictedSoon": "Restricted list (details coming soon)",

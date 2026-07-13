@@ -211,6 +211,7 @@
     "dateTime": "Дата и время",
     "host": "Хост",
     "convoyLeader": "Лидер конвоя",
+    "convoyLeaders": "Лидеры конвоя",
     "tracks": "Трассы",
     "carRules": "Правила машин",
     "restrictedSoon": "Ограниченный список (подробности скоро)",
