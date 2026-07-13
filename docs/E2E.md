@@ -194,45 +194,37 @@ Manual QA matrix aligned with current code behavior (not an abstract checklist).
 
 ## 6. Create Event wizard
 
-**Steps:** Basics → Details → Target → Review.
+**Steps:** Event → Publish.
 
-### Basics
+**Persistence:** manual save only (no autosave / WIP / leave guard).
+
+### Event step
 
 - [ ] Validation on empty title / type / date.
-- [ ] All five event types — correct badge/colors on preview.
-- [ ] Cover: default → custom → compress 16:9 → Review preview.
+- [ ] All event types — correct badge/colors on cards after publish.
+- [ ] Cover: default → custom → compress 16:9.
 - [ ] Cover upload **after** first draft save (`upload-cover` + `guild_id`).
+- [ ] **Save as draft** → My Events.
+- [ ] **Continue to publish** → Publish step.
 
-### Details
+### Publish step
 
-| Mode | Cases |
+| Area | Cases |
 |------|--------|
-| **anything_goes** | PI 100–999; optional extra rules on embed |
-| **restricted_list** | ≥1 catalog car; no client insert into `cars` |
-| **Tuning restrictions** | Template chips + optional custom text on embed |
-| Track codes | 0, 1, many; dedupe on save |
-| Description | On card and embed when set |
-
-### Target
-
-- [ ] Guild list = user guilds ∩ bot installed.
-- [ ] Empty list → Add bot → external browser → Refresh → guild appears.
-- [ ] Guild change → channels load **after** guild list (no race).
-- [ ] Channel missing View/Send/Embed → absent or `validate-channel` error.
-- [ ] Channel change → re-validate.
-- [ ] No Manage Server → forbidden with clear copy.
-- [ ] Convoy leader: self (host gamertag) vs `list-guild-members` picker (Members intent).
-- [ ] Member without gamertag → manual gamertag on publish.
-- [ ] Member search in picker.
-
-### Review and publish
-
-- [ ] Save draft without channel → OK; My Events.
-- [ ] Publish blocked without channel / leader / cars (restricted).
-- [ ] Publish modal channel pick if skipped on Target.
-- [ ] Success: embed in channel; guild/channel locked.
-- [ ] Re-publish → idempotent `already_published` or single embed.
-- [ ] Double-click publish → one embed; `PUBLISH_IN_PROGRESS` or idempotent second call.
+| **Cars** | `anything_goes` PI; `restricted_list` ≥1 catalog car; tuning restrictions on embed |
+| **Tracks** | 0, 1, many; dedupe on save |
+| **Target** | Guild list = user guilds ∩ bot installed; empty → Add bot → Refresh |
+| **Target** | Guild change → channels load after guild list; channel re-validate |
+| **Target** | Rate limit / transient API error → saved channel **not** cleared on re-open `?edit=` |
+| **Target** | No Manage Server → forbidden with clear copy |
+| **Convoy** | Self (host gamertag) vs `list-guild-members` picker |
+| **Publish** | Save as draft **without leaving** Publish step |
+| **Publish** | Save draft without channel → OK; My Events from Event step |
+| **Publish** | Publish blocked without channel / leader / cars (restricted) |
+| **Publish** | Publish modal if channel skipped |
+| **Publish** | Success: embed in channel; guild/channel locked |
+| **Publish** | Double-click publish → one embed; `PUBLISH_IN_PROGRESS` or idempotent second call |
+| **Edit URL** | `/create?edit={id}` requires sign-in in browser; missing draft → My Events (no empty form) |
 
 ### Edit published (before start)
 
@@ -252,7 +244,7 @@ Manual QA matrix aligned with current code behavior (not an abstract checklist).
 
 | Scope | Cases |
 |-------|--------|
-| **All** | Hosted + joined + **drafts on top** |
+| **All** | Hosted + joined + **drafts on top** (published may render first; refresh while drafts load) |
 | **Hosted** | Own events + drafts |
 | **Joined** | `participation_source === 'self_join'` only; **no drafts** |
 | Drafts API fail | Warning; published list still loads |

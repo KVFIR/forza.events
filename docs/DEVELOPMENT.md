@@ -204,7 +204,10 @@ npm run optimize:covers   # regenerate bundled WebP
 
 Implementation: **`src/screens/CreateEvent/index.tsx`** only — do not add `CreateEvent.tsx` beside the folder.
 
-Steps: Basics → Details → Target → Review  
+**Steps:** Event → Publish (two steps in `StepIndicator`).
+
+**Persistence:** explicit **Save as draft** / **Save changes** only — no autosave, session WIP, or leave guard. Step 0 save navigates to My Events; Publish-step save stays on the wizard. Browser `?edit={id}` requires Discord sign-in before the form loads.
+
 Validation: `validation.ts`, `src/lib/eventSpec.ts`
 
 **Mobile layout:** On a narrow viewport (~320px), Create → Basics: the `datetime-local` field must not cause horizontal page scroll; event-type segment labels should stay readable in EN and RU (`SegmentGroup` grid + `index.css` WebKit picker rules).
@@ -233,7 +236,9 @@ Quick smoke before a PR or local iteration:
 
 - [ ] Browse lists events (seed or real data)
 - [ ] Sign in → Sign out
-- [ ] Create draft → My Events
+- [ ] Create draft (Event step → Save as draft) → My Events
+- [ ] Create draft (Publish step → Save as draft) → stays on wizard; appears in My Events after refresh/navigate
+- [ ] Open `/create?edit={draftId}` (signed in) → loads publish step
 - [ ] Create Event (narrow ~320px): no horizontal scroll on date/time; event type segments readable (EN + RU)
 - [ ] Upload cover → image on card/detail
 - [ ] Join / leave (signed in, non-host event)
