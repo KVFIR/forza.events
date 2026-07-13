@@ -1,6 +1,6 @@
 import {useMemo} from 'react';
 import {useTranslation} from 'react-i18next';
-import {Calendar, User, Users, Car, Shield, Wrench} from 'lucide-react';
+import {Calendar, Crown, User, Car, Shield, Wrench} from 'lucide-react';
 import {formatDiscordHandle} from '../../../lib/discordHandle';
 import {RoadIcon} from '../../../components/icons/RoadIcon';
 import {formatTrackDisplayLine} from '../../../lib/eventTracks';
@@ -37,7 +37,7 @@ export function EventDetailInfoPanel({event, when}: Props) {
   return (
     <div className="mt-5 divide-y divide-white/[0.05]">
       <div className={rowClass}>
-        <Calendar className={cn(iconClass, 'text-accent-purple-light/80')} />
+        <Calendar className={iconClass} />
         <div>
           <p className={sectionLabelClass}>{t('eventDetail.dateTime')}</p>
           <p className="mt-0.5 text-sm text-slate-200">{when}</p>
@@ -45,7 +45,7 @@ export function EventDetailInfoPanel({event, when}: Props) {
       </div>
 
       <div className={rowClass}>
-        <User className={cn(iconClass, 'text-accent-purple-light/80')} />
+        <User className={iconClass} />
         <div>
           <p className={sectionLabelClass}>{t('eventDetail.host')}</p>
           <p className="mt-0.5 text-sm font-medium text-slate-200">
@@ -56,7 +56,7 @@ export function EventDetailInfoPanel({event, when}: Props) {
 
       {convoyLeaderGroups.length > 0 ? (
         <div className={rowClass}>
-          <Users className={cn(iconClass, 'text-accent-green/80')} />
+          <Crown className={iconClass} />
           <div className="min-w-0">
             <p className={sectionLabelClass}>
               {showConvoyLeaderList

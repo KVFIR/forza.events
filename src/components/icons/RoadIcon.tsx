@@ -14,7 +14,7 @@ export function RoadIcon({className}: Props) {
       strokeWidth="2"
       strokeLinecap="round"
       strokeLinejoin="round"
-      className={cn('h-3.5 w-3.5', className)}
+      className={cn('h-4 w-4', className)}
       aria-hidden
     >
       <path d="M9 3 5 21" />
