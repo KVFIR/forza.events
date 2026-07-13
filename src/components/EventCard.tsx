@@ -43,7 +43,7 @@ function CarList({cars}: {cars: EventAllowedCar[]}) {
   const extra = cars.length - shown.length;
 
   return (
-    <div className="relative hidden min-[500px]:block min-w-0 max-w-[50%] text-left">
+    <div className="hidden min-[500px]:block w-[10.5rem] shrink-0 text-left">
       <ul className="flex flex-col divide-y divide-white/[0.05]">
         {shown.map((car) => {
           const maxClass = piToClass(car.maxPi);
@@ -72,11 +72,11 @@ function CarList({cars}: {cars: EventAllowedCar[]}) {
           );
         })}
       </ul>
-      {extra > 0 && (
-        <span className="pointer-events-none absolute left-0 top-full mt-1 text-[10px] leading-none text-muted">
+      {extra > 0 ? (
+        <p className="mt-1 text-[10px] leading-none text-muted">
           {t('eventCard.moreCars', {count: extra})}
-        </span>
-      )}
+        </p>
+      ) : null}
     </div>
   );
 }
@@ -87,7 +87,7 @@ function OpenBuildSummary({event}: {event: ForzaEvent}) {
   const label = event.additionalCarRestrictions?.trim() || t('common.openBuild');
 
   return (
-    <div className="hidden min-[500px]:block min-w-0 max-w-[50%] text-left">
+    <div className="hidden min-[500px]:block w-[10.5rem] shrink-0 text-left">
       <ul className="flex flex-col gap-1">
         <li className="grid grid-cols-[minmax(0,1fr)_2.75rem] items-center gap-x-2.5 text-[10px] leading-tight">
           <span className="truncate font-medium text-slate-200" title={label}>
@@ -157,10 +157,10 @@ export function EventCard({event, participantResult}: Props) {
           <div className="absolute inset-0 bg-gradient-to-r from-base/80 via-base/70 to-base/60" />
           <div className="absolute inset-0 bg-black/25 transition-colors duration-200 group-hover:bg-black/20" />
 
-          <div className="relative flex items-center gap-3 px-4 pt-3 pb-4">
-            <div className="min-w-0 flex-1 shrink-0 text-left">
+          <div className="relative flex flex-col gap-3 px-4 pt-3 pb-4 min-[500px]:flex-row min-[500px]:items-start min-[500px]:gap-4">
+            <div className="min-w-0 flex-1 text-left">
               <h2
-                className="truncate text-lg font-semibold leading-tight text-white"
+                className="text-lg font-semibold leading-snug text-white line-clamp-2 min-[500px]:line-clamp-none"
                 title={event.title}
               >
                 {event.title}
