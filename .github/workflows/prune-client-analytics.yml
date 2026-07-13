@@ -1,0 +1,25 @@
+# Prune client_events older than 90 days (prune-client-analytics Edge Function).
+name: Prune client analytics
+
+on:
+  schedule:
+    - cron: '0 3 * * *'
+  workflow_dispatch:
+
+concurrency:
+  group: prune-client-analytics
+  cancel-in-progress: false
+
+jobs:
+  invoke:
+    runs-on: ubuntu-latest
+    timeout-minutes: 2
+    steps:
+      - uses: actions/checkout@v6
+
+      - name: Invoke prune-client-analytics
+        env:
+          VITE_SUPABASE_URL: ${{ secrets.VITE_SUPABASE_URL }}
+          VITE_SUPABASE_ANON_KEY: ${{ secrets.VITE_SUPABASE_ANON_KEY }}
+          NOTIFICATION_CRON_SECRET: ${{ secrets.NOTIFICATION_CRON_SECRET }}
+        run: bash scripts/invoke-prune-client-analytics.sh

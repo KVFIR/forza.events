@@ -23,6 +23,9 @@ FUNCTIONS=(
   launch-intent
   upload-cover
   process-notifications
+  prune-client-analytics
+  track-event
+  analytics-dashboard
 )
 
 echo "Deploying ${#FUNCTIONS[@]} Supabase Edge Functions..."

@@ -1,5 +1,5 @@
 const ALLOWED_HEADERS =
-  'authorization, x-client-info, apikey, content-type, x-discord-access-token';
+  'authorization, x-client-info, apikey, content-type, x-discord-access-token, x-client-surface, x-analytics-dashboard-secret, x-analytics-track-secret';
 const ALLOWED_METHODS = 'POST, GET, OPTIONS';
 
 const STATIC_ORIGINS = new Set([

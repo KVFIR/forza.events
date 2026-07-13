@@ -73,3 +73,12 @@ verify_jwt = false
 
 [functions.process-notifications]
 verify_jwt = false
+
+[functions.prune-client-analytics]
+verify_jwt = false
+
+[functions.track-event]
+verify_jwt = false
+
+[functions.analytics-dashboard]
+verify_jwt = false
