@@ -65,6 +65,8 @@ describe('cloudflare static OG helpers', () => {
     await expect(import('../cloudflare/worker.js')).resolves.toBeDefined();
     await expect(import('../cloudflare/eventOgHandler.js')).resolves.toBeDefined();
     await expect(import('../cloudflare/staticOgHandler.js')).resolves.toBeDefined();
+    await expect(import('../cloudflare/sitemapHandler.js')).resolves.toBeDefined();
+    await expect(import('../cloudflare/robotsHandler.js')).resolves.toBeDefined();
     await expect(import('../cloudflare/railwayProxy.js')).resolves.toBeDefined();
   });
 

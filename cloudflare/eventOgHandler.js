@@ -1,12 +1,14 @@
 import {
-  buildEventOgHtml,
+  buildCrawlerPageHtml,
+  buildEventCrawlerBody,
+  buildEventJsonLd,
   buildEventPageMeta,
   isLinkPreviewCrawler,
   parseEventPagePath,
   SITE_NAME,
 } from '../shared/eventPageMeta.mjs';
 import {ogResponseHeaders, proxyToRailway, siteOrigin} from './railwayProxy.js';
-import {resolveDefaultOgImage} from '../shared/sitePageMeta.mjs';
+import {resolveDefaultOgImage, buildStaticCrawlerBody} from '../shared/sitePageMeta.mjs';
 
 const DEFAULT_SUPABASE_ORIGIN = 'https://uoysqfczahqmctbrrizn.supabase.co';
 
@@ -18,6 +20,7 @@ async function fetchPublishedEvent(eventId, env) {
   const params = new URLSearchParams({
     id: `eq.${eventId}`,
     status: 'neq.draft',
+    discord_message_id: 'not.is.null',
     select: 'id,title,type,cover_image_url,starts_at,current_players,max_players,status',
   });
 
@@ -48,10 +51,13 @@ function notFoundHtml(pageUrl, env) {
     url: pageUrl,
     siteName: SITE_NAME,
   };
-  return new Response(buildEventOgHtml(meta), {
-    status: 404,
-    headers: ogResponseHeaders(60),
-  });
+  return new Response(
+    buildCrawlerPageHtml(meta, {bodyHtml: buildStaticCrawlerBody(meta), robots: 'noindex, follow'}),
+    {
+      status: 404,
+      headers: ogResponseHeaders(60),
+    },
+  );
 }
 
 function errorHtml(pageUrl, env) {
@@ -63,10 +69,13 @@ function errorHtml(pageUrl, env) {
     url: pageUrl,
     siteName: SITE_NAME,
   };
-  return new Response(buildEventOgHtml(meta), {
-    status: 503,
-    headers: ogResponseHeaders(30),
-  });
+  return new Response(
+    buildCrawlerPageHtml(meta, {bodyHtml: buildStaticCrawlerBody(meta), robots: 'noindex, follow'}),
+    {
+      status: 503,
+      headers: ogResponseHeaders(30),
+    },
+  );
 }
 
 export async function handleEventRoute(request, env) {
@@ -97,9 +106,16 @@ export async function handleEventRoute(request, env) {
     pageUrl,
     isResults: parsed.isResults,
   });
+  const jsonLd = buildEventJsonLd(outcome.event, meta, {siteOrigin: siteOrigin(env)});
 
-  return new Response(buildEventOgHtml(meta), {
-    status: 200,
-    headers: ogResponseHeaders(300),
-  });
+  return new Response(
+    buildCrawlerPageHtml(meta, {
+      bodyHtml: buildEventCrawlerBody(meta),
+      jsonLd,
+    }),
+    {
+      status: 200,
+      headers: ogResponseHeaders(300),
+    },
+  );
 }

@@ -17,6 +17,20 @@ export function ogResponseHeaders(maxAge) {
   };
 }
 
+export function xmlResponseHeaders(maxAge) {
+  return {
+    'content-type': 'application/xml; charset=utf-8',
+    'cache-control': `public, max-age=${maxAge}`,
+  };
+}
+
+export function textResponseHeaders(maxAge) {
+  return {
+    'content-type': 'text/plain; charset=utf-8',
+    'cache-control': `public, max-age=${maxAge}`,
+  };
+}
+
 export async function proxyToRailway(request, env) {
   const url = new URL(request.url);
   const target = `${railwayOrigin(env)}${url.pathname}${url.search}`;

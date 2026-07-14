@@ -1,6 +1,6 @@
 /** Static site page meta — keep in sync with `src/lib/sitePageMeta.ts`. */
 
-import {SITE_NAME, isLinkPreviewCrawler} from './eventPageMeta.mjs';
+import {SITE_NAME, escapeHtml, isLinkPreviewCrawler} from './eventPageMeta.mjs';
 
 export {SITE_NAME, isLinkPreviewCrawler};
 
@@ -82,6 +82,38 @@ export function buildDefaultSitePageMeta({siteOrigin, pageUrl} = {}) {
     url,
     siteName: SITE_NAME,
   };
+}
+
+export function buildSiteJsonLd({siteOrigin, pageUrl} = {}) {
+  const origin = (siteOrigin ?? DEFAULT_SITE_ORIGIN).replace(/\/$/, '');
+  const url = pageUrl ?? origin;
+  return {
+    '@context': 'https://schema.org',
+    '@type': 'WebSite',
+    name: SITE_NAME,
+    url,
+    description: DEFAULT_SITE_DESCRIPTION,
+  };
+}
+
+export function buildStaticCrawlerBody(meta) {
+  const title = escapeHtml(meta.title);
+  const description = escapeHtml(meta.description);
+  const url = escapeHtml(meta.url);
+  const siteName = escapeHtml(meta.siteName ?? SITE_NAME);
+
+  return `<main>
+  <h1>${title}</h1>
+  <p>${description}</p>
+  <p><a href="${url}">Open ${siteName}</a></p>
+</main>`;
+}
+
+export function buildStaticCrawlerExtras(pathname, meta, {siteOrigin} = {}) {
+  const path = normalizeSitePath(pathname);
+  const bodyHtml = buildStaticCrawlerBody(meta);
+  const jsonLd = path === '/' ? buildSiteJsonLd({siteOrigin, pageUrl: meta.url}) : undefined;
+  return {bodyHtml, jsonLd};
 }
 
 export function buildStaticPageMeta(pathname, {siteOrigin, pageUrl} = {}) {

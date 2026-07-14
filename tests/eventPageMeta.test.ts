@@ -1,7 +1,8 @@
 import {describe, expect, it} from 'vitest';
 import {buildEventPageMeta as buildClientMeta} from '../src/lib/eventPageMeta';
 import {
-  buildEventOgHtml,
+  buildCrawlerPageHtml,
+  buildEventCrawlerBody,
   buildEventPageMeta as buildSharedMeta,
   escapeHtml,
   isLinkPreviewCrawler,
@@ -123,15 +124,17 @@ describe('eventPageMeta shared', () => {
     expect(image).toBe('https://cdn.example.com/custom.webp');
   });
 
-  it('emits escaped OG HTML', () => {
+  it('emits escaped OG HTML with crawler body', () => {
     const meta = buildSharedMeta(
       {...baseDbEvent, title: 'A & B <test>'},
       {siteOrigin: 'https://forza.events'},
     );
-    const html = buildEventOgHtml(meta);
+    const html = buildCrawlerPageHtml(meta, {bodyHtml: buildEventCrawlerBody(meta)});
     expect(html).toContain('A &amp; B &lt;test&gt;');
+    expect(html).toContain('<h1>');
     expect(html).toContain('property="og:image"');
     expect(html).toContain('name="twitter:card"');
+    expect(html).toContain('name="robots" content="index, follow"');
     expect(escapeHtml('a "b"')).toBe('a &quot;b&quot;');
   });
 });

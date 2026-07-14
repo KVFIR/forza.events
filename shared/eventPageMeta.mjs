@@ -23,7 +23,7 @@ export const EVENT_PATH_RE =
   /^\/event\/([0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12})(?:\/results)?\/?$/i;
 
 const CRAWLER_UA_RE =
-  /bot|facebookexternalhit|discordbot|slackbot|telegrambot|twitterbot|linkedinbot|whatsapp|embedly|pinterest|applebot|bingbot|bingpreview|skypeuripreview|vkshare|redditbot/i;
+  /bot|facebookexternalhit|discordbot|slackbot|telegrambot|twitterbot|linkedinbot|whatsapp|embedly|pinterest|applebot|bingbot|bingpreview|skypeuripreview|vkshare|redditbot|google-inspectiontool|google-extended|gptbot|chatgpt-user|anthropic-ai|claude-web|claudebot|perplexitybot|bytespider|meta-externalagent|cohere-ai/i;
 
 export function parseEventPagePath(pathname) {
   const m = pathname.match(EVENT_PATH_RE);
@@ -113,12 +113,64 @@ export function escapeHtml(value) {
     .replaceAll('"', '&quot;');
 }
 
-export function buildEventOgHtml(meta) {
+function schemaEventStatus(status) {
+  if (status === 'cancelled') return 'https://schema.org/EventCancelled';
+  if (status === 'completed' || status === 'archived') return null;
+  return 'https://schema.org/EventScheduled';
+}
+
+export function buildEventJsonLd(event, meta, {siteOrigin} = {}) {
+  const origin = (siteOrigin ?? 'https://forza.events').replace(/\/$/, '');
+  const status = event.status ?? event.lifecycle ?? 'open';
+  const startDate = event.starts_at ?? event.startsAt;
+  const name = String(meta.title ?? 'Event')
+    .replace(/ · Results$/i, '')
+    .trim();
+  const eventStatus = schemaEventStatus(status);
+
+  return {
+    '@context': 'https://schema.org',
+    '@type': 'Event',
+    name,
+    description: meta.description,
+    startDate,
+    ...(eventStatus ? {eventStatus} : {}),
+    eventAttendanceMode: 'https://schema.org/OnlineEventAttendanceMode',
+    image: meta.image,
+    url: meta.url,
+    organizer: {
+      '@type': 'Organization',
+      name: SITE_NAME,
+      url: origin,
+    },
+  };
+}
+
+export function buildEventCrawlerBody(meta) {
+  const title = escapeHtml(meta.title);
+  const description = escapeHtml(meta.description);
+  const url = escapeHtml(meta.url);
+  const siteName = escapeHtml(meta.siteName ?? SITE_NAME);
+
+  return `<main>
+  <h1>${title}</h1>
+  <p>${description}</p>
+  <p>Forza Horizon community event on ${siteName}. Sign in with Discord to browse and join.</p>
+  <p><a href="${url}">View event on ${siteName}</a></p>
+</main>`;
+}
+
+export function buildCrawlerPageHtml(meta, {bodyHtml, jsonLd, robots = 'index, follow'} = {}) {
   const title = escapeHtml(meta.title);
   const description = escapeHtml(meta.description);
   const image = escapeHtml(meta.image);
   const url = escapeHtml(meta.url);
   const siteName = escapeHtml(meta.siteName ?? SITE_NAME);
+  const body = bodyHtml ?? `<p><a href="${url}">${title}</a></p>`;
+  const robotsContent = escapeHtml(robots);
+  const jsonLdScript = jsonLd
+    ? `\n  <script type="application/ld+json">${JSON.stringify(jsonLd).replace(/</g, '\\u003c')}</script>`
+    : '';
 
   return `<!DOCTYPE html>
 <html lang="en">
@@ -127,6 +179,7 @@ export function buildEventOgHtml(meta) {
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>${title}</title>
   <meta name="description" content="${description}">
+  <meta name="robots" content="${robotsContent}">
   <link rel="canonical" href="${url}">
   <meta property="og:title" content="${title}">
   <meta property="og:description" content="${description}">
@@ -137,10 +190,15 @@ export function buildEventOgHtml(meta) {
   <meta name="twitter:card" content="summary_large_image">
   <meta name="twitter:title" content="${title}">
   <meta name="twitter:description" content="${description}">
-  <meta name="twitter:image" content="${image}">
+  <meta name="twitter:image" content="${image}">${jsonLdScript}
 </head>
 <body>
-  <p><a href="${url}">${title}</a></p>
+  ${body}
 </body>
 </html>`;
+}
+
+/** @deprecated Use buildCrawlerPageHtml — kept for existing imports. */
+export function buildEventOgHtml(meta, options) {
+  return buildCrawlerPageHtml(meta, options);
 }
