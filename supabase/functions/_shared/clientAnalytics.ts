@@ -20,6 +20,8 @@ export const ALLOWED_CLIENT_EVENT_NAMES = new Set<string>([
   'add_group',
   'change_group_leader',
   'bot_install_click',
+  'notification_dm_enable',
+  'notification_dm_disable',
   'empty_guild_list',
   'api_error',
 ]);

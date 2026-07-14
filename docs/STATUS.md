@@ -11,7 +11,7 @@ Remaining work is mostly **Activity E2E in pilot guilds**, **Railway frontend re
 | Layer | State |
 |-------|--------|
 | React Activity (UI) | Done — Browse, Detail, Create (wizard), My Events, Profile, i18n (EN + RU) |
-| Supabase schema | Done — migrations `001`–`024` |
+| Supabase schema | Done — migrations `001`–`026` |
 | Edge Functions | Done — 21 functions ([`supabase/README.md`](../supabase/README.md)) |
 | Security hardening | Done — storage, RLS scope, CORS, rate limits, publish validation |
 | Local browser dev | Done — Discord OAuth + Supabase (not mock mode) |
@@ -88,7 +88,7 @@ Details: [`supabase/README.md`](../supabase/README.md).
 | Check | Result |
 |-------|--------|
 | Supabase project | `uoysqfczahqmctbrrizn` (FORZA.EVENTS) |
-| Migrations | `001`–`024` on remote |
+| Migrations | `001`–`026` on remote |
 | Edge Functions | 21 via `deploy:functions` |
 | Activity hosting | Railway `https://forzaevents.up.railway.app` |
 | Discord application verification | Approved — legal URLs on deploy origin |
@@ -130,7 +130,7 @@ Set **`APP_ORIGIN`** on Railway to the deploy URL (embed cover URLs + Edge CORS)
 | Double Discord embed after publish | Old code / race before `003` | `db push` + redeploy `publish-event`; delete duplicate message manually |
 | DMs not delivered | Cron not scheduled or missing `NOTIFICATION_CRON_SECRET` | Supabase secret + GitHub Actions secrets (see `.github/workflows/process-notifications.yml`) |
 | Analytics empty / 403 ingest | Missing `ANALYTICS_TRACK_SECRET` on Railway build or Supabase | Set in `.env`, `npm run sync:secrets`, redeploy frontend; check `/analytics` ingest banner locally |
-| `client_events` table missing | Migrations `021`–`024` not pushed | `supabase db push` |
+| `client_events` table missing | Migrations `021`–`026` not pushed | `supabase db push` |
 
 ---
 

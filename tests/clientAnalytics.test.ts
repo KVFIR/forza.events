@@ -23,6 +23,17 @@ describe('normalizeClientEvent', () => {
     });
   });
 
+  it('accepts notification preference events', () => {
+    expect(
+      normalizeClientEvent({name: 'notification_dm_enable', outcome: 'success'}, 'activity', '1')
+        ?.event_name,
+    ).toBe('notification_dm_enable');
+    expect(
+      normalizeClientEvent({name: 'notification_dm_disable', outcome: 'success'}, 'activity', '1')
+        ?.event_name,
+    ).toBe('notification_dm_disable');
+  });
+
   it('rejects invalid names and meta', () => {
     expect(normalizeClientEvent({name: 'JOIN'}, 'unknown', null)).toBeNull();
     expect(normalizeClientEvent({name: 'not_allowed'}, 'unknown', null)).toBeNull();

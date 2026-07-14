@@ -15,6 +15,29 @@ export type EventViewsPerSessionMetric = {
   avg: number | null;
 };
 
+export type NotificationDashboard = {
+  outbox_in_window: number;
+  by_status: Record<string, number>;
+  by_kind: Record<string, number>;
+  by_kind_sent: Record<string, number>;
+  skip_reasons: Record<string, number>;
+  delivery: {sent: number; failed: number; rate: number | null};
+  backlog: {pending: number; processing: number};
+  dm_prefs: {enabled: number; disabled: number};
+  client_prefs: {
+    dm_enable: number;
+    dm_disable: number;
+    dm_enable_blocked_bot_install: number;
+  };
+  recent_failures: {
+    at: string;
+    kind: string;
+    last_error: string | null;
+    attempts: number;
+  }[];
+  daily: {day: string; sent: number; failed: number; skipped: number}[];
+};
+
 export type AnalyticsDashboardSummary = {
   days: number;
   since: string;
@@ -33,6 +56,7 @@ export type AnalyticsDashboardSummary = {
     event_views_per_session: EventViewsPerSessionMetric;
   };
   host_actions: Record<string, number>;
+  notifications?: NotificationDashboard;
   top_errors: {code: string; function_name: string | null; count: number}[];
   errors_by_surface: Record<string, number>;
   errors_by_function: Record<string, number>;
