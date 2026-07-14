@@ -152,7 +152,7 @@ serve(async (req) => {
         if (detail.includes('Discord rate limit')) {
           return appErrorResponse(req, 429, API_ERROR_CODES.TOO_MANY_REQUESTS);
         }
-        return appErrorResponse(req, 400, VALIDATION_CODES.CONVOY_LEADER_HANDLE_REQUIRED);
+        return internalErrorResponse(req, e);
       }
     }
 

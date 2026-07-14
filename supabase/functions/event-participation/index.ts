@@ -11,7 +11,10 @@ import {validateGamertag} from '../_shared/gamertag.ts';
 import {rateLimitMutation} from '../_shared/rateLimitPresets.ts';
 import {responseForRpcError} from '../_shared/rpcErrors.ts';
 import {deferNotificationDelivery} from '../_shared/notifications.ts';
-import {groupFillsOnJoin, groupFillsOnPromote} from '../_shared/notificationParticipation.ts';
+import {
+  shouldEnqueueHostGroupFilledOnJoin,
+  shouldEnqueueHostGroupFilledOnPromote,
+} from '../_shared/notificationParticipation.ts';
 import {
   enqueueHostGroupFilled,
   enqueueHostLobbyFull,
@@ -121,7 +124,14 @@ serve(async (req) => {
               groupIndex,
               participants,
             );
-            if (groupFillsOnPromote(participants, groupIndex, eventRow.max_players)) {
+            if (
+              shouldEnqueueHostGroupFilledOnPromote(
+                participants,
+                groupIndex,
+                eventRow.max_players,
+                eventRow.group_count ?? 1,
+              )
+            ) {
               await enqueueHostGroupFilled(supabase, eventRow, groupIndex);
             }
             deferNotificationDelivery(supabase);
@@ -241,13 +251,14 @@ serve(async (req) => {
         await enqueueHostLobbyFull(supabase, eventRow, waitlistCount);
         deferNotificationDelivery(supabase);
       } else if (
-        groupFillsOnJoin(
+        shouldEnqueueHostGroupFilledOnJoin(
           existing,
           waitlisted,
           roster ?? [],
           groupIndex,
           discordUser.id,
           event.max_players,
+          event.group_count ?? 1,
         )
       ) {
         await enqueueHostGroupFilled(supabase, eventRow, groupIndex);

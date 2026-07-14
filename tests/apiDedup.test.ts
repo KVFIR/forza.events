@@ -5,6 +5,8 @@ describe('dedupCacheKey', () => {
   it('does not embed the raw secret', () => {
     const token = 'super-secret-discord-token';
     expect(dedupCacheKey('list-guilds', token)).not.toContain(token);
+    expect(dedupCacheKey('list-guilds:dm', token)).not.toContain(token);
+    expect(dedupCacheKey('list-guilds', token)).not.toBe(dedupCacheKey('list-guilds:dm', token));
   });
 });
 

@@ -118,6 +118,9 @@ export function EventDetailChangeGroupLeader({
           {t('changeGroupLeader.title', {n: groupIndex})}
         </h2>
         <p className="mt-2 text-sm text-muted">{t('changeGroupLeader.description')}</p>
+        <p className="mt-1.5 text-[10px] leading-relaxed text-muted">
+          {t('changeGroupLeader.notifyHint')}
+        </p>
 
         <ConvoyLeaderPicker
           accessToken={accessToken}

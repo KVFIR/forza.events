@@ -6,9 +6,9 @@ import {
   fetchUserGuilds,
   filterGuildsWithBot,
   publishTargetHint,
-  userCanManageGuild,
   verifyDiscordToken,
 } from '../_shared/discord.ts';
+import {resolveListGuildCandidates} from '../_shared/listGuildCandidates.ts';
 import {rateLimitAuth} from '../_shared/rateLimitPresets.ts';
 
 serve(async (req) => {
@@ -25,10 +25,16 @@ serve(async (req) => {
   if (authLimited) return authLimited;
 
   try {
+    const body = req.method === 'POST' ? await req.json().catch(() => ({})) : {};
+    const dmReachability = body?.dm_reachability === true;
+    const fresh = body?.fresh === true;
+
     const userGuilds = await fetchUserGuilds(token!);
-    const manageable = userGuilds.filter((g) => userCanManageGuild(g.permissions));
-    const candidates = manageable.length > 0 ? manageable : userGuilds;
-    const withBot = await filterGuildsWithBot(candidates);
+    const candidates = resolveListGuildCandidates(userGuilds, dmReachability);
+    const withBot = await filterGuildsWithBot(
+      candidates,
+      dmReachability && fresh ? {fresh: true} : undefined,
+    );
 
     const list = withBot
       .map((g) => ({
@@ -42,7 +48,11 @@ serve(async (req) => {
 
     return jsonResponse({
       guilds: list,
-      hint: list.length === 0 ? publishTargetHint() : null,
+      hint: list.length === 0
+        ? (dmReachability
+          ? 'Add FORZA.EVENTS to a Discord server you share to receive DMs.'
+          : publishTargetHint())
+        : null,
     }, 200, req);
   } catch (e) {
     const msg = e instanceof Error ? e.message : String(e);

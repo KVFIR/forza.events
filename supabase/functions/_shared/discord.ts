@@ -231,9 +231,9 @@ const BOT_GUILDS_TTL_MS = 60_000;
 let botGuildIdsCache: {ids: Set<string>; expiresAt: number} | null = null;
 
 /** Guild IDs where the bot is installed (one paginated list call, cached). */
-export async function fetchBotGuildIds(): Promise<Set<string>> {
+export async function fetchBotGuildIds(options?: {fresh?: boolean}): Promise<Set<string>> {
   const now = Date.now();
-  if (botGuildIdsCache && now < botGuildIdsCache.expiresAt) {
+  if (!options?.fresh && botGuildIdsCache && now < botGuildIdsCache.expiresAt) {
     return botGuildIdsCache.ids;
   }
 
@@ -272,8 +272,9 @@ export async function isBotInGuild(guildId: string): Promise<boolean> {
 /** Intersect user guilds with servers where the bot is installed. */
 export async function filterGuildsWithBot(
   guilds: DiscordGuildSummary[],
+  options?: {fresh?: boolean},
 ): Promise<DiscordGuildSummary[]> {
-  const botIds = await fetchBotGuildIds();
+  const botIds = await fetchBotGuildIds(options);
   return guilds.filter((g) => botIds.has(g.id));
 }
 

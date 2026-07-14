@@ -20,7 +20,9 @@
     "editNotifyTitle": "Notify registered racers?",
     "editNotifyBody": "Saving will send Discord DMs about changes to the date/time, tracks, and/or car rules. Waitlisted racers are notified only when the date or time changes.",
     "editNotifyConfirm": "Save & notify",
-    "editNotifyCancel": "Keep editing"
+    "editNotifyCancel": "Keep editing",
+    "dmSetupBody": "Discord can only DM you when you share a server with FORZA.EVENTS. Add the bot to a server you manage, then return here and try again.",
+    "dmEnableBlockedTitle": "Add FORZA.EVENTS to a server"
   },
   "common": {
     "back": "Back",
@@ -204,6 +206,7 @@
     "button": "Change leader",
     "title": "Change convoy leader — Group {{n}}",
     "description": "Pick a new convoy leader for this group. Racers from the waitlist, other groups (not convoy leaders), or you (if not already a convoy leader) can be chosen.",
+    "notifyHint": "Racers in this group and the new convoy leader will get a Discord DM.",
     "leaderCandidates": "Suggested leaders",
     "confirm": "Save",
     "pickLeader": "Pick a convoy leader for this group.",

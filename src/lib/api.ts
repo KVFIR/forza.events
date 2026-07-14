@@ -190,15 +190,25 @@ export async function fetchLaunchIntent(
 
 export async function listGuilds(
   discordToken: string,
-  options?: {fresh?: boolean},
+  options?: {fresh?: boolean; dmReachability?: boolean},
 ) {
+  const cachePrefix = options?.dmReachability ? 'list-guilds:dm' : 'list-guilds';
   return coalesceInflight(
-    dedupCacheKey('list-guilds', discordToken),
+    dedupCacheKey(cachePrefix, discordToken),
     () =>
       invoke<{
         guilds: {id: string; name: string; icon_url?: string | null}[];
         hint?: string | null;
-      }>('list-guilds', {}, discordToken),
+      }>(
+        'list-guilds',
+        options?.dmReachability
+          ? {
+              dm_reachability: true,
+              ...(options?.fresh ? {fresh: true} : {}),
+            }
+          : {},
+        discordToken,
+      ),
     {cacheMs: 30_000, fresh: options?.fresh},
   );
 }

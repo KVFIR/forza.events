@@ -278,6 +278,7 @@ Manual QA matrix aligned with current code behavior (not an abstract checklist).
 - [ ] `date-fns` locale on dates.
 - [ ] Hosted / participated stats.
 - [ ] Recent completed + placements.
+- [ ] **DM bell:** no mutual guild with bot → toggle **off** (even when DB default on); enable → **Add bot** dialog; after install + return to Activity → toggle **on** without re-saving.
 
 ---
 
@@ -346,9 +347,12 @@ At least one mapped message per screen:
 
 | Case | Steps | Expected |
 |------|--------|----------|
+| No mutual guild | Profile with account that shares no server with the bot | Bell **off**; enable → Add bot dialog |
+| After bot install | Add bot via dialog → return to Activity tab | Bell **on** (DB pref still default true) |
 | Opt-out | Profile → bell off | No cancel / leader / 2h / host-fill / tracks-only edit DMs; **reschedule** DM still sent |
 | Waitlist promote | Fill group; user on waitlist; active racer leaves | Promoted user gets **seat opened** DM (even if bell off) |
-| Host group full | Promote fills last seat in group | Host gets **group filled** DM |
+| Host group full (partial) | `group_count ≥ 2`; one group fills while another has open seats | Host does **not** get **group filled** DM |
+| Host group full (lobby) | Last open seat in the **last** group fills (all groups full) | Host gets **group filled** DM for that group |
 | Cancel | Host cancels published event | Active + waitlist get cancel DM; pending 2h reminders skipped; **host does not** |
 | Published edit | Host changes date/time, tracks, and/or cars → **Save & notify** | Active racers get update DM; waitlist too when **date/time** changes |
 | Add group (empty waitlist) | Host adds group with guild leader | New leader gets **convoy leader assigned** DM |
