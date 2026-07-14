@@ -3,7 +3,7 @@ import type {LegalDocument} from './types';
 /** English terms of service — authoritative for Discord verification. */
 export const termsOfServiceEn: LegalDocument = {
   title: 'Terms of Service',
-  lastUpdated: '2026-05-28',
+  lastUpdated: '2026-07-14',
   intro:
     'These Terms of Service ("Terms") govern your access to and use of FORZA.EVENTS, including our Discord Application, embedded Activity, bot features, and related websites (collectively, the "Service"). By using the Service, you agree to these Terms. If you do not agree, do not use the Service.',
   sections: [
@@ -13,7 +13,7 @@ export const termsOfServiceEn: LegalDocument = {
       blocks: [
         {
           type: 'p',
-          text: 'FORZA.EVENTS is a community tool for organizing and joining Forza Horizon racing events through Discord. The Service is delivered primarily as a Discord Activity inside the Discord client. Certain pages (including these Terms and our Privacy Policy) may be viewed in a standard web browser for reference and compliance purposes.',
+          text: 'FORZA.EVENTS is a community tool for organizing and joining Forza Horizon racing events through Discord. The Service is delivered primarily as a Discord Activity inside the Discord client. The same features are also available on our website at forza.events (and on localhost during development) in a standard web browser after Discord sign-in. Public legal pages are available without signing in.',
         },
       ],
     },
@@ -43,7 +43,7 @@ export const termsOfServiceEn: LegalDocument = {
       blocks: [
         {
           type: 'p',
-          text: 'You sign in through Discord OAuth. You are responsible for activity under your Discord account and for keeping your account secure. You must provide accurate information (for example, your Xbox gamertag when joining events) so hosts and other players can coordinate in-game.',
+          text: 'You sign in through Discord OAuth (in the Activity or in a browser on forza.events). You are responsible for activity under your Discord account and for keeping your account secure. You must provide accurate information (for example, your Xbox gamertag when joining events) so hosts and other players can coordinate in-game.',
         },
       ],
     },
@@ -69,7 +69,8 @@ export const termsOfServiceEn: LegalDocument = {
         {
           type: 'ul',
           items: [
-            'You may join events subject to capacity, event rules, and Service restrictions (for example, valid gamertag format).',
+            'You may join events subject to capacity, waitlist rules, event rules, and Service restrictions (for example, valid gamertag format). When a lobby is full you may enter a waitlist and be promoted automatically when a seat opens.',
+            'Hosts may assign convoy leaders and open additional lobby groups; assigned leaders have product-specific restrictions (for example, they cannot leave until the host selects a replacement).',
             'Leaving an event may be restricted after the event start time.',
             'You agree not to harass others, post unlawful content, attempt to disrupt the Service, abuse APIs, scrape data, or impersonate others.',
             'Convoy leader and host roles have specific rules in the product; misuse may result in removal from events or loss of access.',

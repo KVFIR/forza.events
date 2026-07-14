@@ -3,7 +3,7 @@ import type {LegalDocument} from './types';
 /** English privacy policy — authoritative for Discord verification and compliance. */
 export const privacyPolicyEn: LegalDocument = {
   title: 'Privacy Policy',
-  lastUpdated: '2026-07-13',
+  lastUpdated: '2026-07-14',
   intro:
     'This Privacy Policy describes how FORZA.EVENTS ("we", "us", "our") collects, uses, stores, and shares information when you use our Discord Application, embedded Activity, and related services (collectively, the "Service"). The Service helps Forza Horizon community members discover, create, join, and run racing events through Discord.',
   sections: [
@@ -27,7 +27,7 @@ export const privacyPolicyEn: LegalDocument = {
       blocks: [
         {
           type: 'p',
-          text: 'This policy applies to the Service when you use it inside Discord (including through the App Launcher, voice, DMs, or links from event embeds) and when you open certain public pages on our website (such as this policy and our Terms of Service).',
+          text: 'This policy applies to the Service when you use it inside Discord (including through the App Launcher, voice, DMs, or links from event embeds) and when you use our website at forza.events (or localhost during development) in a standard web browser after Discord sign-in, as well as public pages such as this policy and our Terms of Service.',
         },
         {
           type: 'p',
@@ -52,7 +52,8 @@ export const privacyPolicyEn: LegalDocument = {
             'Event and participation data: event titles, types, schedules, tracks, cars, restrictions, cover images you upload, server and channel IDs for publishing, join/leave actions, convoy leader assignments, race results, and related metadata created when you host or join events.',
             'Discord channel and embed metadata: channel IDs, message IDs for published embeds, and launch-intent records when you open the Activity from a button on an embed.',
             'Technical and security data: API request metadata (such as client IP address and timestamps) used for rate limiting and abuse prevention; browser language preference stored locally; optional locale choice stored in your browser’s local storage.',
-            'Session data on your device: after sign-in, your Discord OAuth access token and a cached copy of basic profile fields may be stored in session storage until you close the browser tab or sign out, so the Service can call our backend on your behalf.',
+            'Sign-in data on your device: after browser sign-in on forza.events (or localhost), your Discord OAuth access token and a cached copy of basic profile fields may be stored in your browser’s local storage until you sign out or clear site data, so the Service can call our backend on your behalf. Inside the Discord Activity iframe, equivalent session data is kept in memory for that Activity session.',
+            'Product analytics (when enabled): pseudonymous usage events such as screen views, join/leave/publish actions, API error codes, client surface (Activity vs browser), and your Discord user ID when signed in — stored in our database to measure reliability and improve the Service, not for advertising. Retained for a limited period (typically 90 days) then pruned.',
           ],
         },
         {
@@ -92,6 +93,7 @@ export const privacyPolicyEn: LegalDocument = {
             'Validate publish targets (confirm you can manage the server and the bot can post in the chosen channel).',
             'Display public event and participant information to other users of the Service.',
             'Maintain security, prevent abuse, and enforce rate limits.',
+            'Measure reliability and improve the Service through optional product analytics (not used for advertising).',
             'Comply with law and respond to lawful requests.',
           ],
         },
@@ -107,7 +109,7 @@ export const privacyPolicyEn: LegalDocument = {
       blocks: [
         {
           type: 'p',
-          text: 'Where the GDPR or UK GDPR applies, we rely on: (a) performance of a contract — to provide the Service you request; (b) legitimate interests — to secure and improve the Service, prevent fraud, and show community event listings (balanced against your rights); and (c) consent — where required, for example when you choose optional profile fields or authorize Discord OAuth. You may withdraw consent by disconnecting the Application or contacting us, without affecting lawfulness of processing before withdrawal.',
+          text: 'Where the GDPR or UK GDPR applies, we rely on: (a) performance of a contract — to provide the Service you request; (b) legitimate interests — to secure and improve the Service, prevent fraud, show community event listings, and run product analytics (balanced against your rights); and (c) consent — where required, for example when you choose optional profile fields or authorize Discord OAuth. You may withdraw consent by disconnecting the Application or contacting us, without affecting lawfulness of processing before withdrawal.',
         },
       ],
     },
@@ -125,6 +127,7 @@ export const privacyPolicyEn: LegalDocument = {
             'Discord, Inc. — OAuth, bot APIs, Activity hosting, embeds, and interactions. Data you share with Discord is also subject to Discord’s Privacy Policy and Developer Terms.',
             'Supabase (database, storage, serverless functions) — hosting and processing data we store (events, users, participation, images). Supabase acts as our infrastructure provider.',
             'Railway or similar hosting — serving the web Application frontend.',
+            'Cloudflare — reverse proxy, link-preview (Open Graph) pages for public event URLs, and related edge delivery on forza.events.',
             'Other users — published events, participant gamertags, host usernames, and results visible according to event status and Service rules.',
           ],
         },
@@ -140,7 +143,7 @@ export const privacyPolicyEn: LegalDocument = {
       blocks: [
         {
           type: 'p',
-          text: 'We keep information for as long as needed to provide the Service and for legitimate business purposes (for example, maintaining event history and participation records). Rate-limit and security logs are kept for a limited period. You may request deletion of your account data as described in Section 10. Some information may remain in backups for a short period or where we must retain it for legal obligations.',
+          text: 'We keep information for as long as needed to provide the Service and for legitimate business purposes (for example, maintaining event history and participation records). Product analytics events are typically retained for about 90 days, then pruned. Rate-limit and security logs are kept for a limited period. You may request deletion of your account data as described in Section 10. Some information may remain in backups for a short period or where we must retain it for legal obligations.',
         },
       ],
     },
@@ -168,7 +171,7 @@ export const privacyPolicyEn: LegalDocument = {
             'Update profile fields (such as gamertag) in the Service where available.',
             'Leave events and stop participating; some host-created records may remain tied to completed events.',
             'Revoke the Application’s access in Discord under User Settings → Authorized Apps.',
-            'Clear session data by closing the browser session or signing out where the Service provides sign-out.',
+            'Clear sign-in data by signing out in the browser or clearing site data for forza.events; in the Activity, session data clears when you end the Activity session.',
             'Request access or deletion by emailing us (Section 12). We may need to verify your Discord identity before fulfilling requests.',
           ],
         },
