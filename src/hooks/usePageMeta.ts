@@ -1,7 +1,5 @@
-import {useEffect} from 'react';
-import type {EventPageMeta} from '../lib/eventPageMeta';
-
-const DEFAULT_TITLE = 'FORZA.EVENTS';
+import {useLayoutEffect} from 'react';
+import type {PageMeta} from '../lib/pageMeta';
 
 function upsertMeta(attr: 'name' | 'property', key: string, content: string) {
   const selector = `meta[${attr}="${key}"]`;
@@ -14,11 +12,7 @@ function upsertMeta(attr: 'name' | 'property', key: string, content: string) {
   el.setAttribute('content', content);
 }
 
-function removeMeta(attr: 'name' | 'property', key: string) {
-  document.head.querySelector(`meta[${attr}="${key}"]`)?.remove();
-}
-
-function applyPageMeta(meta: EventPageMeta) {
+function applyPageMeta(meta: PageMeta) {
   document.title = meta.title;
   upsertMeta('name', 'description', meta.description);
   upsertMeta('property', 'og:title', meta.title);
@@ -33,37 +27,10 @@ function applyPageMeta(meta: EventPageMeta) {
   upsertMeta('name', 'twitter:image', meta.image);
 }
 
-function clearPageMeta() {
-  document.title = DEFAULT_TITLE;
-  for (const key of [
-    'description',
-    'twitter:card',
-    'twitter:title',
-    'twitter:description',
-    'twitter:image',
-  ]) {
-    removeMeta('name', key);
-  }
-  for (const key of [
-    'og:title',
-    'og:description',
-    'og:image',
-    'og:url',
-    'og:type',
-    'og:site_name',
-  ]) {
-    removeMeta('property', key);
-  }
-}
-
 /** Updates document title + OG/Twitter meta for shareable public pages. */
-export function usePageMeta(meta: EventPageMeta | null | undefined) {
-  useEffect(() => {
-    if (!meta) {
-      clearPageMeta();
-      return;
-    }
+export function usePageMeta(meta: PageMeta | null | undefined) {
+  useLayoutEffect(() => {
+    if (!meta) return;
     applyPageMeta(meta);
-    return () => clearPageMeta();
   }, [meta]);
 }

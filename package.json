@@ -18,6 +18,7 @@
     "deploy:cf-worker": "wrangler deploy",
     "sync:secrets": "node scripts/sync-secrets.mjs",
     "optimize:covers": "node scripts/optimize-covers.mjs",
+    "build:og": "node scripts/build-og-site-image.mjs",
     "seed:events": "node scripts/seed-events.mjs",
     "seed:cars": "node scripts/seed-cars.mjs",
     "data:fh6:scrape": "python3 scripts/scrape_fh6_fandom_cars.py",

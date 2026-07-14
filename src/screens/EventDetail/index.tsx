@@ -13,7 +13,7 @@ import {
   type EventRichPresenceRole,
 } from '../../lib/discordRichPresence';
 import {useEventDetailResults} from '../../hooks/useEventDetailResults';
-import {usePageMeta} from '../../hooks/usePageMeta';
+import {usePageMetaOverride} from '../../context/PageMetaContext';
 import type {EventDetailLocationState} from '../../lib/navigationState';
 import {buildEventPageMeta} from '../../lib/eventPageMeta';
 import {eventDetailBackTo, saveAuthReturnTo} from '../../lib/returnTo';
@@ -175,12 +175,13 @@ export function EventDetail() {
 
   const pageMeta = useMemo(() => {
     if (!event) return null;
+    const origin = typeof window !== 'undefined' ? window.location.origin : undefined;
     return buildEventPageMeta(event, {
-      siteOrigin: typeof window !== 'undefined' ? window.location.origin : undefined,
-      pageUrl: typeof window !== 'undefined' ? window.location.href : undefined,
+      siteOrigin: origin,
+      pageUrl: origin ? `${origin}${location.pathname}` : undefined,
     });
-  }, [event]);
-  usePageMeta(pageMeta);
+  }, [event, location.pathname]);
+  usePageMetaOverride(pageMeta);
 
   if (!event) {
     const awaitingAuthForPossibleDraft =

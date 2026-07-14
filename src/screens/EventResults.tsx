@@ -15,8 +15,8 @@ import {API_ERROR_CODES} from '../lib/apiErrorCodes';
 import {buildResultSubmitRows} from '../lib/eventResults';
 import {resolveResultsRoster} from '../lib/eventRoster';
 import {fetchEventById, fetchEventResults} from '../lib/events';
+import {usePageMetaOverride} from '../context/PageMetaContext';
 import {buildEventPageMeta} from '../lib/eventPageMeta';
-import {usePageMeta} from '../hooks/usePageMeta';
 import {
   savedCountFromResultsFetch,
   shouldLeaveResultsScreen,
@@ -111,13 +111,14 @@ export function EventResults() {
 
   const pageMeta = useMemo(() => {
     if (!event) return null;
+    const origin = typeof window !== 'undefined' ? window.location.origin : undefined;
     return buildEventPageMeta(event, {
-      siteOrigin: typeof window !== 'undefined' ? window.location.origin : undefined,
-      pageUrl: typeof window !== 'undefined' ? window.location.href : undefined,
+      siteOrigin: origin,
+      pageUrl: origin ? `${origin}${location.pathname}` : undefined,
       isResults: true,
     });
-  }, [event]);
-  usePageMeta(pageMeta);
+  }, [event, location.pathname]);
+  usePageMetaOverride(pageMeta);
 
   const discordToken = getAccessToken();
 

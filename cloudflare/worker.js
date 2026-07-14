@@ -1,4 +1,5 @@
 import {handleEventRoute} from './eventOgHandler.js';
+import {handleStaticRoute} from './staticOgHandler.js';
 import {proxySupabase} from './supabaseProxy.js';
 
 export default {
@@ -13,6 +14,6 @@ export default {
       return handleEventRoute(request, env);
     }
 
-    return new Response('Not found', {status: 404});
+    return handleStaticRoute(request, env);
   },
 };

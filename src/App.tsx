@@ -18,6 +18,7 @@ import {AuthProvider, useAuth} from './context/AuthContext';
 import {DiscordLayoutProvider, useDiscordLayout} from './context/DiscordLayoutContext';
 import {DiscordRichPresenceProvider} from './context/DiscordRichPresenceContext';
 import {JoinedEventsProvider} from './context/JoinedEventsContext';
+import {PageMetaProvider} from './context/PageMetaContext';
 import {DiscordRichPresenceSync} from './components/DiscordRichPresenceSync';
 import type {ReactNode} from 'react';
 import {PageLoading} from './components/ui/PageLoading';
@@ -157,8 +158,10 @@ function AppWithProviders() {
       <DiscordLayoutProvider>
         <DiscordRichPresenceProvider>
           <JoinedEventsProvider>
+            <PageMetaProvider>
               <DiscordRichPresenceSync />
               <AppRoutes />
+            </PageMetaProvider>
           </JoinedEventsProvider>
         </DiscordRichPresenceProvider>
       </DiscordLayoutProvider>

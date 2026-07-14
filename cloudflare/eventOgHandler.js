@@ -5,26 +5,10 @@ import {
   parseEventPagePath,
   SITE_NAME,
 } from '../shared/eventPageMeta.mjs';
+import {ogResponseHeaders, proxyToRailway, siteOrigin} from './railwayProxy.js';
+import {resolveDefaultOgImage} from '../shared/sitePageMeta.mjs';
 
 const DEFAULT_SUPABASE_ORIGIN = 'https://uoysqfczahqmctbrrizn.supabase.co';
-const DEFAULT_SITE_ORIGIN = 'https://forza.events';
-const DEFAULT_RAILWAY_ORIGIN = 'https://forzaevents.up.railway.app';
-
-function siteOrigin(env) {
-  return (env.SITE_ORIGIN || DEFAULT_SITE_ORIGIN).replace(/\/$/, '');
-}
-
-function railwayOrigin(env) {
-  return (env.RAILWAY_ORIGIN || DEFAULT_RAILWAY_ORIGIN).replace(/\/$/, '');
-}
-
-function ogResponseHeaders(maxAge) {
-  return {
-    'content-type': 'text/html; charset=utf-8',
-    'cache-control': `private, max-age=${maxAge}`,
-    vary: 'User-Agent',
-  };
-}
 
 async function fetchPublishedEvent(eventId, env) {
   const anonKey = env.SUPABASE_ANON_KEY?.trim();
@@ -55,25 +39,12 @@ async function fetchPublishedEvent(eventId, env) {
   }
 }
 
-async function proxyToRailway(request, env) {
-  const url = new URL(request.url);
-  const target = `${railwayOrigin(env)}${url.pathname}${url.search}`;
-  const response = await fetch(new Request(target, request));
-  const headers = new Headers(response.headers);
-  headers.set('vary', 'User-Agent');
-  return new Response(response.body, {
-    status: response.status,
-    statusText: response.statusText,
-    headers,
-  });
-}
-
 function notFoundHtml(pageUrl, env) {
   const origin = siteOrigin(env);
   const meta = {
     title: `Event not found · ${SITE_NAME}`,
     description: 'This event may have been removed or is not public.',
-    image: `${origin}/logo/logo.png`,
+    image: resolveDefaultOgImage(origin),
     url: pageUrl,
     siteName: SITE_NAME,
   };
@@ -88,7 +59,7 @@ function errorHtml(pageUrl, env) {
   const meta = {
     title: SITE_NAME,
     description: 'Event preview is temporarily unavailable. Open the link in your browser.',
-    image: `${origin}/logo/logo.png`,
+    image: resolveDefaultOgImage(origin),
     url: pageUrl,
     siteName: SITE_NAME,
   };
@@ -102,7 +73,10 @@ export async function handleEventRoute(request, env) {
   const url = new URL(request.url);
   const parsed = parseEventPagePath(url.pathname);
   if (!parsed) {
-    return new Response('Not found', {status: 404});
+    if (isLinkPreviewCrawler(request.headers.get('user-agent'))) {
+      return notFoundHtml(`${siteOrigin(env)}${url.pathname}`, env);
+    }
+    return proxyToRailway(request, env);
   }
 
   if (!isLinkPreviewCrawler(request.headers.get('user-agent'))) {

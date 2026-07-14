@@ -11,6 +11,14 @@ zone_name = "forza.events"
 pattern = "forza.events/event/*"
 zone_name = "forza.events"
 
+[[routes]]
+pattern = "forza.events/"
+zone_name = "forza.events"
+
+[[routes]]
+pattern = "forza.events/*"
+zone_name = "forza.events"
+
 [vars]
 SUPABASE_ORIGIN = "https://uoysqfczahqmctbrrizn.supabase.co"
 SITE_ORIGIN = "https://forza.events"

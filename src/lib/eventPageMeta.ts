@@ -1,6 +1,9 @@
+import type {PageMeta} from './pageMeta';
+import {SITE_NAME} from './pageMeta';
 import type {EventType, ForzaEvent} from './types';
 
-export const SITE_NAME = 'FORZA.EVENTS';
+export {SITE_NAME};
+export type EventPageMeta = PageMeta;
 
 export const DEFAULT_COVER_BY_TYPE: Record<EventType, string> = {
   road: '/covers/cover-road-2.webp',
@@ -14,14 +17,6 @@ export const EVENT_TYPE_LABEL_EN: Record<EventType, string> = {
   road: 'Road racing',
   dirt: 'Dirt racing',
   cruise: 'Cruise',
-};
-
-export type EventPageMeta = {
-  title: string;
-  description: string;
-  image: string;
-  url: string;
-  siteName: string;
 };
 
 type EventMetaInput = Pick<
@@ -86,7 +81,7 @@ function lifecycleSuffix(lifecycle: ForzaEvent['lifecycle']): string {
 export function buildEventPageMeta(
   event: EventMetaInput,
   options?: {siteOrigin?: string; pageUrl?: string; isResults?: boolean},
-): EventPageMeta {
+): PageMeta {
   const origin = (options?.siteOrigin ?? 'https://forza.events').replace(/\/$/, '');
   const url =
     options?.pageUrl ?? `${origin}/event/${event.id}${options?.isResults ? '/results' : ''}`;
