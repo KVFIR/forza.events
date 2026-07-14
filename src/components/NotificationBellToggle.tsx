@@ -9,48 +9,58 @@ type Props = {
   className?: string;
 };
 
-const OPTIONS = [
-  {value: true, Icon: Bell, labelKey: 'notifications.toggleOn' as const},
-  {value: false, Icon: BellOff, labelKey: 'notifications.toggleOff' as const},
-];
-
-/** Profile DM notifications pill — matches LanguageToggle layout. */
+/** Profile DM notifications — labeled row + switch inside profile card footer. */
 export function NotificationBellToggle({enabled, disabled, onChange, className}: Props) {
   const {t} = useTranslation();
+  const Icon = enabled ? Bell : BellOff;
 
   return (
-    <div
+    <label
       className={cn(
-        'inline-flex rounded-lg border border-white/[0.1] bg-black/25 p-0.5 shadow-sm backdrop-blur-md',
+        'flex cursor-pointer items-center justify-between gap-3',
+        disabled && 'pointer-events-none opacity-50',
         className,
       )}
-      role="group"
-      aria-label={t('notifications.toggleOn')}
     >
-      {OPTIONS.map((opt) => {
-        const active = enabled === opt.value;
-        return (
-          <button
-            key={String(opt.value)}
-            type="button"
-            aria-pressed={active}
-            aria-label={t(opt.labelKey)}
-            disabled={disabled}
-            onClick={() => {
-              if (!active) onChange(opt.value);
-            }}
-            className={cn(
-              'flex min-w-[2rem] items-center justify-center rounded-md px-2 py-1 transition-all duration-200',
-              active
-                ? 'bg-white/[0.12] text-white shadow-[inset_0_1px_0_rgba(255,255,255,0.08)]'
-                : 'text-muted hover:text-slate-300',
-              disabled && 'opacity-50',
-            )}
-          >
-            <opt.Icon className="h-3.5 w-3.5" strokeWidth={active ? 2.25 : 2} />
-          </button>
-        );
-      })}
-    </div>
+      <span className="flex min-w-0 flex-1 items-center gap-2.5">
+        <Icon
+          aria-hidden
+          className={cn(
+            'h-3.5 w-3.5 shrink-0',
+            enabled ? 'text-slate-300' : 'text-muted',
+          )}
+          strokeWidth={enabled ? 2.25 : 2}
+        />
+        <span className="min-w-0 text-xs leading-snug text-slate-300">
+          {t('notifications.profileLabel')}
+        </span>
+      </span>
+      <span className="relative inline-flex h-5 w-9 shrink-0">
+        <input
+          type="checkbox"
+          role="switch"
+          checked={enabled}
+          disabled={disabled}
+          aria-label={enabled ? t('notifications.toggleOn') : t('notifications.toggleOff')}
+          onChange={(e) => onChange(e.target.checked)}
+          className="peer sr-only"
+        />
+        <span
+          aria-hidden
+          className={cn(
+            'absolute inset-0 rounded-full border border-white/[0.12] bg-black/30 transition-colors duration-200',
+            'peer-checked:border-white/25 peer-checked:bg-white/15',
+            'peer-focus-visible:outline peer-focus-visible:outline-2 peer-focus-visible:outline-offset-2 peer-focus-visible:outline-white/30',
+          )}
+        />
+        <span
+          aria-hidden
+          className={cn(
+            'pointer-events-none absolute left-0.5 top-0.5 h-4 w-4 rounded-full bg-white shadow-sm transition-transform duration-200',
+            'peer-checked:translate-x-4',
+          )}
+        />
+      </span>
+    </label>
   );
 }

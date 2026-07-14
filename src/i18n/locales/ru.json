@@ -11,6 +11,7 @@
     "ru": "Русский"
   },
   "notifications": {
+    "profileLabel": "Уведомления в Discord о ваших событиях",
     "toggleOn": "Уведомления в Discord",
     "toggleOff": "Уведомления выключены",
     "joinWaitlistTitle": "Встать в очередь?",

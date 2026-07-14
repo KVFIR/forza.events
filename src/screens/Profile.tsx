@@ -157,16 +157,7 @@ export function Profile() {
     <ContentReveal className="pb-10 pt-5">
       <div className="relative overflow-hidden rounded-2xl border border-white/[0.08] bg-card">
         <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_80%_20%,rgba(139,92,246,0.12)_0%,transparent_70%)]" />
-        <div className="absolute right-3 top-1/2 z-10 flex -translate-y-1/2 flex-col items-end gap-3">
-          {isSignedIn ? (
-            <NotificationBellToggle
-              enabled={user.dmNotificationsEnabled !== false}
-              disabled={savingNotifications}
-              onChange={(next) => {
-                void syncProfilePrefs({dm_notifications_enabled: next});
-              }}
-            />
-          ) : null}
+        <div className="absolute right-3 top-1/2 z-10 -translate-y-1/2">
           <LanguageToggle
             onLanguageSelect={(lng) => {
               if (!isSignedIn) return;
@@ -174,7 +165,7 @@ export function Profile() {
             }}
           />
         </div>
-        <div className="relative flex items-center gap-4 p-5 pr-20">
+        <div className="relative flex items-center gap-4 p-5 pr-14">
           <UserAvatar
             src={user.avatarUrl}
             name={user.username}
@@ -197,6 +188,17 @@ export function Profile() {
             </TextButton>
           </div>
         </div>
+        {isSignedIn ? (
+          <div className="relative border-t border-white/[0.06] px-5 py-3">
+            <NotificationBellToggle
+              enabled={user.dmNotificationsEnabled !== false}
+              disabled={savingNotifications}
+              onChange={(next) => {
+                void syncProfilePrefs({dm_notifications_enabled: next});
+              }}
+            />
+          </div>
+        ) : null}
       </div>
 
       {needsGamertag ? (

@@ -11,6 +11,7 @@
     "ru": "Русский"
   },
   "notifications": {
+    "profileLabel": "Discord notifications about your events",
     "toggleOn": "Discord notifications",
     "toggleOff": "Discord notifications off",
     "joinWaitlistTitle": "Join the waitlist?",
