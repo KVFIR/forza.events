@@ -121,23 +121,39 @@ serve(async (req) => {
     }
 
     if (!existingLeaderRow) {
-      const {data: leaderProfile} = await supabase
-        .from('users')
-        .select('username, avatar_url, xbox_gamertag')
-        .eq('discord_id', leaderId)
-        .maybeSingle();
-      if (!leaderGamertag) leaderGamertag = leaderProfile?.xbox_gamertag?.trim() ?? '';
+      try {
+        const {data: leaderProfile} = await supabase
+          .from('users')
+          .select('username, avatar_url, xbox_gamertag')
+          .eq('discord_id', leaderId)
+          .maybeSingle();
+        if (!leaderGamertag) leaderGamertag = leaderProfile?.xbox_gamertag?.trim() ?? '';
 
-      const handle = await resolveDiscordHandleForUserId(leaderId, {
-        bodyHandle: body.leader_username,
-        existingUsername: leaderProfile?.username,
-        fetchById: fetchDiscordUserById,
-      });
-      if (!handle) return appErrorResponse(req, 400, VALIDATION_CODES.CONVOY_LEADER_HANDLE_REQUIRED);
-      await ensureUserRowForDiscordId(supabase, leaderId, {
-        username: handle,
-        avatar_url: body.leader_avatar_url ?? leaderProfile?.avatar_url,
-      });
+        const handle = await resolveDiscordHandleForUserId(leaderId, {
+          bodyHandle: body.leader_username,
+          existingUsername: leaderProfile?.username,
+          fetchById: fetchDiscordUserById,
+        });
+        if (!handle) {
+          return appErrorResponse(req, 400, VALIDATION_CODES.CONVOY_LEADER_HANDLE_REQUIRED);
+        }
+        await ensureUserRowForDiscordId(supabase, leaderId, {
+          username: handle,
+          avatar_url: body.leader_avatar_url ?? leaderProfile?.avatar_url,
+        });
+      } catch (e) {
+        const detail = String(e);
+        console.error(
+          JSON.stringify({msg: 'change-group-leader leader profile setup failed', detail}),
+        );
+        if (detail.includes('Discord user not found')) {
+          return appErrorResponse(req, 400, VALIDATION_CODES.CONVOY_LEADER_HANDLE_REQUIRED);
+        }
+        if (detail.includes('Discord rate limit')) {
+          return appErrorResponse(req, 429, API_ERROR_CODES.TOO_MANY_REQUESTS);
+        }
+        return appErrorResponse(req, 400, VALIDATION_CODES.CONVOY_LEADER_HANDLE_REQUIRED);
+      }
     }
 
     const tag = validateGamertag(leaderGamertag);

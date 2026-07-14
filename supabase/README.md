@@ -53,6 +53,7 @@ npx supabase migration repair --linked --status applied 006 --yes
 | `018_add_group_without_waitlist.sql` | `add_event_group`: allow add group when every active group is full, without requiring waitlist |
 | `019_notification_outbox_claim.sql` | Outbox `processing` status + `claim_notification_outbox_batch` (`FOR UPDATE SKIP LOCKED`) |
 | `020_change_event_group_leader.sql` | `change_event_group_leader` RPC — host reassigns convoy leader per group (published, before start) |
+| `025_change_event_group_leader_postgrest.sql` | Drop integer RPC overload — PostgREST `PGRST203` when Edge passes JSON `p_group_index` |
 | `021_client_analytics.sql` | `client_events` table + `prune_client_events` — surface/funnel/API error analytics |
 | `022_analytics_dashboard_rpc.sql` | `analytics_dashboard_summary` RPC for localhost dashboard |
 | `023_analytics_dashboard_enriched.sql` | Enriched dashboard RPC: conversion, funnel by surface, recent errors |

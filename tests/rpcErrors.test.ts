@@ -1,8 +1,11 @@
 import {describe, expect, it} from 'vitest';
 import {API_ERROR_CODES} from '../src/lib/apiErrorCodes';
+import {VALIDATION_CODES} from '../src/lib/validationCodes';
 import {
+  parsePostgresRpcErrorCode,
   parseRpcExceptionCode,
   responseForRpcException,
+  responseForRpcError,
 } from '../supabase/functions/_shared/rpcErrors.ts';
 
 const req = new Request('https://forza.events');
@@ -42,6 +45,37 @@ describe('parseRpcExceptionCode', () => {
   });
 });
 
+describe('parsePostgresRpcErrorCode', () => {
+  it('maps PostgREST overload ambiguity to BAD_REQUEST', () => {
+    expect(
+      parsePostgresRpcErrorCode({
+        code: 'PGRST203',
+        message: 'Could not choose the best candidate function between: ...',
+      }),
+    ).toBe(API_ERROR_CODES.BAD_REQUEST);
+  });
+
+  it('maps convoy leader unique violations', () => {
+    expect(
+      parsePostgresRpcErrorCode({
+        code: '23505',
+        message:
+          'duplicate key value violates unique constraint "ep_one_convoy_leader_per_event_idx"',
+      }),
+    ).toBe(API_ERROR_CODES.LEADER_ALREADY_CONVOY_LEADER);
+  });
+
+  it('maps missing users FK to CONVOY_LEADER_HANDLE_REQUIRED', () => {
+    expect(
+      parsePostgresRpcErrorCode({
+        code: '23503',
+        message:
+          'insert or update on table "event_participants" violates foreign key constraint "event_participants_discord_id_fkey"',
+      }),
+    ).toBe(VALIDATION_CODES.CONVOY_LEADER_HANDLE_REQUIRED);
+  });
+});
+
 describe('responseForRpcException', () => {
   it('maps conflict codes to HTTP 409', async () => {
     for (const message of ['RESULTS_ALREADY_SUBMITTED', 'EVENT_FULL'] as const) {
@@ -57,5 +91,16 @@ describe('responseForRpcException', () => {
     await expect(res!.json()).resolves.toMatchObject({
       code: API_ERROR_CODES.LEADER_CANNOT_LEAVE,
     });
+  });
+});
+
+describe('responseForRpcError', () => {
+  it('maps PGRST203 to HTTP 400 BAD_REQUEST', async () => {
+    const res = responseForRpcError(req, {
+      code: 'PGRST203',
+      message: 'Could not choose the best candidate function between: ...',
+    });
+    expect(res.status).toBe(400);
+    await expect(res.json()).resolves.toMatchObject({code: API_ERROR_CODES.BAD_REQUEST});
   });
 });
