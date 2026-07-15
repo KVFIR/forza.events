@@ -38,16 +38,32 @@
       rel="stylesheet"
     />
     <style>
+      /* Critical paint before Tailwind — prevents default white body margin/frame */
+      html,
+      body,
+      #root {
+        margin: 0;
+        padding: 0;
+        min-height: 100%;
+        background-color: #06060e;
+      }
+
+      /* Keep in sync with AppBootScreen + body::before in index.css */
       #boot-splash {
         box-sizing: border-box;
+        position: fixed;
+        inset: 0;
+        z-index: 9999;
         display: flex;
-        min-height: 100vh;
+        width: 100%;
+        min-height: 100%;
         flex-direction: column;
         align-items: center;
         justify-content: center;
+        gap: 1rem;
         padding: 1.5rem;
         text-align: center;
-        color: #94a3b8;
+        color: #4b5680;
         font-family:
           Inter,
           system-ui,
@@ -61,14 +77,31 @@
           radial-gradient(ellipse 45% 35% at 95% 95%, rgba(34, 211, 238, 0.05) 0%, transparent 100%);
       }
 
+      #boot-splash .boot-brand {
+        display: flex;
+        align-items: center;
+        gap: 0.75rem;
+      }
+
+      #boot-splash .boot-logo {
+        display: block;
+        width: 2.5rem;
+        height: 2.5rem;
+        flex-shrink: 0;
+        object-fit: contain;
+        border: 0;
+      }
+
       #boot-splash .boot-wordmark {
+        display: inline-block;
         margin: 0;
+        transform: skewX(-10deg);
+        transform-origin: left;
         font-size: 1.125rem;
         font-weight: 800;
-        font-style: italic;
-        letter-spacing: -0.02em;
+        letter-spacing: -0.025em;
         color: #fff;
-        transform: skewX(-10deg);
+        user-select: none;
       }
 
       #boot-splash .boot-accent {
@@ -81,18 +114,14 @@
       #boot-splash .boot-spinner {
         width: 2rem;
         height: 2rem;
-        margin-top: 1.25rem;
-        border: 2px solid rgba(148, 163, 184, 0.2);
-        border-top-color: rgba(139, 92, 246, 0.75);
-        border-radius: 9999px;
+        color: rgba(107, 114, 138, 0.55);
         animation: boot-spin 0.8s linear infinite;
       }
 
       #boot-splash .boot-label {
-        margin: 1rem 0 0;
+        margin: 0;
         font-size: 0.875rem;
-        font-weight: 500;
-        color: rgba(148, 163, 184, 0.8);
+        color: #4b5680;
       }
 
       @keyframes boot-spin {
@@ -105,10 +134,34 @@
   <body>
     <div id="root">
       <div id="boot-splash" role="status" aria-live="polite" aria-busy="true">
-        <p class="boot-wordmark" aria-label="FORZA.EVENTS">
-          FORZA<span class="boot-accent">.EVENTS</span>
-        </p>
-        <div class="boot-spinner" aria-hidden="true"></div>
+        <div class="boot-brand">
+          <picture>
+            <source srcset="/logo/logo.webp 1x, /logo/logo@2x.webp 2x" type="image/webp" />
+            <img
+              class="boot-logo"
+              src="/logo/logo.png"
+              alt=""
+              width="40"
+              height="40"
+              decoding="async"
+            />
+          </picture>
+          <span class="boot-wordmark" aria-label="FORZA.EVENTS">
+            FORZA<span class="boot-accent">.EVENTS</span>
+          </span>
+        </div>
+        <svg
+          class="boot-spinner"
+          viewBox="0 0 24 24"
+          fill="none"
+          stroke="currentColor"
+          stroke-width="2"
+          stroke-linecap="round"
+          stroke-linejoin="round"
+          aria-hidden="true"
+        >
+          <path d="M21 12a9 9 0 1 1-6.219-8.56" />
+        </svg>
         <p class="boot-label">Loading</p>
       </div>
     </div>

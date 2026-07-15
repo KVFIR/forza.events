@@ -19,9 +19,7 @@ export function EventDetailOrganiser({event}: Props) {
 
   if (!showGuildBrand) {
     return (
-      <p className="mt-8 text-xs text-muted">
-        {t('common.by')} {label}
-      </p>
+      <p className="mt-8 text-xs text-muted">{label}</p>
     );
   }
 
@@ -34,9 +32,7 @@ export function EventDetailOrganiser({event}: Props) {
         variant="neutral"
         className="!rounded-md"
       />
-      <p className="text-xs text-muted">
-        {t('common.by')} {label}
-      </p>
+      <p className="text-xs text-muted">{label}</p>
       {event.guildInviteUrl ? (
         <>
           <span className="text-xs text-muted" aria-hidden>

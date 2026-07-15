@@ -13,7 +13,7 @@ import {AppBootGate} from './components/AppBootGate';
 import {BrowserSignInScreen} from './components/BrowserSignInScreen';
 import {DiscordOnlyGate} from './components/DiscordOnlyGate';
 import {Navbar} from './components/Navbar';
-import {Logo} from './components/ui/Logo';
+import {AppBootScreen} from './components/ui/AppBootScreen';
 import {AuthProvider, useAuth} from './context/AuthContext';
 import {DiscordLayoutProvider, useDiscordLayout} from './context/DiscordLayoutContext';
 import {DiscordRichPresenceProvider} from './context/DiscordRichPresenceContext';
@@ -22,7 +22,6 @@ import {PageMetaProvider} from './context/PageMetaContext';
 import {DiscordRichPresenceSync} from './components/DiscordRichPresenceSync';
 import type {ReactNode} from 'react';
 import {PageLoading} from './components/ui/PageLoading';
-import {Spinner} from './components/ui/Spinner';
 import {useBrowserSignInGate} from './hooks/useBrowserSignInGate';
 import {isPublicLegalBrowserPath} from './lib/publicLegalPaths';
 import {isLocalAnalyticsDashboardPath} from './lib/localAnalyticsDashboard';
@@ -65,32 +64,14 @@ function RouteFallback() {
 
 function BrowserSignInLoading() {
   const {t} = useTranslation();
-  return (
-    <div
-      className="flex min-h-screen flex-col items-center justify-center gap-4 px-6"
-      role="status"
-      aria-live="polite"
-      aria-busy="true"
-    >
-      <Logo size="lg" />
-      <Spinner size="lg" />
-      <p className="text-sm text-muted">{t('loading.page')}</p>
-    </div>
-  );
+  return <AppBootScreen label={t('loading.page')} />;
 }
 
 function AppShell({children}: {children: ReactNode}) {
   const {isCompact} = useDiscordLayout();
 
   if (isCompact) {
-    return (
-      <div
-        className="flex min-h-screen items-center justify-center bg-base"
-        data-discord-layout="compact"
-      >
-        <Logo size="lg" />
-      </div>
-    );
+    return <AppBootScreen spinner={false} data-discord-layout="compact" />;
   }
 
   return (
