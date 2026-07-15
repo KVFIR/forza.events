@@ -253,7 +253,8 @@
     "deleteDraftTitle": "Delete draft?",
     "deleteDraftDesc": "Delete this draft permanently? This cannot be undone.",
     "cancelEventTitle": "Cancel event?",
-    "cancelEventDesc": "The Discord announcement will be updated and registration will close."
+    "cancelEventDesc": "The Discord announcement will be updated and registration will close.",
+    "joinServer": "Join server"
   },
   "create": {
     "steps": {

@@ -54,6 +54,8 @@ export interface ForzaEvent {
   createdAt?: string;
   guildId?: string;
   guildName?: string;
+  guildIconUrl?: string;
+  guildInviteUrl?: string;
   channelId?: string;
   /** Set after publish-event posts the Discord embed. */
   discordMessageId?: string;

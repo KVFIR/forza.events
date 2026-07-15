@@ -182,6 +182,53 @@ export type DiscordGuildSummary = {
   permissions?: string;
 };
 
+export function guildIconCdnUrl(guildId: string, icon: string | null | undefined): string | null {
+  const hash = icon?.trim();
+  if (!hash) return null;
+  const ext = hash.startsWith('a_') ? 'gif' : 'png';
+  return `https://cdn.discordapp.com/icons/${guildId}/${hash}.${ext}`;
+}
+
+type DiscordInvite = {code?: string; max_age?: number; temporary?: boolean};
+
+/** Reuse a permanent channel invite or create one (bot needs Create Invite on the channel). */
+export async function resolveChannelInviteUrl(channelId: string): Promise<string | null> {
+  const listRes = await discordApiFetch(
+    `https://discord.com/api/v10/channels/${channelId}/invites`,
+    {headers: botHeaders()},
+  );
+  if (listRes.ok) {
+    const invites = (await listRes.json()) as DiscordInvite[];
+    const existing = invites.find(
+      (i) => i.code && !i.temporary && (i.max_age === 0 || i.max_age == null),
+    );
+    if (existing?.code) return `https://discord.gg/${existing.code}`;
+  }
+
+  const createRes = await discordApiFetch(
+    `https://discord.com/api/v10/channels/${channelId}/invites`,
+    {
+      method: 'POST',
+      headers: botHeaders(),
+      body: JSON.stringify({max_age: 0, max_uses: 0}),
+    },
+  );
+  if (!createRes.ok) {
+    const text = await createRes.text();
+    console.warn(
+      JSON.stringify({
+        msg: 'resolveChannelInviteUrl failed',
+        channel_id: channelId,
+        status: createRes.status,
+        body: text.slice(0, 200),
+      }),
+    );
+    return null;
+  }
+  const created = (await createRes.json()) as DiscordInvite;
+  return created.code ? `https://discord.gg/${created.code}` : null;
+}
+
 const MANAGE_GUILD = 0x20n;
 const ADMINISTRATOR = 0x8n;
 

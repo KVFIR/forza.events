@@ -1,4 +1,5 @@
-import {resolveGuildNameForUser} from './guildAccess.ts';
+import {buildGuildCatalogUpsert} from './guildCatalog.ts';
+import {resolveUserGuild} from './guildAccess.ts';
 import {adminClient} from './supabase.ts';
 
 declare const EdgeRuntime: {waitUntil: (promise: Promise<unknown>) => void} | undefined;
@@ -17,12 +18,12 @@ function logDeferredGuildCatalogFailure(guildId: string, detail: string): void {
 export function deferGuildCatalogUpsert(accessToken: string, guildId: string): void {
   const work = async () => {
     try {
-      const canonicalName = await resolveGuildNameForUser(accessToken, guildId);
-      if (!canonicalName) return;
+      const guild = await resolveUserGuild(accessToken, guildId);
+      if (!guild?.name) return;
 
       const supabase = adminClient();
       const {error} = await supabase.from('discord_guilds').upsert(
-        {guild_id: guildId, guild_name: canonicalName},
+        buildGuildCatalogUpsert(guildId, guild.name, guild),
         {onConflict: 'guild_id'},
       );
       if (error) logDeferredGuildCatalogFailure(guildId, error.message);

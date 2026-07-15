@@ -1,4 +1,5 @@
 import {getDiscordSdk, isStandaloneBrowser} from './discord';
+import {isDiscordLinkUrl} from './guildDisplay';
 
 /**
  * Bot permissions for guild install (publish embeds + read channels).
@@ -45,17 +46,23 @@ export function buildBotInstallUrl(options?: {guildId?: string}): string | null 
 export async function openBotInstallUrl(options?: {guildId?: string}): Promise<boolean> {
   const url = buildBotInstallUrl(options);
   if (!url) return false;
+  return openExternalUrl(url);
+}
+
+export async function openExternalUrl(url: string): Promise<boolean> {
+  const trimmed = url.trim();
+  if (!trimmed || !isDiscordLinkUrl(trimmed)) return false;
 
   const sdk = getDiscordSdk();
   if (sdk && !isStandaloneBrowser()) {
     try {
-      await sdk.commands.openExternalLink({url});
+      await sdk.commands.openExternalLink({url: trimmed});
       return true;
     } catch {
       // Fall through to window.open (e.g. older SDK or blocked command).
     }
   }
 
-  window.open(url, '_blank', 'noopener,noreferrer');
+  window.open(trimmed, '_blank', 'noopener,noreferrer');
   return true;
 }

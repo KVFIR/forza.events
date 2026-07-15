@@ -17,7 +17,8 @@ import {appErrorResponse, databaseErrorResponse, internalErrorResponse} from '..
 import {jsonResponse, optionsResponse} from '../_shared/cors.ts';
 import {verifyDiscordToken} from '../_shared/discord.ts';
 import {ensureDiscordUserRow} from '../_shared/discordUserRow.ts';
-import {resolveGuildNameForUser} from '../_shared/guildAccess.ts';
+import {resolveUserGuild} from '../_shared/guildAccess.ts';
+import {buildGuildCatalogUpsert} from '../_shared/guildCatalog.ts';
 import {resolveSaveCoverUrl} from '../_shared/eventCovers.ts';
 import {slugify} from '../_shared/events.ts';
 import {normalizeGuildName} from '../_shared/guildDisplay.ts';
@@ -145,14 +146,13 @@ serve(async (req) => {
 
     const draftGuildId = body.guild_id?.trim();
     if (draftGuildId) {
-      const guildName = normalizeGuildName(
-        await resolveGuildNameForUser(token!, draftGuildId),
-      );
+      const guild = await resolveUserGuild(token!, draftGuildId);
+      const guildName = normalizeGuildName(guild?.name);
       if (!guildName) {
         return appErrorResponse(req, 400, VALIDATION_CODES.GUILD_REQUIRED);
       }
       await supabase.from('discord_guilds').upsert(
-        {guild_id: draftGuildId, guild_name: guildName},
+        buildGuildCatalogUpsert(draftGuildId, guildName, guild),
         {onConflict: 'guild_id'},
       );
     }

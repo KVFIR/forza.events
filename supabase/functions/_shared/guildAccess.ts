@@ -29,14 +29,22 @@ export async function userIsGuildMember(
   return guilds.some((g) => g.id === guildId);
 }
 
+/** User OAuth guild row — membership + icon hash for catalog upsert. */
+export async function resolveUserGuild(
+  accessToken: string,
+  guildId: string,
+): Promise<DiscordGuildSummary | null> {
+  const guilds = await fetchUserGuilds(accessToken);
+  return guilds.find((g) => g.id === guildId) ?? null;
+}
+
 /** Canonical guild name from Discord (prevents spoofed discord_guilds labels). */
 export async function resolveGuildNameForUser(
   accessToken: string,
   guildId: string,
 ): Promise<string | null> {
-  const guilds = await fetchUserGuilds(accessToken);
-  const match = guilds.find((g) => g.id === guildId);
-  return match?.name ?? null;
+  const guild = await resolveUserGuild(accessToken, guildId);
+  return guild?.name ?? null;
 }
 
 /** User may configure publish targets (Manage Guild or Administrator). */

@@ -8,6 +8,7 @@ import {resolveEventCoverUrl} from './eventCovers';
 import {parseTracksFromRow} from './eventTracks';
 import {normalizeEventType} from './eventTypes';
 import {isHostDraftLifecycle} from './draftEvents';
+import {parseGuildInviteUrl} from './guildDisplay';
 import {sortParticipantsByJoinedAt} from './eventRoster';
 import {isBrowseFeedEvent, resolveEventDisplayStatus} from './eventSpec';
 import type {
@@ -68,7 +69,7 @@ type DbEventRow = {
   lobby_leader_discord_id?: string | null;
   timezone_hint?: string | null;
   users?: {username: string; avatar_url?: string | null} | null;
-  discord_guilds?: {guild_name: string} | null;
+  discord_guilds?: {guild_name: string; icon_url?: string | null; settings?: unknown} | null;
   event_participants?: {
     discord_id: string;
     gamertag_snapshot?: string | null;
@@ -114,10 +115,10 @@ type DbEventCarRow = {
     | null;
 };
 
-const EVENT_LIST_SELECT = `
+export const EVENT_LIST_SELECT = `
   *,
   users!events_host_discord_id_fkey(username, avatar_url),
-  discord_guilds(guild_name),
+  discord_guilds(guild_name, icon_url, settings),
   event_participants(
     order: joined_at,
     discord_id,
@@ -312,6 +313,8 @@ export function mapDbEvent(row: DbEventRow): ForzaEvent {
     createdAt: row.created_at ?? undefined,
     guildId: row.guild_id ?? undefined,
     guildName: guild?.guild_name ?? undefined,
+    guildIconUrl: guild?.icon_url ?? undefined,
+    guildInviteUrl: parseGuildInviteUrl(guild?.settings),
     channelId: row.channel_id ?? undefined,
     discordMessageId: row.discord_message_id ?? undefined,
     carRuleMode: row.car_rule_mode ?? 'anything_goes',

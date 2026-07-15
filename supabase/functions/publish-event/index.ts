@@ -6,13 +6,15 @@ import {
   deleteChannelMessage,
   mapDiscordPostError,
   postChannelMessage,
+  resolveChannelInviteUrl,
   verifyDiscordToken,
 } from '../_shared/discord.ts';
-import {requireManageGuildAccess, resolveGuildNameForUser} from '../_shared/guildAccess.ts';
+import {requireManageGuildAccess} from '../_shared/guildAccess.ts';
 import {validatePublishChannelTarget} from '../_shared/publishTarget.ts';
 import {buildEventEmbed, mapEventCarsForEmbed} from '../_shared/events.ts';
 import {validatePublishReady} from '../_shared/eventSpec.ts';
 import {VALIDATION_CODES} from '../_shared/validationCodes.ts';
+import {buildGuildCatalogUpsert} from '../_shared/guildCatalog.ts';
 import {normalizeGuildName} from '../_shared/guildDisplay.ts';
 import {ensureConvoyLeaderParticipantForEvent} from '../_shared/participantLeader.ts';
 import {buildPublishEventBody} from '../_shared/publishEventBody.ts';
@@ -51,8 +53,9 @@ serve(async (req) => {
       return jsonResponse({error: 'Missing event_id, guild_id, or channel_id'}, 400, req);
     }
 
+    let publishGuild;
     try {
-      await requireManageGuildAccess(token!, guild_id);
+      publishGuild = await requireManageGuildAccess(token!, guild_id);
     } catch (e) {
       const msg = e instanceof Error ? e.message : String(e);
       if (msg === 'Forbidden') return jsonResponse({error: 'Forbidden'}, 403, req);
@@ -93,9 +96,7 @@ serve(async (req) => {
     const publishErr = validatePublishReady(publishBody);
     if (publishErr) return appErrorResponse(req, 400, publishErr);
 
-    const resolvedGuildName = normalizeGuildName(
-      await resolveGuildNameForUser(token!, guild_id),
-    );
+    const resolvedGuildName = normalizeGuildName(publishGuild.name);
     if (!resolvedGuildName) {
       return appErrorResponse(req, 400, VALIDATION_CODES.GUILD_REQUIRED);
     }
@@ -120,11 +121,6 @@ serve(async (req) => {
 
     lockedEventId = event_id;
     postedChannelId = channel_id;
-
-    await supabase.from('discord_guilds').upsert(
-      {guild_id, guild_name: resolvedGuildName},
-      {onConflict: 'guild_id'},
-    );
 
     let leaderProfile: {username?: string | null; avatar_url?: string | null} | undefined;
     if (event.lobby_leader_discord_id && event.lobby_leader_is_host === false) {
@@ -209,6 +205,21 @@ serve(async (req) => {
       postedMessageId = null;
       return appErrorResponse(req, 500, API_ERROR_CODES.INTERNAL);
     }
+
+    const {data: existingGuild} = await supabase
+      .from('discord_guilds')
+      .select('settings')
+      .eq('guild_id', guild_id)
+      .maybeSingle();
+
+    const inviteUrl = await resolveChannelInviteUrl(channel_id);
+    await supabase.from('discord_guilds').upsert(
+      buildGuildCatalogUpsert(guild_id, resolvedGuildName, publishGuild, {
+        inviteUrl,
+        existingSettings: existingGuild?.settings,
+      }),
+      {onConflict: 'guild_id'},
+    );
 
     lockedEventId = null;
     postedMessageId = null;

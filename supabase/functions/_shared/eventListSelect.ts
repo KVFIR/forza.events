@@ -2,7 +2,7 @@
 export const EVENT_LIST_SELECT = `
   *,
   users!events_host_discord_id_fkey(username, avatar_url),
-  discord_guilds(guild_name),
+  discord_guilds(guild_name, icon_url, settings),
   event_participants(
     order: joined_at,
     discord_id,
