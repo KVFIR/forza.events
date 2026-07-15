@@ -69,6 +69,19 @@ describe('create event validation', () => {
     expect(outcome.ok).toBe(true);
   });
 
+  it('publish form outcome allows open build without PI cap', () => {
+    const outcome = validatePublishFormOutcome(
+      {
+        ...baseValues,
+        maxPi: null,
+        lobbyLeaderIsHost: true,
+        lobbyLeaderGamertag: 'HostTag1',
+      },
+      'HostTag1',
+    );
+    expect(outcome.ok).toBe(true);
+  });
+
   it('routes convoy field errors to publish step', () => {
     expect(firstFieldErrorStep({lobbyLeaderDiscordId: 'Required'})).toBe(1);
     expect(firstFieldErrorStep({title: 'Required'})).toBe(0);

@@ -37,6 +37,10 @@ describe('publishedNotifyFieldsChanged', () => {
     expect(publishedNotifyFieldsChanged({...baseline, maxPi: 900}, baseline)).toBe(true);
   });
 
+  it('detects clearing open-build PI cap', () => {
+    expect(publishedNotifyFieldsChanged({...baseline, maxPi: null}, baseline)).toBe(true);
+  });
+
   it('ignores sub-minute drift', () => {
     expect(
       publishedNotifyFieldsChanged(

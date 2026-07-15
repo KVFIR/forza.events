@@ -362,6 +362,7 @@ serve(async (req) => {
               body.tracks ?? data.tracks,
               body.car_rule_mode ?? data.car_rule_mode,
               body.max_pi ?? data.max_pi,
+              body.additional_car_restrictions ?? data.additional_car_restrictions,
               resolvedCars.length,
               diff.tracks,
               diff.cars,

@@ -92,7 +92,7 @@ export function useCreateEventForm() {
   const [coverUrl, setCoverUrl] = useState<string | null>(null);
   const [tracks, setTracks] = useState<EventTrack[]>([]);
   const [carRuleMode, setCarRuleMode] = useState<CarRuleMode>('anything_goes');
-  const [maxPi, setMaxPi] = useState(800);
+  const [maxPi, setMaxPi] = useState<number | null>(null);
   const [additionalCarRestrictions, setAdditionalCarRestrictions] = useState('');
   const [eventCars, setEventCars] = useState<EventCarEntry[]>([]);
   const [lobbyLeaderIsHost, setLobbyLeaderIsHost] = useState(true);
@@ -556,6 +556,15 @@ export function useCreateEventForm() {
     return true;
   }
 
+  function navigateToStep(target: CreateEventStepIndex) {
+    if (target === step) return;
+    if (target < step) {
+      goToStep(target);
+      return;
+    }
+    if (target > step) tryContinue();
+  }
+
   function validateBeforePublish(): boolean {
     const outcome = validatePublishFormOutcome(
       values,
@@ -656,6 +665,7 @@ export function useCreateEventForm() {
     values,
     normalizedTracks,
     tryContinue,
+    navigateToStep,
     onCoverChange,
     persistDraft,
     deleteConfirmOpen,
@@ -693,9 +703,9 @@ export function useCreateEventForm() {
       clearFieldError('maxPi');
       setCarRuleMode(m);
     },
-    setMaxPi: (n: number) => {
+    setMaxPi: (n: number | null) => {
       clearFieldError('maxPi');
-      setMaxPi(clampPi(n));
+      setMaxPi(n === null ? null : clampPi(n));
     },
     setAdditionalCarRestrictions,
     setEventCars: (cars: EventCarEntry[]) => {

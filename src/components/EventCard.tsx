@@ -14,6 +14,7 @@ import {resolveOrganiserLabel} from '../lib/organiser';
 import {formatEventStart} from '../lib/datetime';
 import {defaultCoverPath} from '../lib/eventCovers';
 import {formatCarDisplayName} from '../lib/carDisplay';
+import {formatOpenBuildCarRulesDisplay, openBuildHasDisplayRules} from '../lib/carRules';
 import {piToClass} from '../lib/pi';
 import {useAuth} from '../context/AuthContext';
 import {useResolveEventDisplayStatus} from '../hooks/useResolveEventDisplayStatus';
@@ -82,25 +83,36 @@ function CarList({cars}: {cars: EventAllowedCar[]}) {
 }
 
 function OpenBuildSummary({event}: {event: ForzaEvent}) {
-  const {t} = useTranslation();
-  const maxClass = piToClass(event.maxPi);
-  const label = event.additionalCarRestrictions?.trim() || t('common.openBuild');
+  const display = formatOpenBuildCarRulesDisplay(event);
+  if (!display) return null;
+  const twoCol = Boolean(display.notes && display.piLabel);
+  const piClass = display.piLabel ? piToClass(event.maxPi!) : null;
 
   return (
     <div className="hidden min-[500px]:block w-[10.5rem] shrink-0 text-left">
       <ul className="flex flex-col gap-1">
-        <li className="grid grid-cols-[minmax(0,1fr)_2.75rem] items-center gap-x-2.5 text-[10px] leading-tight">
-          <span className="truncate font-medium text-slate-200" title={label}>
-            {label}
-          </span>
-          <span
-            className={cn(
-              'text-right font-bold tabular-nums',
-              classColor[maxClass] ?? 'text-muted',
-            )}
-          >
-            {maxClass} {event.maxPi}
-          </span>
+        <li
+          className={cn(
+            'text-[10px] leading-tight',
+            twoCol && 'grid grid-cols-[minmax(0,1fr)_2.75rem] items-center gap-x-2.5',
+          )}
+        >
+          {display.notes ? (
+            <span className="truncate font-medium text-slate-200" title={display.notes}>
+              {display.notes}
+            </span>
+          ) : null}
+          {display.piLabel && piClass ? (
+            <span
+              className={cn(
+                'font-bold tabular-nums',
+                twoCol && 'text-right',
+                classColor[piClass] ?? 'text-muted',
+              )}
+            >
+              {display.piLabel}
+            </span>
+          ) : null}
         </li>
       </ul>
     </div>
@@ -216,7 +228,7 @@ export function EventCard({event, participantResult}: Props) {
             {event.carRuleMode === 'restricted_list' && event.allowedCars.length > 0 && (
               <CarList cars={event.allowedCars} />
             )}
-            {event.carRuleMode === 'anything_goes' && (
+            {event.carRuleMode === 'anything_goes' && openBuildHasDisplayRules(event) && (
               <OpenBuildSummary event={event} />
             )}
           </div>

@@ -1,4 +1,5 @@
 import {formatCarEmbedName} from './carDisplay.ts';
+import {openBuildHasDisplayRules} from './carRules.ts';
 import {eventHasStarted} from './eventSpec.ts';
 import {resolveCoverAbsolute} from './eventCovers.ts';
 import {openEventCustomId} from './eventLaunch.ts';
@@ -290,11 +291,13 @@ function fitRestrictedCarFields(
   };
 }
 
-function formatOpenBuildCarField(event: EmbedEventInput): string {
-  const pi = event.max_pi ? formatMaxPi(event.max_pi) : 'PI cap';
-  const label = `Open build ${inlineCode(pi)}`;
+function formatOpenBuildCarField(event: EmbedEventInput): string | null {
   const notes = resolveOpenBuildNotes(event);
-  return notes ? `${label} ${inlineCode(notes)}` : label;
+  if (!openBuildHasDisplayRules(event.car_rule_mode, event.max_pi, notes)) return null;
+  const parts: string[] = [];
+  if (event.max_pi != null) parts.push(inlineCode(formatMaxPi(event.max_pi)));
+  if (notes) parts.push(inlineCode(notes));
+  return parts.length ? parts.join(' ') : null;
 }
 
 
@@ -483,7 +486,11 @@ export function buildEventEmbed(event: EmbedEventInput) {
     description,
     fields: skeletonFields,
   });
-  const skeletonFieldCount = skeletonFields.length + (isOpenBuild ? 1 : 0);
+  const openBuildNotes = resolveOpenBuildNotes(event);
+  const showOpenBuildCarRules = isOpenBuild &&
+    openBuildHasDisplayRules(event.car_rule_mode, event.max_pi, openBuildNotes);
+
+  const skeletonFieldCount = skeletonFields.length + (showOpenBuildCarRules ? 1 : 0);
 
   const carBudget = {
     maxChars: Math.max(0, EMBED_TOTAL_CHAR_MAX - skeletonChars),
@@ -497,13 +504,16 @@ export function buildEventEmbed(event: EmbedEventInput) {
 
   function assembleFields(carFields: EmbedField[]): EmbedField[] {
     const list: EmbedField[] = [...fixedFields];
-    if (isOpenBuild) {
-      list.push({
-        name: embedFieldName('🚗 Car rules'),
-        value: truncateFieldValue(formatOpenBuildCarField(event)),
-        inline: false,
-      });
-    } else {
+    if (showOpenBuildCarRules) {
+      const value = formatOpenBuildCarField(event);
+      if (value) {
+        list.push({
+          name: embedFieldName('🚗 Car rules'),
+          value: truncateFieldValue(value),
+          inline: false,
+        });
+      }
+    } else if (!isOpenBuild) {
       list.push(...carFields);
     }
     list.push(...participantsFields);

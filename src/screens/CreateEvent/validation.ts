@@ -109,10 +109,12 @@ export function validateDetailsStep(
   if (values.carRuleMode === 'restricted_list' && values.eventCars.length === 0) {
     errors.eventCars = i18n.t('validation.carsRequired');
   }
-  if (values.carRuleMode === 'anything_goes') {
-    if (!isPiInRange(values.maxPi)) {
-      errors.maxPi = i18n.t('validation.piRange', piRangeI18nParams());
-    }
+  if (
+    values.carRuleMode === 'anything_goes' &&
+    values.maxPi != null &&
+    !isPiInRange(values.maxPi)
+  ) {
+    errors.maxPi = i18n.t('validation.piRange', piRangeI18nParams());
   }
   return errors;
 }

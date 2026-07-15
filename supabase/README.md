@@ -59,6 +59,7 @@ npx supabase migration repair --linked --status applied 006 --yes
 | `023_analytics_dashboard_enriched.sql` | Enriched dashboard RPC: conversion, funnel by surface, recent errors |
 | `024_analytics_dashboard_fixes.sql` | Join conversion uses join-only errors; event views per session metric |
 | `026_analytics_notifications.sql` | Dashboard: notification outbox aggregates + `notification_dm_*` client prefs |
+| `027_nullable_event_max_pi.sql` | `events.max_pi` nullable — open build may omit PI cap |
 
 Seeds are **not** included in the migration. Run separately after `db push`:
 

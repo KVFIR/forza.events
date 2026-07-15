@@ -11,7 +11,7 @@ export type PublishedNotifyBaseline = {
   startsAt: string;
   tracks: EventTrack[];
   carRuleMode: CarRuleMode;
-  maxPi: number;
+  maxPi: number | null;
   additionalCarRestrictions: string;
   cars: PublishedNotifyCar[];
 };
@@ -27,7 +27,7 @@ function normalizeTracks(tracks: EventTrack[]): string {
 
 function normalizeCars(
   mode: CarRuleMode,
-  maxPi: number,
+  maxPi: number | null,
   additional: string,
   cars: PublishedNotifyCar[],
 ): string {

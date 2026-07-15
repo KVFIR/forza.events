@@ -4,6 +4,7 @@ import {
   controlClassNames,
   isNativePickerInputType,
   nativePickerInputClass,
+  nativePickerWrapperClass,
 } from './formStyles';
 
 type Props = InputHTMLAttributes<HTMLInputElement> & {
@@ -12,7 +13,7 @@ type Props = InputHTMLAttributes<HTMLInputElement> & {
 
 export function Input({invalid, className, type, ...props}: Props) {
   const isNativePicker = isNativePickerInputType(type);
-  return (
+  const input = (
     <input
       type={type}
       className={cn(
@@ -22,4 +23,6 @@ export function Input({invalid, className, type, ...props}: Props) {
       {...props}
     />
   );
+  if (!isNativePicker) return input;
+  return <div className={nativePickerWrapperClass}>{input}</div>;
 }

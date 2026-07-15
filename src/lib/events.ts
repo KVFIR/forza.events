@@ -10,7 +10,6 @@ import {normalizeEventType} from './eventTypes';
 import {isHostDraftLifecycle} from './draftEvents';
 import {sortParticipantsByJoinedAt} from './eventRoster';
 import {isBrowseFeedEvent, resolveEventDisplayStatus} from './eventSpec';
-import {PI_MAX} from './pi';
 import type {
   AppUser,
   CarRuleMode,
@@ -316,7 +315,7 @@ export function mapDbEvent(row: DbEventRow): ForzaEvent {
     channelId: row.channel_id ?? undefined,
     discordMessageId: row.discord_message_id ?? undefined,
     carRuleMode: row.car_rule_mode ?? 'anything_goes',
-    maxPi: row.max_pi ?? PI_MAX,
+    maxPi: row.max_pi ?? null,
     allowedCars: [],
     voicePolicy: row.voice_policy,
     maxPlayers: row.max_players,

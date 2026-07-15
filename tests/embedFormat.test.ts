@@ -28,30 +28,37 @@ describe('buildEventEmbed', () => {
 
     const carField = embed.fields.find((field) => field.name === '🚗 Car rules');
     expect(carField?.value).toBe(
-      'Open build `A 650` `No engine swap; stock bodykit only`',
+      '`A 650` `No engine swap; stock bodykit only`',
     );
     expect(carField?.value).not.toContain('extra rules');
   });
 
-  it('omits restrictions when open build has no additional notes', () => {
+  it('shows PI only when open build has no additional notes', () => {
     const embed = buildEventEmbed(event()).embeds[0];
 
     const carField = embed.fields.find((field) => field.name === '🚗 Car rules');
-    expect(carField?.value).toBe('Open build `A 650`');
+    expect(carField?.value).toBe('`A 650`');
+  });
+
+  it('omits car rules when open build has no cap or notes', () => {
+    const embed = buildEventEmbed(event({max_pi: null})).embeds[0];
+
+    const carField = embed.fields.find((field) => field.name === '🚗 Car rules');
+    expect(carField).toBeUndefined();
   });
 
   it('shows X class for open build capped at 999', () => {
     const embed = buildEventEmbed(event({max_pi: 999})).embeds[0];
 
     const carField = embed.fields.find((field) => field.name === '🚗 Car rules');
-    expect(carField?.value).toBe('Open build `X 999`');
+    expect(carField?.value).toBe('`X 999`');
   });
 
   it('shows R class for open build capped at 998', () => {
     const embed = buildEventEmbed(event({max_pi: 998})).embeds[0];
 
     const carField = embed.fields.find((field) => field.name === '🚗 Car rules');
-    expect(carField?.value).toBe('Open build `R 998`');
+    expect(carField?.value).toBe('`R 998`');
   });
 
   it('formats named tracks with share code and format', () => {

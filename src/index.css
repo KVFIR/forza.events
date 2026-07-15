@@ -93,8 +93,11 @@
   input[type='month'],
   input[type='week'] {
     display: block;
+    width: 100%;
     max-width: 100%;
     min-width: 0;
+    box-sizing: border-box;
+    overflow: hidden;
   }
 
   input[type='date']::-webkit-datetime-edit,
@@ -104,13 +107,42 @@
     min-width: 0;
   }
 
-  input[type='datetime-local']::-webkit-datetime-edit {
+  input[type='datetime-local']::-webkit-date-and-time-value {
     min-width: 0;
+    text-align: left;
+  }
+
+  input[type='datetime-local']::-webkit-datetime-edit {
+    display: inline-flex;
+    min-width: 0;
+    max-width: 100%;
     overflow: hidden;
   }
 
   input[type='datetime-local']::-webkit-datetime-edit-fields-wrapper {
+    display: inline-flex;
     min-width: 0;
+    max-width: 100%;
+    overflow: hidden;
+  }
+
+  input[type='datetime-local']::-webkit-datetime-edit-text,
+  input[type='datetime-local']::-webkit-datetime-edit-month-field,
+  input[type='datetime-local']::-webkit-datetime-edit-day-field,
+  input[type='datetime-local']::-webkit-datetime-edit-year-field,
+  input[type='datetime-local']::-webkit-datetime-edit-hour-field,
+  input[type='datetime-local']::-webkit-datetime-edit-minute-field,
+  input[type='datetime-local']::-webkit-datetime-edit-second-field,
+  input[type='datetime-local']::-webkit-datetime-edit-ampm-field {
+    min-width: 0;
+    padding: 0;
+  }
+
+  input[type='datetime-local']::-webkit-calendar-picker-indicator,
+  input[type='date']::-webkit-calendar-picker-indicator {
+    margin: 0;
+    padding: 0;
+    flex-shrink: 0;
   }
 }
 
@@ -170,7 +202,7 @@
 
   /* Viewport-centered main column; on lg+ clears fixed left sidebar when needed */
   .app-main-column {
-    @apply mx-auto w-full max-w-2xl;
+    @apply mx-auto w-full min-w-0 max-w-2xl;
   }
 
   @media (min-width: 1024px) {

@@ -19,7 +19,6 @@ import {useAuth} from '../../context/AuthContext';
 import {useRichPresenceOverride} from '../../context/DiscordRichPresenceContext';
 import {buildCreateRichPresence} from '../../lib/discordRichPresence';
 import {useLoadingUI} from '../../hooks/useLoadingUI';
-import {isLocalDevHost} from '../../lib/runtime';
 import {trackOncePerSession} from '../../lib/analytics';
 
 export function CreateEvent() {
@@ -52,7 +51,6 @@ export function CreateEvent() {
     isSignedIn,
     canPersist,
     step,
-    setStep,
     fieldErrors,
     globalError,
     saving,
@@ -65,6 +63,7 @@ export function CreateEvent() {
     wouldNotifyRacersOnSave,
     values,
     tryContinue,
+    navigateToStep,
     onCoverChange,
     persistDraft,
     deleteConfirmOpen,
@@ -232,13 +231,9 @@ export function CreateEvent() {
   };
 
   return (
-    <ContentReveal className="pb-10 pt-5">
+    <ContentReveal className="min-w-0 pb-10 pt-5">
       {!isPublished && (
-        <StepIndicator
-          step={step}
-          freeNavigation={hasDraftId || isLocalDevHost()}
-          onStepClick={setStep}
-        />
+        <StepIndicator step={step} onStepClick={navigateToStep} />
       )}
 
       <FormAlerts

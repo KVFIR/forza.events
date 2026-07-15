@@ -212,12 +212,20 @@ export function enrichPayloadForSend(
       }
     }
     if (out.carsChanged === '1') {
+      const rawMaxPi = out.maxPi;
+      const maxPi =
+        rawMaxPi === '' || rawMaxPi == null
+          ? null
+          : Number.isFinite(Number(rawMaxPi))
+          ? Number(rawMaxPi)
+          : null;
       out.carsSummary = summarizeCarsForNotify(
         out.carMode || 'anything_goes',
-        Number(out.maxPi) || 800,
+        maxPi,
+        typeof out.additionalCarRestrictions === 'string' ? out.additionalCarRestrictions : null,
         Number(out.carCount) || 0,
         lng,
-      );
+      ) ?? '';
     }
   }
   return out;

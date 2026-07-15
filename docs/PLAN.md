@@ -11,7 +11,7 @@ If any older note, prototype, or backlog item conflicts with this spec, the froz
 - **Visibility:** users can browse all published public events across all servers.
 - **Create flow:** event creation includes choosing the target Discord server and target channel before publish. After publication, the event's server and channel cannot be changed.
 - **Car rules:** each event must explicitly choose one mode: `Anything goes` or `Restricted car list`.
-- **Anything goes mode:** no per-car list is required; the event must still define a class and/or PI cap, and the UI should show an explicit `Anything goes` badge.
+- **Anything goes mode:** no per-car list is required; **PI cap** and **additional car restrictions** are optional. When neither is set, car-rule surfaces (cards, detail, embed, update DMs) show nothing for open build.
 - **Restricted mode:** at least one allowed car is required, with optional per-car restrictions.
 - **Tuning restrictions:** optional template chips and custom text (shown on embed as extra rules).
 - **Publish requirements:** title, **event type**, start time, host gamertag, cover image (or type default), target server, target channel, and a valid car rule mode are required. In `Restricted car list`, at least one car is mandatory.

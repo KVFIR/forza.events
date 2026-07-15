@@ -36,7 +36,7 @@ export type SaveEventBody = {
   lobby_leader_avatar_url?: string | null;
   voice_policy?: string;
   car_rule_mode?: CarRuleMode;
-  max_pi?: number;
+  max_pi?: number | null;
   /** @deprecated legacy — use `tracks` */
   track_codes?: string[];
   tracks?: EventTrackRow[];
@@ -86,9 +86,8 @@ export function validatePublishReady(body: SaveEventBody): ValidationCode | null
   const mode = body.car_rule_mode ?? 'anything_goes';
   if (mode === 'restricted_list') {
     if (!body.cars?.length) return VALIDATION_CODES.CARS_REQUIRED;
-  } else {
-    const maxPi = Number(body.max_pi ?? 0);
-    if (!isPiInRange(maxPi)) return VALIDATION_CODES.PI_RANGE;
+  } else if (body.max_pi != null && !isPiInRange(Number(body.max_pi))) {
+    return VALIDATION_CODES.PI_RANGE;
   }
 
   return null;
@@ -134,10 +133,14 @@ export function buildEventFields(
   const mode: CarRuleMode = body.car_rule_mode ?? 'anything_goes';
   const maxPi =
     mode === 'anything_goes'
-      ? clampPi(Number(body.max_pi ?? PI_MAX))
+      ? body.max_pi == null
+        ? null
+        : clampPi(Number(body.max_pi))
       : cars.length
       ? Math.max(...cars.map((c) => clampPi(c.max_pi ?? PI_MAX)))
-      : clampPi(Number(body.max_pi ?? PI_MAX));
+      : body.max_pi == null
+      ? null
+      : clampPi(Number(body.max_pi));
 
   return {
     title: body.title?.trim(),

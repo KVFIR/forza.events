@@ -1,11 +1,11 @@
 import {useEffect, useState} from 'react';
 import {cn} from '../lib/cn';
-import {clampPi, PI_MAX, PI_MIN, piClassColor, piRangeI18nParams, piToClass} from '../lib/pi';
+import {clampPi, PI_MAX, PI_MIN, piClassColor, piRangeI18nParams, piToClass, type CarClassLetter} from '../lib/pi';
 import {useTranslation} from 'react-i18next';
 
 type Props = {
-  value: number;
-  onChange: (value: number) => void;
+  value: number | null;
+  onChange: (value: number | null) => void;
   id?: string;
   error?: boolean;
   className?: string;
@@ -20,19 +20,25 @@ function parsePiDraft(draft: string): number | null {
 
 export function MaxPiInput({value, onChange, id, error, className, inputClass}: Props) {
   const {t} = useTranslation();
-  const [draft, setDraft] = useState(String(value));
+  const [draft, setDraft] = useState(value == null ? '' : String(value));
   const range = piRangeI18nParams();
 
   useEffect(() => {
-    setDraft(String(value));
+    setDraft(value == null ? '' : String(value));
   }, [value]);
 
   const parsed = parsePiDraft(draft);
-  const displayPi = parsed !== null ? clampPi(parsed) : value;
-  const classLetter = piToClass(displayPi);
+  const displayPi = parsed !== null ? clampPi(parsed) : value ?? PI_MIN;
+  const empty = value == null && parsed === null;
+  const classLetter: CarClassLetter | null = empty ? null : piToClass(displayPi);
 
   function commit() {
-    const next = parsed !== null ? clampPi(parsed) : value;
+    if (parsed === null) {
+      setDraft('');
+      onChange(null);
+      return;
+    }
+    const next = clampPi(parsed);
     setDraft(String(next));
     onChange(next);
   }
@@ -42,11 +48,11 @@ export function MaxPiInput({value, onChange, id, error, className, inputClass}: 
       <span
         className={cn(
           'flex w-11 shrink-0 items-center justify-center rounded-l-lg border border-r-0 border-white/[0.08] bg-white/[0.06] text-sm font-black tabular-nums',
-          piClassColor[classLetter],
+          classLetter ? piClassColor[classLetter] : 'text-muted',
         )}
         aria-hidden
       >
-        {classLetter}
+        {classLetter ?? '—'}
       </span>
       <input
         id={id}

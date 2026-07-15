@@ -239,7 +239,9 @@ export function EventCarList({
                       <MaxPiInput
                         inputClass={inputClass}
                         value={c.maxPi}
-                        onChange={(maxPi) => update(c.id, {maxPi})}
+                        onChange={(maxPi) => {
+                          if (maxPi != null) update(c.id, {maxPi});
+                        }}
                       />
                     </div>
                     <div>

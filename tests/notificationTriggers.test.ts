@@ -1,5 +1,28 @@
 import {describe, expect, it} from 'vitest';
-import {eventUpdateRecipients} from '../supabase/functions/_shared/notificationTriggers.ts';
+import {
+  eventUpdateRecipients,
+  summarizeCarsForNotify,
+} from '../supabase/functions/_shared/notificationTriggers.ts';
+
+describe('summarizeCarsForNotify', () => {
+  it('returns null for open build without PI cap or notes', () => {
+    expect(summarizeCarsForNotify('anything_goes', null, null, 0, 'en')).toBeNull();
+  });
+
+  it('summarizes PI cap only', () => {
+    expect(summarizeCarsForNotify('anything_goes', 650, null, 0, 'en')).toBe('PI cap 650');
+  });
+
+  it('summarizes notes only', () => {
+    expect(summarizeCarsForNotify('anything_goes', null, 'No swap', 0, 'ru')).toBe('No swap');
+  });
+
+  it('still summarizes restricted list updates', () => {
+    expect(summarizeCarsForNotify('restricted_list', null, null, 3, 'en')).toBe(
+      'Restricted list updated (3 cars)',
+    );
+  });
+});
 
 describe('eventUpdateRecipients', () => {
   const roster = [

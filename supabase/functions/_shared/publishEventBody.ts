@@ -32,7 +32,7 @@ type EventRowForPublish = {
   lobby_leader_gamertag: string;
   lobby_leader_is_host: boolean | null;
   car_rule_mode: string;
-  max_pi: number;
+  max_pi: number | null;
   tracks?: unknown;
   additional_car_restrictions?: string | null;
   rules_allowed?: string[] | null;

@@ -15,11 +15,10 @@ const STEP_KEYS = ['create.steps.event', 'create.steps.publish'] as const;
 
 type StepIndicatorProps = {
   step: CreateEventStepIndex;
-  freeNavigation?: boolean;
   onStepClick?: (index: CreateEventStepIndex) => void;
 };
 
-export function StepIndicator({step, freeNavigation, onStepClick}: StepIndicatorProps) {
+export function StepIndicator({step, onStepClick}: StepIndicatorProps) {
   const {t} = useTranslation();
 
   return (
@@ -29,9 +28,8 @@ export function StepIndicator({step, freeNavigation, onStepClick}: StepIndicator
     >
       {STEP_KEYS.map((labelKey, i) => {
         const idx = i as CreateEventStepIndex;
-        const done = idx < step;
         const active = idx === step;
-        const clickable = Boolean(onStepClick) && (freeNavigation ? !active : done);
+        const clickable = Boolean(onStepClick) && !active;
 
         return (
           <button

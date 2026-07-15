@@ -16,7 +16,7 @@ export interface CreateEventFormValues {
   coverUrl: string | null;
   tracks: EventTrack[];
   carRuleMode: CarRuleMode;
-  maxPi: number;
+  maxPi: number | null;
   additionalCarRestrictions: string;
   eventCars: EventCarEntry[];
   lobbyLeaderIsHost: boolean;

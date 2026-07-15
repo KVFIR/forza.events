@@ -40,7 +40,7 @@ Lessons from implementation work (keep in sync when behavior changes).
 - **My Events** merges host drafts **on top** for scopes `all` and `hosted`; **Joined** has no drafts. **Joined** / **All** filter via `userIsParticipating` (`filterMyEvents` + `JoinedEventsContext.isParticipating`); waitlisted rows show a **Waitlisted** badge on `EventCard`. Catalog still loads the full `browse-events` feed and filters client-side (server `my-events` filter is a scale backlog). `useMyEventsCatalog` gates the list via `resolveMyEventsCatalogLoading` until Discord auth resolves and host drafts load (avoids a published-only flash before drafts).
 - Draft cards link to `/create?edit={id}`, not `/event/{id}`. **Save as draft** (any step) navigates to `/event/{id}` after a successful save.
 - Do not treat `draftsLoadError` as `loadError` for the whole list — published events can load while drafts fail.
-- **Create flow:** form state lives in `useCreateEventForm`; server drafts via explicit **Save** / **Save as draft** (`persistDraft()` → `save-event`) only — no autosave, session WIP, or leave guard. **Publish** (`executePublish` / publish modal) runs `persistDraft()` then `publish-event` — no prior Save required. `PublishTargetPicker` guild-name sync must not clear `channel_id` when `guild_id` is unchanged (`onGuildChange` only resets channel on real guild change).
+- **Create flow:** form state lives in `useCreateEventForm`; server drafts via explicit **Save** / **Save as draft** (`persistDraft()` → `save-event`) only — no autosave, session WIP, or leave guard. **Publish** (`executePublish` / publish modal) runs `persistDraft()` then `publish-event` — no prior Save required. `PublishTargetPicker` guild-name sync must not clear `channel_id` when `guild_id` is unchanged (`onGuildChange` only resets channel on real guild change). **Open build:** `events.max_pi` optional (`027`); PI cap + `additional_car_restrictions` both empty → hide car-rules on cards/detail/embed/update DMs (`openBuildHasDisplayRules` / `src/lib/carRules.ts` ↔ `_shared/carRules.ts`).
 
 ## Supabase Edge Functions
 
@@ -101,7 +101,7 @@ Lessons from implementation work (keep in sync when behavior changes).
 
 ## Deploy checklist (when touching events browse/drafts)
 
-1. `supabase db push` when migrations changed
+1. `supabase db push` when migrations changed (`027` before shipping optional open-build PI cap)
 2. **`018` before frontend** when shipping add-group-without-waitlist — old RPC still raises `WAITLIST_EMPTY` until `018` is applied ([`docs/E2E.md`](docs/E2E.md) §0.8)
 3. **`020` before frontend** when shipping change-group-leader — RPC missing until `020` is applied ([`docs/E2E.md`](docs/E2E.md) Change convoy leader); **`025`** drops `integer` overload — without it Edge `change-group-leader` hits PostgREST `PGRST203` → 500 INTERNAL
 4. **`017` RPC return-type changes:** `CREATE OR REPLACE` cannot change `leave_event_participant` boolean → jsonb (`42P13`) — migration must `DROP FUNCTION IF EXISTS leave_event_participant(uuid, text)` then `CREATE` + `revoke`/`grant` (match `008` pattern)
@@ -185,7 +185,8 @@ Also align **`browse-events`** / **`src/lib/events.ts`** if the server list quer
 - Agent replies in Russian; UI copy, commits, and project docs stay in English (i18n for UI strings).
 - Roster self-indication via card border colors (purple = viewer), not inline "You" labels on participant cards.
 - Discord `@handle` under gamertag on participant cards is intentionally visible to all viewers, not host-only.
-- DM notification opt-in UI: Profile bell, waitlist join modal, and published-edit **Save & notify** — no inline Event Detail `joinHint` copy.
+- DM notification opt-in UI: Profile bell, waitlist join modal, and published-edit **Save & notify** — no inline Event Detail `joinHint` copy; Profile bell shows **off** when DM unreachable (no mutual guild with bot), not only when DB pref is off.
+- Local `/analytics` dashboard: tab navigation (not anchor sections); active tab persisted in `sessionStorage`; Overview **Health watch** links to detail tabs.
 
 ## Learned Workspace Facts
 
@@ -199,4 +200,5 @@ Also align **`browse-events`** / **`src/lib/events.ts`** if the server list quer
 - `cancelPendingStartingSoonForEvent` on cancel/reschedule skips pending/processing 2h rows even when the participant roster is empty (avoids stale host 2h after cancel).
 - `events.timezone_hint` is the DB column (not `timezone`); Edge `select` on `events` must use `timezone_hint` — wrong column yields empty row and `EVENT_NOT_FOUND` on join.
 - `user-profile` returns current user without DB write when the body has no updatable fields (`Object.keys(updates).length === 0`) — avoids 500 on bell/locale no-op calls.
-- Remote migration history can list timestamp versions for `015`/`016` while repo uses numbered files — repair with `migration repair` (revert timestamps, mark `015`/`016` applied) before pushing later migrations.
+- Remote migration history can list timestamp versions (`015`/`016`, or `025` as `20260714133038`) while repo uses numbered files — `migration repair --status reverted <timestamp>` then `--status applied <nnn>` before `db push`; prefer `supabase db push` over MCP `apply_migration` to avoid orphan timestamps.
+- **Host group full DM:** `host_group_filled` only when `firstOpenGroup()` is null (all existing groups full); partial multi-group fill does not trigger it — use `shouldEnqueueHostGroupFilledOnJoin`/`OnPromote`; `host_lobby_full` when lobby full + waitlist.

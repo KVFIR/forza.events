@@ -5,6 +5,10 @@ import {formatDiscordHandle} from '../../../lib/discordHandle';
 import {RoadIcon} from '../../../components/icons/RoadIcon';
 import {formatTrackDisplayLine} from '../../../lib/eventTracks';
 import {formatCarDisplayName} from '../../../lib/carDisplay';
+import {
+  formatOpenBuildCarRulesDisplay,
+  openBuildHasDisplayRules,
+} from '../../../lib/carRules';
 import {piClassColor, piToClass} from '../../../lib/pi';
 import {sectionLabelClass} from '../../../components/ui/formStyles';
 import {resolveEventGroups} from '../../../lib/eventRoster';
@@ -24,6 +28,9 @@ type Props = {
 
 export function EventDetailInfoPanel({event, when}: Props) {
   const {t} = useTranslation();
+  const openBuildDisplay = formatOpenBuildCarRulesDisplay(event);
+  const showCarRulesRow =
+    event.carRuleMode === 'restricted_list' || openBuildHasDisplayRules(event);
   const multiGroup = (event.groupCount ?? 1) > 1;
   const convoyLeaderGroups = useMemo(
     () =>
@@ -130,24 +137,34 @@ export function EventDetailInfoPanel({event, when}: Props) {
         </div>
       ) : null}
 
+      {showCarRulesRow ? (
       <div className={rowClass}>
         <Car className={iconClass} />
         <div className="min-w-0 flex-1">
           <p className={sectionLabelClass}>{t('eventDetail.carRules')}</p>
-          {event.carRuleMode === 'anything_goes' ? (
+          {event.carRuleMode === 'anything_goes' && openBuildDisplay ? (
             <ul className="mt-1.5 flex flex-col gap-1">
-              <li className={carRuleRowClass}>
-                <span className="truncate font-medium text-slate-200">
-                  {event.additionalCarRestrictions?.trim() || t('common.openBuild')}
-                </span>
-                <span
-                  className={cn(
-                    'text-right font-bold tabular-nums',
-                    piClassColor[piToClass(event.maxPi)] ?? 'text-muted',
-                  )}
-                >
-                  {piToClass(event.maxPi)} {event.maxPi}
-                </span>
+              <li
+                className={cn(
+                  carRuleRowClass,
+                  !(openBuildDisplay.notes && openBuildDisplay.piLabel) && 'grid-cols-1',
+                )}
+              >
+                {openBuildDisplay.notes ? (
+                  <span className="truncate font-medium text-slate-200">
+                    {openBuildDisplay.notes}
+                  </span>
+                ) : null}
+                {openBuildDisplay.piLabel ? (
+                  <span
+                    className={cn(
+                      'text-right font-bold tabular-nums',
+                      piClassColor[piToClass(event.maxPi!)] ?? 'text-muted',
+                    )}
+                  >
+                    {openBuildDisplay.piLabel}
+                  </span>
+                ) : null}
               </li>
             </ul>
           ) : event.allowedCars.length === 0 ? (
@@ -197,6 +214,7 @@ export function EventDetailInfoPanel({event, when}: Props) {
           )}
         </div>
       </div>
+      ) : null}
     </div>
   );
 }

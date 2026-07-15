@@ -227,7 +227,7 @@ Manual QA matrix aligned with current code behavior (not an abstract checklist).
 
 | Area | Cases |
 |------|--------|
-| **Cars** | `anything_goes` PI; `restricted_list` ≥1 catalog car; tuning restrictions on embed |
+| **Cars** | `anything_goes` optional PI cap + optional extra restrictions (empty → no car-rules UI/embed field); `restricted_list` ≥1 catalog car; tuning restrictions on embed |
 | **Tracks** | 0, 1, many; dedupe on save |
 | **Target** | Guild list = user guilds ∩ bot installed; empty → Add bot → Refresh |
 | **Target** | Guild change → channels load after guild list; channel re-validate |

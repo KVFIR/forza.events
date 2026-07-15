@@ -1,4 +1,5 @@
 import {enqueueNotifications, type OutboxInsert} from './notifications.ts';
+import {openBuildHasDisplayRules} from './carRules.ts';
 import type {adminClient} from './supabase.ts';
 
 export function formatStartsAtForNotify(
@@ -187,6 +188,7 @@ export async function enqueueEventUpdated(
   tracks: unknown,
   carMode: string,
   maxPi: number | null | undefined,
+  additionalCarRestrictions: string | null | undefined,
   carCount: number,
   tracksChanged: boolean,
   carsChanged: boolean,
@@ -208,7 +210,8 @@ export async function enqueueEventUpdated(
         (Array.isArray(tracks) ? tracks as {name?: string}[] : []).map((t) => (t.name ?? '').trim()).filter(Boolean),
       ),
       carMode,
-      maxPi: maxPi ?? 800,
+      maxPi: maxPi ?? null,
+      additionalCarRestrictions: additionalCarRestrictions?.trim() || null,
       carCount,
     },
   }));
@@ -324,14 +327,21 @@ export function summarizeTracksForNotify(tracks: unknown, locale: string): strin
 export function summarizeCarsForNotify(
   mode: string,
   maxPi: number | null | undefined,
+  additionalRestrictions: string | null | undefined,
   carCount: number,
   locale: string,
-): string {
+): string | null {
   if (mode === 'restricted_list') {
     if (locale === 'ru') return `Список машин обновлён (${carCount})`;
     return `Restricted list updated (${carCount} cars)`;
   }
-  const cap = maxPi ?? 800;
-  if (locale === 'ru') return `Любая машина · лимит PI ${cap}`;
-  return `Anything goes · PI cap ${cap}`;
+  const notes = additionalRestrictions?.trim() || null;
+  if (!openBuildHasDisplayRules(mode, maxPi, notes)) return null;
+
+  const parts: string[] = [];
+  if (maxPi != null) {
+    parts.push(locale === 'ru' ? `лимит PI ${maxPi}` : `PI cap ${maxPi}`);
+  }
+  if (notes) parts.push(notes);
+  return parts.join(' · ');
 }

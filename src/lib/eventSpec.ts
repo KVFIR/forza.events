@@ -23,7 +23,7 @@ export function validatePublishForm(input: {
   guildId: string | null;
   channelId: string | null;
   carRuleMode: CarRuleMode;
-  maxPi: number;
+  maxPi: number | null;
   carCount: number;
   lobbyLeaderGamertag: string;
 }): ValidationCode | null {
@@ -39,7 +39,11 @@ export function validatePublishForm(input: {
   if (input.carRuleMode === 'restricted_list' && input.carCount === 0) {
     return VALIDATION_CODES.CARS_REQUIRED;
   }
-  if (input.carRuleMode === 'anything_goes' && !isPiInRange(input.maxPi)) {
+  if (
+    input.carRuleMode === 'anything_goes' &&
+    input.maxPi != null &&
+    !isPiInRange(input.maxPi)
+  ) {
     return VALIDATION_CODES.PI_RANGE;
   }
   return null;

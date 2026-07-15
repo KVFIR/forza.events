@@ -29,7 +29,7 @@ type Props = {
   onCoverChange: (file: File | null) => void;
   onTracks: (tracks: CreateEventFormValues['tracks']) => void;
   onCarRuleMode: (mode: CarRuleMode) => void;
-  onMaxPi: (n: number) => void;
+  onMaxPi: (n: number | null) => void;
   onAdditionalCarRestrictions: (v: string) => void;
   onEventCars: (cars: EventCarEntry[]) => void;
   editSessionKey?: string | null;
@@ -179,7 +179,12 @@ export function EventStep({
 
         {values.carRuleMode === 'anything_goes' ? (
           <div className="space-y-3">
-            <Field title={t('create.maxPi')} htmlFor="create-maxPi" error={fieldErrors.maxPi}>
+            <Field
+              title={t('create.maxPi')}
+              htmlFor="create-maxPi"
+              error={fieldErrors.maxPi}
+              optional
+            >
               <MaxPiInput
                 id="create-maxPi"
                 value={values.maxPi}

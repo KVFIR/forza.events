@@ -58,7 +58,7 @@ export interface ForzaEvent {
   /** Set after publish-event posts the Discord embed. */
   discordMessageId?: string;
   carRuleMode: CarRuleMode;
-  maxPi: number;
+  maxPi: number | null;
   allowedCars: EventAllowedCar[];
   voicePolicy: VoicePolicy;
   /** Capacity **per group**; total lobby capacity = groupCount * maxPlayers. */

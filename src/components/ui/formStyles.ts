@@ -43,7 +43,11 @@ export const inputClass = [
 export const mobileFormControlClass = 'text-base sm:text-sm';
 
 /** Native date/time pickers via `<Input />` — same mobile sizing as track/car fields. */
-export const nativePickerInputClass = mobileFormControlClass;
+export const nativePickerInputClass = [mobileFormControlClass, 'box-border overflow-hidden'].join(
+  ' ',
+);
+
+export const nativePickerWrapperClass = 'min-w-0 max-w-full overflow-hidden';
 
 const NATIVE_PICKER_INPUT_TYPES = new Set([
   'date',
