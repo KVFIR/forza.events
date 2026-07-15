@@ -10,7 +10,6 @@ export type NotificationKind =
   | 'event_updated'
   | 'event_starting_soon'
   | 'host_group_filled'
-  | 'host_lobby_full'
   | 'host_event_starting_soon';
 
 /** Transactional waitlist DMs — sent even when dm_notifications_enabled is false. */
@@ -175,16 +174,6 @@ const COPY: Record<NotificationKind, Record<NotificationLocale, CopyBuilder>> = 
       description: `**Группа ${str(p.groupIndex)}** в **${str(p.eventTitle)}** заполнена (${str(p.maxPlayers)}/${str(p.maxPlayers)}).`,
     }),
   },
-  host_lobby_full: {
-    en: (p) => ({
-      title: 'Lobby full',
-      description: `All groups in **${str(p.eventTitle)}** are full. New racers join the **waitlist** (${str(p.waitlistCount)} waiting).`,
-    }),
-    ru: (p) => ({
-      title: 'Лобби заполнено',
-      description: `Все группы в **${str(p.eventTitle)}** заполнены. Новые гонщики попадают в **очередь** (${str(p.waitlistCount)} в ожидании).`,
-    }),
-  },
   host_event_starting_soon: {
     en: (p) => ({
       title: 'Your event starts in 2 hours',
@@ -216,4 +205,9 @@ export function buildNotificationEmbed(
 ): {title: string; description: string; fields?: {name: string; value: string}[]} {
   const lng = pickLocale(locale);
   return COPY[kind][lng](params);
+}
+
+/** Runtime guard for outbox rows whose kind was removed from COPY. */
+export function isKnownNotificationKind(kind: string): kind is NotificationKind {
+  return Object.prototype.hasOwnProperty.call(COPY, kind);
 }

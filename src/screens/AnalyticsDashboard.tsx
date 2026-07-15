@@ -137,7 +137,6 @@ const NOTIFICATION_KIND_LABELS: Record<string, string> = {
   event_updated: 'Event updated',
   event_starting_soon: 'Starting soon (racer)',
   host_group_filled: 'Host: group full',
-  host_lobby_full: 'Host: lobby full',
   host_event_starting_soon: 'Starting soon (host)',
 };
 

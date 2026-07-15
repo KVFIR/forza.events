@@ -236,23 +236,6 @@ export async function enqueueHostGroupFilled(
   }]);
 }
 
-export async function enqueueHostLobbyFull(
-  supabase: ReturnType<typeof adminClient>,
-  event: EventNotifyRow,
-  waitlistCount: number,
-): Promise<void> {
-  await enqueueNotifications(supabase, [{
-    kind: 'host_lobby_full',
-    event_id: event.id,
-    recipient_discord_id: event.host_discord_id,
-    dedupe_key: `host_lobby_full:${event.id}`,
-    payload: {
-      eventTitle: event.title,
-      waitlistCount,
-    },
-  }]);
-}
-
 export async function scanStartingSoonReminders(
   supabase: ReturnType<typeof adminClient>,
 ): Promise<void> {

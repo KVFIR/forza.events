@@ -1,6 +1,7 @@
 import {sendUserDm} from './discordDm.ts';
 import {
   buildNotificationEmbed,
+  isKnownNotificationKind,
   openEventButtonLabel,
   WAITLIST_NOTIFICATION_KINDS,
   type NotificationKind,
@@ -112,7 +113,13 @@ export async function processNotificationBatch(
   let skipped = 0;
 
   for (const row of batch) {
-    const kind = row.kind as NotificationKind;
+    const kind = row.kind as string;
+    if (!isKnownNotificationKind(kind)) {
+      await markOutbox(supabase, row.id, 'skipped', row.attempts, 'unknown_kind');
+      skipped += 1;
+      continue;
+    }
+
     const {data: userRow} = await supabase
       .from('users')
       .select('discord_id, dm_notifications_enabled, notification_locale')

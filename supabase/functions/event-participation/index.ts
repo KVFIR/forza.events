@@ -17,7 +17,6 @@ import {
 } from '../_shared/notificationParticipation.ts';
 import {
   enqueueHostGroupFilled,
-  enqueueHostLobbyFull,
   enqueueWaitlistSeatOpened,
 } from '../_shared/notificationTriggers.ts';
 import {adminClient} from '../_shared/supabase.ts';
@@ -245,12 +244,8 @@ serve(async (req) => {
         timezone: event.timezone_hint,
       };
 
-      if (waitlisted) {
-        const priorWaitlistCount = (roster ?? []).filter((r) => r.waitlisted).length;
-        const waitlistCount = priorWaitlistCount + (existing?.waitlisted ? 0 : 1);
-        await enqueueHostLobbyFull(supabase, eventRow, waitlistCount);
-        deferNotificationDelivery(supabase);
-      } else if (
+      if (
+        !waitlisted &&
         shouldEnqueueHostGroupFilledOnJoin(
           existing,
           waitlisted,
