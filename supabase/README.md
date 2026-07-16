@@ -130,7 +130,7 @@ Uses `DISCORD_PUBLIC_KEY` for request verification (not user OAuth).
 
 - Bucket: `event-covers` (public read)
 - **Writes:** only via `upload-cover` (service role)
-- Client: `uploadCoverImage(token, guildId, eventId, file)` in `src/lib/api.ts`
+- Client: `uploadCoverImage(token, guildId?, eventId, file)` in `src/lib/api.ts` (`guild_id` optional for drafts)
 
 ## Sample events
 

@@ -419,15 +419,16 @@ function fileToBase64(file: File): Promise<string> {
 
 export async function uploadCoverImage(
   discordToken: string,
-  guildId: string,
+  guildId: string | null | undefined,
   eventId: string,
   file: File,
 ): Promise<string> {
   const content_base64 = await fileToBase64(file);
+  const trimmedGuild = guildId?.trim();
   const data = await invoke<{url: string}>(
     'upload-cover',
     {
-      guild_id: guildId,
+      ...(trimmedGuild ? {guild_id: trimmedGuild} : {}),
       event_id: eventId,
       content_base64,
       content_type: file.type,

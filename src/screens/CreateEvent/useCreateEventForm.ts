@@ -511,9 +511,10 @@ export function useCreateEventForm() {
     try {
       const result = await saveEvent(token, buildPayload());
       const id = result.id;
-      if (coverFile && targetGuildId) {
+      // Drafts may omit guild_id until publish — still upload cover (path uses draft/ or guild/).
+      if (coverFile) {
         const compressed = await compressCoverForUpload(coverFile);
-        const url = await uploadCoverImage(token, targetGuildId, id, compressed);
+        const url = await uploadCoverImage(token, targetGuildId || undefined, id, compressed);
         setCoverUrl(url);
         setCoverPreview(url);
         setCoverFile(null);

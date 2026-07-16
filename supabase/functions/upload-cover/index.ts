@@ -3,6 +3,7 @@ import {serve} from 'https://deno.land/std@0.224.0/http/server.ts';
 import {databaseErrorResponse, internalErrorResponse} from '../_shared/apiResponse.ts';
 import {jsonResponse, optionsResponse} from '../_shared/cors.ts';
 import {COVER_SOURCE_MAX_BYTES, coverSourceLimitErrorEn} from '../_shared/coverImage.ts';
+import {coverStoragePath} from '../_shared/eventCovers.ts';
 import {verifyDiscordToken} from '../_shared/discord.ts';
 import {rateLimitMutation} from '../_shared/rateLimitPresets.ts';
 import {adminClient} from '../_shared/supabase.ts';
@@ -27,7 +28,10 @@ serve(async (req) => {
   try {
     const body = await req.json();
     const eventId = body.event_id as string;
-    const guildId = body.guild_id as string;
+    const guildId =
+      typeof body.guild_id === 'string' && body.guild_id.trim()
+        ? body.guild_id.trim()
+        : undefined;
     const contentBase64 = body.content_base64 as string;
     const contentType = String(body.content_type ?? '');
     const filename = String(body.filename ?? 'cover.webp');
@@ -35,7 +39,6 @@ serve(async (req) => {
     if (!eventId || !UUID_RE.test(eventId)) {
       return jsonResponse({error: 'Invalid event_id'}, 400, req);
     }
-    if (!guildId) return jsonResponse({error: 'Missing guild_id'}, 400, req);
     if (!contentBase64) return jsonResponse({error: 'Missing content_base64'}, 400, req);
     if (!ALLOWED_TYPES.has(contentType)) {
       return jsonResponse({error: 'Unsupported image type'}, 400, req);
@@ -56,13 +59,14 @@ serve(async (req) => {
     if (!event || event.host_discord_id !== discordUser.id) {
       return jsonResponse({error: 'Forbidden'}, 403, req);
     }
-    if (event.guild_id !== guildId) {
+    // Optional client guild_id is consistency-only; path always follows the event row
+    // (draft/ when guild_id is still null — migration 014).
+    if (guildId && event.guild_id && event.guild_id !== guildId) {
       return jsonResponse({error: 'Guild does not match event'}, 400, req);
     }
 
     const ext = (filename.split('.').pop() ?? 'webp').toLowerCase();
-    const safeExt = ['webp', 'jpg', 'jpeg', 'png'].includes(ext) ? ext : 'webp';
-    const path = `${guildId}/${eventId}/cover.${safeExt}`;
+    const path = coverStoragePath(eventId, event.guild_id, ext);
 
     const {error: uploadError} = await supabase.storage.from('event-covers').upload(path, bytes, {
       upsert: true,

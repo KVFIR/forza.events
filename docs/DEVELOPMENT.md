@@ -204,7 +204,7 @@ Flow:
 
 1. Save draft (`save-event`) → get `event_id`
 2. `compressCoverForUpload` (client)
-3. `uploadCoverImage(discordToken, guildId, eventId, file)` → Edge Function
+3. `uploadCoverImage(discordToken, guildId?, eventId, file)` → Edge Function (`guild_id` optional for drafts)
 4. Save again with `cover_image_url`
 
 ```bash

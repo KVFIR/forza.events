@@ -51,3 +51,16 @@ export function resolveCoverAbsolute(
   const base = siteOrigin.replace(/\/$/, '');
   return `${base}${path.startsWith('/') ? path : `/${path}`}`;
 }
+
+/** Storage object path for custom covers. Drafts may have no guild yet (migration 014). */
+export function coverStoragePath(
+  eventId: string,
+  guildId: string | null | undefined,
+  ext: string,
+): string {
+  const folder = guildId?.trim() || 'draft';
+  const safeExt = ['webp', 'jpg', 'jpeg', 'png'].includes(ext.toLowerCase())
+    ? ext.toLowerCase()
+    : 'webp';
+  return `${folder}/${eventId}/cover.${safeExt}`;
+}

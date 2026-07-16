@@ -135,7 +135,7 @@ Lessons from implementation work (keep in sync when behavior changes).
 ## Security (Edge + Storage + RLS)
 
 - **Mutations** use Edge Functions + `verifyDiscordToken()`; Postgres RLS is read-only for anon on sensitive tables.
-- **Cover uploads:** `upload-cover` only (host + matching `guild_id`/`event_id`); baseline schema drops anon storage write policies on `event-covers`.
+- **Cover uploads:** `upload-cover` only (host + `event_id`). Optional body `guild_id` must match the event when both are set. Storage path is `{guildId|draft}/{eventId}/cover.*` from the event row only (not client-supplied). Baseline schema drops anon storage write policies on `event-covers`.
 - **Publish target:** `publish-event` and `validate-channel` call `validatePublishChannelTarget`; user must be guild member with Manage Server (`guildAccess.ts`).
 - **OAuth:** `token-exchange` whitelists `redirect_uri` via `oauthRedirect.ts` (+ optional `DISCORD_REDIRECT_URI_ALLOWLIST`).
 - **Cars catalog:** `save-event` resolves cars via `resolveEventCars()` **before** insert/update (avoids orphan drafts on `CARS_UNRESOLVED`); matches by id or `(make, model, year, pi)` on active rows only — no client-driven inserts into `cars`. Refresh prod: `npm run data:fh6:scrape` then `npm run seed:cars` (upsert via `006_cars_catalog_sync`; never `DELETE FROM cars` / `event_cars`).
