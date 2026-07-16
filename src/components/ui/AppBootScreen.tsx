@@ -1,4 +1,4 @@
-import type {HTMLAttributes, ReactNode} from 'react';
+import type {ReactNode} from 'react';
 import {cn} from '../../lib/cn';
 import {Logo} from './Logo';
 import {Spinner} from './Spinner';
@@ -9,7 +9,9 @@ type Props = {
   /** Show spinner under the logo (default true). */
   spinner?: boolean;
   children?: ReactNode;
-} & Pick<HTMLAttributes<HTMLDivElement>, 'data-discord-layout'>;
+  /** Mirrors Discord Activity layout attribute used by CSS. */
+  'data-discord-layout'?: string;
+};
 
 /** Full-viewport boot / gate loading — keep in sync with `#boot-splash` in index.html. */
 export function AppBootScreen({
@@ -28,7 +30,7 @@ export function AppBootScreen({
       role="status"
       aria-live="polite"
       aria-busy="true"
-      data-discord-layout={discordLayout}
+      {...(discordLayout ? {'data-discord-layout': discordLayout} : {})}
     >
       <Logo size="lg" />
       {spinner ? <Spinner size="lg" muted /> : null}
