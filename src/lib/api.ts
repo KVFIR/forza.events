@@ -228,6 +228,8 @@ export async function listGuildMembers(
   }>('list-guild-members', {guild_id: guildId, query}, discordToken);
 }
 
+export type ListChannelsHintCode = 'NO_TEXT_CHANNELS' | 'NO_PERMITTED_CHANNELS';
+
 export async function listChannels(
   discordToken: string,
   guildId: string,
@@ -238,7 +240,7 @@ export async function listChannels(
     () =>
       invoke<{
         channels: {id: string; name: string; position: number}[];
-        hint?: string | null;
+        hint_code?: ListChannelsHintCode | null;
       }>('list-channels', {guild_id: guildId}, discordToken),
     {cacheMs: 30_000, fresh: options?.fresh},
   );

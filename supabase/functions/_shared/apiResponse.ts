@@ -1,6 +1,7 @@
 import {jsonResponse} from './cors.ts';
 import type {ApiErrorCode} from './apiErrorCodes.ts';
 import {API_ERROR_CODES} from './apiErrorCodes.ts';
+import {BOT_CANNOT_POST_MESSAGE} from './channelPermissions.ts';
 import type {ValidationCode} from './validationCodes.ts';
 import {validationMessageEn} from './validationMessages.ts';
 
@@ -19,8 +20,7 @@ const API_MESSAGES_EN: Partial<Record<ApiErrorCode, string>> = {
   [API_ERROR_CODES.CHANNEL_NOT_TEXT]: 'Only text channels can be used for announcements.',
   [API_ERROR_CODES.CHANNEL_WRONG_GUILD]: 'Channel does not belong to the selected server.',
   [API_ERROR_CODES.BOT_NOT_GUILD_MEMBER]: 'Bot is not a member of this server.',
-  [API_ERROR_CODES.BOT_CANNOT_POST]:
-    'FORZA.EVENTS cannot post in this channel. Allow View Channel, Send Messages, and Embed Links for the bot (or its role) in channel settings.',
+  [API_ERROR_CODES.BOT_CANNOT_POST]: BOT_CANNOT_POST_MESSAGE,
   [API_ERROR_CODES.EVENT_FULL]: 'Event full',
   [API_ERROR_CODES.REGISTRATION_CLOSED]: 'Registration is closed',
   [API_ERROR_CODES.REGISTRATION_AFTER_START]: 'Registration closed after event start',

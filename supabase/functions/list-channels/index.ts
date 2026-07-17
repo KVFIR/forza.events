@@ -5,6 +5,8 @@ import {
   fetchGuildMember,
   fetchGuildRoles,
   getBotUserId,
+  LIST_CHANNELS_HINT_CODES,
+  type ListChannelsHintCode,
 } from '../_shared/channelPermissions.ts';
 import {API_ERROR_CODES} from '../_shared/apiErrorCodes.ts';
 import {appErrorResponse, internalErrorResponse} from '../_shared/apiResponse.ts';
@@ -71,10 +73,11 @@ serve(async (req) => {
 
     return jsonResponse({
       channels: postable,
-      hint:
-        postable.length === 0
-          ? 'No text channels where FORZA.EVENTS can post. Check channel permissions for the bot role.'
-          : null,
+      hint_code: (text.length === 0
+        ? LIST_CHANNELS_HINT_CODES.NO_TEXT_CHANNELS
+        : postable.length === 0
+          ? LIST_CHANNELS_HINT_CODES.NO_PERMITTED_CHANNELS
+          : null) satisfies ListChannelsHintCode | null,
     }, 200, req);
   } catch (e) {
     const msg = e instanceof Error ? e.message : String(e);

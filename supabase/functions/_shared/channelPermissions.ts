@@ -1,11 +1,27 @@
 import {botHeaders, discordApiFetch, discordRateLimitMessage} from './discord.ts';
 
 const ADMINISTRATOR = 0x8n;
+const CREATE_INSTANT_INVITE = 0x1n;
 const VIEW_CHANNEL = 0x400n;
 const SEND_MESSAGES = 0x800n;
 const EMBED_LINKS = 0x4000n;
 const ALL_PERMISSIONS = (1n << 52n) - 1n;
-const POST_PERMISSIONS = VIEW_CHANNEL | SEND_MESSAGES | EMBED_LINKS;
+const POST_PERMISSIONS = VIEW_CHANNEL | SEND_MESSAGES | EMBED_LINKS | CREATE_INSTANT_INVITE;
+
+/** Human-readable publish-channel permission list — keep in sync with i18n publish.noPostableChannelsHint / errors.botCannotPost. */
+export const PUBLISH_CHANNEL_PERMISSIONS_LABEL =
+  'View Channel, Send Messages, Embed Links, and Create Invite';
+
+export const BOT_CANNOT_POST_MESSAGE =
+  `FORZA.EVENTS cannot post in this channel. Allow ${PUBLISH_CHANNEL_PERMISSIONS_LABEL} for the bot (or its role) in channel settings.`;
+
+export const LIST_CHANNELS_HINT_CODES = {
+  NO_TEXT_CHANNELS: 'NO_TEXT_CHANNELS',
+  NO_PERMITTED_CHANNELS: 'NO_PERMITTED_CHANNELS',
+} as const;
+
+export type ListChannelsHintCode =
+  (typeof LIST_CHANNELS_HINT_CODES)[keyof typeof LIST_CHANNELS_HINT_CODES];
 
 export type PermissionOverwrite = {
   id: string;
@@ -57,9 +73,6 @@ export function mergedChannelOverwrites(
   }
   return merged;
 }
-
-export const BOT_CANNOT_POST_MESSAGE =
-  'FORZA.EVENTS cannot post in this channel. Allow View Channel, Send Messages, and Embed Links for the bot (or its role) in channel settings.';
 
 let cachedBotUserId: string | null = null;
 

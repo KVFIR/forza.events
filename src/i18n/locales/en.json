@@ -383,7 +383,9 @@
     "modalHint": "Server and channel cannot be changed after publish.",
     "selectServerFirst": "Select a server first.",
     "refreshingChannels": "Loading channels…",
-    "checkingChannel": "Checking permissions…"
+    "checkingChannel": "Checking permissions…",
+    "noTextChannelsHint": "This server has no text channels. Create one for announcements, then refresh.",
+    "noPostableChannelsHint": "No text channels where FORZA.EVENTS has View Channel, Send Messages, Embed Links, and Create Invite. Check channel permissions for the bot role."
   },
   "gamertag": {
     "required": "Gamertag is required",

@@ -1,7 +1,7 @@
 import {useCallback, useEffect, useMemo, useRef, useState} from 'react';
 import {useTranslation} from 'react-i18next';
 import {busyLabel} from '../i18n/busyLabels';
-import {listChannels, listGuilds} from '../lib/api';
+import {listChannels, listGuilds, type ListChannelsHintCode} from '../lib/api';
 import {track} from '../lib/analytics';
 import {getGuildContext} from '../lib/discord';
 import {buildBotInstallUrl, openBotInstallUrl} from '../lib/discordInstall';
@@ -42,7 +42,7 @@ export function PublishTargetPicker({
   const [guildHint, setGuildHint] = useState<string | null>(null);
   const [loadingGuilds, setLoadingGuilds] = useState(true);
   const [loadingChannels, setLoadingChannels] = useState(false);
-  const [channelHint, setChannelHint] = useState<string | null>(null);
+  const [channelHintCode, setChannelHintCode] = useState<ListChannelsHintCode | null>(null);
   const [guildError, setGuildError] = useState<string | null>(null);
   const [channelsError, setChannelsError] = useState<string | null>(null);
   const guildRequestRef = useRef(0);
@@ -125,7 +125,7 @@ export function PublishTargetPicker({
     const requestId = ++channelRequestRef.current;
     if (guildChanged) {
       setChannels([]);
-      setChannelHint(null);
+      setChannelHintCode(null);
       setChannelsError(null);
     }
     if (!options?.background || guildChanged) setLoadingChannels(true);
@@ -133,7 +133,7 @@ export function PublishTargetPicker({
       .then((r) => {
         if (requestId !== channelRequestRef.current) return;
         setChannels(r.channels);
-        setChannelHint(r.hint ?? null);
+        setChannelHintCode(r.hint_code ?? null);
         const savedChannelId = channelIdRef.current;
         if (
           !lockChannel &&
@@ -325,8 +325,12 @@ export function PublishTargetPicker({
             </TextButton>
           </div>
         )}
-        {channelHint && !channelsError && (
-          <p className="mt-1.5 text-[10px] text-amber-200/90">{channelHint}</p>
+        {channelHintCode && !channelsError && (
+          <p className="mt-1.5 text-[10px] text-amber-200/90">
+            {channelHintCode === 'NO_TEXT_CHANNELS'
+              ? t('publish.noTextChannelsHint')
+              : t('publish.noPostableChannelsHint')}
+          </p>
         )}
         {lockChannel && (
           <p className="mt-1.5 text-xs text-muted">{t('create.channelLocked')}</p>

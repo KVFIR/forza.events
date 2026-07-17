@@ -1,11 +1,25 @@
 import {getDiscordSdk, isStandaloneBrowser} from './discord';
 import {isDiscordLinkUrl} from './guildDisplay';
 
+/** Discord permission bits requested on bot OAuth install. */
+const VIEW_CHANNEL = 1 << 10;
+const SEND_MESSAGES = 1 << 11;
+const EMBED_LINKS = 1 << 14;
+const READ_MESSAGE_HISTORY = 1 << 16;
+const USE_EXTERNAL_EMOJIS = 1 << 18;
+const CREATE_INSTANT_INVITE = 1 << 0;
+
 /**
- * Bot permissions for guild install (publish embeds + read channels).
- * Send Messages | Embed Links | Read Message History | Use External Emojis
+ * Bot permissions for guild install (publish embeds + Join server invite on publish channel).
+ * View Channel | Send Messages | Embed Links | Read Message History | Use External Emojis | Create Invite
  */
-export const BOT_INSTALL_PERMISSIONS = 346112;
+export const BOT_INSTALL_PERMISSIONS =
+  VIEW_CHANNEL |
+  SEND_MESSAGES |
+  EMBED_LINKS |
+  READ_MESSAGE_HISTORY |
+  USE_EXTERNAL_EMOJIS |
+  CREATE_INSTANT_INVITE;
 
 /**
  * OAuth2 guild install — adds the app's bot user to a server (one step).

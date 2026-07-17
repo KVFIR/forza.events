@@ -37,6 +37,7 @@ describe('buildBotInstallUrl', () => {
     expect(params.get('client_id')).toBe('123456789');
     expect(params.get('scope')).toBe('bot');
     expect(params.get('permissions')).toBe(String(BOT_INSTALL_PERMISSIONS));
+    expect(BOT_INSTALL_PERMISSIONS & 1).toBe(1);
     expect(params.has('response_type')).toBe(false);
     expect(params.has('redirect_uri')).toBe(false);
   });
