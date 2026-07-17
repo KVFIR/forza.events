@@ -234,6 +234,7 @@ describe('buildEventDetailViewModel', () => {
     expect(view.showGroupRoster).toBe(true);
     expect(view.canBalanceGroupRoster).toBe(true);
     expect(view.canShuffleGroupRoster).toBe(true);
+    expect(view.canBalanceShuffleGroupRoster).toBe(true);
   });
 
   it('hides balance when group sizes are already even', () => {
@@ -252,9 +253,10 @@ describe('buildEventDetailViewModel', () => {
     expect(view.showGroupRoster).toBe(true);
     expect(view.canBalanceGroupRoster).toBe(false);
     expect(view.canShuffleGroupRoster).toBe(true);
+    expect(view.canBalanceShuffleGroupRoster).toBe(false);
   });
 
-  it('lets the host manage roster when there are multiple groups', () => {
+  it('shows a disabled roster control when only leaders remain', () => {
     const event = baseEvent({
       hostDiscordId: 'viewer-1',
       discordMessageId: 'msg-1',
@@ -265,7 +267,10 @@ describe('buildEventDetailViewModel', () => {
       ],
     });
     const view = buildView({event, displayEvent: event});
-    expect(view.showGroupRoster).toBe(false);
+    expect(view.showGroupRoster).toBe(true);
+    expect(view.canBalanceGroupRoster).toBe(false);
+    expect(view.canShuffleGroupRoster).toBe(false);
+    expect(view.canBalanceShuffleGroupRoster).toBe(false);
   });
 
   it('blocks convoy leader changes after the event starts', () => {

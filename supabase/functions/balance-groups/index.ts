@@ -4,7 +4,12 @@ import {appErrorResponse, internalErrorResponse} from '../_shared/apiResponse.ts
 import {jsonResponse, optionsResponse} from '../_shared/cors.ts';
 import {verifyDiscordToken} from '../_shared/discord.ts';
 import {syncPublishedEmbedByEventId} from '../_shared/embedSync.ts';
-import {planGroupBalance, planGroupShuffle} from '../_shared/eventGroups.ts';
+import {
+  netGroupMovePlans,
+  planGroupBalance,
+  planGroupBalanceShuffle,
+  planGroupShuffle,
+} from '../_shared/eventGroups.ts';
 import {eventHasStarted} from '../_shared/eventSpec.ts';
 import {responseForRpcError} from '../_shared/rpcErrors.ts';
 import {rateLimitMutation} from '../_shared/rateLimitPresets.ts';
@@ -63,7 +68,12 @@ serve(async (req) => {
       return appErrorResponse(req, 400, API_ERROR_CODES.BAD_REQUEST);
     }
 
-    const mode = body.mode === 'shuffle' ? 'shuffle' : 'balance';
+    const mode =
+      body.mode === 'shuffle'
+        ? 'shuffle'
+        : body.mode === 'balance_shuffle'
+          ? 'balance_shuffle'
+          : 'balance';
 
     const {data: roster} = await supabase
       .from('event_participants')
@@ -74,7 +84,9 @@ serve(async (req) => {
     const plan =
       mode === 'shuffle'
         ? planGroupShuffle(rosterRows, groupCount, event.max_players)
-        : planGroupBalance(rosterRows, groupCount, event.max_players);
+        : mode === 'balance_shuffle'
+          ? planGroupBalanceShuffle(rosterRows, groupCount, event.max_players)
+          : planGroupBalance(rosterRows, groupCount, event.max_players);
     if (!plan.length) {
       return jsonResponse({ok: true, unchanged: true, moved: []}, 200, req);
     }
@@ -110,12 +122,15 @@ serve(async (req) => {
       from_group: Number(m.from_group),
       to_group: Number(m.to_group),
     }));
+    // balance_shuffle applies two hops; DMs use one original→final move per racer.
+    const notified =
+      mode === 'balance_shuffle' ? netGroupMovePlans(normalized) : normalized;
 
     await enqueueGroupReassigned(
       supabase,
       eventRow,
       rosterAfter ?? [],
-      normalized,
+      notified,
       crypto.randomUUID(),
     );
     deferNotificationDelivery(supabase);
@@ -124,7 +139,12 @@ serve(async (req) => {
     if (!embedSync.ok) {
       console.error(
         JSON.stringify({
-          msg: mode === 'shuffle' ? 'Shuffled groups but Discord embed sync failed' : 'Balanced groups but Discord embed sync failed',
+          msg:
+            mode === 'shuffle'
+              ? 'Shuffled groups but Discord embed sync failed'
+              : mode === 'balance_shuffle'
+                ? 'Balanced and shuffled groups but Discord embed sync failed'
+                : 'Balanced groups but Discord embed sync failed',
           eventId,
           status: embedSync.status,
         }),
@@ -132,7 +152,7 @@ serve(async (req) => {
     }
 
     return jsonResponse(
-      {ok: true, mode, moved: normalized, embed_synced: embedSync.ok},
+      {ok: true, mode, moved: notified, embed_synced: embedSync.ok},
       200,
       req,
     );

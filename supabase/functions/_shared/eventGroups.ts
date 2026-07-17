@@ -370,3 +370,60 @@ export function planGroupShuffle(
   }
   return [];
 }
+
+function cloneBalanceRows(rows: BalanceRosterRow[]): BalanceRosterRow[] {
+  return rows.map((r) => ({...r}));
+}
+
+function applyMovesVirtually(rows: BalanceRosterRow[], moves: GroupMovePlan[]): void {
+  const byId = new Map(rows.map((r) => [r.discord_id, r]));
+  for (const move of moves) {
+    const row = byId.get(move.discord_id);
+    if (row) row.group_index = move.to_group;
+  }
+}
+
+/** Collapse multi-hop apply results to one original→final move per racer (for DMs). */
+export function netGroupMovePlans(moves: GroupMovePlan[]): GroupMovePlan[] {
+  const firstFrom = new Map<string, number>();
+  const lastTo = new Map<string, number>();
+  for (const move of moves) {
+    if (!firstFrom.has(move.discord_id)) firstFrom.set(move.discord_id, move.from_group);
+    lastTo.set(move.discord_id, move.to_group);
+  }
+  const out: GroupMovePlan[] = [];
+  for (const [discord_id, to_group] of lastTo) {
+    const from_group = firstFrom.get(discord_id);
+    if (from_group == null || from_group === to_group) continue;
+    out.push({discord_id, from_group, to_group});
+  }
+  return out;
+}
+
+/**
+ * Balance, then shuffle — staged apply order (do not re-sort as one list).
+ * Returns [] when shuffle after balance is impossible (caller should offer balance alone).
+ */
+export function planGroupBalanceShuffle(
+  rows: BalanceRosterRow[],
+  groupCount: number,
+  maxPlayers: number,
+  random: () => number = Math.random,
+): GroupMovePlan[] {
+  if (groupCount < 2 || maxPlayers < 1) return [];
+
+  const active = rows.filter((r) => !r.waitlisted);
+  const balanceMoves = planGroupBalance(rows, groupCount, maxPlayers);
+  if (!balanceMoves.length) return [];
+
+  const afterBalance = cloneBalanceRows(active);
+  applyMovesVirtually(afterBalance, balanceMoves);
+
+  for (let attempt = 0; attempt < 12; attempt++) {
+    const shuffleMoves = planGroupShuffle(afterBalance, groupCount, maxPlayers, random);
+    if (!shuffleMoves.length) continue;
+    // Phase 1 then phase 2 — capacity-safe only if order is preserved.
+    return [...balanceMoves, ...shuffleMoves];
+  }
+  return [];
+}

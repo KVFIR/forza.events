@@ -14,7 +14,7 @@ import {cn} from '../../../lib/cn';
 type Props = {
   view: Pick<
     EventDetailViewModel,
-    'ev' | 'groups' | 'waitlist' | 'canChangeGroupLeader' | 'showGroupRoster' | 'canBalanceGroupRoster' | 'canShuffleGroupRoster'
+    'ev' | 'groups' | 'waitlist' | 'canChangeGroupLeader' | 'showGroupRoster' | 'canBalanceGroupRoster' | 'canShuffleGroupRoster' | 'canBalanceShuffleGroupRoster'
   >;
   viewerDiscordId: string;
   accessToken: string | null;
@@ -149,7 +149,7 @@ export function EventDetailParticipants({
   onRosterChanged,
 }: Props) {
   const {t} = useTranslation();
-  const {ev, groups, waitlist, canChangeGroupLeader, showGroupRoster, canBalanceGroupRoster, canShuffleGroupRoster} = view;
+  const {ev, groups, waitlist, canChangeGroupLeader, showGroupRoster, canBalanceGroupRoster, canShuffleGroupRoster, canBalanceShuffleGroupRoster} = view;
   const multiGroup = groups.length > 1;
   const [changingGroupIndex, setChangingGroupIndex] = useState<number | null>(null);
 
@@ -167,6 +167,7 @@ export function EventDetailParticipants({
           accessToken={accessToken}
           canBalance={canBalanceGroupRoster}
           canShuffle={canShuffleGroupRoster}
+          canBalanceShuffle={canBalanceShuffleGroupRoster}
           onBalanced={onRosterChanged}
         >
           {({trigger, error}) => (

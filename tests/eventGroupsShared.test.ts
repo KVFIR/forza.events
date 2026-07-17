@@ -5,7 +5,9 @@ import {
   isActiveConvoyLeaderRow,
   isHostDenormalizedConvoyLeader,
   balancedGroupTargets,
+  netGroupMovePlans,
   planGroupBalance,
+  planGroupBalanceShuffle,
   planGroupShuffle,
   resolveActiveGroupLeaderId,
   resolveAddGroupParticipationSource,
@@ -360,6 +362,59 @@ describe('planGroupShuffle', () => {
     const moves = planGroupShuffle(rows, 2, 12, () => 0);
     expect(moves).toHaveLength(2);
     expect(moves.every((m) => m.discord_id === 'a' || m.discord_id === 'b')).toBe(true);
+  });
+});
+
+describe('planGroupBalanceShuffle', () => {
+  it('stages balance then shuffle and nets one notify move per racer', () => {
+    const rows = [
+      {discord_id: 'l1', group_index: 1, waitlisted: false, is_convoy_leader: true},
+      {discord_id: 'l2', group_index: 2, waitlisted: false, is_convoy_leader: true},
+      {discord_id: 'l3', group_index: 3, waitlisted: false, is_convoy_leader: true},
+      ...Array.from({length: 11}, (_, i) => ({
+        discord_id: `g1_${i}`,
+        group_index: 1,
+        waitlisted: false,
+        is_convoy_leader: false,
+      })),
+      ...Array.from({length: 11}, (_, i) => ({
+        discord_id: `g2_${i}`,
+        group_index: 2,
+        waitlisted: false,
+        is_convoy_leader: false,
+      })),
+      {discord_id: 'g3_0', group_index: 3, waitlisted: false, is_convoy_leader: false},
+      {discord_id: 'g3_1', group_index: 3, waitlisted: false, is_convoy_leader: false},
+    ];
+    const balanceOnly = planGroupBalance(rows, 3, 12);
+    let seed = 1;
+    const random = () => {
+      seed = (Math.imul(seed, 1664525) + 1013904223) >>> 0;
+      return seed / 0x100000000;
+    };
+    const staged = planGroupBalanceShuffle(rows, 3, 12, random);
+    expect(balanceOnly.length).toBeGreaterThan(0);
+    expect(staged.length).toBeGreaterThan(balanceOnly.length);
+    expect(canApplyGroupMovesInOrder(staged, rows, 12)).toBe(true);
+    expect(planGroupShuffle(rows, 3, 12)).toEqual([]);
+
+    const notified = netGroupMovePlans(staged);
+    expect(notified.length).toBeGreaterThan(0);
+    expect(new Set(notified.map((m) => m.discord_id)).size).toBe(notified.length);
+  });
+
+  it('returns empty when shuffle after balance is impossible', () => {
+    expect(
+      planGroupBalanceShuffle(
+        [
+          {discord_id: 'l1', group_index: 1, waitlisted: false, is_convoy_leader: true},
+          {discord_id: 'l2', group_index: 2, waitlisted: false, is_convoy_leader: true},
+          {discord_id: 'a', group_index: 1, waitlisted: false, is_convoy_leader: false},
+        ],
+        2,
+        12,
+      ),
+    ).toEqual([]);
   });
 });
 

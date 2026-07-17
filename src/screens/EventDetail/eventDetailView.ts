@@ -64,6 +64,7 @@ export type EventDetailViewModel = {
   canChangeGroupLeader: boolean;
   canBalanceGroupRoster: boolean;
   canShuffleGroupRoster: boolean;
+  canBalanceShuffleGroupRoster: boolean;
   showGroupRoster: boolean;
   onWaitlist: boolean;
   willWaitlist: boolean;
@@ -185,6 +186,10 @@ export function buildEventDetailViewModel(input: {
     isHost && canEdit && !isDraft && (ev.groupCount ?? 1) > 1;
   const rosterCanBalance = hostMultiGroupRoster && groupRosterWouldChange(ev, 'balance');
   const rosterCanShuffle = hostMultiGroupRoster && groupRosterWouldChange(ev, 'shuffle');
+  const rosterCanBalanceShuffle =
+    hostMultiGroupRoster &&
+    rosterCanBalance &&
+    groupRosterWouldChange(ev, 'balance_shuffle');
 
   return {
     ev,
@@ -216,7 +221,8 @@ export function buildEventDetailViewModel(input: {
     canChangeGroupLeader: isHost && canEdit && !isDraft,
     canBalanceGroupRoster: rosterCanBalance,
     canShuffleGroupRoster: rosterCanShuffle,
-    showGroupRoster: rosterCanBalance || rosterCanShuffle,
+    canBalanceShuffleGroupRoster: rosterCanBalanceShuffle,
+    showGroupRoster: hostMultiGroupRoster,
     onWaitlist,
     willWaitlist,
     showResultsSection,

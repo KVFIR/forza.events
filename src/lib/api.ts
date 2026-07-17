@@ -366,7 +366,7 @@ export async function changeGroupLeader(
   );
 }
 
-export type GroupRosterMode = 'balance' | 'shuffle';
+export type GroupRosterMode = 'balance' | 'shuffle' | 'balance_shuffle';
 
 export async function balanceGroups(
   discordToken: string,

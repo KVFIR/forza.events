@@ -1,4 +1,4 @@
-import {useState, type ReactNode} from 'react';
+import {useMemo, useState, type ReactNode} from 'react';
 import {useTranslation} from 'react-i18next';
 import {balanceGroups, type GroupRosterMode} from '../../../lib/api';
 import {track} from '../../../lib/analytics';
@@ -16,8 +16,15 @@ type Props = {
   accessToken: string;
   canBalance: boolean;
   canShuffle: boolean;
+  canBalanceShuffle: boolean;
   onBalanced: () => void;
   children: (parts: {trigger: ReactNode; error: ReactNode | null}) => ReactNode;
+};
+
+type RosterChoice = {
+  mode: GroupRosterMode;
+  title: string;
+  hint: string;
 };
 
 function ChoiceRow({
@@ -47,11 +54,18 @@ function ChoiceRow({
   );
 }
 
+function rosterAnalyticsName(mode: GroupRosterMode): string {
+  if (mode === 'shuffle') return 'shuffle_groups';
+  if (mode === 'balance_shuffle') return 'balance_shuffle_groups';
+  return 'balance_groups';
+}
+
 export function EventDetailBalanceGroups({
   event,
   accessToken,
   canBalance,
   canShuffle,
+  canBalanceShuffle,
   onBalanced,
   children,
 }: Props) {
@@ -62,14 +76,31 @@ export function EventDetailBalanceGroups({
   const [unchanged, setUnchanged] = useState(false);
   const [unchangedMode, setUnchangedMode] = useState<GroupRosterMode | null>(null);
 
-  const dualChoice = canBalance && canShuffle;
-  const singleMode: GroupRosterMode | null = dualChoice
-    ? null
-    : canBalance
-      ? 'balance'
-      : canShuffle
-        ? 'shuffle'
-        : null;
+  const choices = useMemo((): RosterChoice[] => {
+    const list: RosterChoice[] = [];
+    if (canBalanceShuffle) {
+      list.push({
+        mode: 'balance_shuffle',
+        title: t('groupRoster.balanceShuffle'),
+        hint: t('groupRoster.balanceShuffleHint'),
+      });
+    }
+    if (canBalance) {
+      list.push({
+        mode: 'balance',
+        title: t('groupRoster.balance'),
+        hint: t('groupRoster.balanceHint'),
+      });
+    }
+    if (canShuffle) {
+      list.push({
+        mode: 'shuffle',
+        title: t('groupRoster.shuffle'),
+        hint: t('groupRoster.shuffleHint'),
+      });
+    }
+    return list;
+  }, [canBalance, canBalanceShuffle, canShuffle, t]);
 
   async function run(mode: GroupRosterMode) {
     setBusy(true);
@@ -82,13 +113,13 @@ export function EventDetailBalanceGroups({
       if (result.unchanged || movedCount === 0) {
         setUnchanged(true);
         setUnchangedMode(mode);
-        track(mode === 'shuffle' ? 'shuffle_groups' : 'balance_groups', {
+        track(rosterAnalyticsName(mode), {
           outcome: 'unchanged',
           event_id: event.id,
         });
         return;
       }
-      track(mode === 'shuffle' ? 'shuffle_groups' : 'balance_groups', {
+      track(rosterAnalyticsName(mode), {
         outcome: 'success',
         event_id: event.id,
         meta: {moved: movedCount},
@@ -98,7 +129,7 @@ export function EventDetailBalanceGroups({
     } catch (e) {
       const message = e instanceof ApiRequestError || e instanceof Error ? e.message : String(e);
       setError(message);
-      track(mode === 'shuffle' ? 'shuffle_groups' : 'balance_groups', {
+      track(rosterAnalyticsName(mode), {
         outcome: 'error',
         event_id: event.id,
         api_code: e instanceof ApiRequestError ? e.code : undefined,
@@ -109,36 +140,63 @@ export function EventDetailBalanceGroups({
   }
 
   function modalTitle(): string {
-    if (dualChoice) return t('groupRoster.titleChoose');
-    if (singleMode === 'balance') return t('groupRoster.titleBalance');
+    const only = choices.length === 1 ? choices[0] : null;
+    if (!only) return t('groupRoster.titleChoose');
+    if (only.mode === 'balance') return t('groupRoster.titleBalance');
+    if (only.mode === 'balance_shuffle') return t('groupRoster.titleBalanceShuffle');
     return t('groupRoster.titleShuffle');
   }
 
   function modalIntro(): string {
-    if (dualChoice) return t('groupRoster.introUneven');
-    if (singleMode === 'balance') return t('groupRoster.introBalance');
+    const only = choices.length === 1 ? choices[0] : null;
+    if (!only) return t('groupRoster.introUneven');
+    if (only.mode === 'balance') return t('groupRoster.introBalance');
+    if (only.mode === 'balance_shuffle') return t('groupRoster.introBalanceShuffle');
     return t('groupRoster.introShuffle');
   }
 
+  function unchangedMessage(mode: GroupRosterMode | null): string {
+    if (mode === 'shuffle' || mode === 'balance_shuffle') {
+      return t('groupRoster.shuffleUnchanged');
+    }
+    return t('groupRoster.unchanged');
+  }
+
   function openModal() {
-    if (busy) return;
+    if (busy || choices.length === 0) return;
     setError(null);
     setUnchanged(false);
     setUnchangedMode(null);
     setOpen(true);
   }
 
-  const trigger = (
-    <TextButton
-      type="button"
-      tone="action"
-      className="shrink-0"
-      disabled={busy}
-      onClick={openModal}
-    >
-      {busy ? busyLabel('working') : t('groupRoster.action')}
-    </TextButton>
-  );
+  const trigger =
+    choices.length > 0 ? (
+      <TextButton
+        type="button"
+        tone="action"
+        className="shrink-0"
+        disabled={busy}
+        onClick={openModal}
+      >
+        {busy ? busyLabel('working') : t('groupRoster.action')}
+      </TextButton>
+    ) : (
+      <span
+        className="inline-flex shrink-0"
+        title={t('groupRoster.unavailableTip')}
+      >
+        <TextButton
+          type="button"
+          tone="subtle"
+          className="cursor-not-allowed opacity-50"
+          disabled
+          aria-disabled="true"
+        >
+          {t('groupRoster.action')}
+        </TextButton>
+      </span>
+    );
 
   const errorNode = error && !open ? (
     <Alert variant="warning" className="mt-2">
@@ -167,45 +225,22 @@ export function EventDetailBalanceGroups({
 
             {unchanged ? (
               <Alert variant="info" className="mt-3">
-                {unchangedMode === 'shuffle'
-                  ? t('groupRoster.shuffleUnchanged')
-                  : t('groupRoster.unchanged')}
+                {unchangedMessage(unchangedMode)}
               </Alert>
             ) : null}
 
-            {dualChoice ? (
+            {choices.length > 0 ? (
               <div className="mt-4 space-y-2">
-                {canBalance ? (
+                {choices.map((choice) => (
                   <ChoiceRow
-                    title={t('groupRoster.balance')}
-                    hint={t('groupRoster.balanceHint')}
+                    key={choice.mode}
+                    title={choice.title}
+                    hint={choice.hint}
                     disabled={busy}
-                    onClick={() => void run('balance')}
+                    onClick={() => void run(choice.mode)}
                   />
-                ) : null}
-                {canShuffle ? (
-                  <ChoiceRow
-                    title={t('groupRoster.shuffle')}
-                    hint={t('groupRoster.shuffleHint')}
-                    disabled={busy}
-                    onClick={() => void run('shuffle')}
-                  />
-                ) : null}
+                ))}
               </div>
-            ) : singleMode ? (
-              <Button
-                type="button"
-                className="mt-4 w-full"
-                emphasis="solid"
-                disabled={busy}
-                onClick={() => void run(singleMode)}
-              >
-                {busy
-                  ? busyLabel('working')
-                  : singleMode === 'balance'
-                    ? t('groupRoster.confirmBalance')
-                    : t('groupRoster.confirmShuffle')}
-              </Button>
             ) : null}
 
             <Button

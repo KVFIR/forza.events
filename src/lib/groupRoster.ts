@@ -1,5 +1,6 @@
 import {
   planGroupBalance,
+  planGroupBalanceShuffle,
   planGroupShuffle,
   type BalanceRosterRow,
 } from '@edge/eventGroups.ts';
@@ -24,9 +25,11 @@ export function planGroupRosterMoves(
 ) {
   const groupCount = event.groupCount ?? 1;
   const rows = toBalanceRows(event);
-  return mode === 'shuffle'
-    ? planGroupShuffle(rows, groupCount, event.maxPlayers)
-    : planGroupBalance(rows, groupCount, event.maxPlayers);
+  if (mode === 'shuffle') return planGroupShuffle(rows, groupCount, event.maxPlayers);
+  if (mode === 'balance_shuffle') {
+    return planGroupBalanceShuffle(rows, groupCount, event.maxPlayers);
+  }
+  return planGroupBalance(rows, groupCount, event.maxPlayers);
 }
 
 export function groupRosterWouldChange(
