@@ -26,6 +26,7 @@ const API_I18N_KEYS: Partial<Record<ApiErrorCode, string>> = {
   [API_ERROR_CODES.REGISTRATION_AFTER_START]: 'errors.registrationAfterStart',
   [API_ERROR_CODES.HOST_CANNOT_JOIN]: 'errors.hostCannotJoin',
   [API_ERROR_CODES.LEADER_CANNOT_LEAVE]: 'errors.leaderCannotLeave',
+  [API_ERROR_CODES.LEADER_CANNOT_MOVE]: 'errors.leaderCannotMove',
   [API_ERROR_CODES.EVENT_NOT_FOUND]: 'errors.eventNotFound',
   [API_ERROR_CODES.NOT_DRAFT]: 'errors.notDraft',
   [API_ERROR_CODES.INVALID_RESPONSE]: 'errors.invalidResponse',

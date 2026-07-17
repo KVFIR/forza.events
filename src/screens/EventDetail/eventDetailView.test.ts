@@ -213,6 +213,59 @@ describe('buildEventDetailViewModel', () => {
     });
     const view = buildView({event, displayEvent: event});
     expect(view.canChangeGroupLeader).toBe(true);
+    expect(view.showGroupRoster).toBe(false);
+  });
+
+  it('shows group roster when sizes are uneven with shufflable drivers', () => {
+    const event = baseEvent({
+      hostDiscordId: 'viewer-1',
+      discordMessageId: 'msg-1',
+      groupCount: 2,
+      participants: [
+        participant({discordId: 'viewer-1', gamertag: 'HostGT', isConvoyLeader: true, groupIndex: 1}),
+        participant({discordId: 'l2', gamertag: 'L2', isConvoyLeader: true, groupIndex: 2}),
+        participant({discordId: 'a', gamertag: 'A', groupIndex: 1}),
+        participant({discordId: 'b', gamertag: 'B', groupIndex: 1}),
+        participant({discordId: 'c', gamertag: 'C', groupIndex: 1}),
+        participant({discordId: 'd', gamertag: 'D', groupIndex: 2}),
+      ],
+    });
+    const view = buildView({event, displayEvent: event});
+    expect(view.showGroupRoster).toBe(true);
+    expect(view.canBalanceGroupRoster).toBe(true);
+    expect(view.canShuffleGroupRoster).toBe(true);
+  });
+
+  it('hides balance when group sizes are already even', () => {
+    const event = baseEvent({
+      hostDiscordId: 'viewer-1',
+      discordMessageId: 'msg-1',
+      groupCount: 2,
+      participants: [
+        participant({discordId: 'viewer-1', gamertag: 'HostGT', isConvoyLeader: true, groupIndex: 1}),
+        participant({discordId: 'l2', gamertag: 'L2', isConvoyLeader: true, groupIndex: 2}),
+        participant({discordId: 'a', gamertag: 'A', groupIndex: 1}),
+        participant({discordId: 'b', gamertag: 'B', groupIndex: 2}),
+      ],
+    });
+    const view = buildView({event, displayEvent: event});
+    expect(view.showGroupRoster).toBe(true);
+    expect(view.canBalanceGroupRoster).toBe(false);
+    expect(view.canShuffleGroupRoster).toBe(true);
+  });
+
+  it('lets the host manage roster when there are multiple groups', () => {
+    const event = baseEvent({
+      hostDiscordId: 'viewer-1',
+      discordMessageId: 'msg-1',
+      groupCount: 2,
+      participants: [
+        participant({discordId: 'viewer-1', gamertag: 'HostGT', isConvoyLeader: true, groupIndex: 1}),
+        participant({discordId: 'l2', gamertag: 'L2', isConvoyLeader: true, groupIndex: 2}),
+      ],
+    });
+    const view = buildView({event, displayEvent: event});
+    expect(view.showGroupRoster).toBe(false);
   });
 
   it('blocks convoy leader changes after the event starts', () => {
@@ -226,6 +279,7 @@ describe('buildEventDetailViewModel', () => {
     });
     const view = buildView({event, displayEvent: event});
     expect(view.canChangeGroupLeader).toBe(false);
+    expect(view.showGroupRoster).toBe(false);
   });
 
   it('prompts browser sign-in for guests on forza.events', () => {

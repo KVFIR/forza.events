@@ -1,3 +1,4 @@
+import path from 'node:path';
 import {defineConfig, loadEnv} from 'vite';
 import react from '@vitejs/plugin-react';
 
@@ -40,6 +41,11 @@ export default defineConfig(({mode}) => {
 
   return {
     plugins: [react()],
+    resolve: {
+      alias: {
+        '@edge': path.resolve(__dirname, 'supabase/functions/_shared'),
+      },
+    },
     define: {
       'import.meta.env.VITE_DISCORD_CLIENT_ID': JSON.stringify(client.VITE_DISCORD_CLIENT_ID),
       'import.meta.env.VITE_SUPABASE_URL': JSON.stringify(client.VITE_SUPABASE_URL),
@@ -81,6 +87,11 @@ export default defineConfig(({mode}) => {
               target: client.VITE_SUPABASE_URL,
               changeOrigin: true,
               rewrite: (path) => path.replace(/^\/supabase/, ''),
+              bypass(req) {
+                const path = req.url?.split('?')[0] ?? '';
+                // Client imports shared Edge helpers — serve from repo, not Supabase API.
+                if (path.startsWith('/supabase/functions/_shared/')) return path;
+              },
             },
           }
         : undefined,

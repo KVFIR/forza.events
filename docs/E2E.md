@@ -129,6 +129,7 @@ Manual QA matrix aligned with current code behavior (not an abstract checklist).
 | Condition | Expected |
 |-----------|----------|
 | Full group 1, then join | Row goes to **Waitlist** section; button = **Leave waitlist** |
+| Group 1 has open seats but group 2 is smaller | Next **Join** lands in the **smallest** open group (tie-break lower group number) |
 | Active racer leaves before start | Earliest waitlisted racer auto-promoted into freed group; count steady |
 | Host, every active group full (12/24/36…) | **Add group N** button; picker lists waitlist (if any), active non-leaders from other groups, host (if not already a convoy leader), plus guild search |
 | 12/12, waitlist empty, host adds group 2 (guild pick leader) | `group_count = 2`; new group has leader only; group 1 still full; next **Join** lands in **group 2**; embed shows second group field |
@@ -148,6 +149,18 @@ Manual QA matrix aligned with current code behavior (not an abstract checklist).
 | New leader assigned | Leader gets **convoy leader assigned** DM (transactional); racers get **convoy leader changed** |
 | Same leader picked again | `unchanged: true`; no DMs, no embed churn |
 | After `starts_at` | **Change leader** hidden; API `REGISTRATION_AFTER_START` |
+
+### Balance groups (published, host, `group_count` ≥ 2)
+
+| Condition | Expected |
+|-----------|----------|
+| Host, before `starts_at`, 2+ groups, roster action available | **Reorganize groups** opens a confirmation modal; warns that moved racers get a Discord DM |
+| Uneven sizes + 2+ drivers | Modal offers **Balance groups** and **Shuffle** |
+| Even sizes, 2+ drivers | Modal offers **Shuffle** only with confirm button |
+| Balance / shuffle confirmed | Leaders stay; roster updates; DMs to moved racers |
+| Already balanced | `unchanged: true`; no DMs |
+| Single group | Hint hidden |
+| After `starts_at` | Hint hidden; API `REGISTRATION_AFTER_START` |
 
 ### Display
 

@@ -279,15 +279,19 @@ export function EventDetail() {
         view={view}
         viewerDiscordId={user.discordId}
         accessToken={discordToken}
-        onLeaderChanged={syncEventFromServer}
+        onRosterChanged={syncEventFromServer}
       />
 
-      <EventDetailAddGroup
-        event={event}
-        view={view}
-        accessToken={discordToken}
-        onAdded={syncEventFromServer}
-      />
+      {view.canAddGroup ? (
+        <div className="mt-4">
+          <EventDetailAddGroup
+            event={event}
+            view={view}
+            accessToken={discordToken}
+            onAdded={syncEventFromServer}
+          />
+        </div>
+      ) : null}
 
       <EventDetailOrganiser event={event} />
     </ContentReveal>

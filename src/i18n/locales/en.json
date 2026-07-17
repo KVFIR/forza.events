@@ -49,6 +49,17 @@
     "publishing": "Publishing…",
     "signingIn": "Signing in…"
   },
+  "errors": {
+    "route": {
+      "devTitle": "Route error (localhost)",
+      "devHint": "Something threw while rendering this page. Check the console and the details below.",
+      "devChunkTitle": "Page module failed to load (localhost)",
+      "devChunkHint": "Common after HMR or a bad save while Vite is running. Hard-refresh the tab (or restart the dev server), then try again.",
+      "prodTitle": "Something went wrong",
+      "prodChunkTitle": "This page needs a refresh",
+      "prodDesc": "Please reload and try again."
+    }
+  },
   "loading": {
     "page": "Loading page",
     "events": "Loading events",
@@ -203,14 +214,31 @@
   },
   "changeGroupLeader": {
     "button": "Change leader",
-    "title": "Change convoy leader — Group {{n}}",
-    "description": "Pick a new convoy leader for this group. Racers from the waitlist, other groups (not convoy leaders), or you (if not already a convoy leader) can be chosen.",
-    "notifyHint": "Racers in this group and the new convoy leader will get a Discord DM.",
-    "leaderCandidates": "Suggested leaders",
+    "title": "Change convoy leader",
+    "description": "Pick from the list or search your server. This group and the new leader get a Discord DM.",
+    "leaderCandidates": "Suggestions",
     "confirm": "Save",
-    "pickLeader": "Pick a convoy leader for this group.",
+    "pickLeader": "Choose a convoy leader.",
     "gamertagRequired": "This leader needs an Xbox gamertag.",
-    "guildSearchDisabled": "This group is full — pick a driver from the list above."
+    "guildSearchDisabled": "Group is full — pick a driver from the list."
+  },
+  "groupRoster": {
+    "action": "Reorganize groups",
+    "titleChoose": "Reorganize groups",
+    "titleBalance": "Balance groups",
+    "titleShuffle": "Shuffle groups",
+    "introUneven": "Group sizes are uneven. Convoy leaders stay put.",
+    "introBalance": "Move the fewest drivers to even out group sizes.",
+    "introShuffle": "Randomly mix drivers between groups. Each group keeps the same headcount.",
+    "notifyWarning": "Moved racers will receive a Discord DM.",
+    "unchanged": "No drivers needed to move for this action. The roster is already set.",
+    "shuffleUnchanged": "No safe shuffle was found. Try again, or wait until a group has a free seat.",
+    "balance": "Balance groups",
+    "balanceHint": "Move the fewest drivers to even out group sizes.",
+    "shuffle": "Shuffle",
+    "shuffleHint": "Randomly reassign drivers across groups with an even split in each.",
+    "confirmBalance": "Balance",
+    "confirmShuffle": "Shuffle"
   },
   "statusBanner": {
     "draftTitle": "Draft",
@@ -409,12 +437,13 @@
     "channelNotText": "Only text channels can be used for announcements.",
     "channelWrongGuild": "Channel does not belong to the selected server.",
     "botNotGuildMember": "The bot is not a member of this server.",
-    "botCannotPost": "FORZA.EVENTS cannot post in this channel. Allow View Channel, Send Messages, and Embed Links for the bot (or its role).",
+    "botCannotPost": "FORZA.EVENTS cannot post in this channel. Allow View Channel, Send Messages, Embed Links, and Create Invite for the bot (or its role).",
     "eventFull": "This event is full.",
     "registrationClosed": "Registration is closed.",
     "registrationAfterStart": "Registration closed after the event started.",
     "hostCannotJoin": "Event hosts do not need to join.",
     "leaderCannotLeave": "Convoy leaders cannot leave. Ask the host to assign a different leader first.",
+    "leaderCannotMove": "Convoy leaders cannot be moved. Assign a different leader first.",
     "eventNotFound": "Event not found.",
     "notDraft": "Only draft events can be published.",
     "invalidResponse": "Could not reach the server. Try again.",

@@ -12,5 +12,6 @@ describe('bypassesDmOptOut', () => {
 
   it('bypasses opt-out for transactional waitlist kinds', () => {
     expect(bypassesDmOptOut('waitlist_seat_opened', {})).toBe(true);
+    expect(bypassesDmOptOut('group_reassigned', {})).toBe(true);
   });
 });

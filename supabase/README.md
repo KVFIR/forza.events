@@ -60,6 +60,7 @@ npx supabase migration repair --linked --status applied 006 --yes
 | `024_analytics_dashboard_fixes.sql` | Join conversion uses join-only errors; event views per session metric |
 | `026_analytics_notifications.sql` | Dashboard: notification outbox aggregates + `notification_dm_*` client prefs |
 | `027_nullable_event_max_pi.sql` | `events.max_pi` nullable — open build may omit PI cap |
+| `028_apply_event_group_moves.sql` | `apply_event_group_moves` RPC — host move/balance active non-leaders between groups |
 
 Seeds are **not** included in the migration. Run separately after `db push`:
 
@@ -70,7 +71,7 @@ npm run seed:events   # sample events (dev only)
 
 ## Edge Functions
 
-**20 functions** — canonical list in [`scripts/deploy-edge-functions.sh`](../scripts/deploy-edge-functions.sh). Deploy all:
+**22 functions** — canonical list in [`scripts/deploy-edge-functions.sh`](../scripts/deploy-edge-functions.sh). Deploy all:
 
 ```bash
 npm run deploy:functions
@@ -87,9 +88,10 @@ npm run deploy:functions
 | `validate-channel` | Discord token | Channel validation |
 | `publish-event` | Discord token | Post Discord embed |
 | `save-event` | Discord token | CRUD draft / edit / cancel |
-| `event-participation` | Discord token | Join (first open group / waitlist) / leave (auto-promote queue) |
+| `event-participation` | Discord token | Join (smallest open group / waitlist) / leave (auto-promote queue) |
 | `add-group` | Discord token | Host adds a lobby group (leader + auto-fill from waitlist) |
 | `change-group-leader` | Discord token | Host reassigns convoy leader for a published group (before start) |
+| `balance-groups` | Discord token | Host redistributes non-leaders evenly (leaders stay) |
 | `submit-results` | Discord token | Results + complete |
 | `user-profile` | Discord token | Profile updates |
 | `launch-intent` | Discord token | Embed deep-link fallback |

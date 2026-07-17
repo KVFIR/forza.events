@@ -106,14 +106,22 @@ export function groupIsFull(
   return groupParticipants(participants, groupIndex).length >= event.maxPlayers;
 }
 
-/** First group with a free seat, or null when every active group is full. */
+/** Group with the fewest active racers that still has a free seat; tie-break lower group index. */
 export function firstOpenGroupIndex(
   event: Pick<ForzaEvent, 'groupCount' | 'maxPlayers' | 'participants'>,
 ): number | null {
-  for (let g = 1; g <= (event.groupCount || 1); g++) {
-    if (!groupIsFull(event, g, event.participants)) return g;
+  const groupCount = event.groupCount || 1;
+  let best: number | null = null;
+  let bestSize = Infinity;
+  for (let g = 1; g <= groupCount; g++) {
+    const size = groupParticipants(event.participants, g).length;
+    if (size >= event.maxPlayers) continue;
+    if (size < bestSize || (size === bestSize && (best == null || g < best))) {
+      best = g;
+      bestSize = size;
+    }
   }
-  return null;
+  return best;
 }
 
 /** True when every active group is full — the next join goes to the waitlist. */
@@ -122,6 +130,49 @@ export function lobbyIsFull(
 ): boolean {
   if (event.currentPlayers >= totalCapacity(event)) return true;
   return firstOpenGroupIndex(event) === null;
+}
+
+/** Per-group active headcount targets; extra racers go to lower-numbered groups. Keep in sync with `_shared/eventGroups.ts`. */
+export function balancedGroupTargets(totalActive: number, groupCount: number): number[] {
+  const base = Math.floor(totalActive / groupCount);
+  let remainder = totalActive % groupCount;
+  const targets: number[] = [];
+  for (let g = 1; g <= groupCount; g++) {
+    targets.push(base + (remainder > 0 ? 1 : 0));
+    remainder--;
+  }
+  return targets;
+}
+
+/** True when active group sizes differ from an even split. */
+export function groupRosterNeedsBalance(
+  event: Pick<ForzaEvent, 'groupCount' | 'participants'>,
+): boolean {
+  const groupCount = event.groupCount ?? 1;
+  if (groupCount < 2) return false;
+  const counts: number[] = [];
+  for (let g = 1; g <= groupCount; g++) {
+    counts.push(groupParticipants(event.participants, g).length);
+  }
+  const targets = balancedGroupTargets(
+    counts.reduce((n, c) => n + c, 0),
+    groupCount,
+  );
+  return counts.some((c, i) => c !== targets[i]);
+}
+
+/** True when at least two active non-leader drivers can be shuffled. */
+export function groupRosterCanShuffle(
+  event: Pick<ForzaEvent, 'groupCount' | 'participants'>,
+): boolean {
+  const groupCount = event.groupCount ?? 1;
+  if (groupCount < 2) return false;
+  let drivers = 0;
+  for (const p of event.participants) {
+    if (p.waitlisted || p.isConvoyLeader) continue;
+    drivers++;
+  }
+  return drivers >= 2;
 }
 
 /** Host may add another group when every active group is full (12/24/36…). */

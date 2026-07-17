@@ -4,6 +4,8 @@ import {
   canAddGroup,
   firstOpenGroupIndex,
   groupIsFull,
+  groupRosterCanShuffle,
+  groupRosterNeedsBalance,
   lobbyIsFull,
   totalCapacity,
   waitlistCount,
@@ -85,12 +87,18 @@ describe('group fullness / routing', () => {
     expect(lobbyIsFull(full)).toBe(true);
   });
 
-  it('routes to the first open group across multiple groups', () => {
+  it('routes to the smallest open group across multiple groups', () => {
     const ev = event({
       groupCount: 2,
       participants: [...fill(12, 1), ...fill(3, 2)],
     });
     expect(firstOpenGroupIndex(ev)).toBe(2);
+
+    const uneven = event({
+      groupCount: 2,
+      participants: [...fill(8, 1), ...fill(5, 2)],
+    });
+    expect(firstOpenGroupIndex(uneven)).toBe(2);
   });
 
   it('lobbyIsFull when currentPlayers reaches total capacity even if participants is stale', () => {
@@ -135,5 +143,47 @@ describe('canAddGroup', () => {
   it('is blocked for non-hosts', () => {
     const ev = event({participants: [...fullGroup, ...fill(1, 1, true)]});
     expect(canAddGroup(ev, {...host, discordId: 'someone-else'})).toBe(false);
+  });
+});
+
+describe('group roster helpers', () => {
+  it('detects uneven group sizes', () => {
+    const uneven = event({
+      groupCount: 2,
+      participants: [
+        participant({discordId: 'l1', isConvoyLeader: true, groupIndex: 1}),
+        participant({discordId: 'l2', isConvoyLeader: true, groupIndex: 2}),
+        ...fill(3, 1),
+        ...fill(1, 2),
+      ],
+    });
+    expect(groupRosterNeedsBalance(uneven)).toBe(true);
+
+    const even = event({
+      groupCount: 2,
+      participants: [
+        participant({discordId: 'l1', isConvoyLeader: true, groupIndex: 1}),
+        participant({discordId: 'l2', isConvoyLeader: true, groupIndex: 2}),
+        participant({discordId: 'a', groupIndex: 1}),
+        participant({discordId: 'b', groupIndex: 2}),
+      ],
+    });
+    expect(groupRosterNeedsBalance(even)).toBe(false);
+  });
+
+  it('requires two drivers before shuffle is offered', () => {
+    const oneDriver = event({
+      groupCount: 2,
+      participants: [
+        participant({discordId: 'l1', isConvoyLeader: true, groupIndex: 1}),
+        participant({discordId: 'l2', isConvoyLeader: true, groupIndex: 2}),
+        participant({discordId: 'a', groupIndex: 1}),
+      ],
+    });
+    expect(groupRosterCanShuffle(oneDriver)).toBe(false);
+    expect(groupRosterCanShuffle({
+      ...oneDriver,
+      participants: [...oneDriver.participants, participant({discordId: 'b', groupIndex: 2})],
+    })).toBe(true);
   });
 });

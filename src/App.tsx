@@ -10,6 +10,7 @@ import {
   useLocation,
 } from 'react-router-dom';
 import {AppBootGate} from './components/AppBootGate';
+import {RouteErrorFallback} from './components/RouteErrorFallback';
 import {BrowserSignInScreen} from './components/BrowserSignInScreen';
 import {DiscordOnlyGate} from './components/DiscordOnlyGate';
 import {Navbar} from './components/Navbar';
@@ -151,7 +152,9 @@ function AppWithProviders() {
 }
 
 /** Data router for SPA navigation. */
-const appRouter = createBrowserRouter([{path: '*', element: <AppWithProviders />}]);
+const appRouter = createBrowserRouter([
+  {path: '*', element: <AppWithProviders />, errorElement: <RouteErrorFallback />},
+]);
 
 export default function App() {
   if (shouldShowDiscordOnlyGate()) {

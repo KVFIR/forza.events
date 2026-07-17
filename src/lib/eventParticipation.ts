@@ -82,7 +82,7 @@ export function patchEventAfterSelfJoin(
       ? existing.participationSource
       : 'self_join';
 
-  // Route into the first open group, or the waitlist when the lobby is full.
+  // Route into the smallest open group, or the waitlist when the lobby is full.
   const alreadyActive = existing !== undefined && !existing.waitlisted;
   const waitlisted = alreadyActive ? false : lobbyIsFull(event);
   const openGroup = waitlisted ? null : firstOpenGroupIndex(event);

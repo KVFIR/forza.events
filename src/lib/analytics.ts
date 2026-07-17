@@ -6,7 +6,7 @@ import {createSupabaseFetch, isDiscordActivityFrame, resolveSupabaseUrl} from '.
 
 export const ANALYTICS_TRACK_SECRET_HEADER = 'x-analytics-track-secret';
 
-export type AnalyticsOutcome = 'success' | 'error';
+export type AnalyticsOutcome = 'success' | 'error' | 'unchanged';
 
 export type AnalyticsEventInput = {
   name: string;

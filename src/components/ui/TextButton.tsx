@@ -2,7 +2,7 @@ import type {ButtonHTMLAttributes, ReactNode} from 'react';
 import {Link, type LinkProps} from 'react-router-dom';
 import {cn} from '../../lib/cn';
 
-export type TextButtonTone = 'action' | 'nav' | 'emphasis';
+export type TextButtonTone = 'action' | 'nav' | 'emphasis' | 'subtle';
 
 const toneClass: Record<TextButtonTone, string> = {
   action:
@@ -10,6 +10,7 @@ const toneClass: Record<TextButtonTone, string> = {
   nav: 'text-xs font-semibold uppercase tracking-widest text-muted transition-colors hover:text-accent-purple-light',
   emphasis:
     'text-sm font-semibold text-accent-purple transition-colors hover:text-accent-purple-light',
+  subtle: 'text-xs font-semibold text-muted transition-colors hover:text-slate-200',
 };
 
 type TextButtonProps = ButtonHTMLAttributes<HTMLButtonElement> & {

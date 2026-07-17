@@ -133,7 +133,7 @@ export function ConvoyLeaderPicker({
   const needsGamertag = Boolean(selected && !hasGamertag(selected.xboxGamertag));
 
   return (
-    <div id="create-lobbyLeaderDiscordId" className="mt-2 space-y-2">
+    <div id="create-lobbyLeaderDiscordId" className="mt-2 space-y-3">
       {!guildId ? (
         <p className="text-xs text-muted">{t('create.convoyLeaderPickServerFirst')}</p>
       ) : (

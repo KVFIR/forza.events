@@ -188,7 +188,7 @@ serve(async (req) => {
         .eq('event_id', event_id);
       const existing = roster?.find((r) => r.discord_id === discordUser.id);
 
-      // Route into the first open group; waitlist when every group is full.
+      // Route into the smallest open group; waitlist when every group is full.
       let groupIndex = existing?.group_index ?? 1;
       let waitlisted: boolean;
       if (existing && !existing.waitlisted) {

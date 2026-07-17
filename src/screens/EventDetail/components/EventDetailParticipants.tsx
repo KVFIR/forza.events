@@ -7,14 +7,18 @@ import {formatLobbyCount} from '../../../lib/constants';
 import type {EventParticipant} from '../../../lib/types';
 import type {RosterConvoyLeader, RosterGroup} from '../../../lib/eventRoster';
 import type {EventDetailViewModel} from '../eventDetailView';
+import {EventDetailBalanceGroups} from './EventDetailBalanceGroups';
 import {EventDetailChangeGroupLeader} from './EventDetailChangeGroupLeader';
 import {cn} from '../../../lib/cn';
 
 type Props = {
-  view: Pick<EventDetailViewModel, 'ev' | 'groups' | 'waitlist' | 'canChangeGroupLeader'>;
+  view: Pick<
+    EventDetailViewModel,
+    'ev' | 'groups' | 'waitlist' | 'canChangeGroupLeader' | 'showGroupRoster' | 'canBalanceGroupRoster' | 'canShuffleGroupRoster'
+  >;
   viewerDiscordId: string;
   accessToken: string | null;
-  onLeaderChanged: () => void;
+  onRosterChanged: () => void;
 };
 
 function SeatNumber({n}: {n: number}) {
@@ -131,7 +135,7 @@ function DriverCard({
     >
       <SeatNumber n={position} />
       <UserAvatar src={p.avatarUrl} name={p.gamertag ?? p.username} size="xs" variant="purple" />
-      <div className="min-w-0">
+      <div className="min-w-0 flex-1">
         <ParticipantDisplayNames gamertag={p.gamertag} username={p.username} />
       </div>
     </div>
@@ -142,10 +146,10 @@ export function EventDetailParticipants({
   view,
   viewerDiscordId,
   accessToken,
-  onLeaderChanged,
+  onRosterChanged,
 }: Props) {
   const {t} = useTranslation();
-  const {ev, groups, waitlist, canChangeGroupLeader} = view;
+  const {ev, groups, waitlist, canChangeGroupLeader, showGroupRoster, canBalanceGroupRoster, canShuffleGroupRoster} = view;
   const multiGroup = groups.length > 1;
   const [changingGroupIndex, setChangingGroupIndex] = useState<number | null>(null);
 
@@ -157,7 +161,27 @@ export function EventDetailParticipants({
 
   return (
     <div className="mt-6">
-      <p className="mb-3 text-sm font-semibold text-white">{t('eventDetail.participants')}</p>
+      {showGroupRoster && accessToken ? (
+        <EventDetailBalanceGroups
+          event={ev}
+          accessToken={accessToken}
+          canBalance={canBalanceGroupRoster}
+          canShuffle={canShuffleGroupRoster}
+          onBalanced={onRosterChanged}
+        >
+          {({trigger, error}) => (
+            <>
+              <div className="mb-3 flex items-center justify-between gap-2">
+                <p className="text-sm font-semibold text-white">{t('eventDetail.participants')}</p>
+                {trigger}
+              </div>
+              {error}
+            </>
+          )}
+        </EventDetailBalanceGroups>
+      ) : (
+        <p className="mb-3 text-sm font-semibold text-white">{t('eventDetail.participants')}</p>
+      )}
 
       <div className="space-y-4">
         {groups.map((group) => (
@@ -172,18 +196,18 @@ export function EventDetailParticipants({
                   <span />
                 )}
                 <div className="ml-auto flex items-center gap-3">
-                  <span className="text-xs tabular-nums text-muted">
-                    {formatLobbyCount(groupCount(group), ev.maxPlayers)}
-                  </span>
                   {canChangeGroupLeader && accessToken ? (
                     <TextButton
                       type="button"
-                      className="text-xs"
+                      tone="subtle"
                       onClick={() => setChangingGroupIndex(group.groupIndex)}
                     >
                       {t('changeGroupLeader.button')}
                     </TextButton>
                   ) : null}
+                  <span className="text-xs tabular-nums text-muted">
+                    {formatLobbyCount(groupCount(group), ev.maxPlayers)}
+                  </span>
                 </div>
               </div>
             ) : null}
@@ -258,7 +282,7 @@ export function EventDetailParticipants({
           accessToken={accessToken}
           open
           onClose={() => setChangingGroupIndex(null)}
-          onChanged={onLeaderChanged}
+          onChanged={onRosterChanged}
         />
       ) : null}
     </div>

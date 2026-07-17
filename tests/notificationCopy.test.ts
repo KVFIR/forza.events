@@ -5,6 +5,7 @@ describe('isKnownNotificationKind', () => {
   it('accepts active kinds', () => {
     expect(isKnownNotificationKind('host_group_filled')).toBe(true);
     expect(isKnownNotificationKind('waitlist_seat_opened')).toBe(true);
+    expect(isKnownNotificationKind('group_reassigned')).toBe(true);
   });
 
   it('rejects removed or unknown kinds', () => {

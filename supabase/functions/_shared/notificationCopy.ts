@@ -10,7 +10,8 @@ export type NotificationKind =
   | 'event_updated'
   | 'event_starting_soon'
   | 'host_group_filled'
-  | 'host_event_starting_soon';
+  | 'host_event_starting_soon'
+  | 'group_reassigned';
 
 /** Transactional waitlist DMs — sent even when dm_notifications_enabled is false. */
 export const WAITLIST_NOTIFICATION_KINDS = new Set<NotificationKind>([
@@ -18,6 +19,7 @@ export const WAITLIST_NOTIFICATION_KINDS = new Set<NotificationKind>([
   'waitlist_new_group',
   'waitlist_new_group_leader',
   'convoy_leader_assigned',
+  'group_reassigned',
 ]);
 
 type CopyParams = Record<string, string | number | undefined | null>;
@@ -194,6 +196,18 @@ const COPY: Record<NotificationKind, Record<NotificationLocale, CopyBuilder>> = 
           value: `${str(p.activeCount)}/${str(p.totalCapacity)} гонщиков · ${str(p.waitlistCount)} в очереди`,
         },
       ],
+    }),
+  },
+  group_reassigned: {
+    en: (p) => ({
+      title: 'Group updated',
+      description: `The host moved you to **Group ${str(p.groupIndex)}** in **${str(p.eventTitle)}**.`,
+      fields: [{name: 'Convoy leader', value: str(p.leaderGamertag)}],
+    }),
+    ru: (p) => ({
+      title: 'Группа изменена',
+      description: `Организатор перенёс вас в **группу ${str(p.groupIndex)}** в **${str(p.eventTitle)}**.`,
+      fields: [{name: 'Лидер конвоя', value: str(p.leaderGamertag)}],
     }),
   },
 };

@@ -15,9 +15,11 @@ function rows(...counts: {group: number; active: number; queued?: number}[]): Ro
 }
 
 describe('firstOpenGroup (edge routing)', () => {
-  it('returns the first group with a free seat', () => {
+  it('returns the smallest group with a free seat', () => {
     expect(firstOpenGroup(rows({group: 1, active: 5}), 1, 12)).toBe(1);
     expect(firstOpenGroup(rows({group: 1, active: 12}, {group: 2, active: 3}), 2, 12)).toBe(2);
+    expect(firstOpenGroup(rows({group: 1, active: 8}, {group: 2, active: 5}), 2, 12)).toBe(2);
+    expect(firstOpenGroup(rows({group: 1, active: 5}, {group: 2, active: 5}), 2, 12)).toBe(1);
   });
 
   it('returns null when every active group is full (ignoring the queue)', () => {

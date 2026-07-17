@@ -18,6 +18,7 @@ FUNCTIONS=(
   event-participation
   add-group
   change-group-leader
+  balance-groups
   submit-results
   user-profile
   launch-intent

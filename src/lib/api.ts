@@ -366,6 +366,21 @@ export async function changeGroupLeader(
   );
 }
 
+export type GroupRosterMode = 'balance' | 'shuffle';
+
+export async function balanceGroups(
+  discordToken: string,
+  eventId: string,
+  mode: GroupRosterMode = 'balance',
+) {
+  return invoke<{
+    ok: boolean;
+    mode?: GroupRosterMode;
+    unchanged?: boolean;
+    moved: {discord_id: string; from_group: number; to_group: number}[];
+  }>('balance-groups', {event_id: eventId, mode}, discordToken);
+}
+
 export type SubmitResultEntry = {
   discord_id: string;
   position: number | null;

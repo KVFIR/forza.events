@@ -236,6 +236,28 @@ export async function enqueueHostGroupFilled(
   }]);
 }
 
+export async function enqueueGroupReassigned(
+  supabase: ReturnType<typeof adminClient>,
+  event: EventNotifyRow,
+  participants: ParticipantRow[],
+  moves: {discord_id: string; from_group: number; to_group: number}[],
+  batchId: string,
+): Promise<void> {
+  if (!moves.length) return;
+  const rows: OutboxInsert[] = moves.map((m) => ({
+    kind: 'group_reassigned',
+    event_id: event.id,
+    recipient_discord_id: m.discord_id,
+    dedupe_key: `group_move:${event.id}:${m.discord_id}:${m.from_group}:${m.to_group}:${batchId}`,
+    payload: {
+      eventTitle: event.title,
+      groupIndex: m.to_group,
+      leaderGamertag: leaderGamertag(participants, m.to_group),
+    },
+  }));
+  await enqueueNotifications(supabase, rows);
+}
+
 export async function scanStartingSoonReminders(
   supabase: ReturnType<typeof adminClient>,
 ): Promise<void> {

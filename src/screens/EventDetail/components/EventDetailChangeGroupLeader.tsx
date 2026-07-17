@@ -114,29 +114,35 @@ export function EventDetailChangeGroupLeader({
   return (
     <ModalBackdrop onBackdropClick={busy ? undefined : handleClose}>
       <ModalPanel role="dialog" aria-modal="true" aria-labelledby="change-group-leader-title">
-        <h2 id="change-group-leader-title" className="text-lg font-bold text-white">
-          {t('changeGroupLeader.title', {n: groupIndex})}
-        </h2>
-        <p className="mt-2 text-sm text-muted">{t('changeGroupLeader.description')}</p>
-        <p className="mt-1.5 text-[10px] leading-relaxed text-muted">
-          {t('changeGroupLeader.notifyHint')}
-        </p>
+        <div className="space-y-1">
+          <h2 id="change-group-leader-title" className="text-lg font-bold text-white">
+            {t('changeGroupLeader.title')}
+          </h2>
+          <p className="text-xs font-bold uppercase tracking-widest text-muted">
+            {t('eventDetail.group', {n: groupIndex})}
+          </p>
+          <p className="pt-1 text-sm leading-relaxed text-muted">
+            {t('changeGroupLeader.description')}
+          </p>
+        </div>
 
-        <ConvoyLeaderPicker
-          accessToken={accessToken}
-          guildId={event.guildId ?? ''}
-          guildName={event.guildName}
-          hostDiscordId={event.hostDiscordId}
-          selected={selected}
-          gamertag={gamertag}
-          onSelect={setSelected}
-          onGamertagChange={setGamertag}
-          candidates={candidates}
-          candidatesLabel={t('changeGroupLeader.leaderCandidates')}
-          allowHostCandidate
-          excludeDiscordIds={excludeDiscordIds}
-          disableGuildSearch={disableGuildSearch}
-        />
+        <div className="mt-4">
+          <ConvoyLeaderPicker
+            accessToken={accessToken}
+            guildId={event.guildId ?? ''}
+            guildName={event.guildName}
+            hostDiscordId={event.hostDiscordId}
+            selected={selected}
+            gamertag={gamertag}
+            onSelect={setSelected}
+            onGamertagChange={setGamertag}
+            candidates={candidates}
+            candidatesLabel={t('changeGroupLeader.leaderCandidates')}
+            allowHostCandidate
+            excludeDiscordIds={excludeDiscordIds}
+            disableGuildSearch={disableGuildSearch}
+          />
+        </div>
 
         {error ? (
           <Alert variant="warning" className="mt-3">

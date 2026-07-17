@@ -84,7 +84,7 @@ export function EventDetailAddGroup({event, view, accessToken, onAdded}: Props) 
   }
 
   return (
-    <div className="mt-4">
+    <>
       <Button
         variant="secondary"
         size="toolbar"
@@ -146,6 +146,6 @@ export function EventDetailAddGroup({event, view, accessToken, onAdded}: Props) 
           </ModalPanel>
         </ModalBackdrop>
       ) : null}
-    </div>
+    </>
   );
 }

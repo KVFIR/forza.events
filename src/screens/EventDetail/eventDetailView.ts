@@ -6,6 +6,7 @@ import {
   shouldShowEventResults,
   userHasParticipantRow,
 } from '../../lib/events';
+import {groupRosterWouldChange} from '../../lib/groupRoster';
 import {
   canAddGroup,
   canCancelEvent,
@@ -61,6 +62,9 @@ export type EventDetailViewModel = {
   totalCapacity: number;
   canAddGroup: boolean;
   canChangeGroupLeader: boolean;
+  canBalanceGroupRoster: boolean;
+  canShuffleGroupRoster: boolean;
+  showGroupRoster: boolean;
   onWaitlist: boolean;
   willWaitlist: boolean;
   showResultsSection: boolean;
@@ -177,6 +181,11 @@ export function buildEventDetailViewModel(input: {
     !finalized &&
     !started;
 
+  const hostMultiGroupRoster =
+    isHost && canEdit && !isDraft && (ev.groupCount ?? 1) > 1;
+  const rosterCanBalance = hostMultiGroupRoster && groupRosterWouldChange(ev, 'balance');
+  const rosterCanShuffle = hostMultiGroupRoster && groupRosterWouldChange(ev, 'shuffle');
+
   return {
     ev,
     isHost,
@@ -205,6 +214,9 @@ export function buildEventDetailViewModel(input: {
     totalCapacity: capacity,
     canAddGroup: canAddGroup(ev, user),
     canChangeGroupLeader: isHost && canEdit && !isDraft,
+    canBalanceGroupRoster: rosterCanBalance,
+    canShuffleGroupRoster: rosterCanShuffle,
+    showGroupRoster: rosterCanBalance || rosterCanShuffle,
     onWaitlist,
     willWaitlist,
     showResultsSection,

@@ -6,7 +6,7 @@ import {fieldLabelClass, fileUploadLabelClass, inputClass} from '../../../compon
 import {eventTypeLabel} from '../../../lib/eventTypes';
 import {COVER_ASPECT_CLASS, COVER_SOURCE_MAX_MB} from '../../../lib/coverImage';
 import {datetimeLocalInputBounds} from '../../../lib/datetime';
-import {TITLE_MAX_LENGTH, EVENT_TYPES, COVER_ACCEPT} from '../constants';
+import {DESCRIPTION_MAX_LENGTH, TITLE_MAX_LENGTH, EVENT_TYPES, COVER_ACCEPT} from '../constants';
 import {Field, FormSection} from '../components/Field';
 import {EventCover} from '../../../components/EventCover';
 import {EventTrackList} from '../../../components/EventTrackList';
@@ -52,6 +52,8 @@ export function EventStep({
 }: Props) {
   const {t} = useTranslation();
   const titleLen = values.title.length;
+  const descriptionLen = values.description.length;
+  const descriptionNearLimit = descriptionLen > DESCRIPTION_MAX_LENGTH * 0.9;
   const {min: startsAtMin, max: startsAtMax} = datetimeLocalInputBounds();
 
   return (
@@ -116,11 +118,23 @@ export function EventStep({
         <Field title={t('create.description')} htmlFor="create-description" optional>
           <Textarea
             id="create-description"
+            autoGrow
             rows={3}
             value={values.description}
             onChange={(e) => onDescription(e.target.value)}
             placeholder={t('create.descriptionPlaceholder')}
+            maxLength={DESCRIPTION_MAX_LENGTH}
+            aria-describedby="create-description-meta"
           />
+          <p
+            id="create-description-meta"
+            className={cn(
+              'mt-1 text-right text-[10px] tabular-nums',
+              descriptionNearLimit ? 'text-amber-400/90' : 'text-muted',
+            )}
+          >
+            {descriptionLen}/{DESCRIPTION_MAX_LENGTH}
+          </p>
         </Field>
 
         <Field title={t('create.coverImage')} error={fieldErrors.cover} optional>
