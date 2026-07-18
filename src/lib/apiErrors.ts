@@ -30,6 +30,7 @@ const API_I18N_KEYS: Partial<Record<ApiErrorCode, string>> = {
   [API_ERROR_CODES.EVENT_NOT_FOUND]: 'errors.eventNotFound',
   [API_ERROR_CODES.NOT_DRAFT]: 'errors.notDraft',
   [API_ERROR_CODES.INVALID_RESPONSE]: 'errors.invalidResponse',
+  [API_ERROR_CODES.NETWORK_ERROR]: 'errors.invalidResponse',
   [API_ERROR_CODES.RESULTS_PARTICIPANTS_ONLY]: 'errors.resultsParticipantsOnly',
   [API_ERROR_CODES.PUBLISH_IN_PROGRESS]: 'errors.publishInProgress',
   [API_ERROR_CODES.RESULTS_ALREADY_SUBMITTED]: 'errors.resultsAlreadySubmitted',
@@ -71,7 +72,10 @@ export function apiErrorFromPayload(
   return new ApiRequestError(message, {code: payload.code, status});
 }
 
-const TRANSIENT_API_ERROR_CODES = new Set<string>([API_ERROR_CODES.TOO_MANY_REQUESTS]);
+const TRANSIENT_API_ERROR_CODES = new Set<string>([
+  API_ERROR_CODES.TOO_MANY_REQUESTS,
+  API_ERROR_CODES.NETWORK_ERROR,
+]);
 
 /** Network blips, rate limits, and gateway errors — safe to retry without discarding form state. */
 export function isTransientApiError(error: unknown): boolean {

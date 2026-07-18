@@ -1,7 +1,8 @@
 import {serve} from 'https://deno.land/std@0.224.0/http/server.ts';
 import {databaseErrorResponse, internalErrorResponse} from '../_shared/apiResponse.ts';
 import {jsonResponse, optionsResponse} from '../_shared/cors.ts';
-import {avatarUrl, discordUniqueUsername, verifyDiscordToken} from '../_shared/discord.ts';
+import {avatarUrl, discordUniqueUsername} from '../_shared/discord.ts';
+import {requireDiscordUser} from '../_shared/discordRequestAuth.ts';
 import {ensureDiscordUserRow} from '../_shared/discordUserRow.ts';
 import {validateGamertag} from '../_shared/gamertag.ts';
 import {rateLimitAuth} from '../_shared/rateLimitPresets.ts';
@@ -11,11 +12,9 @@ serve(async (req) => {
   if (req.method === 'OPTIONS') return optionsResponse(req);
   if (req.method !== 'POST') return jsonResponse({error: 'Method not allowed'}, 405, req);
 
-  const token =
-    req.headers.get('x-discord-access-token') ??
-    req.headers.get('authorization')?.replace(/^Bearer\s+/i, '');
-  const discordUser = await verifyDiscordToken(token);
-  if (!discordUser) return jsonResponse({error: 'Unauthorized'}, 401, req);
+  const auth = await requireDiscordUser(req);
+  if (auth instanceof Response) return auth;
+  const {user: discordUser} = auth;
 
   const authLimited = await rateLimitAuth(req, discordUser.id);
   if (authLimited) return authLimited;

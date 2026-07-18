@@ -110,6 +110,22 @@ export class DiscordRateLimitError extends Error {
   }
 }
 
+export function isDiscordRateLimitError(e: unknown): boolean {
+  return (
+    e instanceof DiscordRateLimitError ||
+    (e instanceof Error && e.name === 'DiscordRateLimitError')
+  );
+}
+
+/**
+ * Discord user OAuth token from the Activity/browser client.
+ * Only `x-discord-access-token` — never `Authorization` (that is the Supabase anon JWT).
+ */
+export function discordAccessTokenFrom(req: Request): string | null {
+  const raw = req.headers.get('x-discord-access-token')?.trim();
+  return raw || null;
+}
+
 const VERIFY_TOKEN_TTL_MS = 30_000;
 const verifyTokenCache = new Map<string, {user: DiscordUser; expiresAt: number}>();
 

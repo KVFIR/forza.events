@@ -2,7 +2,7 @@ import {serve} from 'https://deno.land/std@0.224.0/http/server.ts';
 import {EVENT_LIST_SELECT} from '../_shared/eventListSelect.ts';
 import {databaseErrorResponse, internalErrorResponse} from '../_shared/apiResponse.ts';
 import {jsonResponse, optionsResponse} from '../_shared/cors.ts';
-import {verifyDiscordToken} from '../_shared/discord.ts';
+import {requireDiscordUser} from '../_shared/discordRequestAuth.ts';
 import {rateLimitAuth} from '../_shared/rateLimitPresets.ts';
 import {hostDraftStatusFilter} from '../_shared/draftEvents.ts';
 import {adminClient} from '../_shared/supabase.ts';
@@ -14,11 +14,9 @@ serve(async (req) => {
   }
 
   try {
-    const token =
-      req.headers.get('x-discord-access-token') ??
-      req.headers.get('authorization')?.replace(/^Bearer\s+/i, '');
-    const discordUser = await verifyDiscordToken(token);
-    if (!discordUser) return jsonResponse({error: 'Unauthorized'}, 401, req);
+    const auth = await requireDiscordUser(req);
+    if (auth instanceof Response) return auth;
+    const {user: discordUser} = auth;
 
     const authLimited = await rateLimitAuth(req, discordUser.id);
     if (authLimited) return authLimited;

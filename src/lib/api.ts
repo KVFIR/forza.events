@@ -75,7 +75,7 @@ async function invoke<T>(
   } catch {
     trackNetworkError(name, {eventId, meta: errorMeta});
     throw new ApiRequestError('Network request failed', {
-      code: API_ERROR_CODES.INVALID_RESPONSE,
+      code: API_ERROR_CODES.NETWORK_ERROR,
       status: 0,
     });
   }

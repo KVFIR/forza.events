@@ -45,6 +45,7 @@ describe('isTransientApiError', () => {
 describe('isTransientApiErrorCode', () => {
   it('matches server retry codes', () => {
     expect(isTransientApiErrorCode(API_ERROR_CODES.TOO_MANY_REQUESTS)).toBe(true);
+    expect(isTransientApiErrorCode(API_ERROR_CODES.NETWORK_ERROR)).toBe(true);
     expect(isTransientApiErrorCode(API_ERROR_CODES.INTERNAL)).toBe(false);
     expect(isTransientApiErrorCode(API_ERROR_CODES.BOT_CANNOT_POST)).toBe(false);
   });

@@ -2,7 +2,7 @@ import {serve} from 'https://deno.land/std@0.224.0/http/server.ts';
 import {API_ERROR_CODES} from '../_shared/apiErrorCodes.ts';
 import {appErrorResponse, internalErrorResponse} from '../_shared/apiResponse.ts';
 import {jsonResponse, optionsResponse} from '../_shared/cors.ts';
-import {verifyDiscordToken} from '../_shared/discord.ts';
+import {requireDiscordUser} from '../_shared/discordRequestAuth.ts';
 import {searchGuildMembers} from '../_shared/guildMembers.ts';
 import {userIsGuildMember} from '../_shared/guildAccess.ts';
 import {rateLimitAuth} from '../_shared/rateLimitPresets.ts';
@@ -12,11 +12,9 @@ serve(async (req) => {
   if (req.method === 'OPTIONS') return optionsResponse(req);
   if (req.method !== 'POST') return jsonResponse({error: 'Method not allowed'}, 405, req);
 
-  const token =
-    req.headers.get('x-discord-access-token') ??
-    req.headers.get('authorization')?.replace(/^Bearer\s+/i, '');
-  const user = await verifyDiscordToken(token);
-  if (!user) return jsonResponse({error: 'Unauthorized'}, 401, req);
+  const auth = await requireDiscordUser(req);
+  if (auth instanceof Response) return auth;
+  const {user} = auth;
 
   const authLimited = await rateLimitAuth(req, user.id);
   if (authLimited) return authLimited;

@@ -2,6 +2,7 @@ import {jsonResponse} from './cors.ts';
 import type {ApiErrorCode} from './apiErrorCodes.ts';
 import {API_ERROR_CODES} from './apiErrorCodes.ts';
 import {BOT_CANNOT_POST_MESSAGE} from './channelPermissions.ts';
+import {isDiscordRateLimitError} from './discord.ts';
 import type {ValidationCode} from './validationCodes.ts';
 import {validationMessageEn} from './validationMessages.ts';
 
@@ -62,6 +63,9 @@ export function appErrorResponse(
 }
 
 export function internalErrorResponse(req: Request, e: unknown): Response {
+  if (isDiscordRateLimitError(e)) {
+    return appErrorResponse(req, 503, API_ERROR_CODES.TOO_MANY_REQUESTS);
+  }
   console.error(e);
   return appErrorResponse(req, 500, API_ERROR_CODES.INTERNAL);
 }

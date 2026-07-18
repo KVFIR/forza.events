@@ -4,7 +4,7 @@ import {trackSecretOk} from '../_shared/analyticsTrack.ts';
 import {databaseErrorResponse, internalErrorResponse} from '../_shared/apiResponse.ts';
 import {CLIENT_SURFACE_HEADER, parseClientSurface} from '../_shared/clientSurface.ts';
 import {clientIp, jsonResponse, optionsResponse} from '../_shared/cors.ts';
-import {verifyDiscordToken} from '../_shared/discord.ts';
+import {optionalDiscordUser} from '../_shared/discordRequestAuth.ts';
 import {rateLimitOr429} from '../_shared/rateLimit.ts';
 import {adminClient} from '../_shared/supabase.ts';
 
@@ -30,8 +30,9 @@ serve(async (req) => {
       return jsonResponse({error: 'Bad request'}, 400, req);
     }
 
-    const discordToken = req.headers.get('x-discord-access-token');
-    const discordUser = discordToken ? await verifyDiscordToken(discordToken) : null;
+    const discordUserOrErr = await optionalDiscordUser(req);
+    if (discordUserOrErr instanceof Response) return discordUserOrErr;
+    const discordUser = discordUserOrErr;
     const surface = parseClientSurface(req.headers.get(CLIENT_SURFACE_HEADER));
 
     const rows = events

@@ -2,7 +2,7 @@ import {serve} from 'https://deno.land/std@0.224.0/http/server.ts';
 import {EVENT_DETAIL_SELECT, EVENT_LIST_SELECT} from '../_shared/eventListSelect.ts';
 import {databaseErrorResponse, internalErrorResponse} from '../_shared/apiResponse.ts';
 import {jsonResponse, optionsResponse} from '../_shared/cors.ts';
-import {verifyDiscordToken} from '../_shared/discord.ts';
+import {optionalDiscordUser} from '../_shared/discordRequestAuth.ts';
 import {rateLimitPublicRead} from '../_shared/rateLimitPresets.ts';
 import {hostDraftStatusFilter} from '../_shared/draftEvents.ts';
 import {adminClient} from '../_shared/supabase.ts';
@@ -22,10 +22,9 @@ serve(async (req) => {
     const eventId = typeof body.event_id === 'string' ? body.event_id : null;
     const hostDrafts = Boolean(body.host_drafts);
 
-    const token =
-      req.headers.get('x-discord-access-token') ??
-      req.headers.get('authorization')?.replace(/^Bearer\s+/i, '');
-    const discordUser = token ? await verifyDiscordToken(token) : null;
+    const discordUserOrErr = await optionalDiscordUser(req);
+    if (discordUserOrErr instanceof Response) return discordUserOrErr;
+    const discordUser = discordUserOrErr;
 
     const supabase = adminClient();
 

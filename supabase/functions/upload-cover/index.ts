@@ -4,7 +4,7 @@ import {databaseErrorResponse, internalErrorResponse} from '../_shared/apiRespon
 import {jsonResponse, optionsResponse} from '../_shared/cors.ts';
 import {COVER_SOURCE_MAX_BYTES, coverSourceLimitErrorEn} from '../_shared/coverImage.ts';
 import {coverStoragePath} from '../_shared/eventCovers.ts';
-import {verifyDiscordToken} from '../_shared/discord.ts';
+import {requireDiscordUser} from '../_shared/discordRequestAuth.ts';
 import {rateLimitMutation} from '../_shared/rateLimitPresets.ts';
 import {adminClient} from '../_shared/supabase.ts';
 
@@ -16,11 +16,9 @@ serve(async (req) => {
   if (req.method === 'OPTIONS') return optionsResponse(req);
   if (req.method !== 'POST') return jsonResponse({error: 'Method not allowed'}, 405, req);
 
-  const token =
-    req.headers.get('x-discord-access-token') ??
-    req.headers.get('authorization')?.replace(/^Bearer\s+/i, '');
-  const discordUser = await verifyDiscordToken(token);
-  if (!discordUser) return jsonResponse({error: 'Unauthorized'}, 401, req);
+  const auth = await requireDiscordUser(req);
+  if (auth instanceof Response) return auth;
+  const {user: discordUser} = auth;
 
   const uploadLimited = await rateLimitMutation(req, discordUser.id);
   if (uploadLimited) return uploadLimited;
