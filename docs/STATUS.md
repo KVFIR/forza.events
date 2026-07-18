@@ -39,7 +39,9 @@ Remaining work is mostly **Activity E2E in pilot guilds**, **Railway frontend re
 | Supabase schema | Done | `001_baseline` + `002`–`010` |
 | Edge Functions | Done | `npm run deploy:functions` |
 | Realtime lobby | Done | `events` + `event_participants` |
+| FH5 / FH6 cars + event game | Done | `events.game` / `cars.game` (`029`); Create selector; Browse filter (default All); card/detail/embed badges |
 | FH6 cars catalog | Done | Autocomplete; no client inserts into `cars` |
+| FH5 cars catalog | Done | Fandom scrape → `fh5cars.json`; same seed path |
 | Cover storage | Done | Host-only upload; public read |
 | Security (RLS/CORS/rate) | Done | Baseline + `003`/`004` migrations + Edge shared modules |
 | Sample seed | Done | `npm run seed:events` |

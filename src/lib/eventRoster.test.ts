@@ -33,6 +33,7 @@ function event(
     slug: 'e',
     title: 'Race',
     type: 'road',
+    game: 'fh6',
     status: 'open',
     lifecycle: 'open',
     startsAt: new Date().toISOString(),

@@ -7,6 +7,7 @@ function event(id: string, title: string): ForzaEvent {
     id,
     title,
     type: 'road',
+    game: 'fh6',
     status: 'draft',
     startsAt: '2026-08-01T12:00:00.000Z',
     hostDiscordId: 'host',

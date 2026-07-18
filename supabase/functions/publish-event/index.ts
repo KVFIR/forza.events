@@ -31,7 +31,7 @@ serve(async (req) => {
 
   const auth = await requireDiscordUser(req);
   if (auth instanceof Response) return auth;
-  const {user} = auth;
+  const {user, token} = auth;
 
   const mutationLimited = await rateLimitMutation(req, user.id);
   if (mutationLimited) return mutationLimited;

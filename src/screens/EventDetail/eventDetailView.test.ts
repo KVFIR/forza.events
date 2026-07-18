@@ -23,6 +23,7 @@ function baseEvent(overrides: Partial<ForzaEvent> = {}): ForzaEvent {
     slug: 'ev-1',
     title: 'Test',
     type: 'road',
+    game: 'fh6',
     status: 'open',
     lifecycle: 'open',
     startsAt: new Date(Date.now() + 86_400_000).toISOString(),

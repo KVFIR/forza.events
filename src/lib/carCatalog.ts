@@ -1,9 +1,12 @@
+import type {ForzaGame} from './eventGames';
+
 export type CatalogCar = {
   id: string;
   make: string;
   model: string;
   year: number | null;
   pi: number;
+  game: ForzaGame;
 };
 
 let catalogCache: CatalogCar[] | null = null;
@@ -11,28 +14,44 @@ let catalogCache: CatalogCar[] | null = null;
 async function loadCatalog(): Promise<CatalogCar[]> {
   if (catalogCache) return catalogCache;
 
-  // Generated from Fandom scrape: npm run data:fh6:scrape (see supabase/README.md)
-  const {default: catalog} = await import('../../supabase/seed/fh6cars.json');
-  catalogCache = (
-    catalog as {make: string; model: string; year: number | null; pi: number}[]
-  ).map((c, i) => ({
-    id: `catalog-${i}-${c.make}-${c.model}`.replace(/\s+/g, '-').slice(0, 80),
-    make: c.make,
-    model: c.model,
-    year: c.year,
-    pi: c.pi,
-  }));
+  const [{default: fh6}, {default: fh5}] = await Promise.all([
+    import('../../supabase/seed/fh6cars.json'),
+    import('../../supabase/seed/fh5cars.json'),
+  ]);
 
+  const rows: CatalogCar[] = [];
+  const push = (catalog: unknown, game: ForzaGame) => {
+    const list = catalog as {make: string; model: string; year: number | null; pi: number}[];
+    list.forEach((c, i) => {
+      rows.push({
+        id: `catalog-${game}-${i}-${c.make}-${c.model}`.replace(/\s+/g, '-').slice(0, 80),
+        make: c.make,
+        model: c.model,
+        year: c.year,
+        pi: c.pi,
+        game,
+      });
+    });
+  };
+  push(fh6, 'fh6');
+  push(fh5, 'fh5');
+  catalogCache = rows;
   return catalogCache;
 }
 
 /** Client-side search when Supabase is not configured. */
-export async function searchCarCatalog(query: string, limit = 20): Promise<CatalogCar[]> {
+export async function searchCarCatalog(
+  query: string,
+  options: {limit?: number; game?: ForzaGame} = {},
+): Promise<CatalogCar[]> {
   const q = query.trim().toLowerCase();
   if (!q) return [];
+  const limit = options.limit ?? 20;
+  const game = options.game ?? 'fh6';
 
   const catalog = await loadCatalog();
   return catalog
+    .filter((c) => c.game === game)
     .filter((c) => {
       const hay = `${c.make} ${c.model} ${c.year ?? ''} ${c.pi}`.toLowerCase();
       return hay.includes(q);

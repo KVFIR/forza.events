@@ -25,6 +25,7 @@ type EventCarJoinRow = {
 type EventRowForPublish = {
   title: string;
   type: string;
+  game?: string | null;
   starts_at: string;
   timezone_hint: string | null;
   description: string | null;
@@ -47,6 +48,7 @@ export function buildPublishEventBody(
   return {
     title: event.title,
     type: event.type,
+    game: event.game ?? 'fh6',
     starts_at: event.starts_at,
     timezone_hint: event.timezone_hint ?? undefined,
     description: event.description ?? undefined,

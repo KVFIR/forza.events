@@ -1,8 +1,9 @@
 import {useEffect, useRef, useState} from 'react';
 import {ChevronDown, ChevronUp, Trash2} from 'lucide-react';
 import {useTranslation} from 'react-i18next';
-import {formatCarDisplayName} from '../lib/carDisplay';
+import {formatCarListDisplayNames} from '../lib/carDisplay';
 import {piToClass} from '../lib/pi';
+import type {ForzaGame} from '../lib/eventGames';
 import {MaxPiInput} from './MaxPiInput';
 import {searchCars, type CarSearchResult} from '../lib/events';
 import {ShareCodeInput} from './ShareCodeInput';
@@ -32,6 +33,8 @@ type Props = {
   onChange: (cars: EventCarEntry[]) => void;
   inputClass: string;
   labelClass: string;
+  /** Catalog game — filters search. */
+  game: ForzaGame;
   /** When set (edit flow), collapse all cards once after cars load. */
   collapseAllKey?: string | null;
 };
@@ -54,6 +57,7 @@ export function EventCarList({
   onChange,
   inputClass,
   labelClass,
+  game,
   collapseAllKey,
 }: Props) {
   const {t} = useTranslation();
@@ -62,6 +66,9 @@ export function EventCarList({
   const [open, setOpen] = useState(false);
   const {collapsedIds, setCollapsedIds, collapseAll} = useCollapseAllOnLoad(collapseAllKey);
   const wrapRef = useRef<HTMLDivElement>(null);
+  const listLabels = formatCarListDisplayNames(
+    cars.map((c) => ({id: c.id, make: c.make, model: c.model, year: c.year})),
+  );
 
   useEffect(() => {
     if (cars.length === 0) {
@@ -76,14 +83,14 @@ export function EventCarList({
       setResults([]);
       return;
     }
-    const t = setTimeout(() => {
-      void searchCars(query).then((r) => {
+    const timer = setTimeout(() => {
+      void searchCars(query, {game}).then((r) => {
         const picked = new Set(cars.map((c) => c.id));
         setResults(r.filter((c) => !picked.has(c.id)));
       });
     }, 250);
-    return () => clearTimeout(t);
-  }, [query, cars]);
+    return () => clearTimeout(timer);
+  }, [query, cars, game]);
 
   useEffect(() => {
     function onDocClick(e: MouseEvent) {
@@ -165,7 +172,7 @@ export function EventCarList({
                       {c.year ? ` · ${c.year}` : ''}
                     </span>
                     <span className="text-xs text-muted">
-                      {piToClass(c.pi)} {c.pi}
+                      {piToClass(c.pi, game)} {c.pi}
                     </span>
                   </DropdownItem>
                 ))
@@ -181,7 +188,7 @@ export function EventCarList({
         <ul className="space-y-3">
           {cars.map((c) => {
             const collapsed = isCollapsed(c.id);
-            const displayName = formatCarDisplayName(c);
+            const displayName = listLabels.get(c.id) ?? c.model;
             return (
             <li key={c.id}>
               <Panel variant="soft" className="p-0">
@@ -238,6 +245,7 @@ export function EventCarList({
                       <FieldLabel className="mb-1.5 block">{t('create.maxPi')}</FieldLabel>
                       <MaxPiInput
                         inputClass={inputClass}
+                        game={game}
                         value={c.maxPi}
                         onChange={(maxPi) => {
                           if (maxPi != null) update(c.id, {maxPi});

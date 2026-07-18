@@ -13,9 +13,11 @@ import {totalCapacity} from '../lib/eventSpec';
 import {resolveOrganiserLabel} from '../lib/organiser';
 import {formatEventStart} from '../lib/datetime';
 import {defaultCoverPath} from '../lib/eventCovers';
-import {formatCarDisplayName} from '../lib/carDisplay';
+import {formatCarListDisplayNames} from '../lib/carDisplay';
 import {formatOpenBuildCarRulesDisplay, openBuildHasDisplayRules} from '../lib/carRules';
 import {piToClass} from '../lib/pi';
+import {normalizeEventGame} from '../lib/eventGames';
+import {GameBadge} from './ui/Badge';
 import {useAuth} from '../context/AuthContext';
 import {useResolveEventDisplayStatus} from '../hooks/useResolveEventDisplayStatus';
 import {EventCover} from './EventCover';
@@ -34,21 +36,26 @@ const classColor: Record<string, string> = {
   S1: 'text-violet-400/90',
   S2: 'text-fuchsia-400/90',
   R: 'text-amber-400/90',
+  X: 'text-rose-300/95',
 };
 
 const MAX_CARS_SHOWN = 4;
 
-function CarList({cars}: {cars: EventAllowedCar[]}) {
+function CarList({cars, game}: {cars: EventAllowedCar[]; game: ForzaEvent['game']}) {
   const {t} = useTranslation();
   const shown = cars.slice(0, MAX_CARS_SHOWN);
   const extra = cars.length - shown.length;
+  const labels = formatCarListDisplayNames(
+    cars.map((c) => ({carId: c.carId, make: c.make, model: c.model, year: c.year})),
+  );
+  const g = normalizeEventGame(game);
 
   return (
     <div className="hidden min-[500px]:block w-[10.5rem] shrink-0 text-left">
       <ul className="flex flex-col divide-y divide-white/[0.05]">
         {shown.map((car) => {
-          const maxClass = piToClass(car.maxPi);
-          const carLabel = formatCarDisplayName(car);
+          const maxClass = piToClass(car.maxPi, g);
+          const carLabel = labels.get(car.carId) ?? car.model;
 
           return (
             <li
@@ -86,7 +93,9 @@ function OpenBuildSummary({event}: {event: ForzaEvent}) {
   const display = formatOpenBuildCarRulesDisplay(event);
   if (!display) return null;
   const twoCol = Boolean(display.notes && display.piLabel);
-  const piClass = display.piLabel ? piToClass(event.maxPi!) : null;
+  const piClass = display.piLabel
+    ? piToClass(event.maxPi!, normalizeEventGame(event.game))
+    : null;
 
   return (
     <div className="hidden min-[500px]:block w-[10.5rem] shrink-0 text-left">
@@ -179,10 +188,15 @@ export function EventCard({event, participantResult}: Props) {
               >
                 {event.title}
               </h2>
-              <p className="mt-0.5 truncate text-xs text-slate-400">
-                {organiserLabel}
+              <p className="mt-0.5 flex min-w-0 items-center gap-1.5 truncate text-xs text-slate-400">
+                <GameBadge
+                  game={normalizeEventGame(event.game)}
+                  variant="short"
+                  className="shrink-0"
+                />
+                <span className="min-w-0 truncate">{organiserLabel}</span>
                 {isHost && (
-                  <span className="ml-1.5 text-[9px] font-bold uppercase tracking-widest text-accent-purple-light">
+                  <span className="shrink-0 text-[9px] font-bold uppercase tracking-widest text-accent-purple-light">
                     · You
                   </span>
                 )}
@@ -226,7 +240,7 @@ export function EventCard({event, participantResult}: Props) {
             </div>
 
             {event.carRuleMode === 'restricted_list' && event.allowedCars.length > 0 && (
-              <CarList cars={event.allowedCars} />
+              <CarList cars={event.allowedCars} game={event.game} />
             )}
             {event.carRuleMode === 'anything_goes' && openBuildHasDisplayRules(event) && (
               <OpenBuildSummary event={event} />

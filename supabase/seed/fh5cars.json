@@ -1,0 +1,6344 @@
+[
+  {
+    "make": "Abarth",
+    "model": "Abarth 124 Spider",
+    "year": 2017,
+    "pi": 562,
+    "class": "C"
+  },
+  {
+    "make": "Abarth",
+    "model": "Abarth 595 esseesse",
+    "year": 1968,
+    "pi": 100,
+    "class": "D"
+  },
+  {
+    "make": "Abarth",
+    "model": "Abarth 695 Biposto",
+    "year": 2016,
+    "pi": 657,
+    "class": "B"
+  },
+  {
+    "make": "Abarth",
+    "model": "Abarth Fiat 131",
+    "year": 1980,
+    "pi": 510,
+    "class": "C"
+  },
+  {
+    "make": "Acura",
+    "model": "Acura Integra Type-R",
+    "year": 2001,
+    "pi": 596,
+    "class": "C"
+  },
+  {
+    "make": "Acura",
+    "model": "Acura NSX",
+    "year": 2017,
+    "pi": 831,
+    "class": "S1"
+  },
+  {
+    "make": "Acura",
+    "model": "Acura RSX Type-S",
+    "year": 2002,
+    "pi": 585,
+    "class": "C"
+  },
+  {
+    "make": "Alejandra's",
+    "model": "Alejandra's Flatbed Truck",
+    "year": 2020,
+    "pi": 451,
+    "class": "D"
+  },
+  {
+    "make": "Alejandra's",
+    "model": "Alejandra's Flatbed Truck (Hi Car)",
+    "year": 2020,
+    "pi": 632,
+    "class": "B"
+  },
+  {
+    "make": "Alejandra's",
+    "model": "Alejandra's Flatbed Truck (Low Car)",
+    "year": 2020,
+    "pi": 632,
+    "class": "B"
+  },
+  {
+    "make": "Alfa Romeo",
+    "model": "Alfa Romeo 155 Q4",
+    "year": 1992,
+    "pi": 561,
+    "class": "C"
+  },
+  {
+    "make": "Alfa Romeo",
+    "model": "Alfa Romeo 33 Stradale",
+    "year": 1968,
+    "pi": 707,
+    "class": "A"
+  },
+  {
+    "make": "Alfa Romeo",
+    "model": "Alfa Romeo 4C",
+    "year": 2014,
+    "pi": 755,
+    "class": "A"
+  },
+  {
+    "make": "Alfa Romeo",
+    "model": "Alfa Romeo 8C Competizione",
+    "year": 2007,
+    "pi": 755,
+    "class": "A"
+  },
+  {
+    "make": "Alfa Romeo",
+    "model": "Alfa Romeo Giulia Quadrifoglio",
+    "year": 2017,
+    "pi": 775,
+    "class": "A"
+  },
+  {
+    "make": "Alfa Romeo",
+    "model": "Alfa Romeo Giulia Sprint GTA Stradale",
+    "year": 1965,
+    "pi": 486,
+    "class": "D"
+  },
+  {
+    "make": "Alfa Romeo",
+    "model": "Alfa Romeo Giulia TZ2",
+    "year": 1965,
+    "pi": 641,
+    "class": "B"
+  },
+  {
+    "make": "Alpine",
+    "model": "Alpine A110",
+    "year": 2017,
+    "pi": 694,
+    "class": "B"
+  },
+  {
+    "make": "Alpine",
+    "model": "Alpine A110 1600s",
+    "year": 1973,
+    "pi": 550,
+    "class": "C"
+  },
+  {
+    "make": "Alumi",
+    "model": "Alumi Craft Class 10 Race Car",
+    "year": 2015,
+    "pi": 642,
+    "class": "B"
+  },
+  {
+    "make": "Alumi",
+    "model": "Alumicraft #122 Class 1 Buggy",
+    "year": 2021,
+    "pi": 689,
+    "class": "B"
+  },
+  {
+    "make": "Alumi",
+    "model": "Alumicraft #6165 Trick Truck",
+    "year": 2022,
+    "pi": 596,
+    "class": "C"
+  },
+  {
+    "make": "AMC",
+    "model": "AMC Gremlin X",
+    "year": 1973,
+    "pi": 403,
+    "class": "D"
+  },
+  {
+    "make": "AMC",
+    "model": "AMC Javelin AMX",
+    "year": 1971,
+    "pi": 493,
+    "class": "D"
+  },
+  {
+    "make": "AMC",
+    "model": "AMC Rebel \"The Machine\"",
+    "year": 1970,
+    "pi": 531,
+    "class": "C"
+  },
+  {
+    "make": "AMG Transport Dynamics",
+    "model": "AMG Transport Dynamics M12S Warthog CST",
+    "year": 2554,
+    "pi": 719,
+    "class": "A"
+  },
+  {
+    "make": "Apollo",
+    "model": "Apollo Intensa Emozione",
+    "year": 2018,
+    "pi": 963,
+    "class": "S2"
+  },
+  {
+    "make": "Apollo",
+    "model": "Apollo Intensa Emozione 'Welcome Pack'",
+    "year": 2018,
+    "pi": 998,
+    "class": "S2"
+  },
+  {
+    "make": "Ariel",
+    "model": "Ariel Atom 500 V8",
+    "year": 2013,
+    "pi": 924,
+    "class": "S2"
+  },
+  {
+    "make": "Ariel",
+    "model": "Ariel Nomad",
+    "year": 2016,
+    "pi": 711,
+    "class": "A"
+  },
+  {
+    "make": "Ascari",
+    "model": "Ascari KZ1R",
+    "year": 2012,
+    "pi": 829,
+    "class": "S1"
+  },
+  {
+    "make": "Aston Martin",
+    "model": "Aston Martin DB11",
+    "year": 2017,
+    "pi": 787,
+    "class": "A"
+  },
+  {
+    "make": "Aston Martin",
+    "model": "Aston Martin DB5",
+    "year": 1964,
+    "pi": 548,
+    "class": "C"
+  },
+  {
+    "make": "Aston Martin",
+    "model": "Aston Martin DBR1",
+    "year": 1958,
+    "pi": 678,
+    "class": "B"
+  },
+  {
+    "make": "Aston Martin",
+    "model": "Aston Martin DBS",
+    "year": 2008,
+    "pi": 746,
+    "class": "A"
+  },
+  {
+    "make": "Aston Martin",
+    "model": "Aston Martin DBS Superleggera",
+    "year": 2019,
+    "pi": 835,
+    "class": "S1"
+  },
+  {
+    "make": "Aston Martin",
+    "model": "Aston Martin DBX",
+    "year": 2021,
+    "pi": 732,
+    "class": "A"
+  },
+  {
+    "make": "Aston Martin",
+    "model": "Aston Martin Lagonda",
+    "year": 1990,
+    "pi": 502,
+    "class": "C"
+  },
+  {
+    "make": "Aston Martin",
+    "model": "Aston Martin One-77",
+    "year": 2010,
+    "pi": 843,
+    "class": "S1"
+  },
+  {
+    "make": "Aston Martin",
+    "model": "Aston Martin V12 Vantage S",
+    "year": 2013,
+    "pi": 796,
+    "class": "A"
+  },
+  {
+    "make": "Aston Martin",
+    "model": "Aston Martin Valhalla Concept Car",
+    "year": 2019,
+    "pi": 959,
+    "class": "S2"
+  },
+  {
+    "make": "Aston Martin",
+    "model": "Aston Martin Valkyrie",
+    "year": 2023,
+    "pi": 978,
+    "class": "S2"
+  },
+  {
+    "make": "Aston Martin",
+    "model": "Aston Martin Valkyrie AMR Pro",
+    "year": 2022,
+    "pi": 998,
+    "class": "S2"
+  },
+  {
+    "make": "Aston Martin",
+    "model": "Aston Martin Vanquish Zagato Coupé",
+    "year": 2017,
+    "pi": 803,
+    "class": "S1"
+  },
+  {
+    "make": "Aston Martin",
+    "model": "Aston Martin Vantage",
+    "year": 2019,
+    "pi": 801,
+    "class": "S1"
+  },
+  {
+    "make": "Aston Martin",
+    "model": "Aston Martin Vantage GT12",
+    "year": 2016,
+    "pi": 829,
+    "class": "S1"
+  },
+  {
+    "make": "Aston Martin",
+    "model": "Aston Martin Vulcan AMR Pro",
+    "year": 2017,
+    "pi": 953,
+    "class": "S2"
+  },
+  {
+    "make": "ATS",
+    "model": "ATS GT",
+    "year": 2018,
+    "pi": 877,
+    "class": "S1"
+  },
+  {
+    "make": "Audi",
+    "model": "Audi #2 Audi Sport quattro S1",
+    "year": 1986,
+    "pi": 827,
+    "class": "S1"
+  },
+  {
+    "make": "Audi",
+    "model": "Audi R8 Coupé V10 plus 5.2 FSI quattro",
+    "year": 2013,
+    "pi": 802,
+    "class": "S1"
+  },
+  {
+    "make": "Audi",
+    "model": "Audi R8 V10 plus",
+    "year": 2016,
+    "pi": 834,
+    "class": "S1"
+  },
+  {
+    "make": "Audi",
+    "model": "Audi RS 2 Avant",
+    "year": 1995,
+    "pi": 601,
+    "class": "B"
+  },
+  {
+    "make": "Audi",
+    "model": "Audi RS 3 Sedan",
+    "year": 2020,
+    "pi": 734,
+    "class": "A"
+  },
+  {
+    "make": "Audi",
+    "model": "Audi RS 3 Sportback",
+    "year": 2011,
+    "pi": 682,
+    "class": "B"
+  },
+  {
+    "make": "Audi",
+    "model": "Audi RS 4",
+    "year": 2006,
+    "pi": 710,
+    "class": "A"
+  },
+  {
+    "make": "Audi",
+    "model": "Audi RS 4 Avant",
+    "year": 2001,
+    "pi": 663,
+    "class": "B"
+  },
+  {
+    "make": "Audi",
+    "model": "Audi RS 4 Avant",
+    "year": 2013,
+    "pi": 728,
+    "class": "A"
+  },
+  {
+    "make": "Audi",
+    "model": "Audi RS 4 Avant",
+    "year": 2018,
+    "pi": 751,
+    "class": "A"
+  },
+  {
+    "make": "Audi",
+    "model": "Audi RS 5 Coupé",
+    "year": 2011,
+    "pi": 733,
+    "class": "A"
+  },
+  {
+    "make": "Audi",
+    "model": "Audi RS 5 Coupé",
+    "year": 2018,
+    "pi": 750,
+    "class": "A"
+  },
+  {
+    "make": "Audi",
+    "model": "Audi RS 6",
+    "year": 2003,
+    "pi": 677,
+    "class": "B"
+  },
+  {
+    "make": "Audi",
+    "model": "Audi RS 6",
+    "year": 2009,
+    "pi": 722,
+    "class": "A"
+  },
+  {
+    "make": "Audi",
+    "model": "Audi RS 6 Avant",
+    "year": 2015,
+    "pi": 754,
+    "class": "A"
+  },
+  {
+    "make": "Audi",
+    "model": "Audi RS 6 Avant",
+    "year": 2021,
+    "pi": 763,
+    "class": "A"
+  },
+  {
+    "make": "Audi",
+    "model": "Audi RS 7 Sportback",
+    "year": 2013,
+    "pi": 739,
+    "class": "A"
+  },
+  {
+    "make": "Audi",
+    "model": "Audi RS 7 Sportback",
+    "year": 2021,
+    "pi": 768,
+    "class": "A"
+  },
+  {
+    "make": "Audi",
+    "model": "Audi RS e-tron GT",
+    "year": 2021,
+    "pi": 770,
+    "class": "A"
+  },
+  {
+    "make": "Audi",
+    "model": "Audi S1",
+    "year": 2015,
+    "pi": 644,
+    "class": "B"
+  },
+  {
+    "make": "Audi",
+    "model": "Audi Sport quattro",
+    "year": 1983,
+    "pi": 638,
+    "class": "B"
+  },
+  {
+    "make": "Audi",
+    "model": "Audi TT RS",
+    "year": 2018,
+    "pi": 748,
+    "class": "A"
+  },
+  {
+    "make": "Audi",
+    "model": "Audi TT RS Coupe",
+    "year": 2020,
+    "pi": 765,
+    "class": "A"
+  },
+  {
+    "make": "Audi",
+    "model": "Audi TT RS Coupé",
+    "year": 2010,
+    "pi": 707,
+    "class": "A"
+  },
+  {
+    "make": "Audi",
+    "model": "Audi TTS Coupé",
+    "year": 2015,
+    "pi": 724,
+    "class": "A"
+  },
+  {
+    "make": "Austin-Healey",
+    "model": "Austin-Healey Sprite MkI",
+    "year": 1958,
+    "pi": 131,
+    "class": "D"
+  },
+  {
+    "make": "Auto",
+    "model": "Auto Union Type D",
+    "year": 1939,
+    "pi": 675,
+    "class": "B"
+  },
+  {
+    "make": "Automobili",
+    "model": "Automobili Pininfarina Battista",
+    "year": 2020,
+    "pi": 928,
+    "class": "S2"
+  },
+  {
+    "make": "Autozam",
+    "model": "Autozam AZ-1",
+    "year": 1993,
+    "pi": 450,
+    "class": "D"
+  },
+  {
+    "make": "BAC",
+    "model": "BAC Mono",
+    "year": 2014,
+    "pi": 868,
+    "class": "S1"
+  },
+  {
+    "make": "Bentley",
+    "model": "Bentley 8 Litre",
+    "year": 1930,
+    "pi": 181,
+    "class": "D"
+  },
+  {
+    "make": "Bentley",
+    "model": "Bentley Bentayga",
+    "year": 2016,
+    "pi": 727,
+    "class": "A"
+  },
+  {
+    "make": "Bentley",
+    "model": "Bentley Blower 4-1/2 Litre Supercharged",
+    "year": 1931,
+    "pi": 207,
+    "class": "D"
+  },
+  {
+    "make": "Bentley",
+    "model": "Bentley Continental GT Convertible",
+    "year": 2021,
+    "pi": 759,
+    "class": "A"
+  },
+  {
+    "make": "Bentley",
+    "model": "Bentley Continental Supersports",
+    "year": 2017,
+    "pi": 769,
+    "class": "A"
+  },
+  {
+    "make": "Bentley",
+    "model": "Bentley Flying Spur",
+    "year": 2021,
+    "pi": 719,
+    "class": "A"
+  },
+  {
+    "make": "Bentley",
+    "model": "Bentley Turbo R",
+    "year": 1991,
+    "pi": 543,
+    "class": "C"
+  },
+  {
+    "make": "BMW",
+    "model": "BMW #1 M Motorsport M8 GTE",
+    "year": 2018,
+    "pi": 910,
+    "class": "S2"
+  },
+  {
+    "make": "BMW",
+    "model": "BMW 1 Series M Coupe",
+    "year": 2011,
+    "pi": 712,
+    "class": "A"
+  },
+  {
+    "make": "BMW",
+    "model": "BMW 2002 Turbo",
+    "year": 1973,
+    "pi": 531,
+    "class": "C"
+  },
+  {
+    "make": "BMW",
+    "model": "BMW 850CSi",
+    "year": 1995,
+    "pi": 610,
+    "class": "B"
+  },
+  {
+    "make": "BMW",
+    "model": "BMW i4 eDrive40",
+    "year": 2022,
+    "pi": 633,
+    "class": "B"
+  },
+  {
+    "make": "BMW",
+    "model": "BMW i8",
+    "year": 2015,
+    "pi": 764,
+    "class": "A"
+  },
+  {
+    "make": "BMW",
+    "model": "BMW Isetta 300 Export",
+    "year": 1957,
+    "pi": 100,
+    "class": "D"
+  },
+  {
+    "make": "BMW",
+    "model": "BMW iX xDrive50",
+    "year": 2022,
+    "pi": 703,
+    "class": "A"
+  },
+  {
+    "make": "BMW",
+    "model": "BMW M1",
+    "year": 1981,
+    "pi": 629,
+    "class": "B"
+  },
+  {
+    "make": "BMW",
+    "model": "BMW M2",
+    "year": 2023,
+    "pi": 762,
+    "class": "A"
+  },
+  {
+    "make": "BMW",
+    "model": "BMW M2 Coupé",
+    "year": 2016,
+    "pi": 718,
+    "class": "A"
+  },
+  {
+    "make": "BMW",
+    "model": "BMW M3",
+    "year": 1991,
+    "pi": 583,
+    "class": "C"
+  },
+  {
+    "make": "BMW",
+    "model": "BMW M3",
+    "year": 1997,
+    "pi": 665,
+    "class": "B"
+  },
+  {
+    "make": "BMW",
+    "model": "BMW M3",
+    "year": 2005,
+    "pi": 675,
+    "class": "B"
+  },
+  {
+    "make": "BMW",
+    "model": "BMW M3",
+    "year": 2008,
+    "pi": 725,
+    "class": "A"
+  },
+  {
+    "make": "BMW",
+    "model": "BMW M3 Competition Sedan",
+    "year": 2021,
+    "pi": 772,
+    "class": "A"
+  },
+  {
+    "make": "BMW",
+    "model": "BMW M3 GTS",
+    "year": 2010,
+    "pi": 794,
+    "class": "A"
+  },
+  {
+    "make": "BMW",
+    "model": "BMW M3-GTR",
+    "year": 2002,
+    "pi": 747,
+    "class": "A"
+  },
+  {
+    "make": "BMW",
+    "model": "BMW M4 Competition Coupé",
+    "year": 2021,
+    "pi": 778,
+    "class": "A"
+  },
+  {
+    "make": "BMW",
+    "model": "BMW M4 Coupé",
+    "year": 2014,
+    "pi": 782,
+    "class": "A"
+  },
+  {
+    "make": "BMW",
+    "model": "BMW M4 GTS",
+    "year": 2016,
+    "pi": 814,
+    "class": "S1"
+  },
+  {
+    "make": "BMW",
+    "model": "BMW M5",
+    "year": 1988,
+    "pi": 583,
+    "class": "C"
+  },
+  {
+    "make": "BMW",
+    "model": "BMW M5",
+    "year": 1995,
+    "pi": 634,
+    "class": "B"
+  },
+  {
+    "make": "BMW",
+    "model": "BMW M5",
+    "year": 2003,
+    "pi": 694,
+    "class": "B"
+  },
+  {
+    "make": "BMW",
+    "model": "BMW M5",
+    "year": 2009,
+    "pi": 719,
+    "class": "A"
+  },
+  {
+    "make": "BMW",
+    "model": "BMW M5",
+    "year": 2012,
+    "pi": 766,
+    "class": "A"
+  },
+  {
+    "make": "BMW",
+    "model": "BMW M5",
+    "year": 2018,
+    "pi": 784,
+    "class": "A"
+  },
+  {
+    "make": "BMW",
+    "model": "BMW M5 CS",
+    "year": 2022,
+    "pi": 827,
+    "class": "S1"
+  },
+  {
+    "make": "BMW",
+    "model": "BMW M6 Coupe",
+    "year": 2013,
+    "pi": 758,
+    "class": "A"
+  },
+  {
+    "make": "BMW",
+    "model": "BMW M635 CSi",
+    "year": 1986,
+    "pi": 589,
+    "class": "C"
+  },
+  {
+    "make": "BMW",
+    "model": "BMW M8 Competition Coupe",
+    "year": 2020,
+    "pi": 791,
+    "class": "A"
+  },
+  {
+    "make": "BMW",
+    "model": "BMW X5 M",
+    "year": 2011,
+    "pi": 666,
+    "class": "B"
+  },
+  {
+    "make": "BMW",
+    "model": "BMW X5 M Forza Edition",
+    "year": 2011,
+    "pi": 998,
+    "class": "S2"
+  },
+  {
+    "make": "BMW",
+    "model": "BMW X6 M",
+    "year": 2015,
+    "pi": 687,
+    "class": "B"
+  },
+  {
+    "make": "BMW",
+    "model": "BMW Z3 M Coupe",
+    "year": 2002,
+    "pi": 675,
+    "class": "B"
+  },
+  {
+    "make": "BMW",
+    "model": "BMW Z4 M Coupe",
+    "year": 2008,
+    "pi": 694,
+    "class": "B"
+  },
+  {
+    "make": "BMW",
+    "model": "BMW Z4 Roadster",
+    "year": 2019,
+    "pi": 751,
+    "class": "A"
+  },
+  {
+    "make": "Brabham",
+    "model": "Brabham BT62",
+    "year": 2019,
+    "pi": 974,
+    "class": "S2"
+  },
+  {
+    "make": "Bugatti",
+    "model": "Bugatti Chiron",
+    "year": 2018,
+    "pi": 927,
+    "class": "S2"
+  },
+  {
+    "make": "Bugatti",
+    "model": "Bugatti Divo",
+    "year": 2019,
+    "pi": 958,
+    "class": "S2"
+  },
+  {
+    "make": "Bugatti",
+    "model": "Bugatti EB110 Super Sport",
+    "year": 1992,
+    "pi": 805,
+    "class": "S1"
+  },
+  {
+    "make": "Bugatti",
+    "model": "Bugatti Type 35 C",
+    "year": 1926,
+    "pi": 285,
+    "class": "D"
+  },
+  {
+    "make": "Bugatti",
+    "model": "Bugatti Veyron Super Sport",
+    "year": 2011,
+    "pi": 913,
+    "class": "S2"
+  },
+  {
+    "make": "Buick",
+    "model": "Buick GSX",
+    "year": 1970,
+    "pi": 558,
+    "class": "C"
+  },
+  {
+    "make": "Buick",
+    "model": "Buick Regal GNX",
+    "year": 1987,
+    "pi": 564,
+    "class": "C"
+  },
+  {
+    "make": "Cadillac",
+    "model": "Cadillac #3 Cadillac Racing ATS-V.R",
+    "year": 2015,
+    "pi": 890,
+    "class": "S1"
+  },
+  {
+    "make": "Cadillac",
+    "model": "Cadillac ATS-V",
+    "year": 2016,
+    "pi": 716,
+    "class": "A"
+  },
+  {
+    "make": "Cadillac",
+    "model": "Cadillac CT4-V Blackwing",
+    "year": 2022,
+    "pi": 760,
+    "class": "A"
+  },
+  {
+    "make": "Cadillac",
+    "model": "Cadillac CT5-V Blackwing",
+    "year": 2022,
+    "pi": 799,
+    "class": "A"
+  },
+  {
+    "make": "Cadillac",
+    "model": "Cadillac CTS-V Sedan",
+    "year": 2016,
+    "pi": 761,
+    "class": "A"
+  },
+  {
+    "make": "Cadillac",
+    "model": "Cadillac CTS-V Sport Wagon",
+    "year": 2014,
+    "pi": 724,
+    "class": "A"
+  },
+  {
+    "make": "Cadillac",
+    "model": "Cadillac XTS Limousine",
+    "year": 2013,
+    "pi": 492,
+    "class": "D"
+  },
+  {
+    "make": "Can-Am",
+    "model": "Can-Am Maverick X RS Turbo R",
+    "year": 2018,
+    "pi": 607,
+    "class": "B"
+  },
+  {
+    "make": "Casey Currie Motorsports",
+    "model": "Casey Currie Motorsports #4402 Ultra 4 'Trophy Jeep'",
+    "year": 2019,
+    "pi": 745,
+    "class": "A"
+  },
+  {
+    "make": "Caterham",
+    "model": "Caterham Superlight R500",
+    "year": 2013,
+    "pi": 786,
+    "class": "A"
+  },
+  {
+    "make": "Chevrolet",
+    "model": "Chevrolet \"Barbie Movie\" Corvette EV",
+    "year": 1956,
+    "pi": 658,
+    "class": "B"
+  },
+  {
+    "make": "Chevrolet",
+    "model": "Chevrolet #3 Corvette Racing C8.R",
+    "year": 2020,
+    "pi": 910,
+    "class": "S2"
+  },
+  {
+    "make": "Chevrolet",
+    "model": "Chevrolet 150 Utility Sedan",
+    "year": 1955,
+    "pi": 360,
+    "class": "D"
+  },
+  {
+    "make": "Chevrolet",
+    "model": "Chevrolet Bel Air",
+    "year": 1957,
+    "pi": 432,
+    "class": "D"
+  },
+  {
+    "make": "Chevrolet",
+    "model": "Chevrolet Camaro Jordan Luka 3 Motorsport Edition",
+    "year": 1969,
+    "pi": 800,
+    "class": "A"
+  },
+  {
+    "make": "Chevrolet",
+    "model": "Chevrolet Camaro Super Sport Coupe",
+    "year": 1969,
+    "pi": 585,
+    "class": "C"
+  },
+  {
+    "make": "Chevrolet",
+    "model": "Chevrolet Camaro Z/28",
+    "year": 2015,
+    "pi": 797,
+    "class": "A"
+  },
+  {
+    "make": "Chevrolet",
+    "model": "Chevrolet Camaro Z28",
+    "year": 1970,
+    "pi": 539,
+    "class": "C"
+  },
+  {
+    "make": "Chevrolet",
+    "model": "Chevrolet Camaro Z28",
+    "year": 1979,
+    "pi": 466,
+    "class": "D"
+  },
+  {
+    "make": "Chevrolet",
+    "model": "Chevrolet Camaro ZL1",
+    "year": 2017,
+    "pi": 821,
+    "class": "S1"
+  },
+  {
+    "make": "Chevrolet",
+    "model": "Chevrolet Camaro ZL1 1LE",
+    "year": 2018,
+    "pi": 824,
+    "class": "S1"
+  },
+  {
+    "make": "Chevrolet",
+    "model": "Chevrolet Chevelle Super Sport 454",
+    "year": 1970,
+    "pi": 531,
+    "class": "C"
+  },
+  {
+    "make": "Chevrolet",
+    "model": "Chevrolet Colorado ZR2",
+    "year": 2017,
+    "pi": 530,
+    "class": "C"
+  },
+  {
+    "make": "Chevrolet",
+    "model": "Chevrolet Corvette",
+    "year": 1953,
+    "pi": 366,
+    "class": "D"
+  },
+  {
+    "make": "Chevrolet",
+    "model": "Chevrolet Corvette",
+    "year": 1960,
+    "pi": 541,
+    "class": "C"
+  },
+  {
+    "make": "Chevrolet",
+    "model": "Chevrolet Corvette E-Ray",
+    "year": 2024,
+    "pi": 834,
+    "class": "S1"
+  },
+  {
+    "make": "Chevrolet",
+    "model": "Chevrolet Corvette Forza Edition",
+    "year": 1953,
+    "pi": 800,
+    "class": "A"
+  },
+  {
+    "make": "Chevrolet",
+    "model": "Chevrolet Corvette Stingray 427",
+    "year": 1967,
+    "pi": 623,
+    "class": "B"
+  },
+  {
+    "make": "Chevrolet",
+    "model": "Chevrolet Corvette Stingray Coupé",
+    "year": 2020,
+    "pi": 806,
+    "class": "S1"
+  },
+  {
+    "make": "Chevrolet",
+    "model": "Chevrolet Corvette Z06",
+    "year": 2002,
+    "pi": 722,
+    "class": "A"
+  },
+  {
+    "make": "Chevrolet",
+    "model": "Chevrolet Corvette Z06",
+    "year": 2015,
+    "pi": 852,
+    "class": "S1"
+  },
+  {
+    "make": "Chevrolet",
+    "model": "Chevrolet Corvette Z06",
+    "year": 2023,
+    "pi": 855,
+    "class": "S1"
+  },
+  {
+    "make": "Chevrolet",
+    "model": "Chevrolet Corvette ZR-1",
+    "year": 1970,
+    "pi": 610,
+    "class": "B"
+  },
+  {
+    "make": "Chevrolet",
+    "model": "Chevrolet Corvette ZR-1",
+    "year": 1995,
+    "pi": 693,
+    "class": "B"
+  },
+  {
+    "make": "Chevrolet",
+    "model": "Chevrolet Corvette ZR1",
+    "year": 2009,
+    "pi": 809,
+    "class": "S1"
+  },
+  {
+    "make": "Chevrolet",
+    "model": "Chevrolet Corvette ZR1",
+    "year": 2019,
+    "pi": 871,
+    "class": "S1"
+  },
+  {
+    "make": "Chevrolet",
+    "model": "Chevrolet El Camino Super Sport 454",
+    "year": 1970,
+    "pi": 544,
+    "class": "C"
+  },
+  {
+    "make": "Chevrolet",
+    "model": "Chevrolet Hot Wheels COPO Camaro",
+    "year": 2018,
+    "pi": 867,
+    "class": "S1"
+  },
+  {
+    "make": "Chevrolet",
+    "model": "Chevrolet Impala Super Sport",
+    "year": 1996,
+    "pi": 509,
+    "class": "C"
+  },
+  {
+    "make": "Chevrolet",
+    "model": "Chevrolet Impala Super Sport 409",
+    "year": 1964,
+    "pi": 544,
+    "class": "C"
+  },
+  {
+    "make": "Chevrolet",
+    "model": "Chevrolet K-10 Custom",
+    "year": 1972,
+    "pi": 369,
+    "class": "D"
+  },
+  {
+    "make": "Chevrolet",
+    "model": "Chevrolet Monte Carlo Super Sport",
+    "year": 1988,
+    "pi": 396,
+    "class": "D"
+  },
+  {
+    "make": "Chevrolet",
+    "model": "Chevrolet Nova Super Sport",
+    "year": 1966,
+    "pi": 554,
+    "class": "C"
+  },
+  {
+    "make": "Chevrolet",
+    "model": "Chevrolet Nova Super Sport 396",
+    "year": 1969,
+    "pi": 545,
+    "class": "C"
+  },
+  {
+    "make": "Chevrolet",
+    "model": "Chevrolet Silverado LT Trail Boss",
+    "year": 2020,
+    "pi": 561,
+    "class": "C"
+  },
+  {
+    "make": "Chevrolet",
+    "model": "Chevrolet Summit Racing Pro Stock Camaro",
+    "year": 2013,
+    "pi": 919,
+    "class": "S2"
+  },
+  {
+    "make": "Citroën",
+    "model": "Citroën BX 4TC",
+    "year": 1986,
+    "pi": 567,
+    "class": "C"
+  },
+  {
+    "make": "Citroën",
+    "model": "Citroën DS 23",
+    "year": 1975,
+    "pi": 330,
+    "class": "D"
+  },
+  {
+    "make": "CUPRA",
+    "model": "CUPRA Formentor VZ5",
+    "year": 2021,
+    "pi": 740,
+    "class": "A"
+  },
+  {
+    "make": "CUPRA",
+    "model": "CUPRA Tavascan Concept",
+    "year": 2022,
+    "pi": 677,
+    "class": "B"
+  },
+  {
+    "make": "CUPRA",
+    "model": "CUPRA UrbanRebel Concept",
+    "year": 2022,
+    "pi": 854,
+    "class": "S1"
+  },
+  {
+    "make": "Czinger",
+    "model": "Czinger 21C",
+    "year": 2024,
+    "pi": 998,
+    "class": "S2"
+  },
+  {
+    "make": "Datsun",
+    "model": "Datsun 510",
+    "year": 1970,
+    "pi": 264,
+    "class": "D"
+  },
+  {
+    "make": "DeBerti",
+    "model": "DeBerti Chevrolet C10 'Slayer'",
+    "year": 1965,
+    "pi": 802,
+    "class": "S1"
+  },
+  {
+    "make": "DeBerti",
+    "model": "DeBerti Chevrolet Silverado 1500 Drift Truck",
+    "year": 2018,
+    "pi": 798,
+    "class": "A"
+  },
+  {
+    "make": "DeBerti",
+    "model": "DeBerti F-150 Prerunner",
+    "year": 2018,
+    "pi": 691,
+    "class": "B"
+  },
+  {
+    "make": "DeBerti",
+    "model": "DeBerti Ford Econoline 'Shop Rod'",
+    "year": 1961,
+    "pi": 799,
+    "class": "A"
+  },
+  {
+    "make": "DeBerti",
+    "model": "DeBerti Ford Mustang GT",
+    "year": 2018,
+    "pi": 824,
+    "class": "S1"
+  },
+  {
+    "make": "DeBerti",
+    "model": "DeBerti Ford Super Duty F-250 Lariat 'Transformer'",
+    "year": 2019,
+    "pi": 665,
+    "class": "B"
+  },
+  {
+    "make": "DeBerti",
+    "model": "DeBerti Toyota Tacoma TRD \"The Performance Truck\"",
+    "year": 2019,
+    "pi": 836,
+    "class": "S1"
+  },
+  {
+    "make": "DeBerti",
+    "model": "DeBerti Wrangler Unlimited",
+    "year": 2013,
+    "pi": 749,
+    "class": "A"
+  },
+  {
+    "make": "DeLorean",
+    "model": "DeLorean DMC-12",
+    "year": 1982,
+    "pi": 464,
+    "class": "D"
+  },
+  {
+    "make": "Dodge",
+    "model": "Dodge Challenger R/T",
+    "year": 1970,
+    "pi": 551,
+    "class": "C"
+  },
+  {
+    "make": "Dodge",
+    "model": "Dodge Challenger SRT Demon",
+    "year": 2018,
+    "pi": 786,
+    "class": "A"
+  },
+  {
+    "make": "Dodge",
+    "model": "Dodge Challenger SRT Hellcat",
+    "year": 2015,
+    "pi": 755,
+    "class": "A"
+  },
+  {
+    "make": "Dodge",
+    "model": "Dodge Challenger SRT Super Stock",
+    "year": 2022,
+    "pi": 802,
+    "class": "S1"
+  },
+  {
+    "make": "Dodge",
+    "model": "Dodge Charger Daytona HEMI",
+    "year": 1969,
+    "pi": 595,
+    "class": "C"
+  },
+  {
+    "make": "Dodge",
+    "model": "Dodge Charger R/T",
+    "year": 1969,
+    "pi": 548,
+    "class": "C"
+  },
+  {
+    "make": "Dodge",
+    "model": "Dodge Charger R/T Forza Edition",
+    "year": 1969,
+    "pi": 900,
+    "class": "S1"
+  },
+  {
+    "make": "Dodge",
+    "model": "Dodge Charger SRT Hellcat",
+    "year": 2015,
+    "pi": 762,
+    "class": "A"
+  },
+  {
+    "make": "Dodge",
+    "model": "Dodge Coronet Super Bee",
+    "year": 1970,
+    "pi": 566,
+    "class": "C"
+  },
+  {
+    "make": "Dodge",
+    "model": "Dodge Dart HEMI Super Stock",
+    "year": 1968,
+    "pi": 650,
+    "class": "B"
+  },
+  {
+    "make": "Dodge",
+    "model": "Dodge Durango SRT",
+    "year": 2018,
+    "pi": 666,
+    "class": "B"
+  },
+  {
+    "make": "Dodge",
+    "model": "Dodge Durango SRT Hellcat",
+    "year": 2021,
+    "pi": 744,
+    "class": "A"
+  },
+  {
+    "make": "Dodge",
+    "model": "Dodge Magnum SRT-8",
+    "year": 2008,
+    "pi": 669,
+    "class": "B"
+  },
+  {
+    "make": "Dodge",
+    "model": "Dodge SRT Viper GTS",
+    "year": 2013,
+    "pi": 813,
+    "class": "S1"
+  },
+  {
+    "make": "Dodge",
+    "model": "Dodge SRT Viper GTS Anniversary Edition",
+    "year": 2013,
+    "pi": 900,
+    "class": "S1"
+  },
+  {
+    "make": "Dodge",
+    "model": "Dodge Viper ACR",
+    "year": 2016,
+    "pi": 873,
+    "class": "S1"
+  },
+  {
+    "make": "Dodge",
+    "model": "Dodge Viper GTS ACR",
+    "year": 1999,
+    "pi": 717,
+    "class": "A"
+  },
+  {
+    "make": "Dodge",
+    "model": "Dodge Viper SRT10 ACR",
+    "year": 2008,
+    "pi": 844,
+    "class": "S1"
+  },
+  {
+    "make": "Donkervoort",
+    "model": "Donkervoort D8 GTO",
+    "year": 2013,
+    "pi": 814,
+    "class": "S1"
+  },
+  {
+    "make": "Eagle",
+    "model": "Eagle Speedster",
+    "year": 2012,
+    "pi": 723,
+    "class": "A"
+  },
+  {
+    "make": "Elemental",
+    "model": "Elemental RP1",
+    "year": 2019,
+    "pi": 867,
+    "class": "S1"
+  },
+  {
+    "make": "Exomotive",
+    "model": "Exomotive Exocet Off-Road",
+    "year": 2018,
+    "pi": 682,
+    "class": "B"
+  },
+  {
+    "make": "Exomotive",
+    "model": "Exomotive Exocet Off-Road Forza Edition",
+    "year": 2018,
+    "pi": 800,
+    "class": "A"
+  },
+  {
+    "make": "Extreme",
+    "model": "Extreme E #125 ABT Cupra XE",
+    "year": 2022,
+    "pi": 748,
+    "class": "A"
+  },
+  {
+    "make": "Extreme",
+    "model": "Extreme E #22 JBXE",
+    "year": 2022,
+    "pi": 748,
+    "class": "A"
+  },
+  {
+    "make": "Extreme",
+    "model": "Extreme E #23 Genesys Andretti United",
+    "year": 2022,
+    "pi": 748,
+    "class": "A"
+  },
+  {
+    "make": "Extreme",
+    "model": "Extreme E #42 XITE Racing Team",
+    "year": 2022,
+    "pi": 748,
+    "class": "A"
+  },
+  {
+    "make": "Extreme",
+    "model": "Extreme E #44 X44",
+    "year": 2022,
+    "pi": 748,
+    "class": "A"
+  },
+  {
+    "make": "Extreme",
+    "model": "Extreme E #5 Veloce Racing",
+    "year": 2022,
+    "pi": 748,
+    "class": "A"
+  },
+  {
+    "make": "Extreme",
+    "model": "Extreme E #58 McLaren Racing",
+    "year": 2022,
+    "pi": 748,
+    "class": "A"
+  },
+  {
+    "make": "Extreme",
+    "model": "Extreme E #6 Rosberg X Racing",
+    "year": 2022,
+    "pi": 748,
+    "class": "A"
+  },
+  {
+    "make": "Extreme",
+    "model": "Extreme E #99 Chip Ganassi Racing GMC Hummer EV",
+    "year": 2022,
+    "pi": 748,
+    "class": "A"
+  },
+  {
+    "make": "Fast",
+    "model": "Fast and Furious Chevrolet Impala Super Sport 'Fast X'",
+    "year": 1966,
+    "pi": 836,
+    "class": "S1"
+  },
+  {
+    "make": "Fast",
+    "model": "Fast and Furious Datsun 240Z 'Fast X'",
+    "year": 1973,
+    "pi": 838,
+    "class": "S1"
+  },
+  {
+    "make": "Fast",
+    "model": "Fast and Furious Dodge Charger 'Fast X'",
+    "year": 1970,
+    "pi": 855,
+    "class": "S1"
+  },
+  {
+    "make": "Fast",
+    "model": "Fast and Furious Dodge Charger SRT Hellcat Redeye Widebody 'Fast X'",
+    "year": 2022,
+    "pi": 831,
+    "class": "S1"
+  },
+  {
+    "make": "Fast",
+    "model": "Fast and Furious Flip Car 2.0 'Fast X'",
+    "year": 2022,
+    "pi": 815,
+    "class": "S1"
+  },
+  {
+    "make": "Ferrari",
+    "model": "Ferrari #24 Ferrari Spa 330 P4",
+    "year": 1967,
+    "pi": 780,
+    "class": "A"
+  },
+  {
+    "make": "Ferrari",
+    "model": "Ferrari #25 Corse Clienti 488 Challenge",
+    "year": 2017,
+    "pi": 911,
+    "class": "S2"
+  },
+  {
+    "make": "Ferrari",
+    "model": "Ferrari #62 Risi Competizione 488 GTE",
+    "year": 2019,
+    "pi": 910,
+    "class": "S2"
+  },
+  {
+    "make": "Ferrari",
+    "model": "Ferrari 250 California",
+    "year": 1957,
+    "pi": 564,
+    "class": "C"
+  },
+  {
+    "make": "Ferrari",
+    "model": "Ferrari 250 GT Berlinetta Lusso",
+    "year": 1962,
+    "pi": 590,
+    "class": "C"
+  },
+  {
+    "make": "Ferrari",
+    "model": "Ferrari 250 GTO",
+    "year": 1962,
+    "pi": 612,
+    "class": "B"
+  },
+  {
+    "make": "Ferrari",
+    "model": "Ferrari 250 Testa Rossa",
+    "year": 1957,
+    "pi": 691,
+    "class": "B"
+  },
+  {
+    "make": "Ferrari",
+    "model": "Ferrari 288 GTO",
+    "year": 1984,
+    "pi": 750,
+    "class": "A"
+  },
+  {
+    "make": "Ferrari",
+    "model": "Ferrari 296 GTB",
+    "year": 2022,
+    "pi": 892,
+    "class": "S1"
+  },
+  {
+    "make": "Ferrari",
+    "model": "Ferrari 360 Challenge Stradale",
+    "year": 2003,
+    "pi": 773,
+    "class": "A"
+  },
+  {
+    "make": "Ferrari",
+    "model": "Ferrari 365 GTB/4",
+    "year": 1968,
+    "pi": 637,
+    "class": "B"
+  },
+  {
+    "make": "Ferrari",
+    "model": "Ferrari 430 Scuderia",
+    "year": 2007,
+    "pi": 810,
+    "class": "S1"
+  },
+  {
+    "make": "Ferrari",
+    "model": "Ferrari 458 Italia",
+    "year": 2009,
+    "pi": 823,
+    "class": "S1"
+  },
+  {
+    "make": "Ferrari",
+    "model": "Ferrari 458 Speciale",
+    "year": 2013,
+    "pi": 865,
+    "class": "S1"
+  },
+  {
+    "make": "Ferrari",
+    "model": "Ferrari 488 GTB",
+    "year": 2015,
+    "pi": 863,
+    "class": "S1"
+  },
+  {
+    "make": "Ferrari",
+    "model": "Ferrari 488 Pista",
+    "year": 2019,
+    "pi": 889,
+    "class": "S1"
+  },
+  {
+    "make": "Ferrari",
+    "model": "Ferrari 512 S",
+    "year": 1970,
+    "pi": 861,
+    "class": "S1"
+  },
+  {
+    "make": "Ferrari",
+    "model": "Ferrari 512 TR",
+    "year": 1992,
+    "pi": 733,
+    "class": "A"
+  },
+  {
+    "make": "Ferrari",
+    "model": "Ferrari 575M Maranello",
+    "year": 2002,
+    "pi": 747,
+    "class": "A"
+  },
+  {
+    "make": "Ferrari",
+    "model": "Ferrari 599 GTO",
+    "year": 2010,
+    "pi": 828,
+    "class": "S1"
+  },
+  {
+    "make": "Ferrari",
+    "model": "Ferrari 599XX",
+    "year": 2010,
+    "pi": 924,
+    "class": "S2"
+  },
+  {
+    "make": "Ferrari",
+    "model": "Ferrari 599XX Evolution",
+    "year": 2012,
+    "pi": 952,
+    "class": "S2"
+  },
+  {
+    "make": "Ferrari",
+    "model": "Ferrari 812 Superfast",
+    "year": 2017,
+    "pi": 878,
+    "class": "S1"
+  },
+  {
+    "make": "Ferrari",
+    "model": "Ferrari California T",
+    "year": 2014,
+    "pi": 784,
+    "class": "A"
+  },
+  {
+    "make": "Ferrari",
+    "model": "Ferrari Dino 246 GT",
+    "year": 1969,
+    "pi": 535,
+    "class": "C"
+  },
+  {
+    "make": "Ferrari",
+    "model": "Ferrari Enzo Ferrari",
+    "year": 2002,
+    "pi": 857,
+    "class": "S1"
+  },
+  {
+    "make": "Ferrari",
+    "model": "Ferrari F12tdf",
+    "year": 2015,
+    "pi": 884,
+    "class": "S1"
+  },
+  {
+    "make": "Ferrari",
+    "model": "Ferrari F355 Berlinetta",
+    "year": 1994,
+    "pi": 717,
+    "class": "A"
+  },
+  {
+    "make": "Ferrari",
+    "model": "Ferrari F40",
+    "year": 1987,
+    "pi": 784,
+    "class": "A"
+  },
+  {
+    "make": "Ferrari",
+    "model": "Ferrari F40 Competizione",
+    "year": 1989,
+    "pi": 947,
+    "class": "S2"
+  },
+  {
+    "make": "Ferrari",
+    "model": "Ferrari F50",
+    "year": 1995,
+    "pi": 789,
+    "class": "A"
+  },
+  {
+    "make": "Ferrari",
+    "model": "Ferrari F50 GT",
+    "year": 1996,
+    "pi": 976,
+    "class": "S2"
+  },
+  {
+    "make": "Ferrari",
+    "model": "Ferrari F8 Tributo",
+    "year": 2019,
+    "pi": 891,
+    "class": "S1"
+  },
+  {
+    "make": "Ferrari",
+    "model": "Ferrari FXX",
+    "year": 2005,
+    "pi": 956,
+    "class": "S2"
+  },
+  {
+    "make": "Ferrari",
+    "model": "Ferrari FXX K",
+    "year": 2014,
+    "pi": 979,
+    "class": "S2"
+  },
+  {
+    "make": "Ferrari",
+    "model": "Ferrari FXX-K Evo",
+    "year": 2018,
+    "pi": 998,
+    "class": "S2"
+  },
+  {
+    "make": "Ferrari",
+    "model": "Ferrari GTC4Lusso",
+    "year": 2017,
+    "pi": 816,
+    "class": "S1"
+  },
+  {
+    "make": "Ferrari",
+    "model": "Ferrari J50",
+    "year": 2017,
+    "pi": 857,
+    "class": "S1"
+  },
+  {
+    "make": "Ferrari",
+    "model": "Ferrari LaFerrari",
+    "year": 2013,
+    "pi": 934,
+    "class": "S2"
+  },
+  {
+    "make": "Ferrari",
+    "model": "Ferrari Monza SP2",
+    "year": 2019,
+    "pi": 867,
+    "class": "S1"
+  },
+  {
+    "make": "Ferrari",
+    "model": "Ferrari Portofino",
+    "year": 2018,
+    "pi": 814,
+    "class": "S1"
+  },
+  {
+    "make": "Ferrari",
+    "model": "Ferrari Roma",
+    "year": 2020,
+    "pi": 830,
+    "class": "S1"
+  },
+  {
+    "make": "Ferrari",
+    "model": "Ferrari SF90 Stradale",
+    "year": 2020,
+    "pi": 915,
+    "class": "S2"
+  },
+  {
+    "make": "FIAT",
+    "model": "FIAT 124 Sport Spider",
+    "year": 1980,
+    "pi": 288,
+    "class": "D"
+  },
+  {
+    "make": "FIAT",
+    "model": "FIAT Dino 2.4 Coupe",
+    "year": 1969,
+    "pi": 498,
+    "class": "D"
+  },
+  {
+    "make": "Ford",
+    "model": "Ford #11 Rockstar F-150 Trophy Truck",
+    "year": 2014,
+    "pi": 731,
+    "class": "A"
+  },
+  {
+    "make": "Ford",
+    "model": "Ford #14 Rahal Letterman Lanigan Racing GRC Fiesta",
+    "year": 2017,
+    "pi": 860,
+    "class": "S1"
+  },
+  {
+    "make": "Ford",
+    "model": "Ford #2 GT40 Mk II Le Mans",
+    "year": 1966,
+    "pi": 771,
+    "class": "A"
+  },
+  {
+    "make": "Ford",
+    "model": "Ford #2069 Ford Bronco R 'Welcome Pack'",
+    "year": 2020,
+    "pi": 800,
+    "class": "A"
+  },
+  {
+    "make": "Ford",
+    "model": "Ford #2069 Ford Performance Bronco R",
+    "year": 2020,
+    "pi": 544,
+    "class": "C"
+  },
+  {
+    "make": "Ford",
+    "model": "Ford #25 \"Brocky\" Ultra4 Bronco RTR",
+    "year": 2017,
+    "pi": 748,
+    "class": "A"
+  },
+  {
+    "make": "Ford",
+    "model": "Ford #25 Mustang RTR",
+    "year": 2018,
+    "pi": 834,
+    "class": "S1"
+  },
+  {
+    "make": "Ford",
+    "model": "Ford #4 Ford Focus RS",
+    "year": 2001,
+    "pi": 749,
+    "class": "A"
+  },
+  {
+    "make": "Ford",
+    "model": "Ford #5 Escort RS1800 MKII",
+    "year": 1977,
+    "pi": 662,
+    "class": "B"
+  },
+  {
+    "make": "Ford",
+    "model": "Ford #66 GTLM Le Mans",
+    "year": 2016,
+    "pi": 910,
+    "class": "S2"
+  },
+  {
+    "make": "Ford",
+    "model": "Ford #88 Mustang RTR",
+    "year": 2018,
+    "pi": 834,
+    "class": "S1"
+  },
+  {
+    "make": "Ford",
+    "model": "Ford Anglia 105E",
+    "year": 1959,
+    "pi": 100,
+    "class": "D"
+  },
+  {
+    "make": "Ford",
+    "model": "Ford Bronco",
+    "year": 1975,
+    "pi": 421,
+    "class": "D"
+  },
+  {
+    "make": "Ford",
+    "model": "Ford Bronco",
+    "year": 2021,
+    "pi": 560,
+    "class": "C"
+  },
+  {
+    "make": "Ford",
+    "model": "Ford Bronco Raptor",
+    "year": 2022,
+    "pi": 588,
+    "class": "C"
+  },
+  {
+    "make": "Ford",
+    "model": "Ford Capri RS3100",
+    "year": 1973,
+    "pi": 497,
+    "class": "D"
+  },
+  {
+    "make": "Ford",
+    "model": "Ford Crown Victoria Police Interceptor",
+    "year": 2010,
+    "pi": 462,
+    "class": "D"
+  },
+  {
+    "make": "Ford",
+    "model": "Ford De Luxe Coupe",
+    "year": 1940,
+    "pi": 130,
+    "class": "D"
+  },
+  {
+    "make": "Ford",
+    "model": "Ford De Luxe Five-Window Coupe",
+    "year": 1932,
+    "pi": 126,
+    "class": "D"
+  },
+  {
+    "make": "Ford",
+    "model": "Ford De Luxe Five-Window Coupe Forza Edition",
+    "year": 1932,
+    "pi": 800,
+    "class": "A"
+  },
+  {
+    "make": "Ford",
+    "model": "Ford Escort RS Cosworth",
+    "year": 1992,
+    "pi": 565,
+    "class": "C"
+  },
+  {
+    "make": "Ford",
+    "model": "Ford Escort RS Turbo",
+    "year": 1986,
+    "pi": 516,
+    "class": "C"
+  },
+  {
+    "make": "Ford",
+    "model": "Ford Escort RS1600",
+    "year": 1973,
+    "pi": 476,
+    "class": "D"
+  },
+  {
+    "make": "Ford",
+    "model": "Ford Escort RS1800",
+    "year": 1977,
+    "pi": 477,
+    "class": "D"
+  },
+  {
+    "make": "Ford",
+    "model": "Ford F-100",
+    "year": 1965,
+    "pi": 302,
+    "class": "D"
+  },
+  {
+    "make": "Ford",
+    "model": "Ford F-150 Lightning Platinum",
+    "year": 2022,
+    "pi": 607,
+    "class": "B"
+  },
+  {
+    "make": "Ford",
+    "model": "Ford F-150 Raptor",
+    "year": 2017,
+    "pi": 559,
+    "class": "C"
+  },
+  {
+    "make": "Ford",
+    "model": "Ford F-150 Raptor R",
+    "year": 2023,
+    "pi": 689,
+    "class": "B"
+  },
+  {
+    "make": "Ford",
+    "model": "Ford F-150 SVT Lightning",
+    "year": 2003,
+    "pi": 585,
+    "class": "C"
+  },
+  {
+    "make": "Ford",
+    "model": "Ford F-150 SVT Raptor",
+    "year": 2011,
+    "pi": 518,
+    "class": "C"
+  },
+  {
+    "make": "Ford",
+    "model": "Ford F-150 XLT Lariat",
+    "year": 1986,
+    "pi": 357,
+    "class": "D"
+  },
+  {
+    "make": "Ford",
+    "model": "Ford Falcon GT F 351",
+    "year": 2015,
+    "pi": 718,
+    "class": "A"
+  },
+  {
+    "make": "Ford",
+    "model": "Ford Falcon XA GT-HO",
+    "year": 1972,
+    "pi": 624,
+    "class": "B"
+  },
+  {
+    "make": "Ford",
+    "model": "Ford Fiesta ST",
+    "year": 2014,
+    "pi": 607,
+    "class": "B"
+  },
+  {
+    "make": "Ford",
+    "model": "Ford Fiesta ST",
+    "year": 2023,
+    "pi": 615,
+    "class": "B"
+  },
+  {
+    "make": "Ford",
+    "model": "Ford Fiesta XR2",
+    "year": 1981,
+    "pi": 369,
+    "class": "D"
+  },
+  {
+    "make": "Ford",
+    "model": "Ford Focus RS",
+    "year": 2003,
+    "pi": 593,
+    "class": "C"
+  },
+  {
+    "make": "Ford",
+    "model": "Ford Focus RS",
+    "year": 2009,
+    "pi": 660,
+    "class": "B"
+  },
+  {
+    "make": "Ford",
+    "model": "Ford Focus RS",
+    "year": 2017,
+    "pi": 702,
+    "class": "A"
+  },
+  {
+    "make": "Ford",
+    "model": "Ford Focus ST",
+    "year": 2022,
+    "pi": 707,
+    "class": "A"
+  },
+  {
+    "make": "Ford",
+    "model": "Ford FPV Limited Edition Pursuit Ute",
+    "year": 2014,
+    "pi": 685,
+    "class": "B"
+  },
+  {
+    "make": "Ford",
+    "model": "Ford GT",
+    "year": 2005,
+    "pi": 786,
+    "class": "A"
+  },
+  {
+    "make": "Ford",
+    "model": "Ford GT",
+    "year": 2017,
+    "pi": 863,
+    "class": "S1"
+  },
+  {
+    "make": "Ford",
+    "model": "Ford GT 'OPI Edition'",
+    "year": 2017,
+    "pi": 900,
+    "class": "S1"
+  },
+  {
+    "make": "Ford",
+    "model": "Ford GT40 Mk I",
+    "year": 1964,
+    "pi": 754,
+    "class": "A"
+  },
+  {
+    "make": "Ford",
+    "model": "Ford GT70",
+    "year": 1970,
+    "pi": 671,
+    "class": "B"
+  },
+  {
+    "make": "Ford",
+    "model": "Ford Lotus Cortina",
+    "year": 1966,
+    "pi": 389,
+    "class": "D"
+  },
+  {
+    "make": "Ford",
+    "model": "Ford M-Sport Fiesta RS",
+    "year": 2017,
+    "pi": 808,
+    "class": "S1"
+  },
+  {
+    "make": "Ford",
+    "model": "Ford Mustang Boss 302",
+    "year": 1969,
+    "pi": 581,
+    "class": "C"
+  },
+  {
+    "make": "Ford",
+    "model": "Ford Mustang Dark Horse",
+    "year": 2024,
+    "pi": 772,
+    "class": "A"
+  },
+  {
+    "make": "Ford",
+    "model": "Ford Mustang GT",
+    "year": 2018,
+    "pi": 756,
+    "class": "A"
+  },
+  {
+    "make": "Ford",
+    "model": "Ford Mustang GT",
+    "year": 2024,
+    "pi": 739,
+    "class": "A"
+  },
+  {
+    "make": "Ford",
+    "model": "Ford Mustang GT 2+2 Fastback",
+    "year": 1968,
+    "pi": 498,
+    "class": "D"
+  },
+  {
+    "make": "Ford",
+    "model": "Ford Mustang GT Coupe",
+    "year": 1965,
+    "pi": 499,
+    "class": "D"
+  },
+  {
+    "make": "Ford",
+    "model": "Ford Mustang Mach 1",
+    "year": 1971,
+    "pi": 546,
+    "class": "C"
+  },
+  {
+    "make": "Ford",
+    "model": "Ford Mustang Mach-E 1400",
+    "year": 2021,
+    "pi": 900,
+    "class": "S1"
+  },
+  {
+    "make": "Ford",
+    "model": "Ford Mustang RTR Spec 5",
+    "year": 2018,
+    "pi": 757,
+    "class": "A"
+  },
+  {
+    "make": "Ford",
+    "model": "Ford Mustang Shelby GT500",
+    "year": 2020,
+    "pi": 836,
+    "class": "S1"
+  },
+  {
+    "make": "Ford",
+    "model": "Ford Mustang SVO",
+    "year": 1986,
+    "pi": 525,
+    "class": "C"
+  },
+  {
+    "make": "Ford",
+    "model": "Ford Mustang SVT Cobra",
+    "year": 2003,
+    "pi": 639,
+    "class": "B"
+  },
+  {
+    "make": "Ford",
+    "model": "Ford Mustang SVT Cobra R",
+    "year": 1995,
+    "pi": 625,
+    "class": "B"
+  },
+  {
+    "make": "Ford",
+    "model": "Ford Racing Escort Mk1",
+    "year": 1967,
+    "pi": 636,
+    "class": "B"
+  },
+  {
+    "make": "Ford",
+    "model": "Ford Racing Puma",
+    "year": 1999,
+    "pi": 514,
+    "class": "C"
+  },
+  {
+    "make": "Ford",
+    "model": "Ford Racing Puma Forza Edition",
+    "year": 1999,
+    "pi": 900,
+    "class": "S1"
+  },
+  {
+    "make": "Ford",
+    "model": "Ford Ranger Raptor",
+    "year": 2019,
+    "pi": 451,
+    "class": "D"
+  },
+  {
+    "make": "Ford",
+    "model": "Ford Ranger T6 Rally Raid",
+    "year": 2014,
+    "pi": 643,
+    "class": "B"
+  },
+  {
+    "make": "Ford",
+    "model": "Ford RS200 Evolution",
+    "year": 1985,
+    "pi": 808,
+    "class": "S1"
+  },
+  {
+    "make": "Ford",
+    "model": "Ford Shelby GT350R",
+    "year": 2016,
+    "pi": 815,
+    "class": "S1"
+  },
+  {
+    "make": "Ford",
+    "model": "Ford Shelby GT500",
+    "year": 2013,
+    "pi": 756,
+    "class": "A"
+  },
+  {
+    "make": "Ford",
+    "model": "Ford Sierra Cosworth RS500",
+    "year": 1987,
+    "pi": 604,
+    "class": "B"
+  },
+  {
+    "make": "Ford",
+    "model": "Ford Super Deluxe Station Wagon",
+    "year": 1946,
+    "pi": 124,
+    "class": "D"
+  },
+  {
+    "make": "Ford",
+    "model": "Ford Super Duty F-450 DRW Platinum",
+    "year": 2020,
+    "pi": 466,
+    "class": "D"
+  },
+  {
+    "make": "Ford",
+    "model": "Ford Supervan 3",
+    "year": 1994,
+    "pi": 820,
+    "class": "S1"
+  },
+  {
+    "make": "Ford",
+    "model": "Ford Supervan 3 'Donut Media Edition'",
+    "year": 1994,
+    "pi": 900,
+    "class": "S1"
+  },
+  {
+    "make": "Ford",
+    "model": "Ford Supervan 4",
+    "year": 2022,
+    "pi": 953,
+    "class": "S2"
+  },
+  {
+    "make": "Ford",
+    "model": "Ford SVT Cobra R",
+    "year": 1993,
+    "pi": 539,
+    "class": "C"
+  },
+  {
+    "make": "Ford",
+    "model": "Ford SVT Cobra R",
+    "year": 2000,
+    "pi": 648,
+    "class": "B"
+  },
+  {
+    "make": "Ford",
+    "model": "Ford Transit",
+    "year": 1965,
+    "pi": 100,
+    "class": "D"
+  },
+  {
+    "make": "Ford",
+    "model": "Ford Transit SuperSportVan",
+    "year": 2011,
+    "pi": 347,
+    "class": "D"
+  },
+  {
+    "make": "Ford",
+    "model": "Ford XB Falcon GT",
+    "year": 1973,
+    "pi": 532,
+    "class": "C"
+  },
+  {
+    "make": "Formula Drift",
+    "model": "Formula Drift #117 599 GTB Fiorano",
+    "year": 2007,
+    "pi": 852,
+    "class": "S1"
+  },
+  {
+    "make": "Formula Drift",
+    "model": "Formula Drift #13 Ford Mustang",
+    "year": 2015,
+    "pi": 825,
+    "class": "S1"
+  },
+  {
+    "make": "Formula Drift",
+    "model": "Formula Drift #151 Toyota GR Supra",
+    "year": 2020,
+    "pi": 863,
+    "class": "S1"
+  },
+  {
+    "make": "Formula Drift",
+    "model": "Formula Drift #34 Toyota Supra MkIV",
+    "year": 1995,
+    "pi": 845,
+    "class": "S1"
+  },
+  {
+    "make": "Formula Drift",
+    "model": "Formula Drift #357 Chevrolet Corvette Z06",
+    "year": 2017,
+    "pi": 835,
+    "class": "S1"
+  },
+  {
+    "make": "Formula Drift",
+    "model": "Formula Drift #411 Toyota Corolla Hatchback",
+    "year": 2019,
+    "pi": 840,
+    "class": "S1"
+  },
+  {
+    "make": "Formula Drift",
+    "model": "Formula Drift #43 Dodge Viper SRT10",
+    "year": 2006,
+    "pi": 826,
+    "class": "S1"
+  },
+  {
+    "make": "Formula Drift",
+    "model": "Formula Drift #51 Donut Media Nissan 240SX",
+    "year": 1996,
+    "pi": 822,
+    "class": "S1"
+  },
+  {
+    "make": "Formula Drift",
+    "model": "Formula Drift #530 HSV Maloo Gen-F",
+    "year": 2016,
+    "pi": 808,
+    "class": "S1"
+  },
+  {
+    "make": "Formula Drift",
+    "model": "Formula Drift #64 Forsberg Racing Nissan Z",
+    "year": 2023,
+    "pi": 854,
+    "class": "S1"
+  },
+  {
+    "make": "Formula Drift",
+    "model": "Formula Drift #64 Nissan 370Z",
+    "year": 2018,
+    "pi": 843,
+    "class": "S1"
+  },
+  {
+    "make": "Formula Drift",
+    "model": "Formula Drift #777 Chevrolet Corvette",
+    "year": 2013,
+    "pi": 848,
+    "class": "S1"
+  },
+  {
+    "make": "Formula Drift",
+    "model": "Formula Drift #777 Nissan 240SX",
+    "year": 1997,
+    "pi": 826,
+    "class": "S1"
+  },
+  {
+    "make": "Formula Drift",
+    "model": "Formula Drift #91 BMW M2",
+    "year": 2020,
+    "pi": 839,
+    "class": "S1"
+  },
+  {
+    "make": "Formula Drift",
+    "model": "Formula Drift #98 BMW 325i",
+    "year": 1989,
+    "pi": 813,
+    "class": "S1"
+  },
+  {
+    "make": "Formula Drift",
+    "model": "Formula Drift #99 Mazda RX-8",
+    "year": 2009,
+    "pi": 829,
+    "class": "S1"
+  },
+  {
+    "make": "Forsberg",
+    "model": "Forsberg Racing Nissan 'Altimaniac'",
+    "year": 2021,
+    "pi": 881,
+    "class": "S1"
+  },
+  {
+    "make": "Forsberg",
+    "model": "Forsberg Racing Nissan 'Gold Leader' Datsun 280Z",
+    "year": 1975,
+    "pi": 791,
+    "class": "A"
+  },
+  {
+    "make": "Forsberg",
+    "model": "Forsberg Racing Nissan 'SafariZ' 370Z Safari Rally Tribute",
+    "year": 2014,
+    "pi": 720,
+    "class": "A"
+  },
+  {
+    "make": "Forsberg",
+    "model": "Forsberg Racing Toyota Gumout 2JZ Camry Stock Car",
+    "year": 2010,
+    "pi": 900,
+    "class": "S1"
+  },
+  {
+    "make": "Funco",
+    "model": "Funco Motorsports F9",
+    "year": 2018,
+    "pi": 821,
+    "class": "S1"
+  },
+  {
+    "make": "Ginetta",
+    "model": "Ginetta G10 RM",
+    "year": 2019,
+    "pi": 769,
+    "class": "A"
+  },
+  {
+    "make": "GMC",
+    "model": "GMC \"Barbie Movie\" HUMMER EV Pickup",
+    "year": 2022,
+    "pi": 718,
+    "class": "A"
+  },
+  {
+    "make": "GMC",
+    "model": "GMC HUMMER EV Pickup",
+    "year": 2022,
+    "pi": 718,
+    "class": "A"
+  },
+  {
+    "make": "GMC",
+    "model": "GMC Jimmy",
+    "year": 1970,
+    "pi": 521,
+    "class": "C"
+  },
+  {
+    "make": "GMC",
+    "model": "GMC Syclone",
+    "year": 1991,
+    "pi": 548,
+    "class": "C"
+  },
+  {
+    "make": "GMC",
+    "model": "GMC Typhoon",
+    "year": 1992,
+    "pi": 538,
+    "class": "C"
+  },
+  {
+    "make": "GMC",
+    "model": "GMC Vandura G-1500",
+    "year": 1983,
+    "pi": 226,
+    "class": "D"
+  },
+  {
+    "make": "Gordon Murray Automotive",
+    "model": "Gordon Murray Automotive T.50",
+    "year": 2022,
+    "pi": 936,
+    "class": "S2"
+  },
+  {
+    "make": "HDT",
+    "model": "HDT VK Commodore Group A",
+    "year": 1985,
+    "pi": 550,
+    "class": "C"
+  },
+  {
+    "make": "Hennessey",
+    "model": "Hennessey Camaro Exorcist",
+    "year": 2019,
+    "pi": 857,
+    "class": "S1"
+  },
+  {
+    "make": "Hennessey",
+    "model": "Hennessey Mammoth 1000 6x6 TRX",
+    "year": 2022,
+    "pi": 697,
+    "class": "B"
+  },
+  {
+    "make": "Hennessey",
+    "model": "Hennessey VelociRaptor 6x6",
+    "year": 2019,
+    "pi": 634,
+    "class": "B"
+  },
+  {
+    "make": "Hennessey",
+    "model": "Hennessey Venom F5",
+    "year": 2021,
+    "pi": 964,
+    "class": "S2"
+  },
+  {
+    "make": "Hennessey",
+    "model": "Hennessey Venom GT",
+    "year": 2012,
+    "pi": 911,
+    "class": "S2"
+  },
+  {
+    "make": "Holden",
+    "model": "Holden HQ Monaro GTS 350",
+    "year": 1973,
+    "pi": 525,
+    "class": "C"
+  },
+  {
+    "make": "Holden",
+    "model": "Holden Sandman HQ Panelvan",
+    "year": 1974,
+    "pi": 501,
+    "class": "C"
+  },
+  {
+    "make": "Holden",
+    "model": "Holden Torana A9X",
+    "year": 1977,
+    "pi": 517,
+    "class": "C"
+  },
+  {
+    "make": "Honda",
+    "model": "Honda Civic Coupe GRC",
+    "year": 2016,
+    "pi": 861,
+    "class": "S1"
+  },
+  {
+    "make": "Honda",
+    "model": "Honda Civic CRX Mugen",
+    "year": 1984,
+    "pi": 499,
+    "class": "D"
+  },
+  {
+    "make": "Honda",
+    "model": "Honda Civic RS",
+    "year": 1974,
+    "pi": 368,
+    "class": "D"
+  },
+  {
+    "make": "Honda",
+    "model": "Honda Civic Type R",
+    "year": 1997,
+    "pi": 553,
+    "class": "C"
+  },
+  {
+    "make": "Honda",
+    "model": "Honda Civic Type R",
+    "year": 2004,
+    "pi": 600,
+    "class": "C"
+  },
+  {
+    "make": "Honda",
+    "model": "Honda Civic Type R",
+    "year": 2007,
+    "pi": 574,
+    "class": "C"
+  },
+  {
+    "make": "Honda",
+    "model": "Honda Civic Type R",
+    "year": 2016,
+    "pi": 699,
+    "class": "B"
+  },
+  {
+    "make": "Honda",
+    "model": "Honda Civic Type R",
+    "year": 2018,
+    "pi": 727,
+    "class": "A"
+  },
+  {
+    "make": "Honda",
+    "model": "Honda CR-X SiR",
+    "year": 1991,
+    "pi": 534,
+    "class": "C"
+  },
+  {
+    "make": "Honda",
+    "model": "Honda NSX-R",
+    "year": 1992,
+    "pi": 691,
+    "class": "B"
+  },
+  {
+    "make": "Honda",
+    "model": "Honda NSX-R",
+    "year": 2005,
+    "pi": 691,
+    "class": "B"
+  },
+  {
+    "make": "Honda",
+    "model": "Honda NSX-R GT",
+    "year": 2005,
+    "pi": 725,
+    "class": "A"
+  },
+  {
+    "make": "Honda",
+    "model": "Honda Prelude Si",
+    "year": 1994,
+    "pi": 521,
+    "class": "C"
+  },
+  {
+    "make": "Honda",
+    "model": "Honda Ridgeline Baja Trophy Truck",
+    "year": 2015,
+    "pi": 703,
+    "class": "A"
+  },
+  {
+    "make": "Honda",
+    "model": "Honda S2000",
+    "year": 2003,
+    "pi": 630,
+    "class": "B"
+  },
+  {
+    "make": "Honda",
+    "model": "Honda S2000 CR",
+    "year": 2009,
+    "pi": 634,
+    "class": "B"
+  },
+  {
+    "make": "Hoonigan",
+    "model": "Hoonigan Chevrolet \"Napalm Nova\"",
+    "year": 1972,
+    "pi": 731,
+    "class": "A"
+  },
+  {
+    "make": "Hoonigan",
+    "model": "Hoonigan Chevrolet Bel Air",
+    "year": 1955,
+    "pi": 621,
+    "class": "B"
+  },
+  {
+    "make": "Hoonigan",
+    "model": "Hoonigan Ford \"Hoonicorn\" Mustang",
+    "year": 1965,
+    "pi": 951,
+    "class": "S2"
+  },
+  {
+    "make": "Hoonigan",
+    "model": "Hoonigan Ford Escort Cosworth WRC \"Cossie V2\"",
+    "year": 1994,
+    "pi": 783,
+    "class": "A"
+  },
+  {
+    "make": "Hoonigan",
+    "model": "Hoonigan Ford Escort RS1800",
+    "year": 1978,
+    "pi": 820,
+    "class": "S1"
+  },
+  {
+    "make": "Hoonigan",
+    "model": "Hoonigan Ford RS200 Evolution",
+    "year": 1986,
+    "pi": 904,
+    "class": "S2"
+  },
+  {
+    "make": "Hoonigan",
+    "model": "Hoonigan Gymkhana 10 Ford Escort Cosworth Group A",
+    "year": 1991,
+    "pi": 862,
+    "class": "S1"
+  },
+  {
+    "make": "Hoonigan",
+    "model": "Hoonigan Gymkhana 10 Ford F-150 'Hoonitruck'",
+    "year": 1965,
+    "pi": 896,
+    "class": "S1"
+  },
+  {
+    "make": "Hoonigan",
+    "model": "Hoonigan Gymkhana 10 Ford Focus RS RX",
+    "year": 2016,
+    "pi": 864,
+    "class": "S1"
+  },
+  {
+    "make": "Hoonigan",
+    "model": "Hoonigan Gymkhana 10 Ford Hoonicorn Mustang",
+    "year": 1965,
+    "pi": 952,
+    "class": "S2"
+  },
+  {
+    "make": "Hoonigan",
+    "model": "Hoonigan Gymkhana 9 Ford Focus RS RX",
+    "year": 2016,
+    "pi": 863,
+    "class": "S1"
+  },
+  {
+    "make": "Hoonigan",
+    "model": "Hoonigan Mazda RX-7 Twerkstallion",
+    "year": 1992,
+    "pi": 799,
+    "class": "A"
+  },
+  {
+    "make": "Hoonigan",
+    "model": "Hoonigan Rauh-Welt Begriff Porsche 911 Turbo",
+    "year": 1991,
+    "pi": 811,
+    "class": "S1"
+  },
+  {
+    "make": "Hoonigan",
+    "model": "Hoonigan Volkswagen Baja Beetle Class 5/1600 'Scumbug'",
+    "year": 1973,
+    "pi": 524,
+    "class": "C"
+  },
+  {
+    "make": "Hot",
+    "model": "Hot Wheels 2JetZ",
+    "year": 2018,
+    "pi": 854,
+    "class": "S1"
+  },
+  {
+    "make": "Hot",
+    "model": "Hot Wheels Bad to the Blade",
+    "year": 2012,
+    "pi": 998,
+    "class": "S2"
+  },
+  {
+    "make": "Hot",
+    "model": "Hot Wheels Baja Bone Shaker",
+    "year": 2013,
+    "pi": 700,
+    "class": "B"
+  },
+  {
+    "make": "Hot",
+    "model": "Hot Wheels Bone Shaker",
+    "year": 2011,
+    "pi": 790,
+    "class": "A"
+  },
+  {
+    "make": "Hot",
+    "model": "Hot Wheels Deora II",
+    "year": 2000,
+    "pi": 800,
+    "class": "A"
+  },
+  {
+    "make": "Hot",
+    "model": "Hot Wheels Ford F-5 Dually Custom Hot Rod",
+    "year": 1949,
+    "pi": 630,
+    "class": "B"
+  },
+  {
+    "make": "Hot",
+    "model": "Hot Wheels Ford Mustang",
+    "year": 2005,
+    "pi": 819,
+    "class": "S1"
+  },
+  {
+    "make": "Hot",
+    "model": "Hot Wheels Monster Trucks Bone Shaker",
+    "year": 2020,
+    "pi": 693,
+    "class": "B"
+  },
+  {
+    "make": "Hot",
+    "model": "Hot Wheels Nash Metropolitan Custom",
+    "year": 1957,
+    "pi": 631,
+    "class": "B"
+  },
+  {
+    "make": "Hot",
+    "model": "Hot Wheels Pontiac Firebird Trans Am Custom",
+    "year": 1970,
+    "pi": 894,
+    "class": "S1"
+  },
+  {
+    "make": "Hot",
+    "model": "Hot Wheels Rip Rod",
+    "year": 2012,
+    "pi": 715,
+    "class": "A"
+  },
+  {
+    "make": "Hot",
+    "model": "Hot Wheels Twin Mill",
+    "year": 1969,
+    "pi": 798,
+    "class": "A"
+  },
+  {
+    "make": "HSV",
+    "model": "HSV GEN-F GTS",
+    "year": 2014,
+    "pi": 721,
+    "class": "A"
+  },
+  {
+    "make": "HSV",
+    "model": "HSV Limited Edition Gen-F GTS Maloo",
+    "year": 2014,
+    "pi": 742,
+    "class": "A"
+  },
+  {
+    "make": "Hummer",
+    "model": "Hummer H1 Alpha",
+    "year": 2006,
+    "pi": 354,
+    "class": "D"
+  },
+  {
+    "make": "Hyundai",
+    "model": "Hyundai #98 Bryan Herta Autosport Elantra N",
+    "year": 2021,
+    "pi": 800,
+    "class": "A"
+  },
+  {
+    "make": "Hyundai",
+    "model": "Hyundai i30 N",
+    "year": 2020,
+    "pi": 670,
+    "class": "B"
+  },
+  {
+    "make": "Hyundai",
+    "model": "Hyundai IONIQ 5 N",
+    "year": 2023,
+    "pi": 756,
+    "class": "A"
+  },
+  {
+    "make": "Hyundai",
+    "model": "Hyundai IONIQ6",
+    "year": 2022,
+    "pi": 686,
+    "class": "B"
+  },
+  {
+    "make": "Hyundai",
+    "model": "Hyundai Kona N",
+    "year": 2022,
+    "pi": 684,
+    "class": "B"
+  },
+  {
+    "make": "Hyundai",
+    "model": "Hyundai N Vision 74",
+    "year": 2022,
+    "pi": 799,
+    "class": "A"
+  },
+  {
+    "make": "Hyundai",
+    "model": "Hyundai Veloster N",
+    "year": 2019,
+    "pi": 645,
+    "class": "B"
+  },
+  {
+    "make": "Infiniti",
+    "model": "Infiniti Q60 Concept",
+    "year": 2015,
+    "pi": 735,
+    "class": "A"
+  },
+  {
+    "make": "International",
+    "model": "International Scout 800A",
+    "year": 1970,
+    "pi": 384,
+    "class": "D"
+  },
+  {
+    "make": "Italdesign",
+    "model": "Italdesign DaVinci Concept",
+    "year": 2019,
+    "pi": 809,
+    "class": "S1"
+  },
+  {
+    "make": "Italdesign",
+    "model": "Italdesign Zerouno",
+    "year": 2018,
+    "pi": 869,
+    "class": "S1"
+  },
+  {
+    "make": "Jaguar",
+    "model": "Jaguar C-Type",
+    "year": 1953,
+    "pi": 599,
+    "class": "C"
+  },
+  {
+    "make": "Jaguar",
+    "model": "Jaguar C-X75",
+    "year": 2010,
+    "pi": 880,
+    "class": "S1"
+  },
+  {
+    "make": "Jaguar",
+    "model": "Jaguar D-Type",
+    "year": 1956,
+    "pi": 630,
+    "class": "B"
+  },
+  {
+    "make": "Jaguar",
+    "model": "Jaguar E-type",
+    "year": 1961,
+    "pi": 525,
+    "class": "C"
+  },
+  {
+    "make": "Jaguar",
+    "model": "Jaguar F-PACE S",
+    "year": 2017,
+    "pi": 674,
+    "class": "B"
+  },
+  {
+    "make": "Jaguar",
+    "model": "Jaguar F-TYPE Project 7",
+    "year": 2016,
+    "pi": 786,
+    "class": "A"
+  },
+  {
+    "make": "Jaguar",
+    "model": "Jaguar F-TYPE R Coupé",
+    "year": 2015,
+    "pi": 777,
+    "class": "A"
+  },
+  {
+    "make": "Jaguar",
+    "model": "Jaguar F-TYPE SVR",
+    "year": 2020,
+    "pi": 806,
+    "class": "S1"
+  },
+  {
+    "make": "Jaguar",
+    "model": "Jaguar I-Pace",
+    "year": 2018,
+    "pi": 705,
+    "class": "A"
+  },
+  {
+    "make": "Jaguar",
+    "model": "Jaguar Lightweight E-Type",
+    "year": 1964,
+    "pi": 688,
+    "class": "B"
+  },
+  {
+    "make": "Jaguar",
+    "model": "Jaguar Mk II 3.8",
+    "year": 1959,
+    "pi": 448,
+    "class": "D"
+  },
+  {
+    "make": "Jaguar",
+    "model": "Jaguar Sport XJR-15",
+    "year": 1991,
+    "pi": 828,
+    "class": "S1"
+  },
+  {
+    "make": "Jaguar",
+    "model": "Jaguar XE SV Project 8",
+    "year": 2019,
+    "pi": 830,
+    "class": "S1"
+  },
+  {
+    "make": "Jaguar",
+    "model": "Jaguar XE-S",
+    "year": 2015,
+    "pi": 671,
+    "class": "B"
+  },
+  {
+    "make": "Jaguar",
+    "model": "Jaguar XFR-S",
+    "year": 2015,
+    "pi": 728,
+    "class": "A"
+  },
+  {
+    "make": "Jaguar",
+    "model": "Jaguar XJ13",
+    "year": 1966,
+    "pi": 779,
+    "class": "A"
+  },
+  {
+    "make": "Jaguar",
+    "model": "Jaguar XJ220",
+    "year": 1993,
+    "pi": 786,
+    "class": "A"
+  },
+  {
+    "make": "Jaguar",
+    "model": "Jaguar XJ220S TWR",
+    "year": 1993,
+    "pi": 848,
+    "class": "S1"
+  },
+  {
+    "make": "Jaguar",
+    "model": "Jaguar XKR-S",
+    "year": 2012,
+    "pi": 756,
+    "class": "A"
+  },
+  {
+    "make": "Jaguar",
+    "model": "Jaguar XKR-S GT",
+    "year": 2015,
+    "pi": 778,
+    "class": "A"
+  },
+  {
+    "make": "Jeep",
+    "model": "Jeep CJ5 Renegade",
+    "year": 1976,
+    "pi": 431,
+    "class": "D"
+  },
+  {
+    "make": "Jeep",
+    "model": "Jeep Gladiator Rubicon",
+    "year": 2020,
+    "pi": 456,
+    "class": "D"
+  },
+  {
+    "make": "Jeep",
+    "model": "Jeep Grand Cherokee SRT",
+    "year": 2014,
+    "pi": 680,
+    "class": "B"
+  },
+  {
+    "make": "Jeep",
+    "model": "Jeep Grand Cherokee Trackhawk",
+    "year": 2018,
+    "pi": 749,
+    "class": "A"
+  },
+  {
+    "make": "Jeep",
+    "model": "Jeep Trailcat",
+    "year": 2016,
+    "pi": 744,
+    "class": "A"
+  },
+  {
+    "make": "Jeep",
+    "model": "Jeep Wrangler Rubicon",
+    "year": 2012,
+    "pi": 463,
+    "class": "D"
+  },
+  {
+    "make": "Jimco",
+    "model": "Jimco #179 Hammerhead Class 1",
+    "year": 2020,
+    "pi": 763,
+    "class": "A"
+  },
+  {
+    "make": "Jimco",
+    "model": "Jimco #240 Fastball Racing Spec Trophy Truck",
+    "year": 2019,
+    "pi": 623,
+    "class": "B"
+  },
+  {
+    "make": "Kia",
+    "model": "Kia EV6 GT",
+    "year": 2023,
+    "pi": 719,
+    "class": "A"
+  },
+  {
+    "make": "Koenigsegg",
+    "model": "Koenigsegg Agera",
+    "year": 2011,
+    "pi": 895,
+    "class": "S1"
+  },
+  {
+    "make": "Koenigsegg",
+    "model": "Koenigsegg Agera RS",
+    "year": 2017,
+    "pi": 980,
+    "class": "S2"
+  },
+  {
+    "make": "Koenigsegg",
+    "model": "Koenigsegg CC8S",
+    "year": 2002,
+    "pi": 846,
+    "class": "S1"
+  },
+  {
+    "make": "Koenigsegg",
+    "model": "Koenigsegg CCGT",
+    "year": 2008,
+    "pi": 965,
+    "class": "S2"
+  },
+  {
+    "make": "Koenigsegg",
+    "model": "Koenigsegg CCX",
+    "year": 2006,
+    "pi": 870,
+    "class": "S1"
+  },
+  {
+    "make": "Koenigsegg",
+    "model": "Koenigsegg Jesko",
+    "year": 2020,
+    "pi": 971,
+    "class": "S2"
+  },
+  {
+    "make": "Koenigsegg",
+    "model": "Koenigsegg One:1",
+    "year": 2015,
+    "pi": 983,
+    "class": "S2"
+  },
+  {
+    "make": "Koenigsegg",
+    "model": "Koenigsegg Regera",
+    "year": 2016,
+    "pi": 966,
+    "class": "S2"
+  },
+  {
+    "make": "KTM",
+    "model": "KTM X-Bow GT2",
+    "year": 2020,
+    "pi": 931,
+    "class": "S2"
+  },
+  {
+    "make": "KTM",
+    "model": "KTM X-Bow GT4",
+    "year": 2018,
+    "pi": 845,
+    "class": "S1"
+  },
+  {
+    "make": "KTM",
+    "model": "KTM X-Bow R",
+    "year": 2013,
+    "pi": 802,
+    "class": "S1"
+  },
+  {
+    "make": "Lamborghini",
+    "model": "Lamborghini #63 Squadra Corse Huracán Super Trofeo Evo",
+    "year": 2018,
+    "pi": 906,
+    "class": "S2"
+  },
+  {
+    "make": "Lamborghini",
+    "model": "Lamborghini Aventador J",
+    "year": 2012,
+    "pi": 839,
+    "class": "S1"
+  },
+  {
+    "make": "Lamborghini",
+    "model": "Lamborghini Aventador LP 780-4 Ultimae",
+    "year": 2021,
+    "pi": 878,
+    "class": "S1"
+  },
+  {
+    "make": "Lamborghini",
+    "model": "Lamborghini Aventador LP700-4",
+    "year": 2012,
+    "pi": 847,
+    "class": "S1"
+  },
+  {
+    "make": "Lamborghini",
+    "model": "Lamborghini Aventador Superveloce",
+    "year": 2016,
+    "pi": 872,
+    "class": "S1"
+  },
+  {
+    "make": "Lamborghini",
+    "model": "Lamborghini Aventador SVJ",
+    "year": 2018,
+    "pi": 889,
+    "class": "S1"
+  },
+  {
+    "make": "Lamborghini",
+    "model": "Lamborghini Centenario LP 770-4",
+    "year": 2016,
+    "pi": 884,
+    "class": "S1"
+  },
+  {
+    "make": "Lamborghini",
+    "model": "Lamborghini Countach LP5000 QV",
+    "year": 1988,
+    "pi": 735,
+    "class": "A"
+  },
+  {
+    "make": "Lamborghini",
+    "model": "Lamborghini Countach LPI 800-4",
+    "year": 2021,
+    "pi": 865,
+    "class": "S1"
+  },
+  {
+    "make": "Lamborghini",
+    "model": "Lamborghini Diablo GTR",
+    "year": 1999,
+    "pi": 881,
+    "class": "S1"
+  },
+  {
+    "make": "Lamborghini",
+    "model": "Lamborghini Diablo SV",
+    "year": 1997,
+    "pi": 763,
+    "class": "A"
+  },
+  {
+    "make": "Lamborghini",
+    "model": "Lamborghini Espada 400 GT",
+    "year": 1973,
+    "pi": 597,
+    "class": "C"
+  },
+  {
+    "make": "Lamborghini",
+    "model": "Lamborghini Essenza SCV12",
+    "year": 2020,
+    "pi": 967,
+    "class": "S2"
+  },
+  {
+    "make": "Lamborghini",
+    "model": "Lamborghini Gallardo LP 570-4 Superleggera",
+    "year": 2011,
+    "pi": 814,
+    "class": "S1"
+  },
+  {
+    "make": "Lamborghini",
+    "model": "Lamborghini Gallardo LP570-4 Spyder Performante",
+    "year": 2012,
+    "pi": 797,
+    "class": "A"
+  },
+  {
+    "make": "Lamborghini",
+    "model": "Lamborghini Huracán EVO",
+    "year": 2020,
+    "pi": 851,
+    "class": "S1"
+  },
+  {
+    "make": "Lamborghini",
+    "model": "Lamborghini Huracán LP 610-4",
+    "year": 2014,
+    "pi": 838,
+    "class": "S1"
+  },
+  {
+    "make": "Lamborghini",
+    "model": "Lamborghini Huracán Performante",
+    "year": 2018,
+    "pi": 874,
+    "class": "S1"
+  },
+  {
+    "make": "Lamborghini",
+    "model": "Lamborghini Huracán Sterrato",
+    "year": 2023,
+    "pi": 836,
+    "class": "S1"
+  },
+  {
+    "make": "Lamborghini",
+    "model": "Lamborghini Huracán STO",
+    "year": 2020,
+    "pi": 883,
+    "class": "S1"
+  },
+  {
+    "make": "Lamborghini",
+    "model": "Lamborghini Huracán Tecnica",
+    "year": 2023,
+    "pi": 850,
+    "class": "S1"
+  },
+  {
+    "make": "Lamborghini",
+    "model": "Lamborghini LM 002",
+    "year": 1986,
+    "pi": 562,
+    "class": "C"
+  },
+  {
+    "make": "Lamborghini",
+    "model": "Lamborghini Miura P400",
+    "year": 1967,
+    "pi": 625,
+    "class": "B"
+  },
+  {
+    "make": "Lamborghini",
+    "model": "Lamborghini Murciélago LP 670-4 SV",
+    "year": 2010,
+    "pi": 818,
+    "class": "S1"
+  },
+  {
+    "make": "Lamborghini",
+    "model": "Lamborghini Reventón",
+    "year": 2008,
+    "pi": 817,
+    "class": "S1"
+  },
+  {
+    "make": "Lamborghini",
+    "model": "Lamborghini Revuelto",
+    "year": 2024,
+    "pi": 905,
+    "class": "S2"
+  },
+  {
+    "make": "Lamborghini",
+    "model": "Lamborghini SC20",
+    "year": 2020,
+    "pi": 884,
+    "class": "S1"
+  },
+  {
+    "make": "Lamborghini",
+    "model": "Lamborghini Sesto Elemento",
+    "year": 2011,
+    "pi": 936,
+    "class": "S2"
+  },
+  {
+    "make": "Lamborghini",
+    "model": "Lamborghini Sesto Elemento Forza Edition",
+    "year": 2011,
+    "pi": 998,
+    "class": "S2"
+  },
+  {
+    "make": "Lamborghini",
+    "model": "Lamborghini Sián Roadster",
+    "year": 2020,
+    "pi": 881,
+    "class": "S1"
+  },
+  {
+    "make": "Lamborghini",
+    "model": "Lamborghini Urus",
+    "year": 2019,
+    "pi": 767,
+    "class": "A"
+  },
+  {
+    "make": "Lamborghini",
+    "model": "Lamborghini Veneno",
+    "year": 2013,
+    "pi": 910,
+    "class": "S2"
+  },
+  {
+    "make": "Lancia",
+    "model": "Lancia 037 Stradale",
+    "year": 1982,
+    "pi": 647,
+    "class": "B"
+  },
+  {
+    "make": "Lancia",
+    "model": "Lancia Delta HF Integrale Evo",
+    "year": 1992,
+    "pi": 602,
+    "class": "B"
+  },
+  {
+    "make": "Lancia",
+    "model": "Lancia Delta S4",
+    "year": 1986,
+    "pi": 682,
+    "class": "B"
+  },
+  {
+    "make": "Lancia",
+    "model": "Lancia Fulvia Coupé Rallye 1.6 HF",
+    "year": 1968,
+    "pi": 526,
+    "class": "C"
+  },
+  {
+    "make": "Lancia",
+    "model": "Lancia Stratos HF Stradale",
+    "year": 1974,
+    "pi": 590,
+    "class": "C"
+  },
+  {
+    "make": "Land Rover",
+    "model": "Land Rover Defender 110 X",
+    "year": 2020,
+    "pi": 534,
+    "class": "C"
+  },
+  {
+    "make": "Land Rover",
+    "model": "Land Rover Defender 90",
+    "year": 1997,
+    "pi": 366,
+    "class": "D"
+  },
+  {
+    "make": "Land Rover",
+    "model": "Land Rover Range Rover",
+    "year": 1973,
+    "pi": 274,
+    "class": "D"
+  },
+  {
+    "make": "Land Rover",
+    "model": "Land Rover Range Rover Sport SVR",
+    "year": 2015,
+    "pi": 722,
+    "class": "A"
+  },
+  {
+    "make": "Land Rover",
+    "model": "Land Rover Range Rover Velar First Edition",
+    "year": 2018,
+    "pi": 638,
+    "class": "B"
+  },
+  {
+    "make": "Land Rover",
+    "model": "Land Rover Series III",
+    "year": 1997,
+    "pi": 100,
+    "class": "D"
+  },
+  {
+    "make": "Lexus",
+    "model": "Lexus #14 VASSER SULLIVAN RC F GT3",
+    "year": 2020,
+    "pi": 890,
+    "class": "S1"
+  },
+  {
+    "make": "Lexus",
+    "model": "Lexus LC 500",
+    "year": 2021,
+    "pi": 719,
+    "class": "A"
+  },
+  {
+    "make": "Lexus",
+    "model": "Lexus LFA",
+    "year": 2010,
+    "pi": 810,
+    "class": "S1"
+  },
+  {
+    "make": "Lexus",
+    "model": "Lexus RC F",
+    "year": 2015,
+    "pi": 741,
+    "class": "A"
+  },
+  {
+    "make": "Lexus",
+    "model": "Lexus RC F Track Edition",
+    "year": 2020,
+    "pi": 777,
+    "class": "A"
+  },
+  {
+    "make": "Lexus",
+    "model": "Lexus SC300",
+    "year": 1997,
+    "pi": 555,
+    "class": "C"
+  },
+  {
+    "make": "Lincoln",
+    "model": "Lincoln Continental",
+    "year": 1962,
+    "pi": 381,
+    "class": "D"
+  },
+  {
+    "make": "Local",
+    "model": "Local Motors Rally Fighter",
+    "year": 2014,
+    "pi": 716,
+    "class": "A"
+  },
+  {
+    "make": "Lola",
+    "model": "Lola #6 Penske Sunoco T70 MkIIIB",
+    "year": 1969,
+    "pi": 818,
+    "class": "S1"
+  },
+  {
+    "make": "Lotus",
+    "model": "Lotus 2-Eleven",
+    "year": 2009,
+    "pi": 799,
+    "class": "A"
+  },
+  {
+    "make": "Lotus",
+    "model": "Lotus 3-Eleven",
+    "year": 2016,
+    "pi": 839,
+    "class": "S1"
+  },
+  {
+    "make": "Lotus",
+    "model": "Lotus 340R",
+    "year": 2000,
+    "pi": 700,
+    "class": "B"
+  },
+  {
+    "make": "Lotus",
+    "model": "Lotus Elan Sprint",
+    "year": 1971,
+    "pi": 443,
+    "class": "D"
+  },
+  {
+    "make": "Lotus",
+    "model": "Lotus Elise GT1",
+    "year": 1997,
+    "pi": 794,
+    "class": "A"
+  },
+  {
+    "make": "Lotus",
+    "model": "Lotus Elise Series 1 Sport 190",
+    "year": 1999,
+    "pi": 711,
+    "class": "A"
+  },
+  {
+    "make": "Lotus",
+    "model": "Lotus Emira",
+    "year": 2023,
+    "pi": 767,
+    "class": "A"
+  },
+  {
+    "make": "Lotus",
+    "model": "Lotus Esprit Turbo",
+    "year": 1980,
+    "pi": 538,
+    "class": "C"
+  },
+  {
+    "make": "Lotus",
+    "model": "Lotus Esprit V8",
+    "year": 2002,
+    "pi": 731,
+    "class": "A"
+  },
+  {
+    "make": "Lotus",
+    "model": "Lotus Evija",
+    "year": 2020,
+    "pi": 994,
+    "class": "S2"
+  },
+  {
+    "make": "Lotus",
+    "model": "Lotus Exige Cup 430",
+    "year": 2018,
+    "pi": 833,
+    "class": "S1"
+  },
+  {
+    "make": "Lotus",
+    "model": "Lotus Exige S",
+    "year": 2012,
+    "pi": 754,
+    "class": "A"
+  },
+  {
+    "make": "Lucid",
+    "model": "Lucid Air Sapphire",
+    "year": 2023,
+    "pi": 884,
+    "class": "S1"
+  },
+  {
+    "make": "Lynk",
+    "model": "Lynk & Co #100 Cyan Racing 03",
+    "year": 2020,
+    "pi": 800,
+    "class": "A"
+  },
+  {
+    "make": "Lynk",
+    "model": "Lynk & Co 02 Hatchback",
+    "year": 2022,
+    "pi": 637,
+    "class": "B"
+  },
+  {
+    "make": "Lynk",
+    "model": "Lynk & Co 03+",
+    "year": 2021,
+    "pi": 679,
+    "class": "B"
+  },
+  {
+    "make": "Lynk",
+    "model": "Lynk & Co 05+",
+    "year": 2022,
+    "pi": 622,
+    "class": "B"
+  },
+  {
+    "make": "Maserati",
+    "model": "Maserati 8CTF",
+    "year": 1939,
+    "pi": 657,
+    "class": "B"
+  },
+  {
+    "make": "Maserati",
+    "model": "Maserati Gran Turismo S",
+    "year": 2010,
+    "pi": 702,
+    "class": "A"
+  },
+  {
+    "make": "Maserati",
+    "model": "Maserati Gran Turismo S Forza Edition (MK II)",
+    "year": 2010,
+    "pi": 900,
+    "class": "S1"
+  },
+  {
+    "make": "Maserati",
+    "model": "Maserati Levante S",
+    "year": 2017,
+    "pi": 696,
+    "class": "B"
+  },
+  {
+    "make": "Maserati",
+    "model": "Maserati MC12 Versione Corsa",
+    "year": 2008,
+    "pi": 961,
+    "class": "S2"
+  },
+  {
+    "make": "Mazda",
+    "model": "Mazda 323 GT-R",
+    "year": 1992,
+    "pi": 589,
+    "class": "C"
+  },
+  {
+    "make": "Mazda",
+    "model": "Mazda Mazdaspeed MX-5",
+    "year": 2005,
+    "pi": 587,
+    "class": "C"
+  },
+  {
+    "make": "Mazda",
+    "model": "Mazda MX-5",
+    "year": 2013,
+    "pi": 549,
+    "class": "C"
+  },
+  {
+    "make": "Mazda",
+    "model": "Mazda MX-5",
+    "year": 2016,
+    "pi": 620,
+    "class": "B"
+  },
+  {
+    "make": "Mazda",
+    "model": "Mazda MX-5 Miata",
+    "year": 1994,
+    "pi": 445,
+    "class": "D"
+  },
+  {
+    "make": "Mazda",
+    "model": "Mazda MX-5 Miata RF",
+    "year": 2022,
+    "pi": 626,
+    "class": "B"
+  },
+  {
+    "make": "Mazda",
+    "model": "Mazda RX-7",
+    "year": 1997,
+    "pi": 645,
+    "class": "B"
+  },
+  {
+    "make": "Mazda",
+    "model": "Mazda RX-7 Spirit R Type-A",
+    "year": 2002,
+    "pi": 687,
+    "class": "B"
+  },
+  {
+    "make": "Mazda",
+    "model": "Mazda RX-8 R3",
+    "year": 2011,
+    "pi": 624,
+    "class": "B"
+  },
+  {
+    "make": "Mazda",
+    "model": "Mazda Savanna RX-7",
+    "year": 1990,
+    "pi": 558,
+    "class": "C"
+  },
+  {
+    "make": "McLaren",
+    "model": "McLaren 12C Coupé",
+    "year": 2011,
+    "pi": 832,
+    "class": "S1"
+  },
+  {
+    "make": "McLaren",
+    "model": "McLaren 570S Coupé",
+    "year": 2015,
+    "pi": 824,
+    "class": "S1"
+  },
+  {
+    "make": "McLaren",
+    "model": "McLaren 600LT Coupé",
+    "year": 2018,
+    "pi": 868,
+    "class": "S1"
+  },
+  {
+    "make": "McLaren",
+    "model": "McLaren 620R",
+    "year": 2021,
+    "pi": 864,
+    "class": "S1"
+  },
+  {
+    "make": "McLaren",
+    "model": "McLaren 650S Coupé",
+    "year": 2015,
+    "pi": 859,
+    "class": "S1"
+  },
+  {
+    "make": "McLaren",
+    "model": "McLaren 650S Spider",
+    "year": 2014,
+    "pi": 856,
+    "class": "S1"
+  },
+  {
+    "make": "McLaren",
+    "model": "McLaren 720S Coupé",
+    "year": 2018,
+    "pi": 899,
+    "class": "S1"
+  },
+  {
+    "make": "McLaren",
+    "model": "McLaren 720S Spider",
+    "year": 2019,
+    "pi": 887,
+    "class": "S1"
+  },
+  {
+    "make": "McLaren",
+    "model": "McLaren 765LT",
+    "year": 2021,
+    "pi": 913,
+    "class": "S2"
+  },
+  {
+    "make": "McLaren",
+    "model": "McLaren Artura",
+    "year": 2023,
+    "pi": 860,
+    "class": "S1"
+  },
+  {
+    "make": "McLaren",
+    "model": "McLaren F1",
+    "year": 1993,
+    "pi": 817,
+    "class": "S1"
+  },
+  {
+    "make": "McLaren",
+    "model": "McLaren F1 GT",
+    "year": 1997,
+    "pi": 866,
+    "class": "S1"
+  },
+  {
+    "make": "McLaren",
+    "model": "McLaren GT",
+    "year": 2020,
+    "pi": 823,
+    "class": "S1"
+  },
+  {
+    "make": "McLaren",
+    "model": "McLaren P1",
+    "year": 2013,
+    "pi": 928,
+    "class": "S2"
+  },
+  {
+    "make": "McLaren",
+    "model": "McLaren Sabre",
+    "year": 2021,
+    "pi": 887,
+    "class": "S1"
+  },
+  {
+    "make": "McLaren",
+    "model": "McLaren Senna",
+    "year": 2018,
+    "pi": 934,
+    "class": "S2"
+  },
+  {
+    "make": "McLaren",
+    "model": "McLaren Speedtail",
+    "year": 2019,
+    "pi": 910,
+    "class": "S2"
+  },
+  {
+    "make": "Mercedes-AMG",
+    "model": "Mercedes-AMG C 63 S Coupé",
+    "year": 2016,
+    "pi": 755,
+    "class": "A"
+  },
+  {
+    "make": "Mercedes-AMG",
+    "model": "Mercedes-AMG E 63 S",
+    "year": 2018,
+    "pi": 778,
+    "class": "A"
+  },
+  {
+    "make": "Mercedes-AMG",
+    "model": "Mercedes-AMG GT 4-Door Coupé",
+    "year": 2018,
+    "pi": 768,
+    "class": "A"
+  },
+  {
+    "make": "Mercedes-AMG",
+    "model": "Mercedes-AMG GT Black Series",
+    "year": 2021,
+    "pi": 884,
+    "class": "S1"
+  },
+  {
+    "make": "Mercedes-AMG",
+    "model": "Mercedes-AMG GT R",
+    "year": 2017,
+    "pi": 837,
+    "class": "S1"
+  },
+  {
+    "make": "Mercedes-AMG",
+    "model": "Mercedes-AMG GT S",
+    "year": 2015,
+    "pi": 797,
+    "class": "A"
+  },
+  {
+    "make": "Mercedes-AMG",
+    "model": "Mercedes-AMG GT3",
+    "year": 2018,
+    "pi": 890,
+    "class": "S1"
+  },
+  {
+    "make": "Mercedes-AMG",
+    "model": "Mercedes-AMG Mercedes-AMG ONE",
+    "year": 2021,
+    "pi": 927,
+    "class": "S2"
+  },
+  {
+    "make": "Mercedes-AMG",
+    "model": "Mercedes-AMG SL 63",
+    "year": 2021,
+    "pi": 789,
+    "class": "A"
+  },
+  {
+    "make": "Mercedes-Benz",
+    "model": "Mercedes-Benz #24 Tankpool24 Racing Truck",
+    "year": 2015,
+    "pi": 702,
+    "class": "A"
+  },
+  {
+    "make": "Mercedes-Benz",
+    "model": "Mercedes-Benz #24 Tankpool24 Racing Truck",
+    "year": 2015,
+    "pi": 800,
+    "class": "A"
+  },
+  {
+    "make": "Mercedes-Benz",
+    "model": "Mercedes-Benz 190E 2.5-16 Evolution II",
+    "year": 1990,
+    "pi": 579,
+    "class": "C"
+  },
+  {
+    "make": "Mercedes-Benz",
+    "model": "Mercedes-Benz 280 SL",
+    "year": 1967,
+    "pi": 478,
+    "class": "D"
+  },
+  {
+    "make": "Mercedes-Benz",
+    "model": "Mercedes-Benz 300 SL Coupé",
+    "year": 1954,
+    "pi": 498,
+    "class": "D"
+  },
+  {
+    "make": "Mercedes-Benz",
+    "model": "Mercedes-Benz 300 SLR",
+    "year": 1955,
+    "pi": 714,
+    "class": "A"
+  },
+  {
+    "make": "Mercedes-Benz",
+    "model": "Mercedes-Benz 500 E",
+    "year": 1992,
+    "pi": 616,
+    "class": "B"
+  },
+  {
+    "make": "Mercedes-Benz",
+    "model": "Mercedes-Benz A 45 AMG",
+    "year": 2013,
+    "pi": 707,
+    "class": "A"
+  },
+  {
+    "make": "Mercedes-Benz",
+    "model": "Mercedes-Benz AMG CLK GTR",
+    "year": 1998,
+    "pi": 829,
+    "class": "S1"
+  },
+  {
+    "make": "Mercedes-Benz",
+    "model": "Mercedes-Benz AMG CLK GTR Forza Edition",
+    "year": 1998,
+    "pi": 998,
+    "class": "S2"
+  },
+  {
+    "make": "Mercedes-Benz",
+    "model": "Mercedes-Benz AMG Hammer Coupe",
+    "year": 1987,
+    "pi": 681,
+    "class": "B"
+  },
+  {
+    "make": "Mercedes-Benz",
+    "model": "Mercedes-Benz AMG Hammer Wagon",
+    "year": 1987,
+    "pi": 675,
+    "class": "B"
+  },
+  {
+    "make": "Mercedes-Benz",
+    "model": "Mercedes-Benz C 63 AMG Coupé Black Series",
+    "year": 2012,
+    "pi": 768,
+    "class": "A"
+  },
+  {
+    "make": "Mercedes-Benz",
+    "model": "Mercedes-Benz E 55 AMG Wagon",
+    "year": 2006,
+    "pi": 698,
+    "class": "B"
+  },
+  {
+    "make": "Mercedes-Benz",
+    "model": "Mercedes-Benz E 63 AMG",
+    "year": 2013,
+    "pi": 751,
+    "class": "A"
+  },
+  {
+    "make": "Mercedes-Benz",
+    "model": "Mercedes-Benz G 63 AMG 6x6",
+    "year": 2014,
+    "pi": 606,
+    "class": "B"
+  },
+  {
+    "make": "Mercedes-Benz",
+    "model": "Mercedes-Benz G 65 AMG",
+    "year": 2013,
+    "pi": 639,
+    "class": "B"
+  },
+  {
+    "make": "Mercedes-Benz",
+    "model": "Mercedes-Benz SL 65 AMG Black Series",
+    "year": 2009,
+    "pi": 800,
+    "class": "A"
+  },
+  {
+    "make": "Mercedes-Benz",
+    "model": "Mercedes-Benz SLK 55 AMG",
+    "year": 2012,
+    "pi": 740,
+    "class": "A"
+  },
+  {
+    "make": "Mercedes-Benz",
+    "model": "Mercedes-Benz SLS AMG",
+    "year": 2011,
+    "pi": 804,
+    "class": "S1"
+  },
+  {
+    "make": "Mercedes-Benz",
+    "model": "Mercedes-Benz Super Sport Kurz Barker Roadster",
+    "year": 1929,
+    "pi": 256,
+    "class": "D"
+  },
+  {
+    "make": "Mercedes-Benz",
+    "model": "Mercedes-Benz Unimog U5023",
+    "year": 2014,
+    "pi": 103,
+    "class": "D"
+  },
+  {
+    "make": "Mercedes-Benz",
+    "model": "Mercedes-Benz W154",
+    "year": 1939,
+    "pi": 672,
+    "class": "B"
+  },
+  {
+    "make": "Mercedes-Benz",
+    "model": "Mercedes-Benz X-Class",
+    "year": 2018,
+    "pi": 368,
+    "class": "D"
+  },
+  {
+    "make": "Mercury",
+    "model": "Mercury Cyclone Spoiler",
+    "year": 1970,
+    "pi": 491,
+    "class": "D"
+  },
+  {
+    "make": "Meyers",
+    "model": "Meyers Manx",
+    "year": 1971,
+    "pi": 291,
+    "class": "D"
+  },
+  {
+    "make": "Meyers",
+    "model": "Meyers Manx 2.0 EV",
+    "year": 2023,
+    "pi": 649,
+    "class": "B"
+  },
+  {
+    "make": "Meyers",
+    "model": "Meyers Manx Forza Edition",
+    "year": 1971,
+    "pi": 800,
+    "class": "A"
+  },
+  {
+    "make": "MG",
+    "model": "MG #20 MG6 XPower",
+    "year": 2020,
+    "pi": 800,
+    "class": "A"
+  },
+  {
+    "make": "MG",
+    "model": "MG Cyberster",
+    "year": 2023,
+    "pi": 767,
+    "class": "A"
+  },
+  {
+    "make": "MG",
+    "model": "MG Metro 6R4",
+    "year": 1986,
+    "pi": 811,
+    "class": "S1"
+  },
+  {
+    "make": "MG",
+    "model": "MG MG3",
+    "year": 2015,
+    "pi": 444,
+    "class": "D"
+  },
+  {
+    "make": "MG",
+    "model": "MG MG6 XPower",
+    "year": 2021,
+    "pi": 716,
+    "class": "A"
+  },
+  {
+    "make": "MG",
+    "model": "MG MG7",
+    "year": 2022,
+    "pi": 636,
+    "class": "B"
+  },
+  {
+    "make": "MG",
+    "model": "MG XPower SV-R",
+    "year": 2005,
+    "pi": 694,
+    "class": "B"
+  },
+  {
+    "make": "MINI",
+    "model": "MINI Cooper S",
+    "year": 1965,
+    "pi": 281,
+    "class": "D"
+  },
+  {
+    "make": "MINI",
+    "model": "MINI Cooper S Forza Edition (MK II)",
+    "year": 1965,
+    "pi": 800,
+    "class": "A"
+  },
+  {
+    "make": "MINI",
+    "model": "MINI John Cooper Works",
+    "year": 2009,
+    "pi": 598,
+    "class": "C"
+  },
+  {
+    "make": "MINI",
+    "model": "MINI John Cooper Works Countryman All4",
+    "year": 2018,
+    "pi": 537,
+    "class": "C"
+  },
+  {
+    "make": "MINI",
+    "model": "MINI John Cooper Works GP",
+    "year": 2012,
+    "pi": 628,
+    "class": "B"
+  },
+  {
+    "make": "MINI",
+    "model": "MINI John Cooper Works GP",
+    "year": 2021,
+    "pi": 719,
+    "class": "A"
+  },
+  {
+    "make": "MINI",
+    "model": "MINI X-Raid All4 Racing Countryman",
+    "year": 2014,
+    "pi": 632,
+    "class": "B"
+  },
+  {
+    "make": "MINI",
+    "model": "MINI X-Raid John Cooper Works Buggy",
+    "year": 2018,
+    "pi": 632,
+    "class": "B"
+  },
+  {
+    "make": "Mitsubishi",
+    "model": "Mitsubishi #1 Sierra Sierra Enterprises Lancer Evolution Time Attack",
+    "year": 2005,
+    "pi": 967,
+    "class": "S2"
+  },
+  {
+    "make": "Mitsubishi",
+    "model": "Mitsubishi Eclipse GSX",
+    "year": 1995,
+    "pi": 543,
+    "class": "C"
+  },
+  {
+    "make": "Mitsubishi",
+    "model": "Mitsubishi FTO GP Version R",
+    "year": 1998,
+    "pi": 585,
+    "class": "C"
+  },
+  {
+    "make": "Mitsubishi",
+    "model": "Mitsubishi Galant VR-4",
+    "year": 1992,
+    "pi": 540,
+    "class": "C"
+  },
+  {
+    "make": "Mitsubishi",
+    "model": "Mitsubishi GTO",
+    "year": 1997,
+    "pi": 610,
+    "class": "B"
+  },
+  {
+    "make": "Mitsubishi",
+    "model": "Mitsubishi Lancer Evolution III GSR",
+    "year": 1995,
+    "pi": 632,
+    "class": "B"
+  },
+  {
+    "make": "Mitsubishi",
+    "model": "Mitsubishi Lancer Evolution IX MR",
+    "year": 2006,
+    "pi": 632,
+    "class": "B"
+  },
+  {
+    "make": "Mitsubishi",
+    "model": "Mitsubishi Lancer Evolution VI GSR",
+    "year": 1999,
+    "pi": 659,
+    "class": "B"
+  },
+  {
+    "make": "Mitsubishi",
+    "model": "Mitsubishi Lancer Evolution VIII MR",
+    "year": 2004,
+    "pi": 664,
+    "class": "B"
+  },
+  {
+    "make": "Mitsubishi",
+    "model": "Mitsubishi Lancer Evolution X GSR",
+    "year": 2008,
+    "pi": 649,
+    "class": "B"
+  },
+  {
+    "make": "Mitsubishi",
+    "model": "Mitsubishi Lancer Evolution X GSR 'Welcome Pack'",
+    "year": 2008,
+    "pi": 800,
+    "class": "A"
+  },
+  {
+    "make": "Mitsubishi",
+    "model": "Mitsubishi Montero Evolution",
+    "year": 1997,
+    "pi": 457,
+    "class": "D"
+  },
+  {
+    "make": "Mitsubishi",
+    "model": "Mitsubishi Starion ESI-R",
+    "year": 1998,
+    "pi": 549,
+    "class": "C"
+  },
+  {
+    "make": "Morgan",
+    "model": "Morgan 3 Wheeler",
+    "year": 2014,
+    "pi": 488,
+    "class": "D"
+  },
+  {
+    "make": "Morgan",
+    "model": "Morgan Aero GT",
+    "year": 2018,
+    "pi": 784,
+    "class": "A"
+  },
+  {
+    "make": "Morris",
+    "model": "Morris Mini-Traveller",
+    "year": 1965,
+    "pi": 100,
+    "class": "D"
+  },
+  {
+    "make": "Morris",
+    "model": "Morris Minor 1000",
+    "year": 1958,
+    "pi": 100,
+    "class": "D"
+  },
+  {
+    "make": "Morris",
+    "model": "Morris Minor 1000 Forza Edition",
+    "year": 1958,
+    "pi": 800,
+    "class": "A"
+  },
+  {
+    "make": "Morris",
+    "model": "Morris Minor Series II Traveler",
+    "year": 1953,
+    "pi": 100,
+    "class": "D"
+  },
+  {
+    "make": "Mosler",
+    "model": "Mosler MT900 GT3",
+    "year": 2006,
+    "pi": 910,
+    "class": "S2"
+  },
+  {
+    "make": "Mosler",
+    "model": "Mosler MT900S",
+    "year": 2010,
+    "pi": 919,
+    "class": "S2"
+  },
+  {
+    "make": "Napier",
+    "model": "Napier Napier-Railton",
+    "year": 1933,
+    "pi": 603,
+    "class": "B"
+  },
+  {
+    "make": "NIO",
+    "model": "NIO EP9",
+    "year": 2016,
+    "pi": 998,
+    "class": "S2"
+  },
+  {
+    "make": "Nissan",
+    "model": "Nissan 240SX SE",
+    "year": 1993,
+    "pi": 445,
+    "class": "D"
+  },
+  {
+    "make": "Nissan",
+    "model": "Nissan 370Z",
+    "year": 2010,
+    "pi": 688,
+    "class": "B"
+  },
+  {
+    "make": "Nissan",
+    "model": "Nissan 370Z NISMO",
+    "year": 2019,
+    "pi": 718,
+    "class": "A"
+  },
+  {
+    "make": "Nissan",
+    "model": "Nissan Be-1",
+    "year": 1987,
+    "pi": 257,
+    "class": "D"
+  },
+  {
+    "make": "Nissan",
+    "model": "Nissan Donut Media 350Z 'Hi Car'",
+    "year": 2004,
+    "pi": 792,
+    "class": "A"
+  },
+  {
+    "make": "Nissan",
+    "model": "Nissan Donut Media 350Z 'Low Car'",
+    "year": 2004,
+    "pi": 733,
+    "class": "A"
+  },
+  {
+    "make": "Nissan",
+    "model": "Nissan Fairlady Z",
+    "year": 2003,
+    "pi": 650,
+    "class": "B"
+  },
+  {
+    "make": "Nissan",
+    "model": "Nissan Fairlady Z 432",
+    "year": 1969,
+    "pi": 482,
+    "class": "D"
+  },
+  {
+    "make": "Nissan",
+    "model": "Nissan Fairlady Z Forza Edition",
+    "year": 2003,
+    "pi": 800,
+    "class": "A"
+  },
+  {
+    "make": "Nissan",
+    "model": "Nissan Fairlady Z Version S Twin Turbo",
+    "year": 1994,
+    "pi": 607,
+    "class": "B"
+  },
+  {
+    "make": "Nissan",
+    "model": "Nissan Figaro",
+    "year": 1991,
+    "pi": 324,
+    "class": "D"
+  },
+  {
+    "make": "Nissan",
+    "model": "Nissan GT-R (R35)",
+    "year": 2017,
+    "pi": 814,
+    "class": "S1"
+  },
+  {
+    "make": "Nissan",
+    "model": "Nissan GT-R Black Edition (R35)",
+    "year": 2012,
+    "pi": 810,
+    "class": "S1"
+  },
+  {
+    "make": "Nissan",
+    "model": "Nissan GT-R NISMO (R35)",
+    "year": 2020,
+    "pi": 846,
+    "class": "S1"
+  },
+  {
+    "make": "Nissan",
+    "model": "Nissan NISMO GT-R LM",
+    "year": 1995,
+    "pi": 658,
+    "class": "B"
+  },
+  {
+    "make": "Nissan",
+    "model": "Nissan Pao",
+    "year": 1989,
+    "pi": 228,
+    "class": "D"
+  },
+  {
+    "make": "Nissan",
+    "model": "Nissan Pickup #23 Rally Raid",
+    "year": 2004,
+    "pi": 577,
+    "class": "C"
+  },
+  {
+    "make": "Nissan",
+    "model": "Nissan Pulsar GTI-R",
+    "year": 1990,
+    "pi": 594,
+    "class": "C"
+  },
+  {
+    "make": "Nissan",
+    "model": "Nissan R390 (GT1)",
+    "year": 1998,
+    "pi": 859,
+    "class": "S1"
+  },
+  {
+    "make": "Nissan",
+    "model": "Nissan S-Cargo",
+    "year": 1989,
+    "pi": 222,
+    "class": "D"
+  },
+  {
+    "make": "Nissan",
+    "model": "Nissan Safari Turbo",
+    "year": 1985,
+    "pi": 230,
+    "class": "D"
+  },
+  {
+    "make": "Nissan",
+    "model": "Nissan Sentra NISMO",
+    "year": 2018,
+    "pi": 591,
+    "class": "C"
+  },
+  {
+    "make": "Nissan",
+    "model": "Nissan Silvia CLUB K's",
+    "year": 1992,
+    "pi": 537,
+    "class": "C"
+  },
+  {
+    "make": "Nissan",
+    "model": "Nissan Silvia K's",
+    "year": 1994,
+    "pi": 617,
+    "class": "B"
+  },
+  {
+    "make": "Nissan",
+    "model": "Nissan Silvia K's AERO",
+    "year": 1998,
+    "pi": 609,
+    "class": "B"
+  },
+  {
+    "make": "Nissan",
+    "model": "Nissan Silvia Spec-R",
+    "year": 2000,
+    "pi": 632,
+    "class": "B"
+  },
+  {
+    "make": "Nissan",
+    "model": "Nissan Skyline 2000GT-R",
+    "year": 1971,
+    "pi": 493,
+    "class": "D"
+  },
+  {
+    "make": "Nissan",
+    "model": "Nissan Skyline GT-R V-Spec",
+    "year": 1993,
+    "pi": 626,
+    "class": "B"
+  },
+  {
+    "make": "Nissan",
+    "model": "Nissan Skyline GT-R V-Spec",
+    "year": 1997,
+    "pi": 635,
+    "class": "B"
+  },
+  {
+    "make": "Nissan",
+    "model": "Nissan Skyline GT-R V-Spec II",
+    "year": 2002,
+    "pi": 657,
+    "class": "B"
+  },
+  {
+    "make": "Nissan",
+    "model": "Nissan Skyline GTS-R (HR31)",
+    "year": 1987,
+    "pi": 543,
+    "class": "C"
+  },
+  {
+    "make": "Nissan",
+    "model": "Nissan Skyline H/T 2000GT-R",
+    "year": 1973,
+    "pi": 518,
+    "class": "C"
+  },
+  {
+    "make": "Nissan",
+    "model": "Nissan Stagea RS Four V",
+    "year": 1997,
+    "pi": 547,
+    "class": "C"
+  },
+  {
+    "make": "Nissan",
+    "model": "Nissan TITAN Warrior Concept",
+    "year": 2016,
+    "pi": 486,
+    "class": "D"
+  },
+  {
+    "make": "Nissan",
+    "model": "Nissan Tsuru",
+    "year": 2010,
+    "pi": 444,
+    "class": "D"
+  },
+  {
+    "make": "Nissan",
+    "model": "Nissan Z",
+    "year": 2023,
+    "pi": 736,
+    "class": "A"
+  },
+  {
+    "make": "Nissan",
+    "model": "Nissan Z NISMO",
+    "year": 2024,
+    "pi": 765,
+    "class": "A"
+  },
+  {
+    "make": "Noble",
+    "model": "Noble M400",
+    "year": 2006,
+    "pi": 829,
+    "class": "S1"
+  },
+  {
+    "make": "Noble",
+    "model": "Noble M600",
+    "year": 2010,
+    "pi": 877,
+    "class": "S1"
+  },
+  {
+    "make": "Oldsmobile",
+    "model": "Oldsmobile Toronado",
+    "year": 1966,
+    "pi": 403,
+    "class": "D"
+  },
+  {
+    "make": "Opel",
+    "model": "Opel Manta 400",
+    "year": 1984,
+    "pi": 691,
+    "class": "B"
+  },
+  {
+    "make": "Pagani",
+    "model": "Pagani Huayra BC Coupe",
+    "year": 2016,
+    "pi": 929,
+    "class": "S2"
+  },
+  {
+    "make": "Pagani",
+    "model": "Pagani Huayra BC Forza Edition",
+    "year": 2016,
+    "pi": 998,
+    "class": "S2"
+  },
+  {
+    "make": "Pagani",
+    "model": "Pagani Huayra Coupe",
+    "year": 2011,
+    "pi": 900,
+    "class": "S1"
+  },
+  {
+    "make": "Pagani",
+    "model": "Pagani Huayra R",
+    "year": 2022,
+    "pi": 985,
+    "class": "S2"
+  },
+  {
+    "make": "Pagani",
+    "model": "Pagani Zonda Cinque Roadster",
+    "year": 2010,
+    "pi": 896,
+    "class": "S1"
+  },
+  {
+    "make": "Pagani",
+    "model": "Pagani Zonda Cinque Roadster 'Oreo Edition'",
+    "year": 2009,
+    "pi": 900,
+    "class": "S1"
+  },
+  {
+    "make": "Pagani",
+    "model": "Pagani Zonda R",
+    "year": 2009,
+    "pi": 959,
+    "class": "S2"
+  },
+  {
+    "make": "Peel",
+    "model": "Peel P50",
+    "year": 1962,
+    "pi": 100,
+    "class": "D"
+  },
+  {
+    "make": "Peel",
+    "model": "Peel Trident",
+    "year": 1965,
+    "pi": 100,
+    "class": "D"
+  },
+  {
+    "make": "Penhall",
+    "model": "Penhall The Cholla",
+    "year": 2011,
+    "pi": 655,
+    "class": "B"
+  },
+  {
+    "make": "Peugeot",
+    "model": "Peugeot 205 Rallye",
+    "year": 1991,
+    "pi": 462,
+    "class": "D"
+  },
+  {
+    "make": "Peugeot",
+    "model": "Peugeot 205 T16",
+    "year": 1984,
+    "pi": 616,
+    "class": "B"
+  },
+  {
+    "make": "Peugeot",
+    "model": "Peugeot 207 Super 2000",
+    "year": 2007,
+    "pi": 755,
+    "class": "A"
+  },
+  {
+    "make": "Playground",
+    "model": "Playground Carnival Float",
+    "year": 2020,
+    "pi": 881,
+    "class": "S1"
+  },
+  {
+    "make": "Plymouth",
+    "model": "Plymouth Barracuda Formula-S",
+    "year": 1968,
+    "pi": 550,
+    "class": "C"
+  },
+  {
+    "make": "Plymouth",
+    "model": "Plymouth Belvedere",
+    "year": 1964,
+    "pi": 529,
+    "class": "C"
+  },
+  {
+    "make": "Plymouth",
+    "model": "Plymouth Cuda 426 HEMI",
+    "year": 1971,
+    "pi": 547,
+    "class": "C"
+  },
+  {
+    "make": "Plymouth",
+    "model": "Plymouth Fury",
+    "year": 1958,
+    "pi": 477,
+    "class": "D"
+  },
+  {
+    "make": "Polaris",
+    "model": "Polaris RZR Pro XP Factory Racing Limited Edition",
+    "year": 2021,
+    "pi": 516,
+    "class": "C"
+  },
+  {
+    "make": "Polaris",
+    "model": "Polaris RZR Pro XP Ultimate",
+    "year": 2021,
+    "pi": 593,
+    "class": "C"
+  },
+  {
+    "make": "Polaris",
+    "model": "Polaris RZR XP 1000 EPS",
+    "year": 2015,
+    "pi": 501,
+    "class": "C"
+  },
+  {
+    "make": "Pontiac",
+    "model": "Pontiac Firebird",
+    "year": 1968,
+    "pi": 533,
+    "class": "C"
+  },
+  {
+    "make": "Pontiac",
+    "model": "Pontiac Firebird Trans Am",
+    "year": 1977,
+    "pi": 418,
+    "class": "D"
+  },
+  {
+    "make": "Pontiac",
+    "model": "Pontiac Firebird Trans Am GTA",
+    "year": 1987,
+    "pi": 485,
+    "class": "D"
+  },
+  {
+    "make": "Pontiac",
+    "model": "Pontiac Firebird Trans Am GTA Forza Edition (MK II)",
+    "year": 1987,
+    "pi": 900,
+    "class": "S1"
+  },
+  {
+    "make": "Pontiac",
+    "model": "Pontiac Firebird Trans Am SD-455",
+    "year": 1973,
+    "pi": 551,
+    "class": "C"
+  },
+  {
+    "make": "Pontiac",
+    "model": "Pontiac GTO",
+    "year": 1965,
+    "pi": 484,
+    "class": "D"
+  },
+  {
+    "make": "Pontiac",
+    "model": "Pontiac GTO Judge",
+    "year": 1969,
+    "pi": 545,
+    "class": "C"
+  },
+  {
+    "make": "Porsche",
+    "model": "Porsche #185 959 Prodrive Rally Raid",
+    "year": 1986,
+    "pi": 742,
+    "class": "A"
+  },
+  {
+    "make": "Porsche",
+    "model": "Porsche #23 917/20",
+    "year": 1971,
+    "pi": 849,
+    "class": "S1"
+  },
+  {
+    "make": "Porsche",
+    "model": "Porsche #3 917 LH",
+    "year": 1970,
+    "pi": 856,
+    "class": "S1"
+  },
+  {
+    "make": "Porsche",
+    "model": "Porsche #46 356 SL Gmünd Coupe",
+    "year": 1951,
+    "pi": 243,
+    "class": "D"
+  },
+  {
+    "make": "Porsche",
+    "model": "Porsche #65 Rothsport Racing 911 \"Desert Flyer\"",
+    "year": 1989,
+    "pi": 694,
+    "class": "B"
+  },
+  {
+    "make": "Porsche",
+    "model": "Porsche #70 Porsche Motorsport 935",
+    "year": 2019,
+    "pi": 932,
+    "class": "S2"
+  },
+  {
+    "make": "Porsche",
+    "model": "Porsche #92 GT Team 911 RSR",
+    "year": 2017,
+    "pi": 910,
+    "class": "S2"
+  },
+  {
+    "make": "Porsche",
+    "model": "Porsche 356 A 1600 Super",
+    "year": 1959,
+    "pi": 241,
+    "class": "D"
+  },
+  {
+    "make": "Porsche",
+    "model": "Porsche 356 C Cabriolet Emory Special",
+    "year": 1960,
+    "pi": 651,
+    "class": "B"
+  },
+  {
+    "make": "Porsche",
+    "model": "Porsche 550A Spyder",
+    "year": 1955,
+    "pi": 514,
+    "class": "C"
+  },
+  {
+    "make": "Porsche",
+    "model": "Porsche 718 Cayman GT4 RS",
+    "year": 2022,
+    "pi": 850,
+    "class": "S1"
+  },
+  {
+    "make": "Porsche",
+    "model": "Porsche 718 Cayman GTS",
+    "year": 2018,
+    "pi": 785,
+    "class": "A"
+  },
+  {
+    "make": "Porsche",
+    "model": "Porsche 906 Carrera 6",
+    "year": 1966,
+    "pi": 732,
+    "class": "A"
+  },
+  {
+    "make": "Porsche",
+    "model": "Porsche 911 Carrera 2 by Gunther Werks",
+    "year": 1995,
+    "pi": 804,
+    "class": "S1"
+  },
+  {
+    "make": "Porsche",
+    "model": "Porsche 911 Carrera RS",
+    "year": 1973,
+    "pi": 601,
+    "class": "B"
+  },
+  {
+    "make": "Porsche",
+    "model": "Porsche 911 Carrera S",
+    "year": 2019,
+    "pi": 819,
+    "class": "S1"
+  },
+  {
+    "make": "Porsche",
+    "model": "Porsche 911 GT1 Strassenversion",
+    "year": 1997,
+    "pi": 840,
+    "class": "S1"
+  },
+  {
+    "make": "Porsche",
+    "model": "Porsche 911 GT2",
+    "year": 1995,
+    "pi": 753,
+    "class": "A"
+  },
+  {
+    "make": "Porsche",
+    "model": "Porsche 911 GT2 RS",
+    "year": 2012,
+    "pi": 860,
+    "class": "S1"
+  },
+  {
+    "make": "Porsche",
+    "model": "Porsche 911 GT2 RS",
+    "year": 2018,
+    "pi": 888,
+    "class": "S1"
+  },
+  {
+    "make": "Porsche",
+    "model": "Porsche 911 GT3",
+    "year": 2004,
+    "pi": 778,
+    "class": "A"
+  },
+  {
+    "make": "Porsche",
+    "model": "Porsche 911 GT3",
+    "year": 2021,
+    "pi": 858,
+    "class": "S1"
+  },
+  {
+    "make": "Porsche",
+    "model": "Porsche 911 GT3 R",
+    "year": 2018,
+    "pi": 890,
+    "class": "S1"
+  },
+  {
+    "make": "Porsche",
+    "model": "Porsche 911 GT3 R",
+    "year": 2023,
+    "pi": 890,
+    "class": "S1"
+  },
+  {
+    "make": "Porsche",
+    "model": "Porsche 911 GT3 RS",
+    "year": 2016,
+    "pi": 864,
+    "class": "S1"
+  },
+  {
+    "make": "Porsche",
+    "model": "Porsche 911 GT3 RS",
+    "year": 2019,
+    "pi": 860,
+    "class": "S1"
+  },
+  {
+    "make": "Porsche",
+    "model": "Porsche 911 GT3 RS",
+    "year": 2023,
+    "pi": 867,
+    "class": "S1"
+  },
+  {
+    "make": "Porsche",
+    "model": "Porsche 911 GT3 RS 4.0",
+    "year": 2012,
+    "pi": 825,
+    "class": "S1"
+  },
+  {
+    "make": "Porsche",
+    "model": "Porsche 911 GT3 RS Forza Edition",
+    "year": 2019,
+    "pi": 900,
+    "class": "S1"
+  },
+  {
+    "make": "Porsche",
+    "model": "Porsche 911 Rallye",
+    "year": 2023,
+    "pi": 800,
+    "class": "A"
+  },
+  {
+    "make": "Porsche",
+    "model": "Porsche 911 reimagined by Singer - DLS",
+    "year": 1990,
+    "pi": 830,
+    "class": "S1"
+  },
+  {
+    "make": "Porsche",
+    "model": "Porsche 911 Speedster",
+    "year": 2019,
+    "pi": 813,
+    "class": "S1"
+  },
+  {
+    "make": "Porsche",
+    "model": "Porsche 911 Sport Classic",
+    "year": 2010,
+    "pi": 756,
+    "class": "A"
+  },
+  {
+    "make": "Porsche",
+    "model": "Porsche 911 Turbo 3.3",
+    "year": 1982,
+    "pi": 666,
+    "class": "B"
+  },
+  {
+    "make": "Porsche",
+    "model": "Porsche 911 Turbo S",
+    "year": 2014,
+    "pi": 808,
+    "class": "S1"
+  },
+  {
+    "make": "Porsche",
+    "model": "Porsche 911 Turbo S",
+    "year": 2023,
+    "pi": 857,
+    "class": "S1"
+  },
+  {
+    "make": "Porsche",
+    "model": "Porsche 914/6",
+    "year": 1970,
+    "pi": 427,
+    "class": "D"
+  },
+  {
+    "make": "Porsche",
+    "model": "Porsche 918 Spyder",
+    "year": 2014,
+    "pi": 920,
+    "class": "S2"
+  },
+  {
+    "make": "Porsche",
+    "model": "Porsche 944 Turbo",
+    "year": 1989,
+    "pi": 651,
+    "class": "B"
+  },
+  {
+    "make": "Porsche",
+    "model": "Porsche 959",
+    "year": 1987,
+    "pi": 764,
+    "class": "A"
+  },
+  {
+    "make": "Porsche",
+    "model": "Porsche 968 Turbo S",
+    "year": 1993,
+    "pi": 701,
+    "class": "A"
+  },
+  {
+    "make": "Porsche",
+    "model": "Porsche Carrera GT",
+    "year": 2003,
+    "pi": 845,
+    "class": "S1"
+  },
+  {
+    "make": "Porsche",
+    "model": "Porsche Cayenne Turbo",
+    "year": 2018,
+    "pi": 744,
+    "class": "A"
+  },
+  {
+    "make": "Porsche",
+    "model": "Porsche Cayman GT4",
+    "year": 2016,
+    "pi": 819,
+    "class": "S1"
+  },
+  {
+    "make": "Porsche",
+    "model": "Porsche Cayman GTS",
+    "year": 2015,
+    "pi": 767,
+    "class": "A"
+  },
+  {
+    "make": "Porsche",
+    "model": "Porsche Macan LPR Rally Raid",
+    "year": 2018,
+    "pi": 637,
+    "class": "B"
+  },
+  {
+    "make": "Porsche",
+    "model": "Porsche Macan Turbo",
+    "year": 2019,
+    "pi": 695,
+    "class": "B"
+  },
+  {
+    "make": "Porsche",
+    "model": "Porsche Mission R",
+    "year": 2021,
+    "pi": 925,
+    "class": "S2"
+  },
+  {
+    "make": "Porsche",
+    "model": "Porsche Panamera Turbo",
+    "year": 2017,
+    "pi": 767,
+    "class": "A"
+  },
+  {
+    "make": "Porsche",
+    "model": "Porsche Taycan Cross Turismo Turbo S",
+    "year": 2023,
+    "pi": 800,
+    "class": "A"
+  },
+  {
+    "make": "Porsche",
+    "model": "Porsche Taycan Turbo S",
+    "year": 2020,
+    "pi": 807,
+    "class": "S1"
+  },
+  {
+    "make": "Porsche",
+    "model": "Porsche Taycan Turbo S 'Welcome Pack'",
+    "year": 2020,
+    "pi": 900,
+    "class": "S1"
+  },
+  {
+    "make": "Radical",
+    "model": "Radical RXC Turbo",
+    "year": 2015,
+    "pi": 928,
+    "class": "S2"
+  },
+  {
+    "make": "RAESR",
+    "model": "RAESR Tachyon Speed",
+    "year": 2019,
+    "pi": 983,
+    "class": "S2"
+  },
+  {
+    "make": "RAM",
+    "model": "RAM 2500 Power Wagon",
+    "year": 2017,
+    "pi": 467,
+    "class": "D"
+  },
+  {
+    "make": "Reliant",
+    "model": "Reliant Supervan III",
+    "year": 1972,
+    "pi": 100,
+    "class": "D"
+  },
+  {
+    "make": "Renault",
+    "model": "Renault 4L Export",
+    "year": 1968,
+    "pi": 100,
+    "class": "D"
+  },
+  {
+    "make": "Renault",
+    "model": "Renault 5 Turbo",
+    "year": 1980,
+    "pi": 521,
+    "class": "C"
+  },
+  {
+    "make": "Renault",
+    "model": "Renault 8 Gordini",
+    "year": 1967,
+    "pi": 435,
+    "class": "D"
+  },
+  {
+    "make": "Renault",
+    "model": "Renault Clio R.S.",
+    "year": 2010,
+    "pi": 592,
+    "class": "C"
+  },
+  {
+    "make": "Renault",
+    "model": "Renault Clio R.S. 16 Concept",
+    "year": 2016,
+    "pi": 686,
+    "class": "B"
+  },
+  {
+    "make": "Renault",
+    "model": "Renault Clio R.S. 200 EDC",
+    "year": 2013,
+    "pi": 595,
+    "class": "C"
+  },
+  {
+    "make": "Renault",
+    "model": "Renault Clio Williams",
+    "year": 1993,
+    "pi": 511,
+    "class": "C"
+  },
+  {
+    "make": "Renault",
+    "model": "Renault Megane R.S.",
+    "year": 2018,
+    "pi": 670,
+    "class": "B"
+  },
+  {
+    "make": "Renault",
+    "model": "Renault Megane R.S. 250",
+    "year": 2010,
+    "pi": 657,
+    "class": "B"
+  },
+  {
+    "make": "Renault",
+    "model": "Renault Mégane R26.R",
+    "year": 2008,
+    "pi": 678,
+    "class": "B"
+  },
+  {
+    "make": "Rimac",
+    "model": "Rimac Concept Two",
+    "year": 2019,
+    "pi": 963,
+    "class": "S2"
+  },
+  {
+    "make": "Rimac",
+    "model": "Rimac Nevera",
+    "year": 2021,
+    "pi": 968,
+    "class": "S2"
+  },
+  {
+    "make": "Rivian",
+    "model": "Rivian R1S",
+    "year": 2022,
+    "pi": 726,
+    "class": "A"
+  },
+  {
+    "make": "Rivian",
+    "model": "Rivian R1T",
+    "year": 2022,
+    "pi": 718,
+    "class": "A"
+  },
+  {
+    "make": "RJ Anderson",
+    "model": "RJ Anderson #37 Polaris RZR Pro 4 Truck",
+    "year": 2021,
+    "pi": 776,
+    "class": "A"
+  },
+  {
+    "make": "RJ Anderson",
+    "model": "RJ Anderson #37 Polaris RZR-Rockstar Energy Pro 2 Truck",
+    "year": 2016,
+    "pi": 776,
+    "class": "A"
+  },
+  {
+    "make": "Rossion",
+    "model": "Rossion Q1",
+    "year": 2010,
+    "pi": 813,
+    "class": "S1"
+  },
+  {
+    "make": "Saleen",
+    "model": "Saleen S1",
+    "year": 2018,
+    "pi": 821,
+    "class": "S1"
+  },
+  {
+    "make": "Saleen",
+    "model": "Saleen S7",
+    "year": 2004,
+    "pi": 855,
+    "class": "S1"
+  },
+  {
+    "make": "Saleen",
+    "model": "Saleen S7 LM",
+    "year": 2017,
+    "pi": 918,
+    "class": "S2"
+  },
+  {
+    "make": "Saleen",
+    "model": "Saleen Sportruck XR Black Label",
+    "year": 2020,
+    "pi": 666,
+    "class": "B"
+  },
+  {
+    "make": "Schuppan",
+    "model": "Schuppan 962CR",
+    "year": 1993,
+    "pi": 869,
+    "class": "S1"
+  },
+  {
+    "make": "Shelby",
+    "model": "Shelby Cobra 427 S/C",
+    "year": 1965,
+    "pi": 694,
+    "class": "B"
+  },
+  {
+    "make": "Shelby",
+    "model": "Shelby Cobra Daytona Coupé",
+    "year": 1965,
+    "pi": 637,
+    "class": "B"
+  },
+  {
+    "make": "Shelby",
+    "model": "Shelby GT 500",
+    "year": 1967,
+    "pi": 577,
+    "class": "C"
+  },
+  {
+    "make": "SIERRA Cars",
+    "model": "SIERRA Cars #23 Yokohama Alpha",
+    "year": 2020,
+    "pi": 986,
+    "class": "S2"
+  },
+  {
+    "make": "SIERRA Cars",
+    "model": "SIERRA Cars 700R",
+    "year": 2021,
+    "pi": 414,
+    "class": "D"
+  },
+  {
+    "make": "SIERRA Cars",
+    "model": "SIERRA Cars RX3",
+    "year": 2021,
+    "pi": 737,
+    "class": "A"
+  },
+  {
+    "make": "Spania",
+    "model": "Spania GTA GTA Spano",
+    "year": 2016,
+    "pi": 915,
+    "class": "S2"
+  },
+  {
+    "make": "SUBARU",
+    "model": "SUBARU BRAT GL",
+    "year": 1980,
+    "pi": 273,
+    "class": "D"
+  },
+  {
+    "make": "SUBARU",
+    "model": "SUBARU BRZ",
+    "year": 2013,
+    "pi": 581,
+    "class": "C"
+  },
+  {
+    "make": "SUBARU",
+    "model": "SUBARU BRZ",
+    "year": 2022,
+    "pi": 673,
+    "class": "B"
+  },
+  {
+    "make": "SUBARU",
+    "model": "SUBARU Impreza 22B-STi Version",
+    "year": 1998,
+    "pi": 640,
+    "class": "B"
+  },
+  {
+    "make": "SUBARU",
+    "model": "SUBARU Impreza WRX STi",
+    "year": 2004,
+    "pi": 652,
+    "class": "B"
+  },
+  {
+    "make": "SUBARU",
+    "model": "SUBARU Impreza WRX STi",
+    "year": 2005,
+    "pi": 669,
+    "class": "B"
+  },
+  {
+    "make": "SUBARU",
+    "model": "SUBARU Impreza WRX STI",
+    "year": 2008,
+    "pi": 649,
+    "class": "B"
+  },
+  {
+    "make": "SUBARU",
+    "model": "SUBARU Legacy RS",
+    "year": 1990,
+    "pi": 514,
+    "class": "C"
+  },
+  {
+    "make": "SUBARU",
+    "model": "SUBARU STI S209",
+    "year": 2019,
+    "pi": 689,
+    "class": "B"
+  },
+  {
+    "make": "SUBARU",
+    "model": "SUBARU SVX",
+    "year": 1996,
+    "pi": 574,
+    "class": "C"
+  },
+  {
+    "make": "SUBARU",
+    "model": "SUBARU WRX",
+    "year": 2022,
+    "pi": 663,
+    "class": "B"
+  },
+  {
+    "make": "SUBARU",
+    "model": "SUBARU WRX STI",
+    "year": 2011,
+    "pi": 668,
+    "class": "B"
+  },
+  {
+    "make": "SUBARU",
+    "model": "SUBARU WRX STI",
+    "year": 2015,
+    "pi": 675,
+    "class": "B"
+  },
+  {
+    "make": "SUBARU",
+    "model": "SUBARU WRX STI ARX Supercar",
+    "year": 2018,
+    "pi": 849,
+    "class": "S1"
+  },
+  {
+    "make": "Toyota",
+    "model": "Toyota #1 T100 Baja Truck",
+    "year": 1993,
+    "pi": 693,
+    "class": "B"
+  },
+  {
+    "make": "Toyota",
+    "model": "Toyota 2000GT",
+    "year": 1969,
+    "pi": 487,
+    "class": "D"
+  },
+  {
+    "make": "Toyota",
+    "model": "Toyota 4Runner TRD Pro",
+    "year": 2019,
+    "pi": 531,
+    "class": "C"
+  },
+  {
+    "make": "Toyota",
+    "model": "Toyota Camry TRD",
+    "year": 2023,
+    "pi": 645,
+    "class": "B"
+  },
+  {
+    "make": "Toyota",
+    "model": "Toyota Celica GT",
+    "year": 1974,
+    "pi": 315,
+    "class": "D"
+  },
+  {
+    "make": "Toyota",
+    "model": "Toyota Celica GT-Four RC ST185",
+    "year": 1992,
+    "pi": 544,
+    "class": "C"
+  },
+  {
+    "make": "Toyota",
+    "model": "Toyota Celica GT-Four ST205",
+    "year": 1994,
+    "pi": 590,
+    "class": "C"
+  },
+  {
+    "make": "Toyota",
+    "model": "Toyota Celica Sport Specialty II",
+    "year": 2003,
+    "pi": 557,
+    "class": "C"
+  },
+  {
+    "make": "Toyota",
+    "model": "Toyota Chaser GT Twin Turbo",
+    "year": 1991,
+    "pi": 597,
+    "class": "C"
+  },
+  {
+    "make": "Toyota",
+    "model": "Toyota FJ40",
+    "year": 1979,
+    "pi": 269,
+    "class": "D"
+  },
+  {
+    "make": "Toyota",
+    "model": "Toyota GR Supra",
+    "year": 2020,
+    "pi": 731,
+    "class": "A"
+  },
+  {
+    "make": "Toyota",
+    "model": "Toyota GR Yaris",
+    "year": 2021,
+    "pi": 672,
+    "class": "B"
+  },
+  {
+    "make": "Toyota",
+    "model": "Toyota GR86",
+    "year": 2022,
+    "pi": 676,
+    "class": "B"
+  },
+  {
+    "make": "Toyota",
+    "model": "Toyota GT86",
+    "year": 2013,
+    "pi": 579,
+    "class": "C"
+  },
+  {
+    "make": "Toyota",
+    "model": "Toyota Hilux Arctic Trucks AT38",
+    "year": 2007,
+    "pi": 457,
+    "class": "D"
+  },
+  {
+    "make": "Toyota",
+    "model": "Toyota Land Cruiser Arctic Trucks AT37",
+    "year": 2016,
+    "pi": 404,
+    "class": "D"
+  },
+  {
+    "make": "Toyota",
+    "model": "Toyota MR2 GT",
+    "year": 1995,
+    "pi": 632,
+    "class": "B"
+  },
+  {
+    "make": "Toyota",
+    "model": "Toyota MR2 SC",
+    "year": 1989,
+    "pi": 502,
+    "class": "C"
+  },
+  {
+    "make": "Toyota",
+    "model": "Toyota Sera",
+    "year": 1991,
+    "pi": 447,
+    "class": "D"
+  },
+  {
+    "make": "Toyota",
+    "model": "Toyota Soarer 2.5 GT-T",
+    "year": 1997,
+    "pi": 601,
+    "class": "B"
+  },
+  {
+    "make": "Toyota",
+    "model": "Toyota Sports 800",
+    "year": 1965,
+    "pi": 246,
+    "class": "D"
+  },
+  {
+    "make": "Toyota",
+    "model": "Toyota Sprinter Trueno GT Apex",
+    "year": 1985,
+    "pi": 480,
+    "class": "D"
+  },
+  {
+    "make": "Toyota",
+    "model": "Toyota Supra 2.0 GT",
+    "year": 1992,
+    "pi": 558,
+    "class": "C"
+  },
+  {
+    "make": "Toyota",
+    "model": "Toyota Supra RZ",
+    "year": 1998,
+    "pi": 646,
+    "class": "B"
+  },
+  {
+    "make": "Toyota",
+    "model": "Toyota Supra RZ 'Welcome Pack'",
+    "year": 1998,
+    "pi": 800,
+    "class": "A"
+  },
+  {
+    "make": "Toyota",
+    "model": "Toyota Tacoma TRD Pro",
+    "year": 2019,
+    "pi": 518,
+    "class": "C"
+  },
+  {
+    "make": "Toyota",
+    "model": "Toyota Tundra TRD Pro",
+    "year": 2020,
+    "pi": 562,
+    "class": "C"
+  },
+  {
+    "make": "TVR",
+    "model": "TVR Cerbera Speed 12",
+    "year": 1998,
+    "pi": 861,
+    "class": "S1"
+  },
+  {
+    "make": "TVR",
+    "model": "TVR Griffith",
+    "year": 2018,
+    "pi": 825,
+    "class": "S1"
+  },
+  {
+    "make": "TVR",
+    "model": "TVR Sagaris",
+    "year": 2005,
+    "pi": 779,
+    "class": "A"
+  },
+  {
+    "make": "Ultima",
+    "model": "Ultima Evolution Coupe 1020",
+    "year": 2015,
+    "pi": 961,
+    "class": "S2"
+  },
+  {
+    "make": "Universal",
+    "model": "Universal Studios Back to the Future Time Machine 1",
+    "year": 1981,
+    "pi": 455,
+    "class": "D"
+  },
+  {
+    "make": "Universal",
+    "model": "Universal Studios Back to the Future Time Machine 2",
+    "year": 1981,
+    "pi": 453,
+    "class": "D"
+  },
+  {
+    "make": "Universal",
+    "model": "Universal Studios Back to the Future Time Machine 3",
+    "year": 1981,
+    "pi": 335,
+    "class": "D"
+  },
+  {
+    "make": "Universal",
+    "model": "Universal Studios Jeep Wrangler Sahara 'Jurassic Park'",
+    "year": 1992,
+    "pi": 344,
+    "class": "D"
+  },
+  {
+    "make": "Universal",
+    "model": "Universal Studios K.I.T.T.",
+    "year": 1982,
+    "pi": 743,
+    "class": "A"
+  },
+  {
+    "make": "Vauxhall",
+    "model": "Vauxhall Corsa VXR",
+    "year": 2016,
+    "pi": 584,
+    "class": "C"
+  },
+  {
+    "make": "Vauxhall",
+    "model": "Vauxhall Lotus Carlton",
+    "year": 1990,
+    "pi": 635,
+    "class": "B"
+  },
+  {
+    "make": "Vauxhall",
+    "model": "Vauxhall Monaro VXR",
+    "year": 2005,
+    "pi": 696,
+    "class": "B"
+  },
+  {
+    "make": "Volkswagen",
+    "model": "Volkswagen #1107 Desert Dingo Racing Stock Bug",
+    "year": 1970,
+    "pi": 371,
+    "class": "D"
+  },
+  {
+    "make": "Volkswagen",
+    "model": "Volkswagen #34 Volkswagen Andretti Rallycross Beetle",
+    "year": 2017,
+    "pi": 851,
+    "class": "S1"
+  },
+  {
+    "make": "Volkswagen",
+    "model": "Volkswagen Beetle",
+    "year": 1963,
+    "pi": 100,
+    "class": "D"
+  },
+  {
+    "make": "Volkswagen",
+    "model": "Volkswagen Beetle Forza Edition",
+    "year": 1963,
+    "pi": 900,
+    "class": "S1"
+  },
+  {
+    "make": "Volkswagen",
+    "model": "Volkswagen Class 5/1600 Baja Bug",
+    "year": 1969,
+    "pi": 349,
+    "class": "D"
+  },
+  {
+    "make": "Volkswagen",
+    "model": "Volkswagen Corrado VR6",
+    "year": 1995,
+    "pi": 533,
+    "class": "C"
+  },
+  {
+    "make": "Volkswagen",
+    "model": "Volkswagen Double Cab Pick-Up",
+    "year": 1966,
+    "pi": 100,
+    "class": "D"
+  },
+  {
+    "make": "Volkswagen",
+    "model": "Volkswagen Golf GTI",
+    "year": 1983,
+    "pi": 428,
+    "class": "D"
+  },
+  {
+    "make": "Volkswagen",
+    "model": "Volkswagen Golf Gti 16v Mk2",
+    "year": 1992,
+    "pi": 429,
+    "class": "D"
+  },
+  {
+    "make": "Volkswagen",
+    "model": "Volkswagen Golf R",
+    "year": 2010,
+    "pi": 645,
+    "class": "B"
+  },
+  {
+    "make": "Volkswagen",
+    "model": "Volkswagen Golf R",
+    "year": 2014,
+    "pi": 663,
+    "class": "B"
+  },
+  {
+    "make": "Volkswagen",
+    "model": "Volkswagen Golf R",
+    "year": 2021,
+    "pi": 668,
+    "class": "B"
+  },
+  {
+    "make": "Volkswagen",
+    "model": "Volkswagen Golf R",
+    "year": 2022,
+    "pi": 672,
+    "class": "B"
+  },
+  {
+    "make": "Volkswagen",
+    "model": "Volkswagen Golf R32",
+    "year": 2003,
+    "pi": 618,
+    "class": "B"
+  },
+  {
+    "make": "Volkswagen",
+    "model": "Volkswagen GTI VR6 Mk3",
+    "year": 1998,
+    "pi": 510,
+    "class": "C"
+  },
+  {
+    "make": "Volkswagen",
+    "model": "Volkswagen ID.4",
+    "year": 2021,
+    "pi": 527,
+    "class": "C"
+  },
+  {
+    "make": "Volkswagen",
+    "model": "Volkswagen Pickup LX",
+    "year": 1982,
+    "pi": 100,
+    "class": "D"
+  },
+  {
+    "make": "Volkswagen",
+    "model": "Volkswagen Santana",
+    "year": 2012,
+    "pi": 340,
+    "class": "D"
+  },
+  {
+    "make": "Volkswagen",
+    "model": "Volkswagen Scirocco R",
+    "year": 2011,
+    "pi": 663,
+    "class": "B"
+  },
+  {
+    "make": "Volkswagen",
+    "model": "Volkswagen Scirocco S",
+    "year": 1981,
+    "pi": 293,
+    "class": "D"
+  },
+  {
+    "make": "Volkswagen",
+    "model": "Volkswagen SP-2",
+    "year": 1976,
+    "pi": 252,
+    "class": "D"
+  },
+  {
+    "make": "Volkswagen",
+    "model": "Volkswagen Thing",
+    "year": 1973,
+    "pi": 100,
+    "class": "D"
+  },
+  {
+    "make": "Volkswagen",
+    "model": "Volkswagen Type 2 De Luxe",
+    "year": 1963,
+    "pi": 100,
+    "class": "D"
+  },
+  {
+    "make": "Volvo",
+    "model": "Volvo 242 Turbo Evolution",
+    "year": 1983,
+    "pi": 548,
+    "class": "C"
+  },
+  {
+    "make": "Volvo",
+    "model": "Volvo 850 R",
+    "year": 1997,
+    "pi": 511,
+    "class": "C"
+  },
+  {
+    "make": "Volvo",
+    "model": "Volvo C30 Polestar",
+    "year": 2013,
+    "pi": 626,
+    "class": "B"
+  },
+  {
+    "make": "Volvo",
+    "model": "Volvo V60 Polestar",
+    "year": 2015,
+    "pi": 662,
+    "class": "B"
+  },
+  {
+    "make": "VUHL",
+    "model": "VUHL 05RR",
+    "year": 2017,
+    "pi": 886,
+    "class": "S1"
+  },
+  {
+    "make": "W",
+    "model": "W Motors Lykan HyperSport",
+    "year": 2016,
+    "pi": 877,
+    "class": "S1"
+  },
+  {
+    "make": "Willys",
+    "model": "Willys MB Jeep",
+    "year": 1945,
+    "pi": 198,
+    "class": "D"
+  },
+  {
+    "make": "Wuling",
+    "model": "Wuling Hongguang Mini EV Macaron",
+    "year": 2022,
+    "pi": 136,
+    "class": "D"
+  },
+  {
+    "make": "Wuling",
+    "model": "Wuling Sunshine S",
+    "year": 2013,
+    "pi": 207,
+    "class": "D"
+  },
+  {
+    "make": "Xpeng",
+    "model": "Xpeng P7",
+    "year": 2020,
+    "pi": 722,
+    "class": "A"
+  },
+  {
+    "make": "Zenvo",
+    "model": "Zenvo ST1",
+    "year": 2016,
+    "pi": 883,
+    "class": "S1"
+  },
+  {
+    "make": "Zenvo",
+    "model": "Zenvo TSR-S",
+    "year": 2019,
+    "pi": 927,
+    "class": "S2"
+  }
+]

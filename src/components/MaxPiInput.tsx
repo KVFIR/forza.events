@@ -1,11 +1,14 @@
 import {useEffect, useState} from 'react';
 import {cn} from '../lib/cn';
+import {normalizeEventGame, type ForzaGame} from '../lib/eventGames';
 import {clampPi, PI_MAX, PI_MIN, piClassColor, piRangeI18nParams, piToClass, type CarClassLetter} from '../lib/pi';
 import {useTranslation} from 'react-i18next';
 
 type Props = {
   value: number | null;
   onChange: (value: number | null) => void;
+  /** Class letter bands differ by game (FH5 has no R). */
+  game?: ForzaGame;
   id?: string;
   error?: boolean;
   className?: string;
@@ -18,10 +21,11 @@ function parsePiDraft(draft: string): number | null {
   return Number(digits);
 }
 
-export function MaxPiInput({value, onChange, id, error, className, inputClass}: Props) {
+export function MaxPiInput({value, onChange, game = 'fh6', id, error, className, inputClass}: Props) {
   const {t} = useTranslation();
+  const g = normalizeEventGame(game);
   const [draft, setDraft] = useState(value == null ? '' : String(value));
-  const range = piRangeI18nParams();
+  const range = piRangeI18nParams(g);
 
   useEffect(() => {
     setDraft(value == null ? '' : String(value));
@@ -30,7 +34,7 @@ export function MaxPiInput({value, onChange, id, error, className, inputClass}: 
   const parsed = parsePiDraft(draft);
   const displayPi = parsed !== null ? clampPi(parsed) : value ?? PI_MIN;
   const empty = value == null && parsed === null;
-  const classLetter: CarClassLetter | null = empty ? null : piToClass(displayPi);
+  const classLetter: CarClassLetter | null = empty ? null : piToClass(displayPi, g);
 
   function commit() {
     if (parsed === null) {

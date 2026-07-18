@@ -49,6 +49,14 @@ export function filterByEventType(events: ForzaEvent[], type: EventType | 'all')
   return events.filter((e) => e.type === type);
 }
 
+export function filterByGame(
+  events: ForzaEvent[],
+  game: import('./eventGames').ForzaGame | 'all',
+): ForzaEvent[] {
+  if (game === 'all') return events;
+  return events.filter((e) => e.game === game);
+}
+
 export function isDraftEvent(event: ForzaEvent): boolean {
   return !isPublishedToDiscord(event);
 }

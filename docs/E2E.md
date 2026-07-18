@@ -91,8 +91,9 @@ Manual QA matrix aligned with current code behavior (not an abstract checklist).
 
 - [ ] Browse feed = upcoming published events with registration open (`isBrowseFeedEvent`: not draft, not live/started, not completed/cancelled/archived).
 - [ ] Type filter: `road`, `dirt`, `cruise` + **All**.
+- [ ] Game filter: **All** (default) / FH5 / FH6; cards show short game label; Detail shows full game badge.
 - [ ] Sort: event date / created / fill.
-- [ ] Empty filter → “no match” + clear filters.
+- [ ] Empty filter → “no match” + clear filters (clears type **and** game).
 - [ ] Cards: type, date, organiser (`guildName` or host), fill, cover via **proxy URL**.
 
 ### Realtime (two clients)
@@ -231,6 +232,7 @@ Manual QA matrix aligned with current code behavior (not an abstract checklist).
 
 - [ ] Validation on empty title / type / date.
 - [ ] All event types — correct badge/colors on cards after publish.
+- [ ] Game: FH5 | FH6 (default FH6); changing game clears restricted cars; car search scoped to game; locked after publish.
 - [ ] Cover: default → custom → compress 16:9.
 - [ ] Cover upload **after** first draft save (`upload-cover` + `guild_id`).
 - [ ] **Save as draft** → My Events.

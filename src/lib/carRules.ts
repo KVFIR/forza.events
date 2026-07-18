@@ -1,4 +1,5 @@
 import type {ForzaEvent} from './types';
+import {normalizeEventGame} from './eventGames';
 import {formatMaxPi} from './pi';
 
 /** Open build shows car rules only when a PI cap and/or extra notes are set. */
@@ -11,10 +12,11 @@ export function openBuildHasDisplayRules(
 
 /** Label + optional PI for cards/detail; null when nothing to show. */
 export function formatOpenBuildCarRulesDisplay(
-  input: Pick<ForzaEvent, 'maxPi' | 'additionalCarRestrictions'>,
+  input: Pick<ForzaEvent, 'maxPi' | 'additionalCarRestrictions' | 'game'>,
 ): {notes: string | null; piLabel: string | null} | null {
   const notes = input.additionalCarRestrictions?.trim() || null;
-  const piLabel = input.maxPi != null ? formatMaxPi(input.maxPi) : null;
+  const piLabel =
+    input.maxPi != null ? formatMaxPi(input.maxPi, normalizeEventGame(input.game)) : null;
   if (!notes && !piLabel) return null;
   return {notes, piLabel};
 }

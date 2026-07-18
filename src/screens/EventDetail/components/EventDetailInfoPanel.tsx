@@ -10,6 +10,7 @@ import {
   openBuildHasDisplayRules,
 } from '../../../lib/carRules';
 import {piClassColor, piToClass} from '../../../lib/pi';
+import {normalizeEventGame} from '../../../lib/eventGames';
 import {sectionLabelClass} from '../../../components/ui/formStyles';
 import {resolveEventGroups} from '../../../lib/eventRoster';
 import type {ForzaEvent} from '../../../lib/types';
@@ -28,6 +29,7 @@ type Props = {
 
 export function EventDetailInfoPanel({event, when}: Props) {
   const {t} = useTranslation();
+  const game = normalizeEventGame(event.game);
   const openBuildDisplay = formatOpenBuildCarRulesDisplay(event);
   const showCarRulesRow =
     event.carRuleMode === 'restricted_list' || openBuildHasDisplayRules(event);
@@ -159,7 +161,7 @@ export function EventDetailInfoPanel({event, when}: Props) {
                   <span
                     className={cn(
                       'text-right font-bold tabular-nums',
-                      piClassColor[piToClass(event.maxPi!)] ?? 'text-muted',
+                      piClassColor[piToClass(event.maxPi!, game)] ?? 'text-muted',
                     )}
                   >
                     {openBuildDisplay.piLabel}
@@ -172,7 +174,7 @@ export function EventDetailInfoPanel({event, when}: Props) {
           ) : (
             <ul className="mt-1.5 space-y-2">
               {event.allowedCars.map((c) => {
-                const maxClass = piToClass(c.maxPi);
+                const maxClass = piToClass(c.maxPi, game);
                 return (
                   <li key={c.carId}>
                     <div className={carRuleRowClass}>

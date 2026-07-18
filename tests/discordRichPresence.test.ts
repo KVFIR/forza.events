@@ -21,6 +21,7 @@ function publishedEvent(overrides: Partial<ForzaEvent> = {}): ForzaEvent {
     id: 'e1',
     title: 'Test Event',
     type: 'road',
+    game: 'fh6',
     status: 'open',
     lifecycle: 'open',
     startsAt: new Date(Date.now() + 86_400_000).toISOString(),

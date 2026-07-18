@@ -3,28 +3,53 @@ import {useTranslation} from 'react-i18next';
 import {useNavigate} from 'react-router-dom';
 import {Alert} from '../components/ui/Alert';
 import {EventList} from '../components/EventList';
-import {EventListMetaSelect} from '../components/EventListMetaSelect';
+import {EventListFilterChips} from '../components/EventListFilterChips';
 import {useAuth} from '../context/AuthContext';
 import {useJoinedEvents} from '../context/JoinedEventsContext';
 import {useMyEventsCatalog} from '../hooks/useMyEventsCatalog';
 import {useParticipantResults} from '../hooks/useParticipantResults';
+import {EVENT_GAMES, eventGameLabel, type ForzaGame} from '../lib/eventGames';
+import {filterByGame, type MyEventsScope} from '../lib/eventList';
 import {isEventSuccessfullyCompleted} from '../lib/eventSpec';
-import type {MyEventsScope} from '../lib/eventList';
+
+type GameFilter = ForzaGame | 'all';
 
 export function MyEvents() {
   const {t} = useTranslation();
   const navigate = useNavigate();
 
-  const scopeOptions: {value: MyEventsScope; label: string}[] = [
-    {value: 'all', label: t('myEvents.scopeAll')},
-    {value: 'hosted', label: t('myEvents.scopeHosted')},
-    {value: 'joined', label: t('myEvents.scopeJoined')},
-  ];
+  const scopeOptions = useMemo(
+    () => [
+      {value: 'all' as const, label: t('myEvents.scopeAll')},
+      {value: 'hosted' as const, label: t('myEvents.scopeHosted')},
+      {value: 'joined' as const, label: t('myEvents.scopeJoined')},
+    ],
+    [t],
+  );
+
+  const gameOptions = useMemo(
+    () => [
+      {value: 'all' as const, label: t('browse.filterAll')},
+      ...EVENT_GAMES.map((g) => ({
+        value: g.value,
+        label: eventGameLabel(g.value),
+        selectedClassName: g.chipSelected,
+      })),
+    ],
+    [t],
+  );
+
   const [scope, setScope] = useState<MyEventsScope>('all');
+  const [gameFilter, setGameFilter] = useState<GameFilter>('all');
   const {isSignedIn, loading: authLoading, user} = useAuth();
   const {isJoined} = useJoinedEvents();
-  const {filtered, isLoading, isRefreshing, loadError, draftsLoadError, refetch} =
+  const {filtered: scoped, isLoading, isRefreshing, loadError, draftsLoadError, refetch} =
     useMyEventsCatalog(scope);
+
+  const filtered = useMemo(
+    () => filterByGame(scoped, gameFilter),
+    [scoped, gameFilter],
+  );
 
   const placementEventIds = useMemo(
     () =>
@@ -34,6 +59,13 @@ export function MyEvents() {
     [filtered, isJoined],
   );
   const participantResults = useParticipantResults(placementEventIds, user.discordId);
+
+  const hasActiveFilters = scope !== 'all' || gameFilter !== 'all';
+
+  const clearFilters = () => {
+    setScope('all');
+    setGameFilter('all');
+  };
 
   const emptyTitle =
     !authLoading && !isSignedIn
@@ -76,22 +108,30 @@ export function MyEvents() {
         emptyTitle={emptyTitle}
         emptyDescription={emptyDescription}
         emptyAction={
-          scope === 'joined'
-            ? undefined
-            : scope !== 'all'
-              ? {label: t('common.clearFilters'), onClick: () => setScope('all')}
-              : !loadError && isSignedIn
-                ? {label: t('myEvents.createEvent'), onClick: () => navigate('/create')}
-                : undefined
+          hasActiveFilters
+            ? {label: t('common.clearFilters'), onClick: clearFilters}
+            : !loadError && isSignedIn
+              ? {label: t('myEvents.createEvent'), onClick: () => navigate('/create')}
+              : undefined
         }
         participantResults={participantResults}
-        metaRight={
-          <EventListMetaSelect
-            value={scope}
-            onChange={setScope}
-            options={scopeOptions}
-            aria-label={t('myEvents.filterAria')}
-          />
+        filters={
+          <>
+            <EventListFilterChips
+              label={t('myEvents.filterScope')}
+              value={scope}
+              onChange={setScope}
+              options={scopeOptions}
+              aria-label={t('myEvents.filterAria')}
+            />
+            <EventListFilterChips
+              label={t('browse.filterGame')}
+              value={gameFilter}
+              onChange={setGameFilter}
+              options={gameOptions}
+              aria-label={t('browse.filterByGame')}
+            />
+          </>
         }
       />
     </div>

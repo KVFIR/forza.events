@@ -1,7 +1,7 @@
 import {useTranslation} from 'react-i18next';
 import {useNavigate} from 'react-router-dom';
 import {busyLabel} from '../../../i18n/busyLabels';
-import {Badge, DraftBadge, StatusBadge} from '../../../components/ui/Badge';
+import {Badge, DraftBadge, GameBadge, StatusBadge} from '../../../components/ui/Badge';
 import {Button} from '../../../components/ui/Button';
 import {Alert} from '../../../components/ui/Alert';
 import {
@@ -161,6 +161,7 @@ export function EventDetailTitleSection({
       <div className="relative z-10 -mt-10 flex items-center gap-3 sm:-mt-12">
         <div className="min-w-0 flex-1">
           <div className="flex flex-wrap items-center gap-2">
+            <GameBadge game={event.game} variant="full" />
             <Badge type={event.type} />
             {view.isDraft ? <DraftBadge /> : <StatusBadge status={displayStatus} />}
           </div>

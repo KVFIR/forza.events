@@ -12,6 +12,7 @@ function event(id: string): ForzaEvent {
     slug: 'race',
     title: 'Race',
     type: 'road',
+    game: 'fh6',
     status: 'ended',
     lifecycle: 'completed',
     startsAt: new Date().toISOString(),

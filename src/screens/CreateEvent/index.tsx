@@ -80,6 +80,7 @@ export function CreateEvent() {
     navigate,
     setTitle,
     setType,
+    setGame,
     setStartsAtLocal,
     setDescription,
     setTracks,
@@ -201,8 +202,10 @@ export function CreateEvent() {
   const eventStepProps = {
     values,
     fieldErrors,
+    lockGame: isPublished,
     onTitle: setTitle,
     onType: setType,
+    onGame: setGame,
     onStartsAtLocal: setStartsAtLocal,
     onDescription: setDescription,
     onCoverChange,

@@ -1,34 +1,62 @@
 #!/usr/bin/env node
 /**
- * Sync FH6 car catalog into Postgres without breaking event_cars links.
+ * Sync FH5 + FH6 car catalogs into Postgres without breaking event_cars links.
  *
- * - UPSERT on (make, model, year, pi) — existing UUIDs are preserved
- * - Cars removed from fh6cars.json → active = false (not deleted)
+ * - UPSERT on (game, make, model, year, pi) — existing UUIDs are preserved
+ * - Cars removed from a game's catalog → active = false for that game only
  * - Does NOT touch event_cars
  *
  * Usage:
  *   npm run seed:cars              # prefers Supabase CLI (--linked)
- *   node scripts/seed-cars.mjs     # same
  *   node scripts/seed-cars.mjs --service-role  # SUPABASE_SERVICE_ROLE_KEY + JS upsert
  *
- * Requires migration 006_cars_catalog_sync.sql applied first.
+ * Requires migration 029_forza_game.sql applied first.
  */
 import {execSync} from 'node:child_process';
-import {readFileSync, writeFileSync} from 'node:fs';
+import {readFileSync, writeFileSync, existsSync} from 'node:fs';
 import {tmpdir} from 'node:os';
 import {dirname, join} from 'node:path';
 import {fileURLToPath} from 'node:url';
 import {createClient} from '@supabase/supabase-js';
+import {stripYearFromModelTitle} from './catalogModelUtils.mjs';
 
 const root = dirname(fileURLToPath(import.meta.url));
 const repoRoot = join(root, '..');
-const catalogPath = join(repoRoot, 'supabase/seed/fh6cars.json');
+const catalogs = [
+  {game: 'fh6', path: join(repoRoot, 'supabase/seed/fh6cars.json')},
+  {game: 'fh5', path: join(repoRoot, 'supabase/seed/fh5cars.json')},
+];
 
 const useServiceRole = process.argv.includes('--service-role');
-const cars = JSON.parse(readFileSync(catalogPath, 'utf8'));
 
-if (!Array.isArray(cars) || cars.length === 0) {
-  console.error('Empty or invalid catalog:', catalogPath);
+function loadCatalogRows() {
+  const rows = [];
+  for (const {game, path} of catalogs) {
+    if (!existsSync(path)) {
+      console.warn(`Skipping missing catalog: ${path}`);
+      continue;
+    }
+    const cars = JSON.parse(readFileSync(path, 'utf8'));
+    if (!Array.isArray(cars) || cars.length === 0) {
+      console.warn(`Empty catalog: ${path}`);
+      continue;
+    }
+    for (const c of cars) {
+      rows.push({
+        game,
+        make: c.make,
+        model: stripYearFromModelTitle(c.model),
+        year: c.year,
+        pi: c.pi,
+      });
+    }
+  }
+  return rows;
+}
+
+const cars = loadCatalogRows();
+if (cars.length === 0) {
+  console.error('No cars loaded from fh5cars.json / fh6cars.json');
   process.exit(1);
 }
 
@@ -44,13 +72,14 @@ function carSearchText(c) {
 }
 
 function catalogKey(c) {
-  return `${c.make}\0${c.model}\0${c.year}\0${c.pi}`;
+  return `${c.game}\0${c.make}\0${c.model}\0${c.year}\0${c.pi}`;
 }
 
 function buildSyncSql(rows) {
   const lines = [
     'BEGIN;',
     'CREATE TEMP TABLE _catalog_staging (',
+    '  game forza_game NOT NULL,',
     '  make text NOT NULL,',
     '  model text NOT NULL,',
     '  year integer NOT NULL,',
@@ -66,17 +95,19 @@ function buildSyncSql(rows) {
       .map((c) => {
         const y = c.year;
         const st = escSql(carSearchText(c));
-        return `('${escSql(c.make)}', '${escSql(c.model)}', ${y}, ${c.pi}, '${st}')`;
+        return `('${c.game}', '${escSql(c.make)}', '${escSql(c.model)}', ${y}, ${c.pi}, '${st}')`;
       })
       .join(',\n  ');
-    lines.push(`INSERT INTO _catalog_staging (make, model, year, pi, search_text) VALUES\n  ${vals};`);
+    lines.push(
+      `INSERT INTO _catalog_staging (game, make, model, year, pi, search_text) VALUES\n  ${vals};`,
+    );
   }
 
   lines.push(
-    `INSERT INTO cars (make, model, year, pi, search_text, active)
-SELECT make, model, year, pi, search_text, true
+    `INSERT INTO cars (game, make, model, year, pi, search_text, active)
+SELECT game, make, model, year, pi, search_text, true
 FROM _catalog_staging
-ON CONFLICT (make, model, year, pi)
+ON CONFLICT (game, make, model, year, pi)
 DO UPDATE SET
   search_text = EXCLUDED.search_text,
   active = true;`,
@@ -85,7 +116,8 @@ SET active = false
 WHERE c.active = true
   AND NOT EXISTS (
     SELECT 1 FROM _catalog_staging s
-    WHERE s.make = c.make
+    WHERE s.game = c.game
+      AND s.make = c.make
       AND s.model = c.model
       AND s.year = c.year
       AND s.pi = c.pi
@@ -110,6 +142,7 @@ async function syncViaServiceRole() {
   const batch = 100;
   for (let i = 0; i < cars.length; i += batch) {
     const chunk = cars.slice(i, i + batch).map((c) => ({
+      game: c.game,
       make: c.make,
       model: c.model,
       year: c.year,
@@ -118,7 +151,7 @@ async function syncViaServiceRole() {
       active: true,
     }));
     const {error} = await supabase.from('cars').upsert(chunk, {
-      onConflict: 'make,model,year,pi',
+      onConflict: 'game,make,model,year,pi',
     });
     if (error) {
       console.error(error);
@@ -135,7 +168,7 @@ async function syncViaServiceRole() {
     const to = from + pageSize - 1;
     const {data, error} = await supabase
       .from('cars')
-      .select('id, make, model, year, pi')
+      .select('id, game, make, model, year, pi')
       .eq('active', true)
       .range(from, to);
     if (error) {
@@ -176,7 +209,10 @@ async function main() {
   } else {
     syncViaLinkedCli();
   }
-  console.log(`Done: synced ${cars.length} cars from ${catalogPath}`);
+  const byGame = Object.fromEntries(
+    catalogs.map(({game}) => [game, cars.filter((c) => c.game === game).length]),
+  );
+  console.log(`Done: synced ${cars.length} cars`, byGame);
 }
 
 main().catch((e) => {

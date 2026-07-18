@@ -128,10 +128,15 @@
   },
   "browse": {
     "allTypes": "All types",
+    "allGames": "All games",
+    "filterAll": "All",
+    "filterGame": "Game",
+    "filterType": "Type",
     "sortEventDate": "Event date",
     "sortCreated": "Created",
     "sortFill": "Fill",
     "filterByType": "Filter by event type",
+    "filterByGame": "Filter by game",
     "sortEvents": "Sort events",
     "noMatch": "No events match these filters",
     "errorNotConfiguredTitle": "App is missing Supabase configuration",
@@ -146,6 +151,7 @@
     "scopeHosted": "Hosted",
     "scopeJoined": "Joined",
     "filterAria": "Filter my events",
+    "filterScope": "Scope",
     "unableToLoad": "Unable to load your events",
     "loadError": "Could not load your events",
     "noJoined": "No joined events yet",
@@ -176,6 +182,12 @@
     "road": "Road racing",
     "dirt": "Dirt racing",
     "cruise": "Meet & cruise"
+  },
+  "eventGames": {
+    "fh5": "FH5",
+    "fh6": "FH6",
+    "fh5Full": "Forza Horizon 5",
+    "fh6Full": "Forza Horizon 6"
   },
   "eventStatus": {
     "open": "Open",
@@ -318,6 +330,8 @@
     "eventName": "Event name",
     "eventNamePlaceholder": "Name your event",
     "type": "Type",
+    "game": "Game",
+    "gameLocked": "Locked after publish.",
     "dateTime": "Date & time",
     "description": "Description",
     "descriptionPlaceholder": "e.g. expected length, route plan, livery tips, house rules, voice channel",
@@ -485,6 +499,7 @@
     "convoyLeaderGuildCheckFailed": "Could not verify convoy leader membership. Try again in a moment.",
     "targetGuildLocked": "Server cannot be changed after publish.",
     "targetChannelLocked": "Channel cannot be changed after publish.",
+    "gameLocked": "Game cannot be changed after publish.",
     "trackNameRequired": "Each track needs a name.",
     "trackShareCodeInvalid": "Share code must be nine digits.",
     "trackFormatTooLong": "Format is too long (max 100 characters).",

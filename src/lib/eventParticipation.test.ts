@@ -15,6 +15,7 @@ const base = {
   slug: 'e1',
   title: 'Test',
   type: 'road' as const,
+    game: 'fh6',
   status: 'open' as const,
   lifecycle: 'open' as const,
   startsAt: new Date().toISOString(),

@@ -21,6 +21,7 @@ type Props<T extends string> = {
   options: SegmentOption<T>[];
   ariaLabel: string;
   invalid?: boolean;
+  disabled?: boolean;
   layout?: 'flex' | 'grid';
   containerClassName?: string;
   itemClassName?: string;
@@ -32,6 +33,7 @@ export function SegmentGroup<T extends string>({
   options,
   ariaLabel,
   invalid,
+  disabled,
   layout = 'flex',
   containerClassName,
   itemClassName,
@@ -43,11 +45,13 @@ export function SegmentGroup<T extends string>({
         'min-w-0 w-full',
         layout === 'grid' && 'grid gap-1',
         layout === 'flex' && 'flex',
+        disabled && 'opacity-60',
         containerClassName,
       )}
       role="group"
       aria-label={ariaLabel}
       aria-invalid={invalid || undefined}
+      aria-disabled={disabled || undefined}
     >
       {options.map((opt) => {
         const selected = value === opt.value;
@@ -56,6 +60,7 @@ export function SegmentGroup<T extends string>({
             key={opt.value}
             type="button"
             aria-pressed={selected}
+            disabled={disabled}
             onClick={() => onChange(opt.value)}
             className={cn(
               segmentItemBaseClass,
@@ -65,6 +70,7 @@ export function SegmentGroup<T extends string>({
               selected
                 ? (opt.selectedClassName ?? segmentItemSelectedClass)
                 : segmentItemIdleClass,
+              disabled && 'cursor-not-allowed',
             )}
           >
             {opt.label}

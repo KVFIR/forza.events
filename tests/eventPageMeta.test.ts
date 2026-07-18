@@ -14,6 +14,7 @@ const baseEvent = {
   id: '94d86ab7-ce55-49f8-84e3-91f3b9a7b39c',
   title: 'Sunset Sprint',
   type: 'road' as const,
+    game: 'fh6',
   startsAt: '2026-07-15T18:00:00.000Z',
   currentPlayers: 4,
   maxPlayers: 12,

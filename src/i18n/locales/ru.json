@@ -128,10 +128,15 @@
   },
   "browse": {
     "allTypes": "Все типы",
+    "allGames": "Все игры",
+    "filterAll": "Все",
+    "filterGame": "Игра",
+    "filterType": "Тип",
     "sortEventDate": "Дата события",
     "sortCreated": "Создано",
     "sortFill": "Заполненность",
     "filterByType": "Фильтр по типу события",
+    "filterByGame": "Фильтр по игре",
     "sortEvents": "Сортировка событий",
     "noMatch": "Нет событий по этим фильтрам",
     "errorNotConfiguredTitle": "Не настроен Supabase",
@@ -146,6 +151,7 @@
     "scopeHosted": "Мои",
     "scopeJoined": "Участие",
     "filterAria": "Фильтр моих событий",
+    "filterScope": "Список",
     "unableToLoad": "Не удалось загрузить ваши события",
     "loadError": "Не удалось загрузить события",
     "noJoined": "Вы пока ни в одном событии",
@@ -176,6 +182,12 @@
     "road": "Шоссе",
     "dirt": "Грунт",
     "cruise": "Встреча и круиз"
+  },
+  "eventGames": {
+    "fh5": "FH5",
+    "fh6": "FH6",
+    "fh5Full": "Forza Horizon 5",
+    "fh6Full": "Forza Horizon 6"
   },
   "eventStatus": {
     "open": "Открыто",
@@ -320,6 +332,8 @@
     "eventName": "Название",
     "eventNamePlaceholder": "Название события",
     "type": "Тип",
+    "game": "Игра",
+    "gameLocked": "Заблокировано после публикации.",
     "dateTime": "Дата и время",
     "description": "Описание",
     "descriptionPlaceholder": "напр. длительность, план заезда, ливреи, особые правила, голосовой канал",
@@ -489,6 +503,7 @@
     "convoyLeaderGuildCheckFailed": "Не удалось проверить участие лидера конвоя на сервере. Попробуйте снова через минуту.",
     "targetGuildLocked": "Сервер нельзя изменить после публикации.",
     "targetChannelLocked": "Канал нельзя изменить после публикации.",
+    "gameLocked": "Игру нельзя изменить после публикации.",
     "trackNameRequired": "У каждой трассы должно быть название.",
     "trackShareCodeInvalid": "Share-код — ровно 9 цифр.",
     "trackFormatTooLong": "Слишком длинный формат (макс. 100 символов).",

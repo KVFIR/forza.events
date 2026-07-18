@@ -2,32 +2,59 @@ import {useMemo, useState, useEffect} from 'react';
 import {useTranslation} from 'react-i18next';
 import type {EventType} from '../lib/types';
 import {trackOncePerSession} from '../lib/analytics';
-import {EVENT_TYPES, eventTypeLabel} from '../lib/eventTypes';
+import {EVENT_TYPES, eventTypeLabel, eventTypeMeta} from '../lib/eventTypes';
+import {EVENT_GAMES, eventGameLabel, type ForzaGame} from '../lib/eventGames';
 import {EventList} from '../components/EventList';
+import {EventListFilterChips} from '../components/EventListFilterChips';
 import {EventListMetaSelect} from '../components/EventListMetaSelect';
 import {useAuth} from '../context/AuthContext';
 import {DISCORD_SUPABASE_PROXY_PREFIX} from '../lib/supabaseEnv';
 import {usePublishedEvents} from '../hooks/usePublishedEvents';
-import {filterByEventType, sortEvents, type EventSortKey} from '../lib/eventList';
+import {filterByEventType, filterByGame, sortEvents, type EventSortKey} from '../lib/eventList';
 
 type TypeFilter = EventType | 'all';
+type GameFilter = ForzaGame | 'all';
 
 export function BrowseEvents() {
   const {t} = useTranslation();
   const {isStandalone} = useAuth();
 
-  const typeOptions: {value: TypeFilter; label: string}[] = [
-    {value: 'all', label: t('browse.allTypes')},
-    ...EVENT_TYPES.map((et) => ({value: et.value, label: eventTypeLabel(et.value)})),
-  ];
+  const gameOptions = useMemo(
+    () => [
+      {value: 'all' as const, label: t('browse.filterAll')},
+      ...EVENT_GAMES.map((g) => ({
+        value: g.value,
+        label: eventGameLabel(g.value),
+        selectedClassName: g.chipSelected,
+      })),
+    ],
+    [t],
+  );
+
+  const typeOptions = useMemo(
+    () => [
+      {value: 'all' as const, label: t('browse.filterAll')},
+      ...EVENT_TYPES.map((et) => {
+        const meta = eventTypeMeta(et.value);
+        return {
+          value: et.value,
+          label: eventTypeLabel(et.value),
+          selectedClassName: `${meta.badge.border} ${meta.badge.bg} ${meta.badge.text}`,
+        };
+      }),
+    ],
+    [t],
+  );
 
   const sortOptions: {value: EventSortKey; label: string}[] = [
     {value: 'event_date', label: t('browse.sortEventDate')},
     {value: 'created', label: t('browse.sortCreated')},
     {value: 'fill', label: t('browse.sortFill')},
   ];
+
   const {events, isLoading, isRefreshing, loadError, refetch} = usePublishedEvents();
   const [typeFilter, setTypeFilter] = useState<TypeFilter>('all');
+  const [gameFilter, setGameFilter] = useState<GameFilter>('all');
   const [sort, setSort] = useState<EventSortKey>('event_date');
 
   useEffect(() => {
@@ -36,10 +63,16 @@ export function BrowseEvents() {
 
   const filtered = useMemo(() => {
     const byType = filterByEventType(events, typeFilter);
-    return sortEvents(byType, sort);
-  }, [events, typeFilter, sort]);
+    const byGame = filterByGame(byType, gameFilter);
+    return sortEvents(byGame, sort);
+  }, [events, typeFilter, gameFilter, sort]);
 
-  const hasActiveFilters = typeFilter !== 'all';
+  const hasActiveFilters = typeFilter !== 'all' || gameFilter !== 'all';
+
+  const clearFilters = () => {
+    setTypeFilter('all');
+    setGameFilter('all');
+  };
 
   const errorTitle =
     loadError === 'not_configured'
@@ -69,28 +102,32 @@ export function BrowseEvents() {
         emptyDescription={loadError ? errorDescription : undefined}
         emptyAction={
           !loadError && hasActiveFilters
-            ? {label: t('common.clearFilters'), onClick: () => setTypeFilter('all')}
+            ? {label: t('common.clearFilters'), onClick: clearFilters}
             : undefined
         }
-        metaRight={
+        sortControl={
+          <EventListMetaSelect
+            value={sort}
+            onChange={setSort}
+            options={sortOptions}
+            aria-label={t('browse.sortEvents')}
+          />
+        }
+        filters={
           <>
-            <EventListMetaSelect
+            <EventListFilterChips
+              label={t('browse.filterGame')}
+              value={gameFilter}
+              onChange={setGameFilter}
+              options={gameOptions}
+              aria-label={t('browse.filterByGame')}
+            />
+            <EventListFilterChips
+              label={t('browse.filterType')}
               value={typeFilter}
               onChange={setTypeFilter}
               options={typeOptions}
               aria-label={t('browse.filterByType')}
-            />
-            <span className="text-[11px] text-muted/35" aria-hidden>
-              ·
-            </span>
-            <span className="shrink-0 text-[11px] font-medium text-muted">
-              {t('common.sortBy')}
-            </span>
-            <EventListMetaSelect
-              value={sort}
-              onChange={setSort}
-              options={sortOptions}
-              aria-label={t('browse.sortEvents')}
             />
           </>
         }

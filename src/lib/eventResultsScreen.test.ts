@@ -8,6 +8,7 @@ function event(partial: Partial<ForzaEvent>): ForzaEvent {
     slug: 'race',
     title: 'Race',
     type: 'road',
+    game: 'fh6',
     status: 'live',
     lifecycle: 'open',
     startsAt: new Date(Date.now() - 60_000).toISOString(),

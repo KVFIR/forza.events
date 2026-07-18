@@ -64,6 +64,7 @@ describe('publish validation parity', () => {
   const base = {
     title: 'Race',
     type: 'road',
+    game: 'fh6',
     startsAtLocal: '2030-01-01T12:00',
     guildId: 'g1',
     channelId: 'c1',

@@ -22,6 +22,7 @@ const VALIDATION_MESSAGES_EN: Record<ValidationCode, string> = {
   PI_RANGE: `Set a PI cap from ${piRangeLabelEn()}.`,
   TARGET_GUILD_LOCKED: 'Server cannot be changed after publish.',
   TARGET_CHANNEL_LOCKED: 'Channel cannot be changed after publish.',
+  GAME_LOCKED: 'Game cannot be changed after publish.',
   TRACK_NAME_REQUIRED: 'Each track needs a name.',
   TRACK_SHARE_CODE_INVALID: 'Share code must be nine digits.',
   TRACK_FORMAT_TOO_LONG: 'Format is too long (max 100 characters).',

@@ -7,6 +7,7 @@ import {EVENT_PLAYER_SLOTS} from './constants';
 import {resolveEventCoverUrl} from './eventCovers';
 import {parseTracksFromRow} from './eventTracks';
 import {normalizeEventType} from './eventTypes';
+import {normalizeEventGame} from './eventGames';
 import {isHostDraftLifecycle} from './draftEvents';
 import {parseGuildInviteUrl} from './guildDisplay';
 import {sortParticipantsByJoinedAt} from './eventRoster';
@@ -43,6 +44,7 @@ type DbEventRow = {
   slug: string;
   title: string;
   type: EventType;
+  game?: string | null;
   status: string;
   starts_at: string;
   ends_at?: string | null;
@@ -306,6 +308,7 @@ export function mapDbEvent(row: DbEventRow): ForzaEvent {
     slug: row.slug,
     title: row.title,
     type: normalizeEventType(row.type),
+    game: normalizeEventGame(row.game),
     status: mapStatus(row),
     lifecycle: mapLifecycle(row.status),
     startsAt: row.starts_at,
@@ -604,12 +607,16 @@ function mapCarSearchRows(
   }));
 }
 
-export async function searchCars(query: string): Promise<CarSearchResult[]> {
+export async function searchCars(
+  query: string,
+  options: {game?: import('./eventGames').ForzaGame} = {},
+): Promise<CarSearchResult[]> {
   const q = sanitizeCarSearchQuery(query);
   if (!q) return [];
+  const game = options.game ?? 'fh6';
 
   if (!isSupabaseConfigured()) {
-    return await searchCarCatalog(q);
+    return await searchCarCatalog(q, {game});
   }
 
   try {
@@ -619,6 +626,7 @@ export async function searchCars(query: string): Promise<CarSearchResult[]> {
       .from('cars')
       .select('id, make, model, year, pi')
       .eq('active', true)
+      .eq('game', game)
       .or(
         `search_text.ilike."${pattern}",make.ilike."${pattern}",model.ilike."${pattern}"`,
       )
@@ -626,17 +634,17 @@ export async function searchCars(query: string): Promise<CarSearchResult[]> {
 
     if (error) {
       console.error('searchCars', error);
-      return await searchCarCatalog(q);
+      return await searchCarCatalog(q, {game});
     }
 
     if (data?.length) {
       return mapCarSearchRows(data);
     }
 
-    return await searchCarCatalog(q);
+    return await searchCarCatalog(q, {game});
   } catch (err) {
     console.error('searchCars', err);
-    return await searchCarCatalog(q);
+    return await searchCarCatalog(q, {game});
   }
 }
 

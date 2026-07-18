@@ -24,6 +24,7 @@ import {
 } from '../../lib/datetime';
 import {isLocalDevHost, supportsBrowserOAuth} from '../../lib/runtime';
 import {isEventType} from '../../lib/eventTypes';
+import {normalizeEventGame, type ForzaGame} from '../../lib/eventGames';
 import {clampPi} from '../../lib/pi';
 import {EVENT_PLAYER_SLOTS} from '../../lib/constants';
 import {
@@ -85,6 +86,7 @@ export function useCreateEventForm() {
 
   const [title, setTitle] = useState('');
   const [type, setType] = useState<CreateEventType>('');
+  const [game, setGame] = useState<ForzaGame>('fh6');
   const [startsAtLocal, setStartsAtLocal] = useState('');
   const [description, setDescription] = useState('');
   const [coverFile, setCoverFile] = useState<File | null>(null);
@@ -131,6 +133,7 @@ export function useCreateEventForm() {
     () => ({
       title,
       type,
+      game,
       startsAtLocal,
       description,
       coverFile,
@@ -152,6 +155,7 @@ export function useCreateEventForm() {
     [
       title,
       type,
+      game,
       startsAtLocal,
       description,
       coverFile,
@@ -278,6 +282,7 @@ export function useCreateEventForm() {
         if (published) setStep(0);
         setTitle(ev.title);
         setType(ev.type);
+        setGame(normalizeEventGame(ev.game));
         setStartsAtLocal(utcToLocalInput(ev.startsAt, defaultTimezone()));
         setDescription(ev.description ?? '');
         setTracks(ev.tracks ?? []);
@@ -376,6 +381,7 @@ export function useCreateEventForm() {
       channel_id: targetChannelId || null,
       title,
       type,
+      game,
       starts_at: localInputToUtc(startsAtLocal, tz),
       timezone_hint: tz,
       max_players: EVENT_PLAYER_SLOTS,
@@ -692,6 +698,12 @@ export function useCreateEventForm() {
       if (coverUrl !== null && !isBundledDefaultCover(coverUrl)) return;
       setCoverUrl(null);
       setCoverPreview(defaultCoverPath(nextType));
+    },
+    setGame: (nextGame: ForzaGame) => {
+      if (isPublished || nextGame === game) return;
+      setGame(nextGame);
+      setEventCars([]);
+      clearFieldError('eventCars');
     },
     setStartsAtLocal: (v: string) => {
       clearFieldError('startsAtLocal');

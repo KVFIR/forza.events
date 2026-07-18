@@ -18,7 +18,10 @@ type Props = {
   emptyTitle: string;
   emptyDescription?: string;
   emptyAction?: {label: string; onClick: () => void};
-  metaRight?: ReactNode;
+  /** Sort control — top-right of the filter block. */
+  sortControl?: ReactNode;
+  /** Filter chip rows. */
+  filters?: ReactNode;
   /** Published placement per event for the signed-in participant. */
   participantResults?: Map<string, ParticipantEventResult>;
 };
@@ -32,7 +35,8 @@ export function EventList({
   emptyTitle,
   emptyDescription,
   emptyAction,
-  metaRight,
+  sortControl,
+  filters,
   participantResults,
 }: Props) {
   const {t} = useTranslation();
@@ -63,17 +67,12 @@ export function EventList({
 
   return (
     <ContentReveal>
-      <div className="mb-3 flex min-w-0 items-center justify-between gap-3">
-        <div className="flex min-w-0 items-center gap-2">
-          <p className="shrink-0 text-[11px] font-medium text-muted">{countLabel}</p>
-          {isRefreshing ? (
-            <Spinner size="sm" label={t('loading.refreshing')} className="shrink-0" muted />
-          ) : null}
+      {(filters || sortControl) ? (
+        <div className="mb-3 flex min-w-0 items-start gap-3">
+          {filters ? <div className="min-w-0 flex-1 space-y-1.5">{filters}</div> : null}
+          {sortControl ? <div className="shrink-0 pt-px">{sortControl}</div> : null}
         </div>
-        {metaRight ? (
-          <div className="flex min-w-0 items-center justify-end gap-1.5">{metaRight}</div>
-        ) : null}
-      </div>
+      ) : null}
 
       <ul className="flex list-none flex-col gap-2">
         {events.map((event) => (
@@ -93,6 +92,13 @@ export function EventList({
           secondaryAction={emptyAction}
         />
       )}
+
+      <div className="mt-3 flex min-w-0 items-center gap-2">
+        <p className="shrink-0 text-[11px] font-medium text-muted">{countLabel}</p>
+        {isRefreshing ? (
+          <Spinner size="sm" label={t('loading.refreshing')} className="shrink-0" muted />
+        ) : null}
+      </div>
     </ContentReveal>
   );
 }

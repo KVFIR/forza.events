@@ -1,9 +1,10 @@
-import {formatCarEmbedName} from './carDisplay.ts';
+import {formatCarListDisplayNames} from './carDisplay.ts';
 import {openBuildHasDisplayRules} from './carRules.ts';
 import {eventHasStarted} from './eventSpec.ts';
 import {resolveCoverAbsolute} from './eventCovers.ts';
 import {openEventCustomId} from './eventLaunch.ts';
 import {eventTypeEmbedColor} from './eventTypes.ts';
+import {eventGameLabelEn, normalizeEventGame, type ForzaGame} from './eventGames.ts';
 import type {CarRuleMode} from './eventSpec.ts';
 import {formatTrackEmbedLine, resolveTrackRows} from './eventTracks.ts';
 import {formatMaxPi} from './pi.ts';
@@ -33,6 +34,7 @@ export type EmbedEventInput = {
   id: string;
   title: string;
   type: string;
+  game?: string | null;
   status?: string;
   starts_at: string;
   max_players: number;
@@ -189,16 +191,12 @@ function resolveOpenBuildNotes(event: EmbedEventInput): string | null {
   return text?.trim() || null;
 }
 
-function formatCarName(car: EmbedAllowedCar): string {
-  return formatCarEmbedName({
-    make: car.make,
-    model: car.model,
-    year: car.year,
-  });
-}
-
-function formatRestrictedCarBlock(car: EmbedAllowedCar): string {
-  const coded: string[] = [inlineCode(formatMaxPi(car.max_pi))];
+function formatRestrictedCarBlock(
+  car: EmbedAllowedCar,
+  label: string,
+  game: ForzaGame,
+): string {
+  const coded: string[] = [inlineCode(formatMaxPi(car.max_pi, game))];
   if (car.tune_share_code?.trim()) {
     coded.push(inlineCode(car.tune_share_code));
   }
@@ -206,7 +204,7 @@ function formatRestrictedCarBlock(car: EmbedAllowedCar): string {
   if (hasTuningRules) {
     coded.push(inlineCode('extra rules'));
   }
-  return [formatCarName(car), ...coded].join(' ');
+  return [label, ...coded].join(' ');
 }
 
 function splitOversizedBlock(block: string, max = EMBED_FIELD_VALUE_MAX): string[] {
@@ -244,6 +242,7 @@ type EmbedField = {name: string; value: string; inline: false};
 function fitRestrictedCarFields(
   cars: EmbedAllowedCar[],
   limits: {maxChars: number; maxFields: number},
+  game: ForzaGame,
 ): {fields: EmbedField[]; shown: number} {
   if (cars.length === 0) {
     return {
@@ -252,9 +251,20 @@ function fitRestrictedCarFields(
     };
   }
 
+  const labels = formatCarListDisplayNames(
+    cars.map((car, i) => ({
+      id: `car-${i}`,
+      make: car.make,
+      model: car.model,
+      year: car.year,
+    })),
+  );
+
   for (let count = cars.length; count >= 1; count--) {
     const omitted = cars.length - count;
-    const blocks = cars.slice(0, count).map(formatRestrictedCarBlock);
+    const blocks = cars.slice(0, count).map((car, i) =>
+      formatRestrictedCarBlock(car, labels.get(`car-${i}`) ?? car.model, game),
+    );
     let values = chunkCarFieldValues(blocks);
 
     if (omitted > 0) {
@@ -294,8 +304,9 @@ function fitRestrictedCarFields(
 function formatOpenBuildCarField(event: EmbedEventInput): string | null {
   const notes = resolveOpenBuildNotes(event);
   if (!openBuildHasDisplayRules(event.car_rule_mode, event.max_pi, notes)) return null;
+  const game = normalizeEventGame(event.game);
   const parts: string[] = [];
-  if (event.max_pi != null) parts.push(inlineCode(formatMaxPi(event.max_pi)));
+  if (event.max_pi != null) parts.push(inlineCode(formatMaxPi(event.max_pi, game)));
   if (notes) parts.push(inlineCode(notes));
   return parts.length ? parts.join(' ') : null;
 }
@@ -475,6 +486,11 @@ export function buildEventEmbed(event: EmbedEventInput) {
       : null;
 
   const fixedFields: EmbedField[] = [
+    {
+      name: embedFieldName('🎮 Game'),
+      value: eventGameLabelEn(normalizeEventGame(event.game)),
+      inline: false,
+    },
     {name: embedFieldName('📅 Date & Time'), value: discordTimestamp(event.starts_at), inline: false},
     ...(trackField ? [trackField] : []),
     ...(aboutField ? [aboutField] : []),
@@ -498,9 +514,10 @@ export function buildEventEmbed(event: EmbedEventInput) {
   };
 
   const allCars = event.allowed_cars ?? [];
+  const game = normalizeEventGame(event.game);
   let carFit = isOpenBuild
     ? null
-    : fitRestrictedCarFields(allCars, carBudget);
+    : fitRestrictedCarFields(allCars, carBudget, game);
 
   function assembleFields(carFields: EmbedField[]): EmbedField[] {
     const list: EmbedField[] = [...fixedFields];
@@ -528,7 +545,7 @@ export function buildEventEmbed(event: EmbedEventInput) {
         EMBED_TOTAL_CHAR_MAX &&
       carFit.shown > 1
     ) {
-      carFit = fitRestrictedCarFields(allCars.slice(0, carFit.shown - 1), carBudget);
+      carFit = fitRestrictedCarFields(allCars.slice(0, carFit.shown - 1), carBudget, game);
       finalFields = assembleFields(carFit.fields);
     }
   }

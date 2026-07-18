@@ -295,70 +295,70 @@
   },
   {
     "make": "Audi",
-    "model": "Audi RS 4 Avant (2001)",
+    "model": "Audi RS 4 Avant",
     "year": 2001,
     "pi": 544,
     "class": "B"
   },
   {
     "make": "Audi",
-    "model": "Audi RS 4 Avant (2013)",
+    "model": "Audi RS 4 Avant",
     "year": 2013,
     "pi": 607,
     "class": "A"
   },
   {
     "make": "Audi",
-    "model": "Audi RS 4 Avant (2018)",
+    "model": "Audi RS 4 Avant",
     "year": 2018,
     "pi": 637,
     "class": "A"
   },
   {
     "make": "Audi",
-    "model": "Audi RS 5 Coupé (2011)",
+    "model": "Audi RS 5 Coupé",
     "year": 2011,
     "pi": 613,
     "class": "A"
   },
   {
     "make": "Audi",
-    "model": "Audi RS 6 (2003)",
+    "model": "Audi RS 6",
     "year": 2003,
     "pi": 556,
     "class": "B"
   },
   {
     "make": "Audi",
-    "model": "Audi RS 6 (2009)",
+    "model": "Audi RS 6",
     "year": 2009,
     "pi": 598,
     "class": "B"
   },
   {
     "make": "Audi",
-    "model": "Audi RS 6 Avant (2015)",
+    "model": "Audi RS 6 Avant",
     "year": 2015,
     "pi": 640,
     "class": "A"
   },
   {
     "make": "Audi",
-    "model": "Audi RS 6 Avant (2021)",
+    "model": "Audi RS 6 Avant",
     "year": 2021,
     "pi": 650,
     "class": "A"
   },
   {
     "make": "Audi",
-    "model": "Audi RS 7 Sportback (2013)",
+    "model": "Audi RS 7 Sportback",
     "year": 2013,
     "pi": 620,
     "class": "A"
   },
   {
     "make": "Audi",
-    "model": "Audi RS 7 Sportback (2021)",
+    "model": "Audi RS 7 Sportback",
     "year": 2021,
     "pi": 655,
     "class": "A"
@@ -386,7 +386,7 @@
   },
   {
     "make": "Audi",
-    "model": "Audi TT RS Coupé (2010)",
+    "model": "Audi TT RS Coupé",
     "year": 2010,
     "pi": 593,
     "class": "B"
@@ -470,7 +470,7 @@
   },
   {
     "make": "BMW",
-    "model": "BMW M2 (2023)",
+    "model": "BMW M2",
     "year": 2023,
     "pi": 647,
     "class": "A"
@@ -491,28 +491,28 @@
   },
   {
     "make": "BMW",
-    "model": "BMW M3 (1988)",
+    "model": "BMW M3",
     "year": 1988,
     "pi": 474,
     "class": "C"
   },
   {
     "make": "BMW",
-    "model": "BMW M3 (1997)",
+    "model": "BMW M3",
     "year": 1997,
     "pi": 549,
     "class": "B"
   },
   {
     "make": "BMW",
-    "model": "BMW M3 (2005)",
+    "model": "BMW M3",
     "year": 2005,
     "pi": 554,
     "class": "B"
   },
   {
     "make": "BMW",
-    "model": "BMW M3 (2008)",
+    "model": "BMW M3",
     "year": 2008,
     "pi": 608,
     "class": "A"
@@ -554,35 +554,35 @@
   },
   {
     "make": "BMW",
-    "model": "BMW M5 (1988)",
+    "model": "BMW M5",
     "year": 1988,
     "pi": 469,
     "class": "C"
   },
   {
     "make": "BMW",
-    "model": "BMW M5 (1995)",
+    "model": "BMW M5",
     "year": 1995,
     "pi": 516,
     "class": "B"
   },
   {
     "make": "BMW",
-    "model": "BMW M5 (2003)",
+    "model": "BMW M5",
     "year": 2003,
     "pi": 580,
     "class": "B"
   },
   {
     "make": "BMW",
-    "model": "BMW M5 (2009)",
+    "model": "BMW M5",
     "year": 2009,
     "pi": 595,
     "class": "B"
   },
   {
     "make": "BMW",
-    "model": "BMW M5 (2012)",
+    "model": "BMW M5",
     "year": 2012,
     "pi": 652,
     "class": "A"
@@ -708,28 +708,28 @@
   },
   {
     "make": "Chevrolet",
-    "model": "Chevrolet Camaro Z/28 (2015)",
+    "model": "Chevrolet Camaro Z/28",
     "year": 2015,
     "pi": 695,
     "class": "A"
   },
   {
     "make": "Chevrolet",
-    "model": "Chevrolet Camaro Z28 (1970)",
+    "model": "Chevrolet Camaro Z28",
     "year": 1970,
     "pi": 430,
     "class": "C"
   },
   {
     "make": "Chevrolet",
-    "model": "Chevrolet Camaro Z28 (1979)",
+    "model": "Chevrolet Camaro Z28",
     "year": 1979,
     "pi": 364,
     "class": "D"
   },
   {
     "make": "Chevrolet",
-    "model": "Chevrolet Camaro ZL1 (2017)",
+    "model": "Chevrolet Camaro ZL1",
     "year": 2017,
     "pi": 727,
     "class": "S1"
@@ -750,14 +750,14 @@
   },
   {
     "make": "Chevrolet",
-    "model": "Chevrolet Corvette (1953)",
+    "model": "Chevrolet Corvette",
     "year": 1953,
     "pi": 270,
     "class": "D"
   },
   {
     "make": "Chevrolet",
-    "model": "Chevrolet Corvette (1960)",
+    "model": "Chevrolet Corvette",
     "year": 1960,
     "pi": 428,
     "class": "C"
@@ -785,49 +785,49 @@
   },
   {
     "make": "Chevrolet",
-    "model": "Chevrolet Corvette Z06 (2002)",
+    "model": "Chevrolet Corvette Z06",
     "year": 2002,
     "pi": 602,
     "class": "A"
   },
   {
     "make": "Chevrolet",
-    "model": "Chevrolet Corvette Z06 (2015)",
+    "model": "Chevrolet Corvette Z06",
     "year": 2015,
     "pi": 755,
     "class": "S1"
   },
   {
     "make": "Chevrolet",
-    "model": "Chevrolet Corvette Z06 (2023)",
+    "model": "Chevrolet Corvette Z06",
     "year": 2023,
     "pi": 763,
     "class": "S1"
   },
   {
     "make": "Chevrolet",
-    "model": "Chevrolet Corvette ZR-1 (1970)",
+    "model": "Chevrolet Corvette ZR-1",
     "year": 1970,
     "pi": 497,
     "class": "C"
   },
   {
     "make": "Chevrolet",
-    "model": "Chevrolet Corvette ZR-1 (1995)",
+    "model": "Chevrolet Corvette ZR-1",
     "year": 1995,
     "pi": 576,
     "class": "B"
   },
   {
     "make": "Chevrolet",
-    "model": "Chevrolet Corvette ZR1 (2009)",
+    "model": "Chevrolet Corvette ZR1",
     "year": 2009,
     "pi": 712,
     "class": "S1"
   },
   {
     "make": "Chevrolet",
-    "model": "Chevrolet Corvette ZR1 (2019)",
+    "model": "Chevrolet Corvette ZR1",
     "year": 2019,
     "pi": 778,
     "class": "S1"
@@ -1429,35 +1429,35 @@
   },
   {
     "make": "Ford",
-    "model": "Ford Fiesta ST (2023)",
+    "model": "Ford Fiesta ST",
     "year": 2023,
     "pi": 500,
     "class": "C"
   },
   {
     "make": "Ford",
-    "model": "Ford Focus RS (2003)",
+    "model": "Ford Focus RS",
     "year": 2003,
     "pi": 484,
     "class": "C"
   },
   {
     "make": "Ford",
-    "model": "Ford Focus RS (2009)",
+    "model": "Ford Focus RS",
     "year": 2009,
     "pi": 551,
     "class": "B"
   },
   {
     "make": "Ford",
-    "model": "Ford Focus RS (2017)",
+    "model": "Ford Focus RS",
     "year": 2017,
     "pi": 588,
     "class": "B"
   },
   {
     "make": "Ford",
-    "model": "Ford Focus ST (2022)",
+    "model": "Ford Focus ST",
     "year": 2022,
     "pi": 594,
     "class": "B"
@@ -1471,14 +1471,14 @@
   },
   {
     "make": "Ford",
-    "model": "Ford GT (2005)",
+    "model": "Ford GT",
     "year": 2005,
     "pi": 676,
     "class": "A"
   },
   {
     "make": "Ford",
-    "model": "Ford GT (2017)",
+    "model": "Ford GT",
     "year": 2017,
     "pi": 757,
     "class": "S1"
@@ -1506,7 +1506,7 @@
   },
   {
     "make": "Ford",
-    "model": "Ford Mustang GT (2024)",
+    "model": "Ford Mustang GT",
     "year": 2024,
     "pi": 628,
     "class": "A"
@@ -1548,28 +1548,28 @@
   },
   {
     "make": "Ford",
-    "model": "Ford Mustang Shelby GT500 (2013)",
+    "model": "Ford Mustang Shelby GT500",
     "year": 2013,
     "pi": 647,
     "class": "A"
   },
   {
     "make": "Ford",
-    "model": "Ford Mustang Shelby GT500 (2020)",
+    "model": "Ford Mustang Shelby GT500",
     "year": 2020,
     "pi": 734,
     "class": "S1"
   },
   {
     "make": "Ford",
-    "model": "Ford Mustang SVT Cobra R (1993)",
+    "model": "Ford Mustang SVT Cobra R",
     "year": 1993,
     "pi": 432,
     "class": "C"
   },
   {
     "make": "Ford",
-    "model": "Ford Mustang SVT Cobra R (2000)",
+    "model": "Ford Mustang SVT Cobra R",
     "year": 2000,
     "pi": 528,
     "class": "B"
@@ -1877,56 +1877,56 @@
   },
   {
     "make": "Honda",
-    "model": "Honda Civic Si (1986)",
+    "model": "Honda Civic Si",
     "year": 1986,
     "pi": 253,
     "class": "D"
   },
   {
     "make": "Honda",
-    "model": "Honda Civic Type R (1997)",
+    "model": "Honda Civic Type R",
     "year": 1997,
     "pi": 430,
     "class": "C"
   },
   {
     "make": "Honda",
-    "model": "Honda Civic Type R (2004)",
+    "model": "Honda Civic Type R",
     "year": 2004,
     "pi": 480,
     "class": "C"
   },
   {
     "make": "Honda",
-    "model": "Honda Civic Type R (2007)",
+    "model": "Honda Civic Type R",
     "year": 2007,
     "pi": 454,
     "class": "C"
   },
   {
     "make": "Honda",
-    "model": "Honda Civic Type R (2008)",
+    "model": "Honda Civic Type R",
     "year": 2008,
     "pi": 514,
     "class": "B"
   },
   {
     "make": "Honda",
-    "model": "Honda Civic Type R (2015)",
+    "model": "Honda Civic Type R",
     "year": 2015,
     "pi": 585,
     "class": "B"
   },
   {
     "make": "Honda",
-    "model": "Honda Civic Type R (2018)",
+    "model": "Honda Civic Type R",
     "year": 2018,
     "pi": 608,
     "class": "A"
   },
   {
     "make": "Honda",
-    "model": "Honda Civic Type R (2023)",
+    "model": "Honda Civic Type R",
     "year": 2023,
     "pi": 620,
     "class": "A"
@@ -1947,14 +1947,14 @@
   },
   {
     "make": "Honda",
-    "model": "Honda NSX-R (1992)",
+    "model": "Honda NSX-R",
     "year": 1992,
     "pi": 572,
     "class": "B"
   },
   {
     "make": "Honda",
-    "model": "Honda NSX-R (2005)",
+    "model": "Honda NSX-R",
     "year": 2005,
     "pi": 570,
     "class": "B"
@@ -2409,7 +2409,7 @@
   },
   {
     "make": "Lincoln",
-    "model": "Lincoln Continental (1962)",
+    "model": "Lincoln Continental",
     "year": 1962,
     "pi": 267,
     "class": "D"
@@ -2528,7 +2528,7 @@
   },
   {
     "make": "Mazda",
-    "model": "Mazda Mazdaspeed 3 (2010)",
+    "model": "Mazda Mazdaspeed 3",
     "year": 2010,
     "pi": 536,
     "class": "B"
@@ -2542,28 +2542,28 @@
   },
   {
     "make": "Mazda",
-    "model": "Mazda MX-5 (2013)",
+    "model": "Mazda MX-5",
     "year": 2013,
     "pi": 432,
     "class": "C"
   },
   {
     "make": "Mazda",
-    "model": "Mazda MX-5 (2016)",
+    "model": "Mazda MX-5",
     "year": 2016,
     "pi": 499,
     "class": "C"
   },
   {
     "make": "Mazda",
-    "model": "Mazda MX-5 Cup (2017)",
+    "model": "Mazda MX-5 Cup",
     "year": 2017,
     "pi": 586,
     "class": "B"
   },
   {
     "make": "Mazda",
-    "model": "Mazda MX-5 Miata (1994)",
+    "model": "Mazda MX-5 Miata",
     "year": 1994,
     "pi": 329,
     "class": "D"
@@ -2892,21 +2892,21 @@
   },
   {
     "make": "MINI",
-    "model": "MINI Cooper S (1965)",
+    "model": "MINI Cooper S",
     "year": 1965,
     "pi": 158,
     "class": "D"
   },
   {
     "make": "MINI",
-    "model": "MINI John Cooper Works GP (2012)",
+    "model": "MINI John Cooper Works GP",
     "year": 2012,
     "pi": 509,
     "class": "B"
   },
   {
     "make": "MINI",
-    "model": "MINI John Cooper Works GP (2021)",
+    "model": "MINI John Cooper Works GP",
     "year": 2021,
     "pi": 599,
     "class": "B"
@@ -3137,7 +3137,7 @@
   },
   {
     "make": "Nissan",
-    "model": "Nissan GT-R NISMO (2024)",
+    "model": "Nissan GT-R NISMO",
     "year": 2024,
     "pi": 741,
     "class": "S1"
@@ -3200,14 +3200,14 @@
   },
   {
     "make": "Nissan",
-    "model": "Nissan Silvia K's (1989)",
+    "model": "Nissan Silvia K's",
     "year": 1989,
     "pi": 455,
     "class": "C"
   },
   {
     "make": "Nissan",
-    "model": "Nissan Silvia K's (1994)",
+    "model": "Nissan Silvia K's",
     "year": 1994,
     "pi": 499,
     "class": "C"
@@ -3221,7 +3221,7 @@
   },
   {
     "make": "Nissan",
-    "model": "Nissan Silvia Spec-R (2002)",
+    "model": "Nissan Silvia Spec-R",
     "year": 2002,
     "pi": 551,
     "class": "B"
@@ -3235,7 +3235,7 @@
   },
   {
     "make": "Nissan",
-    "model": "Nissan Skyline GT-R (1992)",
+    "model": "Nissan Skyline GT-R",
     "year": 1992,
     "pi": 541,
     "class": "B"
@@ -3249,14 +3249,14 @@
   },
   {
     "make": "Nissan",
-    "model": "Nissan Skyline GT-R V-Spec (1997)",
+    "model": "Nissan Skyline GT-R V-Spec",
     "year": 1997,
     "pi": 555,
     "class": "B"
   },
   {
     "make": "Nissan",
-    "model": "Nissan Skyline GT-R V-spec II (2000)",
+    "model": "Nissan Skyline GT-R V-spec II",
     "year": 2000,
     "pi": 590,
     "class": "B"
@@ -3410,7 +3410,7 @@
   },
   {
     "make": "Pontiac",
-    "model": "Pontiac Firebird Trans Am (1977)",
+    "model": "Pontiac Firebird Trans Am",
     "year": 1977,
     "pi": 311,
     "class": "D"
@@ -3487,42 +3487,42 @@
   },
   {
     "make": "Porsche",
-    "model": "Porsche 911 GT2 (1995)",
+    "model": "Porsche 911 GT2",
     "year": 1995,
     "pi": 644,
     "class": "A"
   },
   {
     "make": "Porsche",
-    "model": "Porsche 911 GT2 RS (2018)",
+    "model": "Porsche 911 GT2 RS",
     "year": 2018,
     "pi": 803,
     "class": "S2"
   },
   {
     "make": "Porsche",
-    "model": "Porsche 911 GT3 (2004)",
+    "model": "Porsche 911 GT3",
     "year": 2004,
     "pi": 674,
     "class": "A"
   },
   {
     "make": "Porsche",
-    "model": "Porsche 911 GT3 (2021)",
+    "model": "Porsche 911 GT3",
     "year": 2021,
     "pi": 752,
     "class": "S1"
   },
   {
     "make": "Porsche",
-    "model": "Porsche 911 GT3 RS (2019)",
+    "model": "Porsche 911 GT3 RS",
     "year": 2019,
     "pi": 760,
     "class": "S1"
   },
   {
     "make": "Porsche",
-    "model": "Porsche 911 GT3 RS (2023)",
+    "model": "Porsche 911 GT3 RS",
     "year": 2023,
     "pi": 758,
     "class": "S1"
@@ -3550,7 +3550,7 @@
   },
   {
     "make": "Porsche",
-    "model": "Porsche 911 Turbo S (2023)",
+    "model": "Porsche 911 Turbo S",
     "year": 2023,
     "pi": 774,
     "class": "S1"
@@ -3606,7 +3606,7 @@
   },
   {
     "make": "Porsche",
-    "model": "Porsche Cayenne Turbo (2018)",
+    "model": "Porsche Cayenne Turbo",
     "year": 2018,
     "pi": 638,
     "class": "A"
@@ -3795,21 +3795,21 @@
   },
   {
     "make": "Subaru",
-    "model": "Subaru BRZ (2013)",
+    "model": "Subaru BRZ",
     "year": 2013,
     "pi": 463,
     "class": "C"
   },
   {
     "make": "Subaru",
-    "model": "Subaru BRZ (2022)",
+    "model": "Subaru BRZ",
     "year": 2022,
     "pi": 551,
     "class": "B"
   },
   {
     "make": "Subaru",
-    "model": "Subaru BRZ (2022) Forza Edition",
+    "model": "Subaru BRZ Forza Edition",
     "year": 2022,
     "pi": 700,
     "class": "A"
@@ -3823,21 +3823,21 @@
   },
   {
     "make": "Subaru",
-    "model": "Subaru IMPREZA WRX STI (2004)",
+    "model": "Subaru IMPREZA WRX STI",
     "year": 2004,
     "pi": 552,
     "class": "B"
   },
   {
     "make": "Subaru",
-    "model": "Subaru IMPREZA WRX STI (2005)",
+    "model": "Subaru IMPREZA WRX STI",
     "year": 2005,
     "pi": 570,
     "class": "B"
   },
   {
     "make": "Subaru",
-    "model": "Subaru IMPREZA WRX STI (2008)",
+    "model": "Subaru IMPREZA WRX STI",
     "year": 2008,
     "pi": 539,
     "class": "B"
@@ -3893,14 +3893,14 @@
   },
   {
     "make": "Subaru",
-    "model": "Subaru WRX STI (2011)",
+    "model": "Subaru WRX STI",
     "year": 2011,
     "pi": 547,
     "class": "B"
   },
   {
     "make": "Subaru",
-    "model": "Subaru WRX STI (2015)",
+    "model": "Subaru WRX STI",
     "year": 2015,
     "pi": 555,
     "class": "B"
@@ -4236,28 +4236,28 @@
   },
   {
     "make": "Volkswagen",
-    "model": "Volkswagen Golf R (2010)",
+    "model": "Volkswagen Golf R",
     "year": 2010,
     "pi": 526,
     "class": "B"
   },
   {
     "make": "Volkswagen",
-    "model": "Volkswagen Golf R (2014)",
+    "model": "Volkswagen Golf R",
     "year": 2014,
     "pi": 536,
     "class": "B"
   },
   {
     "make": "Volkswagen",
-    "model": "Volkswagen Golf R (2021)",
+    "model": "Volkswagen Golf R",
     "year": 2021,
     "pi": 546,
     "class": "B"
   },
   {
     "make": "Volkswagen",
-    "model": "Volkswagen Golf R (2022)",
+    "model": "Volkswagen Golf R",
     "year": 2022,
     "pi": 548,
     "class": "B"

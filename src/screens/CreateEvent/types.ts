@@ -1,4 +1,5 @@
 import type {CarRuleMode, EventTrack, EventType} from '../../lib/types';
+import type {ForzaGame} from '../../lib/eventGames';
 import type {EventCarEntry} from '../../components/EventCarList';
 
 export type FieldErrors = Partial<Record<string, string>>;
@@ -9,6 +10,7 @@ export type CreateEventType = EventType | '';
 export interface CreateEventFormValues {
   title: string;
   type: CreateEventType;
+  game: ForzaGame;
   startsAtLocal: string;
   description: string;
   coverFile: File | null;

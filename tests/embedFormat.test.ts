@@ -9,6 +9,7 @@ function event(partial: Partial<EmbedEventInput> = {}): EmbedEventInput {
     id: 'event-1',
     title: 'Open Build Night',
     type: 'road',
+    game: 'fh6',
     status: 'open',
     starts_at: new Date(Date.now() + 3_600_000).toISOString(),
     max_players: 12,
@@ -97,7 +98,7 @@ describe('buildEventEmbed', () => {
     ).embeds[0];
 
     const carField = embed.fields.find((field) => field.name === '🚗 Car rules');
-    expect(carField?.value).toContain('2023 Lotus Emira');
+    expect(carField?.value).toContain('Lotus Emira');
     expect(carField?.value).toContain('`S1 800`');
     expect(carField?.value).toContain('`extra rules`');
     expect(carField?.value).not.toContain('No engine swap');

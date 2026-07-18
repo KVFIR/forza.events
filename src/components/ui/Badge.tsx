@@ -1,6 +1,7 @@
 import {useTranslation} from 'react-i18next';
 import type {CarRuleMode, EventType} from '../../lib/types';
 import {eventTypeMeta} from '../../lib/eventTypes';
+import {eventGameMeta, normalizeEventGame, type ForzaGame} from '../../lib/eventGames';
 import {cn} from '../../lib/cn';
 import {badgeBaseClass} from './formStyles';
 
@@ -27,6 +28,37 @@ export function Badge({type, className}: Props) {
   );
 }
 
+export function GameBadge({
+  game,
+  className,
+  /** `short` = FH5/FH6 beside organiser (cards); `full` = Forza Horizon N (detail). */
+  variant = 'full',
+}: {
+  game: ForzaGame;
+  className?: string;
+  variant?: 'short' | 'full';
+}) {
+  const {t} = useTranslation();
+  const g = normalizeEventGame(game);
+  const meta = eventGameMeta(g);
+  const short = variant === 'short';
+  return (
+    <span
+      className={cn(
+        short
+          ? cn(
+              'inline-flex items-center text-[10px] font-bold uppercase tracking-wider',
+              meta.badge.short,
+            )
+          : cn(badgeBaseClass, meta.badge.bg, meta.badge.border, meta.badge.text),
+        className,
+      )}
+    >
+      {t(short ? `eventGames.${g}` : `eventGames.${g}Full`)}
+    </span>
+  );
+}
+
 export function CarRuleBadge({
   mode,
   className,
@@ -41,8 +73,8 @@ export function CarRuleBadge({
       className={cn(
         badgeBaseClass,
         restricted
-          ? 'border-cyan-500/30 bg-cyan-500/10 text-cyan-200'
-          : 'border-emerald-500/30 bg-emerald-500/10 text-emerald-200',
+          ? 'border-cyan-500/20 bg-cyan-500/[0.07] text-cyan-200/80'
+          : 'border-emerald-500/20 bg-emerald-500/[0.07] text-emerald-200/80',
         className,
       )}
     >
@@ -61,26 +93,26 @@ const statusStyles: Record<
   {border: string; text: string; bg: string; dot?: string}
 > = {
   open: {
-    border: 'border-accent-green/30',
-    text: 'text-accent-green',
-    bg: 'bg-accent-green/10',
-    dot: 'bg-accent-green',
+    border: 'border-accent-green/20',
+    text: 'text-accent-green/80',
+    bg: 'bg-accent-green/[0.07]',
+    dot: 'bg-accent-green/70',
   },
   full: {
-    border: 'border-amber-500/30',
-    text: 'text-amber-300',
-    bg: 'bg-amber-500/10',
+    border: 'border-amber-500/20',
+    text: 'text-amber-300/80',
+    bg: 'bg-amber-500/[0.07]',
   },
   live: {
-    border: 'border-accent-green/40',
-    text: 'text-accent-green',
-    bg: 'bg-accent-green/15',
-    dot: 'bg-accent-green',
+    border: 'border-accent-green/25',
+    text: 'text-accent-green/85',
+    bg: 'bg-accent-green/10',
+    dot: 'bg-accent-green/80',
   },
   ended: {
-    border: 'border-slate-600/30',
-    text: 'text-slate-500',
-    bg: 'bg-slate-700/20',
+    border: 'border-slate-600/20',
+    text: 'text-slate-500/80',
+    bg: 'bg-slate-700/10',
   },
 };
 
@@ -90,7 +122,7 @@ export function DraftBadge({className}: {className?: string}) {
     <span
       className={cn(
         badgeBaseClass,
-        'border-sky-500/35 bg-sky-500/10 text-sky-200',
+        'border-sky-500/20 bg-sky-500/[0.07] text-sky-200/80',
         className,
       )}
     >

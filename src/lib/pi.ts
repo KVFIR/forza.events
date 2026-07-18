@@ -1,16 +1,18 @@
 /**
- * Forza Horizon 6 Performance Index (100–999).
- * Class bands match the official FH6 car list (forza.net/fh6cars).
+ * Forza Horizon Performance Index (100–999).
+ * Class bands differ by game — keep Edge `_shared/pi.ts` in sync.
  */
+
+import type {ForzaGame} from './eventGames';
 
 export const PI_MIN = 100;
 export const PI_MAX = 999;
 
-/** FH6 classes (R = 901–998; X = 999 only). */
+/** Shared letter set (FH6 adds R; FH5 maps 901–998 to S2). */
 export type CarClassLetter = 'D' | 'C' | 'B' | 'A' | 'S1' | 'S2' | 'R' | 'X';
 
-/** Official PI → class bands derived from forza.net/fh6cars */
-export function piToClass(pi: number): CarClassLetter {
+/** FH6 classes (R = 901–998; X = 999 only). Official forza.net/fh6cars bands. */
+export function piToClassFh6(pi: number): CarClassLetter {
   const p = clampPi(pi);
   if (p === PI_MAX) return 'X';
   if (p >= 901) return 'R';
@@ -22,9 +24,25 @@ export function piToClass(pi: number): CarClassLetter {
   return 'D';
 }
 
-export function formatMaxPi(maxPi: number): string {
+/** FH5 classes (no R; S2 = 901–998). */
+export function piToClassFh5(pi: number): CarClassLetter {
+  const p = clampPi(pi);
+  if (p === PI_MAX) return 'X';
+  if (p >= 901) return 'S2';
+  if (p >= 801) return 'S1';
+  if (p >= 701) return 'A';
+  if (p >= 601) return 'B';
+  if (p >= 501) return 'C';
+  return 'D';
+}
+
+export function piToClass(pi: number, game: ForzaGame = 'fh6'): CarClassLetter {
+  return game === 'fh5' ? piToClassFh5(pi) : piToClassFh6(pi);
+}
+
+export function formatMaxPi(maxPi: number, game: ForzaGame = 'fh6'): string {
   const p = clampPi(maxPi);
-  return `${piToClass(p)} ${p}`;
+  return `${piToClass(p, game)} ${p}`;
 }
 
 export const piClassColor: Record<CarClassLetter, string> = {
@@ -48,16 +66,16 @@ export function isPiInRange(value: number): boolean {
 }
 
 /** Params for `validation.piRange` (D 100 … X 999). */
-export function piRangeI18nParams(): {
+export function piRangeI18nParams(game: ForzaGame = 'fh6'): {
   minClass: CarClassLetter;
   minPi: number;
   maxClass: CarClassLetter;
   maxPi: number;
 } {
   return {
-    minClass: piToClass(PI_MIN),
+    minClass: piToClass(PI_MIN, game),
     minPi: PI_MIN,
-    maxClass: piToClass(PI_MAX),
+    maxClass: piToClass(PI_MAX, game),
     maxPi: PI_MAX,
   };
 }
@@ -70,5 +88,15 @@ export const FH6_CLASS_BANDS: {class: CarClassLetter; min: number; max: number}[
   {class: 'S1', min: 701, max: 800},
   {class: 'S2', min: 801, max: 900},
   {class: 'R', min: 901, max: 998},
+  {class: 'X', min: 999, max: 999},
+];
+
+export const FH5_CLASS_BANDS: {class: CarClassLetter; min: number; max: number}[] = [
+  {class: 'D', min: 100, max: 500},
+  {class: 'C', min: 501, max: 600},
+  {class: 'B', min: 601, max: 700},
+  {class: 'A', min: 701, max: 800},
+  {class: 'S1', min: 801, max: 900},
+  {class: 'S2', min: 901, max: 998},
   {class: 'X', min: 999, max: 999},
 ];

@@ -21,6 +21,8 @@
     "build:og": "node scripts/build-og-site-image.mjs",
     "seed:events": "node scripts/seed-events.mjs",
     "seed:cars": "node scripts/seed-cars.mjs",
+    "data:fh5:scrape": "python3 scripts/scrape_fh5_fandom_cars.py",
+    "data:fh5:catalog": "node scripts/build-fh5-app-catalog.mjs",
     "data:fh6:scrape": "python3 scripts/scrape_fh6_fandom_cars.py",
     "data:fh6:xlsx": "python3 scripts/build_fh6_fandom_xlsx.py",
     "data:fh6:catalog": "node scripts/build-fh6-app-catalog.mjs"

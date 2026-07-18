@@ -4,6 +4,7 @@ import {SegmentGroup} from '../../../components/ui/SegmentGroup';
 import {Textarea} from '../../../components/ui/Textarea';
 import {fieldLabelClass, fileUploadLabelClass, inputClass} from '../../../components/ui/formStyles';
 import {eventTypeLabel} from '../../../lib/eventTypes';
+import {EVENT_GAMES, eventGameLabelFull, type ForzaGame} from '../../../lib/eventGames';
 import {COVER_ASPECT_CLASS, COVER_SOURCE_MAX_MB} from '../../../lib/coverImage';
 import {datetimeLocalInputBounds} from '../../../lib/datetime';
 import {DESCRIPTION_MAX_LENGTH, TITLE_MAX_LENGTH, EVENT_TYPES, COVER_ACCEPT} from '../constants';
@@ -22,8 +23,11 @@ const createFieldLabelClass = `${fieldLabelClass} mb-1.5`;
 type Props = {
   values: CreateEventFormValues;
   fieldErrors: FieldErrors;
+  /** Published events cannot change game (server also rejects). */
+  lockGame?: boolean;
   onTitle: (v: string) => void;
   onType: (v: EventType) => void;
+  onGame: (v: ForzaGame) => void;
   onStartsAtLocal: (v: string) => void;
   onDescription: (v: string) => void;
   onCoverChange: (file: File | null) => void;
@@ -38,8 +42,10 @@ type Props = {
 export function EventStep({
   values,
   fieldErrors,
+  lockGame = false,
   onTitle,
   onType,
+  onGame,
   onStartsAtLocal,
   onDescription,
   onCoverChange,
@@ -90,6 +96,27 @@ export function EventStep({
               selectedClassName: et.typeButtonSelected,
             }))}
           />
+        </Field>
+
+        <Field title={t('create.game')} error={fieldErrors.game}>
+          <SegmentGroup
+            value={values.game}
+            onChange={onGame}
+            ariaLabel={t('create.game')}
+            invalid={Boolean(fieldErrors.game)}
+            disabled={lockGame}
+            layout="grid"
+            containerClassName="grid-cols-2"
+            itemClassName="px-2 py-2 text-xs leading-tight sm:text-[13px]"
+            options={EVENT_GAMES.map((g) => ({
+              value: g.value,
+              label: eventGameLabelFull(g.value),
+              selectedClassName: `${g.badge.bg} ${g.badge.border} ${g.badge.text}`,
+            }))}
+          />
+          {lockGame && (
+            <p className="mt-1.5 text-xs text-muted">{t('create.gameLocked')}</p>
+          )}
         </Field>
 
         <Field
@@ -203,6 +230,7 @@ export function EventStep({
                 id="create-maxPi"
                 value={values.maxPi}
                 onChange={onMaxPi}
+                game={values.game}
                 error={Boolean(fieldErrors.maxPi)}
                 inputClass={inputClass}
               />
@@ -231,6 +259,7 @@ export function EventStep({
             <EventCarList
               cars={values.eventCars}
               onChange={onEventCars}
+              game={values.game}
               inputClass={inputClass}
               labelClass={createFieldLabelClass}
               collapseAllKey={editSessionKey}

@@ -7,6 +7,7 @@ const baseEvent = {
   slug: 'e1',
   title: 'Race',
   type: 'road' as const,
+    game: 'fh6',
   status: 'open' as const,
   lifecycle: 'open' as const,
   startsAt: '2099-06-01T12:00:00.000Z',

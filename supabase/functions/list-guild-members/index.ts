@@ -14,7 +14,7 @@ serve(async (req) => {
 
   const auth = await requireDiscordUser(req);
   if (auth instanceof Response) return auth;
-  const {user} = auth;
+  const {user, token} = auth;
 
   const authLimited = await rateLimitAuth(req, user.id);
   if (authLimited) return authLimited;

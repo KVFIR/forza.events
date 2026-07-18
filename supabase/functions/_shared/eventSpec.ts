@@ -1,5 +1,6 @@
 import type {adminClient} from './supabase.ts';
 import {isValidEventType} from './eventTypes.ts';
+import {normalizeEventGame, type ForzaGame} from './eventGames.ts';
 import {normalizeTrackRows, validateTrackRows, type EventTrackRow} from './eventTracks.ts';
 import {clampPi, isPiInRange, PI_MAX} from './pi.ts';
 import {VALIDATION_CODES, type ValidationCode} from './validationCodes.ts';
@@ -24,6 +25,7 @@ export type SaveEventBody = {
   channel_id?: string | null;
   title?: string;
   type?: string;
+  game?: string;
   starts_at?: string;
   timezone_hint?: string;
   description?: string;
@@ -55,6 +57,7 @@ type DbEvent = {
   channel_id: string | null;
   discord_message_id: string | null;
   starts_at: string;
+  game?: string | null;
 };
 
 const PLAYER_SLOTS = 12;
@@ -145,6 +148,7 @@ export function buildEventFields(
   return {
     title: body.title?.trim(),
     type: body.type,
+    game: normalizeEventGame(body.game) as ForzaGame,
     host_discord_id: hostDiscordId,
     guild_id: body.guild_id?.trim() || null,
     channel_id: body.channel_id?.trim() || null,
@@ -207,6 +211,13 @@ export async function assertTargetNotLocked(
     body.channel_id.trim() !== existing.channel_id
   ) {
     return VALIDATION_CODES.TARGET_CHANNEL_LOCKED;
+  }
+  if (
+    body.game != null &&
+    body.game !== '' &&
+    normalizeEventGame(body.game) !== normalizeEventGame(existing.game)
+  ) {
+    return VALIDATION_CODES.GAME_LOCKED;
   }
   return null;
 }

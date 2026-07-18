@@ -1,5 +1,8 @@
 export type EventType = 'road' | 'dirt' | 'cruise';
 
+export type {ForzaGame} from './eventGames';
+import type {ForzaGame} from './eventGames';
+
 export type VoicePolicy = 'required' | 'optional' | 'none';
 
 /** UI-facing registration state */
@@ -47,6 +50,8 @@ export interface ForzaEvent {
   slug: string;
   title: string;
   type: EventType;
+  /** Forza Horizon title (fh5 | fh6). */
+  game: ForzaGame;
   status: EventStatus;
   lifecycle: EventLifecycle;
   startsAt: string;

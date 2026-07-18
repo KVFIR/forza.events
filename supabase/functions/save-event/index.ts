@@ -25,6 +25,7 @@ import {normalizeGuildName} from '../_shared/guildDisplay.ts';
 import {resolveLobbyLeaderFields} from '../_shared/lobbyLeader.ts';
 import {ensureConvoyLeaderParticipantForEvent, leaderFromEventRow} from '../_shared/participantLeader.ts';
 import {PI_MAX} from '../_shared/pi.ts';
+import {normalizeEventGame, type ForzaGame} from '../_shared/eventGames.ts';
 import {rateLimitMutation} from '../_shared/rateLimitPresets.ts';
 import {adminClient} from '../_shared/supabase.ts';
 import {VALIDATION_CODES, type ValidationCode} from '../_shared/validationCodes.ts';
@@ -50,7 +51,7 @@ serve(async (req) => {
 
   const auth = await requireDiscordUser(req);
   if (auth instanceof Response) return auth;
-  const {user: discordUser} = auth;
+  const {user: discordUser, token} = auth;
 
   const mutationLimited = await rateLimitMutation(req, discordUser.id);
   if (mutationLimited) return mutationLimited;
@@ -163,6 +164,7 @@ serve(async (req) => {
       channel_id: string | null;
       discord_message_id: string | null;
       starts_at: string;
+      game?: string | null;
       cover_image_url: string | null;
       title: string;
       tracks: unknown;
@@ -179,7 +181,7 @@ serve(async (req) => {
       const {data} = await supabase
         .from('events')
         .select(
-          'id, host_discord_id, status, guild_id, channel_id, discord_message_id, starts_at, cover_image_url, title, tracks, car_rule_mode, max_pi, additional_car_restrictions, lobby_leader_discord_id, lobby_leader_is_host, lobby_leader_gamertag',
+          'id, host_discord_id, status, guild_id, channel_id, discord_message_id, starts_at, game, cover_image_url, title, tracks, car_rule_mode, max_pi, additional_car_restrictions, lobby_leader_discord_id, lobby_leader_is_host, lobby_leader_gamertag',
         )
         .eq('id', body.id)
         .single();
@@ -240,10 +242,16 @@ serve(async (req) => {
       body.car_rule_mode === 'restricted_list' ? body.cars ?? [] : [];
 
     // Resolve cars before touching the event row so CARS_UNRESOLVED never leaves an orphan draft.
+    // Published edits keep the stored game (body.game omitted/wrong must not rewrite FH5→FH6).
+    const eventGame =
+      isPublishedEdit && existing
+        ? normalizeEventGame(existing.game)
+        : normalizeEventGame(body.game);
     const resolvedCars = await resolveEventCars(
       supabase,
       cars,
       body.car_rule_mode ?? 'anything_goes',
+      eventGame,
     );
     if (typeof resolvedCars === 'string') return appErrorResponse(req, 400, resolvedCars);
 
@@ -253,6 +261,7 @@ serve(async (req) => {
       existing?.cover_image_url,
     );
     const fields = buildEventFields(body, discordUser.id, coverUrl, lobbyResolved);
+    if (isPublishedEdit) fields.game = eventGame;
     const insertRow = buildEventRow(body, discordUser.id, coverUrl, lobbyResolved);
 
     let eventId = body.id;
@@ -418,10 +427,12 @@ serve(async (req) => {
 async function resolveCarIdByNaturalKey(
   supabase: ReturnType<typeof adminClient>,
   c: CarPayload,
+  game: ForzaGame,
 ): Promise<string | null> {
   let q = supabase
     .from('cars')
     .select('id')
+    .eq('game', game)
     .eq('make', c.make)
     .eq('model', c.model)
     .eq('pi', c.pi)
@@ -439,12 +450,21 @@ async function resolveCarIdByNaturalKey(
 async function resolveCarId(
   supabase: ReturnType<typeof adminClient>,
   c: CarPayload,
+  game: ForzaGame,
 ): Promise<string | null> {
   if (UUID_RE.test(c.id)) {
-    const {data} = await supabase.from('cars').select('id').eq('id', c.id).maybeSingle();
-    if (data?.id) return data.id;
+    const {data} = await supabase
+      .from('cars')
+      .select('id, game, active')
+      .eq('id', c.id)
+      .maybeSingle();
+    if (data) {
+      // Wrong-game or inactive UUID must not fall through to a different natural-key match.
+      if (data.game !== game || data.active !== true) return null;
+      return data.id;
+    }
   }
-  return resolveCarIdByNaturalKey(supabase, c);
+  return resolveCarIdByNaturalKey(supabase, c, game);
 }
 
 type ResolvedEventCar = {
@@ -459,13 +479,14 @@ async function resolveEventCars(
   supabase: ReturnType<typeof adminClient>,
   cars: CarPayload[],
   mode: 'anything_goes' | 'restricted_list',
+  game: ForzaGame,
 ): Promise<ResolvedEventCar[] | ValidationCode> {
   if (mode !== 'restricted_list' || cars.length === 0) return [];
 
   const rows: ResolvedEventCar[] = [];
   const seenCarIds = new Set<string>();
   for (const c of cars) {
-    const carId = await resolveCarId(supabase, c);
+    const carId = await resolveCarId(supabase, c, game);
     if (!carId || seenCarIds.has(carId)) continue;
     seenCarIds.add(carId);
     rows.push({

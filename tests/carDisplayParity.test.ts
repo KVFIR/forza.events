@@ -1,8 +1,14 @@
 import {describe, expect, it} from 'vitest';
-import {formatCarDisplayName, formatCarEmbedName} from '../src/lib/carDisplay';
+import {
+  formatCarDisplayName,
+  formatCarEmbedName,
+  formatCarListDisplayNames,
+  stripYearFromModelTitle,
+} from '../src/lib/carDisplay';
 import {
   formatCarDisplayName as edgeFormatCarDisplayName,
   formatCarEmbedName as edgeFormatCarEmbedName,
+  formatCarListDisplayNames as edgeFormatCarListDisplayNames,
 } from '@edge/carDisplay.ts';
 
 describe('car display parity', () => {
@@ -13,14 +19,45 @@ describe('car display parity', () => {
     expect(formatCarDisplayName(car)).toBe('Acura Integra Type R');
   });
 
-  it('client and Edge formatCarEmbedName match', () => {
+  it('client and Edge formatCarEmbedName match (no year prefix)', () => {
     expect(edgeFormatCarEmbedName(car)).toBe(formatCarEmbedName(car));
-    expect(formatCarEmbedName(car)).toBe('2001 Acura Integra Type R');
+    expect(formatCarEmbedName(car)).toBe('Acura Integra Type R');
   });
 
   it('adds make when model omits it', () => {
     const legacy = {make: 'Ford', model: 'GT40'};
     expect(formatCarDisplayName(legacy)).toBe('Ford GT40');
     expect(edgeFormatCarDisplayName(legacy)).toBe('Ford GT40');
+  });
+
+  it('strips year parenthetical from model title', () => {
+    expect(stripYearFromModelTitle('Audi RS 4 Avant (2001)')).toBe('Audi RS 4 Avant');
+    expect(stripYearFromModelTitle('Subaru BRZ (2022) Forza Edition')).toBe(
+      'Subaru BRZ Forza Edition',
+    );
+  });
+
+  it('appends YY only when make+model collide in a list', () => {
+    const cars = [
+      {id: 'a', make: 'Audi', model: 'Audi RS 4 Avant', year: 2001},
+      {id: 'b', make: 'Audi', model: 'Audi RS 4 Avant', year: 2013},
+      {id: 'c', make: 'Ford', model: 'Ford GT', year: 2017},
+    ];
+    const labels = formatCarListDisplayNames(cars);
+    expect(labels.get('a')).toBe("Audi RS 4 Avant '01");
+    expect(labels.get('b')).toBe("Audi RS 4 Avant '13");
+    expect(labels.get('c')).toBe('Ford GT');
+    expect(edgeFormatCarListDisplayNames(cars)).toEqual(labels);
+  });
+
+  it('collides on display name and recovers year from model title', () => {
+    const cars = [
+      {id: 'a', make: 'BMW', model: 'BMW M3 (1988)', year: null},
+      {id: 'b', make: 'BMW', model: 'M3', year: 2005},
+    ];
+    const labels = formatCarListDisplayNames(cars);
+    expect(labels.get('a')).toBe("BMW M3 '88");
+    expect(labels.get('b')).toBe("BMW M3 '05");
+    expect(edgeFormatCarListDisplayNames(cars)).toEqual(labels);
   });
 });

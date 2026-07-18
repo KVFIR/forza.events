@@ -144,15 +144,20 @@ Host: `000000000000000001`, guild `000000000000000001`.
 
 ## Cars catalog
 
-- `supabase/seed/fh6cars.json` — app + offline search (`src/lib/carCatalog.ts`); generated from Fandom scrape
-- `data/fh6_fandom_cars.json` — full wiki scrape; `data/Forza_Horizon_6_Cars_Fandom.xlsx` — spreadsheet export
-- `save-event` resolves cars by id/lookup only (no arbitrary catalog inserts)
+- `supabase/seed/fh6cars.json` / `fh5cars.json` — app + offline search (`src/lib/carCatalog.ts`); generated from Fandom scrape
+- `data/fh6_fandom_cars.json` / `fh5_fandom_cars.json` — full wiki scrapes
+- `cars.game` + `events.game` (`fh5` | `fh6`, migration `029`); existing rows default `fh6`
+- Model titles strip `(YYYY)` — year is the `year` column only
+- `save-event` resolves cars by id/lookup within the event’s game only (no arbitrary catalog inserts)
 
 ```bash
+npm run data:fh5:scrape    # scrape → fh5_fandom_cars.json + fh5cars.json
 npm run data:fh6:scrape    # scrape → fh6_fandom_cars.json + fh6cars.json
+npm run data:fh5:catalog   # rebuild fh5cars.json from scrape dump
+npm run data:fh6:catalog   # rebuild fh6cars.json from scrape dump
 npm run data:fh6:xlsx      # optional spreadsheet from fh6_fandom_cars.json
-supabase db push           # apply 007+ if needed
-npm run seed:cars          # upsert catalog (linked CLI); does not delete event_cars
+supabase db push           # apply 029_forza_game if needed
+npm run seed:cars          # upsert both catalogs (linked CLI); does not delete event_cars
 ```
 
-`seed:cars` upserts on `(make, model, year, pi)`, keeps existing `cars.id`, and sets `active=false` for removed entries. Use `node scripts/seed-cars.mjs --service-role` when `SUPABASE_SERVICE_ROLE_KEY` is set.
+`seed:cars` upserts on `(game, make, model, year, pi)`, keeps existing `cars.id`, and sets `active=false` for removed entries. Use `node scripts/seed-cars.mjs --service-role` when `SUPABASE_SERVICE_ROLE_KEY` is set.

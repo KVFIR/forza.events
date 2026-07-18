@@ -1,23 +1,21 @@
 #!/usr/bin/env node
 /**
- * Build app car catalog (supabase/seed/fh6cars.json) from scraped Fandom data.
+ * Build app car catalog (supabase/seed/fh5cars.json) from scraped Fandom data.
  *
- * Schema matches Create Event search + seed-cars.mjs:
- *   { make, model, year, pi, class }
+ * Schema: { make, model, year, pi, class }
+ * - model: display name without year
+ * - class: PI band via FH5 rules (src/lib/pi.ts)
  *
- * - model: display name without year (year is a separate field)
- * - class: PI band via FH6 rules (src/lib/pi.ts)
- *
- * Usage: node scripts/build-fh6-app-catalog.mjs [path-to-fh6_fandom_cars.json]
+ * Usage: node scripts/build-fh5-app-catalog.mjs [path-to-fh5_fandom_cars.json]
  */
 import {readFileSync, writeFileSync} from 'node:fs';
 import {dirname, join} from 'node:path';
 import {fileURLToPath} from 'node:url';
-import {PI_MAX, PI_MIN, piToClassFh6, stripYearFromModelTitle} from './catalogModelUtils.mjs';
+import {PI_MAX, PI_MIN, piToClassFh5, stripYearFromModelTitle} from './catalogModelUtils.mjs';
 
 const root = dirname(fileURLToPath(import.meta.url));
-const inputPath = process.argv[2] ?? join(root, '../data/fh6_fandom_cars.json');
-const outJson = join(root, '../supabase/seed/fh6cars.json');
+const inputPath = process.argv[2] ?? join(root, '../data/fh5_fandom_cars.json');
+const outJson = join(root, '../supabase/seed/fh5cars.json');
 
 function parseYear(raw) {
   if (raw == null || raw === '') return null;
@@ -32,12 +30,9 @@ function parsePi(raw) {
   return p;
 }
 
-/** Keep in sync with scripts/fh6_fandom_mappings.py EDITION_LABEL */
 const EDITION_LABEL = {
   wp: 'Welcome Pack',
   pass: 'Car Pass',
-  wtac: 'Time Attack Car Pack',
-  ita: 'Italian Passion Car Pack',
   vip: 'VIP Membership',
   preorder: 'Pre-order bonus',
   fe: 'Forza Edition',
@@ -53,7 +48,6 @@ function editionLabel(unlockCode) {
   return '';
 }
 
-/** Keep in sync with scripts/fh6_fandom_normalize.py vehicle_display_title */
 function vehicleDisplayTitle(car) {
   const vehicle = String(car.vehicle ?? '').trim();
   const display = String(car.display_name ?? '').trim();
@@ -61,7 +55,6 @@ function vehicleDisplayTitle(car) {
   return vehicle || display || String(car.model ?? '').trim();
 }
 
-/** Edition suffix only for duplicate vehicle names (e.g. Welcome Pack vs Autoshow). */
 function catalogModelName(car, duplicateVehicles) {
   const vehicle = String(car.vehicle ?? '').trim();
   const base = stripYearFromModelTitle(vehicleDisplayTitle(car));
@@ -96,7 +89,7 @@ function catalogRow(car, duplicateVehicles) {
     model,
     year: parseYear(car.year),
     pi,
-    class: piToClassFh6(pi),
+    class: piToClassFh5(pi),
   };
 }
 

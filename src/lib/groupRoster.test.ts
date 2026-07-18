@@ -24,6 +24,7 @@ function event(partial: Partial<ForzaEvent>): ForzaEvent {
     slug: 'e1',
     title: 'T',
     type: 'road',
+    game: 'fh6',
     status: 'open',
     hostDiscordId: 'host',
     maxPlayers: 12,

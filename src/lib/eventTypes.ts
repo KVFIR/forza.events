@@ -37,9 +37,9 @@ export const EVENT_TYPES: EventTypeOption[] = [
     accentBar: 'bg-blue-500/25',
     progressFill: 'bg-blue-500',
     badge: {
-      border: 'border-blue-500/30',
-      text: 'text-blue-300',
-      bg: 'bg-blue-500/10',
+      border: 'border-blue-500/20',
+      text: 'text-blue-300/80',
+      bg: 'bg-blue-500/[0.07]',
     },
     detailVisual: {
       gradient: 'from-blue-950 via-blue-900/50 to-base',
@@ -52,9 +52,9 @@ export const EVENT_TYPES: EventTypeOption[] = [
     accentBar: 'bg-orange-500/25',
     progressFill: 'bg-orange-500',
     badge: {
-      border: 'border-orange-500/30',
-      text: 'text-orange-300',
-      bg: 'bg-orange-500/10',
+      border: 'border-orange-500/20',
+      text: 'text-orange-300/80',
+      bg: 'bg-orange-500/[0.07]',
     },
     detailVisual: {
       gradient: 'from-orange-950 via-orange-900/50 to-base',
@@ -67,9 +67,9 @@ export const EVENT_TYPES: EventTypeOption[] = [
     accentBar: 'bg-emerald-500/25',
     progressFill: 'bg-emerald-500',
     badge: {
-      border: 'border-emerald-500/30',
-      text: 'text-emerald-300',
-      bg: 'bg-emerald-500/10',
+      border: 'border-emerald-500/20',
+      text: 'text-emerald-300/80',
+      bg: 'bg-emerald-500/[0.07]',
     },
     detailVisual: {
       gradient: 'from-emerald-950 via-emerald-900/50 to-base',

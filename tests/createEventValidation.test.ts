@@ -13,6 +13,7 @@ import type {CreateEventFormValues} from '../src/screens/CreateEvent/types';
 const baseValues: CreateEventFormValues = {
   title: 'Test Event',
   type: 'road',
+  game: 'fh6',
   startsAtLocal: '2099-06-01T18:00',
   description: '',
   coverFile: null,
