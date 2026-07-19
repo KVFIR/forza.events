@@ -54,7 +54,7 @@ describe('isBrowseFeedEvent', () => {
     expect(isBrowseFeedEvent(event({...published}))).toBe(true);
   });
 
-  it('excludes live, completed, and cancelled', () => {
+  it('includes live; excludes completed and cancelled', () => {
     expect(
       isBrowseFeedEvent(
         event({
@@ -64,7 +64,7 @@ describe('isBrowseFeedEvent', () => {
           startsAt: new Date(Date.now() - 60_000).toISOString(),
         }),
       ),
-    ).toBe(false);
+    ).toBe(true);
     expect(
       isBrowseFeedEvent(
         event({
@@ -87,7 +87,7 @@ describe('isBrowseFeedEvent', () => {
     ).toBe(false);
   });
 
-  it('excludes started events still marked open in the database', () => {
+  it('includes started events still marked open in the database', () => {
     expect(
       isBrowseFeedEvent(
         event({
@@ -97,7 +97,7 @@ describe('isBrowseFeedEvent', () => {
           startsAt: new Date(Date.now() - 60_000).toISOString(),
         }),
       ),
-    ).toBe(false);
+    ).toBe(true);
   });
 });
 

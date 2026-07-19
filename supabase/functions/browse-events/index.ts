@@ -78,7 +78,8 @@ serve(async (req) => {
       .order('starts_at', {ascending: true});
 
     if (!includeCompleted) {
-      query = query.eq('status', 'open').gt('starts_at', new Date().toISOString());
+      // Keep live/in-progress events visible; drop only terminal statuses.
+      query = query.in('status', ['open', 'checkin', 'live']);
     }
 
     const {data, error} = await query;

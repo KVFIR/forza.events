@@ -28,7 +28,7 @@ Remaining work is mostly **Activity E2E in pilot guilds**, **Railway frontend re
 
 | Area | Status | Notes |
 |------|--------|-------|
-| Browse Events | Done | Activity: `browse-events`; localhost: PostgREST + same `isBrowseFeedEvent` filter |
+| Browse Events | Done | Activity: `browse-events`; localhost: PostgREST + same `isBrowseFeedEvent` filter (published until completed/cancelled/archived; started/live stay visible) |
 | Event Detail | Done | Join/leave, host actions, balance groups, results, live updates |
 | Create Event | Done | 4 steps; cover via `upload-cover`; convoy leader via `list-guild-members` |
 | My Events | Done | Hosted/joined + host drafts merge |

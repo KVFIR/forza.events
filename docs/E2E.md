@@ -89,7 +89,7 @@ Manual QA matrix aligned with current code behavior (not an abstract checklist).
 
 ### Load and filters
 
-- [ ] Browse feed = upcoming published events with registration open (`isBrowseFeedEvent`: not draft, not live/started, not completed/cancelled/archived).
+- [ ] Browse feed = published events until terminal (`isBrowseFeedEvent`: not draft, not completed/cancelled/archived; started/live stay visible).
 - [ ] Type filter: `road`, `dirt`, `cruise` + **All**.
 - [ ] Game filter: **All** (default) / FH5 / FH6; cards show short game label; Detail shows full game badge.
 - [ ] Sort: event date / created / fill.

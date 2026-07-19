@@ -230,9 +230,9 @@ export function canLeaveRegistration(event: ForzaEvent): boolean {
   return isRegistrationOpen(event);
 }
 
-/** Public browse feed — upcoming published events with registration still open. */
+/** Public browse feed — published events until completed/cancelled/archived (incl. after start). */
 export function isBrowseFeedEvent(event: ForzaEvent): boolean {
-  return isPublishedToDiscord(event) && isRegistrationOpen(event);
+  return isPublishedToDiscord(event) && !isEventFinalized(event);
 }
 
 /** True once publish-event has posted the Discord announcement embed. */
