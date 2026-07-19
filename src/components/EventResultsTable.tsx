@@ -24,7 +24,7 @@ export function EventResultsTable({
 }: Props) {
   const {t} = useTranslation();
 
-  if (loadFailed) {
+  if (loadFailed && !pending) {
     return (
       <Panel className="flex flex-col gap-3 px-4 py-3 text-sm text-muted">
         <p>{t('results.loadFailed')}</p>

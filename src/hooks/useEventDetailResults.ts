@@ -53,10 +53,6 @@ export function useEventDetailResults({eventId, event, routeState, refreshKey}: 
       const eid = eventId;
       if (!ev || !eid) return;
 
-      if (ev.publishedResults !== undefined) {
-        applyLoadOutcome(ev.publishedResults, false);
-      }
-
       const first = await loadResultRowsForPublishedEvent(eid, ev);
       if (cancelled) return;
       applyLoadOutcome(first.rows, first.failed);
@@ -65,7 +61,7 @@ export function useEventDetailResults({eventId, event, routeState, refreshKey}: 
         return;
       }
 
-      const second = await loadResultRowsForPublishedEvent(eid, ev);
+      const second = await loadResultRowsForPublishedEvent(eid, ev, {forceNetwork: true});
       if (cancelled) return;
       if (second.rows.length > 0) {
         applyLoadOutcome(second.rows, false);
@@ -81,7 +77,7 @@ export function useEventDetailResults({eventId, event, routeState, refreshKey}: 
 
   const retryResultsLoad = useCallback(() => {
     if (!eventId || !event) return;
-    void loadResultRowsForPublishedEvent(eventId, event).then((outcome) =>
+    void loadResultRowsForPublishedEvent(eventId, event, {forceNetwork: true}).then((outcome) =>
       applyLoadOutcome(outcome.rows, outcome.failed),
     );
   }, [eventId, event, applyLoadOutcome]);

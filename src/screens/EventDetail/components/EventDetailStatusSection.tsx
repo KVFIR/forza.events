@@ -8,6 +8,7 @@ type Props = {
     EventDetailViewModel,
     | 'isDraft'
     | 'isHost'
+    | 'isInParticipants'
     | 'showHostPostStartActions'
     | 'finalized'
     | 'started'
@@ -21,7 +22,10 @@ export function EventDetailStatusSection({event, view, joinError, actionError}: 
     <>
       {view.isDraft && view.isHost ? <EventStatusBanner variant="draft" /> : null}
       {view.showHostPostStartActions ? <EventStatusBanner variant="host-in-progress" /> : null}
-      {!view.isHost && view.started && !view.finalized ? (
+      {!view.isHost &&
+      !view.isInParticipants &&
+      view.started &&
+      !view.finalized ? (
         <EventStatusBanner variant="registration-closed" />
       ) : null}
       {event.lifecycle === 'cancelled' ? <EventStatusBanner variant="cancelled" /> : null}

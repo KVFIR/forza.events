@@ -1,5 +1,5 @@
 import type {SupabaseClient} from '@supabase/supabase-js';
-import {createSupabaseFetch, resolveSupabaseUrl} from './supabaseEnv';
+import {createSupabaseFetch, isDiscordActivityFrame, resolveSupabaseUrl} from './supabaseEnv';
 
 let client: SupabaseClient | null = null;
 let clientPromise: Promise<SupabaseClient | null> | null = null;
@@ -17,6 +17,12 @@ export async function getSupabase(): Promise<SupabaseClient | null> {
 
   const url = resolveSupabaseUrl();
   if (!url) return null;
+
+  // PostgREST must not race ahead of Discord URL mapping (Edge invoke already awaits this).
+  if (isDiscordActivityFrame()) {
+    const {ensureDiscordSupabaseProxy} = await import('./discordUrlProxy');
+    await ensureDiscordSupabaseProxy();
+  }
 
   if (client) return client;
   if (!clientPromise) {

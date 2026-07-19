@@ -77,6 +77,7 @@ Lessons from implementation work (keep in sync when behavior changes).
 - Discord’s proxy often **drops `apikey` and `Authorization`** on forwarded requests (documented for PostgREST; applies to `/functions/v1` too).
 - **Fix:** In the Activity iframe, route Edge `fetch` through **`createSupabaseFetch(anonKey)`** (`src/lib/supabaseEnv.ts`) so headers are re-applied on every request — same pattern as the Supabase JS client.
 - Plain `fetch()` to `functions/v1/*` from `api.ts` **without** that wrapper will 401 in Discord even if localhost works.
+- **`getSupabase()`** (PostgREST: results, cars, realtime) also **`await ensureDiscordSupabaseProxy()`** before use in the Activity iframe — otherwise cold-start Event Detail can race `patchUrlMappings` and show `fetch_failed` on `event_results`.
 - **Client `@edge` imports:** `src/` code that shares Edge helpers imports `@edge/*` → `supabase/functions/_shared` (`vite.config.ts` `resolve.alias`, `tsconfig.app.json` paths; vitest already uses the same alias). **Vite dev:** the `/supabase` proxy must `bypass` `/supabase/functions/_shared/*` so Vite serves repo files — otherwise a relative import resolves to the Supabase API (401) and breaks lazy route chunks (e.g. Event Detail via `groupRoster.ts` → `planGroupBalance`).
 
 ## Client API (`src/lib/api.ts`)
