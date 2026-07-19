@@ -308,7 +308,7 @@ Verify **in channel** after each action:
 | Save published | Fields updated |
 | Cancel | CANCELLED, grey, button disabled |
 | Submit results | COMPLETED, button relabelled |
-| After `starts_at` | LIVE / registration closed |
+| After `starts_at` | LIVE; registration closed in copy; **View** button still enabled |
 | Full lobby | 12/12 consistent with Activity |
 
 **Negative:** message deleted in Discord → app does not crash; Edge logs `{ok:false}` for ops.

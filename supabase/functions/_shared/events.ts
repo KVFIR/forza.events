@@ -438,9 +438,10 @@ function resolveEmbedLifecycleUi(
           statusSubtitle: '🏁 LIVE',
           statusDetail: 'This event has **started**. Registration is closed.',
           color: defaultColor,
-          buttonLabel: 'Registration closed',
-          buttonDisabled: true,
-          buttonStyle: 2,
+          // Keep the open_event button enabled — viewing must stay available after start.
+          buttonLabel: 'View in FORZA.EVENTS',
+          buttonDisabled: false,
+          buttonStyle: 1,
         };
       }
       return {

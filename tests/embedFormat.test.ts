@@ -154,18 +154,21 @@ describe('buildEventEmbed', () => {
     expect(embed.fields.find((f) => f.name === '⏳ Waitlist')).toBeDefined();
   });
 
-  it('uses embed description only for lifecycle status', () => {
-    const embed = buildEventEmbed(
+  it('keeps the open_event button enabled after start', () => {
+    const payload = buildEventEmbed(
       event({
-        status: 'cancelled',
-        description: 'Original host notes',
+        status: 'open',
+        starts_at: new Date(Date.now() - 60_000).toISOString(),
       }),
-    ).embeds[0];
-
-    expect(embed.description).toContain('CANCELLED');
-    expect(embed.description).not.toContain('Original host notes');
-    expect(embed.fields.find((field) => field.name === '📝 About')?.value).toBe(
-      'Original host notes',
     );
+    const button = payload.components[0]?.components[0] as {
+      label?: string;
+      disabled?: boolean;
+      custom_id?: string;
+    };
+    expect(payload.embeds[0].description).toContain('LIVE');
+    expect(button.label).toBe('View in FORZA.EVENTS');
+    expect(button.disabled).toBeUndefined();
+    expect(button.custom_id).toMatch(/^open_event:/);
   });
 });

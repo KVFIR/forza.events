@@ -486,7 +486,8 @@ export async function fetchPublishedEventsResult(
       .order('starts_at', {ascending: true});
 
     if (!includeCompleted) {
-      query = query.eq('status', 'open').gt('starts_at', new Date().toISOString());
+      // Match browse-events: keep started/live visible until terminal status.
+      query = query.in('status', ['open', 'checkin', 'live']);
     }
 
     return query;
