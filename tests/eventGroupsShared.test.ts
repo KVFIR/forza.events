@@ -317,7 +317,7 @@ describe('planGroupShuffle', () => {
     ).toEqual([]);
   });
 
-  it('skips unsafe shuffle permutations when groups are full', () => {
+  it('shuffles full groups when final sizes stay within max_players', () => {
     const rows = [
       {discord_id: 'l1', group_index: 1, waitlisted: false, is_convoy_leader: true},
       {discord_id: 'l2', group_index: 2, waitlisted: false, is_convoy_leader: true},
@@ -334,7 +334,52 @@ describe('planGroupShuffle', () => {
         is_convoy_leader: false,
       })),
     ];
-    expect(planGroupShuffle(rows, 2, 12, () => 0.99)).toEqual([]);
+    let seed = 1;
+    const random = () => {
+      seed = (Math.imul(seed, 1664525) + 1013904223) >>> 0;
+      return seed / 0x100000000;
+    };
+    const moves = planGroupShuffle(rows, 2, 12, random);
+    expect(moves.length).toBeGreaterThan(0);
+    expect(moves.every((m) => m.discord_id !== 'l1' && m.discord_id !== 'l2')).toBe(true);
+  });
+
+  it('shuffles near-full three-group lobbies (11/11/10)', () => {
+    const rows = [
+      {discord_id: 'l1', group_index: 1, waitlisted: false, is_convoy_leader: true},
+      {discord_id: 'l2', group_index: 2, waitlisted: false, is_convoy_leader: true},
+      {discord_id: 'l3', group_index: 3, waitlisted: false, is_convoy_leader: true},
+      ...Array.from({length: 10}, (_, i) => ({
+        discord_id: `g1_${i}`,
+        group_index: 1,
+        waitlisted: false,
+        is_convoy_leader: false,
+      })),
+      ...Array.from({length: 10}, (_, i) => ({
+        discord_id: `g2_${i}`,
+        group_index: 2,
+        waitlisted: false,
+        is_convoy_leader: false,
+      })),
+      ...Array.from({length: 9}, (_, i) => ({
+        discord_id: `g3_${i}`,
+        group_index: 3,
+        waitlisted: false,
+        is_convoy_leader: false,
+      })),
+    ];
+    const moves = planGroupShuffle(rows, 3, 12, () => 0.5);
+    expect(moves.length).toBeGreaterThan(0);
+    expect(moves.every((m) => !['l1', 'l2', 'l3'].includes(m.discord_id))).toBe(true);
+
+    const after = new Map(rows.map((r) => [r.discord_id, r.group_index ?? 1]));
+    for (const m of moves) after.set(m.discord_id, m.to_group);
+    expect(after.get('l1')).toBe(1);
+    expect(after.get('l2')).toBe(2);
+    expect(after.get('l3')).toBe(3);
+    const sizes = [0, 0, 0];
+    for (const g of after.values()) sizes[g - 1]++;
+    expect(sizes).toEqual([11, 11, 10]);
   });
 
   it('retries shuffle until a move is found when possible', () => {
@@ -395,8 +440,15 @@ describe('planGroupBalanceShuffle', () => {
     const staged = planGroupBalanceShuffle(rows, 3, 12, random);
     expect(balanceOnly.length).toBeGreaterThan(0);
     expect(staged.length).toBeGreaterThan(balanceOnly.length);
-    expect(canApplyGroupMovesInOrder(staged, rows, 12)).toBe(true);
-    expect(planGroupShuffle(rows, 3, 12)).toEqual([]);
+    expect(canApplyGroupMovesInOrder(balanceOnly, rows, 12)).toBe(true);
+    // Shuffle alone keeps 12/12/3 headcounts (does not rebalance); still rematches drivers.
+    const shuffleOnly = planGroupShuffle(rows, 3, 12, random);
+    expect(shuffleOnly.length).toBeGreaterThan(0);
+    const after = new Map(rows.map((r) => [r.discord_id, r.group_index ?? 1]));
+    for (const m of shuffleOnly) after.set(m.discord_id, m.to_group);
+    const sizes = [0, 0, 0];
+    for (const g of after.values()) sizes[g - 1]++;
+    expect(sizes).toEqual([12, 12, 3]);
 
     const notified = netGroupMovePlans(staged);
     expect(notified.length).toBeGreaterThan(0);

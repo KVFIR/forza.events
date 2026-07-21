@@ -329,7 +329,10 @@ function driverSlotsForBalancedTargets(
   return slots;
 }
 
-/** Randomly assign active non-leaders across groups while keeping leaders and group sizes. */
+/** Randomly reassign active non-leaders; leaders and per-group headcounts stay put.
+ * RPC applies with a transaction capacity skip + final size check (`030`), so near-full/full
+ * lobbies can rematch without a free-seat mid-apply order.
+ */
 export function planGroupShuffle(
   rows: BalanceRosterRow[],
   groupCount: number,
@@ -345,14 +348,17 @@ export function planGroupShuffle(
   const counts = activeCountsByGroup(
     active.map((r) => ({group_index: r.group_index ?? 1, waitlisted: false})),
   );
-  const totalActive = [...counts.values()].reduce((n, c) => n + c, 0);
-  const targets = balancedGroupTargets(totalActive, groupCount);
+  // Keep each group's current size (balance is a separate mode).
+  const targets: number[] = [];
+  for (let g = 1; g <= groupCount; g++) {
+    targets.push(counts.get(g) ?? 0);
+  }
   if (targets.some((t) => t > maxPlayers)) return [];
 
   const slots = driverSlotsForBalancedTargets(active, targets, groupCount);
   if (slots.length !== drivers.length) return [];
 
-  for (let attempt = 0; attempt < 12; attempt++) {
+  for (let attempt = 0; attempt < 24; attempt++) {
     const shuffledDrivers = shuffleWithRandom(drivers, random);
     const moves: GroupMovePlan[] = [];
     for (let i = 0; i < shuffledDrivers.length; i++) {
@@ -364,8 +370,11 @@ export function planGroupShuffle(
       }
     }
     if (moves.length > 0) {
-      const plan = finalizeGroupMovePlan(moves, active, groupCount, maxPlayers);
-      if (plan.length) return plan;
+      return sortGroupMovesForApply(
+        moves,
+        active.map((r) => ({group_index: r.group_index ?? 1, waitlisted: false})),
+        groupCount,
+      );
     }
   }
   return [];

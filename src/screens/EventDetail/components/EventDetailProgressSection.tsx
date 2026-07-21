@@ -6,13 +6,13 @@ import {cn} from '../../../lib/cn';
 
 type RegistrationProgressView = Pick<
   EventDetailViewModel,
-  'ev' | 'fillPct' | 'showRegistrationProgress' | 'totalCapacity'
+  'ev' | 'fillPct' | 'showRegistrationProgress' | 'registrationOpen' | 'totalCapacity'
 >;
 
 export function EventRegistrationProgress({view}: {view: RegistrationProgressView}) {
   if (!view.showRegistrationProgress) return null;
 
-  const full = view.fillPct >= 100;
+  const muted = !view.registrationOpen || view.fillPct >= 100;
   const {badge, progressFill} = eventTypeMeta(normalizeEventType(view.ev.type));
   const fillWidth = Math.min(view.fillPct, 100);
 
@@ -28,7 +28,7 @@ export function EventRegistrationProgress({view}: {view: RegistrationProgressVie
         <div
           className={cn(
             'h-full rounded-full transition-all duration-700',
-            full ? 'bg-white/25' : progressFill,
+            muted ? 'bg-white/25' : progressFill,
           )}
           style={{width: `${fillWidth}%`}}
         />
@@ -36,7 +36,7 @@ export function EventRegistrationProgress({view}: {view: RegistrationProgressVie
       <span
         className={cn(
           'shrink-0 text-xs font-semibold tabular-nums',
-          full ? 'text-white/50' : badge.text,
+          muted ? 'text-white/50' : badge.text,
         )}
       >
         {formatLobbyCount(view.ev.currentPlayers, view.totalCapacity)}

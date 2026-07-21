@@ -144,8 +144,11 @@ export function buildEventDetailViewModel(input: {
   const willWaitlist = !isInParticipants && lobbyIsFull(ev);
   /** Lifecycle from server row — not `displayEvent` (lobby patch only). */
   const showResultsSection = shouldShowEventResults(event);
+  // Keep lobby count visible while live (greyed via registrationOpen); hide after results/cancel.
   const showRegistrationProgress =
-    !showResultsSection && event.lifecycle !== 'cancelled' && isRegistrationOpen(ev);
+    event.lifecycle !== 'cancelled' &&
+    !isEventSuccessfullyCompleted(event) &&
+    (isRegistrationOpen(ev) || started);
   const resultsAwaitingHost =
     showResultsSection &&
     !isEventSuccessfullyCompleted(event) &&
@@ -182,8 +185,9 @@ export function buildEventDetailViewModel(input: {
     !finalized &&
     !started;
 
+  // Same reorganize modes before and after start until finalized (join/edit still lock at start).
   const hostMultiGroupRoster =
-    isHost && canEdit && !isDraft && (ev.groupCount ?? 1) > 1;
+    isHost && !isDraft && !finalized && (ev.groupCount ?? 1) > 1;
   const rosterCanBalance = hostMultiGroupRoster && groupRosterWouldChange(ev, 'balance');
   const rosterCanShuffle = hostMultiGroupRoster && groupRosterWouldChange(ev, 'shuffle');
   const rosterCanBalanceShuffle =

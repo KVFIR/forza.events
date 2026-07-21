@@ -10,7 +10,6 @@ import {
   planGroupBalanceShuffle,
   planGroupShuffle,
 } from '../_shared/eventGroups.ts';
-import {eventHasStarted} from '../_shared/eventSpec.ts';
 import {responseForRpcError} from '../_shared/rpcErrors.ts';
 import {rateLimitMutation} from '../_shared/rateLimitPresets.ts';
 import {deferNotificationDelivery} from '../_shared/notifications.ts';
@@ -57,9 +56,7 @@ serve(async (req) => {
     if (CLOSED_STATUSES.has(event.status)) {
       return appErrorResponse(req, 400, API_ERROR_CODES.REGISTRATION_CLOSED);
     }
-    if (eventHasStarted(event)) {
-      return appErrorResponse(req, 400, API_ERROR_CODES.REGISTRATION_AFTER_START);
-    }
+    // After start is allowed until finalized (CLOSED_STATUSES); join/edit stay locked elsewhere.
 
     const groupCount = event.group_count ?? 1;
     if (groupCount < 2) {

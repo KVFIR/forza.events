@@ -109,12 +109,24 @@ describe('buildEventDetailViewModel', () => {
     expect(view.showRegistrationProgress).toBe(false);
   });
 
-  it('hides registration progress after the event has started', () => {
+  it('shows grey registration progress after the event has started', () => {
     const event = baseEvent({
       discordMessageId: 'msg-1',
       lifecycle: 'open',
       status: 'live',
       startsAt: new Date(Date.now() - 60_000).toISOString(),
+    });
+    const view = buildView({event, displayEvent: event});
+    expect(view.showRegistrationProgress).toBe(true);
+    expect(view.registrationOpen).toBe(false);
+  });
+
+  it('hides registration progress after results are submitted', () => {
+    const event = baseEvent({
+      discordMessageId: 'msg-1',
+      lifecycle: 'completed',
+      status: 'ended',
+      startsAt: new Date(Date.now() - 3_600_000).toISOString(),
     });
     const view = buildView({event, displayEvent: event});
     expect(view.showRegistrationProgress).toBe(false);
@@ -286,6 +298,43 @@ describe('buildEventDetailViewModel', () => {
     const view = buildView({event, displayEvent: event});
     expect(view.canChangeGroupLeader).toBe(false);
     expect(view.showGroupRoster).toBe(false);
+  });
+
+  it('allows reorganize modes after start when multiple groups have drivers', () => {
+    const even = baseEvent({
+      hostDiscordId: 'viewer-1',
+      discordMessageId: 'msg-1',
+      groupCount: 2,
+      startsAt: new Date(Date.now() - 60_000).toISOString(),
+      participants: [
+        participant({discordId: 'viewer-1', gamertag: 'HostGT', isConvoyLeader: true, groupIndex: 1}),
+        participant({discordId: 'l2', gamertag: 'L2', isConvoyLeader: true, groupIndex: 2}),
+        participant({discordId: 'a', gamertag: 'A', groupIndex: 1}),
+        participant({discordId: 'b', gamertag: 'B', groupIndex: 2}),
+      ],
+    });
+    const evenView = buildView({event: even, displayEvent: even});
+    expect(evenView.canEdit).toBe(false);
+    expect(evenView.showGroupRoster).toBe(true);
+    expect(evenView.canBalanceGroupRoster).toBe(false);
+    expect(evenView.canBalanceShuffleGroupRoster).toBe(false);
+    expect(evenView.canShuffleGroupRoster).toBe(true);
+
+    const uneven = baseEvent({
+      ...even,
+      participants: [
+        participant({discordId: 'viewer-1', gamertag: 'HostGT', isConvoyLeader: true, groupIndex: 1}),
+        participant({discordId: 'l2', gamertag: 'L2', isConvoyLeader: true, groupIndex: 2}),
+        participant({discordId: 'a', gamertag: 'A', groupIndex: 1}),
+        participant({discordId: 'b', gamertag: 'B', groupIndex: 1}),
+        participant({discordId: 'c', gamertag: 'C', groupIndex: 1}),
+        participant({discordId: 'd', gamertag: 'D', groupIndex: 2}),
+      ],
+    });
+    const unevenView = buildView({event: uneven, displayEvent: uneven});
+    expect(unevenView.canBalanceGroupRoster).toBe(true);
+    expect(unevenView.canShuffleGroupRoster).toBe(true);
+    expect(unevenView.canBalanceShuffleGroupRoster).toBe(true);
   });
 
   it('prompts browser sign-in for guests on forza.events', () => {

@@ -37,6 +37,7 @@ type Props = {
     | 'ev'
     | 'fillPct'
     | 'showRegistrationProgress'
+    | 'registrationOpen'
     | 'showJoinXboxHint'
     | 'showConvoyLeaderXboxHint'
     | 'viewerConvoyLeader'

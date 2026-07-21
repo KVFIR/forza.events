@@ -2,6 +2,7 @@ import {useTranslation} from 'react-i18next';
 import {hasFinishingPosition} from '../lib/eventResults';
 import type {EventResultDisplay} from '../lib/events';
 import {cn} from '../lib/cn';
+import {Alert} from './ui/Alert';
 import {TextButton} from './ui/TextButton';
 import {Panel} from './ui/Panel';
 import {panelDividedClass} from './ui/formStyles';
@@ -26,26 +27,30 @@ export function EventResultsTable({
 
   if (loadFailed && !pending) {
     return (
-      <Panel className="flex flex-col gap-3 px-4 py-3 text-sm text-muted">
+      <Alert variant="info" className="flex flex-col gap-3 py-2.5 text-sm">
         <p>{t('results.loadFailed')}</p>
         {onRetryLoad ? (
           <TextButton tone="emphasis" className="self-start text-xs" onClick={onRetryLoad}>
             {t('common.tryAgain')}
           </TextButton>
         ) : null}
-      </Panel>
+      </Alert>
     );
   }
 
   if (pending) {
     return (
-      <Panel className="px-4 py-3 text-sm text-muted">{t('results.pendingHost')}</Panel>
+      <Alert variant="info" className="py-2.5 text-sm">
+        {t('results.pendingHost')}
+      </Alert>
     );
   }
 
   if (rows.length === 0) {
     return (
-      <Panel className="px-4 py-3 text-sm text-muted">{t('results.noneRecorded')}</Panel>
+      <Alert variant="info" className="py-2.5 text-sm">
+        {t('results.noneRecorded')}
+      </Alert>
     );
   }
 

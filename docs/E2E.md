@@ -161,7 +161,7 @@ Manual QA matrix aligned with current code behavior (not an abstract checklist).
 | Balance / shuffle confirmed | Leaders stay; roster updates; DMs to moved racers |
 | Already balanced | `unchanged: true`; no DMs |
 | Single group | Hint hidden |
-| After `starts_at` | Hint hidden; API `REGISTRATION_AFTER_START` |
+| After `starts_at` | Same modes as before start (until finalized); join/leave/edit still locked |
 
 ### Display
 
