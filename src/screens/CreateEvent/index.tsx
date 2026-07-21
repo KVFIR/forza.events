@@ -256,7 +256,6 @@ export function CreateEvent() {
             eventType={values.type}
             isRanked={values.isRanked}
             targetGuildRatingEnabled={values.targetGuildRatingEnabled}
-            onIsRankedChange={setIsRanked}
           />
         </div>
       ) : step === 0 ? (

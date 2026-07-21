@@ -281,7 +281,11 @@ serve(async (req) => {
       existing?.cover_image_url,
     );
     const fields = buildEventFields(body, discordUser.id, coverUrl, lobbyResolved);
-    if (isPublishedEdit) fields.game = eventGame;
+    if (isPublishedEdit) {
+      fields.game = eventGame;
+      // Ranked is locked after publish — keep stored flag regardless of client body.
+      fields.is_ranked = Boolean(existing?.is_ranked);
+    }
     const insertRow = buildEventRow(body, discordUser.id, coverUrl, lobbyResolved);
 
     let eventId = body.id;

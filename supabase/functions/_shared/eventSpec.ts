@@ -234,7 +234,12 @@ export async function assertTargetNotLocked(
   ) {
     return VALIDATION_CODES.GAME_LOCKED;
   }
-  // Ranked may flip on published edits until start (same window as canEditPublishedEvent).
+  if (
+    body.is_ranked !== undefined &&
+    Boolean(body.is_ranked) !== Boolean(existing.is_ranked)
+  ) {
+    return VALIDATION_CODES.RANKED_LOCKED;
+  }
   return null;
 }
 

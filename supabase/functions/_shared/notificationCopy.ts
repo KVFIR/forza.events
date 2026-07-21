@@ -11,7 +11,8 @@ export type NotificationKind =
   | 'event_starting_soon'
   | 'host_group_filled'
   | 'host_event_starting_soon'
-  | 'group_reassigned';
+  | 'group_reassigned'
+  | 'event_now_ranked';
 
 /** Transactional waitlist DMs — sent even when dm_notifications_enabled is false. */
 export const WAITLIST_NOTIFICATION_KINDS = new Set<NotificationKind>([
@@ -208,6 +209,19 @@ const COPY: Record<NotificationKind, Record<NotificationLocale, CopyBuilder>> = 
       title: 'Группа изменена',
       description: `Организатор перенёс вас в **группу ${str(p.groupIndex)}** в **${str(p.eventTitle)}**.`,
       fields: [{name: 'Лидер конвоя', value: str(p.leaderGamertag)}],
+    }),
+  },
+  /** One-off / admin: published event flipped to ranked (not exposed in host UI). */
+  event_now_ranked: {
+    en: (p) => ({
+      title: 'Now a ranked race',
+      description:
+        `**${str(p.eventTitle)}** is now a **ranked** race. Finishing positions update your global driver rating (DNF counts as last; DNS does not count).`,
+    }),
+    ru: (p) => ({
+      title: 'Ивент стал рейтинговым',
+      description:
+        `**${str(p.eventTitle)}** теперь **рейтинговый**. Места на финише обновляют ваш глобальный рейтинг (DNF = последнее место; DNS не учитывается).`,
     }),
   },
 };

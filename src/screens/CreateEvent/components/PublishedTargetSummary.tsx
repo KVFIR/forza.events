@@ -9,20 +9,20 @@ type Props = {
   eventType: CreateEventType;
   isRanked: boolean;
   targetGuildRatingEnabled: boolean;
-  onIsRankedChange: (v: boolean) => void;
 };
 
+/** Published target is locked; ranked is display-only after publish. */
 export function PublishedTargetSummary({
   guildName,
   hasChannel,
   eventType,
   isRanked,
   targetGuildRatingEnabled,
-  onIsRankedChange,
 }: Props) {
   const {t} = useTranslation();
-  const canRank =
-    targetGuildRatingEnabled && (eventType === 'road' || eventType === 'dirt');
+  const showRanked =
+    isRanked ||
+    (targetGuildRatingEnabled && (eventType === 'road' || eventType === 'dirt'));
 
   return (
     <div className="space-y-3">
@@ -42,17 +42,19 @@ export function PublishedTargetSummary({
         <p className="text-xs text-muted">{t('create.publishedTargetLocked')}</p>
       </FormSection>
 
-      {canRank ? (
+      {showRanked ? (
         <FormSection title={t('create.rankedSection')}>
           <label className={toggleRowClass}>
             <span className="text-sm text-slate-300">{t('create.rankedToggle')}</span>
             <input
               type="checkbox"
               checked={isRanked}
-              onChange={(e) => onIsRankedChange(e.target.checked)}
+              disabled
               className="h-4 w-4 accent-white"
+              aria-label={t('create.rankedToggle')}
             />
           </label>
+          <p className="mt-1.5 text-xs text-muted">{t('create.rankedLocked')}</p>
         </FormSection>
       ) : null}
     </div>

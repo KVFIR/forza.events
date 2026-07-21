@@ -27,8 +27,24 @@ describe('assertTargetNotLocked', () => {
     expect(code).toBeNull();
   });
 
-  it('allows ranked flip on published edit', async () => {
+  it('rejects ranked flip on published edit', async () => {
     const code = await assertTargetNotLocked(supabase, published, {is_ranked: true});
+    expect(code).toBe(VALIDATION_CODES.RANKED_LOCKED);
+  });
+
+  it('ignores omitted is_ranked on published edit', async () => {
+    const code = await assertTargetNotLocked(
+      supabase,
+      {...published, is_ranked: true},
+      {game: 'fh5'},
+    );
+    expect(code).toBeNull();
+  });
+
+  it('allows same ranked flag on published edit', async () => {
+    const code = await assertTargetNotLocked(supabase, {...published, is_ranked: true}, {
+      is_ranked: true,
+    });
     expect(code).toBeNull();
   });
 });

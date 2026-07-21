@@ -26,7 +26,7 @@ const VALIDATION_MESSAGES_EN: Record<ValidationCode, string> = {
   RANKED_TYPE_NOT_ALLOWED: 'Ranked races are limited to road and dirt events.',
   RANKED_GUILD_REQUIRED: 'Choose an allowlisted Discord server for a ranked race.',
   RANKED_GUILD_NOT_ALLOWED: 'This Discord server is not enabled for ranked races.',
-  RANKED_LOCKED: 'Ranked setting cannot be changed after the event starts.',
+  RANKED_LOCKED: 'Ranked setting cannot be changed after the event is published.',
   TRACK_NAME_REQUIRED: 'Each track needs a name.',
   TRACK_SHARE_CODE_INVALID: 'Share code must be nine digits.',
   TRACK_FORMAT_TOO_LONG: 'Format is too long (max 100 characters).',
