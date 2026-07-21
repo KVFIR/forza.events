@@ -4,7 +4,7 @@ import {eventHasStarted} from './eventSpec.ts';
 import {resolveCoverAbsolute} from './eventCovers.ts';
 import {openEventCustomId} from './eventLaunch.ts';
 import {eventTypeEmbedColor} from './eventTypes.ts';
-import {eventGameLabelEn, normalizeEventGame, type ForzaGame} from './eventGames.ts';
+import {eventGameLabelFullEn, normalizeEventGame, type ForzaGame} from './eventGames.ts';
 import type {CarRuleMode} from './eventSpec.ts';
 import {formatTrackEmbedLine, resolveTrackRows} from './eventTracks.ts';
 import {formatMaxPi} from './pi.ts';
@@ -135,10 +135,12 @@ function embedFieldName(label: string, part?: string): string {
 function measureEmbedChars(parts: {
   title: string;
   description?: string;
+  footer?: string;
   fields: {name: string; value: string}[];
 }): number {
   let n = parts.title.length;
   if (parts.description) n += parts.description.length;
+  if (parts.footer) n += parts.footer.length;
   for (const f of parts.fields) {
     n += f.name.length + f.value.length;
   }
@@ -487,12 +489,10 @@ export function buildEventEmbed(event: EmbedEventInput) {
       ? {name: embedFieldName('🛣️ Tracks'), value: formatTrackFieldLines(eventTracks), inline: false}
       : null;
 
+  const game = normalizeEventGame(event.game);
+  const footerText = eventGameLabelFullEn(game);
+
   const fixedFields: EmbedField[] = [
-    {
-      name: embedFieldName('🎮 Game'),
-      value: eventGameLabelEn(normalizeEventGame(event.game)),
-      inline: false,
-    },
     ...(event.is_ranked
       ? [{name: embedFieldName('🏆 Ranked'), value: 'Counts toward global driver rating', inline: false as const}]
       : []),
@@ -505,6 +505,7 @@ export function buildEventEmbed(event: EmbedEventInput) {
   const skeletonChars = measureEmbedChars({
     title,
     description,
+    footer: footerText,
     fields: skeletonFields,
   });
   const openBuildNotes = resolveOpenBuildNotes(event);
@@ -519,7 +520,6 @@ export function buildEventEmbed(event: EmbedEventInput) {
   };
 
   const allCars = event.allowed_cars ?? [];
-  const game = normalizeEventGame(event.game);
   let carFit = isOpenBuild
     ? null
     : fitRestrictedCarFields(allCars, carBudget, game);
@@ -546,7 +546,7 @@ export function buildEventEmbed(event: EmbedEventInput) {
 
   if (!isOpenBuild && carFit) {
     while (
-      measureEmbedChars({title, description, fields: finalFields}) >
+      measureEmbedChars({title, description, footer: footerText, fields: finalFields}) >
         EMBED_TOTAL_CHAR_MAX &&
       carFit.shown > 1
     ) {
@@ -562,6 +562,7 @@ export function buildEventEmbed(event: EmbedEventInput) {
     color: lifecycle.color,
     image: {url: coverUrl},
     fields: finalFields,
+    footer: {text: footerText},
   };
 
   const components = [

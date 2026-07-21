@@ -110,6 +110,15 @@ describe('buildEventEmbed', () => {
     expect(embed.url).toBe('https://forza.events/event/evt-42');
   });
 
+  it('puts full game name in footer, not a Game field', () => {
+    const embedFh6 = buildEventEmbed(event({game: 'fh6'})).embeds[0];
+    expect(embedFh6.footer?.text).toBe('Forza Horizon 6');
+    expect(embedFh6.fields.find((f) => f.name === '🎮 Game')).toBeUndefined();
+
+    const embedFh5 = buildEventEmbed(event({game: 'fh5'})).embeds[0];
+    expect(embedFh5.footer?.text).toBe('Forza Horizon 5');
+  });
+
   it('puts host description in About field, not embed description', () => {
     const embed = buildEventEmbed(
       event({

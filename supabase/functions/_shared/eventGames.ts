@@ -11,9 +11,14 @@ export function normalizeEventGame(value: string | undefined | null): ForzaGame 
   return isForzaGame(value) ? value : 'fh6';
 }
 
-/** English short label — Discord embed. */
+/** English short label — cards / filters. */
 export function eventGameLabelEn(game: ForzaGame): string {
   return game === 'fh5' ? 'FH5' : 'FH6';
+}
+
+/** English full product name — Discord embed footer. */
+export function eventGameLabelFullEn(game: ForzaGame): string {
+  return game === 'fh5' ? 'Forza Horizon 5' : 'Forza Horizon 6';
 }
 
 export function isValidEventGame(value: string | undefined | null): value is ForzaGame {
