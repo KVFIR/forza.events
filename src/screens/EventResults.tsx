@@ -274,14 +274,18 @@ export function EventResults() {
         throw new Error(t('results.noParticipants'));
       }
 
-      await submitEventResults(token, id, payload);
+      const submitRes = await submitEventResults(token, id, payload);
       track('submit_results', {outcome: 'success', event_id: id});
       const [updated, savedOutcome] = await Promise.all([
         fetchEventById(id, {discordToken: token}),
         fetchEventResults(id),
       ]);
       bumpRefresh();
-      const detailEvent = updated ?? fresh;
+      let detailEvent = updated ?? fresh;
+      // Surface failed ELO apply on Event Detail (retry CTA) even if detail fetch is stale.
+      if (submitRes.rating_applied === false) {
+        detailEvent = {...detailEvent, isRanked: true, ratingApplied: false};
+      }
       goToEventDetail(id, {
         state: buildEventDetailNavigateStateAfterSubmit(detailEvent, savedOutcome, detailFrom),
       });

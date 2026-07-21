@@ -1,6 +1,7 @@
 import {describe, expect, it} from 'vitest';
 import {
   canLeaveRegistration,
+  canRetryEventRatings,
   eventHasStarted,
   isBrowseFeedEvent,
   isRegistrationOpen,
@@ -9,7 +10,7 @@ import {
   validateDraftForm,
 } from './eventSpec';
 import {VALIDATION_CODES} from './validationCodes';
-import type {ForzaEvent} from './types';
+import type {AppUser, ForzaEvent} from './types';
 
 function event(partial: Partial<ForzaEvent>): ForzaEvent {
   return {
@@ -207,6 +208,49 @@ describe('shouldShowEventResults', () => {
           status: 'ended',
           startsAt: new Date(Date.now() - 3_600_000).toISOString(),
         }),
+      ),
+    ).toBe(false);
+  });
+});
+
+describe('canRetryEventRatings', () => {
+  const host: AppUser = {
+    discordId: 'h1',
+    username: 'host',
+    xboxGamertag: 'Host',
+    eventsJoined: 0,
+    eventsHosted: 0,
+    attendanceRate: 0,
+    noShows: 0,
+    hostRatingAvg: 0,
+  };
+
+  it('is true for host when completed ranked and ratings not applied', () => {
+    expect(
+      canRetryEventRatings(
+        event({
+          lifecycle: 'completed',
+          status: 'ended',
+          isRanked: true,
+          ratingApplied: false,
+          startsAt: new Date(Date.now() - 3_600_000).toISOString(),
+        }),
+        host,
+      ),
+    ).toBe(true);
+  });
+
+  it('is false once ratings applied', () => {
+    expect(
+      canRetryEventRatings(
+        event({
+          lifecycle: 'completed',
+          status: 'ended',
+          isRanked: true,
+          ratingApplied: true,
+          startsAt: new Date(Date.now() - 3_600_000).toISOString(),
+        }),
+        host,
       ),
     ).toBe(false);
   });

@@ -122,7 +122,7 @@ serve(async (req) => {
       return jsonResponse(
         {
           ok: true,
-          embed_synced: true,
+          embed_synced: false,
           rating_deltas: rating.deltas,
           rating_applied: rating.applied,
           rating_retried: true,

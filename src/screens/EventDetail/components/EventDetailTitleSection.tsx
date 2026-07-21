@@ -23,6 +23,7 @@ type Props = {
     | 'showDraftActions'
     | 'showHostPostStartActions'
     | 'canEnterResults'
+    | 'canRetryRatings'
     | 'canCancel'
     | 'canEdit'
     | 'isHost'
@@ -48,9 +49,11 @@ type Props = {
     | 'willWaitlist'
   >;
   cancelling: boolean;
+  retryingRatings: boolean;
   authRetrying: boolean;
   leaving: boolean;
   onConfirmCancel: () => void;
+  onRetryRatings: () => void;
   onJoinClick: () => void;
   /** Original list referrer for nested navigation (e.g. results). */
   detailFrom?: string;
@@ -61,9 +64,11 @@ export function EventDetailTitleSection({
   displayStatus,
   view,
   cancelling,
+  retryingRatings,
   authRetrying,
   leaving,
   onConfirmCancel,
+  onRetryRatings,
   onJoinClick,
   detailFrom,
 }: Props) {
@@ -144,6 +149,16 @@ export function EventDetailTitleSection({
         </Button>
       ) : null}
     </div>
+  ) : view.canRetryRatings ? (
+    <Button
+      variant="primary"
+      size="toolbar"
+      className="shrink-0 whitespace-nowrap"
+      disabled={retryingRatings}
+      onClick={onRetryRatings}
+    >
+      {retryingRatings ? busyLabel('working') : t('eventDetail.retryRatings')}
+    </Button>
   ) : view.isHost ? (
     view.canEdit ? (
       <Button

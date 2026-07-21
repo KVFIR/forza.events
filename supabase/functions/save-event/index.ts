@@ -250,7 +250,11 @@ serve(async (req) => {
         existing?.guild_id ??
         null;
       const allowed = await isGuildRatingEnabled(supabase, guildForRanked);
-      const rankedErr = validateRankedAgainstEvent(true, allowed);
+      const rankedErr = validateRankedAgainstEvent(
+        true,
+        allowed,
+        Boolean(existing?.is_ranked),
+      );
       if (rankedErr) return appErrorResponse(req, 400, rankedErr);
     }
 

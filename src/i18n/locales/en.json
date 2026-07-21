@@ -316,7 +316,11 @@
     "cancelEventDesc": "The Discord announcement will be updated and registration will close.",
     "joinServer": "Join server",
     "rankedTitle": "Ranked race",
-    "rankedExplainer": "Your result updates your driver rating — even if you DNF (counts as last). It affects your place on the leaderboard and will be used when forming convoys."
+    "rankedExplainer": "Your result updates your driver rating — even if you DNF (counts as last). It affects your place on the leaderboard and will be used when forming convoys.",
+    "ratingPendingTitle": "Driver ratings not applied",
+    "ratingPendingBody": "Results are saved, but the ranked rating update failed. Retry to apply ELO.",
+    "retryRatings": "Apply ratings",
+    "ratingRetryFailed": "Could not apply ratings. Try again."
   },
   "create": {
     "steps": {
@@ -385,7 +389,7 @@
     },
     "beforePublish": "Before you publish",
     "publishTarget": "Publish target",
-    "rankedSection": "Ranked race",
+    "rankedSection": "Ranked",
     "rankedToggle": "Ranked race",
     "rankedHint": "Finishing positions update the global driver rating.",
     "rankedLocked": "Ranked can be changed until the event starts.",

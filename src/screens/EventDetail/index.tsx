@@ -233,9 +233,11 @@ export function EventDetail() {
         view={view}
         detailFrom={routeState?.from}
         cancelling={hostActions.cancelling}
+        retryingRatings={hostActions.retryingRatings}
         authRetrying={authRetrying}
         leaving={leaving}
         onConfirmCancel={() => hostActions.setConfirmAction('cancel')}
+        onRetryRatings={() => void hostActions.handleRetryRatings()}
         onJoinClick={() => void handleJoinClick()}
       />
 

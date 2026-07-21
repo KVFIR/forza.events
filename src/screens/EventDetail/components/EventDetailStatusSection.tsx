@@ -16,6 +16,7 @@ type Props = {
     | 'showHostPostStartActions'
     | 'finalized'
     | 'started'
+    | 'canRetryRatings'
   >;
   joinError: string | null;
   actionError: string | null;
@@ -26,7 +27,15 @@ export function EventDetailStatusSection({event, view, joinError, actionError}: 
 
   return (
     <>
-      {event.isRanked ? (
+      {view.canRetryRatings ? (
+        <Alert
+          variant="warning"
+          title={t('eventDetail.ratingPendingTitle')}
+          className="mt-3"
+        >
+          {t('eventDetail.ratingPendingBody')}
+        </Alert>
+      ) : event.isRanked ? (
         <Alert
           variant="info"
           title={t('eventDetail.rankedTitle')}

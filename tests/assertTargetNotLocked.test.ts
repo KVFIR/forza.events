@@ -1,5 +1,5 @@
 import {describe, expect, it} from 'vitest';
-import {assertTargetNotLocked} from '@edge/eventSpec.ts';
+import {assertTargetNotLocked, validateRankedAgainstEvent} from '@edge/eventSpec.ts';
 import {VALIDATION_CODES} from '@edge/validationCodes.ts';
 
 /** assertTargetNotLocked ignores supabase — pass a stub. */
@@ -30,5 +30,21 @@ describe('assertTargetNotLocked', () => {
   it('allows ranked flip on published edit', async () => {
     const code = await assertTargetNotLocked(supabase, published, {is_ranked: true});
     expect(code).toBeNull();
+  });
+});
+
+describe('validateRankedAgainstEvent', () => {
+  it('blocks enabling ranked on non-allowlisted guild', () => {
+    expect(validateRankedAgainstEvent(true, false)).toBe(
+      VALIDATION_CODES.RANKED_GUILD_NOT_ALLOWED,
+    );
+  });
+
+  it('grandfathers already-ranked events if allowlist drops', () => {
+    expect(validateRankedAgainstEvent(true, false, true)).toBeNull();
+  });
+
+  it('allows enabling when guild is allowlisted', () => {
+    expect(validateRankedAgainstEvent(true, true)).toBeNull();
   });
 });

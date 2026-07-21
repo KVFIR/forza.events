@@ -458,4 +458,22 @@ describe('buildEventDetailViewModel', () => {
     expect(view.showConvoyLeaderXboxHint).toBe(true);
     expect(view.showJoinXboxHint).toBe(false);
   });
+
+  it('shows rating retry for host when ranked apply pending', () => {
+    const event = baseEvent({
+      hostDiscordId: 'viewer-1',
+      discordMessageId: 'msg-1',
+      lifecycle: 'completed',
+      status: 'ended',
+      isRanked: true,
+      ratingApplied: false,
+      startsAt: new Date(Date.now() - 3_600_000).toISOString(),
+    });
+    const view = buildView({
+      event,
+      displayEvent: event,
+      user: {...baseUser, discordId: 'viewer-1'},
+    });
+    expect(view.canRetryRatings).toBe(true);
+  });
 });

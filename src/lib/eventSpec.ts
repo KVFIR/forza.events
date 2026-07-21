@@ -278,3 +278,13 @@ export function canSubmitEventResults(event: ForzaEvent, user: AppUser): boolean
     eventHasStarted(event)
   );
 }
+
+/** Host recovery when results saved but ranked ELO apply failed. */
+export function canRetryEventRatings(event: ForzaEvent, user: AppUser): boolean {
+  return (
+    event.hostDiscordId === user.discordId &&
+    event.lifecycle === 'completed' &&
+    Boolean(event.isRanked) &&
+    !event.ratingApplied
+  );
+}

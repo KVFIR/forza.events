@@ -238,12 +238,18 @@ export async function assertTargetNotLocked(
   return null;
 }
 
-/** After sync ranked intent: guild allowlist only. */
+/**
+ * Guild allowlist when enabling ranked.
+ * Already-ranked events stay ranked if the guild is later removed from the allowlist
+ * (otherwise published edits would brick).
+ */
 export function validateRankedAgainstEvent(
   wantsRanked: boolean,
   guildAllowed: boolean,
+  alreadyRanked = false,
 ): ValidationCode | null {
   if (!wantsRanked) return null;
+  if (alreadyRanked) return null;
   if (!guildAllowed) return VALIDATION_CODES.RANKED_GUILD_NOT_ALLOWED;
   return null;
 }

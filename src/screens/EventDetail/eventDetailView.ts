@@ -12,6 +12,7 @@ import {
   canCancelEvent,
   canEditEvent,
   canLeaveRegistration,
+  canRetryEventRatings,
   canSubmitEventResults,
   eventHasStarted,
   isEventFinalized,
@@ -39,6 +40,7 @@ export type EventDetailViewModel = {
   isHost: boolean;
   isDraft: boolean;
   canEnterResults: boolean;
+  canRetryRatings: boolean;
   canEdit: boolean;
   canCancel: boolean;
   joined: boolean;
@@ -115,6 +117,7 @@ export function buildEventDetailViewModel(input: {
   const isHost = ev.hostDiscordId === user.discordId;
   const isDraft = !isPublishedToDiscord(event);
   const canEnterResults = canSubmitEventResults(event, user);
+  const canRetryRatings = canRetryEventRatings(event, user);
   const canEdit = canEditEvent(event, user);
   const canCancel = canCancelEvent(event, user);
   const joined = isJoined(event);
@@ -200,6 +203,7 @@ export function buildEventDetailViewModel(input: {
     isHost,
     isDraft,
     canEnterResults,
+    canRetryRatings,
     canEdit,
     canCancel,
     joined,

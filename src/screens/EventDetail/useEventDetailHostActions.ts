@@ -1,6 +1,6 @@
 import {useState} from 'react';
 import {useTranslation} from 'react-i18next';
-import {cancelEvent, isApiConfigured} from '../../lib/api';
+import {cancelEvent, isApiConfigured, retryEventRatings} from '../../lib/api';
 import {track} from '../../lib/analytics';
 import {fetchEventById} from '../../lib/events';
 import type {ForzaEvent} from '../../lib/types';
@@ -16,6 +16,7 @@ export function useEventDetailHostActions(input: {
   const {event, setEvent, discordToken, getAccessToken, isSignedIn, bumpRefresh} = input;
   const {t} = useTranslation();
   const [cancelling, setCancelling] = useState(false);
+  const [retryingRatings, setRetryingRatings] = useState(false);
   const [confirmAction, setConfirmAction] = useState<'cancel' | null>(null);
   const [actionError, setActionError] = useState<string | null>(null);
 
@@ -45,11 +46,43 @@ export function useEventDetailHostActions(input: {
     }
   }
 
+  async function handleRetryRatings() {
+    if (!event) return;
+    const token = getAccessToken();
+    if (!isSignedIn || !token) {
+      setActionError(t('auth.signInRequired'));
+      return;
+    }
+    setRetryingRatings(true);
+    setActionError(null);
+    try {
+      if (!isApiConfigured()) {
+        setActionError(t('browse.errorNotConfiguredDesc'));
+        return;
+      }
+      const res = await retryEventRatings(token, event.id);
+      if (!res.rating_applied) {
+        setActionError(t('eventDetail.ratingRetryFailed'));
+        return;
+      }
+      track('retry_event_ratings', {outcome: 'success', event_id: event.id});
+      bumpRefresh();
+      const next = await fetchEventById(event.id, {discordToken});
+      setEvent(next);
+    } catch (err) {
+      setActionError(err instanceof Error ? err.message : t('eventDetail.ratingRetryFailed'));
+    } finally {
+      setRetryingRatings(false);
+    }
+  }
+
   return {
     cancelling,
+    retryingRatings,
     confirmAction,
     setConfirmAction,
     actionError,
     handleCancelEvent,
+    handleRetryRatings,
   };
 }

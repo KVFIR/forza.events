@@ -67,16 +67,20 @@ export async function applyRankedEventRatings(
     deltas.push(...computePairwiseElo(ordered, states));
   }
 
-  const payload = deltas.map((d) => {
-    const prev = states.get(d.discordId);
-    return {
-      discord_id: d.discordId,
-      rating_before: d.ratingBefore,
-      rating_after: d.ratingAfter,
-      delta: d.delta,
-      games_rated: (prev?.gamesRated ?? 0) + 1,
-    };
-  });
+  // games_rated kept for 033 compat; 034+ applies relative +1 and ignores it.
+  // Sorted for stable lock order in apply_event_rating_deltas.
+  const payload = deltas
+    .map((d) => {
+      const prev = states.get(d.discordId);
+      return {
+        discord_id: d.discordId,
+        rating_before: d.ratingBefore,
+        rating_after: d.ratingAfter,
+        delta: d.delta,
+        games_rated: (prev?.gamesRated ?? 0) + 1,
+      };
+    })
+    .sort((a, b) => a.discord_id.localeCompare(b.discord_id));
 
   const {error} = await supabase.rpc('apply_event_rating_deltas', {
     p_event_id: eventId,

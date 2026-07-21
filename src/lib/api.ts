@@ -412,6 +412,15 @@ export async function submitEventResults(
   }>('submit-results', {event_id: eventId, results}, discordToken);
 }
 
+/** Rating-only retry after results saved but ELO apply failed. */
+export async function retryEventRatings(discordToken: string, eventId: string) {
+  return invoke<{
+    ok: boolean;
+    rating_applied?: boolean;
+    rating_retried?: boolean;
+  }>('submit-results', {event_id: eventId}, discordToken);
+}
+
 export async function fetchLeaderboard(
   discordToken: string | null,
   options?: {limit?: number},
