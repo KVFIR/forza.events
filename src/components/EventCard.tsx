@@ -136,12 +136,9 @@ export function EventCard({event, participantResult}: Props) {
   const displayStatus = useResolveEventDisplayStatus(event);
   const ended = !draft && displayStatus === 'ended';
   const live = !draft && displayStatus === 'live';
-  const full = !draft && displayStatus === 'full';
   const placement = participantResultLabel(participantResult, t);
   const {user} = useAuth();
   const isHost = event.hostDiscordId === user.discordId;
-  const onWaitlist =
-    event.participants.find((p) => p.discordId === user.discordId)?.waitlisted ?? false;
   const organiserLabel = resolveOrganiserLabel(event);
   const coverSrc = event.coverImageUrl ?? defaultCoverPath(event.type);
   const [coverReady, setCoverReady] = useState(false);
@@ -223,16 +220,6 @@ export function EventCard({event, participantResult}: Props) {
                   {live && (
                     <span className="ml-1 text-[9px] font-bold uppercase tracking-widest text-accent-green">
                       · {t('eventStatus.live')}
-                    </span>
-                  )}
-                  {full && (
-                    <span className="ml-1 text-[9px] font-bold uppercase tracking-widest text-amber-300/90">
-                      · {t('eventStatus.full')}
-                    </span>
-                  )}
-                  {onWaitlist && (
-                    <span className="ml-1 text-[9px] font-bold uppercase tracking-widest text-sky-300/90">
-                      · {t('participation.waitlisted')}
                     </span>
                   )}
                   {placement && (
