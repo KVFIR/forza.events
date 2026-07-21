@@ -9,26 +9,41 @@ export type FilterChipOption<T extends string> = {
 };
 
 type ChipGroupProps<T extends string> = {
-  label: string;
+  /** Optional row label (My Events). Omit for compact unlabeled groups. */
+  label?: string;
   value: T;
   onChange: (value: T) => void;
   options: FilterChipOption<T>[];
   'aria-label': string;
+  /**
+   * When set, clicking the already-selected chip calls onChange(deselectValue)
+   * (no dedicated “All” chip — empty selection = all).
+   */
+  deselectValue?: T;
+  className?: string;
 };
 
-/** Labeled horizontal chip filters — clearer than unlabeled meta selects. */
+/** Horizontal chip filters — labeled rows or compact unlabeled groups. */
 export function EventListFilterChips<T extends string>({
   label,
   value,
   onChange,
   options,
   'aria-label': ariaLabel,
+  deselectValue,
+  className,
 }: ChipGroupProps<T>) {
   return (
-    <div className="flex min-w-0 items-center gap-2" role="group" aria-label={ariaLabel}>
-      <span className="w-11 shrink-0 text-[10px] font-bold uppercase tracking-[0.12em] text-muted">
-        {label}
-      </span>
+    <div
+      className={cn('flex min-w-0 items-center gap-2', className)}
+      role="group"
+      aria-label={ariaLabel}
+    >
+      {label ? (
+        <span className="w-11 shrink-0 text-[10px] font-bold uppercase tracking-[0.12em] text-muted">
+          {label}
+        </span>
+      ) : null}
       <div className="flex min-w-0 flex-wrap gap-1">
         {options.map((opt) => {
           const selected = value === opt.value;
@@ -37,7 +52,13 @@ export function EventListFilterChips<T extends string>({
               key={opt.value}
               type="button"
               aria-pressed={selected}
-              onClick={() => onChange(opt.value)}
+              onClick={() => {
+                if (deselectValue !== undefined && selected) {
+                  onChange(deselectValue);
+                  return;
+                }
+                onChange(opt.value);
+              }}
               className={cn(
                 'rounded-md border px-2 py-1 text-[11px] font-semibold leading-none transition-colors',
                 selected

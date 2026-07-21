@@ -20,21 +20,18 @@ export function BrowseEvents() {
   const {isStandalone} = useAuth();
 
   const gameOptions = useMemo(
-    () => [
-      {value: 'all' as const, label: t('browse.filterAll')},
-      ...EVENT_GAMES.map((g) => ({
+    () =>
+      EVENT_GAMES.map((g) => ({
         value: g.value,
         label: eventGameLabel(g.value),
         selectedClassName: g.chipSelected,
       })),
-    ],
     [t],
   );
 
   const typeOptions = useMemo(
-    () => [
-      {value: 'all' as const, label: t('browse.filterAll')},
-      ...EVENT_TYPES.map((et) => {
+    () =>
+      EVENT_TYPES.map((et) => {
         const meta = eventTypeMeta(et.value);
         return {
           value: et.value,
@@ -42,14 +39,16 @@ export function BrowseEvents() {
           selectedClassName: `${meta.badge.border} ${meta.badge.bg} ${meta.badge.text}`,
         };
       }),
-    ],
     [t],
   );
 
   const rankedOptions = useMemo(
     () => [
-      {value: 'all' as const, label: t('browse.filterAll')},
-      {value: 'ranked' as const, label: t('browse.filterRanked')},
+      {
+        value: 'ranked' as const,
+        label: t('browse.filterRanked'),
+        selectedClassName: 'border-amber-400/45 bg-amber-600/25 text-amber-100',
+      },
     ],
     [t],
   );
@@ -126,29 +125,31 @@ export function BrowseEvents() {
           />
         }
         filters={
-          <>
+          <div className="flex min-w-0 flex-wrap items-center gap-x-2 gap-y-1.5">
             <EventListFilterChips
-              label={t('browse.filterGame')}
               value={gameFilter}
               onChange={setGameFilter}
               options={gameOptions}
+              deselectValue="all"
               aria-label={t('browse.filterByGame')}
             />
+            <span className="h-3 w-px shrink-0 bg-white/10" aria-hidden />
             <EventListFilterChips
-              label={t('browse.filterType')}
               value={typeFilter}
               onChange={setTypeFilter}
               options={typeOptions}
+              deselectValue="all"
               aria-label={t('browse.filterByType')}
             />
+            <span className="h-3 w-px shrink-0 bg-white/10" aria-hidden />
             <EventListFilterChips
-              label={t('browse.filterRanked')}
               value={rankedFilter}
               onChange={setRankedFilter}
               options={rankedOptions}
+              deselectValue="all"
               aria-label={t('browse.filterByRanked')}
             />
-          </>
+          </div>
         }
       />
     </div>

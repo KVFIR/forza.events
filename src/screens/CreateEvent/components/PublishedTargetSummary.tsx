@@ -1,6 +1,6 @@
 import {useTranslation} from 'react-i18next';
 import {FormSection} from './Field';
-import {checkboxHintRowClass} from '../../../components/ui/formStyles';
+import {toggleRowClass} from '../../../components/ui/formStyles';
 import type {CreateEventType} from '../types';
 
 type Props = {
@@ -44,15 +44,14 @@ export function PublishedTargetSummary({
 
       {canRank ? (
         <FormSection title={t('create.rankedSection')}>
-          <label className={checkboxHintRowClass}>
+          <label className={toggleRowClass}>
+            <span className="text-sm text-slate-300">{t('create.rankedToggle')}</span>
             <input
               type="checkbox"
               checked={isRanked}
               onChange={(e) => onIsRankedChange(e.target.checked)}
-              className="mt-0.5 h-4 w-4 shrink-0 accent-white"
-              aria-label={t('create.rankedToggle')}
+              className="h-4 w-4 accent-white"
             />
-            <span className="min-w-0 text-xs text-muted">{t('create.rankedHint')}</span>
           </label>
         </FormSection>
       ) : null}

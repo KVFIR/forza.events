@@ -73,11 +73,8 @@ export function Leaderboard() {
 
   return (
     <div className="pb-10 pt-4">
-      <h1 className="text-lg font-bold tracking-wide text-white">{t('leaderboard.title')}</h1>
-      <p className="mt-1 text-sm text-muted">{t('leaderboard.subtitle')}</p>
-
       {viewer && viewer.rank > 0 ? (
-        <Alert variant="info" className="mt-4 py-2.5 text-sm">
+        <Alert variant="info" className="mb-4 py-2.5 text-sm">
           {t('leaderboard.yourRank', {
             rank: viewer.rank,
             rating: viewer.rating,
@@ -88,12 +85,11 @@ export function Leaderboard() {
 
       {entries.length === 0 ? (
         <EmptyState
-          className="mt-6"
           title={t('leaderboard.emptyTitle')}
           description={t('leaderboard.emptyDesc')}
         />
       ) : (
-        <Panel className="mt-4 overflow-hidden">
+        <Panel className="overflow-hidden">
           <ol className={panelDividedClass}>
             {entries.map((row) => {
               const isViewer = isSignedIn && row.discordId === user.discordId;

@@ -5,7 +5,7 @@ import {
   type CreateEventConvoySectionProps,
 } from '../components/CreateEventConvoySection';
 import {FormSection} from '../components/Field';
-import {checkboxHintRowClass} from '../../../components/ui/formStyles';
+import {toggleRowClass} from '../../../components/ui/formStyles';
 import {isLocalDevHost} from '../../../lib/runtime';
 import type {CreateEventType, FieldErrors} from '../types';
 
@@ -84,16 +84,15 @@ export function PublishStep({
 
       {!devPreview && canRank ? (
         <FormSection title={t('create.rankedSection')}>
-          <label className={checkboxHintRowClass}>
+          <label className={toggleRowClass}>
+            <span className="text-sm text-slate-300">{t('create.rankedToggle')}</span>
             <input
               type="checkbox"
               checked={isRanked}
               disabled={lockRanked}
               onChange={(e) => onIsRankedChange(e.target.checked)}
-              className="mt-0.5 h-4 w-4 shrink-0 accent-white"
-              aria-label={t('create.rankedToggle')}
+              className="h-4 w-4 accent-white"
             />
-            <span className="min-w-0 text-xs text-muted">{t('create.rankedHint')}</span>
           </label>
           {lockRanked ? (
             <p className="mt-1.5 text-xs text-muted">{t('create.rankedLocked')}</p>

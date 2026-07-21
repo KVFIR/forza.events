@@ -20,7 +20,6 @@ export function MyEvents() {
 
   const scopeOptions = useMemo(
     () => [
-      {value: 'all' as const, label: t('myEvents.scopeAll')},
       {value: 'hosted' as const, label: t('myEvents.scopeHosted')},
       {value: 'joined' as const, label: t('myEvents.scopeJoined')},
     ],
@@ -28,14 +27,12 @@ export function MyEvents() {
   );
 
   const gameOptions = useMemo(
-    () => [
-      {value: 'all' as const, label: t('browse.filterAll')},
-      ...EVENT_GAMES.map((g) => ({
+    () =>
+      EVENT_GAMES.map((g) => ({
         value: g.value,
         label: eventGameLabel(g.value),
         selectedClassName: g.chipSelected,
       })),
-    ],
     [t],
   );
 
@@ -116,22 +113,23 @@ export function MyEvents() {
         }
         participantResults={participantResults}
         filters={
-          <>
+          <div className="flex min-w-0 flex-wrap items-center gap-x-2 gap-y-1.5">
             <EventListFilterChips
-              label={t('myEvents.filterScope')}
               value={scope}
               onChange={setScope}
               options={scopeOptions}
+              deselectValue="all"
               aria-label={t('myEvents.filterAria')}
             />
+            <span className="h-3 w-px shrink-0 bg-white/10" aria-hidden />
             <EventListFilterChips
-              label={t('browse.filterGame')}
               value={gameFilter}
               onChange={setGameFilter}
               options={gameOptions}
+              deselectValue="all"
               aria-label={t('browse.filterByGame')}
             />
-          </>
+          </div>
         }
       />
     </div>
