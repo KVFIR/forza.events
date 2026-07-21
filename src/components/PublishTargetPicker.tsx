@@ -22,7 +22,7 @@ type Props = {
   channelId: string;
   lockGuild?: boolean;
   lockChannel?: boolean;
-  onGuildChange: (guildId: string, guildName: string) => void;
+  onGuildChange: (guildId: string, guildName: string, ratingEnabled?: boolean) => void;
   onChannelChange: (channelId: string) => void;
 };
 
@@ -37,7 +37,9 @@ export function PublishTargetPicker({
   onChannelChange,
 }: Props) {
   const {t} = useTranslation();
-  const [guilds, setGuilds] = useState<{id: string; name: string}[]>([]);
+  const [guilds, setGuilds] = useState<
+    {id: string; name: string; rating_enabled?: boolean}[]
+  >([]);
   const [channels, setChannels] = useState<{id: string; name: string}[]>([]);
   const [guildHint, setGuildHint] = useState<string | null>(null);
   const [loadingGuilds, setLoadingGuilds] = useState(true);
@@ -98,7 +100,11 @@ export function PublishTargetPicker({
               : undefined) ?? (r.guilds.length === 1 ? r.guilds[0] : undefined);
           if (preferred) {
             autoSelectAttemptedRef.current = true;
-            onGuildChangeRef.current(preferred.id, preferred.name);
+            onGuildChangeRef.current(
+              preferred.id,
+              preferred.name,
+              Boolean(preferred.rating_enabled),
+            );
           }
         }
       })
@@ -160,12 +166,19 @@ export function PublishTargetPicker({
     if (!guildId || lockGuild || guilds.length === 0) return;
     const match = guilds.find((g) => g.id === guildId);
     if (!match) return;
-    const syncKey = `${guildId}:${match.name}`;
+    const syncKey = `${guildId}:${match.name}:${Boolean(match.rating_enabled)}`;
     if (guildNameSyncedRef.current === syncKey) return;
-    if (isPlaceholderGuildName(guildName) || guildName !== match.name) {
+    if (
+      isPlaceholderGuildName(guildName) ||
+      guildName !== match.name ||
+      !guildNameSyncedRef.current?.startsWith(`${guildId}:`)
+    ) {
       guildNameSyncedRef.current = syncKey;
-      onGuildChangeRef.current(guildId, match.name);
+      onGuildChangeRef.current(guildId, match.name, Boolean(match.rating_enabled));
+      return;
     }
+    guildNameSyncedRef.current = syncKey;
+    onGuildChangeRef.current(guildId, match.name, Boolean(match.rating_enabled));
   }, [guildId, guildName, guilds, lockGuild]);
 
   useEffect(() => {
@@ -269,7 +282,11 @@ export function PublishTargetPicker({
               onChange={(e) => {
                 guildNameSyncedRef.current = null;
                 const next = guildOptions.find((g) => g.id === e.target.value);
-                onGuildChange(e.target.value, next?.name ?? '');
+                onGuildChange(
+                  e.target.value,
+                  next?.name ?? '',
+                  Boolean(next?.rating_enabled),
+                );
               }}
             >
               <option value="">{t('publish.selectServer')}</option>

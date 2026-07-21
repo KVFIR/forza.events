@@ -57,6 +57,13 @@ export function filterByGame(
   return events.filter((e) => e.game === game);
 }
 
+export type RankedFilter = 'all' | 'ranked';
+
+export function filterByRanked(events: ForzaEvent[], ranked: RankedFilter): ForzaEvent[] {
+  if (ranked === 'all') return events;
+  return events.filter((e) => e.isRanked);
+}
+
 export function isDraftEvent(event: ForzaEvent): boolean {
   return !isPublishedToDiscord(event);
 }

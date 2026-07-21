@@ -1,6 +1,7 @@
 {
   "nav": {
     "browse": "Обзор",
+    "leaderboard": "Рейтинг",
     "myEvents": "Мои события",
     "create": "Создать",
     "profile": "Профиль"
@@ -144,7 +145,19 @@
     "errorStandaloneTitle": "Не удалось загрузить события из базы",
     "errorStandaloneDesc": "Проверьте подключение и попробуйте снова.",
     "errorDiscordTitle": "Не удалось подключиться к базе",
-    "errorDiscordDesc": "В Discord Developer Portal добавьте URL mapping {{prefix}} → your-project.supabase.co"
+    "errorDiscordDesc": "В Discord Developer Portal добавьте URL mapping {{prefix}} → your-project.supabase.co",
+    "filterRanked": "Рейтинг",
+    "filterByRanked": "Фильтр рейтинговых событий"
+  },
+  "leaderboard": {
+    "title": "Рейтинг гонщиков",
+    "subtitle": "Глобальный рейтинг по ranked-гонкам.",
+    "yourRank": "Ваше место: #{{rank}} · {{rating}}",
+    "provisional": "Временный",
+    "emptyTitle": "Пока никого в рейтинге",
+    "emptyDesc": "Завершите рейтинговую гонку, чтобы появиться в таблице.",
+    "loadErrorTitle": "Не удалось загрузить рейтинг",
+    "loadErrorDesc": "Проверьте соединение и попробуйте снова."
   },
   "myEvents": {
     "scopeAll": "Все",
@@ -170,7 +183,9 @@
     "hosted": "Организовано",
     "participated": "Участий",
     "rating": "Рейтинг",
-    "ratingTbd": "—",
+    "ratingTbd": "TBD",
+    "ratingProvisional": "Временный",
+    "viewLeaderboard": "К таблице рейтинга",
     "recentResults": "Недавние результаты",
     "allInMyEvents": "Все в «Мои события»",
     "upcoming": "Скоро для вас",
@@ -196,7 +211,8 @@
     "ended": "Завершено",
     "draft": "Черновик",
     "restrictedList": "Список машин",
-    "anythingGoes": "Любая машина"
+    "anythingGoes": "Любая машина",
+    "ranked": "Рейтинг"
   },
   "participation": {
     "join": "Участвовать",
@@ -213,7 +229,7 @@
     "xboxHintTitle": "Вы зарегистрированы",
     "xboxHintBody": "В Xbox добавьте лидера конвоя {{leader}} в друзья и зайдите в его конвой незадолго до начала ивента.",
     "convoyLeaderXboxHintTitle": "Вы лидер конвоя",
-    "convoyLeaderXboxHintBody": "В Xbox принимайте заявки в друзья от гонщиков. Сделайте профиль видимым и в Forza выберите convoy privacy Friends, чтобы они могли зайти."
+    "convoyLeaderXboxHintBody": "В Xbox принимайте заявки в друзья от гонщиков. Сделайте профиль видимым и в Forza выберите convoy privacy Friends, чтобы они могли зайти. После гонки не забудьте отправить хосту скриншот с результатами."
   },
   "addGroup": {
     "button": "Добавить группу {{n}}",
@@ -298,7 +314,9 @@
     "deleteDraftDesc": "Черновик будет удалён безвозвратно.",
     "cancelEventTitle": "Отменить событие?",
     "cancelEventDesc": "Объявление в Discord обновится, регистрация закроется.",
-    "joinServer": "Вступить на сервер"
+    "joinServer": "Вступить на сервер",
+    "rankedTitle": "Рейтинговая гонка",
+    "rankedExplainer": "Ваш результат обновляет рейтинг гонщика — даже при DNF (считается последним местом). Он влияет на место в таблице лидеров и будет учитываться при формировании конвоев."
   },
   "create": {
     "steps": {
@@ -369,6 +387,10 @@
     },
     "beforePublish": "Перед публикацией",
     "publishTarget": "Куда публиковать",
+    "rankedSection": "Рейтинговая гонка",
+    "rankedToggle": "Рейтинговая гонка",
+    "rankedHint": "Места в финише обновляют глобальный рейтинг гонщика.",
+    "rankedLocked": "Ranked можно менять до старта события.",
     "selectedChannel": "Выбранный канал",
     "server": "Сервер",
     "channel": "Канал",
@@ -504,6 +526,10 @@
     "targetGuildLocked": "Сервер нельзя изменить после публикации.",
     "targetChannelLocked": "Канал нельзя изменить после публикации.",
     "gameLocked": "Игру нельзя изменить после публикации.",
+    "rankedTypeNotAllowed": "Рейтинговые гонки только для road и dirt.",
+    "rankedGuildRequired": "Для рейтинговой гонки выберите сервер из allowlist.",
+    "rankedGuildNotAllowed": "Этот Discord-сервер не включён для рейтинговых гонок.",
+    "rankedLocked": "Настройку Ranked нельзя изменить после старта события.",
     "trackNameRequired": "У каждой трассы должно быть название.",
     "trackShareCodeInvalid": "Share-код — ровно 9 цифр.",
     "trackFormatTooLong": "Слишком длинный формат (макс. 100 символов).",

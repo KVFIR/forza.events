@@ -1,6 +1,11 @@
 import {serve} from 'https://deno.land/std@0.224.0/http/server.ts';
 import {EVENT_DETAIL_SELECT, EVENT_LIST_SELECT} from '../_shared/eventListSelect.ts';
-import {databaseErrorResponse, internalErrorResponse} from '../_shared/apiResponse.ts';
+import {
+  appErrorResponse,
+  databaseErrorResponse,
+  internalErrorResponse,
+} from '../_shared/apiResponse.ts';
+import {API_ERROR_CODES} from '../_shared/apiErrorCodes.ts';
 import {jsonResponse, optionsResponse} from '../_shared/cors.ts';
 import {optionalDiscordUser} from '../_shared/discordRequestAuth.ts';
 import {rateLimitPublicRead} from '../_shared/rateLimitPresets.ts';
@@ -29,7 +34,9 @@ serve(async (req) => {
     const supabase = adminClient();
 
     if (hostDrafts) {
-      if (!discordUser) return jsonResponse({error: 'Unauthorized'}, 401, req);
+      if (!discordUser) {
+        return appErrorResponse(req, 401, API_ERROR_CODES.UNAUTHORIZED);
+      }
 
       const {data, error} = await supabase
         .from('events')

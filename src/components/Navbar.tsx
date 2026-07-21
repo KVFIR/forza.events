@@ -1,6 +1,6 @@
 import {NavLink} from 'react-router-dom';
 import {useTranslation} from 'react-i18next';
-import {CalendarDays, Compass, PlusCircle, User2, type LucideIcon} from 'lucide-react';
+import {CalendarDays, Compass, PlusCircle, Trophy, User2, type LucideIcon} from 'lucide-react';
 import {AuthStatusIndicator} from './AuthStatusIndicator';
 import {Logo} from './ui/Logo';
 import {navShellBorderClass} from './ui/formStyles';
@@ -14,6 +14,7 @@ const navBrandBarClass = cn(
 const NAV_ITEMS: {to: string; end: boolean; icon: LucideIcon; labelKey: string}[] = [
   {to: '/', end: true, icon: Compass, labelKey: 'nav.browse'},
   {to: '/my-events', end: true, icon: CalendarDays, labelKey: 'nav.myEvents'},
+  {to: '/leaderboard', end: true, icon: Trophy, labelKey: 'nav.leaderboard'},
   {to: '/create', end: false, icon: PlusCircle, labelKey: 'nav.create'},
   {to: '/profile', end: false, icon: User2, labelKey: 'nav.profile'},
 ];

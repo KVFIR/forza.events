@@ -7,7 +7,8 @@ import {requireDiscordUser} from '../_shared/discordRequestAuth.ts';
 import {requireManageGuildAccess} from '../_shared/guildAccess.ts';
 import {validatePublishChannelTarget} from '../_shared/publishTarget.ts';
 import {buildEventEmbed, mapEventCarsForEmbed} from '../_shared/events.ts';
-import {validatePublishReady} from '../_shared/eventSpec.ts';
+import {validatePublishReady, validateRankedAgainstEvent} from '../_shared/eventSpec.ts';
+import {isGuildRatingEnabled} from '../_shared/applyEventRatings.ts';
 import {VALIDATION_CODES} from '../_shared/validationCodes.ts';
 import {buildGuildCatalogUpsert} from '../_shared/guildCatalog.ts';
 import {normalizeGuildName} from '../_shared/guildDisplay.ts';
@@ -88,6 +89,12 @@ serve(async (req) => {
     const publishBody = buildPublishEventBody(event, eventCars ?? [], guild_id, channel_id);
     const publishErr = validatePublishReady(publishBody);
     if (publishErr) return appErrorResponse(req, 400, publishErr);
+
+    if (publishBody.is_ranked) {
+      const allowed = await isGuildRatingEnabled(supabase, guild_id);
+      const rankedErr = validateRankedAgainstEvent(true, allowed);
+      if (rankedErr) return appErrorResponse(req, 400, rankedErr);
+    }
 
     const resolvedGuildName = normalizeGuildName(publishGuild.name);
     if (!resolvedGuildName) {

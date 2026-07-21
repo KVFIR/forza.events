@@ -4,9 +4,54 @@ import {jsonResponse, optionsResponse} from '../_shared/cors.ts';
 import {avatarUrl, discordUniqueUsername} from '../_shared/discord.ts';
 import {requireDiscordUser} from '../_shared/discordRequestAuth.ts';
 import {ensureDiscordUserRow} from '../_shared/discordUserRow.ts';
+import {driverRatingFromRow} from '../_shared/driverRatingPayload.ts';
 import {validateGamertag} from '../_shared/gamertag.ts';
 import {rateLimitAuth} from '../_shared/rateLimitPresets.ts';
 import {adminClient} from '../_shared/supabase.ts';
+
+async function loadDriverRating(
+  supabase: ReturnType<typeof adminClient>,
+  discordId: string,
+) {
+  const {data} = await supabase
+    .from('player_ratings')
+    .select('rating, games_rated')
+    .eq('discord_id', discordId)
+    .maybeSingle();
+  return driverRatingFromRow(data);
+}
+
+function userPayload(
+  discordUser: {id: string},
+  data: {
+    discord_id: string;
+    xbox_gamertag: string | null;
+    events_joined: number;
+    events_hosted: number;
+    attendance_rate: number | string;
+    no_shows: number;
+    dm_notifications_enabled?: boolean | null;
+    notification_locale?: string | null;
+  },
+  driverRating: ReturnType<typeof driverRatingFromRow>,
+  username: string,
+  avatar: string | null,
+) {
+  return {
+    discordId: data.discord_id,
+    username,
+    avatarUrl: avatar,
+    xboxGamertag: data.xbox_gamertag,
+    eventsJoined: data.events_joined,
+    eventsHosted: data.events_hosted,
+    attendanceRate: Number(data.attendance_rate),
+    noShows: data.no_shows,
+    hostRatingAvg: 0,
+    dmNotificationsEnabled: data.dm_notifications_enabled ?? true,
+    notificationLocale: data.notification_locale === 'ru' ? 'ru' : 'en',
+    driverRating,
+  };
+}
 
 serve(async (req) => {
   if (req.method === 'OPTIONS') return optionsResponse(req);
@@ -51,20 +96,15 @@ serve(async (req) => {
         .eq('discord_id', discordUser.id)
         .single();
       if (error) return databaseErrorResponse(req, 'user-profile', error);
+      const driverRating = await loadDriverRating(supabase, discordUser.id);
       return jsonResponse({
-        user: {
-          discordId: data.discord_id,
-          username: discordUniqueUsername(discordUser),
-          avatarUrl: avatarUrl(discordUser),
-          xboxGamertag: data.xbox_gamertag,
-          eventsJoined: data.events_joined,
-          eventsHosted: data.events_hosted,
-          attendanceRate: Number(data.attendance_rate),
-          noShows: data.no_shows,
-          hostRatingAvg: 0,
-          dmNotificationsEnabled: data.dm_notifications_enabled ?? true,
-          notificationLocale: data.notification_locale === 'ru' ? 'ru' : 'en',
-        },
+        user: userPayload(
+          discordUser,
+          data,
+          driverRating,
+          discordUniqueUsername(discordUser),
+          avatarUrl(discordUser),
+        ),
       }, 200, req);
     }
 
@@ -77,20 +117,15 @@ serve(async (req) => {
 
     if (error) return databaseErrorResponse(req, 'user-profile', error);
 
+    const driverRating = await loadDriverRating(supabase, discordUser.id);
     return jsonResponse({
-      user: {
-        discordId: data.discord_id,
-        username: discordUniqueUsername(discordUser),
-        avatarUrl: avatarUrl(discordUser),
-        xboxGamertag: data.xbox_gamertag,
-        eventsJoined: data.events_joined,
-        eventsHosted: data.events_hosted,
-        attendanceRate: Number(data.attendance_rate),
-        noShows: data.no_shows,
-        hostRatingAvg: 0,
-        dmNotificationsEnabled: data.dm_notifications_enabled ?? true,
-        notificationLocale: data.notification_locale === 'ru' ? 'ru' : 'en',
-      },
+      user: userPayload(
+        discordUser,
+        data,
+        driverRating,
+        discordUniqueUsername(discordUser),
+        avatarUrl(discordUser),
+      ),
     }, 200, req);
   } catch (e) {
     return internalErrorResponse(req, e);

@@ -112,6 +112,10 @@ export const fileUploadLabelClass =
 export const toggleRowClass =
   'flex cursor-pointer items-center justify-between rounded-lg border border-white/[0.08] bg-white/[0.03] px-3.5 py-2.5';
 
+/** Checkbox + title/hint — control sits next to copy, not at the far edge. */
+export const checkboxHintRowClass =
+  'flex cursor-pointer items-start gap-3 rounded-lg border border-white/[0.08] bg-white/[0.03] px-3.5 py-2.5';
+
 export const checkboxLabelClass =
   'flex shrink-0 items-center gap-1.5 text-[10px] font-bold uppercase tracking-widest text-muted';
 

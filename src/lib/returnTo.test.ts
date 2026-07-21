@@ -28,6 +28,7 @@ describe('isSafeReturnPath', () => {
   it('allows known app routes', () => {
     expect(isSafeReturnPath('/')).toBe(true);
     expect(isSafeReturnPath('/my-events')).toBe(true);
+    expect(isSafeReturnPath('/leaderboard')).toBe(true);
     expect(isSafeReturnPath('/event/abc')).toBe(true);
     expect(isSafeReturnPath('/create?edit=x')).toBe(true);
     expect(isSafeReturnPath('/profile')).toBe(true);

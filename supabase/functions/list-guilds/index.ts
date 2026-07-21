@@ -6,6 +6,7 @@ import {fetchUserGuilds, filterGuildsWithBot, publishTargetHint} from '../_share
 import {requireDiscordUser} from '../_shared/discordRequestAuth.ts';
 import {resolveListGuildCandidates} from '../_shared/listGuildCandidates.ts';
 import {rateLimitAuth} from '../_shared/rateLimitPresets.ts';
+import {adminClient} from '../_shared/supabase.ts';
 
 serve(async (req) => {
   if (req.method === 'OPTIONS') return optionsResponse(req);
@@ -30,6 +31,17 @@ serve(async (req) => {
       dmReachability && fresh ? {fresh: true} : undefined,
     );
 
+    const supabase = adminClient();
+    const guildIds = withBot.map((g) => g.id);
+    const enabled = new Set<string>();
+    if (guildIds.length > 0) {
+      const {data: rows} = await supabase
+        .from('rating_enabled_guilds')
+        .select('guild_id')
+        .in('guild_id', guildIds);
+      for (const row of rows ?? []) enabled.add(String(row.guild_id));
+    }
+
     const list = withBot
       .map((g) => ({
         id: g.id,
@@ -37,6 +49,7 @@ serve(async (req) => {
         icon_url: g.icon
           ? `https://cdn.discordapp.com/icons/${g.id}/${g.icon}.png`
           : null,
+        rating_enabled: enabled.has(g.id),
       }))
       .sort((a, b) => a.name.localeCompare(b.name));
 

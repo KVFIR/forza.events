@@ -10,7 +10,7 @@ import {EventListMetaSelect} from '../components/EventListMetaSelect';
 import {useAuth} from '../context/AuthContext';
 import {DISCORD_SUPABASE_PROXY_PREFIX} from '../lib/supabaseEnv';
 import {usePublishedEvents} from '../hooks/usePublishedEvents';
-import {filterByEventType, filterByGame, sortEvents, type EventSortKey} from '../lib/eventList';
+import {filterByEventType, filterByGame, filterByRanked, sortEvents, type EventSortKey, type RankedFilter} from '../lib/eventList';
 
 type TypeFilter = EventType | 'all';
 type GameFilter = ForzaGame | 'all';
@@ -46,6 +46,14 @@ export function BrowseEvents() {
     [t],
   );
 
+  const rankedOptions = useMemo(
+    () => [
+      {value: 'all' as const, label: t('browse.filterAll')},
+      {value: 'ranked' as const, label: t('browse.filterRanked')},
+    ],
+    [t],
+  );
+
   const sortOptions: {value: EventSortKey; label: string}[] = [
     {value: 'event_date', label: t('browse.sortEventDate')},
     {value: 'created', label: t('browse.sortCreated')},
@@ -55,6 +63,7 @@ export function BrowseEvents() {
   const {events, isLoading, isRefreshing, loadError, refetch} = usePublishedEvents();
   const [typeFilter, setTypeFilter] = useState<TypeFilter>('all');
   const [gameFilter, setGameFilter] = useState<GameFilter>('all');
+  const [rankedFilter, setRankedFilter] = useState<RankedFilter>('all');
   const [sort, setSort] = useState<EventSortKey>('event_date');
 
   useEffect(() => {
@@ -64,14 +73,17 @@ export function BrowseEvents() {
   const filtered = useMemo(() => {
     const byType = filterByEventType(events, typeFilter);
     const byGame = filterByGame(byType, gameFilter);
-    return sortEvents(byGame, sort);
-  }, [events, typeFilter, gameFilter, sort]);
+    const byRanked = filterByRanked(byGame, rankedFilter);
+    return sortEvents(byRanked, sort);
+  }, [events, typeFilter, gameFilter, rankedFilter, sort]);
 
-  const hasActiveFilters = typeFilter !== 'all' || gameFilter !== 'all';
+  const hasActiveFilters =
+    typeFilter !== 'all' || gameFilter !== 'all' || rankedFilter !== 'all';
 
   const clearFilters = () => {
     setTypeFilter('all');
     setGameFilter('all');
+    setRankedFilter('all');
   };
 
   const errorTitle =
@@ -128,6 +140,13 @@ export function BrowseEvents() {
               onChange={setTypeFilter}
               options={typeOptions}
               aria-label={t('browse.filterByType')}
+            />
+            <EventListFilterChips
+              label={t('browse.filterRanked')}
+              value={rankedFilter}
+              onChange={setRankedFilter}
+              options={rankedOptions}
+              aria-label={t('browse.filterByRanked')}
             />
           </>
         }

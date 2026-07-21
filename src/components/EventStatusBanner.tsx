@@ -1,6 +1,7 @@
 import {useTranslation} from 'react-i18next';
 import {cn} from '../lib/cn';
 import {Alert, type AlertVariant} from './ui/Alert';
+import {eventDetailHintClass, eventDetailStatusHintClass} from './eventDetailHintStyles';
 
 type Variant = 'draft' | 'host-in-progress' | 'registration-closed' | 'cancelled';
 
@@ -32,11 +33,16 @@ type Props = {
 export function EventStatusBanner({variant, className}: Props) {
   const {t} = useTranslation();
   const keys = copyKeys[variant];
+  const infoOutline = alertByVariant[variant] === 'info';
   return (
     <Alert
       variant={alertByVariant[variant]}
       title={t(keys.title)}
-      className={cn('mt-3 py-2.5 text-sm', className)}
+      className={cn(
+        'mt-3',
+        infoOutline ? eventDetailHintClass : eventDetailStatusHintClass,
+        className,
+      )}
     >
       {t(keys.body)}
     </Alert>

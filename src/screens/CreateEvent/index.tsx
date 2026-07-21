@@ -94,6 +94,7 @@ export function CreateEvent() {
     onLobbyLeaderSelect,
     onGuildChange,
     setTargetChannelId,
+    setIsRanked,
     clearFieldError,
   } = form;
 
@@ -252,6 +253,10 @@ export function CreateEvent() {
           <PublishedTargetSummary
             guildName={values.targetGuildName}
             hasChannel={Boolean(values.targetChannelId)}
+            eventType={values.type}
+            isRanked={values.isRanked}
+            targetGuildRatingEnabled={values.targetGuildRatingEnabled}
+            onIsRankedChange={setIsRanked}
           />
         </div>
       ) : step === 0 ? (
@@ -267,6 +272,11 @@ export function CreateEvent() {
           lockChannel={false}
           fieldErrors={fieldErrors}
           convoy={convoySectionProps}
+          eventType={values.type}
+          isRanked={values.isRanked}
+          targetGuildRatingEnabled={values.targetGuildRatingEnabled}
+          lockRanked={false}
+          onIsRankedChange={setIsRanked}
           onGuildChange={onGuildChange}
           onChannelChange={setTargetChannelId}
         />

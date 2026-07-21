@@ -5,8 +5,9 @@ import {
   type CreateEventConvoySectionProps,
 } from '../components/CreateEventConvoySection';
 import {FormSection} from '../components/Field';
+import {checkboxHintRowClass} from '../../../components/ui/formStyles';
 import {isLocalDevHost} from '../../../lib/runtime';
-import type {FieldErrors} from '../types';
+import type {CreateEventType, FieldErrors} from '../types';
 
 type Props = {
   token: string | null;
@@ -18,7 +19,12 @@ type Props = {
   lockChannel: boolean;
   fieldErrors: FieldErrors;
   convoy: CreateEventConvoySectionProps;
-  onGuildChange: (id: string, name: string) => void;
+  eventType: CreateEventType;
+  isRanked: boolean;
+  targetGuildRatingEnabled: boolean;
+  lockRanked: boolean;
+  onIsRankedChange: (v: boolean) => void;
+  onGuildChange: (id: string, name: string, ratingEnabled?: boolean) => void;
   onChannelChange: (id: string) => void;
 };
 
@@ -32,11 +38,18 @@ export function PublishStep({
   lockChannel,
   fieldErrors,
   convoy,
+  eventType,
+  isRanked,
+  targetGuildRatingEnabled,
+  lockRanked,
+  onIsRankedChange,
   onGuildChange,
   onChannelChange,
 }: Props) {
   const {t} = useTranslation();
   const devPreview = isLocalDevHost() && !token;
+  const canRank =
+    targetGuildRatingEnabled && (eventType === 'road' || eventType === 'dirt');
 
   if (!token && !devPreview) {
     return <p className="text-sm text-muted">{t('auth.openInDiscordTarget')}</p>;
@@ -68,6 +81,25 @@ export function PublishStep({
           </>
         )}
       </FormSection>
+
+      {!devPreview && canRank ? (
+        <FormSection title={t('create.rankedSection')}>
+          <label className={checkboxHintRowClass}>
+            <input
+              type="checkbox"
+              checked={isRanked}
+              disabled={lockRanked}
+              onChange={(e) => onIsRankedChange(e.target.checked)}
+              className="mt-0.5 h-4 w-4 shrink-0 accent-white"
+              aria-label={t('create.rankedToggle')}
+            />
+            <span className="min-w-0 text-xs text-muted">{t('create.rankedHint')}</span>
+          </label>
+          {lockRanked ? (
+            <p className="mt-1.5 text-xs text-muted">{t('create.rankedLocked')}</p>
+          ) : null}
+        </FormSection>
+      ) : null}
 
       {!devPreview && <CreateEventConvoySection {...convoy} />}
     </div>

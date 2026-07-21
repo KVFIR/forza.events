@@ -1,5 +1,9 @@
+import {useTranslation} from 'react-i18next';
+import {Alert} from '../../../components/ui/Alert';
 import {EventStatusBanner} from '../../../components/EventStatusBanner';
+import {cn} from '../../../lib/cn';
 import type {ForzaEvent} from '../../../lib/types';
+import {eventDetailRankedHintClass} from '../../../components/eventDetailHintStyles';
 import type {EventDetailViewModel} from '../eventDetailView';
 
 type Props = {
@@ -18,8 +22,19 @@ type Props = {
 };
 
 export function EventDetailStatusSection({event, view, joinError, actionError}: Props) {
+  const {t} = useTranslation();
+
   return (
     <>
+      {event.isRanked ? (
+        <Alert
+          variant="info"
+          title={t('eventDetail.rankedTitle')}
+          className={cn('mt-3', eventDetailRankedHintClass)}
+        >
+          {t('eventDetail.rankedExplainer')}
+        </Alert>
+      ) : null}
       {view.isDraft && view.isHost ? <EventStatusBanner variant="draft" /> : null}
       {view.showHostPostStartActions ? <EventStatusBanner variant="host-in-progress" /> : null}
       {!view.isHost &&

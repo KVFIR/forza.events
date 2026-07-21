@@ -27,6 +27,7 @@ FUNCTIONS=(
   prune-client-analytics
   track-event
   analytics-dashboard
+  leaderboard
 )
 
 echo "Deploying ${#FUNCTIONS[@]} Supabase Edge Functions..."

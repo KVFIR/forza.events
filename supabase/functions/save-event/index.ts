@@ -9,9 +9,11 @@ import {
   type SaveEventBody,
   validateDraft,
   validatePublishReady,
+  validateRankedAgainstEvent,
   isPublishedStatus,
   eventHasStarted,
 } from '../_shared/eventSpec.ts';
+import {isGuildRatingEnabled} from '../_shared/applyEventRatings.ts';
 import {API_ERROR_CODES} from '../_shared/apiErrorCodes.ts';
 import {appErrorResponse, databaseErrorResponse, internalErrorResponse} from '../_shared/apiResponse.ts';
 import {jsonResponse, optionsResponse} from '../_shared/cors.ts';
@@ -165,6 +167,8 @@ serve(async (req) => {
       discord_message_id: string | null;
       starts_at: string;
       game?: string | null;
+      is_ranked?: boolean | null;
+      group_count?: number | null;
       cover_image_url: string | null;
       title: string;
       tracks: unknown;
@@ -181,7 +185,7 @@ serve(async (req) => {
       const {data} = await supabase
         .from('events')
         .select(
-          'id, host_discord_id, status, guild_id, channel_id, discord_message_id, starts_at, game, cover_image_url, title, tracks, car_rule_mode, max_pi, additional_car_restrictions, lobby_leader_discord_id, lobby_leader_is_host, lobby_leader_gamertag',
+          'id, host_discord_id, status, guild_id, channel_id, discord_message_id, starts_at, game, is_ranked, group_count, cover_image_url, title, tracks, car_rule_mode, max_pi, additional_car_restrictions, lobby_leader_discord_id, lobby_leader_is_host, lobby_leader_gamertag',
         )
         .eq('id', body.id)
         .single();
@@ -236,6 +240,18 @@ serve(async (req) => {
     if (body.publish) {
       const publishErr = validatePublishReady(publishBody);
       if (publishErr) return appErrorResponse(req, 400, publishErr);
+    }
+
+    const wantsRanked = Boolean(body.is_ranked);
+    if (wantsRanked) {
+      const guildForRanked =
+        (isPublishedEdit ? existing?.guild_id : null) ??
+        body.guild_id?.trim() ??
+        existing?.guild_id ??
+        null;
+      const allowed = await isGuildRatingEnabled(supabase, guildForRanked);
+      const rankedErr = validateRankedAgainstEvent(true, allowed);
+      if (rankedErr) return appErrorResponse(req, 400, rankedErr);
     }
 
     const cars: CarPayload[] =

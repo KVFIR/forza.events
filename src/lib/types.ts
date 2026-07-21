@@ -72,6 +72,10 @@ export interface ForzaEvent {
   maxPlayers: number;
   /** Number of active lobbies (1..MAX_GROUPS). Defaults to 1 when absent. */
   groupCount?: number;
+  /** Opt-in ranked race — finishing positions update global driver ELO. */
+  isRanked?: boolean;
+  /** True after ranked ELO was applied (or skipped) on submit-results. */
+  ratingApplied?: boolean;
   currentPlayers: number;
   hostDiscordId: string;
   hostUsername: string;
@@ -92,6 +96,8 @@ export interface ForzaEvent {
   participants: EventParticipant[];
   /** Present when loaded via event-detail select (PostgREST or browse-events by id). */
   publishedResults?: PublishedEventResultRow[];
+  /** Per-driver ELO delta after ranked submit (detail select). */
+  ratingDeltas?: Record<string, number>;
 }
 
 export type PublishedEventResultRow = {
@@ -117,6 +123,12 @@ export interface AppUser {
   dmNotificationsEnabled?: boolean;
   /** Locale for bot DM copy (`en` | `ru`). */
   notificationLocale?: 'en' | 'ru';
+  /** Global driver skill rating (ELO). Absent until profile fetch. */
+  driverRating?: {
+    rating: number;
+    gamesRated: number;
+    provisional: boolean;
+  };
 }
 
 export type DiscordGuildOption = {

@@ -71,7 +71,7 @@ npm run seed:events   # sample events (dev only)
 
 ## Edge Functions
 
-**22 functions** — canonical list in [`scripts/deploy-edge-functions.sh`](../scripts/deploy-edge-functions.sh). Deploy all:
+**23 functions** — canonical list in [`scripts/deploy-edge-functions.sh`](../scripts/deploy-edge-functions.sh). Deploy all:
 
 ```bash
 npm run deploy:functions
@@ -92,8 +92,9 @@ npm run deploy:functions
 | `add-group` | Discord token | Host adds a lobby group (leader + auto-fill from waitlist) |
 | `change-group-leader` | Discord token | Host reassigns convoy leader for a published group (before start) |
 | `balance-groups` | Discord token | Host redistributes non-leaders evenly (leaders stay) |
-| `submit-results` | Discord token | Results + complete |
-| `user-profile` | Discord token | Profile updates |
+| `submit-results` | Discord token | Results + complete (+ ranked ELO when `is_ranked`) |
+| `user-profile` | Discord token | Profile updates + `driverRating` |
+| `leaderboard` | Optional Discord token | Global driver ladder |
 | `launch-intent` | Discord token | Embed deep-link fallback |
 | `upload-cover` | Discord token | Cover image upload |
 | `interactions-endpoint` | Ed25519 signature | `LAUNCH_ACTIVITY` button |

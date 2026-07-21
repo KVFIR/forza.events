@@ -116,6 +116,17 @@ export function EventResultsTable({
                 {showPosition && row.points != null ? (
                   <span className="ml-1.5 text-xs text-muted">{row.points} pts</span>
                 ) : null}
+                {row.ratingDelta != null && row.ratingDelta !== 0 ? (
+                  <span
+                    className={cn(
+                      'ml-1.5 text-xs tabular-nums',
+                      row.ratingDelta > 0 ? 'text-accent-green' : 'text-red-300/90',
+                    )}
+                  >
+                    {row.ratingDelta > 0 ? '+' : ''}
+                    {row.ratingDelta}
+                  </span>
+                ) : null}
               </span>
             </li>
     );

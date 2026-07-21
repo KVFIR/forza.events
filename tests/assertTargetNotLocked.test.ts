@@ -27,8 +27,8 @@ describe('assertTargetNotLocked', () => {
     expect(code).toBeNull();
   });
 
-  it('allows omitted game on published edit', async () => {
-    const code = await assertTargetNotLocked(supabase, published, {});
+  it('allows ranked flip on published edit', async () => {
+    const code = await assertTargetNotLocked(supabase, published, {is_ranked: true});
     expect(code).toBeNull();
   });
 });

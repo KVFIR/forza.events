@@ -83,6 +83,21 @@ export function CarRuleBadge({
   );
 }
 
+export function RankedBadge({className}: {className?: string}) {
+  const {t} = useTranslation();
+  return (
+    <span
+      className={cn(
+        badgeBaseClass,
+        'border-amber-500/25 bg-amber-500/[0.08] text-amber-200/90',
+        className,
+      )}
+    >
+      {t('eventStatus.ranked')}
+    </span>
+  );
+}
+
 type StatusProps = {
   status: 'open' | 'full' | 'live' | 'ended';
   className?: string;

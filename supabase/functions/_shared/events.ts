@@ -59,6 +59,7 @@ export type EmbedEventInput = {
   groups?: EmbedGroupSummary[];
   /** Racers waiting because every active group is full. */
   waitlist_count?: number | null;
+  is_ranked?: boolean | null;
 };
 
 export type EmbedGroupSummary = {
@@ -492,6 +493,9 @@ export function buildEventEmbed(event: EmbedEventInput) {
       value: eventGameLabelEn(normalizeEventGame(event.game)),
       inline: false,
     },
+    ...(event.is_ranked
+      ? [{name: embedFieldName('🏆 Ranked'), value: 'Counts toward global driver rating', inline: false as const}]
+      : []),
     {name: embedFieldName('📅 Date & Time'), value: discordTimestamp(event.starts_at), inline: false},
     ...(trackField ? [trackField] : []),
     ...(aboutField ? [aboutField] : []),

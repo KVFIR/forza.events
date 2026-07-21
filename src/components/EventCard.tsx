@@ -210,6 +210,11 @@ export function EventCard({event, participantResult}: Props) {
                 <p className="mt-1.5 flex items-center gap-1 text-xs text-slate-400">
                   <Users className="h-3 w-3 shrink-0" />
                   {formatLobbyCount(event.currentPlayers, totalCapacity(event))}
+                  {event.isRanked && (
+                    <span className="ml-1 text-[9px] font-bold uppercase tracking-widest text-amber-300/90">
+                      · {t('eventStatus.ranked')}
+                    </span>
+                  )}
                   {ended && (
                     <span className="ml-1 text-[9px] font-bold uppercase tracking-widest text-muted">
                       · {t('eventStatus.ended')}

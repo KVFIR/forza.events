@@ -1,14 +1,16 @@
 import {useTranslation} from 'react-i18next';
 import {useNavigate} from 'react-router-dom';
 import {busyLabel} from '../../../i18n/busyLabels';
-import {Badge, DraftBadge, GameBadge, StatusBadge} from '../../../components/ui/Badge';
+import {Badge, DraftBadge, GameBadge, RankedBadge, StatusBadge} from '../../../components/ui/Badge';
 import {Button} from '../../../components/ui/Button';
 import {Alert} from '../../../components/ui/Alert';
 import {
   participationButtonLabel,
   participationButtonVariant,
 } from '../../../lib/eventActions';
+import {cn} from '../../../lib/cn';
 import type {EventStatus, ForzaEvent} from '../../../lib/types';
+import {eventDetailHintClass} from '../../../components/eventDetailHintStyles';
 import type {EventDetailViewModel} from '../eventDetailView';
 import {EventRegistrationProgress} from './EventDetailProgressSection';
 
@@ -164,6 +166,7 @@ export function EventDetailTitleSection({
           <div className="flex flex-wrap items-center gap-2">
             <GameBadge game={event.game} variant="full" />
             <Badge type={event.type} />
+            {event.isRanked ? <RankedBadge /> : null}
             {view.isDraft ? <DraftBadge /> : <StatusBadge status={displayStatus} />}
           </div>
           <h1 className="mt-1.5 text-xl font-black tracking-tight text-white">{event.title}</h1>
@@ -174,14 +177,18 @@ export function EventDetailTitleSection({
       <EventRegistrationProgress view={view} />
 
       {view.showJoinXboxHint && view.viewerConvoyLeader ? (
-        <Alert variant="info" title={t('participation.xboxHintTitle')} className="mt-2 py-2.5 text-sm">
+        <Alert
+          variant="info"
+          title={t('participation.xboxHintTitle')}
+          className={cn('mt-2', eventDetailHintClass)}
+        >
           {t('participation.xboxHintBody', {leader: view.viewerConvoyLeader.gamertag})}
         </Alert>
       ) : view.showConvoyLeaderXboxHint ? (
         <Alert
           variant="info"
           title={t('participation.convoyLeaderXboxHintTitle')}
-          className="mt-2 py-2.5 text-sm"
+          className={cn('mt-2', eventDetailHintClass)}
         >
           {t('participation.convoyLeaderXboxHintBody')}
         </Alert>

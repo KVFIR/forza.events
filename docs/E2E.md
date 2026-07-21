@@ -92,9 +92,11 @@ Manual QA matrix aligned with current code behavior (not an abstract checklist).
 - [ ] Browse feed = published events until terminal (`isBrowseFeedEvent`: not draft, not completed/cancelled/archived; started/live stay visible).
 - [ ] Type filter: `road`, `dirt`, `cruise` + **All**.
 - [ ] Game filter: **All** (default) / FH5 / FH6; cards show short game label; Detail shows full game badge.
+- [ ] Ranked filter: **All** / **Ranked**; ranked cards/detail show Ranked badge.
 - [ ] Sort: event date / created / fill.
-- [ ] Empty filter → “no match” + clear filters (clears type **and** game).
+- [ ] Empty filter → “no match” + clear filters (clears type, game, **and** ranked).
 - [ ] Cards: type, date, organiser (`guildName` or host), fill, cover via **proxy URL**.
+- [ ] Nav **Ladder** → `/leaderboard` loads top ratings.
 
 ### Realtime (two clients)
 
@@ -211,6 +213,7 @@ Manual QA matrix aligned with current code behavior (not an abstract checklist).
 - [ ] Cancel → confirm → `cancelled`; grey embed; button disabled.
 - [ ] Submit results → immutable (repeat → 409).
 - [ ] Submit results → **Event Detail** shows table immediately (navigation seed); no false “pending host” flash.
+- [ ] **Ranked:** after submit on ranked event (≥4 finishers/DNF **per group**, no DNS-only), results show **Δ rating**; Profile rating + `/leaderboard` update; `events.rating_applied` stays true (no double apply). Multi-group: each group rated separately. ELO write is atomic (`033` RPC); if apply fails after results save, host can re-POST `submit-results` with `{event_id}` only to retry rating.
 - [ ] **Multi-group:** submit screen shows a block per group; positions restart at 1 per group; standings table renders per-group headers. Waitlisted racers are excluded from results.
 - [ ] **Event Detail** results load error → **Try again** recovers table (Activity proxy / offline).
 - [ ] **Submit results** screen: if existing-results check fails, warning + **Try again** still allows submit; successful recheck redirects when rows exist.
@@ -248,6 +251,7 @@ Manual QA matrix aligned with current code behavior (not an abstract checklist).
 | **Target** | Guild change → channels load after guild list; channel re-validate |
 | **Target** | Rate limit / transient API error → saved channel **not** cleared on re-open `?edit=` |
 | **Target** | No Manage Server → forbidden with clear copy |
+| **Ranked** | Create step 2 (after server): toggle when allowlisted + road/dirt. Published edit (before start): same toggle under locked target summary. Save can flip ranked on/off until start. |
 | **Convoy** | Self (host gamertag) vs `list-guild-members` picker |
 | **Publish** | Save as draft **without leaving** Publish step |
 | **Publish** | Save draft without channel → OK; My Events from Event step |
@@ -292,6 +296,7 @@ Manual QA matrix aligned with current code behavior (not an abstract checklist).
 - [ ] **EN | RU** → Browse, Detail, Create, errors.
 - [ ] `date-fns` locale on dates.
 - [ ] Hosted / participated stats.
+- [ ] **Driver rating** StatCard (ELO; provisional until 5 rated races) + link to `/leaderboard`.
 - [ ] Recent completed + placements.
 - [ ] **DM bell:** no mutual guild with bot → toggle **off** (even when DB default on); enable → **Add bot** dialog; after install + return to Activity → toggle **on** without re-saving.
 
@@ -303,7 +308,7 @@ Verify **in channel** after each action:
 
 | Action | Embed |
 |--------|--------|
-| Publish | Title, date, tracks, cars/rules, **n/12**, leader, cover, Register button |
+| Publish | Title, date, tracks, cars/rules, **n/12**, leader, cover, Register button; **Ranked** field when `is_ranked` |
 | Join / leave | Participant count |
 | Save published | Fields updated |
 | Cancel | CANCELLED, grey, button disabled |

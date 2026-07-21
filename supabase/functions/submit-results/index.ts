@@ -2,6 +2,7 @@ import {serve} from 'https://deno.land/std@0.224.0/http/server.ts';
 import {API_ERROR_CODES} from '../_shared/apiErrorCodes.ts';
 import {appErrorResponse, internalErrorResponse} from '../_shared/apiResponse.ts';
 import {jsonResponse, optionsResponse} from '../_shared/cors.ts';
+import {applyRankedEventRatings} from '../_shared/applyEventRatings.ts';
 import {syncPublishedEmbedByEventId} from '../_shared/embedSync.ts';
 import {requireDiscordUser} from '../_shared/discordRequestAuth.ts';
 import {eventHasStarted} from '../_shared/eventSpec.ts';
@@ -17,6 +18,55 @@ type ResultInput = {
   dnf?: boolean;
   dns?: boolean;
 };
+
+type RatingDeltaJson = {
+  discord_id: string;
+  rating_before: number;
+  rating_after: number;
+  delta: number;
+};
+
+function toRatingDeltaJson(
+  deltas: {
+    discordId: string;
+    ratingBefore: number;
+    ratingAfter: number;
+    delta: number;
+  }[],
+): RatingDeltaJson[] {
+  return deltas.map((d) => ({
+    discord_id: d.discordId,
+    rating_before: d.ratingBefore,
+    rating_after: d.ratingAfter,
+    delta: d.delta,
+  }));
+}
+
+async function tryApplyRatings(
+  supabase: ReturnType<typeof adminClient>,
+  eventId: string,
+  rows: {
+    discord_id: string;
+    position: number | null;
+    dnf: boolean;
+    dns: boolean;
+    group_index: number;
+  }[],
+): Promise<{deltas: RatingDeltaJson[]; applied: boolean}> {
+  try {
+    const deltas = await applyRankedEventRatings(supabase, eventId, rows);
+    return {deltas: toRatingDeltaJson(deltas), applied: true};
+  } catch (ratingErr) {
+    console.error(
+      JSON.stringify({
+        msg: 'Results saved but rating apply failed',
+        eventId,
+        error: ratingErr instanceof Error ? ratingErr.message : String(ratingErr),
+      }),
+    );
+    return {deltas: [], applied: false};
+  }
+}
 
 serve(async (req) => {
   if (req.method === 'OPTIONS') return optionsResponse(req);
@@ -35,14 +85,11 @@ serve(async (req) => {
     const results = (body.results ?? []) as ResultInput[];
 
     if (!eventId) return jsonResponse({error: 'Missing event_id'}, 400, req);
-    if (!Array.isArray(results) || results.length === 0) {
-      return jsonResponse({error: 'Add at least one result'}, 400, req);
-    }
 
     const supabase = adminClient();
     const {data: event} = await supabase
       .from('events')
-      .select('host_discord_id, starts_at, status')
+      .select('host_discord_id, starts_at, status, is_ranked, rating_applied')
       .eq('id', eventId)
       .single();
 
@@ -53,8 +100,44 @@ serve(async (req) => {
     if (!eventHasStarted(event)) {
       return jsonResponse({error: 'Event has not started yet'}, 400, req);
     }
+
+    // Rating-only retry: results already saved, ELO apply failed earlier.
+    if (
+      event.status === 'completed' &&
+      event.is_ranked &&
+      !event.rating_applied
+    ) {
+      const {data: saved} = await supabase
+        .from('event_results')
+        .select('discord_id, position, dnf, dns, group_index')
+        .eq('event_id', eventId);
+      const rows = (saved ?? []).map((r) => ({
+        discord_id: String(r.discord_id),
+        position: r.position as number | null,
+        dnf: Boolean(r.dnf),
+        dns: Boolean(r.dns),
+        group_index: Number(r.group_index ?? 1),
+      }));
+      const rating = await tryApplyRatings(supabase, eventId, rows);
+      return jsonResponse(
+        {
+          ok: true,
+          embed_synced: true,
+          rating_deltas: rating.deltas,
+          rating_applied: rating.applied,
+          rating_retried: true,
+        },
+        200,
+        req,
+      );
+    }
+
     if (['completed', 'cancelled', 'archived'].includes(event.status)) {
       return appErrorResponse(req, 409, API_ERROR_CODES.RESULTS_ALREADY_SUBMITTED);
+    }
+
+    if (!Array.isArray(results) || results.length === 0) {
+      return jsonResponse({error: 'Add at least one result'}, 400, req);
     }
 
     const {data: participants} = await supabase
@@ -107,6 +190,14 @@ serve(async (req) => {
       return responseForRpcError(req, rpcError);
     }
 
+    let ratingDeltas: RatingDeltaJson[] = [];
+    let ratingApplied = !event.is_ranked;
+    if (event.is_ranked && !event.rating_applied) {
+      const rating = await tryApplyRatings(supabase, eventId, rows);
+      ratingDeltas = rating.deltas;
+      ratingApplied = rating.applied;
+    }
+
     const embedSync = await syncPublishedEmbedByEventId(supabase, eventId);
     if (!embedSync.ok) {
       console.error(
@@ -118,7 +209,16 @@ serve(async (req) => {
       );
     }
 
-    return jsonResponse({ok: true, embed_synced: embedSync.ok}, 200, req);
+    return jsonResponse(
+      {
+        ok: true,
+        embed_synced: embedSync.ok,
+        rating_deltas: ratingDeltas,
+        rating_applied: ratingApplied,
+      },
+      200,
+      req,
+    );
   } catch (e) {
     return internalErrorResponse(req, e);
   }

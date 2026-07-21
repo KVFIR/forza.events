@@ -113,6 +113,20 @@ export function Profile() {
   }, [token, user, refreshUser]);
 
   useEffect(() => {
+    if (!isSignedIn || !token || !isApiConfigured()) return;
+    void updateProfile(token, {})
+      .then(({user: updated}) => {
+        refreshUser(updated);
+        if (isStandaloneBrowser()) {
+          saveDiscordSession({accessToken: token, user: updated});
+        }
+      })
+      .catch(() => {
+        // ponytail: profile stats still work from local event list
+      });
+  }, [isSignedIn, token, refreshUser]);
+
+  useEffect(() => {
     if (!isSignedIn || !token || localeSyncedRef.current) return;
     const uiLng = (i18n.language.split('-')[0] === 'ru' ? 'ru' : 'en') as AppLanguage;
     if (user.notificationLocale === uiLng) {
@@ -278,7 +292,19 @@ export function Profile() {
       <div className="mt-4 flex gap-2">
         <StatCard label={t('profile.hosted')} value={hostedCount} />
         <StatCard label={t('profile.participated')} value={participatedCount} />
-        <StatCard label={t('profile.rating')} value={t('profile.ratingTbd')} />
+        <StatCard
+          label={t('profile.rating')}
+          value={
+            user.driverRating && user.driverRating.gamesRated > 0
+              ? user.driverRating.rating
+              : t('profile.ratingTbd')
+          }
+        />
+      </div>
+      <div className="mt-2">
+        <TextLink to="/leaderboard" className="text-[11px]">
+          {t('profile.viewLeaderboard')}
+        </TextLink>
       </div>
 
       {recentCompleted.length > 0 && (

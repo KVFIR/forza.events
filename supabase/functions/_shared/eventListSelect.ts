@@ -17,6 +17,7 @@ export const EVENT_LIST_SELECT = `
   event_cars(max_pi, tune_share_code, car_restrictions, cars(id, make, model, year, pi))
 `;
 
-/** Event detail by id — includes results (service role in browse-events). */
+/** Event detail by id — includes results + rating ledger (service role in browse-events). */
 export const EVENT_DETAIL_SELECT = `${EVENT_LIST_SELECT},
-  event_results(discord_id, position, dnf, dns, points, group_index)`;
+  event_results(discord_id, position, dnf, dns, points, group_index),
+  rating_ledger(discord_id, delta, rating_before, rating_after)`;

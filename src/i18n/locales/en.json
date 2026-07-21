@@ -1,6 +1,7 @@
 {
   "nav": {
     "browse": "Browse",
+    "leaderboard": "Ladder",
     "myEvents": "My Events",
     "create": "Create",
     "profile": "Profile"
@@ -144,7 +145,19 @@
     "errorStandaloneTitle": "Could not load events from the database",
     "errorStandaloneDesc": "Check your connection and try again.",
     "errorDiscordTitle": "Could not reach the database",
-    "errorDiscordDesc": "In Discord Developer Portal add URL mapping {{prefix}} → your-project.supabase.co"
+    "errorDiscordDesc": "In Discord Developer Portal add URL mapping {{prefix}} → your-project.supabase.co",
+    "filterRanked": "Ranked",
+    "filterByRanked": "Filter ranked events"
+  },
+  "leaderboard": {
+    "title": "Driver ladder",
+    "subtitle": "Global rating from ranked races.",
+    "yourRank": "Your rank: #{{rank}} · {{rating}}",
+    "provisional": "Provisional",
+    "emptyTitle": "No rated drivers yet",
+    "emptyDesc": "Finish a ranked race to appear on the ladder.",
+    "loadErrorTitle": "Could not load the ladder",
+    "loadErrorDesc": "Check your connection and try again."
   },
   "myEvents": {
     "scopeAll": "All",
@@ -171,6 +184,8 @@
     "participated": "Participated",
     "rating": "Rating",
     "ratingTbd": "TBD",
+    "ratingProvisional": "Provisional",
+    "viewLeaderboard": "View ladder",
     "recentResults": "Recent results",
     "allInMyEvents": "All in My Events",
     "upcoming": "Upcoming for you",
@@ -196,7 +211,8 @@
     "ended": "Ended",
     "draft": "Draft",
     "restrictedList": "Restricted car list",
-    "anythingGoes": "Anything goes"
+    "anythingGoes": "Anything goes",
+    "ranked": "Ranked"
   },
   "participation": {
     "join": "Join",
@@ -213,7 +229,7 @@
     "xboxHintTitle": "You're registered",
     "xboxHintBody": "On Xbox, add convoy leader {{leader}} as a friend and join their convoy shortly before the event starts.",
     "convoyLeaderXboxHintTitle": "You're the convoy leader",
-    "convoyLeaderXboxHintBody": "On Xbox, accept friend requests from racers. Make your profile visible and set Forza convoy privacy to Friends so they can join."
+    "convoyLeaderXboxHintBody": "On Xbox, accept friend requests from racers. Make your profile visible and set Forza convoy privacy to Friends so they can join. After the race, send a screenshot of the results to the host."
   },
   "addGroup": {
     "button": "Add group {{n}}",
@@ -298,7 +314,9 @@
     "deleteDraftDesc": "Delete this draft permanently? This cannot be undone.",
     "cancelEventTitle": "Cancel event?",
     "cancelEventDesc": "The Discord announcement will be updated and registration will close.",
-    "joinServer": "Join server"
+    "joinServer": "Join server",
+    "rankedTitle": "Ranked race",
+    "rankedExplainer": "Your result updates your driver rating — even if you DNF (counts as last). It affects your place on the leaderboard and will be used when forming convoys."
   },
   "create": {
     "steps": {
@@ -367,6 +385,10 @@
     },
     "beforePublish": "Before you publish",
     "publishTarget": "Publish target",
+    "rankedSection": "Ranked race",
+    "rankedToggle": "Ranked race",
+    "rankedHint": "Finishing positions update the global driver rating.",
+    "rankedLocked": "Ranked can be changed until the event starts.",
     "selectedChannel": "Selected channel",
     "server": "Server",
     "channel": "Channel",
@@ -500,6 +522,10 @@
     "targetGuildLocked": "Server cannot be changed after publish.",
     "targetChannelLocked": "Channel cannot be changed after publish.",
     "gameLocked": "Game cannot be changed after publish.",
+    "rankedTypeNotAllowed": "Ranked races are limited to road and dirt events.",
+    "rankedGuildRequired": "Choose an allowlisted Discord server for a ranked race.",
+    "rankedGuildNotAllowed": "This Discord server is not enabled for ranked races.",
+    "rankedLocked": "Ranked setting cannot be changed after the event starts.",
     "trackNameRequired": "Each track needs a name.",
     "trackShareCodeInvalid": "Share code must be nine digits.",
     "trackFormatTooLong": "Format is too long (max 100 characters).",

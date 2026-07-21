@@ -1,6 +1,6 @@
 # Implementation status
 
-Last updated: 2026-07-14
+Last updated: 2026-07-21
 
 ## Summary
 
@@ -10,9 +10,9 @@ Remaining work is mostly **Activity E2E in pilot guilds**, **Railway frontend re
 
 | Layer | State |
 |-------|--------|
-| React Activity (UI) | Done — Browse, Detail, Create (wizard), My Events, Profile, i18n (EN + RU) |
-| Supabase schema | Done — migrations `001`–`030` on remote |
-| Edge Functions | Done — 22 functions ([`supabase/README.md`](../supabase/README.md)) |
+| React Activity (UI) | Done — Browse, Detail, Create (wizard), My Events, Profile, Leaderboard, i18n (EN + RU) |
+| Supabase schema | Done — migrations `001`–`033` (apply `031`–`033` for driver ratings) |
+| Edge Functions | Done — 23 functions ([`supabase/README.md`](../supabase/README.md)) |
 | Security hardening | Done — storage, RLS scope, CORS, rate limits, publish validation |
 | Local browser dev | Done — Discord OAuth + Supabase (not mock mode) |
 | Sample content | Done — optional `sample-*` seed |
@@ -32,7 +32,8 @@ Remaining work is mostly **Activity E2E in pilot guilds**, **Railway frontend re
 | Event Detail | Done | Join/leave, host actions, balance groups, results, live updates |
 | Create Event | Done | 4 steps; cover via `upload-cover`; convoy leader via `list-guild-members` |
 | My Events | Done | Hosted/joined + host drafts merge |
-| Profile | Done | Gamertag + DM notification prefs (`user-profile`) |
+| Profile | Done | Gamertag + DM notification prefs (`user-profile`) + driver rating |
+| Leaderboard / ranked ELO | Done | Phase A+B: `031`–`033`, pairwise ELO on `submit-results`, `/leaderboard`, Browse Ranked filter |
 | Discord Activity auth | Done | SDK → `token-exchange` → `authenticate` |
 | Browser localhost auth | Done | `/auth/callback` + `sessionStorage` |
 | Production browser tab (`forza.events`) | Done | Discord OAuth required (`BrowserAuthGate`); raw `*.up.railway.app` still Activity-only gate |
@@ -90,8 +91,8 @@ Details: [`supabase/README.md`](../supabase/README.md).
 | Check | Result |
 |-------|--------|
 | Supabase project | `uoysqfczahqmctbrrizn` (FORZA.EVENTS) |
-| Migrations | `001`–`030` on remote |
-| Edge Functions | 22 via `deploy:functions` |
+| Migrations | `001`–`033` (`031`–`033` driver ratings + FRS allowlist + atomic apply — push before Edge/Railway) |
+| Edge Functions | 23 via `deploy:functions` |
 | Activity hosting | Railway `https://forzaevents.up.railway.app` |
 | Discord application verification | Approved — legal URLs on deploy origin |
 | Discord Activity OAuth | `https://127.0.0.1` + `token-exchange` allowlist |

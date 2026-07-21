@@ -1,10 +1,20 @@
 # Pilot community server
 
-Last updated: 2026-06-02
+Last updated: 2026-07-21
 
 Recorded setup for the **FORZA.EVENTS** support / pilot Discord server (**Forza Racing Series**).
 
 **Related:** [`DISCORD_PLATFORM.md`](DISCORD_PLATFORM.md) · [`PLAN.md`](PLAN.md) · [`BACKLOG.md`](BACKLOG.md)
+
+---
+
+## Guild ID
+
+| Server | `guild_id` |
+|--------|------------|
+| **Forza Racing Series** (pilot) | `925000150638809178` |
+
+Ranked allowlist: migration `032` inserts this id into `rating_enabled_guilds`.
 
 ---
 

@@ -37,6 +37,8 @@ type EventRowForPublish = {
   tracks?: unknown;
   additional_car_restrictions?: string | null;
   rules_allowed?: string[] | null;
+  is_ranked?: boolean | null;
+  group_count?: number | null;
 };
 
 export function buildPublishEventBody(
@@ -59,6 +61,7 @@ export function buildPublishEventBody(
     channel_id: channelId,
     car_rule_mode: event.car_rule_mode as SaveEventBody['car_rule_mode'],
     max_pi: event.max_pi,
+    is_ranked: Boolean(event.is_ranked),
     tracks: (event.tracks ?? []) as SaveEventBody['tracks'],
     additional_car_restrictions:
       event.additional_car_restrictions ??

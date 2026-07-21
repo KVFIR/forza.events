@@ -55,6 +55,8 @@ type DbEventRow = {
   voice_policy: ForzaEvent['voicePolicy'];
   max_players: number;
   group_count?: number | null;
+  is_ranked?: boolean | null;
+  rating_applied?: boolean | null;
   current_players: number;
   max_pi?: number | null;
   car_rule_mode?: CarRuleMode | null;
@@ -84,6 +86,12 @@ type DbEventRow = {
   }[];
   event_cars?: DbEventCarRow[];
   event_results?: DbEventResultRow[];
+  rating_ledger?: {
+    discord_id: string;
+    delta: number;
+    rating_before: number;
+    rating_after: number;
+  }[];
 };
 
 type DbEventResultRow = {
@@ -135,9 +143,10 @@ export const EVENT_LIST_SELECT = `
   event_cars(max_pi, tune_share_code, car_restrictions, cars(id, make, model, year, pi))
 `;
 
-/** Event detail by id — includes published results rows. */
+/** Event detail by id — includes published results rows + rating deltas. */
 const EVENT_DETAIL_SELECT = `${EVENT_LIST_SELECT},
-  event_results(discord_id, position, dnf, dns, points, group_index)`;
+  event_results(discord_id, position, dnf, dns, points, group_index),
+  rating_ledger(discord_id, delta, rating_before, rating_after)`;
 
 export function mapDbEventResultRows(rows: DbEventResultRow[] | null | undefined): EventResultRow[] {
   return (rows ?? []).map((r) => ({
@@ -182,6 +191,11 @@ export function mapDbEventWithRelations(row: DbEventRow): ForzaEvent {
   if (row.event_results !== undefined) {
     event.publishedResults = mapDbEventResultRows(row.event_results);
   }
+  if (row.rating_ledger?.length) {
+    event.ratingDeltas = Object.fromEntries(
+      row.rating_ledger.map((r) => [r.discord_id, r.delta]),
+    );
+  }
   return event;
 }
 
@@ -219,6 +233,7 @@ export type EventResultDisplay = {
   dns: boolean;
   points?: number | null;
   groupIndex?: number;
+  ratingDelta?: number | null;
 };
 
 export function resolveEventResultDisplay(
@@ -238,6 +253,7 @@ export function resolveEventResultDisplay(
       dns: r.dns,
       points: r.points,
       groupIndex: r.groupIndex ?? 1,
+      ratingDelta: event.ratingDeltas?.[r.discordId] ?? null,
     }));
 }
 
@@ -326,6 +342,8 @@ export function mapDbEvent(row: DbEventRow): ForzaEvent {
     voicePolicy: row.voice_policy,
     maxPlayers: row.max_players,
     groupCount: row.group_count ?? 1,
+    isRanked: Boolean(row.is_ranked),
+    ratingApplied: Boolean(row.rating_applied),
     currentPlayers: row.current_players,
     hostDiscordId: row.host_discord_id,
     hostUsername: host?.username ?? 'Host',

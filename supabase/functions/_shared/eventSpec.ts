@@ -47,6 +47,8 @@ export type SaveEventBody = {
   publish?: boolean;
   cancel?: boolean;
   delete?: boolean;
+  /** Opt-in ranked race (global ELO). */
+  is_ranked?: boolean;
 };
 
 type DbEvent = {
@@ -58,6 +60,8 @@ type DbEvent = {
   discord_message_id: string | null;
   starts_at: string;
   game?: string | null;
+  is_ranked?: boolean | null;
+  group_count?: number | null;
 };
 
 const PLAYER_SLOTS = 12;
@@ -74,6 +78,16 @@ export function validateDraft(body: SaveEventBody): ValidationCode | null {
   if (!body.starts_at) return VALIDATION_CODES.STARTS_AT_REQUIRED;
   const trackErr = validateTrackRows(resolveSaveTracks(body));
   if (trackErr) return trackErr;
+  const rankedErr = validateRankedIntent(body);
+  if (rankedErr) return rankedErr;
+  return null;
+}
+
+/** Sync checks when host requests is_ranked (allowlist is async in save/publish). */
+export function validateRankedIntent(body: SaveEventBody): ValidationCode | null {
+  if (!body.is_ranked) return null;
+  if (body.type === 'cruise') return VALIDATION_CODES.RANKED_TYPE_NOT_ALLOWED;
+  if (!body.guild_id?.trim()) return VALIDATION_CODES.RANKED_GUILD_REQUIRED;
   return null;
 }
 
@@ -177,6 +191,7 @@ export function buildEventFields(
     lobby_leader_is_host: lobbyLeader?.lobby_leader_is_host ??
       body.lobby_leader_is_host ?? true,
     lobby_leader_discord_id: lobbyLeader?.lobby_leader_discord_id ?? null,
+    is_ranked: Boolean(body.is_ranked),
   };
 }
 
@@ -219,5 +234,16 @@ export async function assertTargetNotLocked(
   ) {
     return VALIDATION_CODES.GAME_LOCKED;
   }
+  // Ranked may flip on published edits until start (same window as canEditPublishedEvent).
+  return null;
+}
+
+/** After sync ranked intent: guild allowlist only. */
+export function validateRankedAgainstEvent(
+  wantsRanked: boolean,
+  guildAllowed: boolean,
+): ValidationCode | null {
+  if (!wantsRanked) return null;
+  if (!guildAllowed) return VALIDATION_CODES.RANKED_GUILD_NOT_ALLOWED;
   return null;
 }

@@ -4,6 +4,7 @@ const AUTH_RETURN_KEY = 'forza.auth_return_to';
 const ALLOWED_EXACT = new Set([
   '/',
   '/my-events',
+  '/leaderboard',
   '/create',
   '/profile',
   '/bot-installed',

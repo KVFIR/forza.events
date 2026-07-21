@@ -1,6 +1,5 @@
 import {API_ERROR_CODES} from './apiErrorCodes.ts';
 import {appErrorResponse} from './apiResponse.ts';
-import {jsonResponse} from './cors.ts';
 import {
   discordAccessTokenFrom,
   isDiscordRateLimitError,
@@ -20,7 +19,9 @@ export async function requireDiscordUser(
   try {
     const token = discordAccessTokenFrom(req);
     const user = await verifyDiscordToken(token);
-    if (!user || !token) return jsonResponse({error: 'Unauthorized'}, 401, req);
+    if (!user || !token) {
+      return appErrorResponse(req, 401, API_ERROR_CODES.UNAUTHORIZED);
+    }
     return {user, token};
   } catch (e) {
     if (isDiscordRateLimitError(e)) {

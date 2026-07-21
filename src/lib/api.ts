@@ -197,7 +197,12 @@ export async function listGuilds(
     dedupCacheKey(cachePrefix, discordToken),
     () =>
       invoke<{
-        guilds: {id: string; name: string; icon_url?: string | null}[];
+        guilds: {
+          id: string;
+          name: string;
+          icon_url?: string | null;
+          rating_enabled?: boolean;
+        }[];
         hint?: string | null;
       }>(
         'list-guilds',
@@ -393,7 +398,43 @@ export async function submitEventResults(
   eventId: string,
   results: SubmitResultEntry[],
 ) {
-  return invoke<{ok: boolean}>('submit-results', {event_id: eventId, results}, discordToken);
+  return invoke<{
+    ok: boolean;
+    embed_synced?: boolean;
+    rating_applied?: boolean;
+    rating_retried?: boolean;
+    rating_deltas?: {
+      discord_id: string;
+      rating_before: number;
+      rating_after: number;
+      delta: number;
+    }[];
+  }>('submit-results', {event_id: eventId, results}, discordToken);
+}
+
+export async function fetchLeaderboard(
+  discordToken: string | null,
+  options?: {limit?: number},
+) {
+  return invoke<{
+    entries: {
+      rank: number;
+      discordId: string;
+      username: string | null;
+      avatarUrl: string | null;
+      gamertag: string | null;
+      rating: number;
+      gamesRated: number;
+      provisional: boolean;
+    }[];
+    viewer: {
+      rank: number;
+      rating: number;
+      gamesRated: number;
+      provisional: boolean;
+    } | null;
+    limit: number;
+  }>('leaderboard', {limit: options?.limit ?? 100}, discordToken);
 }
 
 export async function updateProfile(

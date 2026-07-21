@@ -91,7 +91,7 @@ The following items are intentionally deferred and must not block launch:
 - Tournament brackets
 - Automatic in-game results import
 - Club/community pages
-- Global leaderboards and **ranked events / driver skill rating** — see [`BACKLOG.md`](BACKLOG.md) §5 (global pairwise ELO; ranked hosting limited by guild allowlist; any joiner can be rated)
+- Global leaderboards and **ranked events / driver skill rating** — Phase A+B shipped (`031`, pairwise ELO); see [`BACKLOG.md`](BACKLOG.md) §5 for remaining phases (tiers, season points, host ratings UI)
 - Monetization / Discord IAP
 - Native mobile app
 - Livery / build database

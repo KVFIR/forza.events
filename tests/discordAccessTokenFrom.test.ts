@@ -50,6 +50,10 @@ describe('requireDiscordUser / optionalDiscordUser', () => {
     const required = await requireDiscordUser(req);
     expect(required).toBeInstanceOf(Response);
     expect((required as Response).status).toBe(401);
+    await expect((required as Response).json()).resolves.toMatchObject({
+      code: 'UNAUTHORIZED',
+      error: 'Unauthorized',
+    });
 
     const optional = await optionalDiscordUser(req);
     expect(optional).toBeNull();

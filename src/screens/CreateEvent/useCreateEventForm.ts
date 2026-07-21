@@ -8,6 +8,7 @@ import {
   cancelEvent,
   deleteDraftEvent,
   isApiConfigured,
+  listGuilds,
   publishEvent,
   saveEvent,
   uploadCoverImage,
@@ -107,6 +108,8 @@ export function useCreateEventForm() {
   const [targetGuildId, setTargetGuildId] = useState('');
   const [targetGuildName, setTargetGuildName] = useState('');
   const [targetChannelId, setTargetChannelId] = useState('');
+  const [isRanked, setIsRanked] = useState(false);
+  const [targetGuildRatingEnabled, setTargetGuildRatingEnabled] = useState(false);
 
   useEffect(() => {
     try {
@@ -151,6 +154,8 @@ export function useCreateEventForm() {
       targetGuildId,
       targetGuildName,
       targetChannelId,
+      isRanked,
+      targetGuildRatingEnabled,
     }),
     [
       title,
@@ -173,6 +178,8 @@ export function useCreateEventForm() {
       targetGuildId,
       targetGuildName,
       targetChannelId,
+      isRanked,
+      targetGuildRatingEnabled,
     ],
   );
 
@@ -304,6 +311,21 @@ export function useCreateEventForm() {
         setTargetGuildId(ev.guildId ?? '');
         setTargetGuildName(ev.guildName ?? '');
         setTargetChannelId(ev.channelId ?? '');
+        setIsRanked(Boolean(ev.isRanked));
+        setTargetGuildRatingEnabled(false);
+        const guildIdForRating = ev.guildId?.trim();
+        if (guildIdForRating && token) {
+          void listGuilds(token)
+            .then((r) => {
+              if (cancelled) return;
+              const match = r.guilds.find((g) => g.id === guildIdForRating);
+              setTargetGuildRatingEnabled(Boolean(match?.rating_enabled));
+              if (!match?.rating_enabled && !ev.isRanked) setIsRanked(false);
+            })
+            .catch(() => {
+              // ponytail: keep toggle hidden if guild list fails
+            });
+        }
 
         if (ev.lobbyLeaderIsHost === false && ev.lobbyLeaderDiscordId) {
           const leaderParticipant = ev.participants.find(
@@ -394,6 +416,7 @@ export function useCreateEventForm() {
         carRuleMode === 'anything_goes' ? additionalCarRestrictions.trim() || null : null,
       ...leaderFields,
       voice_policy: 'optional' as const,
+      is_ranked: isRanked,
       cars:
         carRuleMode === 'restricted_list'
           ? eventCars.map((c) => ({
@@ -602,7 +625,7 @@ export function useCreateEventForm() {
   }
 
   const onGuildChange = useCallback(
-    (id: string, name: string) => {
+    (id: string, name: string, ratingEnabled = false) => {
       clearFieldError('targetGuildId');
       const guildChanged = id !== targetGuildId;
       if (guildChanged && !lobbyLeaderIsHost && lobbyLeaderDiscordId) {
@@ -610,6 +633,10 @@ export function useCreateEventForm() {
       }
       setTargetGuildId(id);
       setTargetGuildName(name);
+      setTargetGuildRatingEnabled(ratingEnabled);
+      // Only clear ranked on real guild change / cruise — not on PublishTargetPicker
+      // name sync of the same server (allowlist miss must not silently unrank).
+      if (type === 'cruise' || (guildChanged && !ratingEnabled)) setIsRanked(false);
       if (!isPublished && guildChanged) setTargetChannelId('');
     },
     [
@@ -619,6 +646,7 @@ export function useCreateEventForm() {
       lobbyLeaderDiscordId,
       clearLobbyLeaderSelection,
       isPublished,
+      type,
     ],
   );
 
@@ -694,6 +722,7 @@ export function useCreateEventForm() {
     setType: (nextType: EventType) => {
       clearFieldError('type');
       setType(nextType);
+      if (nextType === 'cruise') setIsRanked(false);
       if (coverFile) return;
       if (coverUrl !== null && !isBundledDefaultCover(coverUrl)) return;
       setCoverUrl(null);
@@ -755,5 +784,6 @@ export function useCreateEventForm() {
     setTargetGuildName,
     setTargetChannelId: onTargetChannelChange,
     onGuildChange,
+    setIsRanked,
   };
 }

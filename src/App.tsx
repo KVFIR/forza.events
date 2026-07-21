@@ -42,6 +42,9 @@ const EventResults = lazy(() =>
   import('./screens/EventResults').then((m) => ({default: m.EventResults})),
 );
 const Profile = lazy(() => import('./screens/Profile').then((m) => ({default: m.Profile})));
+const Leaderboard = lazy(() =>
+  import('./screens/Leaderboard').then((m) => ({default: m.Leaderboard})),
+);
 const AuthCallback = lazy(() =>
   import('./screens/AuthCallback').then((m) => ({default: m.AuthCallback})),
 );
@@ -115,6 +118,7 @@ function AppRoutes() {
               <Routes>
                 <Route path="/" element={<BrowseEvents />} />
                 <Route path="/my-events" element={<MyEvents />} />
+                <Route path="/leaderboard" element={<Leaderboard />} />
                 <Route path="/event/:id" element={<EventDetail />} />
                 <Route path="/event/:id/results" element={<EventResults />} />
                 <Route path="/create" element={<CreateEvent />} />
