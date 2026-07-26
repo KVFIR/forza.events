@@ -348,12 +348,12 @@ function buildParticipantsFields(event: EmbedEventInput): EmbedField[] {
   if (groups.length >= 3) {
     const lines = groups.map(
       (g) =>
-        `Group ${g.group_index}: ${g.leader_gamertag?.trim() || 'TBD'} (${formatLobbyCount(g.count, maxPlayers)})`,
+        `Convoy ${g.group_index}: ${g.leader_gamertag?.trim() || 'TBD'} (${formatLobbyCount(g.count, maxPlayers)})`,
     );
     const fields: EmbedField[] = [
       {
         name: embedFieldName(
-          `👤 Groups (${formatLobbyCount(event.current_players, maxPlayers * groupCount)})`,
+          `👤 Convoys (${formatLobbyCount(event.current_players, maxPlayers * groupCount)})`,
         ),
         value: truncateFieldValue(lines.join('\n')),
         inline: false,
@@ -364,7 +364,7 @@ function buildParticipantsFields(event: EmbedEventInput): EmbedField[] {
   }
 
   const fields: EmbedField[] = groups.map((g) => ({
-    name: embedFieldName(`👤 Group ${g.group_index} (${formatLobbyCount(g.count, maxPlayers)})`),
+    name: embedFieldName(`👤 Convoy ${g.group_index} (${formatLobbyCount(g.count, maxPlayers)})`),
     value: truncateFieldValue(`Convoy leader: ${g.leader_gamertag?.trim() || 'TBD'}`),
     inline: false,
   }));

@@ -88,7 +88,7 @@ export const privacyPolicyEn: LegalDocument = {
           type: 'ul',
           items: [
             'Provide, operate, and improve the Service (browse events, create and publish events, join or leave events, submit results, sync Discord embeds).',
-            'Send transactional Discord direct messages you opt into (or that are required for waitlist promotions), such as event cancellations, track or car rule updates, convoy leader changes, lobby status for hosts, and reminders before start.',
+            'Send transactional Discord direct messages you opt into (or that are required for waitlist promotions), such as event cancellations, track or car rule updates, convoy leader changes, convoy capacity alerts for hosts, and reminders before start.',
             'Authenticate you and enforce permissions (for example, only the event host can edit or cancel their event).',
             'Validate publish targets (confirm you can manage the server and the bot can post in the chosen channel).',
             'Display public event and participant information to other users of the Service.',

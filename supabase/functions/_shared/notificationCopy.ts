@@ -58,7 +58,7 @@ const COPY: Record<NotificationKind, Record<NotificationLocale, CopyBuilder>> = 
   convoy_leader_changed: {
     en: (p) => ({
       title: 'Convoy leader updated',
-      description: `Group **${str(p.groupIndex)}** in **${str(p.eventTitle)}** has a new convoy leader.`,
+      description: `Convoy **${str(p.groupIndex)}** in **${str(p.eventTitle)}** has a new convoy leader.`,
       fields: [
         {
           name: 'Convoy leader',
@@ -68,7 +68,7 @@ const COPY: Record<NotificationKind, Record<NotificationLocale, CopyBuilder>> = 
     }),
     ru: (p) => ({
       title: 'Лидер конвоя изменён',
-      description: `В группе **${str(p.groupIndex)}** ивента **${str(p.eventTitle)}** новый лидер конвоя.`,
+      description: `В конвое **${str(p.groupIndex)}** ивента **${str(p.eventTitle)}** новый лидер конвоя.`,
       fields: [
         {
           name: 'Лидер конвоя',
@@ -80,45 +80,45 @@ const COPY: Record<NotificationKind, Record<NotificationLocale, CopyBuilder>> = 
   convoy_leader_assigned: {
     en: (p) => ({
       title: "You're the convoy leader",
-      description: `The host assigned you as **convoy leader** for **Group ${str(p.groupIndex)}** in **${str(p.eventTitle)}**.`,
+      description: `The host assigned you as **convoy leader** for **Convoy ${str(p.groupIndex)}** in **${str(p.eventTitle)}**.`,
     }),
     ru: (p) => ({
       title: 'Вы лидер конвоя',
-      description: `Организатор назначил вас **лидером конвоя** **группы ${str(p.groupIndex)}** в **${str(p.eventTitle)}**.`,
+      description: `Организатор назначил вас **лидером конвоя ${str(p.groupIndex)}** в **${str(p.eventTitle)}**.`,
     }),
   },
   waitlist_seat_opened: {
     en: (p) => ({
       title: "You're in!",
-      description: `A seat opened in **${str(p.eventTitle)}**. You're registered in **Group ${str(p.groupIndex)}**.`,
+      description: `A seat opened in **${str(p.eventTitle)}**. You're registered in **Convoy ${str(p.groupIndex)}**.`,
       fields: [{name: 'Convoy leader', value: str(p.leaderGamertag)}],
     }),
     ru: (p) => ({
       title: 'Вы в игре!',
-      description: `Освободилось место в **${str(p.eventTitle)}**. Вы записаны в **группу ${str(p.groupIndex)}**.`,
+      description: `Освободилось место в **${str(p.eventTitle)}**. Вы записаны в **конвой ${str(p.groupIndex)}**.`,
       fields: [{name: 'Лидер конвоя', value: str(p.leaderGamertag)}],
     }),
   },
   waitlist_new_group: {
     en: (p) => ({
-      title: 'New group added',
-      description: `The host opened **Group ${str(p.groupIndex)}** in **${str(p.eventTitle)}**. You're registered.`,
+      title: 'New convoy added',
+      description: `The host opened **Convoy ${str(p.groupIndex)}** in **${str(p.eventTitle)}**. You're registered.`,
       fields: [{name: 'Convoy leader', value: str(p.leaderGamertag)}],
     }),
     ru: (p) => ({
-      title: 'Добавлена группа',
-      description: `Организатор открыл **группу ${str(p.groupIndex)}** в **${str(p.eventTitle)}**. Вы записаны.`,
+      title: 'Добавлен конвой',
+      description: `Организатор открыл **конвой ${str(p.groupIndex)}** в **${str(p.eventTitle)}**. Вы записаны.`,
       fields: [{name: 'Лидер конвоя', value: str(p.leaderGamertag)}],
     }),
   },
   waitlist_new_group_leader: {
     en: (p) => ({
       title: "You're in — and leading!",
-      description: `The host opened **Group ${str(p.groupIndex)}** in **${str(p.eventTitle)}**. You're the **convoy leader** for this group.`,
+      description: `The host opened **Convoy ${str(p.groupIndex)}** in **${str(p.eventTitle)}**. You're the **convoy leader** for this convoy.`,
     }),
     ru: (p) => ({
       title: 'Вы в игре — вы лидер!',
-      description: `Организатор открыл **группу ${str(p.groupIndex)}** в **${str(p.eventTitle)}**. Вы **лидер конвоя** этой группы.`,
+      description: `Организатор открыл **конвой ${str(p.groupIndex)}** в **${str(p.eventTitle)}**. Вы **лидер** этого конвоя.`,
     }),
   },
   event_updated: {
@@ -151,8 +151,8 @@ const COPY: Record<NotificationKind, Record<NotificationLocale, CopyBuilder>> = 
       description: `**${str(p.eventTitle)}** starts at **${str(p.startsAtLocal)}** (${str(p.timezone)}).`,
       fields: [
         {
-          name: 'Your group',
-          value: `Group ${str(p.groupIndex)} · leader ${str(p.leaderGamertag)}`,
+          name: 'Your convoy',
+          value: `Convoy ${str(p.groupIndex)} · leader ${str(p.leaderGamertag)}`,
         },
       ],
     }),
@@ -161,20 +161,20 @@ const COPY: Record<NotificationKind, Record<NotificationLocale, CopyBuilder>> = 
       description: `**${str(p.eventTitle)}** начинается в **${str(p.startsAtLocal)}** (${str(p.timezone)}).`,
       fields: [
         {
-          name: 'Ваша группа',
-          value: `Группа ${str(p.groupIndex)} · лидер ${str(p.leaderGamertag)}`,
+          name: 'Ваш конвой',
+          value: `Конвой ${str(p.groupIndex)} · лидер ${str(p.leaderGamertag)}`,
         },
       ],
     }),
   },
   host_group_filled: {
     en: (p) => ({
-      title: 'Group full',
-      description: `**Group ${str(p.groupIndex)}** in **${str(p.eventTitle)}** is full (${str(p.maxPlayers)}/${str(p.maxPlayers)}).`,
+      title: 'Convoy full',
+      description: `**Convoy ${str(p.groupIndex)}** in **${str(p.eventTitle)}** is full (${str(p.maxPlayers)}/${str(p.maxPlayers)}).`,
     }),
     ru: (p) => ({
-      title: 'Группа заполнена',
-      description: `**Группа ${str(p.groupIndex)}** в **${str(p.eventTitle)}** заполнена (${str(p.maxPlayers)}/${str(p.maxPlayers)}).`,
+      title: 'Конвой заполнен',
+      description: `**Конвой ${str(p.groupIndex)}** в **${str(p.eventTitle)}** заполнен (${str(p.maxPlayers)}/${str(p.maxPlayers)}).`,
     }),
   },
   host_event_starting_soon: {
@@ -183,7 +183,7 @@ const COPY: Record<NotificationKind, Record<NotificationLocale, CopyBuilder>> = 
       description: `**${str(p.eventTitle)}** starts at **${str(p.startsAtLocal)}**. Make sure convoy leaders and racers are ready on Xbox.`,
       fields: [
         {
-          name: 'Lobby',
+          name: 'Registration',
           value: `${str(p.activeCount)}/${str(p.totalCapacity)} racers · ${str(p.waitlistCount)} on waitlist`,
         },
       ],
@@ -193,7 +193,7 @@ const COPY: Record<NotificationKind, Record<NotificationLocale, CopyBuilder>> = 
       description: `**${str(p.eventTitle)}** начинается в **${str(p.startsAtLocal)}**. Убедитесь, что лидеры конвоев и гонщики готовы в Xbox.`,
       fields: [
         {
-          name: 'Лобби',
+          name: 'Регистрация',
           value: `${str(p.activeCount)}/${str(p.totalCapacity)} гонщиков · ${str(p.waitlistCount)} в очереди`,
         },
       ],
@@ -201,13 +201,13 @@ const COPY: Record<NotificationKind, Record<NotificationLocale, CopyBuilder>> = 
   },
   group_reassigned: {
     en: (p) => ({
-      title: 'Group updated',
-      description: `The host moved you to **Group ${str(p.groupIndex)}** in **${str(p.eventTitle)}**.`,
+      title: 'Convoy updated',
+      description: `The host moved you to **Convoy ${str(p.groupIndex)}** in **${str(p.eventTitle)}**.`,
       fields: [{name: 'Convoy leader', value: str(p.leaderGamertag)}],
     }),
     ru: (p) => ({
-      title: 'Группа изменена',
-      description: `Организатор перенёс вас в **группу ${str(p.groupIndex)}** в **${str(p.eventTitle)}**.`,
+      title: 'Конвой изменён',
+      description: `Организатор перенёс вас в **конвой ${str(p.groupIndex)}** в **${str(p.eventTitle)}**.`,
       fields: [{name: 'Лидер конвоя', value: str(p.leaderGamertag)}],
     }),
   },

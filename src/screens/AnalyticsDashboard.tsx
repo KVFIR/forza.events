@@ -132,11 +132,11 @@ const NOTIFICATION_KIND_LABELS: Record<string, string> = {
   convoy_leader_changed: 'Convoy leader changed',
   convoy_leader_assigned: 'Convoy leader assigned',
   waitlist_seat_opened: 'Waitlist seat opened',
-  waitlist_new_group: 'Waitlist new group',
-  waitlist_new_group_leader: 'Waitlist new group (leader)',
+  waitlist_new_group: 'Waitlist new convoy',
+  waitlist_new_group_leader: 'Waitlist new convoy (leader)',
   event_updated: 'Event updated',
   event_starting_soon: 'Starting soon (racer)',
-  host_group_filled: 'Host: group full',
+  host_group_filled: 'Host: convoy full',
   host_event_starting_soon: 'Starting soon (host)',
 };
 

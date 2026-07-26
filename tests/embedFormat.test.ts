@@ -155,11 +155,11 @@ describe('buildEventEmbed', () => {
       }),
     ).embeds[0];
 
-    const perGroupFields = embed.fields.filter((f) => /^👤 Group \d/.test(f.name));
+    const perGroupFields = embed.fields.filter((f) => /^👤 Convoy \d/.test(f.name));
     expect(perGroupFields).toHaveLength(0);
-    const groupsField = embed.fields.find((f) => f.name.startsWith('👤 Groups'));
-    expect(groupsField?.value).toContain('Group 1: L1');
-    expect(groupsField?.value).toContain('Group 3: L3');
+    const groupsField = embed.fields.find((f) => f.name.startsWith('👤 Convoys'));
+    expect(groupsField?.value).toContain('Convoy 1: L1');
+    expect(groupsField?.value).toContain('Convoy 3: L3');
     expect(embed.fields.find((f) => f.name === '⏳ Waitlist')).toBeDefined();
   });
 

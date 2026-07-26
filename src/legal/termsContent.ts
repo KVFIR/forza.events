@@ -69,8 +69,8 @@ export const termsOfServiceEn: LegalDocument = {
         {
           type: 'ul',
           items: [
-            'You may join events subject to capacity, waitlist rules, event rules, and Service restrictions (for example, valid gamertag format). When a lobby is full you may enter a waitlist and be promoted automatically when a seat opens.',
-            'Hosts may assign convoy leaders and open additional lobby groups; assigned leaders have product-specific restrictions (for example, they cannot leave until the host selects a replacement).',
+            'You may join events subject to capacity, waitlist rules, event rules, and Service restrictions (for example, valid gamertag format). When an event is full you may enter a waitlist and be promoted automatically when a seat opens.',
+            'Hosts may assign convoy leaders and open additional convoys; assigned leaders have product-specific restrictions (for example, they cannot leave until the host selects a replacement).',
             'Leaving an event may be restricted after the event start time.',
             'You agree not to harass others, post unlawful content, attempt to disrupt the Service, abuse APIs, scrape data, or impersonate others.',
             'Convoy leader and host roles have specific rules in the product; misuse may result in removal from events or loss of access.',

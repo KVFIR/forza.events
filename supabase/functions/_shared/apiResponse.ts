@@ -38,12 +38,12 @@ const API_MESSAGES_EN: Partial<Record<ApiErrorCode, string>> = {
     'Complete sign-in before joining events.',
   [API_ERROR_CODES.GUILD_MEMBER_SEARCH_DISABLED]:
     'Convoy leader search is unavailable. Enable the Server Members intent for the bot in the Discord Developer Portal.',
-  [API_ERROR_CODES.GROUPS_MAXED]: 'This event already has the maximum number of groups.',
-  [API_ERROR_CODES.WAITLIST_EMPTY]: 'Could not add a group. Refresh the page and try again.',
+  [API_ERROR_CODES.GROUPS_MAXED]: 'This event already has the maximum number of convoys.',
+  [API_ERROR_CODES.WAITLIST_EMPTY]: 'Could not add a convoy. Refresh the page and try again.',
   [API_ERROR_CODES.LEADER_ALREADY_IN_LOBBY]:
-    'This driver is already in the lobby. Pick someone from the waitlist or a server member who has not joined yet.',
+    'This driver is already in the event. Pick someone from the waitlist or a server member who has not joined yet.',
   [API_ERROR_CODES.LEADER_ALREADY_CONVOY_LEADER]:
-    'This driver is already a convoy leader in another group.',
+    'This driver is already a convoy leader in another convoy.',
 };
 
 export function apiErrorMessage(code: ApiErrorCode | ValidationCode, fallback?: string): string {

@@ -201,10 +201,10 @@ Also align **`browse-events`** / **`src/lib/events.ts`** if the server list quer
 - Local `/analytics` dashboard: tab navigation (not anchor sections); active tab persisted in `sessionStorage`; Overview **Health watch** links to detail tabs.
 - Event Detail organiser footer: show guild server icon + **Join server** invite link when cached on `discord_guilds` (not host-only).
 - Route/chunk load errors: detailed dev panel on localhost only; production shows minimal reload UX with no stack or module URLs.
-- Event Detail **Reorganize groups**: host + `groupCount > 1` + not finalized always shows the control; same modes before and after start (balance / shuffle / balance_shuffle); disabled grey + hover tip when no safe plan; modal ChoiceRow for one or many options; `balance_shuffle` only when shuffle after balance succeeds; copy is evening sizes between groups (not “overflow”); no UI mention of per-racer DMs.
+- Event Detail **Reorganize convoys**: host + `groupCount > 1` + not finalized always shows the control; same modes before and after start (balance / shuffle / balance_shuffle); disabled grey + hover tip when no safe plan; modal ChoiceRow for one or many options; `balance_shuffle` only when shuffle after balance succeeds; copy is evening sizes between convoys (not “overflow”); no UI mention of per-racer DMs.
 - After start, **Registration closed** banner is for non-participants only (`isInParticipants` hides it) — joined/waitlisted should not see a lock-out banner; Join stays closed for everyone.
 - **GameBadge:** short `FH5`/`FH6` left of organiser on cards (quiet text, not a loud status chip); full “Forza Horizon N” on Event Detail title row.
-- **Leaderboard** (`/leaderboard`): no page h1/subtitle — nav **Ladder** is the title signal; list-only layout.
+- **Leaderboard** (`/leaderboard`): short subtitle only (nav **Ladder** is the title); provisional shown as asterisk icon left of rating.
 - Create/Publish **Ranked** toggle: same FormSection pattern as Convoy (section title + `toggleRow` label only; no duplicated title/description inside the row).
 
 ## Learned Workspace Facts

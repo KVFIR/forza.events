@@ -29,7 +29,7 @@ Custom profile status while the Activity is open uses Embedded App SDK `setActiv
 | OAuth scope | `rpc.activities.write` — included in Activity `authorize()` (`DISCORD_ACTIVITY_OAUTH_SCOPES`) |
 | When it updates | Route changes + **Event Detail** / **Results** / **Create** (draft title) screen overrides |
 | Copy | Always **English** on the profile (`RICH_PRESENCE_EN` in `discordRichPresence.ts`) — UI locale does not affect Rich Presence; event types use `eventTypeLabelEn()` → `en.json` `eventTypes` |
-| Event state line | Role (`Hosting`, `Registered`) or status (`Lobby full`, `Race in progress`, …) with `n/12` suffix when the event is published to Discord (`discordMessageId`); same count in `party.size` for clients that render it |
+| Event state line | Role (`Hosting`, `Registered`) or status (`Event full`, `Race in progress`, …) with `n/12` suffix when the event is published to Discord (`discordMessageId`); same count in `party.size` for clients that render it |
 | Assets | URLs use `VITE_APP_ORIGIN` when set (Discord fetches server-side), else iframe origin — `/logo/logo.png`, bundled `/covers/*` |
 | Activity type | RPC `5` (Competing) |
 | Localhost | Rich Presence sync runs only in the Activity iframe (`isDiscordActivityFrame()`), not in a standalone browser tab |

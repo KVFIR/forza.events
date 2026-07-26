@@ -30,5 +30,8 @@ yarn-error.log*
 # Supabase CLI local state
 supabase/.temp/
 
+# Deno (local cache from Edge deploy / tooling)
+deno.lock
+
 # Python
 __pycache__/

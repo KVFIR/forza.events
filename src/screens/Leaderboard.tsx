@@ -1,5 +1,6 @@
 import {useEffect, useState} from 'react';
 import {useTranslation} from 'react-i18next';
+import {Asterisk} from 'lucide-react';
 import {Alert} from '../components/ui/Alert';
 import {EmptyState} from '../components/ui/EmptyState';
 import {PageLoading} from '../components/ui/PageLoading';
@@ -22,6 +23,33 @@ type Entry = {
   provisional: boolean;
 };
 
+function ProvisionalMark({label}: {label: string}) {
+  return (
+    <span className="inline-flex" title={label} role="img" aria-label={label}>
+      <Asterisk className="h-3 w-3 shrink-0 text-muted" aria-hidden />
+    </span>
+  );
+}
+
+function RatingValue({
+  rating,
+  provisional,
+  provisionalLabel,
+  className,
+}: {
+  rating: number;
+  provisional: boolean;
+  provisionalLabel: string;
+  className?: string;
+}) {
+  return (
+    <span className={cn('inline-flex items-center gap-1 tabular-nums', className)}>
+      {provisional ? <ProvisionalMark label={provisionalLabel} /> : null}
+      {rating}
+    </span>
+  );
+}
+
 export function Leaderboard() {
   const {t} = useTranslation();
   const {getAccessToken, user, isSignedIn} = useAuth();
@@ -34,6 +62,7 @@ export function Leaderboard() {
   } | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(false);
+  const provisionalLabel = t('leaderboard.provisional');
 
   const load = () => {
     if (!isApiConfigured()) {
@@ -73,13 +102,19 @@ export function Leaderboard() {
 
   return (
     <div className="pb-10 pt-4">
+      <header className="mb-4">
+        <p className="text-sm text-muted">{t('leaderboard.subtitle')}</p>
+      </header>
+
       {viewer && viewer.rank > 0 ? (
         <Alert variant="info" className="mb-4 py-2.5 text-sm">
-          {t('leaderboard.yourRank', {
-            rank: viewer.rank,
-            rating: viewer.rating,
-          })}
-          {viewer.provisional ? ` · ${t('leaderboard.provisional')}` : ''}
+          {t('leaderboard.yourRank', {rank: viewer.rank})}{' '}
+          <RatingValue
+            rating={viewer.rating}
+            provisional={viewer.provisional}
+            provisionalLabel={provisionalLabel}
+            className="font-semibold"
+          />
         </Alert>
       ) : null}
 
@@ -109,30 +144,24 @@ export function Leaderboard() {
                     name={row.gamertag || row.username || '?'}
                     size="sm"
                   />
-                  <span className="min-w-0 truncate">
-                    <span
-                      className={cn(
-                        'block truncate text-sm font-medium',
-                        isViewer ? 'text-white' : 'text-slate-200',
-                      )}
-                    >
-                      {row.gamertag?.trim() ||
-                        (row.username ? formatDiscordHandle(row.username) : t('common.dash'))}
-                    </span>
-                    {row.provisional ? (
-                      <span className="text-[10px] uppercase tracking-widest text-muted">
-                        {t('leaderboard.provisional')}
-                      </span>
-                    ) : null}
-                  </span>
                   <span
                     className={cn(
-                      'text-sm font-bold tabular-nums',
-                      isViewer ? 'text-accent-purple-light' : 'text-slate-200',
+                      'min-w-0 truncate text-sm font-medium',
+                      isViewer ? 'text-white' : 'text-slate-200',
                     )}
                   >
-                    {row.rating}
+                    {row.gamertag?.trim() ||
+                      (row.username ? formatDiscordHandle(row.username) : t('common.dash'))}
                   </span>
+                  <RatingValue
+                    rating={row.rating}
+                    provisional={row.provisional}
+                    provisionalLabel={provisionalLabel}
+                    className={cn(
+                      'text-sm font-bold',
+                      isViewer ? 'text-accent-purple-light' : 'text-slate-200',
+                    )}
+                  />
                 </li>
               );
             })}

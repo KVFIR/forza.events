@@ -301,11 +301,6 @@ export function Profile() {
           }
         />
       </div>
-      <div className="mt-2">
-        <TextLink to="/leaderboard" className="text-[11px]">
-          {t('profile.viewLeaderboard')}
-        </TextLink>
-      </div>
 
       {recentCompleted.length > 0 && (
         <section className="mt-6">

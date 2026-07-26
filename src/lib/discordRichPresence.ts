@@ -37,7 +37,7 @@ const RICH_PRESENCE_EN = {
   submittingResults: 'Submitting results',
   hosting: 'Hosting',
   registered: 'Registered',
-  full: 'Lobby full',
+  full: 'Event full',
   live: 'Race in progress',
   finished: 'Finished',
   cancelled: 'Cancelled',

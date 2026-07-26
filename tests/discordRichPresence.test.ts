@@ -162,7 +162,7 @@ describe('discordRichPresence', () => {
       }),
       {role: 'viewing', displayStatus: 'full'},
     );
-    expect(activity.state).toBe('Lobby full · 12/12');
+    expect(activity.state).toBe('Event full · 12/12');
   });
 
   it('shows lobby count for live, cancelled, and completed events', () => {
