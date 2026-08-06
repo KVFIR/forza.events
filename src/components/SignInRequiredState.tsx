@@ -11,7 +11,7 @@ type Props = {
   className?: string;
   /**
    * Discord Activity — retry embedded `authorize`.
-   * Omit on localhost only: the component starts browser OAuth via `startDiscordBrowserSignIn()`.
+   * Omit on browser web hosts: the component starts OAuth via `startDiscordBrowserSignIn()`.
    */
   onRetry?: () => void;
 };
@@ -42,7 +42,7 @@ export function SignInRequiredState({
   useEffect(() => {
     if (import.meta.env.DEV && !hasAction) {
       console.warn(
-        'SignInRequiredState: no action. Pass onRetry in Activity, or render on localhost for browser OAuth.',
+        'SignInRequiredState: no action. Pass onRetry in Activity, or render on a browser OAuth host.',
       );
     }
   }, [hasAction]);

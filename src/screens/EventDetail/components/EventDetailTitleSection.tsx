@@ -23,6 +23,7 @@ type Props = {
     | 'showDraftActions'
     | 'showHostPostStartActions'
     | 'canEnterResults'
+    | 'canCompleteWithoutResults'
     | 'canRetryRatings'
     | 'canCancel'
     | 'canEdit'
@@ -49,10 +50,12 @@ type Props = {
     | 'willWaitlist'
   >;
   cancelling: boolean;
+  completing: boolean;
   retryingRatings: boolean;
   authRetrying: boolean;
   leaving: boolean;
   onConfirmCancel: () => void;
+  onConfirmComplete: () => void;
   onRetryRatings: () => void;
   onJoinClick: () => void;
   /** Original list referrer for nested navigation (e.g. results). */
@@ -64,10 +67,12 @@ export function EventDetailTitleSection({
   displayStatus,
   view,
   cancelling,
+  completing,
   retryingRatings,
   authRetrying,
   leaving,
   onConfirmCancel,
+  onConfirmComplete,
   onRetryRatings,
   onJoinClick,
   detailFrom,
@@ -135,6 +140,17 @@ export function EventDetailTitleSection({
           }
         >
           {t('eventDetail.submitResults')}
+        </Button>
+      ) : null}
+      {view.canCompleteWithoutResults ? (
+        <Button
+          variant="primary"
+          size="toolbar"
+          className="shrink-0 whitespace-nowrap"
+          disabled={completing}
+          onClick={onConfirmComplete}
+        >
+          {completing ? busyLabel('saving') : t('eventDetail.markFinished')}
         </Button>
       ) : null}
       {view.canCancel ? (

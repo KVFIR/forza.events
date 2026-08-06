@@ -40,7 +40,7 @@ After deploying a scope change, users may need to **re-open** the Activity (or u
 
 1. `await sdk.ready()`
 2. `sdk.commands.authorize({ client_id, response_type: 'code', scope: ['identify','guilds','rpc.activities.write'], prompt: 'none' })`
-3. Backend `token-exchange` exchanges `code` for `access_token` (with allowlisted `redirect_uri`)
+3. Backend `token-exchange` exchanges `code` for `access_token` (+ `refresh_token` / `expires_in`; with allowlisted `redirect_uri`) — or refreshes via `{refresh_token}`
 4. `sdk.commands.authenticate({ access_token })`
 
 Activity redirect URI in portal: **`https://127.0.0.1`** (not the Railway deploy URL).

@@ -85,4 +85,8 @@ describe('shouldLeaveResultsScreen', () => {
       ),
     ).toBe(true);
   });
+
+  it('redirects cruise hosts (no race results entry)', () => {
+    expect(shouldLeaveResultsScreen(event({type: 'cruise'}), null, host)).toBe(true);
+  });
 });

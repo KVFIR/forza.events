@@ -34,10 +34,18 @@ function invokeErrorMeta(
   return Object.keys(meta).length > 0 ? meta : undefined;
 }
 
+type TokenExchangeResult = {
+  access_token: string;
+  refresh_token?: string | null;
+  expires_in?: number;
+  user: import('./types').AppUser;
+};
+
 async function invoke<T>(
   name: string,
   body: Record<string, unknown>,
   discordAccessToken: string | null,
+  options?: {didRefresh?: boolean},
 ): Promise<T> {
   const base = apiBase();
   if (!base) throw new Error('API not configured');
@@ -105,8 +113,24 @@ async function invoke<T>(
   }
 
   if (!res.ok) {
-    // A stale Discord token surfaces as 401 from Edge Functions — clear it and reset to guest.
-    if (res.status === 401 && discordAccessToken) {
+    // Stale Discord access token → try refresh_token once, then clear session.
+    if (res.status === 401 && discordAccessToken && !options?.didRefresh) {
+      try {
+        const {refreshStoredDiscordSession} = await import('./discordSessionRefresh');
+        const refreshed = await refreshStoredDiscordSession({force: true});
+        if (refreshed) {
+          const {setDiscordSession} = await import('./discord');
+          setDiscordSession(refreshed.accessToken, refreshed.user);
+          return invoke(name, body, refreshed.accessToken, {didRefresh: true});
+        }
+        clearDiscordSession();
+        if (typeof window !== 'undefined') {
+          window.dispatchEvent(new Event(SESSION_EXPIRED_EVENT));
+        }
+      } catch {
+        // Refresh transport failure — keep stored session; surface the original 401.
+      }
+    } else if (res.status === 401 && discordAccessToken && options?.didRefresh) {
       clearDiscordSession();
       if (typeof window !== 'undefined') {
         window.dispatchEvent(new Event(SESSION_EXPIRED_EVENT));
@@ -140,10 +164,7 @@ export async function exchangeToken(
   code: string,
   options?: {guildId?: string; guildName?: string; redirectUri?: string},
 ) {
-  return invoke<{
-    access_token: string;
-    user: import('./types').AppUser;
-  }>(
+  return invoke<TokenExchangeResult>(
     'token-exchange',
     {
       code,
@@ -151,6 +172,15 @@ export async function exchangeToken(
       guild_name: options?.guildName,
       redirect_uri: options?.redirectUri,
     },
+    null,
+  );
+}
+
+/** Silent Discord OAuth refresh (`grant_type=refresh_token` via token-exchange). */
+export async function refreshDiscordToken(refreshToken: string) {
+  return invoke<TokenExchangeResult>(
+    'token-exchange',
+    {refresh_token: refreshToken},
     null,
   );
 }

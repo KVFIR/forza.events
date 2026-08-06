@@ -28,14 +28,14 @@ Remaining work is mostly **Activity E2E in pilot guilds**, **Railway frontend re
 
 | Area | Status | Notes |
 |------|--------|-------|
-| Browse Events | Done | Activity: `browse-events`; localhost: PostgREST + same `isBrowseFeedEvent` filter (published until completed/cancelled/archived; started/live stay visible) |
+| Browse Events | Done | Activity: `browse-events`; localhost: PostgREST + same `isBrowseFeedEvent` filter (published open/live + completed; cancelled/archived excluded; started/live stay visible) |
 | Event Detail | Done | Join/leave, host actions, balance groups, results, live updates |
 | Create Event | Done | 4 steps; cover via `upload-cover`; convoy leader via `list-guild-members` |
 | My Events | Done | Hosted/joined + host drafts merge |
 | Profile | Done | Gamertag + DM notification prefs (`user-profile`) + driver rating |
 | Leaderboard / ranked ELO | Done | Phase A+B: `031`–`033`, pairwise ELO on `submit-results`, `/leaderboard`, Browse Ranked filter |
 | Discord Activity auth | Done | SDK → `token-exchange` → `authenticate` |
-| Browser localhost auth | Done | `/auth/callback` + `sessionStorage` |
+| Browser localhost auth | Done | `/auth/callback` + `localStorage` session + refresh_token |
 | Production browser tab (`forza.events`) | Done | Discord OAuth required (`BrowserAuthGate`); raw `*.up.railway.app` still Activity-only gate |
 | Supabase schema | Done | `001_baseline` + `002`–`010` |
 | Edge Functions | Done | `npm run deploy:functions` |
@@ -61,8 +61,8 @@ Confirmed in code and schema:
 - Event types: `road`, `dirt`, `cruise`; track codes optional
 - Car rules: `anything_goes` or `restricted_list`; optional tuning restriction templates
 - Published events editable only before start
-- After start: submit results or cancel only
-- Results immutable after submit; participants only in results payload
+- After start: road/dirt → submit results (tap-to-order; by convoy or overall) or cancel; cruise → mark finished (no standings) or cancel
+- Results immutable after submit; participants only in results payload; cruise has no results UI
 - Full events block joins (DB trigger + API)
 - Production: Discord Activity only (no standalone web OAuth on Railway origin)
 

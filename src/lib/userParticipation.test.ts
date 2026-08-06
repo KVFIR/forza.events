@@ -1,6 +1,6 @@
 import {describe, expect, it} from 'vitest';
 import {filterMyEvents} from './eventList';
-import {userIsJoined, userIsParticipating} from './events';
+import {userHadActiveSeat, userIsJoined, userIsParticipating} from './events';
 import type {AppUser, ForzaEvent} from './types';
 
 const user: AppUser = {
@@ -163,5 +163,55 @@ describe('filterMyEvents', () => {
 
   it('excludes waitlisted racers from active joined checks', () => {
     expect(userIsJoined(ev, user)).toBe(false);
+  });
+});
+
+describe('userHadActiveSeat', () => {
+  it('counts host convoy-leader seat', () => {
+    const host = {...user, discordId: 'host'};
+    expect(
+      userHadActiveSeat(
+        event([
+          {
+            discordId: 'host',
+            username: 'Host',
+            isConvoyLeader: true,
+            participationSource: 'host_self_assigned',
+          },
+        ]),
+        host,
+      ),
+    ).toBe(true);
+  });
+
+  it('excludes waitlisted rows', () => {
+    expect(
+      userHadActiveSeat(
+        event([
+          {
+            discordId: 'u1',
+            username: 'A',
+            participationSource: 'self_join',
+            waitlisted: true,
+          },
+        ]),
+        user,
+      ),
+    ).toBe(false);
+  });
+
+  it('still counts non-host active seats', () => {
+    expect(
+      userHadActiveSeat(
+        event([
+          {
+            discordId: 'u1',
+            username: 'A',
+            participationSource: 'self_join',
+          },
+        ]),
+        user,
+      ),
+    ).toBe(true);
   });
 });

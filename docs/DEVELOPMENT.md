@@ -54,12 +54,14 @@ Vite maps `DISCORD_CLIENT_ID`, `SUPABASE_URL`, and `SUPABASE_ANON_KEY` at build 
 
 Add the same URL under Discord → OAuth2 → Redirects.
 
-`token-exchange` only accepts allowlisted `redirect_uri` values (`oauthRedirect.ts`):
+`token-exchange` only accepts allowlisted `redirect_uri` values (`oauthRedirect.ts`) for the authorization-code path:
 
 - `DISCORD_REDIRECT_URI`
 - `https://127.0.0.1` (Discord Activity)
 - `http://localhost:5180/auth/callback`, `http://127.0.0.1:5180/auth/callback`
 - Optional: `DISCORD_REDIRECT_URI_ALLOWLIST` (comma-separated, Supabase secret)
+
+Silent browser re-auth: `POST token-exchange` with `{refresh_token}` (no `redirect_uri`). Client stores refresh + expiry in `localStorage` and refreshes near expiry or on Edge 401. After shipping this, existing browser sessions need **one** Discord sign-in to pick up a refresh token.
 
 ### Optional
 
@@ -106,7 +108,7 @@ Discord Developer Portal → OAuth2 → Redirects — add **both**:
 - `https://forza.events/auth/callback` (browser web)
 - `https://www.forza.events/auth/callback` (if you serve `www`)
 
-Activity OAuth still uses `https://127.0.0.1` — not `APP_ORIGIN`. Browser tabs on **forza.events** and **localhost** use Discord OAuth and require sign-in before the app (`BrowserSignInScreen` via `useBrowserSignInGate()`). The raw Railway hostname (`*.up.railway.app`) still shows **Open in Discord** unless you add it to `VITE_APP_ORIGIN` at build time.
+Activity OAuth still uses `https://127.0.0.1` — not `APP_ORIGIN`. Browser tabs on **forza.events** and **localhost** support guest browse (Browse / Event Detail / Ladder); Discord OAuth is soft-prompted on Join, Create, Profile, My Events (`SignInRequiredState` / navbar pill). Explicit `/sign-in` shows `BrowserSignInScreen`. The raw Railway hostname (`*.up.railway.app`) still shows **Open in Discord** unless you add it to `VITE_APP_ORIGIN` at build time.
 
 ```bash
 railway variable set APP_ORIGIN=https://forza.events

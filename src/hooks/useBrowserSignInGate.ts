@@ -5,7 +5,10 @@ import {isLocalAnalyticsDashboardPath} from '../lib/localAnalyticsDashboard';
 
 export type BrowserSignInGateState = 'loading' | 'required' | null;
 
-/** When set, AppRoutes should render the full-screen sign-in instead of app chrome. */
+/**
+ * Full-screen hard gate (off by default). Guests browse showcase paths;
+ * Create / Profile / My Events soft-prompt in-screen. `/sign-in` is separate in App.
+ */
 export function useBrowserSignInGate(): BrowserSignInGateState {
   const {pathname} = useLocation();
   const {loading, isConfigured, isSignedIn} = useAuth();

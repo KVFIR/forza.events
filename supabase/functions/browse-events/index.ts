@@ -85,8 +85,8 @@ serve(async (req) => {
       .order('starts_at', {ascending: true});
 
     if (!includeCompleted) {
-      // Keep live/in-progress events visible; drop only terminal statuses.
-      query = query.in('status', ['open', 'checkin', 'live']);
+      // Browse: active + completed showcase; My Events uses include_completed for cancelled/archived too.
+      query = query.in('status', ['open', 'checkin', 'live', 'completed']);
     }
 
     const {data, error} = await query;

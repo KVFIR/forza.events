@@ -2,7 +2,7 @@ import {useCallback, useEffect, useMemo, useState} from 'react';
 import {useTranslation} from 'react-i18next';
 import {busyLabel} from '../i18n/busyLabels';
 import {useNavigate, useParams, useLocation} from 'react-router-dom';
-import {ArrowLeft, ChevronDown, ChevronUp} from 'lucide-react';
+import {ArrowLeft, ChevronDown, ChevronUp, X} from 'lucide-react';
 import {useAuth} from '../context/AuthContext';
 import {useRichPresenceOverride} from '../context/DiscordRichPresenceContext';
 import {useJoinedEvents} from '../context/JoinedEventsContext';
@@ -27,54 +27,85 @@ import {
   type EventResultsLocationState,
 } from '../lib/navigationState';
 import type {EventParticipant} from '../lib/types';
+import {
+  initResultsEntry,
+  isResultsEntryComplete,
+  moveOrderedDriver,
+  orderedDriversInScope,
+  placeDriver,
+  placementsForSubmit,
+  poolDriversInScope,
+  resultsEntryGroupIndexes,
+  setDriverOutcome,
+  setResultsRankingMode,
+  unplaceDriver,
+  type ResultsEntryDriver,
+  type ResultsEntryState,
+} from '../lib/resultsEntry';
 import {Alert} from '../components/ui/Alert';
 import {Button} from '../components/ui/Button';
-import {CheckboxField} from '../components/ui/CheckboxField';
 import {Panel} from '../components/ui/Panel';
 import {UserAvatar} from '../components/UserAvatar';
 import {TextButton, TextLink} from '../components/ui/TextButton';
 import {ConfirmDialog} from '../components/ui/ConfirmDialog';
 import {ContentReveal} from '../components/ui/ContentReveal';
 import {PageLoading} from '../components/ui/PageLoading';
+import {SegmentGroup} from '../components/ui/SegmentGroup';
+import {sectionLabelClass} from '../components/ui/formStyles';
 import {useLoadingUI} from '../hooks/useLoadingUI';
 import {cn} from '../lib/cn';
 
-type Placement = {
-  discordId: string;
-  label: string;
-  avatarUrl?: string;
-  dnf: boolean;
-  dns: boolean;
-};
-
-type PlacementGroup = {
-  groupIndex: number;
-  rows: Placement[];
-};
-
-function participantLabel(p: EventParticipant): string {
-  return p.gamertag ?? p.username;
+function toEntryDrivers(participants: EventParticipant[]): ResultsEntryDriver[] {
+  return participants.map((p) => ({
+    discordId: p.discordId,
+    label: p.gamertag ?? p.username,
+    avatarUrl: p.avatarUrl,
+    groupIndex: p.groupIndex ?? 1,
+  }));
 }
 
-/** One ordered block per lobby group (results positions restart per group). */
-function buildPlacementGroups(participants: EventParticipant[]): PlacementGroup[] {
-  const byGroup = new Map<number, Placement[]>();
-  for (const p of participants) {
-    const g = p.groupIndex ?? 1;
-    const row: Placement = {
-      discordId: p.discordId,
-      label: participantLabel(p),
-      avatarUrl: p.avatarUrl,
-      dnf: false,
-      dns: false,
-    };
-    const list = byGroup.get(g);
-    if (list) list.push(row);
-    else byGroup.set(g, [row]);
-  }
-  return [...byGroup.keys()]
-    .sort((a, b) => a - b)
-    .map((groupIndex) => ({groupIndex, rows: byGroup.get(groupIndex)!}));
+function OutcomeChips({
+  dnf,
+  dns,
+  onDnf,
+  onDns,
+}: {
+  dnf: boolean;
+  dns: boolean;
+  onDnf: () => void;
+  onDns: () => void;
+}) {
+  const {t} = useTranslation();
+  return (
+    <div className="flex shrink-0 gap-1">
+      <Button
+        type="button"
+        variant="ghost"
+        size="compact"
+        className={cn(
+          'h-7 px-2 text-[10px] font-bold uppercase tracking-wider',
+          dnf ? 'bg-white/10 text-white' : 'text-muted hover:text-white',
+        )}
+        aria-pressed={dnf}
+        onClick={onDnf}
+      >
+        {t('results.dnf')}
+      </Button>
+      <Button
+        type="button"
+        variant="ghost"
+        size="compact"
+        className={cn(
+          'h-7 px-2 text-[10px] font-bold uppercase tracking-wider',
+          dns ? 'bg-white/10 text-white' : 'text-muted hover:text-white',
+        )}
+        aria-pressed={dns}
+        onClick={onDns}
+      >
+        {t('results.dns')}
+      </Button>
+    </div>
+  );
 }
 
 export function EventResults() {
@@ -84,9 +115,10 @@ export function EventResults() {
   const location = useLocation();
   const resultsState = location.state as EventResultsLocationState | null;
   const detailFrom = resultsState?.from;
-  const {user, getAccessToken, isSignedIn} = useAuth();
+  const {user, getAccessToken, isSignedIn, loading: authInitializing} = useAuth();
   const {bumpRefresh, getLobbyPatch} = useJoinedEvents();
-  const [placementGroups, setPlacementGroups] = useState<PlacementGroup[]>([]);
+  const [entry, setEntry] = useState<ResultsEntryState | null>(null);
+  const [activeGroup, setActiveGroup] = useState(1);
   const [loading, setLoading] = useState(true);
   const [resultsCheckFailed, setResultsCheckFailed] = useState(false);
   const [recheckingResults, setRecheckingResults] = useState(false);
@@ -161,6 +193,13 @@ export function EventResults() {
 
   useEffect(() => {
     if (!id) return;
+    // Guest showcase mounts this route before Discord session restore — wait so hosts
+    // are not bounced as guests via shouldLeaveResultsScreen.
+    if (authInitializing) {
+      setLoading(true);
+      return;
+    }
+
     let cancelled = false;
     setLoading(true);
     setResultsCheckFailed(false);
@@ -197,7 +236,10 @@ export function EventResults() {
           return;
         }
 
-        setPlacementGroups(buildPlacementGroups(resolveResultsRoster(loaded)));
+        const drivers = toEntryDrivers(resolveResultsRoster(loaded));
+        const groups = [...new Set(drivers.map((d) => d.groupIndex))].sort((a, b) => a - b);
+        setEntry(initResultsEntry(drivers, 'per_group'));
+        setActiveGroup(groups[0] ?? 1);
       } catch (err) {
         if (!cancelled) {
           console.error('EventResults load', err);
@@ -211,42 +253,21 @@ export function EventResults() {
     return () => {
       cancelled = true;
     };
-  }, [id, user, goToEventDetail, discordToken]);
+  }, [id, user, goToEventDetail, discordToken, authInitializing]);
 
-  function updateGroup(groupIndex: number, updater: (rows: Placement[]) => Placement[]) {
-    setPlacementGroups((groups) =>
-      groups.map((g) => (g.groupIndex === groupIndex ? {...g, rows: updater(g.rows)} : g)),
-    );
-  }
+  const groupIndexes = entry ? resultsEntryGroupIndexes(entry) : [];
+  const multiGroup = groupIndexes.length > 1;
+  const entryComplete = entry ? isResultsEntryComplete(entry) : false;
 
-  function move(groupIndex: number, index: number, dir: -1 | 1) {
-    updateGroup(groupIndex, (rows) => {
-      const next = index + dir;
-      if (next < 0 || next >= rows.length) return rows;
-      const copy = [...rows];
-      [copy[index], copy[next]] = [copy[next], copy[index]];
-      return copy;
-    });
-  }
-
-  function toggleDnf(groupIndex: number, index: number) {
-    updateGroup(groupIndex, (rows) =>
-      rows.map((row, i) => (i === index ? {...row, dnf: !row.dnf, dns: false} : row)),
-    );
-  }
-
-  function toggleDns(groupIndex: number, index: number) {
-    updateGroup(groupIndex, (rows) =>
-      rows.map((row, i) => (i === index ? {...row, dns: !row.dns, dnf: false} : row)),
-    );
-  }
-
-  const allPlacements = placementGroups.flatMap((g) =>
-    g.rows.map((row) => ({...row, groupIndex: g.groupIndex})),
-  );
+  const ordered = entry
+    ? orderedDriversInScope(entry, entry.mode === 'per_group' ? activeGroup : undefined)
+    : [];
+  const pool = entry
+    ? poolDriversInScope(entry, entry.mode === 'per_group' ? activeGroup : undefined)
+    : [];
 
   async function handleSubmit() {
-    if (!id || allPlacements.length === 0) return;
+    if (!id || !entry || !entryComplete) return;
     setSaving(true);
     setError(null);
 
@@ -263,11 +284,10 @@ export function EventResults() {
       if (!fresh) {
         throw new Error(t('eventDetail.notFound'));
       }
-      const allowedIds = new Set(
-        resolveResultsRoster(fresh).map((p) => p.discordId),
-      );
+      const allowedIds = new Set(resolveResultsRoster(fresh).map((p) => p.discordId));
       const payload = buildResultSubmitRows(
-        allPlacements.filter((p) => allowedIds.has(p.discordId)),
+        placementsForSubmit(entry).filter((p) => allowedIds.has(p.discordId)),
+        entry.mode,
       );
 
       if (payload.length === 0) {
@@ -282,7 +302,6 @@ export function EventResults() {
       ]);
       bumpRefresh();
       let detailEvent = updated ?? fresh;
-      // Surface failed ELO apply on Event Detail (retry CTA) even if detail fetch is stale.
       if (submitRes.rating_applied === false) {
         detailEvent = {...detailEvent, isRanked: true, ratingApplied: false};
       }
@@ -308,7 +327,7 @@ export function EventResults() {
     return <PageLoading label={t('loading.results')} className="pb-10 pt-5" />;
   }
 
-  if (loading || !event) {
+  if (loading || !event || !entry) {
     return null;
   }
 
@@ -326,6 +345,35 @@ export function EventResults() {
 
       <p className="text-sm font-semibold text-white">{title}</p>
       <p className="mt-1 text-xs text-muted">{t('results.instructions')}</p>
+
+      {multiGroup ? (
+        <SegmentGroup
+          containerClassName="mt-4"
+          ariaLabel={t('results.rankingModeAria')}
+          value={entry.mode}
+          onChange={(mode) => {
+            setEntry((s) => (s ? setResultsRankingMode(s, mode) : s));
+            setActiveGroup(groupIndexes[0] ?? 1);
+          }}
+          options={[
+            {value: 'per_group', label: t('results.modeByConvoy')},
+            {value: 'overall', label: t('results.modeOverall')},
+          ]}
+        />
+      ) : null}
+
+      {multiGroup && entry.mode === 'per_group' ? (
+        <SegmentGroup
+          containerClassName="mt-3"
+          ariaLabel={t('results.convoyPickerAria')}
+          value={String(activeGroup)}
+          onChange={(v) => setActiveGroup(Number(v))}
+          options={groupIndexes.map((g) => ({
+            value: String(g),
+            label: t('eventDetail.group', {n: g}),
+          }))}
+        />
+      ) : null}
 
       {resultsCheckFailed && (
         <Alert variant="info" className="mt-4 flex flex-col gap-2">
@@ -347,90 +395,156 @@ export function EventResults() {
         </Alert>
       )}
 
-      {placementGroups.map((group) => (
-        <div key={group.groupIndex} className="mt-5">
-          {placementGroups.length > 1 ? (
-            <p className="mb-2 text-xs font-bold uppercase tracking-widest text-muted">
-              {t('eventDetail.group', {n: group.groupIndex})}
-            </p>
-          ) : null}
-          <ol className="space-y-2">
-            {group.rows.map((row, index) => {
-              const finisherIndex = group.rows
-                .slice(0, index + 1)
-                .filter((p) => !p.dnf && !p.dns).length;
-              const positionLabel = row.dns
-                ? t('results.dns')
-                : row.dnf
-                  ? t('results.dnf')
-                  : String(finisherIndex);
+      <p className={cn(sectionLabelClass, 'mt-6')}>{t('results.finishOrder')}</p>
+      {ordered.length === 0 ? (
+        <p className="mt-2 text-xs text-muted">{t('results.finishOrderEmpty')}</p>
+      ) : (
+        <ol className="mt-2 space-y-2">
+          {ordered.map((row, index) => (
+            <li key={row.discordId}>
+              <Panel variant="soft" className="flex items-center gap-2 px-3 py-2.5">
+                <span className="w-6 shrink-0 text-center text-sm font-bold tabular-nums text-amber-300/90">
+                  {index + 1}
+                </span>
+                <UserAvatar src={row.avatarUrl} name={row.label} size="xs" variant="neutral" />
+                <span className="min-w-0 flex-1 truncate text-sm text-white">{row.label}</span>
+                {entry.mode === 'overall' && multiGroup ? (
+                  <span className="shrink-0 text-[10px] font-bold uppercase tracking-wider text-muted">
+                    {t('eventDetail.group', {n: row.groupIndex})}
+                  </span>
+                ) : null}
+                <div className="flex shrink-0 flex-col">
+                  <Button
+                    type="button"
+                    variant="ghost"
+                    size="icon"
+                    className="p-0.5 text-muted hover:text-white disabled:opacity-30"
+                    disabled={index === 0}
+                    onClick={() => setEntry((s) => (s ? moveOrderedDriver(s, row.discordId, -1) : s))}
+                    aria-label={t('results.moveUp')}
+                  >
+                    <ChevronUp className="h-4 w-4" />
+                  </Button>
+                  <Button
+                    type="button"
+                    variant="ghost"
+                    size="icon"
+                    className="p-0.5 text-muted hover:text-white disabled:opacity-30"
+                    disabled={index === ordered.length - 1}
+                    onClick={() => setEntry((s) => (s ? moveOrderedDriver(s, row.discordId, 1) : s))}
+                    aria-label={t('results.moveDown')}
+                  >
+                    <ChevronDown className="h-4 w-4" />
+                  </Button>
+                </div>
+                <Button
+                  type="button"
+                  variant="ghost"
+                  size="icon"
+                  className="shrink-0 p-1 text-muted hover:text-white"
+                  onClick={() => setEntry((s) => (s ? unplaceDriver(s, row.discordId) : s))}
+                  aria-label={t('results.removeFromOrder')}
+                >
+                  <X className="h-4 w-4" />
+                </Button>
+              </Panel>
+            </li>
+          ))}
+        </ol>
+      )}
 
-              return (
-                <li key={row.discordId}>
-                  <Panel variant="soft" className="flex items-center gap-2 px-3 py-2.5">
-                    <span className="w-6 shrink-0 text-center text-sm font-bold tabular-nums text-muted">
-                      {positionLabel}
+      <p className={cn(sectionLabelClass, 'mt-6')}>{t('results.remaining')}</p>
+      {pool.length === 0 ? (
+        <p className="mt-2 text-xs text-muted">{t('results.remainingEmpty')}</p>
+      ) : (
+        <ul className="mt-2 space-y-2">
+          {pool.map((row) => {
+            const outcome = entry.outcome[row.discordId] ?? 'pending';
+            const isOut = outcome === 'dnf' || outcome === 'dns';
+            return (
+              <li key={row.discordId}>
+                <Panel
+                  variant="soft"
+                  className={cn(
+                    'flex items-center gap-2 px-3 py-2.5',
+                    !isOut && 'cursor-pointer hover:bg-white/[0.06]',
+                  )}
+                >
+                  <button
+                    type="button"
+                    className="flex min-w-0 flex-1 items-center gap-2 text-left disabled:cursor-default"
+                    disabled={isOut}
+                    onClick={() => setEntry((s) => (s ? placeDriver(s, row.discordId) : s))}
+                  >
+                    <span
+                      className={cn(
+                        'w-6 shrink-0 text-center text-[10px] font-bold uppercase tracking-wider',
+                        isOut ? 'text-muted' : 'text-slate-500',
+                      )}
+                    >
+                      {isOut ? (outcome === 'dns' ? t('results.dns') : t('results.dnf')) : '·'}
                     </span>
                     <UserAvatar src={row.avatarUrl} name={row.label} size="xs" variant="neutral" />
                     <span
                       className={cn(
                         'min-w-0 flex-1 truncate text-sm',
-                        (row.dnf || row.dns) && 'text-muted',
+                        isOut ? 'text-muted' : 'text-slate-200',
                       )}
                     >
                       {row.label}
                     </span>
-                    <CheckboxField
-                      label={t('results.dnf')}
-                      checked={row.dnf}
-                      onChange={() => toggleDnf(group.groupIndex, index)}
-                    />
-                    <CheckboxField
-                      label={t('results.dns')}
-                      checked={row.dns}
-                      onChange={() => toggleDns(group.groupIndex, index)}
-                    />
-                    <div className="flex shrink-0 flex-col">
-                      <Button
-                        type="button"
-                        variant="ghost"
-                        size="icon"
-                        className="p-0.5 text-muted hover:text-white disabled:opacity-30"
-                        disabled={index === 0}
-                        onClick={() => move(group.groupIndex, index, -1)}
-                        aria-label={t('results.moveUp')}
-                      >
-                        <ChevronUp className="h-4 w-4" />
-                      </Button>
-                      <Button
-                        type="button"
-                        variant="ghost"
-                        size="icon"
-                        className="p-0.5 text-muted hover:text-white disabled:opacity-30"
-                        disabled={index === group.rows.length - 1}
-                        onClick={() => move(group.groupIndex, index, 1)}
-                        aria-label={t('results.moveDown')}
-                      >
-                        <ChevronDown className="h-4 w-4" />
-                      </Button>
-                    </div>
-                  </Panel>
-                </li>
-              );
-            })}
-          </ol>
-        </div>
-      ))}
+                    {entry.mode === 'overall' && multiGroup ? (
+                      <span className="shrink-0 text-[10px] font-bold uppercase tracking-wider text-muted">
+                        {t('eventDetail.group', {n: row.groupIndex})}
+                      </span>
+                    ) : null}
+                  </button>
+                  <OutcomeChips
+                    dnf={outcome === 'dnf'}
+                    dns={outcome === 'dns'}
+                    onDnf={() =>
+                      setEntry((s) =>
+                        s
+                          ? setDriverOutcome(
+                              s,
+                              row.discordId,
+                              outcome === 'dnf' ? 'pending' : 'dnf',
+                            )
+                          : s,
+                      )
+                    }
+                    onDns={() =>
+                      setEntry((s) =>
+                        s
+                          ? setDriverOutcome(
+                              s,
+                              row.discordId,
+                              outcome === 'dns' ? 'pending' : 'dns',
+                            )
+                          : s,
+                      )
+                    }
+                  />
+                </Panel>
+              </li>
+            );
+          })}
+        </ul>
+      )}
 
-      {allPlacements.length === 0 && (
+      {entry.drivers.length === 0 && (
         <p className="mt-8 text-center text-sm text-muted">{t('results.noParticipants')}</p>
       )}
+
+      {!entryComplete && entry.drivers.length > 0 ? (
+        <p className="mt-6 text-center text-xs text-muted">{t('results.placeAllHint')}</p>
+      ) : null}
 
       <Button
         variant="primary"
         fullWidth
-        className="mt-8"
-        disabled={saving || allPlacements.length === 0}
+        className="mt-4"
+        disabled={saving || !entryComplete}
         onClick={() => setSubmitConfirmOpen(true)}
       >
         {saving ? busyLabel('saving') : t('eventDetail.submitResults')}

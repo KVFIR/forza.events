@@ -3,7 +3,7 @@ import type {LegalDocument} from './types';
 /** English terms of service — authoritative for Discord verification. */
 export const termsOfServiceEn: LegalDocument = {
   title: 'Terms of Service',
-  lastUpdated: '2026-07-14',
+  lastUpdated: '2026-08-06',
   intro:
     'These Terms of Service ("Terms") govern your access to and use of FORZA.EVENTS, including our Discord Application, embedded Activity, bot features, and related websites (collectively, the "Service"). By using the Service, you agree to these Terms. If you do not agree, do not use the Service.',
   sections: [
@@ -13,7 +13,7 @@ export const termsOfServiceEn: LegalDocument = {
       blocks: [
         {
           type: 'p',
-          text: 'FORZA.EVENTS is a community tool for organizing and joining Forza Horizon racing events through Discord. The Service is delivered primarily as a Discord Activity inside the Discord client. The same features are also available on our website at forza.events (and on localhost during development) in a standard web browser after Discord sign-in. Public legal pages are available without signing in.',
+          text: 'FORZA.EVENTS is a community tool for organizing and joining Forza Horizon racing events through Discord. The Service is delivered primarily as a Discord Activity inside the Discord client. The same product is also available on our website at forza.events (and on localhost during development) in a standard web browser: you may browse public events and related pages without signing in; Discord sign-in is required to join, create, or manage events and to use account features. Public legal pages are available without signing in.',
         },
       ],
     },

@@ -4,7 +4,14 @@ import {DISCORD_ACTIVITY_OAUTH_SCOPES} from './discordScopes';
 import {ensureDiscordSupabaseProxy} from './discordUrlProxy';
 import {resetRichPresenceSession} from './discordRichPresenceSession';
 import {eventIdFromOpenEventCustomId} from './eventLaunch';
-import {loadDiscordSession, saveDiscordSession} from './discordAuth';
+import {
+  clearDiscordSession,
+  expiresAtFromExpiresIn,
+  loadDiscordSession,
+  saveDiscordSession,
+  sessionNeedsRefresh,
+  type DiscordSessionWrite,
+} from './discordAuth';
 import {GUEST_USER} from './guestUser';
 import type {AppUser} from './types';
 
@@ -62,9 +69,10 @@ export function clearDiscordAuthState(): void {
   resolvedUser = {...GUEST_USER};
 }
 
-function applyBrowserSession(): InitResult | null {
-  const session = loadDiscordSession();
-  if (!session) return null;
+function sessionToInitResult(session: {
+  accessToken: string;
+  user: AppUser;
+}): InitResult {
   setDiscordSession(session.accessToken, session.user);
   return {
     user: session.user,
@@ -74,6 +82,33 @@ function applyBrowserSession(): InitResult | null {
     guildName: null,
     launchEventId: null,
   };
+}
+
+function applyBrowserSession(): InitResult | null {
+  const session = loadDiscordSession();
+  if (!session) return null;
+  return sessionToInitResult(session);
+}
+
+function persistOAuthTokens(
+  result: {
+    access_token: string;
+    refresh_token?: string | null;
+    expires_in?: number;
+    user: AppUser;
+  },
+): void {
+  const write: DiscordSessionWrite = {
+    accessToken: result.access_token,
+    user: result.user,
+  };
+  if (result.refresh_token) {
+    write.refreshToken = result.refresh_token;
+  }
+  if (typeof result.expires_in === 'number') {
+    write.expiresAt = expiresAtFromExpiresIn(result.expires_in);
+  }
+  saveDiscordSession(write);
 }
 
 async function trackActivityAuthFailed(apiCode: string): Promise<void> {
@@ -126,7 +161,7 @@ async function authenticateDiscordActivity(
     });
     discordAccessToken = result.access_token;
     resolvedUser = result.user;
-    saveDiscordSession({accessToken: result.access_token, user: result.user});
+    persistOAuthTokens(result);
     await sdk.commands.authenticate({access_token: result.access_token});
     return {user: result.user, accessToken: result.access_token};
   } catch (err) {
@@ -188,7 +223,31 @@ export async function initDiscordActivity(): Promise<InitResult> {
   initPromise = (async () => {
     if (isStandaloneBrowser()) {
       const existing = applyBrowserSession();
-      if (existing) return existing;
+      if (existing) {
+        try {
+          const prior = loadDiscordSession();
+          const attemptedRefresh = Boolean(prior && sessionNeedsRefresh(prior));
+          const {refreshStoredDiscordSession} = await import('./discordSessionRefresh');
+          const refreshed = await refreshStoredDiscordSession();
+          if (refreshed) return sessionToInitResult(refreshed);
+          // Hard refresh failure already cleared localStorage — drop in-memory too.
+          if (attemptedRefresh) {
+            clearDiscordSession();
+            clearDiscordAuthState();
+            return {
+              user: {...GUEST_USER},
+              ready: false,
+              accessToken: null,
+              guildId: null,
+              guildName: null,
+              launchEventId: null,
+            };
+          }
+        } catch (err) {
+          console.warn('Discord session refresh on load failed', err);
+        }
+        return existing;
+      }
 
       resolvedUser = {...GUEST_USER};
       return {

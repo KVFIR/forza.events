@@ -2,7 +2,11 @@ import {useEffect, useState} from 'react';
 import {useNavigate, useSearchParams} from 'react-router-dom';
 import {exchangeTokenOnce, isApiConfigured} from '../lib/api';
 import {track, trackAuthSuccessOnce} from '../lib/analytics';
-import {getDiscordRedirectUri, saveDiscordSession} from '../lib/discordAuth';
+import {
+  expiresAtFromExpiresIn,
+  getDiscordRedirectUri,
+  saveDiscordSession,
+} from '../lib/discordAuth';
 import {setDiscordSession} from '../lib/discord';
 import {clearAuthReturnTo, consumeAuthReturnTo} from '../lib/returnTo';
 import {useAuth} from '../context/AuthContext';
@@ -52,7 +56,16 @@ export function AuthCallback() {
       try {
         const result = await exchangeTokenOnce(code, {redirectUri: getDiscordRedirectUri()});
         if (cancelled) return;
-        saveDiscordSession({accessToken: result.access_token, user: result.user});
+        saveDiscordSession({
+          accessToken: result.access_token,
+          user: result.user,
+          ...(result.refresh_token
+            ? {refreshToken: result.refresh_token}
+            : {}),
+          ...(typeof result.expires_in === 'number'
+            ? {expiresAt: expiresAtFromExpiresIn(result.expires_in)}
+            : {}),
+        });
         setDiscordSession(result.access_token, result.user);
         refreshUser(result.user);
         trackAuthSuccessOnce();

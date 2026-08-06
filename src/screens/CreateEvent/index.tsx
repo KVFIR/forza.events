@@ -189,12 +189,12 @@ export function CreateEvent() {
     return <PageLoading label={t('loading.event')} className="pb-10 pt-5" />;
   }
 
-  if (isConfigured && !isSignedIn && !authInitializing && (!isStandalone || editId)) {
+  if (isConfigured && !isSignedIn && !authInitializing) {
     return (
       <SignInRequiredState
         description={t('auth.signInCreate')}
-        busy={authRetrying}
-        onRetry={() => void retryDiscordAuth()}
+        busy={!isStandalone ? authRetrying : false}
+        onRetry={!isStandalone ? () => void retryDiscordAuth() : undefined}
         className="pb-10 pt-5"
       />
     );

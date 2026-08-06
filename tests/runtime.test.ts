@@ -27,16 +27,16 @@ describe('runtime browser web hosts', () => {
     expect(isBrowserWebHost()).toBe(true);
     expect(supportsBrowserOAuth()).toBe(true);
     expect(shouldShowDiscordOnlyGate()).toBe(false);
-    expect(shouldRequireBrowserSignIn()).toBe(true);
+    expect(shouldRequireBrowserSignIn()).toBe(false);
   });
 
-  it('requires browser sign-in on localhost and forza.events', () => {
+  it('does not hard-gate browser sign-in on localhost or forza.events', () => {
     stubLocation('localhost');
     expect(isBrowserWebHost()).toBe(true);
-    expect(shouldRequireBrowserSignIn()).toBe(true);
+    expect(shouldRequireBrowserSignIn()).toBe(false);
 
     stubLocation('forza.events');
-    expect(shouldRequireBrowserSignIn()).toBe(true);
+    expect(shouldRequireBrowserSignIn()).toBe(false);
   });
 
   it('shows Discord-only gate on unsupported standalone hosts', () => {
@@ -51,13 +51,18 @@ describe('runtime browser web hosts', () => {
     expect(isBrowserWebHost()).toBe(true);
   });
 
-  it('allows only auth callback and legal paths without sign-in', () => {
+  it('allows guest showcase, auth callback, and legal paths without sign-in', () => {
     stubLocation('forza.events');
     expect(isPublicBrowserPath('/auth/callback')).toBe(true);
     expect(isPublicBrowserPath('/terms')).toBe(true);
     expect(isPublicBrowserPath('/privacy')).toBe(true);
-    expect(isPublicBrowserPath('/')).toBe(false);
-    expect(isPublicBrowserPath('/event/abc-123')).toBe(false);
-    expect(isPublicBrowserPath('/event/abc-123/results')).toBe(false);
+    expect(isPublicBrowserPath('/')).toBe(true);
+    expect(isPublicBrowserPath('/leaderboard')).toBe(true);
+    expect(isPublicBrowserPath('/bot-installed')).toBe(true);
+    expect(isPublicBrowserPath('/event/abc-123')).toBe(true);
+    expect(isPublicBrowserPath('/event/abc-123/results')).toBe(true);
+    expect(isPublicBrowserPath('/create')).toBe(false);
+    expect(isPublicBrowserPath('/profile')).toBe(false);
+    expect(isPublicBrowserPath('/my-events')).toBe(false);
   });
 });

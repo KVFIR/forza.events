@@ -213,7 +213,13 @@ export function isEventSuccessfullyCompleted(event: ForzaEvent): boolean {
   return event.lifecycle === 'completed';
 }
 
+/** Road/dirt keep standings; cruises are social — no race results. */
+export function eventSupportsRaceResults(event: Pick<ForzaEvent, 'type'>): boolean {
+  return event.type !== 'cruise';
+}
+
 export function shouldShowEventResults(event: ForzaEvent): boolean {
+  if (!eventSupportsRaceResults(event)) return false;
   if (event.lifecycle === 'cancelled') return false;
   if (event.lifecycle === 'completed') return true;
   return eventHasStarted(event) && !isEventFinalized(event);
@@ -230,9 +236,14 @@ export function canLeaveRegistration(event: ForzaEvent): boolean {
   return isRegistrationOpen(event);
 }
 
-/** Public browse feed — published events until completed/cancelled/archived (incl. after start). */
+/**
+ * Public browse feed — published open/live/checkin plus successfully completed.
+ * Cancelled/archived stay out (noise for guests when the catalog is small).
+ */
 export function isBrowseFeedEvent(event: ForzaEvent): boolean {
-  return isPublishedToDiscord(event) && !isEventFinalized(event);
+  if (!isPublishedToDiscord(event)) return false;
+  if (event.lifecycle === 'cancelled' || event.lifecycle === 'archived') return false;
+  return true;
 }
 
 /** True once publish-event has posted the Discord announcement embed. */
@@ -271,6 +282,19 @@ export function canCancelEvent(event: ForzaEvent, user: AppUser): boolean {
 
 export function canSubmitEventResults(event: ForzaEvent, user: AppUser): boolean {
   return (
+    eventSupportsRaceResults(event) &&
+    event.hostDiscordId === user.discordId &&
+    event.lifecycle !== 'draft' &&
+    event.lifecycle !== 'cancelled' &&
+    event.lifecycle !== 'completed' &&
+    eventHasStarted(event)
+  );
+}
+
+/** Cruise: host marks the meetup finished without standings. */
+export function canCompleteEventWithoutResults(event: ForzaEvent, user: AppUser): boolean {
+  return (
+    !eventSupportsRaceResults(event) &&
     event.hostDiscordId === user.discordId &&
     event.lifecycle !== 'draft' &&
     event.lifecycle !== 'cancelled' &&

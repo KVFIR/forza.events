@@ -11,10 +11,12 @@ type Props = {
   waitlistConfirmOpen: boolean;
   onWaitlistConfirm: () => void;
   onWaitlistDismiss: () => void;
-  confirmAction: 'cancel' | null;
+  confirmAction: 'cancel' | 'complete' | null;
   cancelling: boolean;
+  completing: boolean;
   onConfirmDismiss: () => void;
   onCancelConfirm: () => void;
+  onCompleteConfirm: () => void;
 };
 
 export function EventDetailDialogs({
@@ -28,8 +30,10 @@ export function EventDetailDialogs({
   onWaitlistDismiss,
   confirmAction,
   cancelling,
+  completing,
   onConfirmDismiss,
   onCancelConfirm,
+  onCompleteConfirm,
 }: Props) {
   const {t} = useTranslation();
 
@@ -62,6 +66,16 @@ export function EventDetailDialogs({
         busy={cancelling}
         onCancel={onConfirmDismiss}
         onConfirm={onCancelConfirm}
+      />
+
+      <ConfirmDialog
+        open={confirmAction === 'complete'}
+        title={t('eventDetail.markFinishedTitle')}
+        description={t('eventDetail.markFinishedDesc')}
+        confirmLabel={t('eventDetail.markFinished')}
+        busy={completing}
+        onCancel={onConfirmDismiss}
+        onConfirm={onCompleteConfirm}
       />
     </>
   );

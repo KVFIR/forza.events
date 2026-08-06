@@ -1,7 +1,9 @@
 import {describe, expect, it} from 'vitest';
 import {
+  canCompleteEventWithoutResults,
   canLeaveRegistration,
   canRetryEventRatings,
+  canSubmitEventResults,
   eventHasStarted,
   isBrowseFeedEvent,
   isRegistrationOpen,
@@ -55,7 +57,7 @@ describe('isBrowseFeedEvent', () => {
     expect(isBrowseFeedEvent(event({...published}))).toBe(true);
   });
 
-  it('includes live; excludes completed and cancelled', () => {
+  it('includes live and completed; excludes cancelled and archived', () => {
     expect(
       isBrowseFeedEvent(
         event({
@@ -75,7 +77,7 @@ describe('isBrowseFeedEvent', () => {
           startsAt: new Date(Date.now() - 3_600_000).toISOString(),
         }),
       ),
-    ).toBe(false);
+    ).toBe(true);
     expect(
       isBrowseFeedEvent(
         event({
@@ -83,6 +85,16 @@ describe('isBrowseFeedEvent', () => {
           lifecycle: 'cancelled',
           status: 'ended',
           startsAt: new Date(Date.now() + 3_600_000).toISOString(),
+        }),
+      ),
+    ).toBe(false);
+    expect(
+      isBrowseFeedEvent(
+        event({
+          ...published,
+          lifecycle: 'archived',
+          status: 'ended',
+          startsAt: new Date(Date.now() - 3_600_000).toISOString(),
         }),
       ),
     ).toBe(false);
@@ -210,6 +222,54 @@ describe('shouldShowEventResults', () => {
         }),
       ),
     ).toBe(false);
+  });
+
+  it('hides for cruise events even after start', () => {
+    expect(
+      shouldShowEventResults(
+        event({
+          type: 'cruise',
+          lifecycle: 'open',
+          status: 'live',
+          startsAt: new Date(Date.now() - 60_000).toISOString(),
+        }),
+      ),
+    ).toBe(false);
+  });
+});
+
+describe('canSubmitEventResults / canCompleteEventWithoutResults', () => {
+  const host: AppUser = {
+    discordId: 'h1',
+    username: 'host',
+    xboxGamertag: 'Host',
+    eventsJoined: 0,
+    eventsHosted: 0,
+    attendanceRate: 0,
+    noShows: 0,
+    hostRatingAvg: 0,
+  };
+
+  it('allows race results for road after start', () => {
+    const e = event({
+      type: 'road',
+      lifecycle: 'open',
+      status: 'live',
+      startsAt: new Date(Date.now() - 60_000).toISOString(),
+    });
+    expect(canSubmitEventResults(e, host)).toBe(true);
+    expect(canCompleteEventWithoutResults(e, host)).toBe(false);
+  });
+
+  it('blocks race results for cruise and offers mark finished', () => {
+    const e = event({
+      type: 'cruise',
+      lifecycle: 'open',
+      status: 'live',
+      startsAt: new Date(Date.now() - 60_000).toISOString(),
+    });
+    expect(canSubmitEventResults(e, host)).toBe(false);
+    expect(canCompleteEventWithoutResults(e, host)).toBe(true);
   });
 });
 

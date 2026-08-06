@@ -1,6 +1,6 @@
 import {useState} from 'react';
 import {useTranslation} from 'react-i18next';
-import {cancelEvent, isApiConfigured, retryEventRatings} from '../../lib/api';
+import {cancelEvent, isApiConfigured, retryEventRatings, submitEventResults} from '../../lib/api';
 import {track} from '../../lib/analytics';
 import {fetchEventById} from '../../lib/events';
 import type {ForzaEvent} from '../../lib/types';
@@ -16,8 +16,9 @@ export function useEventDetailHostActions(input: {
   const {event, setEvent, discordToken, getAccessToken, isSignedIn, bumpRefresh} = input;
   const {t} = useTranslation();
   const [cancelling, setCancelling] = useState(false);
+  const [completing, setCompleting] = useState(false);
   const [retryingRatings, setRetryingRatings] = useState(false);
-  const [confirmAction, setConfirmAction] = useState<'cancel' | null>(null);
+  const [confirmAction, setConfirmAction] = useState<'cancel' | 'complete' | null>(null);
   const [actionError, setActionError] = useState<string | null>(null);
 
   async function handleCancelEvent() {
@@ -43,6 +44,32 @@ export function useEventDetailHostActions(input: {
       setActionError(err instanceof Error ? err.message : t('eventDetail.cancelFailed'));
     } finally {
       setCancelling(false);
+    }
+  }
+
+  async function handleCompleteWithoutResults() {
+    if (!event) return;
+    const token = getAccessToken();
+    if (!isSignedIn || !token) {
+      setActionError(t('auth.signInRequired'));
+      return;
+    }
+    setCompleting(true);
+    setActionError(null);
+    try {
+      if (!isApiConfigured()) {
+        setActionError(t('browse.errorNotConfiguredDesc'));
+        return;
+      }
+      await submitEventResults(token, event.id, []);
+      track('submit_results', {outcome: 'success', event_id: event.id, meta: {cruise: true}});
+      bumpRefresh();
+      const next = await fetchEventById(event.id, {discordToken});
+      setEvent(next);
+    } catch (err) {
+      setActionError(err instanceof Error ? err.message : t('eventDetail.completeFailed'));
+    } finally {
+      setCompleting(false);
     }
   }
 
@@ -78,11 +105,13 @@ export function useEventDetailHostActions(input: {
 
   return {
     cancelling,
+    completing,
     retryingRatings,
     confirmAction,
     setConfirmAction,
     actionError,
     handleCancelEvent,
+    handleCompleteWithoutResults,
     handleRetryRatings,
   };
 }

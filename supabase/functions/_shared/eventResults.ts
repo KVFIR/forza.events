@@ -1,5 +1,7 @@
 /** Keep in sync with src/lib/eventResults.ts */
 
+export type ResultsRankingMode = 'per_group' | 'overall';
+
 export type ResultPlacementInput = {
   discordId: string;
   groupIndex?: number;
@@ -15,8 +17,36 @@ export type ResultSubmitRow = {
   group_index: number;
 };
 
-/** Finishers get positions 1..N **within each group**; DNF/DNS rows have no position. */
-export function buildResultSubmitRows(placements: ResultPlacementInput[]): ResultSubmitRow[] {
+/**
+ * Build submit rows from ordered placements.
+ * - `per_group` (default): positions restart at 1 within each convoy.
+ * - `overall`: one global 1..N across all convoys (group_index still from roster).
+ */
+export function buildResultSubmitRows(
+  placements: ResultPlacementInput[],
+  mode: ResultsRankingMode = 'per_group',
+): ResultSubmitRow[] {
+  if (mode === 'overall') {
+    const finishers = placements.filter((p) => !p.dnf && !p.dns);
+    const nonFinishers = placements.filter((p) => p.dnf || p.dns);
+    return [
+      ...finishers.map((p, index) => ({
+        discord_id: p.discordId,
+        position: index + 1,
+        dnf: false,
+        dns: false,
+        group_index: p.groupIndex ?? 1,
+      })),
+      ...nonFinishers.map((p) => ({
+        discord_id: p.discordId,
+        position: null,
+        dnf: p.dnf,
+        dns: p.dns,
+        group_index: p.groupIndex ?? 1,
+      })),
+    ];
+  }
+
   const byGroup = new Map<number, ResultPlacementInput[]>();
   for (const p of placements) {
     const g = p.groupIndex ?? 1;

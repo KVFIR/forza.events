@@ -167,6 +167,8 @@ export function EventTrackList({
                     className="flex cursor-pointer items-center gap-2 px-3 py-2.5 transition-colors hover:bg-white/[0.03]"
                     onClick={() => toggleCollapsed(id)}
                     onKeyDown={(e) => {
+                      // Nested name input: Space/Enter must type, not collapse the card.
+                      if (e.target !== e.currentTarget) return;
                       if (e.key === 'Enter' || e.key === ' ') {
                         e.preventDefault();
                         toggleCollapsed(id);
@@ -186,6 +188,7 @@ export function EventTrackList({
                           type="text"
                           value={track.name}
                           onClick={(e) => e.stopPropagation()}
+                          onKeyDown={(e) => e.stopPropagation()}
                           onChange={(e) => updateAt(index, {name: e.target.value})}
                           placeholder={t('create.trackNamePlaceholder')}
                           maxLength={TRACK_NAME_MAX}

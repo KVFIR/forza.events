@@ -3,7 +3,7 @@ import type {LegalDocument} from './types';
 /** English privacy policy — authoritative for Discord verification and compliance. */
 export const privacyPolicyEn: LegalDocument = {
   title: 'Privacy Policy',
-  lastUpdated: '2026-07-14',
+  lastUpdated: '2026-08-06',
   intro:
     'This Privacy Policy describes how FORZA.EVENTS ("we", "us", "our") collects, uses, stores, and shares information when you use our Discord Application, embedded Activity, and related services (collectively, the "Service"). The Service helps Forza Horizon community members discover, create, join, and run racing events through Discord.',
   sections: [
@@ -27,7 +27,7 @@ export const privacyPolicyEn: LegalDocument = {
       blocks: [
         {
           type: 'p',
-          text: 'This policy applies to the Service when you use it inside Discord (including through the App Launcher, voice, DMs, or links from event embeds) and when you use our website at forza.events (or localhost during development) in a standard web browser after Discord sign-in, as well as public pages such as this policy and our Terms of Service.',
+          text: 'This policy applies to the Service when you use it inside Discord (including through the App Launcher, voice, DMs, or links from event embeds) and when you use our website at forza.events (or localhost during development) in a standard web browser — including guest browse of public event pages and Discord sign-in for account features — as well as public pages such as this policy and our Terms of Service.',
         },
         {
           type: 'p',

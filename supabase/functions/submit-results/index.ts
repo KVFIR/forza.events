@@ -89,7 +89,7 @@ serve(async (req) => {
     const supabase = adminClient();
     const {data: event} = await supabase
       .from('events')
-      .select('host_discord_id, starts_at, status, is_ranked, rating_applied')
+      .select('host_discord_id, starts_at, status, is_ranked, rating_applied, type')
       .eq('id', eventId)
       .single();
 
@@ -136,8 +136,43 @@ serve(async (req) => {
       return appErrorResponse(req, 409, API_ERROR_CODES.RESULTS_ALREADY_SUBMITTED);
     }
 
+    // Cruise: mark finished with no standings (social meetup, not a race).
+    if ((!Array.isArray(results) || results.length === 0) && event.type === 'cruise') {
+      const {data: completed, error: completeErr} = await supabase
+        .from('events')
+        .update({status: 'completed'})
+        .eq('id', eventId)
+        .eq('host_discord_id', discordUser.id)
+        .not('status', 'in', '(completed,cancelled,archived,draft)')
+        .select('id')
+        .maybeSingle();
+      if (completeErr) return internalErrorResponse(req, completeErr);
+      if (!completed) {
+        return appErrorResponse(req, 409, API_ERROR_CODES.RESULTS_ALREADY_SUBMITTED);
+      }
+      const embedSync = await syncPublishedEmbedByEventId(supabase, eventId);
+      if (!embedSync.ok) {
+        console.error(
+          JSON.stringify({
+            msg: 'Cruise completed but Discord embed sync failed',
+            eventId,
+            status: embedSync.status,
+          }),
+        );
+      }
+      return jsonResponse(
+        {ok: true, embed_synced: embedSync.ok, rating_deltas: [], rating_applied: true},
+        200,
+        req,
+      );
+    }
+
     if (!Array.isArray(results) || results.length === 0) {
       return jsonResponse({error: 'Add at least one result'}, 400, req);
+    }
+
+    if (event.type === 'cruise') {
+      return jsonResponse({error: 'Cruise events do not use race results'}, 400, req);
     }
 
     const {data: participants} = await supabase

@@ -31,6 +31,20 @@ describe('buildResultSubmitRows', () => {
       {discord_id: 'd', position: null, dnf: true, dns: false, group_index: 2},
     ]);
   });
+
+  it('assigns global positions in overall mode', () => {
+    const rows = buildResultSubmitRows(
+      [
+        {discordId: 'a', groupIndex: 1, dnf: false, dns: false},
+        {discordId: 'b', groupIndex: 2, dnf: false, dns: false},
+      ],
+      'overall',
+    );
+    expect(rows).toEqual([
+      {discord_id: 'a', position: 1, dnf: false, dns: false, group_index: 1},
+      {discord_id: 'b', position: 2, dnf: false, dns: false, group_index: 2},
+    ]);
+  });
 });
 
 describe('sortEventResultRows', () => {

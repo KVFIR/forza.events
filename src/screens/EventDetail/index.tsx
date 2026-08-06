@@ -1,9 +1,10 @@
 import {useCallback, useEffect, useMemo} from 'react';
 import {useTranslation} from 'react-i18next';
 import {ArrowLeft} from 'lucide-react';
-import {useLocation, useParams, Navigate} from 'react-router-dom';
+import {useLocation, useParams} from 'react-router-dom';
 import {ContentReveal} from '../../components/ui/ContentReveal';
 import {PageLoading} from '../../components/ui/PageLoading';
+import {SignInRequiredState} from '../../components/SignInRequiredState';
 import {TextLink} from '../../components/ui/TextButton';
 import {useJoinedEvents} from '../../context/JoinedEventsContext';
 import {useRichPresenceOverride} from '../../context/DiscordRichPresenceContext';
@@ -16,8 +17,7 @@ import {useEventDetailResults} from '../../hooks/useEventDetailResults';
 import {usePageMetaOverride} from '../../context/PageMetaContext';
 import type {EventDetailLocationState} from '../../lib/navigationState';
 import {buildEventPageMeta} from '../../lib/eventPageMeta';
-import {eventDetailBackTo, saveAuthReturnTo} from '../../lib/returnTo';
-import {supportsBrowserOAuth} from '../../lib/runtime';
+import {eventDetailBackTo} from '../../lib/returnTo';
 import {useResolveEventDisplayStatus} from '../../hooks/useResolveEventDisplayStatus';
 import {useEventDetailParticipation} from '../../hooks/useEventDetailParticipation';
 import {useDebouncedCallback} from '../../hooks/useDebouncedCallback';
@@ -52,6 +52,7 @@ export function EventDetail() {
     isStandalone,
     loading: authInitializing,
     authRetrying,
+    retryDiscordAuth,
   } = useAuth();
   const discordToken = getAccessToken();
 
@@ -184,16 +185,23 @@ export function EventDetail() {
   usePageMetaOverride(pageMeta);
 
   if (!event) {
-    const awaitingAuthForPossibleDraft =
-      !isStandalone && authInitializing && !routeEvent;
+    // Drafts need a Discord token; wait on every surface so browser session restore
+    // does not flash not-found before host-draft fetch.
+    const awaitingAuthForPossibleDraft = authInitializing && !routeEvent;
     if (loading || awaitingAuthForPossibleDraft) {
       return <PageLoading label={t('loading.event')} className="pb-10 pt-4" />;
     }
 
-    // Localhost: event may be a host draft — send guests to sign-in instead of "not found".
-    if (!isSignedIn && !authInitializing && supportsBrowserOAuth()) {
-      saveAuthReturnTo(`${location.pathname}${location.search}`);
-      return <Navigate to="/sign-in" replace />;
+    // Missing row while logged out is often a host draft — soft-prompt instead of not-found.
+    if (!isSignedIn) {
+      return (
+        <SignInRequiredState
+          description={t('auth.signInEventMaybeDraft')}
+          busy={!isStandalone ? authRetrying : false}
+          onRetry={!isStandalone ? () => void retryDiscordAuth() : undefined}
+          className="pb-10 pt-4"
+        />
+      );
     }
 
     return (
@@ -233,10 +241,12 @@ export function EventDetail() {
         view={view}
         detailFrom={routeState?.from}
         cancelling={hostActions.cancelling}
+        completing={hostActions.completing}
         retryingRatings={hostActions.retryingRatings}
         authRetrying={authRetrying}
         leaving={leaving}
         onConfirmCancel={() => hostActions.setConfirmAction('cancel')}
+        onConfirmComplete={() => hostActions.setConfirmAction('complete')}
         onRetryRatings={() => void hostActions.handleRetryRatings()}
         onJoinClick={() => void handleJoinClick()}
       />
@@ -259,10 +269,15 @@ export function EventDetail() {
         onWaitlistDismiss={dismissWaitlistConfirm}
         confirmAction={hostActions.confirmAction}
         cancelling={hostActions.cancelling}
+        completing={hostActions.completing}
         onConfirmDismiss={() => hostActions.setConfirmAction(null)}
         onCancelConfirm={() => {
           hostActions.setConfirmAction(null);
           void hostActions.handleCancelEvent();
+        }}
+        onCompleteConfirm={() => {
+          hostActions.setConfirmAction(null);
+          void hostActions.handleCompleteWithoutResults();
         }}
       />
 

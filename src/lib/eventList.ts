@@ -25,23 +25,31 @@ export function eventFillRatio(event: ForzaEvent): number {
   return event.currentPlayers / event.maxPlayers;
 }
 
-export function sortEvents(events: ForzaEvent[], sort: EventSortKey): ForzaEvent[] {
-  const list = [...events];
+function compareBySortKey(a: ForzaEvent, b: ForzaEvent, sort: EventSortKey): number {
   switch (sort) {
     case 'created':
-      return list.sort(
-        (a, b) =>
-          new Date(b.createdAt ?? b.startsAt).getTime() -
-          new Date(a.createdAt ?? a.startsAt).getTime(),
+      return (
+        new Date(b.createdAt ?? b.startsAt).getTime() -
+        new Date(a.createdAt ?? a.startsAt).getTime()
       );
     case 'fill':
-      return list.sort((a, b) => eventFillRatio(a) - eventFillRatio(b));
+      return eventFillRatio(a) - eventFillRatio(b);
     case 'event_date':
-    default:
-      return list.sort(
-        (a, b) => new Date(a.startsAt).getTime() - new Date(b.startsAt).getTime(),
-      );
+      return new Date(a.startsAt).getTime() - new Date(b.startsAt).getTime();
+    default: {
+      const _exhaustive: never = sort;
+      void _exhaustive;
+      return 0;
+    }
   }
+}
+
+/** Active first, then completed — so past races fill Browse without burying upcoming. */
+export function sortEvents(events: ForzaEvent[], sort: EventSortKey): ForzaEvent[] {
+  const active = events.filter((e) => e.lifecycle !== 'completed');
+  const completed = events.filter((e) => e.lifecycle === 'completed');
+  const byKey = (a: ForzaEvent, b: ForzaEvent) => compareBySortKey(a, b, sort);
+  return [...active.sort(byKey), ...completed.sort(byKey)];
 }
 
 export function filterByEventType(events: ForzaEvent[], type: EventType | 'all'): ForzaEvent[] {

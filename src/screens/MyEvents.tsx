@@ -4,12 +4,13 @@ import {useNavigate} from 'react-router-dom';
 import {Alert} from '../components/ui/Alert';
 import {EventList} from '../components/EventList';
 import {EventListFilterChips} from '../components/EventListFilterChips';
+import {SignInRequiredState} from '../components/SignInRequiredState';
 import {useAuth} from '../context/AuthContext';
-import {useJoinedEvents} from '../context/JoinedEventsContext';
 import {useMyEventsCatalog} from '../hooks/useMyEventsCatalog';
 import {useParticipantResults} from '../hooks/useParticipantResults';
 import {EVENT_GAMES, eventGameLabel, type ForzaGame} from '../lib/eventGames';
 import {filterByGame, type MyEventsScope} from '../lib/eventList';
+import {userHadActiveSeat} from '../lib/events';
 import {isEventSuccessfullyCompleted} from '../lib/eventSpec';
 
 type GameFilter = ForzaGame | 'all';
@@ -38,8 +39,14 @@ export function MyEvents() {
 
   const [scope, setScope] = useState<MyEventsScope>('all');
   const [gameFilter, setGameFilter] = useState<GameFilter>('all');
-  const {isSignedIn, loading: authLoading, user} = useAuth();
-  const {isJoined} = useJoinedEvents();
+  const {
+    isSignedIn,
+    loading: authLoading,
+    user,
+    isStandalone,
+    authRetrying,
+    retryDiscordAuth,
+  } = useAuth();
   const {filtered: scoped, isLoading, isRefreshing, loadError, draftsLoadError, refetch} =
     useMyEventsCatalog(scope);
 
@@ -51,9 +58,9 @@ export function MyEvents() {
   const placementEventIds = useMemo(
     () =>
       filtered
-        .filter((e) => isEventSuccessfullyCompleted(e) && isJoined(e))
+        .filter((e) => isEventSuccessfullyCompleted(e) && userHadActiveSeat(e, user))
         .map((e) => e.id),
-    [filtered, isJoined],
+    [filtered, user],
   );
   const participantResults = useParticipantResults(placementEventIds, user.discordId);
 
@@ -64,23 +71,28 @@ export function MyEvents() {
     setGameFilter('all');
   };
 
-  const emptyTitle =
-    !authLoading && !isSignedIn
-      ? t('myEvents.unableToLoad')
-      : loadError
-        ? t('myEvents.loadError')
-        : scope === 'joined'
-          ? t('myEvents.noJoined')
-          : t('myEvents.emptyList');
+  if (!authLoading && !isSignedIn) {
+    return (
+      <SignInRequiredState
+        description={t('auth.signInMyEvents')}
+        busy={!isStandalone ? authRetrying : false}
+        onRetry={!isStandalone ? () => void retryDiscordAuth() : undefined}
+        className="pb-8 pt-5"
+      />
+    );
+  }
 
-  const emptyDescription =
-    !authLoading && !isSignedIn
-      ? t('auth.openInDiscordMyEvents')
-      : loadError
-        ? t('myEvents.loadErrorDesc')
-        : scope !== 'joined' && isSignedIn
-          ? t('myEvents.emptyHostedDesc')
-          : undefined;
+  const emptyTitle = loadError
+    ? t('myEvents.loadError')
+    : scope === 'joined'
+      ? t('myEvents.noJoined')
+      : t('myEvents.emptyList');
+
+  const emptyDescription = loadError
+    ? t('myEvents.loadErrorDesc')
+    : scope !== 'joined' && isSignedIn
+      ? t('myEvents.emptyHostedDesc')
+      : undefined;
 
   const draftsHint =
     !loadError && draftsLoadError === 'unauthorized'

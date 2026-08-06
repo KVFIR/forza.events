@@ -10,6 +10,7 @@ import {groupRosterWouldChange} from '../../lib/groupRoster';
 import {
   canAddGroup,
   canCancelEvent,
+  canCompleteEventWithoutResults,
   canEditEvent,
   canLeaveRegistration,
   canRetryEventRatings,
@@ -40,6 +41,7 @@ export type EventDetailViewModel = {
   isHost: boolean;
   isDraft: boolean;
   canEnterResults: boolean;
+  canCompleteWithoutResults: boolean;
   canRetryRatings: boolean;
   canEdit: boolean;
   canCancel: boolean;
@@ -117,6 +119,7 @@ export function buildEventDetailViewModel(input: {
   const isHost = ev.hostDiscordId === user.discordId;
   const isDraft = !isPublishedToDiscord(event);
   const canEnterResults = canSubmitEventResults(event, user);
+  const canCompleteWithoutResults = canCompleteEventWithoutResults(event, user);
   const canRetryRatings = canRetryEventRatings(event, user);
   const canEdit = canEditEvent(event, user);
   const canCancel = canCancelEvent(event, user);
@@ -127,7 +130,8 @@ export function buildEventDetailViewModel(input: {
   const started = eventHasStarted(ev);
   const full = displayStatus === 'full';
   const showDraftActions = isDraft && isHost;
-  const showHostPostStartActions = isHost && started && (canEnterResults || canCancel);
+  const showHostPostStartActions =
+    isHost && started && (canEnterResults || canCompleteWithoutResults || canCancel);
   const when = formatEventStart(ev.startsAt);
   const capacity = totalCapacity(ev);
   const fillPct = Math.round((ev.currentPlayers / capacity) * 100);
@@ -203,6 +207,7 @@ export function buildEventDetailViewModel(input: {
     isHost,
     isDraft,
     canEnterResults,
+    canCompleteWithoutResults,
     canRetryRatings,
     canEdit,
     canCancel,

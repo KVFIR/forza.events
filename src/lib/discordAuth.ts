@@ -1,7 +1,12 @@
 import type {AppUser} from './types';
 
 const TOKEN_KEY = 'forza_discord_access_token';
+const REFRESH_KEY = 'forza_discord_refresh_token';
+const EXPIRES_KEY = 'forza_discord_token_expires_at';
 const USER_KEY = 'forza_discord_user';
+
+/** Refresh access token this long before Discord `expires_in` elapses. */
+export const DISCORD_TOKEN_REFRESH_SKEW_MS = 60 * 60 * 1000;
 
 function readPersistentItem(key: string): string | null {
   try {
@@ -77,27 +82,88 @@ export function buildDiscordAuthorizeUrl(state = ''): string {
 export type DiscordSession = {
   accessToken: string;
   user: AppUser;
+  refreshToken?: string;
+  /** Epoch ms when `accessToken` expires (from Discord `expires_in`). */
+  expiresAt?: number;
 };
+
+export type DiscordSessionWrite = {
+  accessToken: string;
+  user: AppUser;
+  /** Omit to keep the previously stored refresh token. Pass null to clear. */
+  refreshToken?: string | null;
+  /** Omit to keep the previously stored expiry. Pass null to clear. */
+  expiresAt?: number | null;
+};
+
+export function expiresAtFromExpiresIn(
+  expiresInSeconds: number,
+  nowMs = Date.now(),
+): number {
+  return nowMs + Math.max(0, expiresInSeconds) * 1000;
+}
+
+export function sessionNeedsRefresh(
+  session: Pick<DiscordSession, 'refreshToken' | 'expiresAt'>,
+  nowMs = Date.now(),
+  skewMs = DISCORD_TOKEN_REFRESH_SKEW_MS,
+): boolean {
+  if (!session.refreshToken) return false;
+  // Unknown expiry (partial legacy row) → refresh rather than wait for a 401.
+  if (session.expiresAt == null) return true;
+  return session.expiresAt - nowMs <= skewMs;
+}
 
 export function loadDiscordSession(): DiscordSession | null {
   const accessToken = readPersistentItem(TOKEN_KEY);
   const rawUser = readPersistentItem(USER_KEY);
   if (!accessToken || !rawUser) return null;
   try {
-    return {accessToken, user: JSON.parse(rawUser) as AppUser};
+    const refreshToken = readPersistentItem(REFRESH_KEY) ?? undefined;
+    const expiresRaw = readPersistentItem(EXPIRES_KEY);
+    const expiresAt = expiresRaw ? Number(expiresRaw) : undefined;
+    return {
+      accessToken,
+      user: JSON.parse(rawUser) as AppUser,
+      ...(refreshToken ? {refreshToken} : {}),
+      ...(expiresAt != null && Number.isFinite(expiresAt) ? {expiresAt} : {}),
+    };
   } catch {
     clearDiscordSession();
     return null;
   }
 }
 
-export function saveDiscordSession(session: DiscordSession): void {
+/**
+ * Persist browser Discord session. When `refreshToken` / `expiresAt` are omitted,
+ * previous values are kept so profile patches do not wipe the refresh chain.
+ */
+export function saveDiscordSession(session: DiscordSessionWrite): void {
+  const prev = loadDiscordSession();
   writePersistentItem(TOKEN_KEY, session.accessToken);
   writePersistentItem(USER_KEY, JSON.stringify(session.user));
+
+  const refreshToken =
+    session.refreshToken !== undefined ? session.refreshToken : prev?.refreshToken;
+  if (refreshToken) {
+    writePersistentItem(REFRESH_KEY, refreshToken);
+  } else {
+    removePersistentItem(REFRESH_KEY);
+  }
+
+  const expiresAt =
+    session.expiresAt !== undefined ? session.expiresAt : prev?.expiresAt;
+  if (expiresAt != null && Number.isFinite(expiresAt)) {
+    writePersistentItem(EXPIRES_KEY, String(expiresAt));
+  } else {
+    removePersistentItem(EXPIRES_KEY);
+  }
 }
 
 export function clearDiscordSession(): void {
   removePersistentItem(TOKEN_KEY);
+  removePersistentItem(REFRESH_KEY);
+  removePersistentItem(EXPIRES_KEY);
   removePersistentItem(USER_KEY);
 }
 

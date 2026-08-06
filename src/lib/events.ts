@@ -25,10 +25,12 @@ import type {
 export {
   canCancelEvent,
   canCancelPublishedEvent,
+  canCompleteEventWithoutResults,
   canDeleteDraft,
   canEditEvent,
   canSubmitEventResults,
   eventHasStarted,
+  eventSupportsRaceResults,
   isEventFinalized,
   isEventSuccessfullyCompleted,
   isPublishedEvent,
@@ -373,7 +375,10 @@ export function mapDbEvent(row: DbEventRow): ForzaEvent {
 }
 
 export type FetchEventsOptions = {
-  /** Include completed/cancelled/archived (for My Events & Profile). Default false for Browse. */
+  /**
+   * Include cancelled/archived (and all terminal rows) for My Events & Profile.
+   * Browse already includes successfully completed without this flag.
+   */
   includeCompleted?: boolean;
 };
 
@@ -504,8 +509,8 @@ export async function fetchPublishedEventsResult(
       .order('starts_at', {ascending: true});
 
     if (!includeCompleted) {
-      // Match browse-events: keep started/live visible until terminal status.
-      query = query.in('status', ['open', 'checkin', 'live']);
+      // Match browse-events: active + completed (not cancelled/archived).
+      query = query.in('status', ['open', 'checkin', 'live', 'completed']);
     }
 
     return query;
@@ -691,6 +696,13 @@ export function userIsJoined(event: ForzaEvent, user: AppUser): boolean {
 /** True when the user has any participant row (any source) — used for Join/Leave button visibility. */
 export function userHasParticipantRow(event: ForzaEvent, user: AppUser): boolean {
   return event.participants.some((p) => p.discordId === user.discordId);
+}
+
+/** Active roster seat including host (Profile participated / results). Unlike `userIsJoined`, host counts. */
+export function userHadActiveSeat(event: ForzaEvent, user: AppUser): boolean {
+  if (!user.discordId) return false;
+  const row = event.participants.find((p) => p.discordId === user.discordId);
+  return row !== undefined && !row.waitlisted;
 }
 
 export {EVENT_PLAYER_SLOTS};

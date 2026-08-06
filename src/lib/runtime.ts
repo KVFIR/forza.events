@@ -36,15 +36,18 @@ export function supportsBrowserOAuth(): boolean {
 }
 
 /**
- * Browser tab on a supported web host — require Discord sign-in before the app.
- * Discord Activity iframe uses embedded SDK auth instead.
+ * Hard full-screen sign-in gate is off: guests may browse on web hosts.
+ * Soft-prompt at Join / Create / Profile / My Events (`SignInRequiredState` / Join CTA).
+ * Discord Activity iframe still uses embedded SDK auth.
  */
 export function shouldRequireBrowserSignIn(): boolean {
-  if (!isStandaloneBrowser()) return false;
-  return isBrowserWebHost();
+  return false;
 }
 
-/** Paths reachable without signing in in a browser tab (OAuth return + legal only). */
+/**
+ * Guest-readable paths on browser web hosts (showcase + OAuth return + legal).
+ * Create / Profile / My Events soft-gate in-screen; `/sign-in` is handled in App.
+ */
 export function isPublicBrowserPath(pathname?: string): boolean {
   if (isPublicLegalBrowserPath(pathname)) return true;
   if (typeof pathname !== 'string') {
@@ -53,6 +56,10 @@ export function isPublicBrowserPath(pathname?: string): boolean {
   }
   const normalized = pathname.replace(/\/+$/, '') || '/';
   if (normalized === '/auth/callback') return true;
+  if (normalized === '/' || normalized === '/leaderboard') return true;
+  if (normalized === '/bot-installed') return true;
+  // /event/:id and /event/:id/results (host entry redirects non-hosts)
+  if (/^\/event\/[^/]+(?:\/results)?$/.test(normalized)) return true;
   return false;
 }
 

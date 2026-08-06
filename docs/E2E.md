@@ -55,6 +55,7 @@ Manual QA matrix aligned with current code behavior (not an abstract checklist).
 
 - [ ] Cold start: authorize → `token-exchange` → `authenticate` → profile shows Discord name/avatar.
 - [ ] Browse does **not** wait for auth (`usePublishedEvents` without token).
+- [ ] **Browser web (`forza.events` / localhost):** guest can open Browse, Event Detail, Ladder without OAuth; Join / Create / Profile / My Events soft-prompt Discord sign-in.
 - [ ] My Events / Create / Join work after auth.
 - [ ] Re-enter Activity in same session — `prompt: 'none'`, minimal prompts.
 
@@ -89,7 +90,7 @@ Manual QA matrix aligned with current code behavior (not an abstract checklist).
 
 ### Load and filters
 
-- [ ] Browse feed = published events until terminal (`isBrowseFeedEvent`: not draft, not completed/cancelled/archived; started/live stay visible).
+- [ ] Browse feed = published open/live + successfully completed (`isBrowseFeedEvent`: not draft, not cancelled/archived; completed stay visible below active).
 - [ ] Type filter: `road`, `dirt`, `cruise` + **All**.
 - [ ] Game filter: **All** (default) / FH5 / FH6; cards show short game label; Detail shows full game badge.
 - [ ] Ranked filter: **All** / **Ranked**; ranked cards/detail show Ranked badge.
@@ -102,7 +103,7 @@ Manual QA matrix aligned with current code behavior (not an abstract checklist).
 
 - [ ] B join/leave → A’s Browse count updates without refresh.
 - [ ] Host publishes → A sees new event (INSERT/refetch).
-- [ ] Cancelled/completed → removed from browse feed.
+- [ ] Cancelled → removed from browse feed; completed stays (below active).
 
 ### Errors
 
@@ -208,13 +209,14 @@ Manual QA matrix aligned with current code behavior (not an abstract checklist).
 
 ### Published, after start
 
-- [ ] **Event Detail:** **Submit results** + **Cancel event** (separate buttons; Detail uses `canCancelEvent` = after start only).
+- [ ] **Event Detail:** **Submit results** (road/dirt) or **Mark as finished** (cruise) + **Cancel event** (separate buttons; Detail uses `canCancelEvent` = after start only).
+- [ ] Cruise: no results section / no submit screen; **Mark as finished** completes without standings.
 - [ ] Field edit closed (`canEditEvent` false).
 - [ ] Cancel → confirm → `cancelled`; grey embed; button disabled.
 - [ ] Submit results → immutable (repeat → 409).
 - [ ] Submit results → **Event Detail** shows table immediately (navigation seed); no false “pending host” flash.
 - [ ] **Ranked:** after submit on ranked event (≥4 finishers/DNF **per group**, no DNS-only), results show **Δ rating**; Profile rating + `/leaderboard` update; `events.rating_applied` stays true (no double apply). Multi-group: each group rated separately. ELO write is atomic (`033` RPC); if apply fails after results save, host can re-POST `submit-results` with `{event_id}` only to retry rating.
-- [ ] **Multi-group:** submit screen shows a block per group; positions restart at 1 per group; standings table renders per-group headers. Waitlisted racers are excluded from results.
+- [ ] **Multi-group:** submit screen offers **By convoy** (per-group order, positions restart) or **Overall** (one global order); tap drivers in finish order; standings table can toggle the same views. Waitlisted racers are excluded from results.
 - [ ] **Event Detail** results load error → **Try again** recovers table (Activity proxy / offline).
 - [ ] **Submit results** screen: if existing-results check fails, warning + **Try again** still allows submit; successful recheck redirects when rows exist.
 

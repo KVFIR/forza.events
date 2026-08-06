@@ -6,7 +6,6 @@ import {ProfileLegalLinks} from '../components/legal/ProfileLegalLinks';
 import {TextButton, TextLink} from '../components/ui/TextButton';
 import {ConfirmDialog} from '../components/ui/ConfirmDialog';
 import {useAuth} from '../context/AuthContext';
-import {useJoinedEvents} from '../context/JoinedEventsContext';
 import {isApiConfigured, updateProfile} from '../lib/api';
 import {GamertagModal} from '../components/GamertagModal';
 import {EventCard} from '../components/EventCard';
@@ -14,9 +13,10 @@ import {useMyEventsCatalog} from '../hooks/useMyEventsCatalog';
 import {useNotificationDmReachability} from '../hooks/useNotificationDmReachability';
 import {useParticipantResults} from '../hooks/useParticipantResults';
 import {isEventSuccessfullyCompleted} from '../lib/eventSpec';
+import {userHadActiveSeat} from '../lib/events';
 import {formatDiscordHandle} from '../lib/discordHandle';
 import {hasGamertag} from '../lib/gamertag';
-import {isLocalDevHost} from '../lib/runtime';
+import {supportsBrowserOAuth} from '../lib/runtime';
 import {isStandaloneBrowser, getGuildContext} from '../lib/discord';
 import {buildBotInstallUrl, openBotInstallUrl} from '../lib/discordInstall';
 import {saveDiscordSession} from '../lib/discordAuth';
@@ -45,7 +45,6 @@ export function Profile() {
     authRetrying,
     retryDiscordAuth,
   } = useAuth();
-  const {isJoined} = useJoinedEvents();
   const {allMine, active, isLoading, loadError, refetch} = useMyEventsCatalog('all');
   const [editGamertag, setEditGamertag] = useState(false);
   const [saving, setSaving] = useState(false);
@@ -69,8 +68,9 @@ export function Profile() {
     dmReachable,
   );
   const needsGamertag = !hasGamertag(user.xboxGamertag);
+  // Include host when they held an active roster seat (convoy leader / raced).
   const participatedCompleted = allMine.filter(
-    (e) => isJoined(e) && isEventSuccessfullyCompleted(e),
+    (e) => userHadActiveSeat(e, user) && isEventSuccessfullyCompleted(e),
   );
   const recentCompleted = participatedCompleted.slice(0, 3);
   const placementIds = participatedCompleted.map((e) => e.id);
@@ -159,7 +159,7 @@ export function Profile() {
   }, [isSignedIn, token, recheckDmReachability]);
 
   if (isConfigured && !isSignedIn && !authInitializing) {
-    if (isStandalone && isLocalDevHost()) {
+    if (isStandalone && supportsBrowserOAuth()) {
       return (
         <SignInRequiredState
           description={t('auth.signInProfile')}

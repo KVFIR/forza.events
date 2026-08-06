@@ -55,16 +55,34 @@ export function avatarUrl(user: DiscordUser, size = 128): string {
   }
 }
 
-export async function exchangeCode(
-  code: string,
-  redirectUriOverride?: string | null,
-): Promise<{
+export type DiscordOAuthTokens = {
   access_token: string;
   token_type: string;
   expires_in: number;
   refresh_token?: string;
   scope: string;
-}> {
+};
+
+async function discordOAuthTokenRequest(
+  body: URLSearchParams,
+  failureLabel: string,
+): Promise<DiscordOAuthTokens> {
+  const res = await fetch('https://discord.com/api/oauth2/token', {
+    method: 'POST',
+    headers: {'Content-Type': 'application/x-www-form-urlencoded'},
+    body,
+  });
+  if (!res.ok) {
+    const text = await res.text();
+    throw new Error(`${failureLabel}: ${res.status} ${text}`);
+  }
+  return res.json();
+}
+
+export async function exchangeCode(
+  code: string,
+  redirectUriOverride?: string | null,
+): Promise<DiscordOAuthTokens> {
   const clientId = Deno.env.get('DISCORD_CLIENT_ID')!;
   const clientSecret = Deno.env.get('DISCORD_CLIENT_SECRET')!;
   const redirectUri = redirectUriOverride?.trim() || Deno.env.get('DISCORD_REDIRECT_URI') || '';
@@ -80,16 +98,22 @@ export async function exchangeCode(
   }
   body.set('redirect_uri', redirectUri);
 
-  const res = await fetch('https://discord.com/api/oauth2/token', {
-    method: 'POST',
-    headers: {'Content-Type': 'application/x-www-form-urlencoded'},
-    body,
+  return discordOAuthTokenRequest(body, 'Discord token exchange failed');
+}
+
+/** Refresh a user OAuth access token (`grant_type=refresh_token`). Discord may rotate `refresh_token`. */
+export async function refreshAccessToken(refreshToken: string): Promise<DiscordOAuthTokens> {
+  const clientId = Deno.env.get('DISCORD_CLIENT_ID')!;
+  const clientSecret = Deno.env.get('DISCORD_CLIENT_SECRET')!;
+
+  const body = new URLSearchParams({
+    client_id: clientId,
+    client_secret: clientSecret,
+    grant_type: 'refresh_token',
+    refresh_token: refreshToken,
   });
-  if (!res.ok) {
-    const text = await res.text();
-    throw new Error(`Discord token exchange failed: ${res.status} ${text}`);
-  }
-  return res.json();
+
+  return discordOAuthTokenRequest(body, 'Discord token refresh failed');
 }
 
 export async function fetchDiscordUser(accessToken: string): Promise<DiscordUser> {

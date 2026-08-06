@@ -1,14 +1,19 @@
 import {describe, expect, it} from 'vitest';
-import {buildScopedMyEventsList, resolveMyEventsCatalogLoading} from '../src/lib/eventList';
+import {
+  buildScopedMyEventsList,
+  resolveMyEventsCatalogLoading,
+  sortEvents,
+} from '../src/lib/eventList';
 import type {ForzaEvent} from '../src/lib/types';
 
-function event(id: string, title: string): ForzaEvent {
+function event(id: string, title: string, overrides: Partial<ForzaEvent> = {}): ForzaEvent {
   return {
     id,
     title,
     type: 'road',
     game: 'fh6',
     status: 'draft',
+    lifecycle: 'draft',
     startsAt: '2026-08-01T12:00:00.000Z',
     hostDiscordId: 'host',
     guildId: 'g1',
@@ -20,6 +25,7 @@ function event(id: string, title: string): ForzaEvent {
     allowedCars: [],
     participants: [],
     tracks: [],
+    ...overrides,
   } as ForzaEvent;
 }
 
@@ -44,6 +50,25 @@ describe('buildScopedMyEventsList', () => {
       published: [published],
     });
     expect(list.map((e) => e.id)).toEqual(['pub-1']);
+  });
+});
+
+describe('sortEvents', () => {
+  it('keeps completed after active when sorting by event date', () => {
+    const completed = event('done', 'Done', {
+      lifecycle: 'completed',
+      status: 'ended',
+      startsAt: '2026-07-01T12:00:00.000Z',
+    });
+    const upcoming = event('soon', 'Soon', {
+      lifecycle: 'open',
+      status: 'open',
+      startsAt: '2026-09-01T12:00:00.000Z',
+    });
+    expect(sortEvents([completed, upcoming], 'event_date').map((e) => e.id)).toEqual([
+      'soon',
+      'done',
+    ]);
   });
 });
 
