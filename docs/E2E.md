@@ -148,6 +148,7 @@ Manual QA matrix aligned with current code behavior (not an abstract checklist).
 | Host, before `starts_at` | **Change leader** in each group header (`n/12` row); not in published **Edit** |
 | Single group | Same **Change leader** control (no “Group 1” label required) |
 | Pick another driver in the same full group | Swap leader ↔ driver; roster count unchanged |
+| Already-registered driver (any Discord server) | Succeeds; `CONVOY_LEADER_NOT_IN_GUILD` only for new guild-search picks |
 | Full group, `self_join` leader | Waitlist / guild outsiders hidden; guild search disabled; only in-group drivers in quick-pick |
 | Full group, `host_assigned` leader removed | Free seat → waitlist or guild pick allowed; embed + `convoy_leader_changed` DMs to group racers |
 | New leader assigned | Leader gets **convoy leader assigned** DM (transactional); racers get **convoy leader changed** |
@@ -250,6 +251,7 @@ Manual QA matrix aligned with current code behavior (not an abstract checklist).
 | **Cars** | `anything_goes` optional PI cap + optional extra restrictions (empty → no car-rules UI/embed field); `restricted_list` ≥1 catalog car; tuning restrictions on embed |
 | **Tracks** | 0, 1, many; dedupe on save |
 | **Target** | Guild list = user guilds ∩ bot installed; empty → Add bot → Refresh |
+| **Target** | Manage Server **role** on a server the user does not own still lists it (not owner-only) |
 | **Target** | Guild change → channels load after guild list; channel re-validate |
 | **Target** | Rate limit / transient API error → saved channel **not** cleared on re-open `?edit=` |
 | **Target** | No Manage Server → forbidden with clear copy |

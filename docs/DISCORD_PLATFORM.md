@@ -96,7 +96,7 @@ No CORS — Discord server-to-server only.
 | Validate selection | `validate-channel` |
 | Post embed | `publish-event` |
 
-Host must be guild member with **Manage Server** (or Administrator). Server re-validates channel permissions (bot View Channel, Send Messages, Embed Links).
+Host must be guild member with **Manage Server** (or Administrator), including via a role on a server they do not own. OAuth guild `permissions` can miss owner bits and 2FA-stripped Manage Server — `list-guilds` checks `owner` then recovers remaining bot guilds serially via member+roles; `requireManageGuildAccess` does the same for the selected guild (Discord 429 stays 429, not 403). Server re-validates channel permissions (bot View Channel, Send Messages, Embed Links).
 
 **Bot install:** `scope=bot`, **Requires OAuth2 Code Grant = OFF**. User-install alone does not create a publish target.
 
