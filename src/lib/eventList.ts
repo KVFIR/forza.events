@@ -44,12 +44,14 @@ function compareBySortKey(a: ForzaEvent, b: ForzaEvent, sort: EventSortKey): num
   }
 }
 
-/** Active first, then completed — so past races fill Browse without burying upcoming. */
+/** Active first (asc/desc per key); completed uses the same key, except event_date (newest past first). */
 export function sortEvents(events: ForzaEvent[], sort: EventSortKey): ForzaEvent[] {
   const active = events.filter((e) => e.lifecycle !== 'completed');
   const completed = events.filter((e) => e.lifecycle === 'completed');
   const byKey = (a: ForzaEvent, b: ForzaEvent) => compareBySortKey(a, b, sort);
-  return [...active.sort(byKey), ...completed.sort(byKey)];
+  const completedOrder =
+    sort === 'event_date' ? (a: ForzaEvent, b: ForzaEvent) => byKey(b, a) : byKey;
+  return [...active.sort(byKey), ...completed.sort(completedOrder)];
 }
 
 export function filterByEventType(events: ForzaEvent[], type: EventType | 'all'): ForzaEvent[] {

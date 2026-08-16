@@ -114,6 +114,7 @@ async function invoke<T>(
 
   if (!res.ok) {
     // Stale Discord access token → try refresh_token once, then clear session.
+    let sessionExpired = false;
     if (res.status === 401 && discordAccessToken && !options?.didRefresh) {
       try {
         const {refreshStoredDiscordSession} = await import('./discordSessionRefresh');
@@ -124,6 +125,7 @@ async function invoke<T>(
           return invoke(name, body, refreshed.accessToken, {didRefresh: true});
         }
         clearDiscordSession();
+        sessionExpired = true;
         if (typeof window !== 'undefined') {
           window.dispatchEvent(new Event(SESSION_EXPIRED_EVENT));
         }
@@ -132,12 +134,16 @@ async function invoke<T>(
       }
     } else if (res.status === 401 && discordAccessToken && options?.didRefresh) {
       clearDiscordSession();
+      sessionExpired = true;
       if (typeof window !== 'undefined') {
         window.dispatchEvent(new Event(SESSION_EXPIRED_EVENT));
       }
     }
     const apiError = apiErrorFromPayload(data, res.status);
-    trackApiError(name, apiError, {eventId, meta: errorMeta});
+    // session_expired is the canonical signal; skip N×api_error from parallel Profile mounts.
+    if (!sessionExpired) {
+      trackApiError(name, apiError, {eventId, meta: errorMeta});
+    }
     throw apiError;
   }
   return data as T;

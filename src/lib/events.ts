@@ -1,4 +1,5 @@
 import {invokeBrowseEvents, invokeHostDrafts} from './api';
+import {isUnauthorizedApiError} from './apiErrors';
 import {getSupabase, isSupabaseConfigured} from './supabase';
 import {isDiscordActivityFrame, shouldUseDirectSupabaseReads} from './supabaseEnv';
 import {searchCarCatalog} from './carCatalog';
@@ -460,9 +461,9 @@ export async function fetchHostDraftEvents(
     const events = (data ?? []).map((row) => mapDbEventWithRelations(row as DbEventRow));
     return {events, error: null};
   } catch (err) {
-    const message = err instanceof Error ? err.message : String(err);
     console.error('host-drafts', err);
-    if (/unauthorized/i.test(message)) {
+    // i18n maps UNAUTHORIZED → "Sign in to continue." / RU copy — never match message text.
+    if (isUnauthorizedApiError(err)) {
       return {events: [], error: 'unauthorized'};
     }
 

@@ -2,8 +2,7 @@ import {useTranslation} from 'react-i18next';
 import {UserAvatar} from '../../../components/UserAvatar';
 import {TextButton} from '../../../components/ui/TextButton';
 import {openExternalUrl} from '../../../lib/discordInstall';
-import {isPlaceholderGuildName} from '../../../lib/guildDisplay';
-import {resolveOrganiserLabel} from '../../../lib/organiser';
+import {resolveOrganiserGuildName, resolveOrganiserLabel} from '../../../lib/organiser';
 import type {ForzaEvent} from '../../../lib/types';
 
 type Props = {
@@ -13,8 +12,7 @@ type Props = {
 export function EventDetailOrganiser({event}: Props) {
   const {t} = useTranslation();
   const label = resolveOrganiserLabel(event);
-  const hasGuild =
-    Boolean(event.guildName?.trim()) && !isPlaceholderGuildName(event.guildName);
+  const hasGuild = Boolean(resolveOrganiserGuildName(event));
   const showGuildBrand = hasGuild && (event.guildIconUrl || event.guildInviteUrl);
 
   if (!showGuildBrand) {

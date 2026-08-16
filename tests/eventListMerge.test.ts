@@ -70,6 +70,36 @@ describe('sortEvents', () => {
       'done',
     ]);
   });
+
+  it('orders completed newest-first by event date', () => {
+    const older = event('old', 'Old', {
+      lifecycle: 'completed',
+      status: 'ended',
+      startsAt: '2026-06-01T12:00:00.000Z',
+    });
+    const newer = event('new', 'New', {
+      lifecycle: 'completed',
+      status: 'ended',
+      startsAt: '2026-07-01T12:00:00.000Z',
+    });
+    expect(sortEvents([older, newer], 'event_date').map((e) => e.id)).toEqual(['new', 'old']);
+  });
+
+  it('keeps created newest-first for completed events', () => {
+    const older = event('old', 'Old', {
+      lifecycle: 'completed',
+      status: 'ended',
+      createdAt: '2026-06-01T12:00:00.000Z',
+      startsAt: '2026-06-01T12:00:00.000Z',
+    });
+    const newer = event('new', 'New', {
+      lifecycle: 'completed',
+      status: 'ended',
+      createdAt: '2026-07-01T12:00:00.000Z',
+      startsAt: '2026-07-01T12:00:00.000Z',
+    });
+    expect(sortEvents([older, newer], 'created').map((e) => e.id)).toEqual(['new', 'old']);
+  });
 });
 
 describe('resolveMyEventsCatalogLoading', () => {

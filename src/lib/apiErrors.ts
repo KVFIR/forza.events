@@ -94,6 +94,14 @@ export function isTransientApiErrorCode(code: string | undefined): boolean {
   return Boolean(code && TRANSIENT_API_ERROR_CODES.has(code));
 }
 
+/** Auth rejection — match on code/status, never on i18n message text. */
+export function isUnauthorizedApiError(error: unknown): boolean {
+  return (
+    error instanceof ApiRequestError &&
+    (error.status === 401 || error.code === API_ERROR_CODES.UNAUTHORIZED)
+  );
+}
+
 /** Clear channel only when the user picked a new invalid channel — not when re-checking a saved one. */
 export function shouldClearChannelAfterValidationFailure(
   source: 'revalidate' | 'user',

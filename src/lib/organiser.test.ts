@@ -1,5 +1,5 @@
 import {describe, expect, it} from 'vitest';
-import {resolveOrganiserLabel} from './organiser';
+import {resolveOrganiserGuildName, resolveOrganiserLabel} from './organiser';
 
 describe('resolveOrganiserLabel', () => {
   it('uses guild name when set', () => {
@@ -10,5 +10,12 @@ describe('resolveOrganiserLabel', () => {
 
   it('formats host Discord handle when guild is absent', () => {
     expect(resolveOrganiserLabel({hostUsername: 'host_user'})).toBe('@host_user');
+  });
+
+  it('ignores placeholder guild names', () => {
+    expect(resolveOrganiserGuildName({guildName: 'Server', hostUsername: 'host_user'})).toBeNull();
+    expect(resolveOrganiserLabel({guildName: 'Server', hostUsername: 'host_user'})).toBe(
+      '@host_user',
+    );
   });
 });

@@ -7,10 +7,16 @@ export type OrganiserSource = {
   hostUsername: string;
 };
 
+/** Guild name when it carries the attribution; null when we fall back to the host. */
+export function resolveOrganiserGuildName(event: OrganiserSource): string | null {
+  const guild = event.guildName?.trim();
+  return guild && !isPlaceholderGuildName(guild) ? guild : null;
+}
+
 /** Discord server name when set; otherwise the creating host's Discord handle. */
 export function resolveOrganiserLabel(event: OrganiserSource): string {
-  const guild = event.guildName?.trim();
-  if (guild && !isPlaceholderGuildName(guild)) return guild;
+  const guild = resolveOrganiserGuildName(event);
+  if (guild) return guild;
   const host = formatDiscordHandle(event.hostUsername);
   return host || 'Host';
 }
