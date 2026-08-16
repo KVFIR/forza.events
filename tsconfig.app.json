@@ -16,9 +16,8 @@
     "noUnusedParameters": true,
     "noFallthroughCasesInSwitch": true,
     "resolveJsonModule": true,
-    "baseUrl": ".",
     "paths": {
-      "@edge/*": ["supabase/functions/_shared/*"]
+      "@edge/*": ["./supabase/functions/_shared/*"]
     }
   },
   "include": ["src"]
