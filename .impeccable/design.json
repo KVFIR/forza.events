@@ -1,0 +1,158 @@
+{
+  "schemaVersion": 2,
+  "generatedAt": "2026-08-16T11:30:00Z",
+  "title": "Design System: FORZA.EVENTS",
+  "extensions": {
+    "colorMeta": {
+      "base": {
+        "role": "neutral",
+        "displayName": "Base",
+        "canonical": "#06060e",
+        "tonalRamp": ["#06060e", "#0b0d1c", "#0e1020", "#12152a", "#1a1d33", "#2a2f4a"]
+      },
+      "surface": {
+        "role": "neutral",
+        "displayName": "Surface",
+        "canonical": "#0b0d1c",
+        "tonalRamp": ["#06060e", "#0b0d1c", "#0e1020", "#12152a"]
+      },
+      "card": {
+        "role": "neutral",
+        "displayName": "Card",
+        "canonical": "#0e1020",
+        "tonalRamp": ["#0b0d1c", "#0e1020", "#12152a"]
+      },
+      "card-hover": {
+        "role": "neutral",
+        "displayName": "Card Hover",
+        "canonical": "#12152a",
+        "tonalRamp": ["#0e1020", "#12152a", "#1a1d33"]
+      },
+      "ink": {
+        "role": "neutral",
+        "displayName": "Ink",
+        "canonical": "#f1f5f9",
+        "tonalRamp": ["#4b5680", "#6b728a", "#94a3b8", "#f1f5f9", "#ffffff"]
+      },
+      "muted": {
+        "role": "neutral",
+        "displayName": "Muted",
+        "canonical": "#4b5680",
+        "tonalRamp": ["#4b5680", "#6b728a", "#94a3b8"]
+      },
+      "muted-light": {
+        "role": "neutral",
+        "displayName": "Muted Light",
+        "canonical": "#6b728a",
+        "tonalRamp": ["#4b5680", "#6b728a", "#94a3b8"]
+      },
+      "accent-purple": {
+        "role": "primary",
+        "displayName": "Accent Purple",
+        "canonical": "#8b5cf6",
+        "tonalRamp": ["#7c3aed", "#8b5cf6", "#a78bfa", "#c4b5fd"]
+      },
+      "accent-purple-light": {
+        "role": "primary",
+        "displayName": "Accent Purple Light",
+        "canonical": "#a78bfa",
+        "tonalRamp": ["#8b5cf6", "#a78bfa", "#c4b5fd"]
+      },
+      "accent-purple-dark": {
+        "role": "primary",
+        "displayName": "Accent Purple Dark",
+        "canonical": "#7c3aed",
+        "tonalRamp": ["#5b21b6", "#7c3aed", "#8b5cf6"]
+      },
+      "accent-cyan": {
+        "role": "secondary",
+        "displayName": "Accent Cyan",
+        "canonical": "#22d3ee",
+        "tonalRamp": ["#0891b2", "#22d3ee", "#67e8f9"]
+      },
+      "accent-orange": {
+        "role": "tertiary",
+        "displayName": "Accent Orange",
+        "canonical": "#f97316",
+        "tonalRamp": ["#c2410c", "#f97316", "#fb923c"]
+      },
+      "accent-green": {
+        "role": "tertiary",
+        "displayName": "Accent Green",
+        "canonical": "#10b981",
+        "tonalRamp": ["#059669", "#10b981", "#34d399"]
+      },
+      "accent-red": {
+        "role": "tertiary",
+        "displayName": "Accent Red",
+        "canonical": "#ef4444",
+        "tonalRamp": ["#b91c1c", "#ef4444", "#f87171"]
+      }
+    },
+    "typographyMeta": {
+      "display": { "displayName": "Display", "purpose": "Event titles." },
+      "headline": { "displayName": "Headline", "purpose": "Card and hero titles." },
+      "title": { "displayName": "Title", "purpose": "Section and modal titles." },
+      "body": { "displayName": "Body", "purpose": "14px Inter body and inputs." },
+      "label": { "displayName": "Label", "purpose": "10px UPPERCASE tracked labels and nav." }
+    },
+    "shadows": [
+      { "name": "glow-purple", "value": "0 0 22px rgba(139,92,246,0.55), 0 0 50px rgba(139,92,246,0.15)", "purpose": "Primary interactive bloom." },
+      { "name": "glow-purple-sm", "value": "0 0 12px rgba(139,92,246,0.4)", "purpose": "Nav/icon emphasis." },
+      { "name": "card-hover", "value": "0 6px 36px rgba(0,0,0,0.7), 0 0 0 1px rgba(139,92,246,0.22)", "purpose": "Event card hover." }
+    ],
+    "motion": [
+      { "name": "glow-pulse", "value": "glowPulse 2.5s ease-in-out infinite alternate", "purpose": "Idle glow pulse." },
+      { "name": "slide-up", "value": "slideUp 0.3s ease-out both", "purpose": "Content entrance." },
+      { "name": "fade-in", "value": "fadeIn 0.22s ease-out both", "purpose": "Element entrance." }
+    ],
+    "breakpoints": [
+      { "name": "sm", "value": "640px", "purpose": "Form text restores to text-sm." },
+      { "name": "lg", "value": "1024px", "purpose": "Left sidebar; top nav hides." }
+    ]
+  },
+  "components": [
+    {
+      "name": "Primary Button",
+      "kind": "button",
+      "refersTo": "button-primary",
+      "description": "Soft glass violet CTA on pages.",
+      "html": "<button class=\"ds-btn-primary\">Join event</button>",
+      "css": ".ds-btn-primary { display: inline-flex; align-items: center; justify-content: center; gap: 8px; border-radius: 8px; padding: 10px 16px; font-size: 14px; font-weight: 600; font-family: Inter, system-ui, sans-serif; border: 1px solid rgba(139,92,246,0.35); background: rgba(139,92,246,0.10); color: #a78bfa; transition: all 0.2s; } .ds-btn-primary:hover { border-color: rgba(139,92,246,0.50); background: rgba(139,92,246,0.15); color: #ffffff; }"
+    },
+    {
+      "name": "Panel / Card Container",
+      "kind": "card",
+      "refersTo": "panel",
+      "description": "Midnight card with white-alpha hairline.",
+      "html": "<div class=\"ds-panel\"><div style=\"padding:20px\">Panel content</div></div>",
+      "css": ".ds-panel { border-radius: 12px; border: 1px solid rgba(255,255,255,0.07); background: #0e1020; }"
+    }
+  ],
+  "narrative": {
+    "northStar": "Neon Pits",
+    "overview": "Shipped Discord Activity look. Midnight navy ground, violet accent, Inter, soft glass panels, and purple glow. Dark-First Console is a discarded experiment.",
+    "keyCharacteristics": [
+      "Ground #06060e with twin radial washes (violet top, cyan corner).",
+      "Accent purple #8b5cf6 for nav, focus, Join, hover glow.",
+      "Inter as the UI face.",
+      "Glass + purple glow on interactive chrome.",
+      "Left sidebar 13.5rem from lg; centered 42rem column."
+    ],
+    "rules": [
+      { "name": "The Violet Voice Rule", "body": "Purple is the interaction color. Green / orange / red / fuchsia stay semantic.", "section": "colors" },
+      { "name": "The Glow-Is-Material Rule", "body": "Soft violet bloom on hover and text-glow on active labels are in-world.", "section": "elevation" },
+      { "name": "The Caps-Label Rule", "body": "Field labels and nav items are 10px UPPERCASE tracked.", "section": "typography" }
+    ],
+    "dos": [
+      "Do keep midnight navy #06060e and violet #8b5cf6 as the structural pair.",
+      "Do ship Inter.",
+      "Do use glass + purple glow on interactive chrome."
+    ],
+    "donts": [
+      "Don't reapply Dark-First Console graphite or syntax-blue.",
+      "Don't flatten .glass or delete glow utilities unless the user asks for a new world.",
+      "Don't invent social proof or metrics PRODUCT.md does not attest."
+    ]
+  }
+}

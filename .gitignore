@@ -35,3 +35,15 @@ deno.lock
 
 # Python
 __pycache__/
+
+# Graphify (generated AST graph)
+graphify-out/
+
+# Impeccable (keep DESIGN.md, PRODUCT.md, .impeccable/config.json, briefs, mocks)
+.impeccable/config.local.json
+.impeccable/hook.cache.json
+.impeccable/hook.pending.json
+.impeccable/questions/
+.impeccable/critique/
+.impeccable/live/*
+!.impeccable/live/config.json
