@@ -25,6 +25,9 @@ import {
 } from '../_shared/publishLock.ts';
 import {rateLimitMutation} from '../_shared/rateLimitPresets.ts';
 import {adminClient} from '../_shared/supabase.ts';
+import {enqueueEventPublished} from '../_shared/notificationTriggers.ts';
+
+declare const EdgeRuntime: {waitUntil: (promise: Promise<unknown>) => void} | undefined;
 
 serve(async (req) => {
   if (req.method === 'OPTIONS') return optionsResponse(req);
@@ -207,23 +210,55 @@ serve(async (req) => {
       return appErrorResponse(req, 500, API_ERROR_CODES.INTERNAL);
     }
 
-    const {data: existingGuild} = await supabase
-      .from('discord_guilds')
-      .select('settings')
-      .eq('guild_id', guild_id)
-      .maybeSingle();
-
-    const inviteUrl = await resolveChannelInviteUrl(channel_id);
-    await supabase.from('discord_guilds').upsert(
-      buildGuildCatalogUpsert(guild_id, resolvedGuildName, publishGuild, {
-        inviteUrl,
-        existingSettings: existingGuild?.settings,
-      }),
-      {onConflict: 'guild_id'},
-    );
-
-    lockedEventId = null;
+    // Finalize already wrote discord_message_id and cleared the lock.
     postedMessageId = null;
+    lockedEventId = null;
+
+    const followup = async () => {
+      await enqueueEventPublished(supabase, {
+        id: event_id,
+        title: event.title,
+        host_discord_id: event.host_discord_id,
+        starts_at: event.starts_at,
+        timezone: event.timezone_hint,
+        type: event.type,
+        game: event.game,
+      });
+      try {
+        const {data: existingGuild} = await supabase
+          .from('discord_guilds')
+          .select('settings')
+          .eq('guild_id', guild_id)
+          .maybeSingle();
+
+        const inviteUrl = await resolveChannelInviteUrl(channel_id);
+        await supabase.from('discord_guilds').upsert(
+          buildGuildCatalogUpsert(guild_id, resolvedGuildName, publishGuild, {
+            inviteUrl,
+            existingSettings: existingGuild?.settings,
+          }),
+          {onConflict: 'guild_id'},
+        );
+      } catch (e) {
+        console.error(JSON.stringify({
+          msg: 'publish guild catalog failed',
+          eventId: event_id,
+          detail: e instanceof Error ? e.message : String(e),
+        }));
+      }
+    };
+    const runFollowup = () => followup().catch((e) => {
+      console.error(JSON.stringify({
+        msg: 'publish post-finalize failed',
+        eventId: event_id,
+        detail: e instanceof Error ? e.message : String(e),
+      }));
+    });
+    if (typeof EdgeRuntime !== 'undefined' && typeof EdgeRuntime.waitUntil === 'function') {
+      EdgeRuntime.waitUntil(runFollowup());
+    } else {
+      void runFollowup();
+    }
 
     return jsonResponse({message_id: msgRes.id, channel_id, guild_id}, 200, req);
   } catch (e) {

@@ -2,6 +2,7 @@ import {describe, expect, it} from 'vitest';
 import {
   eventUpdateRecipients,
   summarizeCarsForNotify,
+  voiceJoinUrlFromEvent,
 } from '../supabase/functions/_shared/notificationTriggers.ts';
 
 describe('summarizeCarsForNotify', () => {
@@ -36,5 +37,41 @@ describe('eventUpdateRecipients', () => {
 
   it('includes waitlist when schedule changes', () => {
     expect(eventUpdateRecipients(roster, true).map((r) => r.discord_id)).toEqual(['a', 'b']);
+  });
+});
+
+describe('voiceJoinUrlFromEvent', () => {
+  it('prefers a stored invite over the channel URL', () => {
+    expect(
+      voiceJoinUrlFromEvent({
+        guild_id: 'g1',
+        voice_channel_id: 'vc1',
+        voice_invite_url: 'https://discord.gg/abc',
+      }),
+    ).toBe('https://discord.gg/abc');
+  });
+
+  it('ignores a non-Discord invite and falls back to the channel URL', () => {
+    expect(
+      voiceJoinUrlFromEvent({
+        guild_id: 'g1',
+        voice_channel_id: 'vc1',
+        voice_invite_url: 'https://example.com/not-discord',
+      }),
+    ).toBe('https://discord.com/channels/g1/vc1');
+  });
+
+  it('falls back to the Discord channel URL', () => {
+    expect(
+      voiceJoinUrlFromEvent({
+        guild_id: 'g1',
+        voice_channel_id: 'vc1',
+        voice_invite_url: null,
+      }),
+    ).toBe('https://discord.com/channels/g1/vc1');
+  });
+
+  it('is undefined when voice is unset', () => {
+    expect(voiceJoinUrlFromEvent({guild_id: 'g1'})).toBeUndefined();
   });
 });

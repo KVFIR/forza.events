@@ -10,5 +10,6 @@ export const GUEST_USER: AppUser = {
   noShows: 0,
   hostRatingAvg: 0,
   dmNotificationsEnabled: true,
+  newEventNotificationsEnabled: false,
   notificationLocale: 'en',
 };

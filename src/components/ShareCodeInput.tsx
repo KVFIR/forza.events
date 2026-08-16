@@ -1,4 +1,8 @@
-import {formatShareCode} from '../lib/shareCode';
+import {
+  formatShareCode,
+  handleShareCodeCopy,
+  handleShareCodeDoubleClick,
+} from '../lib/shareCode';
 import {cn} from '../lib/cn';
 
 type Props = {
@@ -28,6 +32,8 @@ export function ShareCodeInput({
       maxLength={11}
       placeholder={placeholder}
       value={value}
+      onCopy={handleShareCodeCopy}
+      onMouseDown={handleShareCodeDoubleClick}
       onChange={(e) => onChange(formatShareCode(e.target.value))}
       className={cn(
         className,

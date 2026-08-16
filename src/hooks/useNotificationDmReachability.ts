@@ -12,7 +12,10 @@ async function fetchDmReachable(
 }
 
 /** Whether the signed-in user shares a Discord server with the bot (required for DMs). */
-export function useNotificationDmReachability(accessToken: string | null) {
+export function useNotificationDmReachability(
+  accessToken: string | null,
+  eager = true,
+) {
   const [reachable, setReachable] = useState(false);
   const [loading, setLoading] = useState(false);
   const [checked, setChecked] = useState(false);
@@ -54,9 +57,9 @@ export function useNotificationDmReachability(accessToken: string | null) {
   }, [accessToken]);
 
   useEffect(() => {
-    setChecked(false);
+    if (!eager) return;
     void recheck();
-  }, [recheck]);
+  }, [recheck, eager]);
 
   return {reachable, loading, checked, recheck};
 }

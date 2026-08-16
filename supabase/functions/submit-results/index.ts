@@ -1,13 +1,22 @@
 import {serve} from 'https://deno.land/std@0.224.0/http/server.ts';
 import {API_ERROR_CODES} from '../_shared/apiErrorCodes.ts';
-import {appErrorResponse, internalErrorResponse} from '../_shared/apiResponse.ts';
+import {
+  appErrorResponse,
+  internalErrorResponse,
+} from '../_shared/apiResponse.ts';
 import {jsonResponse, optionsResponse} from '../_shared/cors.ts';
 import {applyRankedEventRatings} from '../_shared/applyEventRatings.ts';
 import {syncPublishedEmbedByEventId} from '../_shared/embedSync.ts';
+import {
+  avatarUrl,
+  discordUniqueUsername,
+  fetchDiscordUserById,
+  isUserMemberOfGuild,
+} from '../_shared/discord.ts';
 import {requireDiscordUser} from '../_shared/discordRequestAuth.ts';
+import {ensureUserRowForDiscordId} from '../_shared/discordUserRow.ts';
 import {eventHasStarted} from '../_shared/eventSpec.ts';
 import {validateResultSubmitRow} from '../_shared/eventResults.ts';
-import {allowedResultDiscordIds} from '../_shared/resultsRoster.ts';
 import {responseForRpcError} from '../_shared/rpcErrors.ts';
 import {rateLimitMutation} from '../_shared/rateLimitPresets.ts';
 import {adminClient} from '../_shared/supabase.ts';
@@ -17,6 +26,15 @@ type ResultInput = {
   position: number | null;
   dnf?: boolean;
   dns?: boolean;
+  group_index?: number;
+  gamertag?: string;
+};
+
+type ParticipantRow = {
+  discord_id: string;
+  group_index: number | null;
+  waitlisted: boolean | null;
+  gamertag_snapshot: string | null;
 };
 
 type RatingDeltaJson = {
@@ -61,7 +79,8 @@ async function tryApplyRatings(
       JSON.stringify({
         msg: 'Results saved but rating apply failed',
         eventId,
-        error: ratingErr instanceof Error ? ratingErr.message : String(ratingErr),
+        error:
+          ratingErr instanceof Error ? ratingErr.message : String(ratingErr),
       }),
     );
     return {deltas: [], applied: false};
@@ -70,7 +89,8 @@ async function tryApplyRatings(
 
 serve(async (req) => {
   if (req.method === 'OPTIONS') return optionsResponse(req);
-  if (req.method !== 'POST') return jsonResponse({error: 'Method not allowed'}, 405, req);
+  if (req.method !== 'POST')
+    return jsonResponse({error: 'Method not allowed'}, 405, req);
 
   const auth = await requireDiscordUser(req);
   if (auth instanceof Response) return auth;
@@ -89,7 +109,9 @@ serve(async (req) => {
     const supabase = adminClient();
     const {data: event} = await supabase
       .from('events')
-      .select('host_discord_id, starts_at, status, is_ranked, rating_applied, type')
+      .select(
+        'host_discord_id, starts_at, status, is_ranked, rating_applied, type, guild_id, group_count, max_players',
+      )
       .eq('id', eventId)
       .single();
 
@@ -133,11 +155,18 @@ serve(async (req) => {
     }
 
     if (['completed', 'cancelled', 'archived'].includes(event.status)) {
-      return appErrorResponse(req, 409, API_ERROR_CODES.RESULTS_ALREADY_SUBMITTED);
+      return appErrorResponse(
+        req,
+        409,
+        API_ERROR_CODES.RESULTS_ALREADY_SUBMITTED,
+      );
     }
 
     // Cruise: mark finished with no standings (social meetup, not a race).
-    if ((!Array.isArray(results) || results.length === 0) && event.type === 'cruise') {
+    if (
+      (!Array.isArray(results) || results.length === 0) &&
+      event.type === 'cruise'
+    ) {
       const {data: completed, error: completeErr} = await supabase
         .from('events')
         .update({status: 'completed'})
@@ -148,7 +177,11 @@ serve(async (req) => {
         .maybeSingle();
       if (completeErr) return internalErrorResponse(req, completeErr);
       if (!completed) {
-        return appErrorResponse(req, 409, API_ERROR_CODES.RESULTS_ALREADY_SUBMITTED);
+        return appErrorResponse(
+          req,
+          409,
+          API_ERROR_CODES.RESULTS_ALREADY_SUBMITTED,
+        );
       }
       const embedSync = await syncPublishedEmbedByEventId(supabase, eventId);
       if (!embedSync.ok) {
@@ -161,7 +194,12 @@ serve(async (req) => {
         );
       }
       return jsonResponse(
-        {ok: true, embed_synced: embedSync.ok, rating_deltas: [], rating_applied: true},
+        {
+          ok: true,
+          embed_synced: embedSync.ok,
+          rating_deltas: [],
+          rating_applied: true,
+        },
         200,
         req,
       );
@@ -172,48 +210,166 @@ serve(async (req) => {
     }
 
     if (event.type === 'cruise') {
-      return jsonResponse({error: 'Cruise events do not use race results'}, 400, req);
+      return jsonResponse(
+        {error: 'Cruise events do not use race results'},
+        400,
+        req,
+      );
     }
 
     const {data: participants} = await supabase
       .from('event_participants')
       .select('discord_id, gamertag_snapshot, group_index, waitlisted')
       .eq('event_id', eventId);
-    const allowedIds = allowedResultDiscordIds(participants ?? []);
-    // Positions are unique per group — derive each racer's group from their roster row.
-    const groupById = new Map(
-      (participants ?? []).map((p) => [String(p.discord_id), p.group_index ?? 1]),
+    const byParticipantId = new Map(
+      ((participants ?? []) as ParticipantRow[]).map((p) => [
+        String(p.discord_id),
+        p,
+      ]),
     );
-
+    const groupCount = Number(event.group_count ?? 1);
+    const groupById = new Map<string, number>();
+    const guestIds: string[] = [];
+    const seenIds = new Set<string>();
     const finisherPositionsByGroup = new Map<number, Set<number>>();
+    const parsedMax = Number(event.max_players);
+    const maxPlayers = Number.isFinite(parsedMax) && parsedMax > 0 ? parsedMax : 12;
 
     for (const r of results) {
-      if (!allowedIds.has(String(r.discord_id))) {
-        return appErrorResponse(req, 400, API_ERROR_CODES.RESULTS_PARTICIPANTS_ONLY);
+      const id = String(r.discord_id ?? '').trim();
+      if (!id || seenIds.has(id)) {
+        return jsonResponse({error: 'Duplicate or missing driver'}, 400, req);
       }
+      seenIds.add(id);
+
+      const existing = byParticipantId.get(id);
+      let group: number;
+      if (existing && !existing.waitlisted) {
+        group = Number(existing.group_index ?? 1);
+      } else {
+        group = Number(r.group_index ?? 1);
+        if (!Number.isInteger(group) || group < 1 || group > groupCount) {
+          return appErrorResponse(req, 400, API_ERROR_CODES.BAD_REQUEST);
+        }
+        if (!existing) guestIds.push(id);
+      }
+      groupById.set(id, group);
+
       const rowErr = validateResultSubmitRow(r);
       if (rowErr) return jsonResponse({error: rowErr}, 400, req);
       if (r.position != null) {
-        const group = groupById.get(String(r.discord_id)) ?? 1;
         let seen = finisherPositionsByGroup.get(group);
         if (!seen) {
           seen = new Set<number>();
           finisherPositionsByGroup.set(group, seen);
         }
         if (seen.has(r.position)) {
-          return jsonResponse({error: 'Duplicate finishing position'}, 400, req);
+          return jsonResponse(
+            {error: 'Duplicate finishing position'},
+            400,
+            req,
+          );
         }
         seen.add(r.position);
       }
     }
 
-    const rows = results.map((r) => ({
-      discord_id: r.discord_id,
-      position: r.position,
-      dnf: r.dnf ?? false,
-      dns: r.dns ?? false,
-      group_index: groupById.get(String(r.discord_id)) ?? 1,
-    }));
+    if (guestIds.length > 0) {
+      // ponytail: one extra full lobby of walk-ons; raise if hosts need more.
+      if (guestIds.length > groupCount * maxPlayers) {
+        return appErrorResponse(req, 400, API_ERROR_CODES.BAD_REQUEST);
+      }
+      const guildId = event.guild_id ? String(event.guild_id) : '';
+      if (!guildId) {
+        return appErrorResponse(
+          req,
+          400,
+          API_ERROR_CODES.RESULTS_PARTICIPANTS_ONLY,
+        );
+      }
+      for (const id of guestIds) {
+        try {
+          const inGuild = await isUserMemberOfGuild(guildId, id);
+          if (!inGuild) {
+            return appErrorResponse(
+              req,
+              400,
+              API_ERROR_CODES.RESULTS_NOT_IN_GUILD,
+            );
+          }
+        } catch (e) {
+          const detail = String(e);
+          console.error(
+            JSON.stringify({
+              msg: 'submit-results guild check failed',
+              detail,
+            }),
+          );
+          if (detail.toLowerCase().includes('rate limit')) {
+            return appErrorResponse(
+              req,
+              429,
+              API_ERROR_CODES.TOO_MANY_REQUESTS,
+            );
+          }
+          if (detail.includes('Guild member lookup failed: 403')) {
+            return appErrorResponse(
+              req,
+              503,
+              API_ERROR_CODES.GUILD_MEMBER_SEARCH_DISABLED,
+            );
+          }
+          return internalErrorResponse(req, e);
+        }
+      }
+      for (const id of guestIds) {
+        try {
+          const user = await fetchDiscordUserById(id);
+          await ensureUserRowForDiscordId(supabase, id, {
+            username: discordUniqueUsername(user),
+            avatar_url: avatarUrl(user),
+          });
+        } catch (e) {
+          const detail = String(e);
+          console.error(
+            JSON.stringify({
+              msg: 'submit-results guest profile failed',
+              detail,
+            }),
+          );
+          if (detail.includes('Discord user not found')) {
+            return appErrorResponse(
+              req,
+              400,
+              API_ERROR_CODES.RESULTS_NOT_IN_GUILD,
+            );
+          }
+          if (detail.toLowerCase().includes('rate limit')) {
+            return appErrorResponse(
+              req,
+              429,
+              API_ERROR_CODES.TOO_MANY_REQUESTS,
+            );
+          }
+          return internalErrorResponse(req, e);
+        }
+      }
+    }
+
+    const rows = results.map((r) => {
+      const id = String(r.discord_id).trim();
+      const existing = byParticipantId.get(id);
+      const group = groupById.get(id) ?? 1;
+      const tag = String(r.gamertag ?? '').trim();
+      return {
+        discord_id: id,
+        position: r.position,
+        dnf: r.dnf ?? false,
+        dns: r.dns ?? false,
+        group_index: group,
+        ...((!existing || existing.waitlisted) && tag ? {gamertag: tag} : {}),
+      };
+    });
 
     const {error: rpcError} = await supabase.rpc('submit_event_results', {
       p_event_id: eventId,

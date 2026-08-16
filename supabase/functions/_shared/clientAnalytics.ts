@@ -25,6 +25,8 @@ export const ALLOWED_CLIENT_EVENT_NAMES = new Set<string>([
   'bot_install_click',
   'notification_dm_enable',
   'notification_dm_disable',
+  'notification_new_event_enable',
+  'notification_new_event_disable',
   'empty_guild_list',
   'api_error',
 ]);

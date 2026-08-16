@@ -4,7 +4,7 @@ import {LanguageToggle} from '../components/LanguageToggle';
 import {NotificationBellToggle} from '../components/NotificationBellToggle';
 import {ProfileLegalLinks} from '../components/legal/ProfileLegalLinks';
 import {TextButton, TextLink} from '../components/ui/TextButton';
-import {ConfirmDialog} from '../components/ui/ConfirmDialog';
+import {NotificationDmSetupDialog} from '../components/NotificationDmSetupDialog';
 import {useAuth} from '../context/AuthContext';
 import {isApiConfigured, updateProfile} from '../lib/api';
 import {GamertagModal} from '../components/GamertagModal';
@@ -17,8 +17,7 @@ import {userHadActiveSeat} from '../lib/events';
 import {formatDiscordHandle} from '../lib/discordHandle';
 import {hasGamertag} from '../lib/gamertag';
 import {supportsBrowserOAuth} from '../lib/runtime';
-import {isStandaloneBrowser, getGuildContext} from '../lib/discord';
-import {buildBotInstallUrl, openBotInstallUrl} from '../lib/discordInstall';
+import {isStandaloneBrowser} from '../lib/discord';
 import {saveDiscordSession} from '../lib/discordAuth';
 import {SignInRequiredState} from '../components/SignInRequiredState';
 import {ContentReveal} from '../components/ui/ContentReveal';
@@ -30,7 +29,10 @@ import {UserAvatar} from '../components/UserAvatar';
 import type {AppLanguage} from '../i18n';
 import {track} from '../lib/analytics';
 import {cn} from '../lib/cn';
-import {notificationToggleActive} from '../lib/notificationDm';
+import {
+  notificationToggleActive,
+  type NotificationDmSetupSource,
+} from '../lib/notificationDm';
 
 export function Profile() {
   const {t, i18n} = useTranslation();
@@ -53,8 +55,10 @@ export function Profile() {
   const localeSyncedRef = useRef(false);
   const dmReachableRef = useRef(false);
   const dmRecheckingRef = useRef(false);
+  const botInstallSourceRef = useRef<NotificationDmSetupSource>('notification_dm_enable');
   const token = getAccessToken();
   const notificationsPrefEnabled = user.dmNotificationsEnabled !== false;
+  const newEventPrefEnabled = user.newEventNotificationsEnabled === true;
   const {
     reachable: dmReachable,
     loading: dmReachabilityLoading,
@@ -64,6 +68,11 @@ export function Profile() {
   dmReachableRef.current = dmReachable;
   const notificationsActive = notificationToggleActive(
     notificationsPrefEnabled,
+    dmReachabilityChecked,
+    dmReachable,
+  );
+  const newEventAlertsActive = notificationToggleActive(
+    newEventPrefEnabled,
     dmReachabilityChecked,
     dmReachable,
   );
@@ -79,15 +88,23 @@ export function Profile() {
     (e) => e.hostDiscordId === user.discordId && isEventSuccessfullyCompleted(e),
   ).length;
   const participatedCount = participatedCompleted.length;
+  const notificationsBusy = savingNotifications || (dmReachabilityLoading && !dmReachabilityChecked);
 
   const syncProfilePrefs = useCallback(async (
-    updates: {dm_notifications_enabled?: boolean; notification_locale?: AppLanguage},
+    updates: {
+      dm_notifications_enabled?: boolean;
+      new_event_notifications_enabled?: boolean;
+      notification_locale?: AppLanguage;
+    },
   ) => {
     if (!token || !isApiConfigured()) {
       refreshUser({
         ...user,
         ...(updates.dm_notifications_enabled !== undefined
           ? {dmNotificationsEnabled: updates.dm_notifications_enabled}
+          : {}),
+        ...(updates.new_event_notifications_enabled !== undefined
+          ? {newEventNotificationsEnabled: updates.new_event_notifications_enabled}
           : {}),
         ...(updates.notification_locale !== undefined
           ? {notificationLocale: updates.notification_locale}
@@ -107,10 +124,37 @@ export function Profile() {
       } else if (updates.dm_notifications_enabled === false) {
         track('notification_dm_disable', {outcome: 'success'});
       }
+      if (updates.new_event_notifications_enabled === true) {
+        track('notification_new_event_enable', {outcome: 'success'});
+      } else if (updates.new_event_notifications_enabled === false) {
+        track('notification_new_event_disable', {outcome: 'success'});
+      }
     } finally {
       setSavingNotifications(false);
     }
   }, [token, user, refreshUser]);
+
+  const enablePrefIfReachable = useCallback(async (
+    source: NotificationDmSetupSource,
+    alreadyOn: boolean,
+    enable: () => Promise<void>,
+  ) => {
+    setSavingNotifications(true);
+    try {
+      const ok =
+        dmReachabilityChecked && dmReachable
+          ? true
+          : await recheckDmReachability({fresh: true});
+      if (!ok) {
+        botInstallSourceRef.current = source;
+        setDmEnableBlockedOpen(true);
+        return;
+      }
+      if (!alreadyOn) await enable();
+    } finally {
+      setSavingNotifications(false);
+    }
+  }, [dmReachabilityChecked, dmReachable, recheckDmReachability]);
 
   useEffect(() => {
     if (!isSignedIn || !token || !isApiConfigured()) return;
@@ -249,34 +293,40 @@ export function Profile() {
           </div>
         </div>
         {isSignedIn ? (
-          <div className="relative border-t border-white/[0.06] px-5 py-3">
+          <div className="relative space-y-3 border-t border-white/[0.06] px-5 py-3">
+            <NotificationBellToggle
+              enabled={newEventAlertsActive}
+              disabled={notificationsBusy}
+              label={t('notifications.newEventsProfileLabel')}
+              switchOnLabel={t('notifications.newEventsToggleOn')}
+              switchOffLabel={t('notifications.newEventsToggleOff')}
+              onChange={(next) => {
+                if (savingNotifications) return;
+                if (!next) {
+                  void syncProfilePrefs({new_event_notifications_enabled: false});
+                  return;
+                }
+                void enablePrefIfReachable(
+                  'notification_new_event_enable',
+                  newEventPrefEnabled,
+                  () => syncProfilePrefs({new_event_notifications_enabled: true}),
+                );
+              }}
+            />
             <NotificationBellToggle
               enabled={notificationsActive}
-              disabled={savingNotifications || (dmReachabilityLoading && !dmReachabilityChecked)}
+              disabled={notificationsBusy}
               onChange={(next) => {
                 if (savingNotifications) return;
                 if (!next) {
                   void syncProfilePrefs({dm_notifications_enabled: false});
                   return;
                 }
-                void (async () => {
-                  setSavingNotifications(true);
-                  try {
-                    const ok =
-                      dmReachabilityChecked && dmReachable
-                        ? true
-                        : await recheckDmReachability({fresh: true});
-                    if (!ok) {
-                      setDmEnableBlockedOpen(true);
-                      return;
-                    }
-                    if (!notificationsPrefEnabled) {
-                      await syncProfilePrefs({dm_notifications_enabled: true});
-                    }
-                  } finally {
-                    setSavingNotifications(false);
-                  }
-                })();
+                void enablePrefIfReachable(
+                  'notification_dm_enable',
+                  notificationsPrefEnabled,
+                  () => syncProfilePrefs({dm_notifications_enabled: true}),
+                );
               }}
             />
           </div>
@@ -305,8 +355,10 @@ export function Profile() {
       {recentCompleted.length > 0 && (
         <section className="mt-6">
           <div className="mb-3 flex items-center justify-between gap-2">
-            <p className="text-[11px] font-medium text-muted">{t('profile.recentResults')}</p>
-            <TextLink to="/my-events" className="text-[11px]">
+            <p className="text-[10px] font-medium uppercase tracking-[0.14em] text-muted">
+              {t('profile.recentResults')}
+            </p>
+            <TextLink to="/my-events" className="text-[10px]">
               {t('profile.allInMyEvents')}
             </TextLink>
           </div>
@@ -325,7 +377,9 @@ export function Profile() {
 
       {active.length > 0 && (
         <section className="mt-6">
-          <p className="mb-3 text-[11px] font-medium text-muted">{t('profile.upcoming')}</p>
+          <p className="mb-3 text-[10px] font-medium uppercase tracking-[0.14em] text-muted">
+            {t('profile.upcoming')}
+          </p>
           <ul className="flex list-none flex-col gap-2">
             {active.slice(0, 2).map((event) => (
               <li key={event.id}>
@@ -350,20 +404,10 @@ export function Profile() {
         onClose={() => setEditGamertag(false)}
       />
 
-      <ConfirmDialog
+      <NotificationDmSetupDialog
         open={dmEnableBlockedOpen}
-        title={t('notifications.dmEnableBlockedTitle')}
-        description={t('notifications.dmSetupBody')}
-        confirmLabel={t('publish.addBot')}
-        cancelLabel={t('common.cancel')}
-        onCancel={() => setDmEnableBlockedOpen(false)}
-        onConfirm={() => {
-          setDmEnableBlockedOpen(false);
-          if (!buildBotInstallUrl()) return;
-          track('bot_install_click', {meta: {source: 'notification_dm_enable'}});
-          const {guildId} = getGuildContext();
-          void openBotInstallUrl(guildId ? {guildId} : undefined);
-        }}
+        source={botInstallSourceRef.current}
+        onClose={() => setDmEnableBlockedOpen(false)}
       />
     </ContentReveal>
   );

@@ -28,6 +28,7 @@ export interface CreateEventFormValues {
   targetGuildId: string;
   targetGuildName: string;
   targetChannelId: string;
+  targetVoiceChannelId: string;
   /** Ranked race (global ELO); only meaningful on allowlisted guilds. */
   isRanked: boolean;
   /** From list-guilds for the selected target guild. */

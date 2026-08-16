@@ -5,11 +5,13 @@ import {
   canRetryEventRatings,
   canSubmitEventResults,
   eventHasStarted,
+  eventVoiceJoinUrl,
   isBrowseFeedEvent,
   isRegistrationOpen,
   resolveEventDisplayStatus,
   shouldShowEventResults,
   validateDraftForm,
+  voiceChannelMention,
 } from './eventSpec';
 import {VALIDATION_CODES} from './validationCodes';
 import type {AppUser, ForzaEvent} from './types';
@@ -313,5 +315,65 @@ describe('canRetryEventRatings', () => {
         host,
       ),
     ).toBe(false);
+  });
+});
+
+describe('eventVoiceJoinUrl', () => {
+  it('returns a Discord channel URL when guild and voice are set', () => {
+    expect(
+      eventVoiceJoinUrl(
+        event({guildId: 'g1', voiceChannelId: 'vc1'}),
+      ),
+    ).toBe('https://discord.com/channels/g1/vc1');
+  });
+
+  it('prefers a stored discord.gg invite over the channel URL', () => {
+    expect(
+      eventVoiceJoinUrl(
+        event({
+          guildId: 'g1',
+          voiceChannelId: 'vc1',
+          voiceInviteUrl: 'https://discord.gg/abc',
+        }),
+      ),
+    ).toBe('https://discord.gg/abc');
+  });
+
+  it('ignores a non-Discord invite and falls back to the channel URL', () => {
+    expect(
+      eventVoiceJoinUrl(
+        event({
+          guildId: 'g1',
+          voiceChannelId: 'vc1',
+          voiceInviteUrl: 'https://example.com/not-discord',
+        }),
+      ),
+    ).toBe('https://discord.com/channels/g1/vc1');
+  });
+
+  it('is null when finalized or unset', () => {
+    expect(eventVoiceJoinUrl(event({guildId: 'g1'}))).toBeNull();
+    expect(
+      eventVoiceJoinUrl(
+        event({
+          guildId: 'g1',
+          voiceChannelId: 'vc1',
+          voiceInviteUrl: 'https://discord.gg/abc',
+          lifecycle: 'completed',
+        }),
+      ),
+    ).toBeNull();
+  });
+});
+
+describe('voiceChannelMention', () => {
+  it('prefixes a cached Discord channel name', () => {
+    expect(voiceChannelMention(' Gathering ')).toBe('#Gathering');
+    expect(voiceChannelMention('#Lounge')).toBe('#Lounge');
+  });
+
+  it('is null when unset', () => {
+    expect(voiceChannelMention(undefined)).toBeNull();
+    expect(voiceChannelMention('  ')).toBeNull();
   });
 });

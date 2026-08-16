@@ -1,13 +1,22 @@
-import {useMemo, useState} from 'react';
+import {useMemo} from 'react';
 import {useTranslation} from 'react-i18next';
-import {hasFinishingPosition, inferResultsDisplayLayout} from '../lib/eventResults';
+import {
+  hasFinishingPosition,
+  inferResultsDisplayLayout,
+} from '../lib/eventResults';
 import type {EventResultDisplay} from '../lib/events';
 import {cn} from '../lib/cn';
 import {Alert} from './ui/Alert';
 import {TextButton} from './ui/TextButton';
 import {Panel} from './ui/Panel';
 import {panelDividedClass} from './ui/formStyles';
-import {SegmentGroup} from './ui/SegmentGroup';
+
+const twoColClass = 'grid gap-3 sm:grid-cols-2';
+
+function splitInHalf<T>(items: T[]): [T[], T[]] {
+  const mid = Math.ceil(items.length / 2);
+  return [items.slice(0, mid), items.slice(mid)];
+}
 
 type Props = {
   rows: EventResultDisplay[];
@@ -26,16 +35,18 @@ export function EventResultsTable({
   viewerDiscordId,
 }: Props) {
   const {t} = useTranslation();
-  const inferred = useMemo(() => inferResultsDisplayLayout(rows), [rows]);
-  const [layoutOverride, setLayoutOverride] = useState<'per_group' | 'overall' | null>(null);
-  const displayLayout = layoutOverride ?? inferred;
+  const displayLayout = useMemo(() => inferResultsDisplayLayout(rows), [rows]);
 
   if (loadFailed && !pending) {
     return (
       <Alert variant="info" className="flex flex-col gap-3 py-2.5 text-sm">
         <p>{t('results.loadFailed')}</p>
         {onRetryLoad ? (
-          <TextButton tone="emphasis" className="self-start text-xs" onClick={onRetryLoad}>
+          <TextButton
+            tone="emphasis"
+            className="self-start text-xs"
+            onClick={onRetryLoad}
+          >
             {t('common.tryAgain')}
           </TextButton>
         ) : null}
@@ -71,8 +82,10 @@ export function EventResultsTable({
   }
   const multiGroup = groupOrder.length > 1;
 
-  const renderRow = (row: EventResultDisplay, opts?: {showGroup?: boolean}) => {
-    const isViewer = Boolean(viewerDiscordId && row.discordId === viewerDiscordId);
+  const renderRow = (row: EventResultDisplay) => {
+    const isViewer = Boolean(
+      viewerDiscordId && row.discordId === viewerDiscordId,
+    );
     const showPosition = hasFinishingPosition(row);
     const posLabel = row.dns
       ? t('results.dns')
@@ -86,7 +99,7 @@ export function EventResultsTable({
       <li
         key={row.discordId}
         className={cn(
-          'grid grid-cols-[2.75rem_1fr] items-center gap-x-3 px-4 py-2.5',
+          'grid min-w-0 grid-cols-[2.75rem_1fr] items-center gap-x-3 px-4 py-2.5',
           isViewer && 'bg-accent-purple/10',
         )}
       >
@@ -106,22 +119,12 @@ export function EventResultsTable({
         </span>
         <span
           className={cn(
-            'truncate text-sm font-medium',
+            'min-w-0 truncate text-sm font-medium',
             row.dnf || row.dns ? 'text-muted' : 'text-slate-200',
             isViewer && 'text-white',
           )}
         >
           {row.label}
-          {opts?.showGroup ? (
-            <span className="ml-1.5 text-[10px] font-bold uppercase tracking-widest text-muted">
-              {t('eventDetail.group', {n: row.groupIndex ?? 1})}
-            </span>
-          ) : null}
-          {isViewer ? (
-            <span className="ml-1.5 text-[10px] font-bold uppercase tracking-widest text-accent-purple-light">
-              · {t('results.yourRow')}
-            </span>
-          ) : null}
           {showPosition && row.points != null ? (
             <span className="ml-1.5 text-xs text-muted">{row.points} pts</span>
           ) : null}
@@ -141,19 +144,6 @@ export function EventResultsTable({
     );
   };
 
-  const layoutToggle = multiGroup ? (
-    <SegmentGroup
-      containerClassName="mb-3"
-      ariaLabel={t('results.rankingModeAria')}
-      value={displayLayout}
-      onChange={setLayoutOverride}
-      options={[
-        {value: 'per_group', label: t('results.modeByConvoy')},
-        {value: 'overall', label: t('results.modeOverall')},
-      ]}
-    />
-  ) : null;
-
   if (displayLayout === 'overall' || !multiGroup) {
     const overallRows =
       displayLayout === 'overall'
@@ -167,30 +157,39 @@ export function EventResultsTable({
           })
         : rows;
 
+    const list = (items: EventResultDisplay[]) => (
+      <ol className={cn(panelDividedClass, 'min-w-0')}>{items.map(renderRow)}</ol>
+    );
+    const [left, right] = splitInHalf(overallRows);
+
     return (
-      <div>
-        {layoutToggle}
-        <Panel className="overflow-hidden">
-          <ol className={panelDividedClass}>
-            {overallRows.map((row) =>
-              renderRow(row, {showGroup: multiGroup && displayLayout === 'overall'}),
-            )}
-          </ol>
-        </Panel>
-      </div>
+      <Panel className="overflow-hidden">
+        {right.length > 0 ? (
+          <>
+            <div className="sm:hidden">{list(overallRows)}</div>
+            <div className="hidden sm:grid sm:grid-cols-2 sm:divide-x sm:divide-white/[0.05]">
+              {list(left)}
+              {list(right)}
+            </div>
+          </>
+        ) : (
+          list(overallRows)
+        )}
+      </Panel>
     );
   }
 
   return (
-    <div className="space-y-3">
-      {layoutToggle}
+    <div className={twoColClass}>
       {groupOrder.map((g) => (
-        <div key={g}>
+        <div key={g} className="min-w-0">
           <p className="mb-1.5 text-xs font-bold uppercase tracking-widest text-muted">
             {t('eventDetail.group', {n: g})}
           </p>
           <Panel className="overflow-hidden">
-            <ol className={panelDividedClass}>{rowsByGroup.get(g)!.map((row) => renderRow(row))}</ol>
+            <ol className={panelDividedClass}>
+              {rowsByGroup.get(g)!.map((row) => renderRow(row))}
+            </ol>
           </Panel>
         </div>
       ))}

@@ -108,6 +108,7 @@ export function useCreateEventForm() {
   const [targetGuildId, setTargetGuildId] = useState('');
   const [targetGuildName, setTargetGuildName] = useState('');
   const [targetChannelId, setTargetChannelId] = useState('');
+  const [targetVoiceChannelId, setTargetVoiceChannelId] = useState('');
   const [isRanked, setIsRanked] = useState(false);
   const [targetGuildRatingEnabled, setTargetGuildRatingEnabled] = useState(false);
 
@@ -154,6 +155,7 @@ export function useCreateEventForm() {
       targetGuildId,
       targetGuildName,
       targetChannelId,
+      targetVoiceChannelId,
       isRanked,
       targetGuildRatingEnabled,
     }),
@@ -178,6 +180,7 @@ export function useCreateEventForm() {
       targetGuildId,
       targetGuildName,
       targetChannelId,
+      targetVoiceChannelId,
       isRanked,
       targetGuildRatingEnabled,
     ],
@@ -311,6 +314,7 @@ export function useCreateEventForm() {
         setTargetGuildId(ev.guildId ?? '');
         setTargetGuildName(ev.guildName ?? '');
         setTargetChannelId(ev.channelId ?? '');
+        setTargetVoiceChannelId(ev.voiceChannelId ?? '');
         setIsRanked(Boolean(ev.isRanked));
         setTargetGuildRatingEnabled(false);
         const guildIdForRating = ev.guildId?.trim();
@@ -401,6 +405,7 @@ export function useCreateEventForm() {
       guild_id: targetGuildId.trim() || undefined,
       guild_name: targetGuildId.trim() ? targetGuildName : undefined,
       channel_id: targetChannelId || null,
+      voice_channel_id: targetVoiceChannelId || null,
       title,
       type,
       game,
@@ -637,7 +642,10 @@ export function useCreateEventForm() {
       // Only clear ranked on real guild change / cruise — not on PublishTargetPicker
       // name sync of the same server (allowlist miss must not silently unrank).
       if (type === 'cruise' || (guildChanged && !ratingEnabled)) setIsRanked(false);
-      if (!isPublished && guildChanged) setTargetChannelId('');
+      if (guildChanged) {
+        if (!isPublished) setTargetChannelId('');
+        setTargetVoiceChannelId('');
+      }
     },
     [
       clearFieldError,
@@ -657,6 +665,10 @@ export function useCreateEventForm() {
     },
     [clearFieldError],
   );
+
+  const onTargetVoiceChannelChange = useCallback((id: string) => {
+    setTargetVoiceChannelId(id);
+  }, []);
 
   return {
     editId,
@@ -783,6 +795,7 @@ export function useCreateEventForm() {
     setTargetGuildId,
     setTargetGuildName,
     setTargetChannelId: onTargetChannelChange,
+    setTargetVoiceChannelId: onTargetVoiceChannelChange,
     onGuildChange,
     setIsRanked,
   };

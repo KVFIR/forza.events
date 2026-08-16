@@ -3,11 +3,18 @@ import {internalErrorResponse} from '../_shared/apiResponse.ts';
 import {jsonResponse, optionsResponse} from '../_shared/cors.ts';
 import {optionalDiscordUser} from '../_shared/discordRequestAuth.ts';
 import {driverRatingFromRow} from '../_shared/driverRatingPayload.ts';
+import {
+  indexLatestRaces,
+  mapViewerRaces,
+  type LatestRaceRow,
+  type LeaderboardLastRace,
+} from '../_shared/leaderboardRaces.ts';
 import {rateLimitAuth, rateLimitPublicRead} from '../_shared/rateLimitPresets.ts';
 import {adminClient} from '../_shared/supabase.ts';
 
 const DEFAULT_LIMIT = 100;
 const MAX_LIMIT = 200;
+const VIEWER_RACES_LIMIT = 8;
 
 serve(async (req) => {
   if (req.method === 'OPTIONS') return optionsResponse(req);
@@ -56,14 +63,41 @@ serve(async (req) => {
         rating: rating.rating,
         gamesRated: rating.gamesRated,
         provisional: rating.provisional,
+        lastRace: null as LeaderboardLastRace | null,
       }];
     }).map((entry, index) => ({...entry, rank: index + 1}));
+
+    const raceIds = entries.map((entry) => entry.discordId);
+    if (auth && !raceIds.includes(auth.id)) raceIds.push(auth.id);
+
+    let lastById = new Map<string, NonNullable<(typeof entries)[number]['lastRace']>>();
+    if (raceIds.length > 0) {
+      const {data: lastRows, error: lastError} = await supabase.rpc(
+        'latest_rating_races',
+        {p_discord_ids: raceIds},
+      );
+      if (lastError) {
+        // ponytail: RPC added in 038 — page still ranks if this deploy is Edge-before-db
+        console.error(JSON.stringify({
+          msg: 'latest_rating_races failed',
+          detail: lastError.message,
+        }));
+      } else {
+        lastById = indexLatestRaces((lastRows ?? []) as LatestRaceRow[]);
+        for (const entry of entries) {
+          entry.lastRace = lastById.get(entry.discordId) ?? null;
+        }
+      }
+    }
 
     let viewer: {
       rank: number;
       rating: number;
       gamesRated: number;
       provisional: boolean;
+      lastDelta: number | null;
+      lastRace: (typeof entries)[number]['lastRace'];
+      races: ReturnType<typeof mapViewerRaces>;
     } | null = null;
 
     if (auth) {
@@ -74,6 +108,9 @@ serve(async (req) => {
           rating: inTop.rating,
           gamesRated: inTop.gamesRated,
           provisional: inTop.provisional,
+          lastDelta: inTop.lastRace?.delta ?? null,
+          lastRace: inTop.lastRace,
+          races: [],
         };
       } else {
         const {data: own} = await supabase
@@ -90,12 +127,36 @@ serve(async (req) => {
             .or(
               `rating.gt.${own!.rating},and(rating.eq.${own!.rating},games_rated.gt.${own!.games_rated})`,
             );
+          const lastRace = lastById.get(auth.id) ?? null;
           viewer = {
             rank: (count ?? 0) + 1,
             rating: rating.rating,
             gamesRated: rating.gamesRated,
             provisional: rating.provisional,
+            lastDelta: lastRace?.delta ?? null,
+            lastRace,
+            races: [],
           };
+        }
+      }
+
+      if (viewer) {
+        const {data: hist, error: histError} = await supabase
+          .from('rating_ledger')
+          .select('event_id, delta, rating_after, events!inner(title, starts_at)')
+          .eq('discord_id', auth.id)
+          .order('created_at', {ascending: false})
+          .limit(VIEWER_RACES_LIMIT);
+        if (histError) {
+          console.error(JSON.stringify({
+            msg: 'leaderboard viewer races failed',
+            detail: histError.message,
+          }));
+        } else {
+          viewer.races = mapViewerRaces(hist ?? []);
+          if (viewer.lastDelta == null && viewer.races[0]) {
+            viewer.lastDelta = viewer.races[0].delta;
+          }
         }
       }
     }

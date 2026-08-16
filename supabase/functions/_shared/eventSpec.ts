@@ -23,6 +23,8 @@ export type SaveEventBody = {
   guild_id?: string;
   guild_name?: string;
   channel_id?: string | null;
+  /** Optional gathering voice channel in the same guild. */
+  voice_channel_id?: string | null;
   title?: string;
   type?: string;
   game?: string;
@@ -57,6 +59,7 @@ type DbEvent = {
   host_discord_id: string;
   guild_id: string | null;
   channel_id: string | null;
+  voice_channel_id?: string | null;
   discord_message_id: string | null;
   starts_at: string;
   game?: string | null;
@@ -166,6 +169,9 @@ export function buildEventFields(
     host_discord_id: hostDiscordId,
     guild_id: body.guild_id?.trim() || null,
     channel_id: body.channel_id?.trim() || null,
+    voice_channel_id: body.guild_id?.trim()
+      ? body.voice_channel_id?.trim() || null
+      : null,
     starts_at: body.starts_at,
     timezone_hint: body.timezone_hint,
     max_pi: maxPi,

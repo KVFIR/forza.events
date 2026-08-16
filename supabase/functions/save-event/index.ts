@@ -31,11 +31,14 @@ import {normalizeEventGame, type ForzaGame} from '../_shared/eventGames.ts';
 import {rateLimitMutation} from '../_shared/rateLimitPresets.ts';
 import {adminClient} from '../_shared/supabase.ts';
 import {VALIDATION_CODES, type ValidationCode} from '../_shared/validationCodes.ts';
+import {fetchDiscordChannel, voiceChannelTargetError} from '../_shared/channelPermissions.ts';
+import {resolveChannelInviteUrl} from '../_shared/discord.ts';
 import {cancelPendingStartingSoonForEvent, deferNotificationDelivery} from '../_shared/notifications.ts';
 import {
   enqueueConvoyLeaderChanged,
   enqueueEventCancelled,
   enqueueEventUpdated,
+  skipPendingNewEventAlertsForEvent,
 } from '../_shared/notificationTriggers.ts';
 import {
   eventUpdateContentHash,
@@ -114,6 +117,7 @@ serve(async (req) => {
         .eq('event_id', body.id);
       if (updated) {
         await cancelPendingStartingSoonForEvent(supabase, body.id);
+        await skipPendingNewEventAlertsForEvent(supabase, body.id);
         if (participants?.length) {
           await enqueueEventCancelled(supabase, {
             id: updated.id,
@@ -164,6 +168,9 @@ serve(async (req) => {
       status: string;
       guild_id: string | null;
       channel_id: string | null;
+      voice_channel_id: string | null;
+      voice_invite_url?: string | null;
+      voice_channel_name?: string | null;
       discord_message_id: string | null;
       starts_at: string;
       game?: string | null;
@@ -185,7 +192,7 @@ serve(async (req) => {
       const {data} = await supabase
         .from('events')
         .select(
-          'id, host_discord_id, status, guild_id, channel_id, discord_message_id, starts_at, game, is_ranked, group_count, cover_image_url, title, tracks, car_rule_mode, max_pi, additional_car_restrictions, lobby_leader_discord_id, lobby_leader_is_host, lobby_leader_gamertag',
+          'id, host_discord_id, status, guild_id, channel_id, voice_channel_id, voice_invite_url, voice_channel_name, discord_message_id, starts_at, game, is_ranked, group_count, cover_image_url, title, tracks, car_rule_mode, max_pi, additional_car_restrictions, lobby_leader_discord_id, lobby_leader_is_host, lobby_leader_gamertag',
         )
         .eq('id', body.id)
         .single();
@@ -213,6 +220,17 @@ serve(async (req) => {
     }
 
     const isPublishedEdit = Boolean(existing && isPublishedStatus(existing.status));
+
+    const guildIdForVoice = body.guild_id?.trim() || '';
+    const nextVoiceId = guildIdForVoice
+      ? body.voice_channel_id?.trim() || null
+      : null;
+    let fetchedVoiceChannel: Awaited<ReturnType<typeof fetchDiscordChannel>> = null;
+    if (nextVoiceId && nextVoiceId !== (existing?.voice_channel_id ?? null)) {
+      fetchedVoiceChannel = await fetchDiscordChannel(nextVoiceId);
+      const voiceErr = voiceChannelTargetError(fetchedVoiceChannel, guildIdForVoice);
+      if (voiceErr) return appErrorResponse(req, 400, voiceErr);
+    }
 
     let lobbyResolved = isPublishedEdit && existing
       ? leaderFromEventRow({
@@ -280,7 +298,28 @@ serve(async (req) => {
       body.cover_image_url,
       existing?.cover_image_url,
     );
-    const fields = buildEventFields(body, discordUser.id, coverUrl, lobbyResolved);
+    const voiceUnchanged = nextVoiceId === (existing?.voice_channel_id ?? null);
+    const storedVoiceInvite = existing?.voice_invite_url?.trim() || null;
+    const storedVoiceName = existing?.voice_channel_name?.trim() || null;
+    const voiceInviteUrl = nextVoiceId
+      ? voiceUnchanged && storedVoiceInvite
+        ? storedVoiceInvite
+        : await resolveChannelInviteUrl(nextVoiceId)
+      : null;
+    let voiceChannelName: string | null = null;
+    if (nextVoiceId) {
+      if (voiceUnchanged && storedVoiceName) {
+        voiceChannelName = storedVoiceName;
+      } else {
+        const ch = fetchedVoiceChannel ?? await fetchDiscordChannel(nextVoiceId);
+        voiceChannelName = ch?.name?.trim() || null;
+      }
+    }
+    const fields = {
+      ...buildEventFields(body, discordUser.id, coverUrl, lobbyResolved),
+      voice_invite_url: voiceInviteUrl,
+      voice_channel_name: voiceChannelName,
+    };
     if (isPublishedEdit) {
       fields.game = eventGame;
       // Ranked is locked after publish — keep stored flag regardless of client body.
@@ -412,7 +451,12 @@ serve(async (req) => {
       const trySlug = i === 0 ? slug : `${slug}-${i + 1}`;
       const {data, error} = await supabase
         .from('events')
-        .insert({...insertRow, slug: trySlug})
+        .insert({
+          ...insertRow,
+          slug: trySlug,
+          voice_invite_url: voiceInviteUrl,
+          voice_channel_name: voiceChannelName,
+        })
         .select('id, slug')
         .single();
       if (!error && data) {

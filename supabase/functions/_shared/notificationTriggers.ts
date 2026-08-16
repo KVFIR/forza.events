@@ -1,3 +1,6 @@
+import {fetchDiscordChannel} from './channelPermissions.ts';
+import {resolveChannelInviteUrl} from './discord.ts';
+import {isDiscordLinkUrl} from './guildDisplay.ts';
 import {enqueueNotifications, type OutboxInsert} from './notifications.ts';
 import {openBuildHasDisplayRules} from './carRules.ts';
 import type {adminClient} from './supabase.ts';
@@ -258,6 +261,69 @@ export async function enqueueGroupReassigned(
   await enqueueNotifications(supabase, rows);
 }
 
+export function voiceJoinUrlFromEvent(event: {
+  guild_id?: string | null;
+  voice_channel_id?: string | null;
+  voice_invite_url?: string | null;
+}): string | undefined {
+  const invite = event.voice_invite_url?.trim();
+  if (invite && isDiscordLinkUrl(invite)) return invite;
+  const guildId = event.guild_id?.trim();
+  const channelId = event.voice_channel_id?.trim();
+  if (!guildId || !channelId) return undefined;
+  return `https://discord.com/channels/${guildId}/${channelId}`;
+}
+
+async function ensureVoiceJoinMeta(
+  supabase: ReturnType<typeof adminClient>,
+  event: {
+    id: string;
+    guild_id?: string | null;
+    voice_channel_id?: string | null;
+    voice_invite_url?: string | null;
+    voice_channel_name?: string | null;
+  },
+): Promise<{url?: string; name?: string}> {
+  const channelId = event.voice_channel_id?.trim();
+  if (!channelId) return {};
+  let invite = event.voice_invite_url?.trim() || null;
+  let name = event.voice_channel_name?.trim() || null;
+  if (!invite || !name) {
+    try {
+      if (!invite) invite = await resolveChannelInviteUrl(channelId);
+      if (!name) {
+        const ch = await fetchDiscordChannel(channelId);
+        name = ch?.name?.trim() || null;
+      }
+      const patch: {voice_invite_url?: string; voice_channel_name?: string} = {};
+      if (invite && invite !== (event.voice_invite_url?.trim() || null)) {
+        patch.voice_invite_url = invite;
+      }
+      if (name && name !== (event.voice_channel_name?.trim() || null)) {
+        patch.voice_channel_name = name;
+      }
+      if (Object.keys(patch).length) {
+        const {error} = await supabase.from('events').update(patch).eq('id', event.id);
+        if (error) {
+          console.warn(JSON.stringify({
+            msg: 'voice invite backfill failed',
+            eventId: event.id,
+            detail: error.message,
+          }));
+        }
+      }
+    } catch (e) {
+      console.warn(JSON.stringify({
+        msg: 'voice invite backfill failed',
+        eventId: event.id,
+        detail: e instanceof Error ? e.message : String(e),
+      }));
+    }
+  }
+  const url = voiceJoinUrlFromEvent({...event, voice_invite_url: invite});
+  return {url, name: name || undefined};
+}
+
 export async function scanStartingSoonReminders(
   supabase: ReturnType<typeof adminClient>,
 ): Promise<void> {
@@ -268,7 +334,9 @@ export async function scanStartingSoonReminders(
 
   const {data: events} = await supabase
     .from('events')
-    .select('id, title, host_discord_id, max_players, group_count, starts_at, timezone_hint, status, discord_message_id')
+    .select(
+      'id, title, host_discord_id, max_players, group_count, starts_at, timezone_hint, status, discord_message_id, guild_id, voice_channel_id, voice_invite_url, voice_channel_name',
+    )
     .not('discord_message_id', 'is', null)
     .in('status', ['open', 'live'])
     .gte('starts_at', windowStart)
@@ -288,6 +356,11 @@ export async function scanStartingSoonReminders(
     const totalCapacity = groupCount * event.max_players;
     const activeCount = activeRacers(roster).length;
     const waitlistCount = roster.filter((r) => r.waitlisted).length;
+    const voiceJoin = await ensureVoiceJoinMeta(supabase, event);
+    const voicePayload = {
+      ...(voiceJoin.url ? {voiceJoinUrl: voiceJoin.url} : {}),
+      ...(voiceJoin.name ? {voiceChannelName: voiceJoin.name} : {}),
+    };
 
     const racerRows: OutboxInsert[] = activeRacers(roster).map((p) => ({
       kind: 'event_starting_soon',
@@ -300,6 +373,7 @@ export async function scanStartingSoonReminders(
         timezone: tz,
         groupIndex: p.group_index ?? 1,
         leaderGamertag: leaderGamertag(roster, p.group_index ?? 1),
+        ...voicePayload,
       },
     }));
 
@@ -315,10 +389,155 @@ export async function scanStartingSoonReminders(
         activeCount,
         totalCapacity,
         waitlistCount,
+        ...voicePayload,
       },
     };
 
     await enqueueNotifications(supabase, [...racerRows, hostRow]);
+  }
+}
+
+export const EVENT_PUBLISHED_DELAY_MS = 60 * 60 * 1000;
+
+export function eventPublishedScheduledFor(nowMs = Date.now()): string {
+  return new Date(nowMs + EVENT_PUBLISHED_DELAY_MS).toISOString();
+}
+
+export function filterNewEventAlertRecipients(
+  subscriberIds: string[],
+  hostDiscordId: string,
+  rosterIds: Iterable<string>,
+): string[] {
+  const roster = new Set(rosterIds);
+  return subscriberIds.filter((id) => id !== hostDiscordId && !roster.has(id));
+}
+
+export function skipEventPublishedSend(input: {
+  prefEnabled: boolean;
+  eventStatus: string | null | undefined;
+  hostDiscordId: string | null | undefined;
+  recipientDiscordId: string;
+  onRoster: boolean;
+}): string | null {
+  if (!input.prefEnabled) return 'new_event_alerts_disabled';
+  if (!input.eventStatus) return 'event_not_found';
+  if (input.eventStatus === 'cancelled' || input.eventStatus === 'archived') {
+    return 'event_cancelled';
+  }
+  if (input.eventStatus === 'completed') return 'event_completed';
+  if (input.eventStatus === 'draft') return 'not_published';
+  if (input.recipientDiscordId === input.hostDiscordId) return 'is_host';
+  if (input.onRoster) return 'already_registered';
+  return null;
+}
+
+export type PublishedSendCtx = {
+  status: string;
+  hostDiscordId: string;
+  roster: Set<string>;
+};
+
+/** Event/roster query failure must retry — empty roster would DM people already registered. */
+export function resolvePublishedSendCtx(
+  event: {status: string; host_discord_id: string} | null,
+  eventErr: boolean,
+  participantIds: string[] | null,
+  participantErr: boolean,
+): PublishedSendCtx | null | 'load_failed' {
+  if (eventErr || participantErr) return 'load_failed';
+  if (!event) return null;
+  return {
+    status: event.status,
+    hostDiscordId: event.host_discord_id,
+    roster: new Set(participantIds ?? []),
+  };
+}
+
+async function listNewEventAlertSubscriberIds(
+  supabase: ReturnType<typeof adminClient>,
+  hostDiscordId: string,
+): Promise<string[]> {
+  const page = 1000;
+  const ids: string[] = [];
+  for (let from = 0; ; from += page) {
+    const {data, error} = await supabase
+      .from('users')
+      .select('discord_id')
+      .eq('new_event_notifications_enabled', true)
+      .neq('discord_id', hostDiscordId)
+      .order('discord_id')
+      .range(from, from + page - 1);
+    if (error) throw new Error(error.message);
+    if (!data?.length) break;
+    ids.push(...data.map((row) => row.discord_id as string));
+    if (data.length < page) break;
+  }
+  return ids;
+}
+
+export async function enqueueEventPublished(
+  supabase: ReturnType<typeof adminClient>,
+  event: {
+    id: string;
+    title: string;
+    host_discord_id: string;
+    starts_at: string;
+    timezone?: string | null;
+    type?: string | null;
+    game?: string | null;
+  },
+): Promise<void> {
+  const subscribers = await listNewEventAlertSubscriberIds(supabase, event.host_discord_id);
+  if (!subscribers.length) return;
+
+  const {data: participants, error: partErr} = await supabase
+    .from('event_participants')
+    .select('discord_id')
+    .eq('event_id', event.id);
+  if (partErr) throw new Error(partErr.message);
+
+  const recipients = filterNewEventAlertRecipients(
+    subscribers,
+    event.host_discord_id,
+    (participants ?? []).map((p) => p.discord_id),
+  );
+  if (!recipients.length) return;
+
+  const scheduledFor = eventPublishedScheduledFor();
+  const rows: OutboxInsert[] = recipients.map((id) => ({
+    kind: 'event_published',
+    event_id: event.id,
+    recipient_discord_id: id,
+    dedupe_key: `published:${event.id}:${id}`,
+    scheduled_for: scheduledFor,
+    payload: {
+      eventTitle: event.title,
+      startsAt: event.starts_at,
+      timezone: event.timezone ?? 'UTC',
+      eventType: event.type ?? '',
+      game: event.game ?? 'fh6',
+    },
+  }));
+  const enqueued = await enqueueNotifications(supabase, rows);
+  if (!enqueued) throw new Error('enqueueNotifications failed');
+}
+
+export async function skipPendingNewEventAlertsForEvent(
+  supabase: ReturnType<typeof adminClient>,
+  eventId: string,
+): Promise<void> {
+  const {error} = await supabase
+    .from('notification_outbox')
+    .update({status: 'skipped', last_error: 'event_cancelled'})
+    .eq('event_id', eventId)
+    .eq('kind', 'event_published')
+    .in('status', ['pending', 'processing']);
+  if (error) {
+    console.error(JSON.stringify({
+      msg: 'skipPendingNewEventAlertsForEvent failed',
+      eventId,
+      detail: error.message,
+    }));
   }
 }
 

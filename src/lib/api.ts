@@ -281,6 +281,7 @@ export async function listChannels(
     () =>
       invoke<{
         channels: {id: string; name: string; position: number}[];
+        voice_channels?: {id: string; name: string; position: number}[];
         hint_code?: ListChannelsHintCode | null;
       }>('list-channels', {guild_id: guildId}, discordToken),
     {cacheMs: 30_000, fresh: options?.fresh},
@@ -427,6 +428,10 @@ export type SubmitResultEntry = {
   position: number | null;
   dnf?: boolean;
   dns?: boolean;
+  group_index?: number;
+  username?: string;
+  avatar_url?: string | null;
+  gamertag?: string;
 };
 
 export async function submitEventResults(
@@ -457,27 +462,43 @@ export async function retryEventRatings(discordToken: string, eventId: string) {
   }>('submit-results', {event_id: eventId}, discordToken);
 }
 
+export type LeaderboardLastRace = {
+  eventId: string;
+  title: string;
+  startsAt: string;
+  delta: number;
+  ratingAfter?: number;
+};
+
+export type LeaderboardEntry = {
+  rank: number;
+  discordId: string;
+  username: string | null;
+  avatarUrl: string | null;
+  gamertag: string | null;
+  rating: number;
+  gamesRated: number;
+  provisional: boolean;
+  lastRace: LeaderboardLastRace | null;
+};
+
+export type LeaderboardViewer = {
+  rank: number;
+  rating: number;
+  gamesRated: number;
+  provisional: boolean;
+  lastDelta: number | null;
+  lastRace: LeaderboardLastRace | null;
+  races: LeaderboardLastRace[];
+};
+
 export async function fetchLeaderboard(
   discordToken: string | null,
   options?: {limit?: number},
 ) {
   return invoke<{
-    entries: {
-      rank: number;
-      discordId: string;
-      username: string | null;
-      avatarUrl: string | null;
-      gamertag: string | null;
-      rating: number;
-      gamesRated: number;
-      provisional: boolean;
-    }[];
-    viewer: {
-      rank: number;
-      rating: number;
-      gamesRated: number;
-      provisional: boolean;
-    } | null;
+    entries: LeaderboardEntry[];
+    viewer: LeaderboardViewer | null;
     limit: number;
   }>('leaderboard', {limit: options?.limit ?? 100}, discordToken);
 }
@@ -489,6 +510,7 @@ export async function updateProfile(
     region?: string;
     timezone?: string;
     dm_notifications_enabled?: boolean;
+    new_event_notifications_enabled?: boolean;
     notification_locale?: string;
   },
 ) {

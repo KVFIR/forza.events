@@ -94,6 +94,7 @@ export function CreateEvent() {
     onLobbyLeaderSelect,
     onGuildChange,
     setTargetChannelId,
+    setTargetVoiceChannelId,
     setIsRanked,
     clearFieldError,
   } = form;
@@ -256,6 +257,10 @@ export function CreateEvent() {
             eventType={values.type}
             isRanked={values.isRanked}
             targetGuildRatingEnabled={values.targetGuildRatingEnabled}
+            accessToken={token ?? ''}
+            guildId={values.targetGuildId}
+            voiceChannelId={values.targetVoiceChannelId}
+            onVoiceChannelChange={setTargetVoiceChannelId}
           />
         </div>
       ) : step === 0 ? (
@@ -278,6 +283,8 @@ export function CreateEvent() {
           onIsRankedChange={setIsRanked}
           onGuildChange={onGuildChange}
           onChannelChange={setTargetChannelId}
+          voiceChannelId={values.targetVoiceChannelId}
+          onVoiceChannelChange={setTargetVoiceChannelId}
         />
       )}
 

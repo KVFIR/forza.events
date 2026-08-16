@@ -63,16 +63,37 @@ describe('ensureUserRowForDiscordId', () => {
     expect(getRow()?.username).toBe(PLACEHOLDER_USER_USERNAME);
   });
 
-  it('updates username when a new handle is provided', async () => {
+  it('does not overwrite a real Discord handle or wipe an avatar', async () => {
     const {supabase, update, getRow} = mockSupabaseForUserRow({
       discord_id: '9',
-      username: 'old_display',
+      username: 'real_handle',
+      avatar_url: 'https://cdn.discordapp.com/avatars/9/a.png',
+    });
+
+    await ensureUserRowForDiscordId(supabase as never, '9', {
+      username: 'evil',
       avatar_url: null,
     });
 
-    await ensureUserRowForDiscordId(supabase as never, '9', {username: 'new_handle'});
+    expect(update).not.toHaveBeenCalled();
+    expect(getRow()?.username).toBe('real_handle');
+    expect(getRow()?.avatar_url).toBe('https://cdn.discordapp.com/avatars/9/a.png');
+  });
+
+  it('upgrades a placeholder username and fills a missing avatar', async () => {
+    const {supabase, update, getRow} = mockSupabaseForUserRow({
+      discord_id: '9',
+      username: PLACEHOLDER_USER_USERNAME,
+      avatar_url: null,
+    });
+
+    await ensureUserRowForDiscordId(supabase as never, '9', {
+      username: 'real_handle',
+      avatar_url: 'https://cdn.discordapp.com/avatars/9/a.png',
+    });
 
     expect(update).toHaveBeenCalledOnce();
-    expect(getRow()?.username).toBe('new_handle');
+    expect(getRow()?.username).toBe('real_handle');
+    expect(getRow()?.avatar_url).toBe('https://cdn.discordapp.com/avatars/9/a.png');
   });
 });

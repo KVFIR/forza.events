@@ -44,8 +44,10 @@ export async function ensureUserRowForDiscordId(
 
   if (existing) {
     const updates: Record<string, unknown> = {};
-    if (handle && handle !== existing.username) updates.username = handle;
-    if (profile?.avatar_url !== undefined && profile.avatar_url !== existing.avatar_url) {
+    if (handle && handle !== existing.username && !isDiscordHandle(existing.username)) {
+      updates.username = handle;
+    }
+    if (profile?.avatar_url && !existing.avatar_url) {
       updates.avatar_url = profile.avatar_url;
     }
     if (Object.keys(updates).length === 0) return;

@@ -1,5 +1,5 @@
 import {useTranslation} from 'react-i18next';
-import {PublishTargetPicker} from '../../../components/PublishTargetPicker';
+import {PublishTargetPicker, VoiceChannelPicker} from '../../../components/PublishTargetPicker';
 import {
   CreateEventConvoySection,
   type CreateEventConvoySectionProps,
@@ -26,6 +26,8 @@ type Props = {
   onIsRankedChange: (v: boolean) => void;
   onGuildChange: (id: string, name: string, ratingEnabled?: boolean) => void;
   onChannelChange: (id: string) => void;
+  voiceChannelId: string;
+  onVoiceChannelChange: (id: string) => void;
 };
 
 export function PublishStep({
@@ -45,6 +47,8 @@ export function PublishStep({
   onIsRankedChange,
   onGuildChange,
   onChannelChange,
+  voiceChannelId,
+  onVoiceChannelChange,
 }: Props) {
   const {t} = useTranslation();
   const devPreview = isLocalDevHost() && !token;
@@ -78,6 +82,16 @@ export function PublishStep({
               onGuildChange={onGuildChange}
               onChannelChange={onChannelChange}
             />
+            {guildId ? (
+              <div className="mt-4">
+                <VoiceChannelPicker
+                  accessToken={accessToken}
+                  guildId={guildId}
+                  voiceChannelId={voiceChannelId}
+                  onChange={onVoiceChannelChange}
+                />
+              </div>
+            ) : null}
           </>
         )}
       </FormSection>

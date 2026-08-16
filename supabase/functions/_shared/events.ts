@@ -60,6 +60,8 @@ export type EmbedEventInput = {
   /** Racers waiting because every active group is full. */
   waitlist_count?: number | null;
   is_ranked?: boolean | null;
+  /** Gathering voice channel; omit/empty hides the embed field. */
+  voice_channel_id?: string | null;
 };
 
 export type EmbedGroupSummary = {
@@ -492,11 +494,22 @@ export function buildEventEmbed(event: EmbedEventInput) {
   const game = normalizeEventGame(event.game);
   const footerText = eventGameLabelFullEn(game);
 
+  const voiceId = event.voice_channel_id?.trim();
+  const showVoice =
+    Boolean(voiceId) &&
+    event.status !== 'cancelled' &&
+    event.status !== 'completed' &&
+    event.status !== 'archived';
+  const voiceField: EmbedField | null = showVoice && voiceId
+    ? {name: embedFieldName('🎙️ Voice'), value: `<#${voiceId}>`, inline: false}
+    : null;
+
   const fixedFields: EmbedField[] = [
     ...(event.is_ranked
       ? [{name: embedFieldName('🏆 Ranked'), value: 'Counts toward global driver rating', inline: false as const}]
       : []),
     {name: embedFieldName('📅 Date & Time'), value: discordTimestamp(event.starts_at), inline: false},
+    ...(voiceField ? [voiceField] : []),
     ...(trackField ? [trackField] : []),
     ...(aboutField ? [aboutField] : []),
   ];

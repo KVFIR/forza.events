@@ -1,10 +1,12 @@
 import {describe, expect, it} from 'vitest';
 import {buildResultSubmitRows, inferResultsDisplayLayout} from './eventResults';
 import {
+  addResultsDriver,
   initResultsEntry,
   isResultsEntryComplete,
   placeDriver,
   placementsForSubmit,
+  removeResultsDriver,
   setDriverOutcome,
   setResultsRankingMode,
 } from './resultsEntry';
@@ -54,6 +56,24 @@ describe('resultsEntry tap-to-order', () => {
     state = setResultsRankingMode(state, 'overall');
     expect(state.overallOrder).toEqual([]);
     expect(state.mode).toBe('overall');
+  });
+
+  it('adds and removes a guild guest without dropping registered drivers', () => {
+    let state = initResultsEntry(drivers, 'per_group');
+    state = addResultsDriver(state, {
+      discordId: 'guest',
+      label: 'Guest',
+      groupIndex: 2,
+      username: 'guestuser',
+      addedFromGuild: true,
+    });
+    expect(state.drivers.map((d) => d.discordId)).toContain('guest');
+    state = placeDriver(state, 'guest');
+    state = removeResultsDriver(state, 'guest');
+    expect(state.drivers.map((d) => d.discordId)).toEqual(['a', 'b', 'c', 'd']);
+    expect(state.groupOrders[2]).toEqual([]);
+    state = removeResultsDriver(state, 'a');
+    expect(state.drivers.map((d) => d.discordId)).toContain('a');
   });
 });
 

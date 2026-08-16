@@ -1,4 +1,4 @@
-/** Discord ids allowed in event_results — keep in sync with resolveResultsRoster in src/lib/eventRoster.ts */
+/** Discord ids already on the racing roster (not waitlisted). Submit-results also allows guild guests. */
 
 type ParticipantRow = {
   discord_id: string;

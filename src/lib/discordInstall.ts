@@ -63,6 +63,19 @@ export async function openBotInstallUrl(options?: {guildId?: string}): Promise<b
   return openExternalUrl(url);
 }
 
+/** Official support / ranked-allowlist guild (migration `032`, `docs/PILOT_COMMUNITY.md`). */
+export const SUPPORT_GUILD_ID = '925000150638809178';
+
+/**
+ * Permanent FRS invite from `discord_guilds.settings.invite_url`.
+ * Rotate here if Discord regenerates the link (catalog updates on next publish).
+ */
+export const SUPPORT_GUILD_INVITE_URL = 'https://discord.gg/hx4X9YdE46';
+
+export async function openSupportGuildInvite(): Promise<boolean> {
+  return openExternalUrl(SUPPORT_GUILD_INVITE_URL);
+}
+
 export async function openExternalUrl(url: string): Promise<boolean> {
   const trimmed = url.trim();
   if (!trimmed || !isDiscordLinkUrl(trimmed)) return false;

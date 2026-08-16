@@ -1,4 +1,4 @@
-import {useCallback, useEffect, useMemo, useState} from 'react';
+import {useCallback, useEffect, useMemo, useRef, useState} from 'react';
 import {useTranslation} from 'react-i18next';
 import {busyLabel} from '../i18n/busyLabels';
 import {useNavigate, useParams, useLocation} from 'react-router-dom';
@@ -8,10 +8,16 @@ import {useRichPresenceOverride} from '../context/DiscordRichPresenceContext';
 import {useJoinedEvents} from '../context/JoinedEventsContext';
 import {buildResultsRichPresence} from '../lib/discordRichPresence';
 import {mergeOptimisticEventPatch} from '../lib/eventParticipation';
-import type {ForzaEvent} from '../lib/types';
-import {ApiRequestError, isApiConfigured, submitEventResults} from '../lib/api';
+import type {EventParticipant, ForzaEvent} from '../lib/types';
+import {
+  ApiRequestError,
+  isApiConfigured,
+  listGuildMembers,
+  submitEventResults,
+} from '../lib/api';
 import {track} from '../lib/analytics';
 import {API_ERROR_CODES} from '../lib/apiErrorCodes';
+import {formatDiscordHandle} from '../lib/discordHandle';
 import {buildResultSubmitRows} from '../lib/eventResults';
 import {resolveResultsRoster} from '../lib/eventRoster';
 import {fetchEventById, fetchEventResults} from '../lib/events';
@@ -26,8 +32,8 @@ import {
   buildEventDetailNavigateStateAfterSubmit,
   type EventResultsLocationState,
 } from '../lib/navigationState';
-import type {EventParticipant} from '../lib/types';
 import {
+  addResultsDriver,
   initResultsEntry,
   isResultsEntryComplete,
   moveOrderedDriver,
@@ -35,7 +41,7 @@ import {
   placeDriver,
   placementsForSubmit,
   poolDriversInScope,
-  resultsEntryGroupIndexes,
+  removeResultsDriver,
   setDriverOutcome,
   setResultsRankingMode,
   unplaceDriver,
@@ -51,17 +57,215 @@ import {ConfirmDialog} from '../components/ui/ConfirmDialog';
 import {ContentReveal} from '../components/ui/ContentReveal';
 import {PageLoading} from '../components/ui/PageLoading';
 import {SegmentGroup} from '../components/ui/SegmentGroup';
+import {Input} from '../components/ui/Input';
 import {sectionLabelClass} from '../components/ui/formStyles';
 import {useLoadingUI} from '../hooks/useLoadingUI';
 import {cn} from '../lib/cn';
 
-function toEntryDrivers(participants: EventParticipant[]): ResultsEntryDriver[] {
+function toEntryDrivers(
+  participants: EventParticipant[],
+): ResultsEntryDriver[] {
   return participants.map((p) => ({
     discordId: p.discordId,
     label: p.gamertag ?? p.username,
     avatarUrl: p.avatarUrl,
     groupIndex: p.groupIndex ?? 1,
+    username: p.username,
+    gamertag: p.gamertag,
   }));
+}
+
+type GuestPick = {
+  discordId: string;
+  username: string;
+  gamertag: string | null;
+  avatarUrl?: string;
+};
+
+function ResultsGuestSearch({
+  accessToken,
+  guildId,
+  excludeDiscordIds,
+  waitlist,
+  onPick,
+}: {
+  accessToken: string;
+  guildId: string | undefined;
+  excludeDiscordIds: readonly string[];
+  waitlist: GuestPick[];
+  onPick: (member: GuestPick) => void;
+}) {
+  const {t} = useTranslation();
+  const excluded = useMemo(
+    () => new Set(excludeDiscordIds),
+    [excludeDiscordIds],
+  );
+  const waitlistHits = waitlist.filter((p) => !excluded.has(p.discordId));
+  const [query, setQuery] = useState('');
+  const [hits, setHits] = useState<GuestPick[]>([]);
+  const [searching, setSearching] = useState(false);
+  const [searchError, setSearchError] = useState<string | null>(null);
+  const debounceRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const searchSerialRef = useRef(0);
+
+  useEffect(() => {
+    setQuery('');
+    setHits([]);
+    setSearchError(null);
+  }, [guildId]);
+
+  useEffect(() => {
+    if (!guildId || query.trim().length < 2) {
+      setHits([]);
+      setSearchError(null);
+      return;
+    }
+    if (debounceRef.current) clearTimeout(debounceRef.current);
+    debounceRef.current = setTimeout(() => {
+      const serial = ++searchSerialRef.current;
+      setSearching(true);
+      setSearchError(null);
+      void listGuildMembers(accessToken, guildId, query.trim())
+        .then((res) => {
+          if (serial !== searchSerialRef.current) return;
+          setHits(
+            res.members
+              .filter((m) => !excluded.has(m.discord_id))
+              .map((m) => ({
+                discordId: m.discord_id,
+                username: m.username,
+                gamertag: m.xbox_gamertag,
+                avatarUrl: m.avatar_url ?? undefined,
+              })),
+          );
+        })
+        .catch((e) => {
+          if (serial !== searchSerialRef.current) return;
+          setHits([]);
+          setSearchError(
+            e instanceof ApiRequestError || e instanceof Error
+              ? e.message
+              : String(e),
+          );
+        })
+        .finally(() => {
+          if (serial === searchSerialRef.current) setSearching(false);
+        });
+    }, 300);
+    return () => {
+      if (debounceRef.current) clearTimeout(debounceRef.current);
+    };
+  }, [accessToken, guildId, query, excluded]);
+
+  const pick = (member: GuestPick) => {
+    onPick(member);
+    setQuery('');
+    setHits([]);
+  };
+
+  if (!guildId && waitlistHits.length === 0) return null;
+
+  return (
+    <div className="space-y-3">
+      <p className={sectionLabelClass}>{t('results.addFromServer')}</p>
+      <p className="text-xs text-muted">{t('results.addFromServerHint')}</p>
+      {waitlistHits.length > 0 ? (
+        <>
+          <p className="text-xs text-muted">{t('eventDetail.waitlist')}</p>
+          <ul
+            className="max-h-40 overflow-y-auto rounded-lg border border-white/[0.08] bg-card"
+            role="listbox"
+          >
+            {waitlistHits.map((m) => (
+              <li key={m.discordId}>
+                <button
+                  type="button"
+                  role="option"
+                  className="flex w-full items-center gap-2 px-3 py-2 text-left text-sm text-slate-200 hover:bg-white/[0.06]"
+                  onClick={() => pick(m)}
+                >
+                  <UserAvatar
+                    src={m.avatarUrl}
+                    name={m.gamertag || m.username}
+                    size="sm"
+                    variant="neutral"
+                  />
+                  <span className="min-w-0 flex-1 truncate">
+                    <span className="font-medium">
+                      {m.gamertag || formatDiscordHandle(m.username)}
+                    </span>
+                    {m.gamertag ? (
+                      <span className="ml-1 text-xs text-muted">
+                        {formatDiscordHandle(m.username)}
+                      </span>
+                    ) : null}
+                  </span>
+                </button>
+              </li>
+            ))}
+          </ul>
+        </>
+      ) : null}
+      {guildId ? (
+        <>
+          <Input
+            placeholder={t('create.convoyLeaderSearchPlaceholder')}
+            value={query}
+            onChange={(e) => setQuery(e.target.value)}
+            autoComplete="off"
+          />
+          {searchError ? <Alert variant="warning">{searchError}</Alert> : null}
+          {searching ? (
+            <p className="text-xs text-muted">
+              {t('create.convoyLeaderSearching')}
+            </p>
+          ) : null}
+          {!searching &&
+          query.trim().length >= 2 &&
+          hits.length === 0 &&
+          !searchError ? (
+            <p className="text-xs text-muted">
+              {t('create.convoyLeaderNoResults')}
+            </p>
+          ) : null}
+          {hits.length > 0 ? (
+            <ul
+              className="max-h-40 overflow-y-auto rounded-lg border border-white/[0.08] bg-card"
+              role="listbox"
+            >
+              {hits.map((m) => (
+                <li key={m.discordId}>
+                  <button
+                    type="button"
+                    role="option"
+                    className="flex w-full items-center gap-2 px-3 py-2 text-left text-sm text-slate-200 hover:bg-white/[0.06]"
+                    onClick={() => pick(m)}
+                  >
+                    <UserAvatar
+                      src={m.avatarUrl}
+                      name={m.username}
+                      size="sm"
+                      variant="neutral"
+                    />
+                    <span className="min-w-0 flex-1 truncate">
+                      <span className="font-medium">
+                        {formatDiscordHandle(m.username)}
+                      </span>
+                      {m.gamertag ? (
+                        <span className="ml-1 text-xs text-muted">
+                          {m.gamertag}
+                        </span>
+                      ) : null}
+                    </span>
+                  </button>
+                </li>
+              ))}
+            </ul>
+          ) : null}
+        </>
+      ) : null}
+    </div>
+  );
 }
 
 function OutcomeChips({
@@ -115,7 +319,12 @@ export function EventResults() {
   const location = useLocation();
   const resultsState = location.state as EventResultsLocationState | null;
   const detailFrom = resultsState?.from;
-  const {user, getAccessToken, isSignedIn, loading: authInitializing} = useAuth();
+  const {
+    user,
+    getAccessToken,
+    isSignedIn,
+    loading: authInitializing,
+  } = useAuth();
   const {bumpRefresh, getLobbyPatch} = useJoinedEvents();
   const [entry, setEntry] = useState<ResultsEntryState | null>(null);
   const [activeGroup, setActiveGroup] = useState(1);
@@ -128,10 +337,12 @@ export function EventResults() {
   const [title, setTitle] = useState('');
   const [event, setEvent] = useState<ForzaEvent | null>(null);
   const [submitConfirmOpen, setSubmitConfirmOpen] = useState(false);
+  const [guestGroupIndex, setGuestGroupIndex] = useState(1);
   const {setRichPresenceOverride} = useRichPresenceOverride();
 
   const displayEvent = useMemo(
-    () => (event && id ? mergeOptimisticEventPatch(event, getLobbyPatch(id)) : null),
+    () =>
+      event && id ? mergeOptimisticEventPatch(event, getLobbyPatch(id)) : null,
     [event, id, getLobbyPatch],
   );
 
@@ -143,7 +354,8 @@ export function EventResults() {
 
   const pageMeta = useMemo(() => {
     if (!event) return null;
-    const origin = typeof window !== 'undefined' ? window.location.origin : undefined;
+    const origin =
+      typeof window !== 'undefined' ? window.location.origin : undefined;
     return buildEventPageMeta(event, {
       siteOrigin: origin,
       pageUrl: origin ? `${origin}${location.pathname}` : undefined,
@@ -157,7 +369,10 @@ export function EventResults() {
   const goToEventDetail = useCallback(
     (
       eventId: string,
-      options?: {replace?: boolean; state?: Parameters<typeof buildEventDetailLocationState>[0]},
+      options?: {
+        replace?: boolean;
+        state?: Parameters<typeof buildEventDetailLocationState>[0];
+      },
     ) => {
       navigate(`/event/${eventId}`, {
         replace: options?.replace ?? true,
@@ -237,7 +452,9 @@ export function EventResults() {
         }
 
         const drivers = toEntryDrivers(resolveResultsRoster(loaded));
-        const groups = [...new Set(drivers.map((d) => d.groupIndex))].sort((a, b) => a - b);
+        const groups = [...new Set(drivers.map((d) => d.groupIndex))].sort(
+          (a, b) => a - b,
+        );
         setEntry(initResultsEntry(drivers, 'per_group'));
         setActiveGroup(groups[0] ?? 1);
       } catch (err) {
@@ -255,15 +472,24 @@ export function EventResults() {
     };
   }, [id, user, goToEventDetail, discordToken, authInitializing]);
 
-  const groupIndexes = entry ? resultsEntryGroupIndexes(entry) : [];
-  const multiGroup = groupIndexes.length > 1;
+  const groupCount = event?.groupCount ?? 1;
+  const groupIndexes = Array.from({length: groupCount}, (_, i) => i + 1);
+  const multiGroup = groupCount > 1;
   const entryComplete = entry ? isResultsEntryComplete(entry) : false;
+  const addGroupIndex =
+    entry?.mode === 'per_group' ? activeGroup : guestGroupIndex;
 
   const ordered = entry
-    ? orderedDriversInScope(entry, entry.mode === 'per_group' ? activeGroup : undefined)
+    ? orderedDriversInScope(
+        entry,
+        entry.mode === 'per_group' ? activeGroup : undefined,
+      )
     : [];
   const pool = entry
-    ? poolDriversInScope(entry, entry.mode === 'per_group' ? activeGroup : undefined)
+    ? poolDriversInScope(
+        entry,
+        entry.mode === 'per_group' ? activeGroup : undefined,
+      )
     : [];
 
   async function handleSubmit() {
@@ -280,15 +506,24 @@ export function EventResults() {
         throw new Error(t('results.notConfigured'));
       }
 
-      const fresh = await fetchEventById(id, {discordToken: token});
-      if (!fresh) {
-        throw new Error(t('eventDetail.notFound'));
-      }
-      const allowedIds = new Set(resolveResultsRoster(fresh).map((p) => p.discordId));
-      const payload = buildResultSubmitRows(
-        placementsForSubmit(entry).filter((p) => allowedIds.has(p.discordId)),
-        entry.mode,
+      const extraById = new Map(
+        entry.drivers
+          .filter((d) => d.addedFromGuild)
+          .map((d) => [d.discordId, d]),
       );
+      const payload = buildResultSubmitRows(
+        placementsForSubmit(entry),
+        entry.mode,
+      ).map((row) => {
+        const extra = extraById.get(row.discord_id);
+        if (!extra) return row;
+        return {
+          ...row,
+          username: extra.username,
+          avatar_url: extra.avatarUrl ?? null,
+          gamertag: extra.gamertag?.trim() || undefined,
+        };
+      });
 
       if (payload.length === 0) {
         throw new Error(t('results.noParticipants'));
@@ -301,12 +536,18 @@ export function EventResults() {
         fetchEventResults(id),
       ]);
       bumpRefresh();
-      let detailEvent = updated ?? fresh;
-      if (submitRes.rating_applied === false) {
-        detailEvent = {...detailEvent, isRanked: true, ratingApplied: false};
-      }
+      const detailEvent = updated ?? event;
+      if (!detailEvent) return;
+      const seeded =
+        submitRes.rating_applied === false
+          ? {...detailEvent, isRanked: true, ratingApplied: false}
+          : detailEvent;
       goToEventDetail(id, {
-        state: buildEventDetailNavigateStateAfterSubmit(detailEvent, savedOutcome, detailFrom),
+        state: buildEventDetailNavigateStateAfterSubmit(
+          seeded,
+          savedOutcome,
+          detailFrom,
+        ),
       });
     } catch (e) {
       if (
@@ -335,7 +576,9 @@ export function EventResults() {
     <ContentReveal className="pb-10 pt-5">
       <TextLink
         to={id ? `/event/${id}` : '/'}
-        state={id ? buildEventDetailLocationState(undefined, detailFrom) : undefined}
+        state={
+          id ? buildEventDetailLocationState(undefined, detailFrom) : undefined
+        }
         tone="nav"
         className="mb-5 inline-flex items-center gap-1.5"
       >
@@ -345,6 +588,9 @@ export function EventResults() {
 
       <p className="text-sm font-semibold text-white">{title}</p>
       <p className="mt-1 text-xs text-muted">{t('results.instructions')}</p>
+      <p className="mt-1 text-xs text-muted">
+        {t(event.isRanked ? 'results.dnfDnsHintRanked' : 'results.dnfDnsHint')}
+      </p>
 
       {multiGroup ? (
         <SegmentGroup
@@ -395,19 +641,33 @@ export function EventResults() {
         </Alert>
       )}
 
-      <p className={cn(sectionLabelClass, 'mt-6')}>{t('results.finishOrder')}</p>
+      <p className={cn(sectionLabelClass, 'mt-6')}>
+        {t('results.finishOrder')}
+      </p>
       {ordered.length === 0 ? (
-        <p className="mt-2 text-xs text-muted">{t('results.finishOrderEmpty')}</p>
+        <p className="mt-2 text-xs text-muted">
+          {t('results.finishOrderEmpty')}
+        </p>
       ) : (
         <ol className="mt-2 space-y-2">
           {ordered.map((row, index) => (
             <li key={row.discordId}>
-              <Panel variant="soft" className="flex items-center gap-2 px-3 py-2.5">
+              <Panel
+                variant="soft"
+                className="flex items-center gap-2 px-3 py-2.5"
+              >
                 <span className="w-6 shrink-0 text-center text-sm font-bold tabular-nums text-amber-300/90">
                   {index + 1}
                 </span>
-                <UserAvatar src={row.avatarUrl} name={row.label} size="xs" variant="neutral" />
-                <span className="min-w-0 flex-1 truncate text-sm text-white">{row.label}</span>
+                <UserAvatar
+                  src={row.avatarUrl}
+                  name={row.label}
+                  size="xs"
+                  variant="neutral"
+                />
+                <span className="min-w-0 flex-1 truncate text-sm text-white">
+                  {row.label}
+                </span>
                 {entry.mode === 'overall' && multiGroup ? (
                   <span className="shrink-0 text-[10px] font-bold uppercase tracking-wider text-muted">
                     {t('eventDetail.group', {n: row.groupIndex})}
@@ -420,7 +680,11 @@ export function EventResults() {
                     size="icon"
                     className="p-0.5 text-muted hover:text-white disabled:opacity-30"
                     disabled={index === 0}
-                    onClick={() => setEntry((s) => (s ? moveOrderedDriver(s, row.discordId, -1) : s))}
+                    onClick={() =>
+                      setEntry((s) =>
+                        s ? moveOrderedDriver(s, row.discordId, -1) : s,
+                      )
+                    }
                     aria-label={t('results.moveUp')}
                   >
                     <ChevronUp className="h-4 w-4" />
@@ -431,7 +695,11 @@ export function EventResults() {
                     size="icon"
                     className="p-0.5 text-muted hover:text-white disabled:opacity-30"
                     disabled={index === ordered.length - 1}
-                    onClick={() => setEntry((s) => (s ? moveOrderedDriver(s, row.discordId, 1) : s))}
+                    onClick={() =>
+                      setEntry((s) =>
+                        s ? moveOrderedDriver(s, row.discordId, 1) : s,
+                      )
+                    }
                     aria-label={t('results.moveDown')}
                   >
                     <ChevronDown className="h-4 w-4" />
@@ -442,7 +710,9 @@ export function EventResults() {
                   variant="ghost"
                   size="icon"
                   className="shrink-0 p-1 text-muted hover:text-white"
-                  onClick={() => setEntry((s) => (s ? unplaceDriver(s, row.discordId) : s))}
+                  onClick={() =>
+                    setEntry((s) => (s ? unplaceDriver(s, row.discordId) : s))
+                  }
                   aria-label={t('results.removeFromOrder')}
                 >
                   <X className="h-4 w-4" />
@@ -474,7 +744,9 @@ export function EventResults() {
                     type="button"
                     className="flex min-w-0 flex-1 items-center gap-2 text-left disabled:cursor-default"
                     disabled={isOut}
-                    onClick={() => setEntry((s) => (s ? placeDriver(s, row.discordId) : s))}
+                    onClick={() =>
+                      setEntry((s) => (s ? placeDriver(s, row.discordId) : s))
+                    }
                   >
                     <span
                       className={cn(
@@ -482,9 +754,18 @@ export function EventResults() {
                         isOut ? 'text-muted' : 'text-slate-500',
                       )}
                     >
-                      {isOut ? (outcome === 'dns' ? t('results.dns') : t('results.dnf')) : '·'}
+                      {isOut
+                        ? outcome === 'dns'
+                          ? t('results.dns')
+                          : t('results.dnf')
+                        : '·'}
                     </span>
-                    <UserAvatar src={row.avatarUrl} name={row.label} size="xs" variant="neutral" />
+                    <UserAvatar
+                      src={row.avatarUrl}
+                      name={row.label}
+                      size="xs"
+                      variant="neutral"
+                    />
                     <span
                       className={cn(
                         'min-w-0 flex-1 truncate text-sm',
@@ -525,6 +806,22 @@ export function EventResults() {
                       )
                     }
                   />
+                  {row.addedFromGuild ? (
+                    <Button
+                      type="button"
+                      variant="ghost"
+                      size="icon"
+                      className="shrink-0 p-1 text-muted hover:text-white"
+                      onClick={() =>
+                        setEntry((s) =>
+                          s ? removeResultsDriver(s, row.discordId) : s,
+                        )
+                      }
+                      aria-label={t('results.removeGuest')}
+                    >
+                      <X className="h-4 w-4" />
+                    </Button>
+                  ) : null}
                 </Panel>
               </li>
             );
@@ -532,12 +829,67 @@ export function EventResults() {
         </ul>
       )}
 
-      {entry.drivers.length === 0 && (
-        <p className="mt-8 text-center text-sm text-muted">{t('results.noParticipants')}</p>
-      )}
+      {discordToken &&
+      (event.guildId || event.participants.some((p) => p.waitlisted)) ? (
+        <div className="mt-8 space-y-3">
+          {multiGroup && entry.mode === 'overall' ? (
+            <div className="space-y-2">
+              <p className={sectionLabelClass}>{t('results.addToConvoy')}</p>
+              <SegmentGroup
+                ariaLabel={t('results.addToConvoyAria')}
+                value={String(guestGroupIndex)}
+                onChange={(v) => setGuestGroupIndex(Number(v))}
+                options={groupIndexes.map((g) => ({
+                  value: String(g),
+                  label: t('eventDetail.group', {n: g}),
+                }))}
+              />
+            </div>
+          ) : null}
+          <ResultsGuestSearch
+            accessToken={discordToken}
+            guildId={event.guildId}
+            excludeDiscordIds={entry.drivers.map((d) => d.discordId)}
+            waitlist={event.participants
+              .filter((p) => p.waitlisted)
+              .map((p) => ({
+                discordId: p.discordId,
+                username: p.username,
+                gamertag: p.gamertag ?? null,
+                avatarUrl: p.avatarUrl,
+              }))}
+            onPick={(member) => {
+              setEntry((s) =>
+                s
+                  ? addResultsDriver(s, {
+                      discordId: member.discordId,
+                      label:
+                        member.gamertag?.trim() ||
+                        formatDiscordHandle(member.username) ||
+                        member.username,
+                      avatarUrl: member.avatarUrl,
+                      groupIndex: addGroupIndex,
+                      username: member.username,
+                      gamertag: member.gamertag,
+                      addedFromGuild: true,
+                    })
+                  : s,
+              );
+            }}
+          />
+        </div>
+      ) : null}
+
+      {entry.drivers.length === 0 && !event.guildId ? (
+        <p className="mt-8 text-center text-sm text-muted">
+          {t('results.noParticipants')}
+        </p>
+      ) : null}
 
       {!entryComplete && entry.drivers.length > 0 ? (
-        <p className="mt-6 text-center text-xs text-muted">{t('results.placeAllHint')}</p>
+        <p className="mt-6 text-center text-xs text-muted">
+          {t('results.placeAllHint')}
+        </p>
       ) : null}
 
       <Button

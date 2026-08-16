@@ -31,6 +31,9 @@ const baseValues: CreateEventFormValues = {
   targetGuildId: 'guild-1',
   targetGuildName: 'Test Server',
   targetChannelId: 'channel-1',
+  targetVoiceChannelId: '',
+  isRanked: false,
+  targetGuildRatingEnabled: false,
 };
 
 describe('create event validation', () => {

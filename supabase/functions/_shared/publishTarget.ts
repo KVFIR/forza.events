@@ -4,6 +4,7 @@ import {
   fetchGuildMember,
   fetchGuildRoles,
   getBotUserId,
+  GUILD_TEXT,
   type DiscordTextChannel,
 } from './channelPermissions.ts';
 import {botIsInGuild} from './discord.ts';
@@ -32,7 +33,7 @@ export async function validatePublishChannelTarget(
     const code = API_ERROR_CODES.CHANNEL_NOT_FOUND;
     return {ok: false, code, error: apiErrorMessage(code)};
   }
-  if (channel.type !== 0) {
+  if (channel.type !== GUILD_TEXT) {
     const code = API_ERROR_CODES.CHANNEL_NOT_TEXT;
     return {ok: false, code, error: apiErrorMessage(code)};
   }

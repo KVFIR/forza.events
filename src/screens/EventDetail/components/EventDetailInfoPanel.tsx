@@ -1,9 +1,9 @@
 import {useMemo} from 'react';
 import {useTranslation} from 'react-i18next';
-import {Calendar, Crown, User, Car, Shield, Wrench} from 'lucide-react';
+import {Calendar, Crown, Mic, User, Car, Shield, Wrench} from 'lucide-react';
 import {formatDiscordHandle} from '../../../lib/discordHandle';
 import {RoadIcon} from '../../../components/icons/RoadIcon';
-import {formatTrackDisplayLine} from '../../../lib/eventTracks';
+import type {EventTrack, ForzaEvent} from '../../../lib/types';
 import {formatCarDisplayName} from '../../../lib/carDisplay';
 import {
   formatOpenBuildCarRulesDisplay,
@@ -13,14 +13,54 @@ import {piClassColor, piToClass} from '../../../lib/pi';
 import {normalizeEventGame} from '../../../lib/eventGames';
 import {sectionLabelClass} from '../../../components/ui/formStyles';
 import {resolveEventGroups} from '../../../lib/eventRoster';
-import type {ForzaEvent} from '../../../lib/types';
+import {openExternalUrl} from '../../../lib/discordInstall';
+import {
+  eventVoiceJoinUrl,
+  voiceChannelMention,
+} from '../../../lib/eventSpec';
+import {TextButton} from '../../../components/ui/TextButton';
 import {cn} from '../../../lib/cn';
+import {handleShareCodeCopy, handleShareCodeDoubleClick} from '../../../lib/shareCode';
 
 const carRuleRowClass =
   'grid grid-cols-[minmax(0,1fr)_3.5rem] items-center gap-x-3 text-sm leading-tight';
 
 const rowClass = 'flex gap-3 py-2 first:pt-0';
 const iconClass = 'mt-0.5 h-4 w-4 shrink-0 text-muted';
+function ShareCodeText({value}: {value: string}) {
+  return <span onMouseDown={handleShareCodeDoubleClick}>{value}</span>;
+}
+
+function TrackDisplayLine({
+  track,
+  fallbackName,
+}: {
+  track: EventTrack;
+  fallbackName: string;
+}) {
+  const name = track.name.trim() || fallbackName;
+  const code = track.shareCode?.trim();
+  const format = track.format?.trim();
+  const codeEl = code ? <ShareCodeText value={code} /> : null;
+  if (name) {
+    return (
+      <>
+        {name}
+        {codeEl ? <> · {codeEl}</> : null}
+        {format ? ` — ${format}` : null}
+      </>
+    );
+  }
+  if (codeEl) {
+    return (
+      <>
+        {codeEl}
+        {format ? ` — ${format}` : null}
+      </>
+    );
+  }
+  return format ?? '';
+}
 
 type Props = {
   event: ForzaEvent;
@@ -42,9 +82,11 @@ export function EventDetailInfoPanel({event, when}: Props) {
     [event],
   );
   const showConvoyLeaderList = convoyLeaderGroups.length > 1 || multiGroup;
+  const joinVoiceUrl = eventVoiceJoinUrl(event);
+  const voiceMention = voiceChannelMention(event.voiceChannelName);
 
   return (
-    <div className="mt-5 divide-y divide-white/[0.05]">
+    <div className="mt-5 divide-y divide-white/[0.05]" onCopy={handleShareCodeCopy}>
       <div className={rowClass}>
         <Calendar className={iconClass} />
         <div>
@@ -52,6 +94,40 @@ export function EventDetailInfoPanel({event, when}: Props) {
           <p className="mt-0.5 text-sm text-slate-200">{when}</p>
         </div>
       </div>
+
+      {joinVoiceUrl ? (
+        <div className={rowClass}>
+          <Mic className={iconClass} />
+          <div className="min-w-0">
+            <p className={sectionLabelClass}>{t('eventDetail.voice')}</p>
+            <TextButton
+              tone="action"
+              className={cn(
+                'mt-0.5 inline-flex max-w-full items-baseline rounded-sm !text-sm',
+                'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent-purple/50',
+                voiceMention &&
+                  'underline decoration-accent-purple/40 underline-offset-[3px] hover:decoration-accent-purple',
+              )}
+              title={voiceMention ?? undefined}
+              aria-label={
+                event.voiceChannelName?.trim()
+                  ? t('eventDetail.joinVoiceNamed', {name: event.voiceChannelName.trim()})
+                  : t('eventDetail.joinVoice')
+              }
+              onClick={() => void openExternalUrl(joinVoiceUrl)}
+            >
+              {voiceMention ? (
+                <span className="min-w-0 truncate">
+                  <span className="font-normal text-muted" aria-hidden>#</span>
+                  {voiceMention.slice(1)}
+                </span>
+              ) : (
+                t('eventDetail.joinVoice')
+              )}
+            </TextButton>
+          </div>
+        </div>
+      ) : null}
 
       <div className={rowClass}>
         <User className={iconClass} />
@@ -101,18 +177,11 @@ export function EventDetailInfoPanel({event, when}: Props) {
           <div className="min-w-0">
             <p className={sectionLabelClass}>{t('eventDetail.tracks')}</p>
             {event.tracks!.length === 1 ? (
-              <p
-                className={cn(
-                  'mt-1 text-sm text-slate-200',
-                  event.tracks![0].shareCode && !event.tracks![0].name
-                    ? 'font-mono tracking-wide'
-                    : '',
-                )}
-              >
-                {formatTrackDisplayLine(
-                  event.tracks![0],
-                  t('create.trackFallback', {n: 1}),
-                )}
+              <p className="mt-1 text-sm text-slate-200">
+                <TrackDisplayLine
+                  track={event.tracks![0]}
+                  fallbackName={t('create.trackFallback', {n: 1})}
+                />
               </p>
             ) : (
               <ol className="mt-1 space-y-0.5">
@@ -124,12 +193,11 @@ export function EventDetailInfoPanel({event, when}: Props) {
                     <span className="inline-flex h-5 min-w-5 shrink-0 items-center justify-center text-[10px] font-bold tabular-nums text-muted">
                       {i + 1}
                     </span>
-                    <span
-                      className={
-                        track.shareCode && !track.name ? 'font-mono tracking-wide' : ''
-                      }
-                    >
-                      {formatTrackDisplayLine(track, t('create.trackFallback', {n: i + 1}))}
+                    <span>
+                      <TrackDisplayLine
+                        track={track}
+                        fallbackName={t('create.trackFallback', {n: i + 1})}
+                      />
                     </span>
                   </li>
                 ))}
@@ -198,7 +266,7 @@ export function EventDetailInfoPanel({event, when}: Props) {
                         {c.tuneShareCode ? (
                           <span className="flex items-center gap-1">
                             <Wrench className="h-3 w-3 shrink-0" />
-                            {c.tuneShareCode}
+                            <ShareCodeText value={c.tuneShareCode} />
                           </span>
                         ) : null}
                         {c.restrictions.map((r) => (

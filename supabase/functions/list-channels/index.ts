@@ -5,7 +5,9 @@ import {
   fetchGuildMember,
   fetchGuildRoles,
   getBotUserId,
+  GUILD_TEXT,
   LIST_CHANNELS_HINT_CODES,
+  listVisibleVoiceChannels,
   type ListChannelsHintCode,
 } from '../_shared/channelPermissions.ts';
 import {API_ERROR_CODES} from '../_shared/apiErrorCodes.ts';
@@ -51,8 +53,9 @@ serve(async (req) => {
     const channels = await fetchGuildChannels(guild_id);
     const channelsById = new Map(channels.map((c) => [c.id, c]));
     const text = channels
-      .filter((c) => c.type === 0)
+      .filter((c) => c.type === GUILD_TEXT)
       .sort((a, b) => a.position - b.position);
+    const voice = listVisibleVoiceChannels(channels);
 
     const botId = await getBotUserId();
     const [roles, member] = await Promise.all([
@@ -73,6 +76,7 @@ serve(async (req) => {
 
     return jsonResponse({
       channels: postable,
+      voice_channels: voice,
       hint_code: (text.length === 0
         ? LIST_CHANNELS_HINT_CODES.NO_TEXT_CHANNELS
         : postable.length === 0

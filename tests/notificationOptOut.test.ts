@@ -14,4 +14,8 @@ describe('bypassesDmOptOut', () => {
     expect(bypassesDmOptOut('waitlist_seat_opened', {})).toBe(true);
     expect(bypassesDmOptOut('group_reassigned', {})).toBe(true);
   });
+
+  it('does not treat new-event alerts as transactional bell bypass', () => {
+    expect(bypassesDmOptOut('event_published', {})).toBe(false);
+  });
 });

@@ -1,6 +1,7 @@
 import {useTranslation} from 'react-i18next';
-import {FormSection} from './Field';
+import {VoiceChannelPicker} from '../../../components/PublishTargetPicker';
 import {toggleRowClass} from '../../../components/ui/formStyles';
+import {FormSection} from './Field';
 import type {CreateEventType} from '../types';
 
 type Props = {
@@ -9,15 +10,23 @@ type Props = {
   eventType: CreateEventType;
   isRanked: boolean;
   targetGuildRatingEnabled: boolean;
+  accessToken: string;
+  guildId: string;
+  voiceChannelId: string;
+  onVoiceChannelChange: (id: string) => void;
 };
 
-/** Published target is locked; ranked is display-only after publish. */
+/** Published target is locked; voice and ranked stay editable until start. */
 export function PublishedTargetSummary({
   guildName,
   hasChannel,
   eventType,
   isRanked,
   targetGuildRatingEnabled,
+  accessToken,
+  guildId,
+  voiceChannelId,
+  onVoiceChannelChange,
 }: Props) {
   const {t} = useTranslation();
   const showRanked =
@@ -40,6 +49,14 @@ export function PublishedTargetSummary({
           </div>
         </dl>
         <p className="text-xs text-muted">{t('create.publishedTargetLocked')}</p>
+        {guildId && accessToken ? (
+          <VoiceChannelPicker
+            accessToken={accessToken}
+            guildId={guildId}
+            voiceChannelId={voiceChannelId}
+            onChange={onVoiceChannelChange}
+          />
+        ) : null}
       </FormSection>
 
       {showRanked ? (

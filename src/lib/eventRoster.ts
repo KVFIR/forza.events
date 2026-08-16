@@ -266,7 +266,7 @@ export function buildAddGroupLeaderCandidates(
   return out;
 }
 
-/** All participants eligible for results (one row per racer; waitlisted never raced). */
+/** Active (non-waitlisted) racers for results entry. Host may add waitlisted / guild guests on submit. */
 export function resolveResultsRoster(
   event: Pick<ForzaEvent, 'participants'>,
 ): EventParticipant[] {

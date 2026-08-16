@@ -7,6 +7,10 @@ export type ResultsEntryDriver = {
   label: string;
   avatarUrl?: string;
   groupIndex: number;
+  username?: string;
+  gamertag?: string | null;
+  /** Host-added from guild search / waitlist — can be removed before submit. */
+  addedFromGuild?: boolean;
 };
 
 export type DriverOutcome = 'pending' | 'dnf' | 'dns';
@@ -35,7 +39,41 @@ export function initResultsEntry(
 }
 
 export function resultsEntryGroupIndexes(state: ResultsEntryState): number[] {
-  return [...new Set(state.drivers.map((d) => d.groupIndex))].sort((a, b) => a - b);
+  return [...new Set(state.drivers.map((d) => d.groupIndex))].sort(
+    (a, b) => a - b,
+  );
+}
+
+export function addResultsDriver(
+  state: ResultsEntryState,
+  driver: ResultsEntryDriver,
+): ResultsEntryState {
+  if (state.drivers.some((d) => d.discordId === driver.discordId)) return state;
+  const next = {...driver, addedFromGuild: driver.addedFromGuild ?? true};
+  return {
+    ...state,
+    drivers: [...state.drivers, next],
+    outcome: {...state.outcome, [next.discordId]: 'pending'},
+    groupOrders: state.groupOrders[next.groupIndex]
+      ? state.groupOrders
+      : {...state.groupOrders, [next.groupIndex]: []},
+  };
+}
+
+export function removeResultsDriver(
+  state: ResultsEntryState,
+  discordId: string,
+): ResultsEntryState {
+  const driver = state.drivers.find((d) => d.discordId === discordId);
+  if (!driver?.addedFromGuild) return state;
+  const cleared = removeFromAllOrders(state, discordId);
+  const outcome = {...cleared.outcome};
+  delete outcome[discordId];
+  return {
+    ...cleared,
+    drivers: cleared.drivers.filter((d) => d.discordId !== discordId),
+    outcome,
+  };
 }
 
 function withOrder(
@@ -50,7 +88,10 @@ function withOrder(
   };
 }
 
-function removeFromAllOrders(state: ResultsEntryState, discordId: string): ResultsEntryState {
+function removeFromAllOrders(
+  state: ResultsEntryState,
+  discordId: string,
+): ResultsEntryState {
   const overallOrder = state.overallOrder.filter((id) => id !== discordId);
   const groupOrders: Record<number, string[]> = {};
   for (const [g, ids] of Object.entries(state.groupOrders)) {
@@ -68,10 +109,14 @@ export function setResultsRankingMode(
 }
 
 /** Append a pending driver to the finish order for their scope. */
-export function placeDriver(state: ResultsEntryState, discordId: string): ResultsEntryState {
+export function placeDriver(
+  state: ResultsEntryState,
+  discordId: string,
+): ResultsEntryState {
   const driver = state.drivers.find((d) => d.discordId === discordId);
   if (!driver) return state;
-  if (state.outcome[discordId] === 'dnf' || state.outcome[discordId] === 'dns') return state;
+  if (state.outcome[discordId] === 'dnf' || state.outcome[discordId] === 'dns')
+    return state;
 
   const cleared = removeFromAllOrders(state, discordId);
   const order =
@@ -86,7 +131,10 @@ export function placeDriver(state: ResultsEntryState, discordId: string): Result
   };
 }
 
-export function unplaceDriver(state: ResultsEntryState, discordId: string): ResultsEntryState {
+export function unplaceDriver(
+  state: ResultsEntryState,
+  discordId: string,
+): ResultsEntryState {
   return {
     ...removeFromAllOrders(state, discordId),
     outcome: {...state.outcome, [discordId]: 'pending'},
@@ -131,7 +179,9 @@ export function orderedDriversInScope(
       ? state.overallOrder
       : (state.groupOrders[groupIndex ?? 1] ?? []);
   const byId = new Map(state.drivers.map((d) => [d.discordId, d]));
-  return ids.map((id) => byId.get(id)).filter((d): d is ResultsEntryDriver => Boolean(d));
+  return ids
+    .map((id) => byId.get(id))
+    .filter((d): d is ResultsEntryDriver => Boolean(d));
 }
 
 export function poolDriversInScope(
@@ -144,7 +194,11 @@ export function poolDriversInScope(
       : (state.groupOrders[groupIndex ?? 1] ?? []),
   );
   return state.drivers.filter((d) => {
-    if (state.mode === 'per_group' && groupIndex != null && d.groupIndex !== groupIndex) {
+    if (
+      state.mode === 'per_group' &&
+      groupIndex != null &&
+      d.groupIndex !== groupIndex
+    ) {
       return false;
     }
     if (ordered.has(d.discordId)) return false;
@@ -174,7 +228,9 @@ export type ResultsPlacementForSubmit = {
 };
 
 /** Flatten entry state into placement order for `buildResultSubmitRows`. */
-export function placementsForSubmit(state: ResultsEntryState): ResultsPlacementForSubmit[] {
+export function placementsForSubmit(
+  state: ResultsEntryState,
+): ResultsPlacementForSubmit[] {
   const byId = new Map(state.drivers.map((d) => [d.discordId, d]));
   const out: ResultsPlacementForSubmit[] = [];
 
@@ -182,14 +238,24 @@ export function placementsForSubmit(state: ResultsEntryState): ResultsPlacementF
     for (const id of state.overallOrder) {
       const d = byId.get(id);
       if (!d) continue;
-      out.push({discordId: id, groupIndex: d.groupIndex, dnf: false, dns: false});
+      out.push({
+        discordId: id,
+        groupIndex: d.groupIndex,
+        dnf: false,
+        dns: false,
+      });
     }
   } else {
     for (const g of resultsEntryGroupIndexes(state)) {
       for (const id of state.groupOrders[g] ?? []) {
         const d = byId.get(id);
         if (!d) continue;
-        out.push({discordId: id, groupIndex: d.groupIndex, dnf: false, dns: false});
+        out.push({
+          discordId: id,
+          groupIndex: d.groupIndex,
+          dnf: false,
+          dns: false,
+        });
       }
     }
   }
@@ -197,9 +263,19 @@ export function placementsForSubmit(state: ResultsEntryState): ResultsPlacementF
   for (const d of state.drivers) {
     const outcome = state.outcome[d.discordId] ?? 'pending';
     if (outcome === 'dnf') {
-      out.push({discordId: d.discordId, groupIndex: d.groupIndex, dnf: true, dns: false});
+      out.push({
+        discordId: d.discordId,
+        groupIndex: d.groupIndex,
+        dnf: true,
+        dns: false,
+      });
     } else if (outcome === 'dns') {
-      out.push({discordId: d.discordId, groupIndex: d.groupIndex, dnf: false, dns: true});
+      out.push({
+        discordId: d.discordId,
+        groupIndex: d.groupIndex,
+        dnf: false,
+        dns: true,
+      });
     }
   }
   return out;

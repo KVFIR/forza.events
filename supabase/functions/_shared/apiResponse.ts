@@ -19,6 +19,7 @@ const API_MESSAGES_EN: Partial<Record<ApiErrorCode, string>> = {
   [API_ERROR_CODES.CHANNEL_NOT_FOUND]:
     'Channel not found. Choose another channel or refresh the list.',
   [API_ERROR_CODES.CHANNEL_NOT_TEXT]: 'Only text channels can be used for announcements.',
+  [API_ERROR_CODES.CHANNEL_NOT_VOICE]: 'Choose a voice channel in this server.',
   [API_ERROR_CODES.CHANNEL_WRONG_GUILD]: 'Channel does not belong to the selected server.',
   [API_ERROR_CODES.BOT_NOT_GUILD_MEMBER]: 'Bot is not a member of this server.',
   [API_ERROR_CODES.BOT_CANNOT_POST]: BOT_CANNOT_POST_MESSAGE,
@@ -29,7 +30,9 @@ const API_MESSAGES_EN: Partial<Record<ApiErrorCode, string>> = {
   [API_ERROR_CODES.EVENT_NOT_FOUND]: 'Event not found',
   [API_ERROR_CODES.NOT_DRAFT]: 'Only draft events can be published',
   [API_ERROR_CODES.RESULTS_PARTICIPANTS_ONLY]:
-    'Results can only include joined drivers or the convoy leader (host leader is always allowed).',
+    'Results can only include joined drivers, waitlisted racers, or members of this Discord server.',
+  [API_ERROR_CODES.RESULTS_NOT_IN_GUILD]:
+    'That driver is not a member of this Discord server.',
   [API_ERROR_CODES.PUBLISH_IN_PROGRESS]:
     'This event is already being published. Wait a moment and try again.',
   [API_ERROR_CODES.RESULTS_ALREADY_SUBMITTED]:

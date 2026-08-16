@@ -41,6 +41,9 @@ export type DiscordMember = {
   roles: string[];
 };
 
+export const GUILD_TEXT = 0;
+export const GUILD_VOICE = 2;
+
 export type DiscordTextChannel = {
   id: string;
   name: string;
@@ -50,6 +53,30 @@ export type DiscordTextChannel = {
   parent_id?: string | null;
   permission_overwrites?: PermissionOverwrite[];
 };
+
+export function isGuildVoiceChannel(channel: Pick<DiscordTextChannel, 'type'>): boolean {
+  return channel.type === GUILD_VOICE;
+}
+
+/** Picker list: guild voice channels the bot can see (GET already hides the rest). */
+export function listVisibleVoiceChannels(
+  channels: DiscordTextChannel[],
+): {id: string; name: string; position: number}[] {
+  return channels
+    .filter(isGuildVoiceChannel)
+    .sort((a, b) => a.position - b.position)
+    .map((c) => ({id: c.id, name: c.name, position: c.position}));
+}
+
+export function voiceChannelTargetError(
+  channel: Pick<DiscordTextChannel, 'type' | 'guild_id'> | null,
+  guildId: string,
+): 'CHANNEL_NOT_FOUND' | 'CHANNEL_NOT_VOICE' | 'CHANNEL_WRONG_GUILD' | null {
+  if (!channel) return 'CHANNEL_NOT_FOUND';
+  if (channel.guild_id !== guildId) return 'CHANNEL_WRONG_GUILD';
+  if (!isGuildVoiceChannel(channel)) return 'CHANNEL_NOT_VOICE';
+  return null;
+}
 
 /** Category + channel overwrites (Discord inheritance, root → leaf). */
 export function mergedChannelOverwrites(
@@ -146,6 +173,19 @@ export async function fetchGuildChannels(guildId: string): Promise<DiscordTextCh
     );
   }
   return (await res.json()) as DiscordTextChannel[];
+}
+
+export async function fetchDiscordChannel(channelId: string): Promise<DiscordTextChannel | null> {
+  const res = await discordApiFetch(`https://discord.com/api/v10/channels/${channelId}`, {
+    headers: botHeaders(),
+  });
+  if (res.status === 404 || res.status === 403) return null;
+  if (!res.ok) {
+    throw new Error(
+      discordRateLimitMessage(res.status) ?? `Failed to fetch channel: ${res.status}`,
+    );
+  }
+  return (await res.json()) as DiscordTextChannel;
 }
 
 export async function fetchGuildRoles(guildId: string): Promise<DiscordRole[]> {

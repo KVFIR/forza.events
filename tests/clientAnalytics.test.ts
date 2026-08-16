@@ -32,6 +32,10 @@ describe('normalizeClientEvent', () => {
       normalizeClientEvent({name: 'notification_dm_disable', outcome: 'success'}, 'activity', '1')
         ?.event_name,
     ).toBe('notification_dm_disable');
+    expect(
+      normalizeClientEvent({name: 'notification_new_event_enable', outcome: 'success'}, 'activity', '1')
+        ?.event_name,
+    ).toBe('notification_new_event_enable');
   });
 
   it('rejects invalid names and meta', () => {

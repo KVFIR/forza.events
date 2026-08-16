@@ -46,3 +46,22 @@ describe('enrichPayloadForSend event_updated', () => {
     expect(out.carsSummary).toBe('PI cap 650');
   });
 });
+
+describe('enrichPayloadForSend event_published', () => {
+  it('adds local time, type, and game labels', () => {
+    const out = enrichPayloadForSend(
+      'event_published',
+      {
+        eventTitle: 'Night Cruise',
+        startsAt: '2030-06-15T18:00:00.000Z',
+        timezone: 'UTC',
+        eventType: 'cruise',
+        game: 'fh6',
+      },
+      'en',
+    );
+    expect(out.startsAtLocal).toMatch(/Jun/);
+    expect(out.typeLabel).toBe('Meet & cruise');
+    expect(out.gameLabel).toBe('FH6');
+  });
+});

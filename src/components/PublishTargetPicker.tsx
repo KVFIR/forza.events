@@ -366,6 +366,132 @@ export function PublishTargetPicker({
   );
 }
 
+const SELECTED_VOICE_SENTINEL = '__forza_selected_voice__';
+
+export function VoiceChannelPicker({
+  accessToken,
+  guildId,
+  voiceChannelId,
+  onChange,
+}: {
+  accessToken: string;
+  guildId: string;
+  voiceChannelId: string;
+  onChange: (id: string) => void;
+}) {
+  const {t} = useTranslation();
+  const [channels, setChannels] = useState<{id: string; name: string}[]>([]);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+  const requestRef = useRef(0);
+
+  const load = useCallback(
+    (options?: {fresh?: boolean}) => {
+      if (!guildId) {
+        requestRef.current += 1;
+        setChannels([]);
+        setLoading(false);
+        setError(null);
+        return;
+      }
+      const requestId = ++requestRef.current;
+      setLoading(true);
+      setError(null);
+      void listChannels(accessToken, guildId, {fresh: options?.fresh})
+        .then((r) => {
+          if (requestId !== requestRef.current) return;
+          setChannels(r.voice_channels ?? []);
+        })
+        .catch((e) => {
+          if (requestId !== requestRef.current) return;
+          setError(e instanceof Error ? e.message : String(e));
+        })
+        .finally(() => {
+          if (requestId === requestRef.current) setLoading(false);
+        });
+    },
+    [accessToken, guildId],
+  );
+
+  useEffect(() => {
+    load();
+  }, [load]);
+
+  const options = useMemo(() => {
+    if (voiceChannelId && !channels.some((c) => c.id === voiceChannelId)) {
+      return [{id: voiceChannelId, name: SELECTED_VOICE_SENTINEL}, ...channels];
+    }
+    return channels;
+  }, [channels, voiceChannelId]);
+
+  const placeholderKey = !guildId
+    ? 'publish.selectServerFirst'
+    : loading && channels.length === 0
+      ? 'publish.refreshingChannels'
+      : 'create.voiceChannelNone';
+
+  return (
+    <div>
+      <FieldLabel className="mb-1.5 block">{t('create.voiceChannel')}</FieldLabel>
+      <Select
+        value={guildId ? voiceChannelId : ''}
+        disabled={!guildId || (loading && channels.length === 0)}
+        aria-busy={loading && channels.length === 0}
+        className="disabled:opacity-60"
+        onChange={(e) => {
+          if (!guildId) return;
+          onChange(e.target.value);
+        }}
+      >
+        <option value="">{t(placeholderKey)}</option>
+        {guildId &&
+          !(loading && channels.length === 0) &&
+          options.map((c) => (
+            <option key={c.id} value={c.id}>
+              {c.name === SELECTED_VOICE_SENTINEL
+                ? t('create.selectedChannel')
+                : c.name}
+            </option>
+          ))}
+      </Select>
+      {guildId ? (
+        <div className="mt-2">
+          <Button
+            type="button"
+            variant="ghost"
+            size="toolbar"
+            onClick={() => load({fresh: true})}
+            disabled={loading}
+          >
+            {t('publish.refreshChannels')}
+          </Button>
+        </div>
+      ) : null}
+      {error ? (
+        <div className="mt-2 space-y-2">
+          <p role="alert" className="text-xs text-accent-red">
+            {error}
+          </p>
+          <TextButton
+            type="button"
+            onClick={() => load({fresh: true})}
+            disabled={loading}
+          >
+            {t('common.tryAgain')}
+          </TextButton>
+        </div>
+      ) : null}
+      {guildId && !loading && !error && channels.length === 0 ? (
+        <p className="mt-1.5 text-[10px] text-amber-200/90">
+          {t('create.noVoiceChannelsHint')}
+        </p>
+      ) : (
+        <p className="mt-1.5 text-xs text-muted">{t('create.voiceChannelHint')}</p>
+      )}
+    </div>
+  );
+}
+
 export function PublishTargetModal({
   accessToken,
   guildId,

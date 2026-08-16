@@ -7,12 +7,26 @@ type Props = {
   disabled?: boolean;
   onChange: (enabled: boolean) => void;
   className?: string;
+  label?: string;
+  switchOnLabel?: string;
+  switchOffLabel?: string;
 };
 
 /** Profile DM notifications — labeled row + switch inside profile card footer. */
-export function NotificationBellToggle({enabled, disabled, onChange, className}: Props) {
+export function NotificationBellToggle({
+  enabled,
+  disabled,
+  onChange,
+  className,
+  label,
+  switchOnLabel,
+  switchOffLabel,
+}: Props) {
   const {t} = useTranslation();
   const Icon = enabled ? Bell : BellOff;
+  const rowLabel = label ?? t('notifications.profileLabel');
+  const ariaOn = switchOnLabel ?? t('notifications.toggleOn');
+  const ariaOff = switchOffLabel ?? t('notifications.toggleOff');
 
   return (
     <label
@@ -32,7 +46,7 @@ export function NotificationBellToggle({enabled, disabled, onChange, className}:
           strokeWidth={enabled ? 2.25 : 2}
         />
         <span className="min-w-0 text-xs leading-snug text-slate-300">
-          {t('notifications.profileLabel')}
+          {rowLabel}
         </span>
       </span>
       <span className="relative inline-flex h-5 w-9 shrink-0">
@@ -41,7 +55,7 @@ export function NotificationBellToggle({enabled, disabled, onChange, className}:
           role="switch"
           checked={enabled}
           disabled={disabled}
-          aria-label={enabled ? t('notifications.toggleOn') : t('notifications.toggleOff')}
+          aria-label={enabled ? ariaOn : ariaOff}
           onChange={(e) => onChange(e.target.checked)}
           className="peer sr-only"
         />

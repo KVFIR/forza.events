@@ -31,6 +31,7 @@ function userPayload(
     attendance_rate: number | string;
     no_shows: number;
     dm_notifications_enabled?: boolean | null;
+    new_event_notifications_enabled?: boolean | null;
     notification_locale?: string | null;
   },
   driverRating: ReturnType<typeof driverRatingFromRow>,
@@ -48,6 +49,7 @@ function userPayload(
     noShows: data.no_shows,
     hostRatingAvg: 0,
     dmNotificationsEnabled: data.dm_notifications_enabled ?? true,
+    newEventNotificationsEnabled: data.new_event_notifications_enabled === true,
     notificationLocale: data.notification_locale === 'ru' ? 'ru' : 'en',
     driverRating,
   };
@@ -65,7 +67,7 @@ serve(async (req) => {
   if (authLimited) return authLimited;
 
   try {
-    const {xbox_gamertag, region, timezone, dm_notifications_enabled, notification_locale} = await req.json();
+    const {xbox_gamertag, region, timezone, dm_notifications_enabled, new_event_notifications_enabled, notification_locale} = await req.json();
     const supabase = adminClient();
 
     let validatedGamertag: string | undefined;
@@ -83,6 +85,9 @@ serve(async (req) => {
     if (timezone !== undefined) updates.timezone = timezone;
     if (dm_notifications_enabled !== undefined) {
       updates.dm_notifications_enabled = Boolean(dm_notifications_enabled);
+    }
+    if (new_event_notifications_enabled !== undefined) {
+      updates.new_event_notifications_enabled = Boolean(new_event_notifications_enabled);
     }
     if (notification_locale !== undefined) {
       const loc = String(notification_locale).split('-')[0];

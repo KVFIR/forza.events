@@ -1,12 +1,20 @@
 import {sendUserDm} from './discordDm.ts';
+import {eventGameLabelEn, normalizeEventGame} from './eventGames.ts';
 import {
   buildNotificationEmbed,
   isKnownNotificationKind,
+  notifyEventTypeLabel,
   openEventButtonLabel,
   WAITLIST_NOTIFICATION_KINDS,
   type NotificationKind,
 } from './notificationCopy.ts';
-import {formatStartsAtForNotify, summarizeCarsForNotify} from './notificationTriggers.ts';
+import {
+  formatStartsAtForNotify,
+  resolvePublishedSendCtx,
+  skipEventPublishedSend,
+  summarizeCarsForNotify,
+  type PublishedSendCtx,
+} from './notificationTriggers.ts';
 import type {adminClient} from './supabase.ts';
 
 declare const EdgeRuntime: {waitUntil: (promise: Promise<unknown>) => void} | undefined;
@@ -23,14 +31,15 @@ export type OutboxInsert = {
 type UserNotifyRow = {
   discord_id: string;
   dm_notifications_enabled: boolean;
+  new_event_notifications_enabled?: boolean | null;
   notification_locale: string | null;
 };
 
 export async function enqueueNotifications(
   supabase: ReturnType<typeof adminClient>,
   rows: OutboxInsert[],
-): Promise<void> {
-  if (!rows.length) return;
+): Promise<boolean> {
+  if (!rows.length) return true;
   const {error} = await supabase.from('notification_outbox').upsert(
     rows.map((r) => ({
       kind: r.kind,
@@ -45,7 +54,7 @@ export async function enqueueNotifications(
   );
   if (error) {
     console.error(JSON.stringify({msg: 'enqueueNotifications failed', detail: error.message}));
-    return;
+    return false;
   }
 
   const dedupeKeys = rows.map((r) => r.dedupe_key);
@@ -57,6 +66,7 @@ export async function enqueueNotifications(
   if (retryErr) {
     console.error(JSON.stringify({msg: 'enqueueNotifications retry failed', detail: retryErr.message}));
   }
+  return true;
 }
 
 export async function cancelPendingStartingSoonForEvent(
@@ -111,6 +121,7 @@ export async function processNotificationBatch(
   let sent = 0;
   let failed = 0;
   let skipped = 0;
+  const publishedCtx = new Map<string, PublishedSendCtx | null | 'load_failed'>();
 
   for (const row of batch) {
     const kind = row.kind as string;
@@ -120,20 +131,52 @@ export async function processNotificationBatch(
       continue;
     }
 
-    const {data: userRow} = await supabase
+    const {data: userRow, error: userErr} = await supabase
       .from('users')
-      .select('discord_id, dm_notifications_enabled, notification_locale')
+      .select()
       .eq('discord_id', row.recipient_discord_id)
       .maybeSingle();
 
     const user = userRow as UserNotifyRow | null;
+    if (userErr) {
+      console.error(JSON.stringify({
+        msg: 'notification user load failed',
+        detail: userErr.message,
+      }));
+      const attempts = row.attempts + 1;
+      const status = attempts >= 5 ? 'failed' : 'pending';
+      await markOutbox(supabase, row.id, status, attempts, 'user_load_failed');
+      failed += attempts >= 5 ? 1 : 0;
+      continue;
+    }
     if (!user) {
       await markOutbox(supabase, row.id, 'skipped', row.attempts, 'user_not_found');
       skipped += 1;
       continue;
     }
 
-    if (!user.dm_notifications_enabled && !bypassesDmOptOut(kind, row.payload as Record<string, unknown>)) {
+    if (kind === 'event_published') {
+      const ctx = await loadPublishedSendCtx(supabase, row.event_id, publishedCtx);
+      if (ctx === 'load_failed') {
+        const attempts = row.attempts + 1;
+        const status = attempts >= 5 ? 'failed' : 'pending';
+        await markOutbox(supabase, row.id, status, attempts, 'event_load_failed');
+        failed += attempts >= 5 ? 1 : 0;
+        continue;
+      }
+      const reason = skipEventPublishedSend({
+        prefEnabled: user.new_event_notifications_enabled === true,
+        eventStatus: ctx?.status,
+        hostDiscordId: ctx?.hostDiscordId,
+        recipientDiscordId: row.recipient_discord_id,
+        onRoster: ctx?.roster.has(row.recipient_discord_id) === true,
+      });
+      if (reason) {
+        await markOutbox(supabase, row.id, 'skipped', row.attempts, reason);
+        skipped += 1;
+        continue;
+      }
+    } else if (!user.dm_notifications_enabled && !bypassesDmOptOut(kind, row.payload as Record<string, unknown>)) {
       await markOutbox(supabase, row.id, 'skipped', row.attempts, 'notifications_disabled');
       skipped += 1;
       continue;
@@ -197,11 +240,15 @@ export function enrichPayloadForSend(
     if (v != null) out[k] = String(v);
   }
   if (
-    (kind === 'event_starting_soon' || kind === 'host_event_starting_soon') &&
+    (kind === 'event_starting_soon' || kind === 'host_event_starting_soon' || kind === 'event_published') &&
     out.startsAt &&
     out.timezone
   ) {
     out.startsAtLocal = formatStartsAtForNotify(out.startsAt, out.timezone, locale);
+  }
+  if (kind === 'event_published') {
+    out.typeLabel = notifyEventTypeLabel(out.eventType, locale);
+    out.gameLabel = eventGameLabelEn(normalizeEventGame(out.game));
   }
   if (kind === 'event_updated') {
     const lng = locale === 'ru' ? 'ru' : 'en';
@@ -236,4 +283,33 @@ export function enrichPayloadForSend(
     }
   }
   return out;
+}
+
+async function loadPublishedSendCtx(
+  supabase: ReturnType<typeof adminClient>,
+  eventId: string,
+  cache: Map<string, PublishedSendCtx | null | 'load_failed'>,
+): Promise<PublishedSendCtx | null | 'load_failed'> {
+  if (cache.has(eventId)) return cache.get(eventId) ?? null;
+
+  const {data: event, error: eventErr} = await supabase
+    .from('events')
+    .select('status, host_discord_id')
+    .eq('id', eventId)
+    .maybeSingle();
+  const {data: participants, error: partErr} = eventErr || !event
+    ? {data: null, error: null}
+    : await supabase
+      .from('event_participants')
+      .select('discord_id')
+      .eq('event_id', eventId);
+
+  const ctx = resolvePublishedSendCtx(
+    event,
+    Boolean(eventErr),
+    (participants ?? []).map((p) => p.discord_id as string),
+    Boolean(partErr),
+  );
+  cache.set(eventId, ctx);
+  return ctx;
 }

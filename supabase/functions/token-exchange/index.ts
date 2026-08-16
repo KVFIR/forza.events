@@ -52,6 +52,7 @@ async function tokenExchangeUserPayload(tokens: DiscordOAuthTokens, guildId?: st
         noShows: user.no_shows,
         hostRatingAvg: 0,
         dmNotificationsEnabled: user.dm_notifications_enabled ?? true,
+        newEventNotificationsEnabled: user.new_event_notifications_enabled === true,
         notificationLocale: user.notification_locale === 'ru' ? 'ru' : 'en',
       },
     },

@@ -1,5 +1,6 @@
 import {afterEach, describe, expect, it, vi} from 'vitest';
-import {BOT_INSTALL_PERMISSIONS, buildBotInstallUrl, buildDiscordAppAddUrl} from './discordInstall';
+import {BOT_INSTALL_PERMISSIONS, buildBotInstallUrl, buildDiscordAppAddUrl, SUPPORT_GUILD_INVITE_URL} from './discordInstall';
+import {isDiscordLinkUrl} from './guildDisplay';
 
 describe('buildDiscordAppAddUrl', () => {
   afterEach(() => {
@@ -48,5 +49,12 @@ describe('buildBotInstallUrl', () => {
     const params = new URL(url!).searchParams;
     expect(params.get('guild_id')).toBe('987654321');
     expect(params.has('disable_guild_select')).toBe(false);
+  });
+});
+
+describe('SUPPORT_GUILD_INVITE_URL', () => {
+  it('is a Discord invite the client will open', () => {
+    expect(isDiscordLinkUrl(SUPPORT_GUILD_INVITE_URL)).toBe(true);
+    expect(SUPPORT_GUILD_INVITE_URL).toContain('discord.gg/');
   });
 });

@@ -54,6 +54,9 @@ type DbEventRow = {
   created_at?: string | null;
   guild_id?: string | null;
   channel_id?: string | null;
+  voice_channel_id?: string | null;
+  voice_invite_url?: string | null;
+  voice_channel_name?: string | null;
   discord_message_id?: string | null;
   voice_policy: ForzaEvent['voicePolicy'];
   max_players: number;
@@ -338,6 +341,9 @@ export function mapDbEvent(row: DbEventRow): ForzaEvent {
     guildIconUrl: guild?.icon_url ?? undefined,
     guildInviteUrl: parseGuildInviteUrl(guild?.settings),
     channelId: row.channel_id ?? undefined,
+    voiceChannelId: row.voice_channel_id ?? undefined,
+    voiceChannelName: row.voice_channel_name?.trim() || undefined,
+    voiceInviteUrl: row.voice_invite_url ?? undefined,
     discordMessageId: row.discord_message_id ?? undefined,
     carRuleMode: row.car_rule_mode ?? 'anything_goes',
     maxPi: row.max_pi ?? null,

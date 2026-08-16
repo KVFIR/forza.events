@@ -12,7 +12,8 @@ export type NotificationKind =
   | 'host_group_filled'
   | 'host_event_starting_soon'
   | 'group_reassigned'
-  | 'event_now_ranked';
+  | 'event_now_ranked'
+  | 'event_published';
 
 /** Transactional waitlist DMs — sent even when dm_notifications_enabled is false. */
 export const WAITLIST_NOTIFICATION_KINDS = new Set<NotificationKind>([
@@ -33,6 +34,28 @@ function str(v: CopyParams[string]): string {
   return v == null ? '' : String(v).trim();
 }
 
+function voiceJoinLabel(
+  lng: NotificationLocale,
+  name: CopyParams[string],
+): string {
+  const cleaned = str(name).replace(/[\[\]()]/g, '').replace(/^#+/, '');
+  if (cleaned) return `#${cleaned}`;
+  return lng === 'ru' ? 'Зайти в голосовой' : 'Join voice';
+}
+
+function voiceJoinFields(
+  lng: NotificationLocale,
+  url: CopyParams[string],
+  name?: CopyParams[string],
+): {name: string; value: string}[] {
+  const v = str(url);
+  if (!v) return [];
+  const label = voiceJoinLabel(lng, name);
+  return lng === 'ru'
+    ? [{name: 'Голос', value: `[${label}](${v})`}]
+    : [{name: 'Voice', value: `[${label}](${v})`}];
+}
+
 const OPEN_EVENT: Record<NotificationLocale, string> = {
   en: 'Open event',
   ru: 'Открыть ивент',
@@ -40,6 +63,20 @@ const OPEN_EVENT: Record<NotificationLocale, string> = {
 
 export function openEventButtonLabel(locale: string | null | undefined): string {
   return OPEN_EVENT[pickLocale(locale)];
+}
+
+const EVENT_TYPE_NOTIFY_LABEL: Record<NotificationLocale, Record<string, string>> = {
+  en: {road: 'Road racing', dirt: 'Dirt racing', cruise: 'Meet & cruise'},
+  ru: {road: 'Шоссе', dirt: 'Грунт', cruise: 'Встреча и круиз'},
+};
+
+export function notifyEventTypeLabel(
+  type: string | null | undefined,
+  locale: string | null | undefined,
+): string {
+  const lng = pickLocale(locale);
+  const key = (type ?? '').trim();
+  return EVENT_TYPE_NOTIFY_LABEL[lng][key] ?? '';
 }
 
 type CopyBuilder = (p: CopyParams) => {title: string; description: string; fields?: {name: string; value: string}[]};
@@ -154,6 +191,7 @@ const COPY: Record<NotificationKind, Record<NotificationLocale, CopyBuilder>> = 
           name: 'Your convoy',
           value: `Convoy ${str(p.groupIndex)} · leader ${str(p.leaderGamertag)}`,
         },
+        ...voiceJoinFields('en', p.voiceJoinUrl, p.voiceChannelName),
       ],
     }),
     ru: (p) => ({
@@ -164,6 +202,7 @@ const COPY: Record<NotificationKind, Record<NotificationLocale, CopyBuilder>> = 
           name: 'Ваш конвой',
           value: `Конвой ${str(p.groupIndex)} · лидер ${str(p.leaderGamertag)}`,
         },
+        ...voiceJoinFields('ru', p.voiceJoinUrl, p.voiceChannelName),
       ],
     }),
   },
@@ -186,6 +225,7 @@ const COPY: Record<NotificationKind, Record<NotificationLocale, CopyBuilder>> = 
           name: 'Registration',
           value: `${str(p.activeCount)}/${str(p.totalCapacity)} racers · ${str(p.waitlistCount)} on waitlist`,
         },
+        ...voiceJoinFields('en', p.voiceJoinUrl, p.voiceChannelName),
       ],
     }),
     ru: (p) => ({
@@ -196,6 +236,7 @@ const COPY: Record<NotificationKind, Record<NotificationLocale, CopyBuilder>> = 
           name: 'Регистрация',
           value: `${str(p.activeCount)}/${str(p.totalCapacity)} гонщиков · ${str(p.waitlistCount)} в очереди`,
         },
+        ...voiceJoinFields('ru', p.voiceJoinUrl, p.voiceChannelName),
       ],
     }),
   },
@@ -209,6 +250,32 @@ const COPY: Record<NotificationKind, Record<NotificationLocale, CopyBuilder>> = 
       title: 'Конвой изменён',
       description: `Организатор перенёс вас в **конвой ${str(p.groupIndex)}** в **${str(p.eventTitle)}**.`,
       fields: [{name: 'Лидер конвоя', value: str(p.leaderGamertag)}],
+    }),
+  },
+  event_published: {
+    en: (p) => ({
+      title: 'New event',
+      description: `**${str(p.eventTitle)}** is now on Browse.`,
+      fields: [
+        ...(str(p.startsAtLocal)
+          ? [{name: 'When', value: `${str(p.startsAtLocal)} (${str(p.timezone) || 'UTC'})`}]
+          : []),
+        ...(str(p.typeLabel) || str(p.gameLabel)
+          ? [{name: 'Type', value: [str(p.gameLabel), str(p.typeLabel)].filter(Boolean).join(' · ')}]
+          : []),
+      ],
+    }),
+    ru: (p) => ({
+      title: 'Новый ивент',
+      description: `**${str(p.eventTitle)}** появился в Обзоре.`,
+      fields: [
+        ...(str(p.startsAtLocal)
+          ? [{name: 'Когда', value: `${str(p.startsAtLocal)} (${str(p.timezone) || 'UTC'})`}]
+          : []),
+        ...(str(p.typeLabel) || str(p.gameLabel)
+          ? [{name: 'Тип', value: [str(p.gameLabel), str(p.typeLabel)].filter(Boolean).join(' · ')}]
+          : []),
+      ],
     }),
   },
   /** One-off / admin: published event flipped to ranked (not exposed in host UI). */

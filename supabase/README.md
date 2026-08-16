@@ -61,6 +61,10 @@ npx supabase migration repair --linked --status applied 006 --yes
 | `026_analytics_notifications.sql` | Dashboard: notification outbox aggregates + `notification_dm_*` client prefs |
 | `027_nullable_event_max_pi.sql` | `events.max_pi` nullable — open build may omit PI cap |
 | `028_apply_event_group_moves.sql` | `apply_event_group_moves` RPC — host move/balance active non-leaders between groups |
+| `035_submit_results_guest_roster.sql` | `submit_event_results` upserts raced guests / waitlisted as `host_assigned` (skip capacity); unique `(event_id, discord_id)` on `event_results` |
+| `036_new_event_notifications.sql` | `users.new_event_notifications_enabled` (default off) — opt-in Browse new-event DMs |
+| `037_event_voice_invite.sql` | `events.voice_invite_url` + `voice_channel_name` — gathering-VC invite and display name for Join voice + 2h DMs |
+| `038_latest_rating_races.sql` | `latest_rating_races(text[])` — last ranked event + Δ per driver for `/leaderboard` |
 
 Seeds are **not** included in the migration. Run separately after `db push`:
 
@@ -83,7 +87,7 @@ npm run deploy:functions
 | `host-drafts` | Discord token | Draft list for host |
 | `token-exchange` | OAuth code | Activity / localhost OAuth |
 | `list-guilds` | Discord token | Publish target servers |
-| `list-guild-members` | Discord token | Convoy leader search (needs Server Members intent) |
+| `list-guild-members` | Discord token | Convoy leader search + results guest search (needs Server Members intent) |
 | `list-channels` | Discord token | Postable channels |
 | `validate-channel` | Discord token | Channel validation |
 | `publish-event` | Discord token | Post Discord embed |
@@ -92,7 +96,7 @@ npm run deploy:functions
 | `add-group` | Discord token | Host adds a lobby group (leader + auto-fill from waitlist) |
 | `change-group-leader` | Discord token | Host reassigns convoy leader for a published group (before start) |
 | `balance-groups` | Discord token | Host redistributes non-leaders evenly (leaders stay) |
-| `submit-results` | Discord token | Results + complete (+ ranked ELO when `is_ranked`) |
+| `submit-results` | Discord token | Results + complete (+ ranked ELO when `is_ranked`); guild guests / waitlist promote |
 | `user-profile` | Discord token | Profile updates + `driverRating` |
 | `leaderboard` | Optional Discord token | Global driver ladder |
 | `launch-intent` | Discord token | Embed deep-link fallback |

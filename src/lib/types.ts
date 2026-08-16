@@ -62,6 +62,12 @@ export interface ForzaEvent {
   guildIconUrl?: string;
   guildInviteUrl?: string;
   channelId?: string;
+  /** Discord gathering voice channel; Join voice on Event Detail / embed. */
+  voiceChannelId?: string;
+  /** Cached Discord name for that VC (shown as #name). */
+  voiceChannelName?: string;
+  /** Permanent discord.gg invite for that VC (non-members). */
+  voiceInviteUrl?: string;
   /** Set after publish-event posts the Discord embed. */
   discordMessageId?: string;
   carRuleMode: CarRuleMode;
@@ -119,8 +125,10 @@ export interface AppUser {
   attendanceRate: number;
   noShows: number;
   hostRatingAvg: number;
-  /** Discord DM notifications (default on). */
+  /** Discord DM notifications about joined/hosted events (default on). */
   dmNotificationsEnabled?: boolean;
+  /** Opt-in DMs when any Browse event is published (default off). */
+  newEventNotificationsEnabled?: boolean;
   /** Locale for bot DM copy (`en` | `ru`). */
   notificationLocale?: 'en' | 'ru';
   /** Global driver skill rating (ELO). Absent until profile fetch. */

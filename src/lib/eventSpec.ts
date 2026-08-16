@@ -4,6 +4,7 @@ import {isEventType} from './eventTypes';
 import {isPiInRange} from './pi';
 import {VALIDATION_CODES, type ValidationCode} from './validationCodes';
 import {validationMessage} from './validationMessages';
+import {isDiscordLinkUrl} from './guildDisplay';
 
 export function validateDraftForm(input: {
   title: string;
@@ -206,6 +207,28 @@ export function isEventFinalized(event: Pick<ForzaEvent, 'lifecycle'>): boolean 
     event.lifecycle === 'completed' ||
     event.lifecycle === 'archived'
   );
+}
+
+/**
+ * Join URL for the gathering voice channel.
+ * Prefers a stored discord.gg invite so non-members can join the server + VC.
+ */
+export function eventVoiceJoinUrl(
+  event: Pick<ForzaEvent, 'voiceChannelId' | 'guildId' | 'voiceInviteUrl' | 'lifecycle'>,
+): string | null {
+  if (isEventFinalized(event)) return null;
+  const invite = event.voiceInviteUrl?.trim();
+  if (invite && isDiscordLinkUrl(invite)) return invite;
+  const guildId = event.guildId?.trim();
+  const channelId = event.voiceChannelId?.trim();
+  if (!guildId || !channelId) return null;
+  return `https://discord.com/channels/${guildId}/${channelId}`;
+}
+
+/** Discord-style `#name` for the gathering VC; null when the cached name is empty. */
+export function voiceChannelMention(name?: string | null): string | null {
+  const trimmed = name?.trim().replace(/^#+/, '');
+  return trimmed ? `#${trimmed}` : null;
 }
 
 /** Host submitted results — excludes cancelled/archived. */

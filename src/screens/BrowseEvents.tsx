@@ -7,6 +7,7 @@ import {EVENT_GAMES, eventGameLabel, type ForzaGame} from '../lib/eventGames';
 import {EventList} from '../components/EventList';
 import {EventListFilterChips} from '../components/EventListFilterChips';
 import {EventListMetaSelect} from '../components/EventListMetaSelect';
+import {NewEventAlertsBanner} from '../components/NewEventAlertsBanner';
 import {useAuth} from '../context/AuthContext';
 import {DISCORD_SUPABASE_PROXY_PREFIX} from '../lib/supabaseEnv';
 import {usePublishedEvents} from '../hooks/usePublishedEvents';
@@ -103,6 +104,7 @@ export function BrowseEvents() {
 
   return (
     <div className="pb-8 pt-5">
+      <NewEventAlertsBanner />
       <EventList
         events={filtered}
         isLoading={isLoading}

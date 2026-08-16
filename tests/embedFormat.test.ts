@@ -180,4 +180,16 @@ describe('buildEventEmbed', () => {
     expect(button.disabled).toBeUndefined();
     expect(button.custom_id).toMatch(/^open_event:/);
   });
+
+  it('shows a Voice mention when a gathering channel is set', () => {
+    const embed = buildEventEmbed(event({voice_channel_id: 'vc-1'})).embeds[0];
+    expect(embed.fields.find((f) => f.name === '🎙️ Voice')?.value).toBe('<#vc-1>');
+  });
+
+  it('omits Voice after cancel', () => {
+    const embed = buildEventEmbed(
+      event({voice_channel_id: 'vc-1', status: 'cancelled'}),
+    ).embeds[0];
+    expect(embed.fields.find((f) => f.name === '🎙️ Voice')).toBeUndefined();
+  });
 });

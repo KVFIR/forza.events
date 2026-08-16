@@ -47,6 +47,13 @@ describe('assertTargetNotLocked', () => {
     });
     expect(code).toBeNull();
   });
+
+  it('allows voice channel change after publish', async () => {
+    const code = await assertTargetNotLocked(supabase, published, {
+      voice_channel_id: 'vc-2',
+    });
+    expect(code).toBeNull();
+  });
 });
 
 describe('validateRankedAgainstEvent', () => {
