@@ -1,6 +1,6 @@
 # Pilot community server
 
-Last updated: 2026-07-21
+Last updated: 2026-08-16
 
 Recorded setup for the **FORZA.EVENTS** support / pilot Discord server (**Forza Racing Series**).
 
@@ -13,6 +13,8 @@ Recorded setup for the **FORZA.EVENTS** support / pilot Discord server (**Forza 
 | Server | `guild_id` |
 |--------|------------|
 | **Forza Racing Series** (pilot) | `925000150638809178` |
+
+Public invite (DM-reachability CTA + Join server): `https://discord.gg/hx4X9YdE46` — keep in sync with `discord_guilds.settings.invite_url` and `SUPPORT_GUILD_INVITE_URL` in `src/lib/discordInstall.ts`.
 
 Ranked allowlist: migration `032` inserts this id into `rating_enabled_guilds`.
 

@@ -44,7 +44,7 @@ Manual QA matrix aligned with current code behavior (not an abstract checklist).
 | 0.5 | Railway `APP_ORIGIN` | Cover images in embed + `<img>` via proxy |
 | 0.6 | Edge Functions deployed with `--no-verify-jwt` | Invalid Discord token → app `401`; **not** gateway `UNAUTHORIZED_NO_AUTH_HEADER` |
 | 0.7 | Hard refresh Activity after deploy | Old bundle does not mask fixes |
-| 0.8 | `supabase db push` includes `017`–`019` + `npm run deploy:functions` (`process-notifications`) | DM outbox + claim RPC live; cron can deliver |
+| 0.8 | `supabase db push` includes `017`–`019` + `036` + `037` + `npm run deploy:functions` (`process-notifications`, `save-event`) | DM outbox + claim RPC live; new-event alert pref column; voice invite column; cron can deliver |
 | 0.9 | GitHub Actions `process-notifications` workflow + repo secrets (or minute cron via `scripts/invoke-process-notifications.sh`) | 2h reminders + outbox drain |
 
 ---
@@ -97,7 +97,7 @@ Manual QA matrix aligned with current code behavior (not an abstract checklist).
 - [ ] Sort: event date / created / fill.
 - [ ] Empty filter → “no match” + clear filters (clears type, game, **and** ranked).
 - [ ] Cards: type, date, organiser (`guildName` or host), fill, cover via **proxy URL**.
-- [ ] Nav **Ladder** → `/leaderboard` loads top ratings.
+- [ ] Nav **Ladder** → `/leaderboard` loads top ratings (no page subtitle); muted last-race names open Event Detail; signed-in drivers always see campaign plate (identity left, rank / rating / races on the right; unrated → dash / dash / 0) and a ranked-race log when they have races (rating after each race + signed delta, no “Δ” prefix). No provisional asterisk or footnote.
 
 ### Realtime (two clients)
 
@@ -173,6 +173,7 @@ Manual QA matrix aligned with current code behavior (not an abstract checklist).
 - [ ] Organiser: real server name, not placeholder `Server`.
 - [ ] Roster: per-group sections (leader + drivers) with `n/12`, then a Waitlist section with queue positions; Xbox lobby hint when not leader.
 - [ ] Track codes, car rules, tuning restrictions, optional description text.
+- [ ] **Join voice** when the host set a gathering voice channel (opens a `discord.gg` invite to that VC so non-members can join the server + voice; label is `#channel-name` when known); hidden after cancel/completed/archived.
 - [ ] Realtime: second client join → roster and count update without F5.
 
 ### Back navigation (`location.state.from`)
@@ -217,7 +218,7 @@ Manual QA matrix aligned with current code behavior (not an abstract checklist).
 - [ ] Submit results → immutable (repeat → 409).
 - [ ] Submit results → **Event Detail** shows table immediately (navigation seed); no false “pending host” flash.
 - [ ] **Ranked:** after submit on ranked event (≥4 finishers/DNF **per group**, no DNS-only), results show **Δ rating**; Profile rating + `/leaderboard` update; `events.rating_applied` stays true (no double apply). Multi-group: each group rated separately. ELO write is atomic (`033` RPC); if apply fails after results save, host can re-POST `submit-results` with `{event_id}` only to retry rating.
-- [ ] **Multi-group:** submit screen offers **By convoy** (per-group order, positions restart) or **Overall** (one global order); tap drivers in finish order; standings table can toggle the same views. Waitlisted racers are excluded from results.
+- [ ] **Multi-group:** submit screen offers **By convoy** (per-group order, positions restart) or **Overall** (one global order); Event Detail standings show **only** the submitted format (no viewer toggle). Host can **Add from server** (guild search + waitlist) even when the lobby is full; guests land on the roster as `host_assigned`.
 - [ ] **Event Detail** results load error → **Try again** recovers table (Activity proxy / offline).
 - [ ] **Submit results** screen: if existing-results check fails, warning + **Try again** still allows submit; successful recheck redirects when rows exist.
 
@@ -252,7 +253,7 @@ Manual QA matrix aligned with current code behavior (not an abstract checklist).
 | **Tracks** | 0, 1, many; dedupe on save |
 | **Target** | Guild list = user guilds ∩ bot installed; empty → Add bot → Refresh |
 | **Target** | Manage Server **role** on a server the user does not own still lists it (not owner-only) |
-| **Target** | Guild change → channels load after guild list; channel re-validate |
+| **Target** | Guild change → channels load after guild list; channel re-validate; voice channel list from same `list-channels` (`voice_channels`); optional, cleared on guild change |
 | **Target** | Rate limit / transient API error → saved channel **not** cleared on re-open `?edit=` |
 | **Target** | No Manage Server → forbidden with clear copy |
 | **Ranked** | Create step 2 (after server): toggle when allowlisted + road/dirt. Published edit (before start): same toggle under locked target summary. Save can flip ranked on/off until start. |
@@ -267,7 +268,7 @@ Manual QA matrix aligned with current code behavior (not an abstract checklist).
 
 ### Edit published (before start)
 
-- [ ] Change title, cars, cover, leader — not guild/channel.
+- [ ] Change title, cars, cover, voice channel — not guild/channel.
 - [ ] Embed PATCH after save.
 - [ ] API rejects guild/channel change → `TARGET_*_LOCKED`.
 
@@ -300,9 +301,9 @@ Manual QA matrix aligned with current code behavior (not an abstract checklist).
 - [ ] **EN | RU** → Browse, Detail, Create, errors.
 - [ ] `date-fns` locale on dates.
 - [ ] Hosted / participated stats.
-- [ ] **Driver rating** StatCard (ELO; provisional until 5 rated races) + link to `/leaderboard`.
+- [ ] **Driver rating** StatCard (ELO) + link to `/leaderboard`.
 - [ ] Recent completed + placements.
-- [ ] **DM bell:** no mutual guild with bot → toggle **off** (even when DB default on); enable → **Add bot** dialog; after install + return to Activity → toggle **on** without re-saving.
+- [ ] **DM bell:** no mutual guild with bot → toggle **off** (even when DB default on); enable → **Join Forza Racing Series** / **Add bot** dialog; after join or install + return to Activity → toggle **on** without re-saving.
 
 ---
 
@@ -312,7 +313,7 @@ Verify **in channel** after each action:
 
 | Action | Embed |
 |--------|--------|
-| Publish | Title, date, tracks, cars/rules, **n/12**, leader, cover, Register button; **Ranked** field when `is_ranked` |
+| Publish | Title, date, optional **Voice** mention, tracks, cars/rules, **n/12**, leader, cover, Register button; **Ranked** field when `is_ranked` |
 | Join / leave | Participant count |
 | Save published | Fields updated |
 | Cancel | CANCELLED, grey, button disabled |
@@ -349,7 +350,7 @@ Verify **in channel** after each action:
 
 At least one mapped message per screen:
 
-`BOT_NOT_IN_GUILD`, `BOT_CANNOT_POST`, `CHANNEL_NOT_FOUND`, `CHANNEL_NOT_TEXT`, `CHANNEL_WRONG_GUILD`, `EVENT_FULL`, `REGISTRATION_CLOSED`, `REGISTRATION_AFTER_START`, `HOST_CANNOT_JOIN`, `LEADER_CANNOT_LEAVE`, `RESULTS_PARTICIPANTS_ONLY`, `TOO_MANY_REQUESTS`, `UNAUTHORIZED`.
+`BOT_NOT_IN_GUILD`, `BOT_CANNOT_POST`, `CHANNEL_NOT_FOUND`, `CHANNEL_NOT_TEXT`, `CHANNEL_WRONG_GUILD`, `EVENT_FULL`, `REGISTRATION_CLOSED`, `REGISTRATION_AFTER_START`, `HOST_CANNOT_JOIN`, `LEADER_CANNOT_LEAVE`, `RESULTS_PARTICIPANTS_ONLY`, `RESULTS_NOT_IN_GUILD`, `TOO_MANY_REQUESTS`, `UNAUTHORIZED`.
 
 ---
 
@@ -371,8 +372,8 @@ At least one mapped message per screen:
 
 | Case | Steps | Expected |
 |------|--------|----------|
-| No mutual guild | Profile with account that shares no server with the bot | Bell **off**; enable → Add bot dialog |
-| After bot install | Add bot via dialog → return to Activity tab | Bell **on** (DB pref still default true) |
+| No mutual guild | Profile with account that shares no server with the bot | Bell **off**; enable → Join FRS / Add bot dialog |
+| After FRS join or bot install | Join FRS or add bot via dialog → return to Activity tab | Bell **on** (DB pref still default true) |
 | Opt-out | Profile → bell off | No cancel / leader / 2h / host-fill / tracks-only edit DMs; **reschedule** DM still sent |
 | Waitlist promote | Fill group; user on waitlist; active racer leaves | Promoted user gets **seat opened** DM (even if bell off) |
 | Host group full (partial) | `group_count ≥ 2`; one group fills while another has open seats | Host does **not** get **group filled** DM |
@@ -381,7 +382,14 @@ At least one mapped message per screen:
 | Published edit | Host changes date/time, tracks, and/or cars → **Save & notify** | Active racers get update DM; waitlist too when **date/time** changes |
 | Add group (empty waitlist) | Host adds group with guild leader | New leader gets **convoy leader assigned** DM |
 | DM button | Open DM → **Open event** | Link opens `forza.events/event/{id}` (or Activity origin) |
-| 2h reminder | Event starts in ~2h (cron running) | Active racers + host get soon DM; reschedule changes dedupe |
+| 2h reminder | Event starts in ~2h (cron running) | Active racers + host get soon DM; **Voice** join link when a gathering VC is set; reschedule changes dedupe |
+| Browse subscribe (guest) | Browse as guest | No new-event alerts row; enable from Profile after sign-in |
+| Browse subscribe (signed-in, reachable) | Toggle the Browse row on | Switch stays on; Profile **Notify me about new events** on |
+| Browse subscribe (no mutual guild) | Toggle the Browse row on | Join FRS / Add bot dialog; after join or install + return, toggle works |
+| New-event DM | Publish; wait ~1h; cron running | Opted-in reachable users get **New event** DM; host and already-joined do not |
+| New-event cancel window | Publish then cancel within 1h | Pending `event_published` skipped; no Browse-alert DM |
+| New-event completed window | Publish then submit results within 1h | Send-time skip `event_completed`; no Browse-alert DM |
+| New-event opt-out | Profile → new-event row off | No `event_published` DMs; transactional bell unchanged |
 
 **Negative:** `process-notifications` without `x-cron-secret` → 401 in prod.
 

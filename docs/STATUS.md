@@ -29,11 +29,11 @@ Remaining work is mostly **Activity E2E in pilot guilds**, **Railway frontend re
 | Area | Status | Notes |
 |------|--------|-------|
 | Browse Events | Done | Activity: `browse-events`; localhost: PostgREST + same `isBrowseFeedEvent` filter (published open/live + completed; cancelled/archived excluded; started/live stay visible) |
-| Event Detail | Done | Join/leave, host actions, balance groups, results, live updates |
-| Create Event | Done | 4 steps; cover via `upload-cover`; convoy leader via `list-guild-members` |
+| Event Detail | Done | Join/leave, host actions, balance groups, results, live updates, optional Join voice |
+| Create Event | Done | 4 steps; cover via `upload-cover`; convoy leader via `list-guild-members`; optional gathering voice channel |
 | My Events | Done | Hosted/joined + host drafts merge |
 | Profile | Done | Gamertag + DM notification prefs (`user-profile`) + driver rating |
-| Leaderboard / ranked ELO | Done | Phase A+B: `031`–`033`, pairwise ELO on `submit-results`, `/leaderboard`, Browse Ranked filter |
+| Leaderboard / ranked ELO | Done | Phase A+B: `031`–`033`, pairwise ELO on `submit-results`, `/leaderboard` (last race + Δ via `038`), Browse Ranked filter |
 | Discord Activity auth | Done | SDK → `token-exchange` → `authenticate` |
 | Browser localhost auth | Done | `/auth/callback` + `localStorage` session + refresh_token |
 | Production browser tab (`forza.events`) | Done | Discord OAuth required (`BrowserAuthGate`); raw `*.up.railway.app` still Activity-only gate |
@@ -47,7 +47,7 @@ Remaining work is mostly **Activity E2E in pilot guilds**, **Railway frontend re
 | Security (RLS/CORS/rate) | Done | Baseline + `003`/`004` migrations + Edge shared modules |
 | Sample seed | Done | `npm run seed:events` |
 | i18n | Done | EN default; RU toggle on profile; notification copy follows `notification_locale` |
-| Discord DM notifications | Done | Outbox + `process-notifications` cron; Profile bell opt-out |
+| Discord DM notifications | Done | Outbox + `process-notifications` cron; Profile bell opt-out; Browse new-event alerts (`036`, opt-in, +1h); 2h reminder Voice link (`037`) |
 | Client analytics | Done | `client_events` + `track-event`; local `/analytics` dashboard; daily `prune-client-analytics` cron |
 | Bot process | Deferred | [`bot/README.md`](../bot/README.md) |
 
@@ -57,12 +57,12 @@ Remaining work is mostly **Activity E2E in pilot guilds**, **Railway frontend re
 
 Confirmed in code and schema:
 
-- Publish requires server + channel; locked after publish (client + `assertTargetNotLocked`)
+- Publish requires server + channel; locked after publish (client + `assertTargetNotLocked`). Optional gathering voice channel is editable until start.
 - Event types: `road`, `dirt`, `cruise`; track codes optional
 - Car rules: `anything_goes` or `restricted_list`; optional tuning restriction templates
 - Published events editable only before start
 - After start: road/dirt → submit results (tap-to-order; by convoy or overall) or cancel; cruise → mark finished (no standings) or cancel
-- Results immutable after submit; participants only in results payload; cruise has no results UI
+- Results immutable after submit; host may add guild members / waitlisted racers on submit (`035`); cruise has no results UI
 - Full events block joins (DB trigger + API)
 - Production: Discord Activity only (no standalone web OAuth on Railway origin)
 

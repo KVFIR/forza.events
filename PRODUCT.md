@@ -27,7 +27,7 @@ Activity-first Discord app with a **global public browse feed** across servers, 
 ## Operating Context
 
 - Discord Activity iframe (`@discord/embedded-app-sdk`): auth via Discord token exchange; guild context when launched from a server.
-- Publish target = Discord server + text channel where the bot can post; after publish, server/channel/game are locked.
+- Publish target = Discord server + text channel where the bot can post; optional gathering voice channel (editable until start; Join voice uses a `discord.gg` invite so non-members can join). After publish, server/channel/game are locked.
 - In-game coordination uses **Convoy** seats (12 per convoy), convoy leaders (Xbox gamertag), and optional waitlist / multi-convoy.
 - Games: Forza Horizon 5 and Forza Horizon 6; event types road, dirt, cruise.
 - Browser guest showcase on `forza.events` (and localhost for engineering); raw Railway hostname stays Activity-gated.
@@ -35,13 +35,13 @@ Activity-first Discord app with a **global public browse feed** across servers, 
 
 ## Capabilities and Constraints
 
-**Shipped capabilities (durable product surface):** Browse, Event Detail (join/leave, host actions), Create wizard, My Events, Profile, Leaderboard / ranked ELO (allowlisted guilds), Discord DM notifications (opt-out), cover images, FH5/FH6 car catalogs, i18n EN+RU.
+**Shipped capabilities (durable product surface):** Browse, Event Detail (join/leave, host actions), Create wizard, My Events, Profile, Leaderboard / ranked ELO (allowlisted guilds), Discord DM notifications (transactional opt-out + Browse new-event opt-in), cover images, FH5/FH6 car catalogs, i18n EN+RU.
 
 **Hard constraints future work must preserve:**
 
 - Primary surface remains Discord Activity; Activity iframe blocks native `confirm`/`alert`/`prompt` (use in-app dialogs).
 - Host permissions stay on `host_discord_id` — Discord Manage Server does not grant app-side edit rights.
-- Publish requires guild + channel; draft may omit guild; after publish guild/channel/game (and ranked flag) stay locked.
+- Publish requires guild + channel; draft may omit guild; after publish guild/channel/game (and ranked flag) stay locked. Optional gathering voice channel may change until start.
 - Terminology: **Convoy** (not Group) for 12-seat slots; full capacity = **Event is full**; roster self-indication via border colors, not “You” labels.
 - UI copy is English with i18n; game-native wording over generic SaaS phrasing.
 - Mutations go through Supabase Edge + Discord token auth; anon PostgREST is read-scoped.
