@@ -219,6 +219,8 @@ export type DiscordGuildSummary = {
   name: string;
   icon: string | null;
   /** Present on GET /users/@me/guilds (user OAuth token). */
+  owner?: boolean;
+  /** Present on GET /users/@me/guilds (user OAuth token). */
   permissions?: string;
 };
 
@@ -272,7 +274,11 @@ export async function resolveChannelInviteUrl(channelId: string): Promise<string
 const MANAGE_GUILD = 0x20n;
 const ADMINISTRATOR = 0x8n;
 
-export function userCanManageGuild(permissions: string | undefined): boolean {
+export function userCanManageGuild(
+  permissions: string | undefined,
+  owner?: boolean,
+): boolean {
+  if (owner) return true;
   if (permissions === undefined || permissions === '') return false;
   const p = BigInt(permissions);
   return (p & ADMINISTRATOR) === ADMINISTRATOR || (p & MANAGE_GUILD) === MANAGE_GUILD;

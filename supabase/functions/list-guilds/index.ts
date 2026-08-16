@@ -4,6 +4,7 @@ import {appErrorResponse, internalErrorResponse} from '../_shared/apiResponse.ts
 import {jsonResponse, optionsResponse} from '../_shared/cors.ts';
 import {fetchUserGuilds, filterGuildsWithBot, publishTargetHint} from '../_shared/discord.ts';
 import {requireDiscordUser} from '../_shared/discordRequestAuth.ts';
+import {expandPublishGuildCandidates} from '../_shared/guildAccess.ts';
 import {resolveListGuildCandidates} from '../_shared/listGuildCandidates.ts';
 import {rateLimitAuth} from '../_shared/rateLimitPresets.ts';
 import {adminClient} from '../_shared/supabase.ts';
@@ -25,7 +26,9 @@ serve(async (req) => {
     const fresh = body?.fresh === true;
 
     const userGuilds = await fetchUserGuilds(token);
-    const candidates = resolveListGuildCandidates(userGuilds, dmReachability);
+    const candidates = dmReachability
+      ? resolveListGuildCandidates(userGuilds, true)
+      : await expandPublishGuildCandidates(userGuilds, user.id);
     const withBot = await filterGuildsWithBot(
       candidates,
       dmReachability && fresh ? {fresh: true} : undefined,

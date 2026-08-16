@@ -6,6 +6,6 @@ export function resolveListGuildCandidates(
   dmReachability: boolean,
 ): DiscordGuildSummary[] {
   if (dmReachability) return userGuilds;
-  const manageable = userGuilds.filter((g) => userCanManageGuild(g.permissions));
+  const manageable = userGuilds.filter((g) => userCanManageGuild(g.permissions, g.owner));
   return manageable.length > 0 ? manageable : userGuilds;
 }

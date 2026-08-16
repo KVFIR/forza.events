@@ -1,7 +1,9 @@
 import {serve} from 'https://deno.land/std@0.224.0/http/server.ts';
+import {API_ERROR_CODES} from '../_shared/apiErrorCodes.ts';
+import {appErrorResponse, internalErrorResponse} from '../_shared/apiResponse.ts';
 import {jsonResponse, optionsResponse} from '../_shared/cors.ts';
 import {requireDiscordUser} from '../_shared/discordRequestAuth.ts';
-import {requireManageGuildAccess} from '../_shared/guildAccess.ts';
+import {isDeniedManageGuildError, requireManageGuildAccess} from '../_shared/guildAccess.ts';
 import {validatePublishChannelTarget} from '../_shared/publishTarget.ts';
 import {rateLimitAuth} from '../_shared/rateLimitPresets.ts';
 
@@ -23,8 +25,9 @@ serve(async (req) => {
     }
 
     try {
-      await requireManageGuildAccess(token!, guild_id);
+      await requireManageGuildAccess(token!, guild_id, user.id);
     } catch (e) {
+      if (!isDeniedManageGuildError(e)) throw e;
       const msg = e instanceof Error ? e.message : String(e);
       if (msg === 'Forbidden') return jsonResponse({error: 'Forbidden'}, 403, req);
       return jsonResponse({ok: false, error: msg}, 403, req);
@@ -37,7 +40,10 @@ serve(async (req) => {
 
     return jsonResponse({ok: true}, 200, req);
   } catch (e) {
-    const {internalErrorResponse} = await import('../_shared/apiResponse.ts');
+    const msg = e instanceof Error ? e.message : String(e);
+    if (msg.includes('rate limit')) {
+      return appErrorResponse(req, 429, API_ERROR_CODES.TOO_MANY_REQUESTS);
+    }
     return internalErrorResponse(req, e);
   }
 });

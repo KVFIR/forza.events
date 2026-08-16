@@ -61,6 +61,15 @@ export function resolveActiveGroupLeaderId(
   return hostProjection.lobbyLeaderDiscordId?.trim() || hostProjection.hostDiscordId;
 }
 
+/** Guild membership is for new guild-search picks. Roster racers and the host already have standing. */
+export function convoyLeaderRequiresGuildMembership(
+  leaderId: string,
+  hostDiscordId: string,
+  alreadyOnRoster: boolean,
+): boolean {
+  return !alreadyOnRoster && leaderId !== hostDiscordId;
+}
+
 /** Host-assigned leader for a new group: waitlist, guild member, active non-leader, or host without a leader row. */
 export function canPickAsNewGroupLeader(
   roster: NewGroupLeaderRow[],

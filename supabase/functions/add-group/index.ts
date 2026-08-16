@@ -7,7 +7,12 @@ import {requireDiscordUser} from '../_shared/discordRequestAuth.ts';
 import {ensureUserRowForDiscordId, resolveDiscordHandleForUserId} from '../_shared/discordUserRow.ts';
 import {syncPublishedEmbedByEventId} from '../_shared/embedSync.ts';
 import {eventHasStarted} from '../_shared/eventSpec.ts';
-import {canPickAsNewGroupLeader, firstOpenGroup, resolveAddGroupParticipationSource} from '../_shared/eventGroups.ts';
+import {
+  canPickAsNewGroupLeader,
+  convoyLeaderRequiresGuildMembership,
+  firstOpenGroup,
+  resolveAddGroupParticipationSource,
+} from '../_shared/eventGroups.ts';
 import {responseForRpcError} from '../_shared/rpcErrors.ts';
 import {validateGamertag} from '../_shared/gamertag.ts';
 import {rateLimitMutation} from '../_shared/rateLimitPresets.ts';
@@ -96,7 +101,14 @@ serve(async (req) => {
     let leaderGamertag = String(body.leader_gamertag ?? '').trim();
     if (!leaderGamertag) leaderGamertag = existingLeaderRow?.gamertag_snapshot?.trim() ?? '';
 
-    if (event.guild_id) {
+    if (
+      event.guild_id &&
+      convoyLeaderRequiresGuildMembership(
+        leaderId,
+        event.host_discord_id,
+        Boolean(existingLeaderRow),
+      )
+    ) {
       try {
         const inGuild = await isUserMemberOfGuild(event.guild_id, leaderId);
         if (!inGuild) {

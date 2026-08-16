@@ -41,4 +41,9 @@ describe('resolveListGuildCandidates', () => {
     const memberOnly = guilds.filter((g) => g.permissions === MEMBER_ONLY);
     expect(resolveListGuildCandidates(memberOnly, false).map((g) => g.id)).toEqual(['2']);
   });
+
+  it('treats guild owner as manageable even without permission bits', () => {
+    const owned = [{id: '3', name: 'Owned', icon: null, owner: true, permissions: '0'}];
+    expect(resolveListGuildCandidates(owned, false).map((g) => g.id)).toEqual(['3']);
+  });
 });

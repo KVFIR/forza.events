@@ -1,6 +1,7 @@
 import {describe, expect, it} from 'vitest';
 import {
   canPickAsNewGroupLeader,
+  convoyLeaderRequiresGuildMembership,
   canApplyGroupMovesInOrder,
   isActiveConvoyLeaderRow,
   isHostDenormalizedConvoyLeader,
@@ -42,6 +43,17 @@ describe('isHostDenormalizedConvoyLeader', () => {
         lobbyLeaderIsHost: false,
       }),
     ).toBe(false);
+  });
+});
+
+describe('convoyLeaderRequiresGuildMembership', () => {
+  it('skips roster members and the host', () => {
+    expect(convoyLeaderRequiresGuildMembership('driver-1', 'host-1', true)).toBe(false);
+    expect(convoyLeaderRequiresGuildMembership('host-1', 'host-1', false)).toBe(false);
+  });
+
+  it('requires a guild check for new guild-search picks', () => {
+    expect(convoyLeaderRequiresGuildMembership('new-1', 'host-1', false)).toBe(true);
   });
 });
 

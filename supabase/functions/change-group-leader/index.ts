@@ -9,6 +9,7 @@ import {syncPublishedEmbedByEventId} from '../_shared/embedSync.ts';
 import {eventHasStarted} from '../_shared/eventSpec.ts';
 import {
   canPickAsNewGroupLeader,
+  convoyLeaderRequiresGuildMembership,
   resolveActiveGroupLeaderId,
   resolveAddGroupParticipationSource,
 } from '../_shared/eventGroups.ts';
@@ -105,7 +106,14 @@ serve(async (req) => {
     let leaderGamertag = String(body.leader_gamertag ?? '').trim();
     if (!leaderGamertag) leaderGamertag = existingLeaderRow?.gamertag_snapshot?.trim() ?? '';
 
-    if (event.guild_id) {
+    if (
+      event.guild_id &&
+      convoyLeaderRequiresGuildMembership(
+        leaderId,
+        event.host_discord_id,
+        Boolean(existingLeaderRow),
+      )
+    ) {
       try {
         const inGuild = await isUserMemberOfGuild(event.guild_id, leaderId);
         if (!inGuild) {

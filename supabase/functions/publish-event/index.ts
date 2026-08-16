@@ -4,7 +4,7 @@ import {appErrorResponse, databaseErrorResponse, internalErrorResponse} from '..
 import {jsonResponse, optionsResponse} from '../_shared/cors.ts';
 import {deleteChannelMessage, mapDiscordPostError, postChannelMessage, resolveChannelInviteUrl} from '../_shared/discord.ts';
 import {requireDiscordUser} from '../_shared/discordRequestAuth.ts';
-import {requireManageGuildAccess} from '../_shared/guildAccess.ts';
+import {isDeniedManageGuildError, requireManageGuildAccess} from '../_shared/guildAccess.ts';
 import {validatePublishChannelTarget} from '../_shared/publishTarget.ts';
 import {buildEventEmbed, mapEventCarsForEmbed} from '../_shared/events.ts';
 import {validatePublishReady, validateRankedAgainstEvent} from '../_shared/eventSpec.ts';
@@ -49,8 +49,9 @@ serve(async (req) => {
 
     let publishGuild;
     try {
-      publishGuild = await requireManageGuildAccess(token!, guild_id);
+      publishGuild = await requireManageGuildAccess(token!, guild_id, user.id);
     } catch (e) {
+      if (!isDeniedManageGuildError(e)) throw e;
       const msg = e instanceof Error ? e.message : String(e);
       if (msg === 'Forbidden') return jsonResponse({error: 'Forbidden'}, 403, req);
       return jsonResponse({error: msg}, 403, req);
@@ -232,6 +233,10 @@ serve(async (req) => {
         await deleteChannelMessage(postedChannelId, postedMessageId);
       }
       await clearPublishLock(supabase, lockedEventId);
+    }
+    const msg = e instanceof Error ? e.message : String(e);
+    if (msg.includes('rate limit')) {
+      return appErrorResponse(req, 429, API_ERROR_CODES.TOO_MANY_REQUESTS);
     }
     return internalErrorResponse(req, e);
   }

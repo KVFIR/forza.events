@@ -13,7 +13,7 @@ import {appErrorResponse, internalErrorResponse} from '../_shared/apiResponse.ts
 import {jsonResponse, optionsResponse} from '../_shared/cors.ts';
 import {botIsInGuild} from '../_shared/discord.ts';
 import {requireDiscordUser} from '../_shared/discordRequestAuth.ts';
-import {requireManageGuildAccess} from '../_shared/guildAccess.ts';
+import {isDeniedManageGuildError, requireManageGuildAccess} from '../_shared/guildAccess.ts';
 import {rateLimitAuth} from '../_shared/rateLimitPresets.ts';
 
 serve(async (req) => {
@@ -32,8 +32,9 @@ serve(async (req) => {
     if (!guild_id) return jsonResponse({error: 'Missing guild_id'}, 400, req);
 
     try {
-      await requireManageGuildAccess(token!, guild_id);
+      await requireManageGuildAccess(token!, guild_id, user.id);
     } catch (e) {
+      if (!isDeniedManageGuildError(e)) throw e;
       const msg = e instanceof Error ? e.message : String(e);
       if (msg === 'Forbidden') return jsonResponse({error: 'Forbidden'}, 403, req);
       return jsonResponse({error: msg}, 403, req);
