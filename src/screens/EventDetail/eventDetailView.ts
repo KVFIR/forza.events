@@ -93,6 +93,8 @@ export function buildEventDetailViewModel(input: {
   resultRows: EventResultRow[];
   isJoined: (event: ForzaEvent) => boolean;
   isSignedIn: boolean;
+  /** Roster/standings Discord handles. Stored session counts before React hydrates `isSignedIn`. */
+  showDiscordHandles?: boolean;
   isStandalone: boolean;
   authInitializing: boolean;
   joining: boolean;
@@ -108,6 +110,7 @@ export function buildEventDetailViewModel(input: {
     resultRows,
     isJoined,
     isSignedIn,
+    showDiscordHandles = isSignedIn,
     isStandalone,
     authInitializing,
     joining,
@@ -140,6 +143,7 @@ export function buildEventDetailViewModel(input: {
     event,
     resultRows,
     t('results.unknownDriver'),
+    {showDiscordHandles},
   );
   const convoyLeader = resolveConvoyLeader(ev, user.discordId);
   const viewerConvoyLeader = resolveViewerConvoyLeader(ev, user.discordId);

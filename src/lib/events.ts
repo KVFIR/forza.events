@@ -259,9 +259,15 @@ export function resolveEventResultDisplay(
   event: ForzaEvent,
   rows: EventResultRow[],
   unknownDriverLabel = 'Driver',
+  options?: {showDiscordHandles?: boolean},
 ): EventResultDisplay[] {
+  const showDiscord = options?.showDiscordHandles !== false;
   const labelById = new Map(
-    event.participants.map((p) => [p.discordId, p.gamertag ?? p.username]),
+    event.participants.map((p) => {
+      const gt = p.gamertag?.trim();
+      const handle = showDiscord ? p.username?.trim() : '';
+      return [p.discordId, gt || handle || unknownDriverLabel];
+    }),
   );
 
   return sortEventResultRows(rows).map((r) => ({
@@ -565,28 +571,18 @@ export async function fetchEventById(
   }
 
   const {discordToken} = options;
-  const directReads = shouldUseDirectSupabaseReads();
-
-  if (directReads) {
-    const fromDb = await fetchPublishedEventViaPostgrest(id);
-    if (fromDb) return fromDb;
-    if (!discordToken) return undefined;
-  }
-
-  if (discordToken || isDiscordActivityFrame()) {
-    const fromEdge = await fetchEventsViaEdge({
-      includeCompleted: true,
-      eventId: id,
-      discordToken,
-    });
-    if (fromEdge?.length) return fromEdge[0];
-
-    const fromDb = await fetchPublishedEventViaPostgrest(id);
-    if (fromDb) return fromDb;
-
-    return undefined;
-  }
-
+  // Guest deep links have no Browse `routeEvent`. On forza.events, anon PostgREST
+  // via `/supabase` returns 401; Edge browse-events by id is the public read path.
+  const fromEdge = await fetchEventsViaEdge({
+    includeCompleted: true,
+    eventId: id,
+    discordToken,
+  });
+  if (fromEdge?.length) return fromEdge[0];
+  // Empty array = confirmed miss. null = Edge transport/5xx — REST still works in
+  // Activity (URL mapping) and on localhost Vite; forza.events `/supabase` 401s.
+  if (fromEdge) return undefined;
+  if (!shouldUseDirectSupabaseReads() && !isDiscordActivityFrame()) return undefined;
   return fetchPublishedEventViaPostgrest(id);
 }
 

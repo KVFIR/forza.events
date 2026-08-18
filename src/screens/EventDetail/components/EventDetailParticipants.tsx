@@ -18,6 +18,7 @@ type Props = {
     'ev' | 'groups' | 'waitlist' | 'canChangeGroupLeader' | 'showGroupRoster' | 'canBalanceGroupRoster' | 'canShuffleGroupRoster' | 'canBalanceShuffleGroupRoster'
   >;
   viewerDiscordId: string;
+  showDiscordHandles?: boolean;
   accessToken: string | null;
   onRosterChanged: () => void;
 };
@@ -169,6 +170,7 @@ function RosterCard({
   avatarVariant,
   gamertag,
   username,
+  showDiscordHandles = true,
   rating,
   showRating,
   hideRating,
@@ -182,6 +184,7 @@ function RosterCard({
   avatarVariant: 'green' | 'purple' | 'neutral';
   gamertag?: string;
   username: string;
+  showDiscordHandles?: boolean;
   rating?: number;
   showRating?: boolean;
   hideRating?: boolean;
@@ -207,7 +210,11 @@ function RosterCard({
       <SeatNumber n={seat} />
       <UserAvatar src={avatarSrc} name={avatarName} size="xs" variant={avatarVariant} />
       <div className="min-w-0 flex-1">
-        <ParticipantDisplayNames gamertag={gamertag} username={username} />
+        <ParticipantDisplayNames
+          gamertag={gamertag}
+          username={username}
+          showDiscord={showDiscordHandles}
+        />
       </div>
       {badges && !hideBadges ? (
         <div ref={badgeRef} className={badgeClassName}>
@@ -224,11 +231,13 @@ function LeaderCard({
   position,
   showRating,
   hideRating,
+  showDiscordHandles,
 }: {
   leader: RosterConvoyLeader;
   position: number;
   showRating: boolean;
   hideRating: boolean;
+  showDiscordHandles: boolean;
 }) {
   const {t} = useTranslation();
 
@@ -241,6 +250,7 @@ function LeaderCard({
       avatarVariant="green"
       gamertag={leader.gamertag}
       username={leader.username ?? ''}
+      showDiscordHandles={showDiscordHandles}
       rating={leader.rating}
       showRating={showRating}
       hideRating={hideRating}
@@ -256,12 +266,14 @@ function DriverCard({
   position,
   showRating,
   hideRating,
+  showDiscordHandles,
 }: {
   p: EventParticipant;
   viewerDiscordId: string;
   position: number;
   showRating: boolean;
   hideRating: boolean;
+  showDiscordHandles: boolean;
 }) {
   return (
     <RosterCard
@@ -276,6 +288,7 @@ function DriverCard({
       avatarVariant="purple"
       gamertag={p.gamertag}
       username={p.username}
+      showDiscordHandles={showDiscordHandles}
       rating={p.rating}
       showRating={showRating}
       hideRating={hideRating}
@@ -286,6 +299,7 @@ function DriverCard({
 export function EventDetailParticipants({
   view,
   viewerDiscordId,
+  showDiscordHandles = true,
   accessToken,
   onRosterChanged,
 }: Props) {
@@ -367,6 +381,7 @@ export function EventDetailParticipants({
                       position={1}
                       showRating={showRating}
                       hideRating={hideRating}
+                      showDiscordHandles={showDiscordHandles}
                     />
                   ) : null}
                   {group.drivers.map((p, i) => (
@@ -377,6 +392,7 @@ export function EventDetailParticipants({
                       position={(group.leader ? 1 : 0) + i + 1}
                       showRating={showRating}
                       hideRating={hideRating}
+                      showDiscordHandles={showDiscordHandles}
                     />
                   ))}
                 </div>
@@ -410,6 +426,7 @@ export function EventDetailParticipants({
                   avatarVariant="neutral"
                   gamertag={p.gamertag}
                   username={p.username}
+                  showDiscordHandles={showDiscordHandles}
                   rating={p.rating}
                   showRating={showRating}
                   hideRating={hideRating}

@@ -105,7 +105,6 @@
     "signInProfile": "Connect your Discord account to view your profile and stats.",
     "signInCreate": "Connect your Discord account to create, save, and publish events.",
     "signInMyEvents": "Sign in with Discord to see events you host or join.",
-    "signInEventMaybeDraft": "Sign in with Discord to open this event. Host drafts are only visible when you are signed in.",
     "signInToJoin": "Sign in to join",
     "signInDiscordCancel": "Sign in with Discord to cancel this event.",
     "signInDiscordDelete": "Sign in with Discord to delete this draft.",

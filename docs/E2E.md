@@ -55,7 +55,7 @@ Manual QA matrix aligned with current code behavior (not an abstract checklist).
 
 - [ ] Cold start: authorize → `token-exchange` → `authenticate` → profile shows Discord name/avatar.
 - [ ] Browse does **not** wait for auth (`usePublishedEvents` without token).
-- [ ] **Browser web (`forza.events` / localhost):** guest can open Browse, Event Detail, Ladder without OAuth; Join / Create / Profile / My Events soft-prompt Discord sign-in.
+- [ ] **Browser web (`forza.events` / localhost):** guest can open Browse, Event Detail, Ladder without OAuth; Join / Create / Profile / My Events soft-prompt Discord sign-in. Cold-open `/event/{slug}` (no Browse `location.state`) shows the published event. Unknown slug **or UUID** after auth is not-found — not the host-draft sign-in wall.
 - [ ] My Events / Create / Join work after auth.
 - [ ] Re-enter Activity in same session — `prompt: 'none'`, minimal prompts.
 
@@ -127,7 +127,7 @@ Manual QA matrix aligned with current code behavior (not an abstract checklist).
 | **Host** | No Join; Edit / post-start actions only |
 | **Convoy leader** (host-assigned) | Leader UI; **cannot leave** (`LEADER_CANNOT_LEAVE`) |
 | Join updates profile | `xbox_gamertag` written to `users` |
-| Roster cards | Ranked events only: rated drivers (`games_rated ≥ 1`) show current ELO right of the name; unrated show **TBD**; waitlist included. Casual events hide ELO. |
+| Roster cards | Ranked events only: rated drivers (`games_rated ≥ 1`) show current ELO right of the name; unrated show **TBD**; waitlist included. Casual events hide ELO. Guests on `forza.events` / localhost must see the same ELO as signed-in (not all-TBD). |
 
 ### Waitlist & groups
 
@@ -172,7 +172,7 @@ Manual QA matrix aligned with current code behavior (not an abstract checklist).
 
 - [ ] Hero cover (16:9 band); default by event type.
 - [ ] Organiser: real server name, not placeholder `Server`.
-- [ ] Roster: per-group sections (leader + drivers) with `n/12`, then a Waitlist section with queue positions; Xbox lobby hint when not leader.
+- [ ] Roster: per-group sections (leader + drivers) with `n/12`, then a Waitlist section with queue positions; Xbox lobby hint when not leader. Guests see Xbox gamertag only (no Discord `@handle`); signed-in viewers still see the handle under the GT.
 - [ ] Track codes, car rules, tuning restrictions, optional description text.
 - [ ] **Join voice** when the host set a gathering voice channel (opens a `discord.gg` invite to that VC so non-members can join the server + voice; label is `#channel-name` when known); hidden after cancel/completed/archived.
 - [ ] Realtime: second client join → roster and count update without F5.

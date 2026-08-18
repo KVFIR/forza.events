@@ -16,6 +16,8 @@ export function useEventDetailLoad(input: {
   const [loading, setLoading] = useState(true);
   const loadedForIdRef = useRef<string | null>(null);
   const fetchSeqRef = useRef(0);
+  const eventRef = useRef(event);
+  eventRef.current = event;
 
   const displayEvent = useMemo(
     () => (event ? mergeOptimisticEventPatch(event, getLobbyPatch(event.id)) : undefined),
@@ -30,6 +32,9 @@ export function useEventDetailLoad(input: {
     if (idChanged) {
       loadedForIdRef.current = id;
       setEvent(routeEvent && eventMatchesRouteKey(routeEvent, id) ? routeEvent : undefined);
+      setLoading(true);
+    } else if (!eventRef.current) {
+      // Token landed after a guest miss (host draft). Keep the spinner — don't flash not-found.
       setLoading(true);
     }
 

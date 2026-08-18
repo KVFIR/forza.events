@@ -66,6 +66,7 @@ function buildView(
     resultRows: overrides.resultRows ?? [],
     isJoined: overrides.isJoined ?? (() => false),
     isSignedIn: overrides.isSignedIn ?? true,
+    showDiscordHandles: overrides.showDiscordHandles,
     isStandalone: overrides.isStandalone ?? false,
     authInitializing: overrides.authInitializing ?? false,
     joining: overrides.joining ?? false,
@@ -352,6 +353,57 @@ describe('buildEventDetailViewModel', () => {
   it('still prompts Activity retry when guest is in the iframe', () => {
     const view = buildView({isSignedIn: false, isStandalone: false});
     expect(view.needsSignInToParticipate).toBe(true);
+  });
+
+  it('omits Discord handles from guest result labels', () => {
+    const event = baseEvent({
+      discordMessageId: 'msg-1',
+      participants: [
+        participant({discordId: 'd1', gamertag: 'XboxGT', username: 'disc_user'}),
+        participant({discordId: 'd2', gamertag: '', username: 'only_discord'}),
+      ],
+    });
+    const view = buildView({
+      event,
+      displayEvent: event,
+      isSignedIn: false,
+      resultRows: [
+        {discordId: 'd1', position: 1, dnf: false, dns: false},
+        {discordId: 'd2', position: 2, dnf: false, dns: false},
+      ],
+    });
+    expect(view.resultDisplay.map((row) => row.label)).toEqual([
+      'XboxGT',
+      'results.unknownDriver',
+    ]);
+  });
+
+  it('keeps Discord handles on signed-in result labels when gamertag is missing', () => {
+    const event = baseEvent({
+      discordMessageId: 'msg-1',
+      participants: [participant({discordId: 'd1', gamertag: '', username: 'only_discord'})],
+    });
+    const view = buildView({
+      event,
+      displayEvent: event,
+      resultRows: [{discordId: 'd1', position: 1, dnf: false, dns: false}],
+    });
+    expect(view.resultDisplay[0]?.label).toBe('only_discord');
+  });
+
+  it('keeps Discord handles when a stored session is present before isSignedIn hydrates', () => {
+    const event = baseEvent({
+      discordMessageId: 'msg-1',
+      participants: [participant({discordId: 'd1', gamertag: '', username: 'only_discord'})],
+    });
+    const view = buildView({
+      event,
+      displayEvent: event,
+      isSignedIn: false,
+      showDiscordHandles: true,
+      resultRows: [{discordId: 'd1', position: 1, dnf: false, dns: false}],
+    });
+    expect(view.resultDisplay[0]?.label).toBe('only_discord');
   });
 
   it('shows Xbox hint for joined racer who is not convoy leader', () => {

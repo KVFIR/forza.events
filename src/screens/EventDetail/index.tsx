@@ -4,11 +4,11 @@ import {ArrowLeft} from 'lucide-react';
 import {useLocation, useParams} from 'react-router-dom';
 import {ContentReveal} from '../../components/ui/ContentReveal';
 import {PageLoading} from '../../components/ui/PageLoading';
-import {SignInRequiredState} from '../../components/SignInRequiredState';
 import {TextLink} from '../../components/ui/TextButton';
 import {useJoinedEvents} from '../../context/JoinedEventsContext';
 import {useRichPresenceOverride} from '../../context/DiscordRichPresenceContext';
 import {useAuth} from '../../context/AuthContext';
+import {loadDiscordSession} from '../../lib/discordAuth';
 import {
   buildEventRichPresence,
   type EventRichPresenceRole,
@@ -56,6 +56,7 @@ export function EventDetail() {
     retryDiscordAuth,
   } = useAuth();
   const discordToken = getAccessToken();
+  const showDiscordHandles = isSignedIn || Boolean(loadDiscordSession()?.accessToken);
 
   const {event, setEvent, loading, displayEvent} = useEventDetailLoad({
     id,
@@ -152,6 +153,7 @@ export function EventDetail() {
       resultRows,
       isJoined,
       isSignedIn,
+      showDiscordHandles,
       isStandalone,
       authInitializing,
       joining,
@@ -167,6 +169,7 @@ export function EventDetail() {
     resultRows,
     isJoined,
     isSignedIn,
+    showDiscordHandles,
     isStandalone,
     authInitializing,
     joining,
@@ -191,18 +194,6 @@ export function EventDetail() {
     const awaitingAuthForPossibleDraft = authInitializing && !routeEvent;
     if (loading || awaitingAuthForPossibleDraft) {
       return <PageLoading label={t('loading.event')} className="pb-10 pt-4" />;
-    }
-
-    // Missing row while logged out is often a host draft — soft-prompt instead of not-found.
-    if (!isSignedIn) {
-      return (
-        <SignInRequiredState
-          description={t('auth.signInEventMaybeDraft')}
-          busy={!isStandalone ? authRetrying : false}
-          onRetry={!isStandalone ? () => void retryDiscordAuth() : undefined}
-          className="pb-10 pt-4"
-        />
-      );
     }
 
     return (
@@ -303,6 +294,7 @@ export function EventDetail() {
         key={event.id}
         view={view}
         viewerDiscordId={user.discordId}
+        showDiscordHandles={showDiscordHandles}
         accessToken={discordToken}
         onRosterChanged={syncEventFromServer}
       />
