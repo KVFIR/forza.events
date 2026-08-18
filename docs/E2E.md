@@ -366,6 +366,7 @@ At least one mapped message per screen:
 5. My Events hosted + joined  
 6. RU toggle on one screen  
 7. Profile bell off → no opt-out DMs; waitlist promote DM still arrives  
+8. Crawler: Googlebot `/event/{slug}` returns 200 with the event title (not 404); Discord unfurl on a slug URL shows the event card  
 
 ---
 

@@ -5,7 +5,7 @@ import {
   buildCrawlerPageHtml,
   isLinkPreviewCrawler,
 } from '../shared/eventPageMeta.mjs';
-import {buildSiteJsonLd, buildStaticCrawlerExtras} from '../shared/sitePageMeta.mjs';
+import {buildSiteJsonLd, buildStaticCrawlerExtras, buildHomeCrawlerBody} from '../shared/sitePageMeta.mjs';
 import {buildRobotsTxt, buildSitemapXml, isPrivateCrawlerPath, SITEMAP_STATIC_PATHS} from '../shared/sitemap.mjs';
 
 const origin = 'https://forza.events';
@@ -15,12 +15,15 @@ describe('sitemap', () => {
     const txt = buildRobotsTxt(origin);
     expect(txt).toContain('Sitemap: https://forza.events/sitemap.xml');
     expect(txt).toContain('Disallow: /sign-in');
+    expect(txt).toContain('Disallow: /bot-installed');
     expect(txt).toContain('Allow: /event/');
   });
 
   it('isPrivateCrawlerPath matches robots disallow targets', () => {
     expect(isPrivateCrawlerPath('/sign-in')).toBe(true);
     expect(isPrivateCrawlerPath('/auth/callback')).toBe(true);
+    expect(isPrivateCrawlerPath('/bot-installed')).toBe(true);
+    expect(isPrivateCrawlerPath('/leaderboard')).toBe(false);
     expect(isPrivateCrawlerPath('/terms')).toBe(false);
     expect(isPrivateCrawlerPath('/')).toBe(false);
   });
@@ -94,6 +97,10 @@ describe('crawler HTML', () => {
     expect(html).toContain('application/ld+json');
     expect(html).toContain('"@type":"Event"');
     expect(jsonLd.eventAttendanceMode).toContain('OnlineEventAttendanceMode');
+    expect(jsonLd.location).toEqual({
+      '@type': 'VirtualLocation',
+      url: meta.url,
+    });
   });
 
   it('omits eventStatus for completed events', () => {
@@ -133,5 +140,24 @@ describe('crawler HTML', () => {
     expect(isLinkPreviewCrawler('GPTBot/1.0')).toBe(true);
     expect(isLinkPreviewCrawler('PerplexityBot/1.0')).toBe(true);
     expect(isLinkPreviewCrawler('Mozilla/5.0 (compatible; Googlebot/2.1)')).toBe(true);
+  });
+
+  it('home crawler body lists event links and site nav', () => {
+    const homeMeta = {
+      title: 'Browse events · FORZA.EVENTS',
+      description: 'Browse upcoming Forza Horizon races.',
+      image: `${origin}/og/site.webp`,
+      url: `${origin}/`,
+      siteName: 'FORZA.EVENTS',
+    };
+    const html = buildHomeCrawlerBody(
+      homeMeta,
+      [{slug: 'sunset-sprint-20260714', title: 'Sunset Sprint'}],
+      {siteOrigin: origin},
+    );
+    expect(html).toContain(`href="${origin}/event/sunset-sprint-20260714"`);
+    expect(html).toContain('Sunset Sprint');
+    expect(html).toContain(`href="${origin}/leaderboard"`);
+    expect(html).toContain(`href="${origin}/terms"`);
   });
 });

@@ -1,6 +1,6 @@
 /** Static site page meta — keep in sync with `src/lib/sitePageMeta.ts`. */
 
-import {SITE_NAME, escapeHtml, isLinkPreviewCrawler} from './eventPageMeta.mjs';
+import {SITE_NAME, escapeHtml, eventPublicUrl, isLinkPreviewCrawler} from './eventPageMeta.mjs';
 
 export {SITE_NAME, isLinkPreviewCrawler};
 
@@ -78,7 +78,7 @@ export function isStaticAssetPath(pathname) {
 
 export function buildDefaultSitePageMeta({siteOrigin, pageUrl} = {}) {
   const origin = (siteOrigin ?? DEFAULT_SITE_ORIGIN).replace(/\/$/, '');
-  const url = pageUrl ?? origin;
+  const url = pageUrl ?? `${origin}/`;
   return {
     title: SITE_NAME,
     description: DEFAULT_SITE_DESCRIPTION,
@@ -90,7 +90,7 @@ export function buildDefaultSitePageMeta({siteOrigin, pageUrl} = {}) {
 
 export function buildSiteJsonLd({siteOrigin, pageUrl} = {}) {
   const origin = (siteOrigin ?? DEFAULT_SITE_ORIGIN).replace(/\/$/, '');
-  const url = pageUrl ?? origin;
+  const url = pageUrl ?? `${origin}/`;
   return {
     '@context': 'https://schema.org',
     '@type': 'WebSite',
@@ -113,6 +113,34 @@ export function buildStaticCrawlerBody(meta) {
 </main>`;
 }
 
+const HOME_CRAWLER_EVENT_LIMIT = 50;
+
+export function buildHomeCrawlerBody(meta, events, {siteOrigin} = {}) {
+  const origin = (siteOrigin ?? DEFAULT_SITE_ORIGIN).replace(/\/$/, '');
+  const title = escapeHtml(meta.title);
+  const description = escapeHtml(meta.description);
+  const url = escapeHtml(meta.url);
+  const siteName = escapeHtml(meta.siteName ?? SITE_NAME);
+  const items = (events ?? [])
+    .slice(0, HOME_CRAWLER_EVENT_LIMIT)
+    .map((event) => {
+      const href = escapeHtml(eventPublicUrl(origin, event));
+      const eventTitle = escapeHtml(String(event.title ?? 'Event').trim() || 'Event');
+      return `    <li><a href="${href}">${eventTitle}</a></li>`;
+    })
+    .join('\n');
+  const list = items
+    ? `\n  <nav aria-label="Events">\n    <ul>\n${items}\n    </ul>\n  </nav>`
+    : '';
+
+  return `<main>
+  <h1>${title}</h1>
+  <p>${description}</p>
+  <p><a href="${escapeHtml(`${origin}/leaderboard`)}">Ladder</a> · <a href="${escapeHtml(`${origin}/terms`)}">Terms of Service</a> · <a href="${escapeHtml(`${origin}/privacy`)}">Privacy Policy</a></p>${list}
+  <p><a href="${url}">Open ${siteName}</a></p>
+</main>`;
+}
+
 export function buildStaticCrawlerExtras(pathname, meta, {siteOrigin} = {}) {
   const path = normalizeSitePath(pathname);
   const bodyHtml = buildStaticCrawlerBody(meta);
@@ -124,7 +152,7 @@ export function buildStaticPageMeta(pathname, {siteOrigin, pageUrl} = {}) {
   const origin = (siteOrigin ?? DEFAULT_SITE_ORIGIN).replace(/\/$/, '');
   const path = normalizeSitePath(pathname);
   const page = STATIC_PAGES[path];
-  const url = pageUrl ?? `${origin}${path === '/' ? '' : path}`;
+  const url = pageUrl ?? (path === '/' ? `${origin}/` : `${origin}${path}`);
 
   if (!page) {
     return buildDefaultSitePageMeta({siteOrigin: origin, pageUrl: url});

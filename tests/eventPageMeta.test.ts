@@ -3,8 +3,11 @@ import {buildEventPageMeta as buildClientMeta} from '../src/lib/eventPageMeta';
 import {
   buildCrawlerPageHtml,
   buildEventCrawlerBody,
+  buildEventJsonLd,
   buildEventPageMeta as buildSharedMeta,
   escapeHtml,
+  eventCrawlerRobots,
+  eventPublicUrl,
   isLinkPreviewCrawler,
   parseEventPagePath,
   resolveEventCoverAbsolute,
@@ -88,6 +91,15 @@ describe('eventPageMeta parity', () => {
     const encoded = `https://forza.events/event/${encodeURIComponent(slug)}`;
     expect(buildSharedMeta({...baseDbEvent, slug}, opts).url).toBe(encoded);
     expect(buildClientMeta({...baseEvent, slug}, opts).url).toBe(encoded);
+    expect(eventPublicUrl('https://forza.events', {slug}, {results: true})).toBe(
+      `${encoded}/results`,
+    );
+    expect(buildSharedMeta({...baseDbEvent, slug}, {...opts, isResults: true}).url).toBe(
+      `${encoded}/results`,
+    );
+    expect(buildClientMeta({...baseEvent, slug}, {...opts, isResults: true}).url).toBe(
+      `${encoded}/results`,
+    );
   });
 });
 
@@ -158,6 +170,30 @@ describe('eventPageMeta shared', () => {
     expect(html).toContain('property="og:image"');
     expect(html).toContain('name="twitter:card"');
     expect(html).toContain('name="robots" content="index, follow"');
+    expect(html).toContain('Browse events');
+    expect(html).toContain('/leaderboard');
     expect(escapeHtml('a "b"')).toBe('a &quot;b&quot;');
+  });
+
+  it('puts event about text in crawler body and JSON-LD', () => {
+    const meta = buildSharedMeta(baseDbEvent, {siteOrigin: 'https://forza.events'});
+    const about = 'Bring a B-class tune.';
+    expect(buildEventCrawlerBody(meta, {about})).toContain(about);
+    expect(
+      buildEventJsonLd({...baseDbEvent, description: about}, meta, {
+        siteOrigin: 'https://forza.events',
+      }).description,
+    ).toBe(about);
+    expect(buildEventCrawlerBody(meta, {about: 'A <b>tune</b>'})).toContain(
+      'A &lt;b&gt;tune&lt;/b&gt;',
+    );
+  });
+
+  it('noindexes results, cancelled, and archived event pages', () => {
+    expect(eventCrawlerRobots('open')).toBe('index, follow');
+    expect(eventCrawlerRobots('completed')).toBe('index, follow');
+    expect(eventCrawlerRobots('open', true)).toBe('noindex, follow');
+    expect(eventCrawlerRobots('cancelled')).toBe('noindex, follow');
+    expect(eventCrawlerRobots('archived')).toBe('noindex, follow');
   });
 });

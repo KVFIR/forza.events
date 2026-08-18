@@ -90,11 +90,22 @@ function lifecycleSuffix(status) {
   return '';
 }
 
+export function eventPublicUrl(siteOrigin, event, {results = false} = {}) {
+  const origin = (siteOrigin ?? 'https://forza.events').replace(/\/$/, '');
+  const slug = typeof event.slug === 'string' ? event.slug.trim() : '';
+  const key = slug || event.id;
+  return `${origin}/event/${encodeURIComponent(key)}${results ? '/results' : ''}`;
+}
+
+export function eventCrawlerRobots(status, isResults = false) {
+  return isResults || status === 'cancelled' || status === 'archived'
+    ? 'noindex, follow'
+    : 'index, follow';
+}
+
 export function buildEventPageMeta(event, {siteOrigin, pageUrl, isResults = false} = {}) {
   const origin = (siteOrigin ?? 'https://forza.events').replace(/\/$/, '');
-  const key = event.slug?.trim() || event.id;
-  const url =
-    pageUrl ?? `${origin}/event/${encodeURIComponent(key)}${isResults ? '/results' : ''}`;
+  const url = pageUrl ?? eventPublicUrl(origin, event, {results: isResults});
   const typeLabel = EVENT_TYPE_LABEL_EN[normalizeEventType(event.type)] ?? 'Road racing';
   const when = formatEventOgDate(event.starts_at ?? event.startsAt);
   const status = event.status ?? event.lifecycle ?? 'open';
@@ -139,14 +150,20 @@ export function buildEventJsonLd(event, meta, {siteOrigin} = {}) {
     .trim();
   const eventStatus = schemaEventStatus(status);
 
+  const about = String(event.description ?? '').trim().slice(0, 2000);
+
   return {
     '@context': 'https://schema.org',
     '@type': 'Event',
     name,
-    description: meta.description,
+    description: about || meta.description,
     startDate,
     ...(eventStatus ? {eventStatus} : {}),
     eventAttendanceMode: 'https://schema.org/OnlineEventAttendanceMode',
+    location: {
+      '@type': 'VirtualLocation',
+      url: meta.url,
+    },
     image: meta.image,
     url: meta.url,
     organizer: {
@@ -157,16 +174,27 @@ export function buildEventJsonLd(event, meta, {siteOrigin} = {}) {
   };
 }
 
-export function buildEventCrawlerBody(meta) {
+export function buildEventCrawlerBody(meta, {about} = {}) {
   const title = escapeHtml(meta.title);
   const description = escapeHtml(meta.description);
   const url = escapeHtml(meta.url);
   const siteName = escapeHtml(meta.siteName ?? SITE_NAME);
+  let origin = '';
+  try {
+    origin = new URL(meta.url).origin;
+  } catch {
+    origin = '';
+  }
+  const browse =
+    origin !== ''
+      ? `\n  <p><a href="${escapeHtml(`${origin}/`)}">Browse events</a> · <a href="${escapeHtml(`${origin}/leaderboard`)}">Ladder</a></p>`
+      : '';
+  const aboutHtml = about?.trim() ? `\n  <p>${escapeHtml(about.trim())}</p>` : '';
 
   return `<main>
   <h1>${title}</h1>
-  <p>${description}</p>
-  <p>Forza Horizon community event on ${siteName}. Sign in with Discord to browse and join.</p>
+  <p>${description}</p>${aboutHtml}
+  <p>Forza Horizon community event on ${siteName}. Sign in with Discord to browse and join.</p>${browse}
   <p><a href="${url}">View event on ${siteName}</a></p>
 </main>`;
 }

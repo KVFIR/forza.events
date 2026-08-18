@@ -4,17 +4,24 @@ import {siteOrigin, textResponseHeaders, xmlResponseHeaders} from './railwayProx
 const DEFAULT_SUPABASE_ORIGIN = 'https://uoysqfczahqmctbrrizn.supabase.co';
 const SITEMAP_EVENT_LIMIT = 500;
 
-async function fetchPublishedEventsForSitemap(env) {
+export async function fetchPublishedEvents(
+  env,
+  {
+    limit = SITEMAP_EVENT_LIMIT,
+    status = 'not.in.(draft,cancelled,archived)',
+    order = 'starts_at.desc',
+  } = {},
+) {
   const anonKey = env.SUPABASE_ANON_KEY?.trim();
   if (!anonKey) return {kind: 'error', reason: 'missing_key'};
 
   const origin = (env.SUPABASE_ORIGIN || DEFAULT_SUPABASE_ORIGIN).replace(/\/$/, '');
   const params = new URLSearchParams({
-    status: 'neq.draft',
+    status,
     discord_message_id: 'not.is.null',
-    select: 'id,slug,updated_at,starts_at',
-    order: 'starts_at.desc',
-    limit: String(SITEMAP_EVENT_LIMIT),
+    select: 'id,slug,title,updated_at,starts_at',
+    order,
+    limit: String(limit),
   });
 
   try {
@@ -36,7 +43,7 @@ async function fetchPublishedEventsForSitemap(env) {
 
 export async function handleSitemapRoute(_request, env) {
   const origin = siteOrigin(env);
-  const outcome = await fetchPublishedEventsForSitemap(env);
+  const outcome = await fetchPublishedEvents(env);
   if (outcome.kind !== 'ok') {
     return new Response('Sitemap temporarily unavailable', {
       status: 503,

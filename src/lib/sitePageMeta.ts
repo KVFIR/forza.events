@@ -64,7 +64,7 @@ export function buildDefaultSitePageMeta(options?: {
   pageUrl?: string;
 }): PageMeta {
   const origin = (options?.siteOrigin ?? DEFAULT_SITE_ORIGIN).replace(/\/$/, '');
-  const url = options?.pageUrl ?? origin;
+  const url = options?.pageUrl ?? `${origin}/`;
   return {
     title: SITE_NAME,
     description: DEFAULT_SITE_DESCRIPTION,
@@ -81,7 +81,7 @@ export function buildStaticPageMeta(
   const origin = (options?.siteOrigin ?? DEFAULT_SITE_ORIGIN).replace(/\/$/, '');
   const path = normalizeSitePath(pathname);
   const page = STATIC_PAGES[path];
-  const url = options?.pageUrl ?? `${origin}${path === '/' ? '' : path}`;
+  const url = options?.pageUrl ?? (path === '/' ? `${origin}/` : `${origin}${path}`);
 
   if (!page) {
     return buildDefaultSitePageMeta({siteOrigin: origin, pageUrl: url});

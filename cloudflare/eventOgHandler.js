@@ -3,6 +3,8 @@ import {
   buildEventCrawlerBody,
   buildEventJsonLd,
   buildEventPageMeta,
+  eventCrawlerRobots,
+  eventPublicUrl,
   isLinkPreviewCrawler,
   parseEventPagePath,
   SITE_NAME,
@@ -12,8 +14,9 @@ import {resolveDefaultOgImage, buildStaticCrawlerBody} from '../shared/sitePageM
 
 const DEFAULT_SUPABASE_ORIGIN = 'https://uoysqfczahqmctbrrizn.supabase.co';
 
-function postgrestEq(value) {
-  return `eq."${String(value).replace(/\\/g, '\\\\').replace(/"/g, '\\"')}"`;
+/** Unquoted `eq.value` — `eq."slug"` via URLSearchParams becomes `eq.%22slug%22` and 404s. */
+export function postgrestEq(value) {
+  return `eq.${String(value)}`;
 }
 
 async function fetchPublishedEvent(eventKey, isUuid, env) {
@@ -25,7 +28,7 @@ async function fetchPublishedEvent(eventKey, isUuid, env) {
     [isUuid ? 'id' : 'slug']: postgrestEq(eventKey),
     status: 'neq.draft',
     discord_message_id: 'not.is.null',
-    select: 'id,slug,title,type,cover_image_url,starts_at,current_players,max_players,status',
+    select: 'id,slug,title,type,cover_image_url,starts_at,current_players,max_players,status,description',
   });
 
   try {
@@ -106,18 +109,22 @@ export async function handleEventRoute(request, env) {
   }
 
   const slug = typeof outcome.event.slug === 'string' ? outcome.event.slug.trim() : '';
-  const canonicalUrl = `${siteOrigin(env)}/event/${encodeURIComponent(slug || parsed.eventId)}${parsed.isResults ? '/results' : ''}`;
+  const origin = siteOrigin(env);
+  const canonicalUrl = eventPublicUrl(origin, {slug, id: parsed.eventId}, {
+    results: parsed.isResults,
+  });
   const meta = buildEventPageMeta(outcome.event, {
-    siteOrigin: siteOrigin(env),
+    siteOrigin: origin,
     pageUrl: canonicalUrl,
     isResults: parsed.isResults,
   });
-  const jsonLd = buildEventJsonLd(outcome.event, meta, {siteOrigin: siteOrigin(env)});
+  const about = String(outcome.event.description ?? '').trim().slice(0, 2000);
 
   return new Response(
     buildCrawlerPageHtml(meta, {
-      bodyHtml: buildEventCrawlerBody(meta),
-      jsonLd,
+      bodyHtml: buildEventCrawlerBody(meta, {about}),
+      jsonLd: buildEventJsonLd(outcome.event, meta, {siteOrigin: origin}),
+      robots: eventCrawlerRobots(outcome.event.status, parsed.isResults),
     }),
     {
       status: 200,

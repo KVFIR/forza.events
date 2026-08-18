@@ -49,6 +49,11 @@ describe('sitePageMeta parity', () => {
     expect(meta.description).toContain('Discord');
   });
 
+  it('canonical home URL has a trailing slash', () => {
+    expect(buildClientMeta('/', {siteOrigin: origin}).url).toBe(`${origin}/`);
+    expect(buildSharedMeta('/', {siteOrigin: origin}).url).toBe(`${origin}/`);
+  });
+
   it('canonical pageUrl omits query strings when built without search', () => {
     const meta = buildClientMeta('/create', {
       siteOrigin: origin,

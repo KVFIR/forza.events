@@ -1,9 +1,11 @@
 /** Sitemap + robots.txt — keep static paths aligned with `shared/sitePageMeta.mjs`. */
 
+import {eventPublicUrl} from './eventPageMeta.mjs';
+
 export const SITEMAP_STATIC_PATHS = ['/', '/leaderboard', '/terms', '/privacy'];
 
 /** Paths blocked in robots.txt — also get `noindex` in crawler HTML. */
-export const PRIVATE_CRAWLER_PATHS = ['/sign-in', '/my-events', '/create', '/profile'];
+export const PRIVATE_CRAWLER_PATHS = ['/sign-in', '/my-events', '/create', '/profile', '/bot-installed'];
 export const PRIVATE_CRAWLER_PREFIXES = ['/auth/'];
 
 function normalizePath(pathname) {
@@ -63,8 +65,7 @@ function staticUrlEntry(origin, path) {
 }
 
 function eventUrlEntry(origin, event) {
-  const key = typeof event.slug === 'string' && event.slug.trim() ? event.slug.trim() : event.id;
-  const loc = `${origin}/event/${encodeURIComponent(key)}`;
+  const loc = eventPublicUrl(origin, event);
   const lastmod = formatSitemapLastmod(event.updated_at ?? event.updatedAt ?? event.starts_at ?? event.startsAt);
   const lastmodTag = lastmod ? `\n    <lastmod>${lastmod}</lastmod>` : '';
   return `  <url>
