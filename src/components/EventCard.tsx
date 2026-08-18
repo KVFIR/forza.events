@@ -202,6 +202,7 @@ export function EventCard({event, participantResult, density = 'compact'}: Props
         draft
           ? 'border border-dashed border-sky-500/35'
           : 'border border-white/[0.08]',
+        dimmed && 'opacity-40 group-hover:opacity-55',
       )}
     >
       <EventCover
@@ -216,12 +217,6 @@ export function EventCard({event, participantResult, density = 'compact'}: Props
       />
       {!coverReady ? (
         <div className="absolute inset-0 animate-pulse bg-white/[0.04]" aria-hidden />
-      ) : null}
-      {dimmed ? (
-        <div
-          className="pointer-events-none absolute inset-0 z-[2] bg-base/70 transition-colors duration-200 group-hover:bg-base/60"
-          aria-hidden
-        />
       ) : null}
       <div
         className={cn(
@@ -270,17 +265,17 @@ export function EventCard({event, participantResult, density = 'compact'}: Props
           </p>
         </div>
         {placement || coverLed ? (
-          <div className="flex min-w-0 shrink-0 flex-col items-end justify-end gap-1">
+          <div className="flex shrink-0 flex-col items-end justify-end gap-1">
             {placement ? (
-              <p className="flex items-baseline justify-end gap-1.5 text-sm font-semibold tabular-nums leading-none text-white">
+              <p className="flex items-center justify-end gap-1.5 leading-none">
                 {event.isRanked && participantResult?.ratingDelta != null ? (
                   <span
                     className={cn(
-                      'text-xs font-medium',
+                      'text-xs font-bold tabular-nums',
                       participantResult.ratingDelta > 0
                         ? 'text-accent-green'
                         : participantResult.ratingDelta < 0
-                          ? 'text-red-300/90'
+                          ? 'text-red-300'
                           : 'text-muted',
                     )}
                   >
@@ -289,7 +284,9 @@ export function EventCard({event, participantResult, density = 'compact'}: Props
                       : String(participantResult.ratingDelta)}
                   </span>
                 ) : null}
-                <span>{placement}</span>
+                <span className="text-sm font-bold tabular-nums text-white">
+                  {placement}
+                </span>
               </p>
             ) : null}
             {coverLed ? <CoverCarLine event={event} /> : null}
