@@ -6,7 +6,9 @@ import {deleteChannelMessage, mapDiscordPostError, postChannelMessage, resolveCh
 import {requireDiscordUser} from '../_shared/discordRequestAuth.ts';
 import {isDeniedManageGuildError, requireManageGuildAccess} from '../_shared/guildAccess.ts';
 import {validatePublishChannelTarget} from '../_shared/publishTarget.ts';
-import {buildEventEmbed, mapEventCarsForEmbed} from '../_shared/events.ts';
+import {mapEventCarsForEmbed} from '../_shared/events.ts';
+import {buildEventMessageV2} from '../_shared/embedV2.ts';
+import {enrichEmbedEvent} from '../_shared/embedSync.ts';
 import {validatePublishReady, validateRankedAgainstEvent} from '../_shared/eventSpec.ts';
 import {isGuildRatingEnabled} from '../_shared/applyEventRatings.ts';
 import {VALIDATION_CODES} from '../_shared/validationCodes.ts';
@@ -168,12 +170,14 @@ serve(async (req) => {
       );
     }
 
-    const payload = buildEventEmbed({
-      ...event,
-      current_players: eventForEmbed.current_players,
-      guild_name: resolvedGuildName,
-      allowed_cars: mapEventCarsForEmbed(eventCars ?? []),
-    });
+    const payload = buildEventMessageV2(
+      await enrichEmbedEvent(supabase, {
+        ...event,
+        current_players: eventForEmbed.current_players,
+        guild_name: resolvedGuildName,
+        allowed_cars: mapEventCarsForEmbed(eventCars ?? []),
+      }),
+    );
 
     const msgRes = await postChannelMessage(channel_id, payload);
     if (!msgRes.ok) {

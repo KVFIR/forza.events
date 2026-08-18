@@ -80,6 +80,25 @@ serve(async (req) => {
       return jsonResponse({data: [data]}, 200, req);
     }
 
+    if (Array.isArray(body.event_ids)) {
+      const eventIds = body.event_ids
+        .filter((id: unknown): id is string => typeof id === 'string' && isEventUuid(id))
+        .slice(0, 60);
+      if (eventIds.length === 0) {
+        return jsonResponse({data: []}, 200, req);
+      }
+      const {data, error} = await supabase
+        .from('events')
+        .select('id, event_results(discord_id, position, dnf, dns), rating_ledger(discord_id, delta)')
+        .in('id', eventIds)
+        .neq('status', 'draft');
+      if (error) {
+        console.error('browse-events event_ids', error);
+        return databaseErrorResponse(req, 'browse-events event_ids', error);
+      }
+      return jsonResponse({data: data ?? []}, 200, req);
+    }
+
     let query = supabase
       .from('events')
       .select(EVENT_LIST_SELECT)

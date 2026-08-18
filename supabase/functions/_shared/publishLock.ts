@@ -117,6 +117,7 @@ export async function finalizePublish(
       guild_id: target.guildId,
       channel_id: target.channelId,
       publish_started_at: null,
+      discord_components_v2: true,
     })
     .eq('id', eventId)
     .eq('status', 'draft')

@@ -1,5 +1,7 @@
 import {botHeaders, discordApiFetch} from './discord.ts';
 import {eventDetailUrl} from './events.ts';
+import {openEventCustomId} from './eventLaunch.ts';
+import {openInAppButtonLabel, openInBrowserButtonLabel} from './notificationCopy.ts';
 
 const DEFAULT_APP_ORIGIN = 'https://forza.events';
 
@@ -40,11 +42,42 @@ export async function getOrCreateDmChannel(recipientDiscordId: string): Promise<
   return data.id;
 }
 
+export type DmEventRef = {
+  id: string;
+  urlKey: string;
+};
+
+export function buildDmEventComponents(
+  event: DmEventRef,
+  origin: string,
+  locale?: string | null,
+): Array<{type: number; components: Array<Record<string, unknown>>}> {
+  return [
+    {
+      type: 1,
+      components: [
+        {
+          type: 2,
+          style: 1,
+          label: openInAppButtonLabel(locale).slice(0, 80),
+          custom_id: openEventCustomId(event.id),
+        },
+        {
+          type: 2,
+          style: 5,
+          label: openInBrowserButtonLabel(locale).slice(0, 80),
+          url: eventDetailUrl(event.urlKey, origin),
+        },
+      ],
+    },
+  ];
+}
+
 export async function sendUserDm(
   recipientDiscordId: string,
-  eventId: string,
+  event: DmEventRef,
   embed: DmEmbed,
-  buttonLabel: string,
+  locale?: string | null,
 ): Promise<DmSendResult> {
   const channelId = await getOrCreateDmChannel(recipientDiscordId);
   if (!channelId) {
@@ -62,19 +95,7 @@ export async function sendUserDm(
         })),
       },
     ],
-    components: [
-      {
-        type: 1,
-        components: [
-          {
-            type: 2,
-            style: 5,
-            label: buttonLabel.slice(0, 80),
-            url: eventDetailUrl(eventId, resolveAppOrigin()),
-          },
-        ],
-      },
-    ],
+    components: buildDmEventComponents(event, resolveAppOrigin(), locale),
   };
 
   const res = await discordApiFetch(

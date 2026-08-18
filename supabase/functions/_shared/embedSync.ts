@@ -5,8 +5,11 @@ import {
   type EmbedEventInput,
   type EmbedGroupSummary,
 } from './events.ts';
+import {buildEventMessageV2} from './embedV2.ts';
 import {normalizeGuildName} from './guildDisplay.ts';
 import type {adminClient} from './supabase.ts';
+
+declare const EdgeRuntime: {waitUntil: (promise: Promise<unknown>) => void} | undefined;
 
 type EmbedParticipantRow = {
   group_index: number | null;
@@ -45,6 +48,7 @@ type PublishedEvent = {
   id: string;
   channel_id: string | null;
   discord_message_id: string | null;
+  discord_components_v2?: boolean | null;
   guild_id?: string | null;
   status?: string;
   car_rule_mode?: EmbedEventInput['car_rule_mode'];
@@ -99,7 +103,9 @@ export async function syncPublishedEmbed(
   }
 
   const enriched = await enrichEmbedEvent(supabase, event);
-  const payload = buildEventEmbed(enriched);
+  const payload = event.discord_components_v2
+    ? buildEventMessageV2(enriched)
+    : buildEventEmbed(enriched);
   const res = await fetch(
     `https://discord.com/api/channels/${event.channel_id}/messages/${event.discord_message_id}`,
     {
@@ -150,4 +156,28 @@ export async function syncPublishedEmbedByEventId(
   }
 
   return syncPublishedEmbed(supabase, event);
+}
+
+/** Background PATCH so interaction replies stay inside Discord's 3s window. */
+export function deferSyncPublishedEmbedByEventId(
+  supabase: ReturnType<typeof adminClient>,
+  eventId: string,
+): void {
+  const work = async () => {
+    const result = await syncPublishedEmbedByEventId(supabase, eventId);
+    if (!result.ok) {
+      console.error(
+        JSON.stringify({
+          msg: 'Joined event but Discord embed sync failed',
+          eventId,
+          status: result.status,
+        }),
+      );
+    }
+  };
+  if (typeof EdgeRuntime !== 'undefined' && typeof EdgeRuntime.waitUntil === 'function') {
+    EdgeRuntime.waitUntil(work());
+  } else {
+    void work();
+  }
 }

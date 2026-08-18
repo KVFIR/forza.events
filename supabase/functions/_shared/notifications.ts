@@ -4,7 +4,6 @@ import {
   buildNotificationEmbed,
   isKnownNotificationKind,
   notifyEventTypeLabel,
-  openEventButtonLabel,
   WAITLIST_NOTIFICATION_KINDS,
   type NotificationKind,
 } from './notificationCopy.ts';
@@ -190,9 +189,9 @@ export async function processNotificationBatch(
     const embed = buildNotificationEmbed(kind, user.notification_locale, payload);
     const result = await sendUserDm(
       row.recipient_discord_id,
-      eventUrlKeyById.get(row.event_id) ?? row.event_id,
+      {id: row.event_id, urlKey: eventUrlKeyById.get(row.event_id) ?? row.event_id},
       embed,
-      openEventButtonLabel(user.notification_locale),
+      user.notification_locale,
     );
 
     if (result.ok) {

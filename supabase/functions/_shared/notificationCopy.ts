@@ -56,13 +56,12 @@ function voiceJoinFields(
     : [{name: 'Voice', value: `[${label}](${v})`}];
 }
 
-const OPEN_EVENT: Record<NotificationLocale, string> = {
-  en: 'Open event',
-  ru: 'Открыть ивент',
-};
+export function openInAppButtonLabel(locale: string | null | undefined): string {
+  return pickLocale(locale) === 'ru' ? 'Открыть в FORZA.EVENTS' : 'Open in FORZA.EVENTS';
+}
 
-export function openEventButtonLabel(locale: string | null | undefined): string {
-  return OPEN_EVENT[pickLocale(locale)];
+export function openInBrowserButtonLabel(locale: string | null | undefined): string {
+  return pickLocale(locale) === 'ru' ? 'Открыть в браузере' : 'Open in browser';
 }
 
 const EVENT_TYPE_NOTIFY_LABEL: Record<NotificationLocale, Record<string, string>> = {
