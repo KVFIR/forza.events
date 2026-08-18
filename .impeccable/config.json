@@ -2,6 +2,13 @@
   "detector": {
     "ignoreRules": [],
     "ignoreFiles": [],
-    "ignoreValues": []
+    "ignoreValues": [
+      {
+        "rule": "overused-font",
+        "value": "inter",
+        "createdAt": "2026-08-18T10:23:59.451Z",
+        "reason": "DESIGN.md commits Inter as the Neon Pits UI face"
+      }
+    ]
   }
 }
