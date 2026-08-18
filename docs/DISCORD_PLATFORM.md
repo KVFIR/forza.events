@@ -1,6 +1,6 @@
 # Discord Activity reference
 
-Last updated: 2026-05-31
+Last updated: 2026-08-18
 
 ## What matters for FORZA.EVENTS
 
@@ -84,6 +84,10 @@ https://<project-ref>.supabase.co/functions/v1/interactions-endpoint
 - Verifies `X-Signature-Ed25519` + `X-Signature-Timestamp` with `DISCORD_PUBLIC_KEY`
 - PING → `{ "type": 1 }`
 - Button `open_event:{uuid}` → `{ "type": 12 }` + optional `launch_intents` row
+- Button `view_results:{uuid}` (also `open_event:{uuid}:results`) → ephemeral standings
+- Button `join_event:{uuid}` → gamertag modal (or join if `users.xbox_gamertag` is set) → same roster path as `event-participation`; ephemeral receipt has `leave_event:{uuid}` (updates that ephemeral, not the public card)
+
+New publishes post **Components V2** (`flags` `1 << 15`). Pre-`040` messages stay classic embeds (`events.discord_components_v2` is false).
 
 No CORS — Discord server-to-server only.
 

@@ -30,6 +30,10 @@ Focus on **pure logic** without Discord or Supabase:
 
 When changing validation rules, update **both** `src/lib/eventSpec.ts` and `supabase/functions/_shared/eventSpec.ts`, and keep `validationCodes.ts` copies identical.
 
+## Client reads (Edge vs PostgREST)
+
+`npm run dev` on localhost uses a working Vite `/supabase` proxy, so PostgREST bugs can hide until `forza.events`. Public event data: Edge `browse-events` first; PostgREST fallback on every browser surface (`canUsePostgrestReads`). New `getSupabase().from('events'|'event_results'|…)` without that gate fails CI (`tests/postgrestReads.test.ts`). `createSupabaseFetch` re-applies `apikey` on Activity and origin `/supabase`.
+
 ## API error codes
 
 - Edge: `{ "error": "…", "code": "BOT_CANNOT_POST" }` via `appErrorResponse()` / `internalErrorResponse()` in `supabase/functions/_shared/apiResponse.ts`.

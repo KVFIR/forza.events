@@ -164,7 +164,13 @@ After any schema change that affects security (RLS, storage policies), redeploy 
 3. `token-exchange` → access token + `users` row
 4. `sessionStorage` until Sign out
 
-On **localhost**, Browse reads via PostgREST (`shouldUseDirectSupabaseReads`). On **forza.events** and in the Activity iframe, Browse uses the **`browse-events`** Edge Function. **My Events** / Profile use `include_completed` for past events. Join/create/publish always use Edge Functions + Discord token.
+On **localhost**, Browse reads via PostgREST (`shouldUseDirectSupabaseReads`). On **forza.events** and in the Activity iframe, Browse uses the **`browse-events`** Edge Function. **My Events** / Profile use `include_completed` for past events. Compact-card finish/Δ and Event Detail result retries: Edge `browse-events` first, PostgREST fallback on every browser surface (`canUsePostgrestReads`). Join/create/publish always use Edge Functions + Discord token.
+
+| Surface | How the client reaches Supabase |
+|---------|----------------------------------|
+| **localhost tab** | Vite proxies `/supabase` → `*.supabase.co`. PostgREST works. Edge optional (Browse skips it so `npm run dev` does not need a function deploy). |
+| **Discord Activity iframe** | Discord URL mapping `/supabase` → project host. Proxy **strips `apikey`**. `createSupabaseFetch` re-applies headers. PostgREST works after `patchUrlMappings`. Public lists still prefer Edge. |
+| **forza.events tab** | Cloudflare Worker proxies `/supabase/*` (direct `*.supabase.co` is blocked in some regions). REST works when `apikey` is present (401 only if missing). Public event/result reads still prefer Edge `browse-events`; PostgREST is the fallback. Mutations already go through `api.ts` `invoke()`. |
 
 ### Discord Activity (iframe)
 

@@ -1,6 +1,6 @@
 # Implementation status
 
-Last updated: 2026-07-21
+Last updated: 2026-08-18
 
 ## Summary
 
@@ -11,7 +11,7 @@ Remaining work is mostly **Activity E2E in pilot guilds**, **Railway frontend re
 | Layer | State |
 |-------|--------|
 | React Activity (UI) | Done — Browse, Detail, Create (wizard), My Events, Profile, Leaderboard, i18n (EN + RU) |
-| Supabase schema | Done — migrations `001`–`033` (apply `031`–`033` for driver ratings) |
+| Supabase schema | Done — migrations `001`–`040` (apply `040` for Discord Components V2 publish cards) |
 | Edge Functions | Done — 23 functions ([`supabase/README.md`](../supabase/README.md)) |
 | Security hardening | Done — storage, RLS scope, CORS, rate limits, publish validation |
 | Local browser dev | Done — Discord OAuth + Supabase (not mock mode) |

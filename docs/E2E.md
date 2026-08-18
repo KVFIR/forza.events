@@ -26,7 +26,7 @@ Manual QA matrix aligned with current code behavior (not an abstract checklist).
 
 - App Launcher **on a server** (`sdk.guildId` → Target server prefill).
 - App Launcher **without server** / personal context.
-- Embed button `open_event:{uuid}` in channel.
+- Embed button `open_event:{uuid}` / `join_event:{uuid}` in channel.
 - Re-open after failed auth (UI **Retry**).
 
 **Discord layout modes:** at least smoke in **focused** and **PIP** (`ACTIVITY_LAYOUT_MODE_UPDATE`).
@@ -44,7 +44,7 @@ Manual QA matrix aligned with current code behavior (not an abstract checklist).
 | 0.5 | Railway `APP_ORIGIN` | Cover images in embed + `<img>` via proxy |
 | 0.6 | Edge Functions deployed with `--no-verify-jwt` | Invalid Discord token → app `401`; **not** gateway `UNAUTHORIZED_NO_AUTH_HEADER` |
 | 0.7 | Hard refresh Activity after deploy | Old bundle does not mask fixes |
-| 0.8 | `supabase db push` includes `017`–`019` + `036` + `037` + `npm run deploy:functions` (`process-notifications`, `save-event`) | DM outbox + claim RPC live; new-event alert pref column; voice invite column; cron can deliver |
+| 0.8 | `supabase db push` includes `017`–`019` + `036` + `037` + `040` + `npm run deploy:functions` (`process-notifications`, `save-event`, `publish-event`) | DM outbox + claim RPC live; new-event alert pref column; voice invite column; V2 publish cards; cron can deliver |
 | 0.9 | GitHub Actions `process-notifications` workflow + repo secrets (or minute cron via `scripts/invoke-process-notifications.sh`) | 2h reminders + outbox drain |
 
 ---
@@ -76,7 +76,7 @@ Manual QA matrix aligned with current code behavior (not an abstract checklist).
 
 | Scenario | Steps | Expected |
 |----------|--------|----------|
-| Embed button | Publish → click channel button | Activity opens **Event Detail** for that id |
+| Embed button | Publish → click channel **Join event** or **Open in FORZA.EVENTS** | Join writes the roster (or gamertag modal); Open launches Activity **Event Detail** |
 | `custom_id` | Cold start + button | `launchEventId` from `open_event:` |
 | Fallback | Old embed / missing custom_id | `launch-intent` by `guild_id` + discord_id |
 | DM / null guild | Embed in DM (if used) | `launch_intents.guild_id` nullable; no crash |
@@ -215,7 +215,7 @@ Manual QA matrix aligned with current code behavior (not an abstract checklist).
 - [ ] **Event Detail:** **Submit results** (road/dirt) or **Mark as finished** (cruise) + **Cancel event** (separate buttons; Detail uses `canCancelEvent` = after start only).
 - [ ] Cruise: no results section / no submit screen; **Mark as finished** completes without standings.
 - [ ] Field edit closed (`canEditEvent` false).
-- [ ] Cancel → confirm → `cancelled`; grey embed; button disabled.
+- [ ] Cancel → confirm → `cancelled`; grey V2 card; Join gone, Open stays.
 - [ ] Submit results → immutable (repeat → 409).
 - [ ] Submit results → **Event Detail** shows table immediately (navigation seed); no false “pending host” flash.
 - [ ] **Ranked:** after submit on ranked event (≥4 finishers/DNF **per group**, no DNS-only), results show **Δ rating**; Profile rating + `/leaderboard` update; `events.rating_applied` stays true (no double apply). Multi-group: each group rated separately. ELO write is atomic (`033` RPC); if apply fails after results save, host can re-POST `submit-results` with `{event_id}` only to retry rating.
@@ -225,8 +225,8 @@ Manual QA matrix aligned with current code behavior (not an abstract checklist).
 
 ### Post-results
 
-- [ ] Completed: results on detail; embed **COMPLETED**.
-- [ ] Participant placement in My Events / Profile when joined + completed.
+- [ ] Completed: results on detail; embed **Completed** + **View results** ephemeral standings.
+- [ ] Participant placement in My Events / Profile when joined + completed (`P2` / DNF / DNS + ranked `+12` on compact cards; Edge `{event_ids}` first, PostgREST fallback).
 
 ---
 
@@ -263,7 +263,7 @@ Manual QA matrix aligned with current code behavior (not an abstract checklist).
 | **Publish** | Save draft without channel → OK; My Events from Event step |
 | **Publish** | Publish blocked without channel / leader / cars (restricted) |
 | **Publish** | Publish modal if channel skipped |
-| **Publish** | Success: embed in channel; guild/channel locked |
+| **Publish** | Success: V2 card in channel (Join + Open); guild/channel locked |
 | **Publish** | Double-click publish → one embed; `PUBLISH_IN_PROGRESS` or idempotent second call |
 | **Edit URL** | `/create?edit={id}` requires sign-in in browser; missing draft → My Events (no empty form) |
 
@@ -293,7 +293,7 @@ Manual QA matrix aligned with current code behavior (not an abstract checklist).
 | Cancelled | Hidden by default; **Cancelled** chip shows only cancelled |
 | Sort | Same keys as Browse (event date / created / fill); drafts stay on top |
 | Drafts API fail | Warning; published list still loads |
-| Completed | Placement badges where applicable |
+| Completed | Compact cards show finish (`P2` / DNF / DNS) and ranked Δ |
 | Not signed in | Copy + retry auth |
 
 ---
@@ -385,7 +385,7 @@ At least one mapped message per screen:
 | Cancel | Host cancels published event | Active + waitlist get cancel DM; pending 2h reminders skipped; **host does not** |
 | Published edit | Host changes date/time, tracks, and/or cars → **Save & notify** | Active racers get update DM; waitlist too when **date/time** changes |
 | Add group (empty waitlist) | Host adds group with guild leader | New leader gets **convoy leader assigned** DM |
-| DM button | Open DM → **Open event** | Link opens `forza.events/event/{slug}` (UUID still works; or Activity origin) |
+| DM buttons | Open a transactional DM | **Open in FORZA.EVENTS** launches the Activity; **Open in browser** opens `forza.events/event/{slug}` |
 | 2h reminder | Event starts in ~2h (cron running) | Active racers + host get soon DM; **Voice** join link when a gathering VC is set; reschedule changes dedupe |
 | Browse subscribe (guest) | Browse as guest | No new-event alerts row; enable from Profile after sign-in |
 | Browse subscribe (signed-in, reachable) | Click **Subscribe** on the Browse row | Button becomes disabled **Subscribed**; hint about DMs / Profile; refresh hides the row |

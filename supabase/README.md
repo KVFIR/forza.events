@@ -65,6 +65,7 @@ npx supabase migration repair --linked --status applied 006 --yes
 | `036_new_event_notifications.sql` | `users.new_event_notifications_enabled` (default off) — opt-in Browse new-event DMs |
 | `037_event_voice_invite.sql` | `events.voice_invite_url` + `voice_channel_name` — gathering-VC invite and display name for Join voice + 2h DMs |
 | `038_latest_rating_races.sql` | `latest_rating_races(text[])` — last ranked event + Δ per driver for `/leaderboard` |
+| `040_discord_components_v2.sql` | `events.discord_components_v2` — new publishes post Discord Components V2 cards |
 
 Seeds are **not** included in the migration. Run separately after `db push`:
 
