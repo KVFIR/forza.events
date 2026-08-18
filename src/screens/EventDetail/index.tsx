@@ -53,7 +53,6 @@ export function EventDetail() {
     isStandalone,
     loading: authInitializing,
     authRetrying,
-    retryDiscordAuth,
   } = useAuth();
   const discordToken = getAccessToken();
   const showDiscordHandles = isSignedIn || Boolean(loadDiscordSession()?.accessToken);
