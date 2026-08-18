@@ -14,6 +14,10 @@ const STATIC_PAGES: Record<string, {title: string; description: string}> = {
     title: 'Browse events',
     description: 'Browse upcoming Forza Horizon races, dirt events, and cruises.',
   },
+  '/leaderboard': {
+    title: 'Ladder',
+    description: 'Driver ladder by rating for ranked Forza Horizon races.',
+  },
   '/my-events': {
     title: 'My Events',
     description: 'Events you host or join on FORZA.EVENTS.',

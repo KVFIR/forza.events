@@ -21,6 +21,14 @@ describe('sitePageMeta parity', () => {
     }
   });
 
+  it('client and shared buildStaticPageMeta match for ladder', () => {
+    const opts = {siteOrigin: origin, pageUrl: `${origin}/leaderboard`};
+    const meta = buildClientMeta('/leaderboard', opts);
+    expect(buildSharedMeta('/leaderboard', opts)).toEqual(meta);
+    expect(meta.title).toBe('Ladder · FORZA.EVENTS');
+    expect(meta.description).toContain('ranked');
+  });
+
   it('client and shared default meta match for unknown paths', () => {
     const opts = {siteOrigin: origin, pageUrl: `${origin}/auth/callback`};
     expect(buildSharedMeta('/auth/callback', opts)).toEqual(

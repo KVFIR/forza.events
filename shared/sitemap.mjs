@@ -1,6 +1,6 @@
 /** Sitemap + robots.txt — keep static paths aligned with `shared/sitePageMeta.mjs`. */
 
-export const SITEMAP_STATIC_PATHS = ['/', '/terms', '/privacy'];
+export const SITEMAP_STATIC_PATHS = ['/', '/leaderboard', '/terms', '/privacy'];
 
 /** Paths blocked in robots.txt — also get `noindex` in crawler HTML. */
 export const PRIVATE_CRAWLER_PATHS = ['/sign-in', '/my-events', '/create', '/profile'];

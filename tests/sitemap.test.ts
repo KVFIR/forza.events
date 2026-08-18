@@ -39,6 +39,7 @@ describe('sitemap', () => {
     });
 
     expect(xml).toContain('<loc>https://forza.events/</loc>');
+    expect(xml).toContain('<loc>https://forza.events/leaderboard</loc>');
     expect(xml).toContain('<loc>https://forza.events/terms</loc>');
     expect(xml).toContain('<loc>https://forza.events/privacy</loc>');
     expect(xml).toContain('<loc>https://forza.events/event/sunset-sprint-20260714</loc>');
