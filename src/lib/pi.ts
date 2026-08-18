@@ -93,15 +93,37 @@ export function restrictedCarsClassRange(
   return classRangeLabel(span.minPi, span.maxPi, game);
 }
 
+export const piClassHex: Record<CarClassLetter, string> = {
+  D: '#49b7f8',
+  C: '#faca33',
+  B: '#f8682c',
+  A: '#f91648',
+  S1: '#ba66e9',
+  S2: '#185cdf',
+  R: '#d7189a',
+  X: '#16d858',
+};
+
 export const piClassColor: Record<CarClassLetter, string> = {
-  D: 'text-slate-400',
-  C: 'text-yellow-400/90',
-  B: 'text-orange-400/90',
-  A: 'text-red-400/90',
-  S1: 'text-violet-400/90',
-  S2: 'text-fuchsia-400/90',
-  R: 'text-amber-400/90',
-  X: 'text-rose-300/95',
+  D: 'text-[#49b7f8]',
+  C: 'text-[#faca33]',
+  B: 'text-[#f8682c]',
+  A: 'text-[#f91648]',
+  S1: 'text-[#ba66e9]',
+  S2: 'text-[#185cdf]',
+  R: 'text-[#d7189a]',
+  X: 'text-[#16d858]',
+};
+
+export const piClassBorderColor: Record<CarClassLetter, string> = {
+  D: 'border-[#49b7f8]/35',
+  C: 'border-[#faca33]/35',
+  B: 'border-[#f8682c]/35',
+  A: 'border-[#f91648]/35',
+  S1: 'border-[#ba66e9]/35',
+  S2: 'border-[#185cdf]/35',
+  R: 'border-[#d7189a]/35',
+  X: 'border-[#16d858]/35',
 };
 
 export function clampPi(value: number): number {

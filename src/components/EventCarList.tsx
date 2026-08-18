@@ -2,7 +2,7 @@ import {useEffect, useRef, useState} from 'react';
 import {ChevronDown, ChevronUp, Trash2} from 'lucide-react';
 import {useTranslation} from 'react-i18next';
 import {formatCarListDisplayNames, formatCarFullName} from '../lib/carDisplay';
-import {piToClass} from '../lib/pi';
+import {piClassColor, piToClass} from '../lib/pi';
 import type {ForzaGame} from '../lib/eventGames';
 import {MaxPiInput} from './MaxPiInput';
 import {searchCars, type CarSearchResult} from '../lib/events';
@@ -175,14 +175,20 @@ export function EventCarList({
               ) : (
                 results.map((c) => {
                   const name = formatCarFullName(c);
+                  const letter = piToClass(c.pi, game);
                   return (
                     <DropdownItem key={c.id} onClick={() => addCar(c)}>
                       <span>
                         {name}
                         {c.year ? ` · ${c.year}` : ''}
                       </span>
-                      <span className="text-xs text-muted">
-                        {piToClass(c.pi, game)} {c.pi}
+                      <span
+                        className={cn(
+                          'text-xs font-bold tabular-nums',
+                          piClassColor[letter] ?? 'text-muted',
+                        )}
+                      >
+                        {letter} {c.pi}
                       </span>
                     </DropdownItem>
                   );
@@ -200,6 +206,7 @@ export function EventCarList({
           {cars.map((c) => {
             const collapsed = isCollapsed(c.id);
             const displayName = listLabels.get(c.id) ?? c.model;
+            const maxClass = piToClass(c.maxPi, game);
             return (
             <li key={c.id}>
               <Panel variant="soft" className="p-0">
@@ -228,6 +235,14 @@ export function EventCarList({
                   <p className="truncate text-sm font-semibold leading-tight text-white">
                     {displayName}
                   </p>
+                </span>
+                <span
+                  className={cn(
+                    'shrink-0 text-sm font-bold tabular-nums',
+                    piClassColor[maxClass] ?? 'text-muted',
+                  )}
+                >
+                  {maxClass} {c.maxPi}
                 </span>
                 <Button
                   type="button"

@@ -19,10 +19,10 @@ import {formatOpenBuildCarRulesDisplay, openBuildHasDisplayRules} from '../lib/c
 import {
   formatMaxPi,
   formatPiRange,
+  piClassBorderColor,
   piClassColor,
   piToClass,
   restrictedCarsPiBounds,
-  type CarClassLetter,
 } from '../lib/pi';
 import {normalizeEventGame} from '../lib/eventGames';
 import {useAuth} from '../context/AuthContext';
@@ -45,17 +45,6 @@ const COVER_FADE_STYLE = {
     'linear-gradient(to top, rgb(6 6 14) 0%, rgb(6 6 14 / 0.92) 22%, rgb(6 6 14 / 0.55) 55%, rgb(6 6 14 / 0) 100%)',
 } as const;
 
-const PI_CLASS_BORDER: Record<CarClassLetter, string> = {
-  D: 'border-slate-400/35',
-  C: 'border-yellow-400/35',
-  B: 'border-orange-400/35',
-  A: 'border-red-400/35',
-  S1: 'border-violet-400/35',
-  S2: 'border-fuchsia-400/35',
-  R: 'border-amber-400/35',
-  X: 'border-rose-300/40',
-};
-
 function ColoredPi({
   pi,
   game,
@@ -71,7 +60,7 @@ function ColoredPi({
       className={cn(
         'inline-flex items-center rounded-md border px-1.5 py-px font-bold tabular-nums',
         piClassColor[letter] ?? 'text-muted',
-        PI_CLASS_BORDER[letter] ?? 'border-white/20',
+        piClassBorderColor[letter] ?? 'border-white/20',
       )}
     >
       {children ?? formatMaxPi(pi, game)}

@@ -89,8 +89,14 @@ export function RankedBadge({className}: {className?: string}) {
 }
 
 type StatusProps = {
-  status: 'open' | 'full' | 'live' | 'ended';
+  status: 'open' | 'full' | 'live' | 'ended' | 'completed' | 'cancelled' | 'archived';
   className?: string;
+};
+
+const endedLook = {
+  border: 'border-slate-600/20',
+  text: 'text-slate-500/80',
+  bg: 'bg-slate-700/10',
 };
 
 const statusStyles: Record<
@@ -114,11 +120,10 @@ const statusStyles: Record<
     bg: 'bg-accent-green/10',
     dot: 'bg-accent-green/80',
   },
-  ended: {
-    border: 'border-slate-600/20',
-    text: 'text-slate-500/80',
-    bg: 'bg-slate-700/10',
-  },
+  ended: endedLook,
+  completed: endedLook,
+  cancelled: endedLook,
+  archived: endedLook,
 };
 
 export function DraftBadge({className}: {className?: string}) {

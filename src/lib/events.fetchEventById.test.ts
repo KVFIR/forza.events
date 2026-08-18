@@ -18,9 +18,10 @@ vi.mock('./supabase', () => ({
 vi.mock('./supabaseEnv', () => ({
   shouldUseDirectSupabaseReads,
   isDiscordActivityFrame,
+  canUsePostgrestReads: () => true,
 }));
 
-import {fetchEventById} from './events';
+import {fetchEventById, fetchEventResults} from './events';
 
 const rankedDetailRow = {
   id: 'e1',
@@ -95,16 +96,92 @@ describe('fetchEventById', () => {
     expect(getSupabase).toHaveBeenCalled();
   });
 
-  it('falls back to PostgREST in Activity when Edge errors', async () => {
-    isDiscordActivityFrame.mockReturnValue(true);
+  it('falls back to PostgREST when Edge errors', async () => {
     invokeBrowseEvents.mockRejectedValue(new Error('down'));
     await fetchEventById('summer-cup');
     expect(getSupabase).toHaveBeenCalled();
   });
+});
 
-  it('skips PostgREST on forza.events when Edge errors', async () => {
-    invokeBrowseEvents.mockRejectedValue(new Error('down'));
-    await expect(fetchEventById('summer-cup')).resolves.toBeUndefined();
+describe('fetchEventResults', () => {
+  beforeEach(() => {
+    invokeBrowseEvents.mockReset();
+    getSupabase.mockReset();
+    shouldUseDirectSupabaseReads.mockReset();
+    isDiscordActivityFrame.mockReset();
+    shouldUseDirectSupabaseReads.mockReturnValue(false);
+    isDiscordActivityFrame.mockReturnValue(false);
+  });
+
+  it('loads via browse-events by id when PostgREST is not used', async () => {
+    invokeBrowseEvents.mockResolvedValue({
+      data: [
+        {
+          ...rankedDetailRow,
+          event_results: [{discord_id: 'd1', position: 2, dnf: false, dns: false}],
+        },
+      ],
+    });
+    const outcome = await fetchEventResults('e1');
+    expect(invokeBrowseEvents).toHaveBeenCalledWith(
+      expect.objectContaining({event_id: 'e1', include_completed: true}),
+      null,
+    );
     expect(getSupabase).not.toHaveBeenCalled();
+    expect(outcome).toEqual({
+      rows: [{discordId: 'd1', position: 2, dnf: false, dns: false, points: undefined, groupIndex: 1}],
+      error: null,
+    });
+  });
+
+  it('falls back to PostgREST when Edge errors', async () => {
+    invokeBrowseEvents.mockRejectedValue(new Error('down'));
+    getSupabase.mockResolvedValue({
+      from: () => ({
+        select: () => ({
+          eq: () => ({
+            order: async () => ({data: [], error: null}),
+          }),
+        }),
+      }),
+    });
+    await expect(fetchEventResults('e1')).resolves.toEqual({rows: [], error: null});
+    expect(getSupabase).toHaveBeenCalled();
+  });
+
+  it('falls back to PostgREST when Edge returns no row', async () => {
+    invokeBrowseEvents.mockResolvedValue({data: []});
+    getSupabase.mockResolvedValue({
+      from: () => ({
+        select: () => ({
+          eq: () => ({
+            order: async () => ({
+              data: [{discord_id: 'd1', position: 1, dnf: false, dns: false, points: 10, group_index: 1}],
+              error: null,
+            }),
+          }),
+        }),
+      }),
+    });
+    await expect(fetchEventResults('e1')).resolves.toEqual({
+      rows: [{discordId: 'd1', position: 1, dnf: false, dns: false, points: 10, groupIndex: 1}],
+      error: null,
+    });
+    expect(getSupabase).toHaveBeenCalled();
+  });
+
+  it('falls back to PostgREST when Edge omits event_results', async () => {
+    invokeBrowseEvents.mockResolvedValue({data: [rankedDetailRow]});
+    getSupabase.mockResolvedValue({
+      from: () => ({
+        select: () => ({
+          eq: () => ({
+            order: async () => ({data: [], error: null}),
+          }),
+        }),
+      }),
+    });
+    await fetchEventResults('e1');
+    expect(getSupabase).toHaveBeenCalled();
   });
 });

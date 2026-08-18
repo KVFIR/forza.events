@@ -1,7 +1,16 @@
 import {useEffect, useState} from 'react';
 import {cn} from '../lib/cn';
 import {normalizeEventGame, type ForzaGame} from '../lib/eventGames';
-import {clampPi, PI_MAX, PI_MIN, piClassColor, piRangeI18nParams, piToClass, type CarClassLetter} from '../lib/pi';
+import {
+  clampPi,
+  PI_MAX,
+  PI_MIN,
+  piClassBorderColor,
+  piClassColor,
+  piRangeI18nParams,
+  piToClass,
+  type CarClassLetter,
+} from '../lib/pi';
 import {useTranslation} from 'react-i18next';
 
 type Props = {
@@ -51,8 +60,10 @@ export function MaxPiInput({value, onChange, game = 'fh6', id, error, className,
     <div className={cn('flex min-w-0', className)}>
       <span
         className={cn(
-          'flex w-11 shrink-0 items-center justify-center rounded-l-lg border border-r-0 border-white/[0.08] bg-white/[0.06] text-sm font-black tabular-nums',
-          classLetter ? piClassColor[classLetter] : 'text-muted',
+          'flex w-11 shrink-0 items-center justify-center rounded-l-lg border border-r-0 bg-white/[0.06] text-sm font-black tabular-nums',
+          classLetter
+            ? [piClassColor[classLetter], piClassBorderColor[classLetter]]
+            : 'border-white/[0.08] text-muted',
         )}
         aria-hidden
       >

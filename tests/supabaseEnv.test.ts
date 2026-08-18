@@ -1,5 +1,5 @@
 import {describe, expect, it, vi, afterEach} from 'vitest';
-import {shouldUseDirectSupabaseReads, resolveSupabaseUrl} from '../src/lib/supabaseEnv';
+import {shouldUseDirectSupabaseReads, canUsePostgrestReads, resolveSupabaseUrl} from '../src/lib/supabaseEnv';
 
 describe('shouldUseDirectSupabaseReads', () => {
   afterEach(() => {
@@ -25,6 +25,39 @@ describe('shouldUseDirectSupabaseReads', () => {
     win.parent = win;
     vi.stubGlobal('window', win);
     expect(shouldUseDirectSupabaseReads()).toBe(false);
+  });
+});
+
+describe('canUsePostgrestReads', () => {
+  afterEach(() => {
+    vi.unstubAllGlobals();
+  });
+
+  it('is true on localhost', () => {
+    const win: {location: {hostname: string}; parent: unknown} = {
+      location: {hostname: 'localhost'},
+      parent: null,
+    };
+    win.parent = win;
+    vi.stubGlobal('window', win);
+    expect(canUsePostgrestReads()).toBe(true);
+  });
+
+  it('is true in the Activity iframe', () => {
+    const outer = {location: {hostname: 'forza.events'}};
+    const win = {location: {hostname: 'discordsays.com'}, parent: outer};
+    vi.stubGlobal('window', win);
+    expect(canUsePostgrestReads()).toBe(true);
+  });
+
+  it('is true on forza.events production browser', () => {
+    const win: {location: {hostname: string}; parent: unknown} = {
+      location: {hostname: 'forza.events'},
+      parent: null,
+    };
+    win.parent = win;
+    vi.stubGlobal('window', win);
+    expect(canUsePostgrestReads()).toBe(true);
   });
 });
 

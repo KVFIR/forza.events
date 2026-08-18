@@ -3,7 +3,7 @@ import {isEventUuid} from '@edge/eventPath.ts';
 import {invokeBrowseEvents, invokeHostDrafts} from './api';
 import {isUnauthorizedApiError} from './apiErrors';
 import {getSupabase, isSupabaseConfigured} from './supabase';
-import {isDiscordActivityFrame, shouldUseDirectSupabaseReads} from './supabaseEnv';
+import {canUsePostgrestReads, shouldUseDirectSupabaseReads} from './supabaseEnv';
 import {searchCarCatalog} from './carCatalog';
 import {sortEventResultRows} from './eventResults';
 import {EVENT_PLAYER_SLOTS} from './constants';
@@ -582,7 +582,7 @@ export async function fetchEventById(
   // Empty array = confirmed miss. null = Edge transport/5xx — REST still works in
   // Activity (URL mapping) and on localhost Vite; forza.events `/supabase` 401s.
   if (fromEdge) return undefined;
-  if (!shouldUseDirectSupabaseReads() && !isDiscordActivityFrame()) return undefined;
+  if (!canUsePostgrestReads()) return undefined;
   return fetchPublishedEventViaPostgrest(id);
 }
 
@@ -595,6 +595,16 @@ export type EventResultsFetchOutcome = {
 
 export async function fetchEventResults(eventId: string): Promise<EventResultsFetchOutcome> {
   if (!isSupabaseConfigured()) return {rows: [], error: null};
+
+  if (!shouldUseDirectSupabaseReads()) {
+    const events = await fetchEventsViaEdge({includeCompleted: true, eventId});
+    if (events?.[0]?.publishedResults !== undefined) {
+      return {rows: events[0].publishedResults, error: null};
+    }
+    if (!canUsePostgrestReads()) {
+      return {rows: [], error: events ? null : 'fetch_failed'};
+    }
+  }
 
   const supabase = (await getSupabase())!;
   const {data, error} = await supabase
@@ -659,7 +669,7 @@ export async function searchCars(
   if (!q) return [];
   const game = options.game ?? 'fh6';
 
-  if (!isSupabaseConfigured()) {
+  if (!isSupabaseConfigured() || !canUsePostgrestReads()) {
     return await searchCarCatalog(q, {game});
   }
 

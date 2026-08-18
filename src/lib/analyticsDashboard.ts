@@ -110,9 +110,7 @@ export async function fetchAnalyticsDashboard(
     [ANALYTICS_DASHBOARD_SECRET_HEADER]: secret,
   });
 
-  const doFetch = isDiscordActivityFrame()
-    ? (createSupabaseFetch(anonKey) ?? fetch)
-    : fetch;
+  const doFetch = createSupabaseFetch(anonKey) ?? fetch;
 
   const res = await doFetch(`${base}/analytics-dashboard`, {
     method: 'POST',

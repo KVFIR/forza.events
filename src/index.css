@@ -11,17 +11,25 @@
 
   html {
     scroll-behavior: smooth;
+    overscroll-behavior: none;
+    background-color: #06060e;
+    background-image:
+      radial-gradient(ellipse 90% 45% at 50% -5%, rgba(139, 92, 246, 0.11) 0%, transparent 100%),
+      radial-gradient(ellipse 45% 35% at 95% 95%, rgba(34, 211, 238, 0.05) 0%, transparent 100%);
   }
 
   body {
     @apply m-0 min-h-screen bg-base font-sans text-slate-100 antialiased;
+    overscroll-behavior: none;
   }
 
+  /* Viewport-locked wash. Keep above the canvas (not z-index:-1) so rubber-band
+     overscroll does not reveal a foreign html background. */
   body::before {
     content: '';
     position: fixed;
     inset: 0;
-    z-index: -1;
+    z-index: 0;
     pointer-events: none;
     background-color: #06060e;
     background-image:
@@ -31,6 +39,8 @@
 
   #root {
     @apply min-h-screen;
+    position: relative;
+    z-index: 1;
   }
 
   * {
@@ -49,7 +59,7 @@
 
   ::-webkit-scrollbar-thumb {
     background: rgba(139, 92, 246, 0.28);
-    border-radius: 100px;
+    border-radius: 8px;
   }
 
   ::-webkit-scrollbar-thumb:hover {
@@ -80,7 +90,7 @@
 
   select option {
     background-color: #0e1020;
-    color: #e2e8f0;
+    color: #f1f5f9;
   }
 
   /*
@@ -184,7 +194,7 @@
 
   .card-glow-border:hover {
     border-color: rgba(139, 92, 246, 0.28);
-    box-shadow: 0 6px 36px rgba(0, 0, 0, 0.65), 0 0 0 1px rgba(139, 92, 246, 0.18);
+    box-shadow: 0 6px 36px rgb(6 6 14 / 0.65), 0 0 0 1px rgba(139, 92, 246, 0.18);
   }
 
   /* Event detail cover → content fade. Use base-color alpha stops, not `transparent`

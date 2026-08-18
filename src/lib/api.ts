@@ -65,10 +65,8 @@ async function invoke<T>(
     headers.set('x-discord-access-token', discordAccessToken);
   }
 
-  // Discord Activity proxy often strips auth headers; createSupabaseFetch re-applies them.
-  const doFetch = isDiscordActivityFrame()
-    ? (createSupabaseFetch(anonKey) ?? fetch)
-    : fetch;
+  // Discord / origin `/supabase` proxies can drop auth headers; re-apply them.
+  const doFetch = createSupabaseFetch(anonKey) ?? fetch;
 
   const eventId = typeof body.event_id === 'string' ? body.event_id : undefined;
   const errorMeta = invokeErrorMeta(body);
@@ -153,6 +151,7 @@ export async function invokeBrowseEvents(
   body: {
     include_completed?: boolean;
     event_id?: string;
+    event_ids?: string[];
     host_drafts?: boolean;
   } = {},
   discordAccessToken: string | null = null,

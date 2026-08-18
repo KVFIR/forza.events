@@ -127,9 +127,7 @@ async function postBatch(events: QueuedEvent[]): Promise<void> {
     headers.set('x-discord-access-token', discordAccessToken);
   }
 
-  const doFetch = isDiscordActivityFrame()
-    ? (createSupabaseFetch(anonKey) ?? fetch)
-    : fetch;
+  const doFetch = createSupabaseFetch(anonKey) ?? fetch;
 
   try {
     const res = await doFetch(`${base}/track-event`, {

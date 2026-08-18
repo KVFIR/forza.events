@@ -8,6 +8,7 @@ import {
   formatMaxPi,
   formatPiRange,
   isPiInRange,
+  piClassHex,
   piRangeI18nParams,
   piToClass,
   restrictedCarsClassRange,
@@ -72,6 +73,19 @@ describe('PI limits', () => {
     expect(restrictedCarsPiBounds([{maxPi: 600}, {maxPi: 765}])).toEqual({
       minPi: 600,
       maxPi: 765,
+    });
+  });
+
+  it('class colours match the Discord PI badges', () => {
+    expect(piClassHex).toEqual({
+      D: '#49b7f8',
+      C: '#faca33',
+      B: '#f8682c',
+      A: '#f91648',
+      S1: '#ba66e9',
+      S2: '#185cdf',
+      R: '#d7189a',
+      X: '#16d858',
     });
   });
 

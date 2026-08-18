@@ -24,6 +24,15 @@ export function isDiscordActivityFrame(): boolean {
   }
 }
 
+/**
+ * PostgREST `getSupabase().from()` is usable in the browser (Vite, Worker, Activity).
+ * Public event/result reads still go Edge-first; this only gates the REST fallback.
+ * Worker REST 401s only when `apikey` is missing — not a reason to skip fallback.
+ */
+export function canUsePostgrestReads(): boolean {
+  return typeof window !== 'undefined';
+}
+
 function directSupabaseUrl(): string | null {
   const raw = import.meta.env.VITE_SUPABASE_URL as string | undefined;
   if (!raw?.trim()) return null;
@@ -53,9 +62,10 @@ export function supabaseProjectHost(): string | null {
   }
 }
 
-/** Ensure apikey headers survive Discord proxy; URL rewrite is handled by patchUrlMappings. */
+/** Re-apply apikey after Discord / origin proxies that drop auth headers. */
 export function createSupabaseFetch(anonKey: string): typeof fetch | undefined {
-  if (!isDiscordActivityFrame()) return undefined;
+  if (typeof window === 'undefined') return undefined;
+  if (!isDiscordActivityFrame() && !shouldProxySupabaseThroughOrigin()) return undefined;
 
   return async (input: RequestInfo | URL, init?: RequestInit) => {
     const headers = new Headers(input instanceof Request ? input.headers : init?.headers);

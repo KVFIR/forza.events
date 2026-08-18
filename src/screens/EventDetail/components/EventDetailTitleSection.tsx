@@ -7,7 +7,7 @@ import {
   participationButtonLabel,
   participationButtonVariant,
 } from '../../../lib/eventActions';
-import type {EventStatus, ForzaEvent} from '../../../lib/types';
+import type {EventLifecycle, EventStatus, ForzaEvent} from '../../../lib/types';
 import {eventDetailPath} from '@edge/eventPath.ts';
 import type {EventDetailViewModel} from '../eventDetailView';
 import {EventRegistrationProgress} from './EventDetailProgressSection';
@@ -74,6 +74,7 @@ export function EventDetailTitleSection({
 }: Props) {
   const {t} = useTranslation();
   const navigate = useNavigate();
+  const statusChip = titleStatusChip(view.isDraft, event.lifecycle, displayStatus);
 
   const participationButton = view.showParticipantActions ? (
     <Button
@@ -191,14 +192,10 @@ export function EventDetailTitleSection({
         <div className="min-w-0 flex-1">
           <h1 className="text-xl font-black tracking-tight text-white">{event.title}</h1>
           <div className="mt-1.5 flex flex-wrap items-center gap-1.5">
-            <GameBadge className="px-1.5 py-px" game={event.game} />
-            <Badge className="px-1.5 py-px" type={event.type} />
+            {statusChip}
             {event.isRanked ? <RankedBadge className="px-1.5 py-px" /> : null}
-            {view.isDraft ? (
-              <DraftBadge className="px-1.5 py-px" />
-            ) : (
-              <StatusBadge className="px-1.5 py-px" status={displayStatus} />
-            )}
+            <Badge className="px-1.5 py-px" type={event.type} />
+            <GameBadge className="px-1.5 py-px" game={event.game} />
           </div>
         </div>
         {titleRowAction ? <div className="shrink-0">{titleRowAction}</div> : null}
@@ -207,4 +204,31 @@ export function EventDetailTitleSection({
       <EventRegistrationProgress view={view} />
     </div>
   );
+}
+
+function titleStatusChip(
+  isDraft: boolean,
+  lifecycle: EventLifecycle,
+  displayStatus: EventStatus,
+) {
+  const chipClass = 'px-1.5 py-px';
+  if (isDraft) return <DraftBadge className={chipClass} />;
+  switch (lifecycle) {
+    case 'cancelled':
+      return <StatusBadge className={chipClass} status="cancelled" />;
+    case 'archived':
+      return <StatusBadge className={chipClass} status="archived" />;
+    case 'completed':
+      return <StatusBadge className={chipClass} status="completed" />;
+    case 'draft':
+      return <DraftBadge className={chipClass} />;
+    case 'open':
+    case 'live':
+      if (displayStatus === 'open' || displayStatus === 'ended') return null;
+      return <StatusBadge className={chipClass} status={displayStatus} />;
+    default: {
+      const _never: never = lifecycle;
+      return _never;
+    }
+  }
 }
