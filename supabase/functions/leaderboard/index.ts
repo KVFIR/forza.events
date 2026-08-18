@@ -84,6 +84,22 @@ serve(async (req) => {
         }));
       } else {
         lastById = indexLatestRaces((lastRows ?? []) as LatestRaceRow[]);
+        const lastEventIds = [...new Set([...lastById.values()].map((race) => race.eventId))];
+        if (lastEventIds.length > 0) {
+          const {data: slugRows} = await supabase
+            .from('events')
+            .select('id, slug')
+            .in('id', lastEventIds);
+          const slugById = new Map<string, string>();
+          for (const row of slugRows ?? []) {
+            const slug = typeof row.slug === 'string' ? row.slug.trim() : '';
+            if (slug) slugById.set(row.id, slug);
+          }
+          for (const [discordId, race] of lastById) {
+            const slug = slugById.get(race.eventId);
+            if (slug) lastById.set(discordId, {...race, slug});
+          }
+        }
         for (const entry of entries) {
           entry.lastRace = lastById.get(entry.discordId) ?? null;
         }
@@ -143,7 +159,7 @@ serve(async (req) => {
       if (viewer) {
         const {data: hist, error: histError} = await supabase
           .from('rating_ledger')
-          .select('event_id, delta, rating_after, events!inner(title, starts_at)')
+          .select('event_id, delta, rating_after, events!inner(title, starts_at, slug)')
           .eq('discord_id', auth.id)
           .order('created_at', {ascending: false})
           .limit(VIEWER_RACES_LIMIT);

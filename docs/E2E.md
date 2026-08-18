@@ -92,7 +92,7 @@ Manual QA matrix aligned with current code behavior (not an abstract checklist).
 
 - [ ] Browse feed = published open/live + successfully completed (`isBrowseFeedEvent`: not draft, not cancelled/archived; completed stay visible below active).
 - [ ] Type filter: `road`, `dirt`, `cruise` + **All**.
-- [ ] Game filter: **All** (default) / FH5 / FH6; cards show short game label; Detail shows full game badge.
+- [ ] Game filter: **All** (default) / FH5 / FH6; cards have no game mark; Detail shows full game badge.
 - [ ] Ranked filter: **All** / **Ranked**; ranked cards/detail show Ranked badge.
 - [ ] Sort: event date / created / fill.
 - [ ] Empty filter → “no match” + clear filters (clears type, game, **and** ranked).
@@ -127,6 +127,7 @@ Manual QA matrix aligned with current code behavior (not an abstract checklist).
 | **Host** | No Join; Edit / post-start actions only |
 | **Convoy leader** (host-assigned) | Leader UI; **cannot leave** (`LEADER_CANNOT_LEAVE`) |
 | Join updates profile | `xbox_gamertag` written to `users` |
+| Roster cards | Ranked events only: rated drivers (`games_rated ≥ 1`) show current ELO right of the name; unrated show **TBD**; waitlist included. Casual events hide ELO. |
 
 ### Waitlist & groups
 
@@ -286,9 +287,11 @@ Manual QA matrix aligned with current code behavior (not an abstract checklist).
 |-------|--------|
 | **All** | Hosted + joined + **drafts on top** (published may render first; refresh while drafts load) |
 | **Hosted** | Own events + drafts |
-| **Joined** | Any roster row (incl. waitlist + host-assigned leader); not host; **no drafts** |
+| **Joined** | Any roster row (incl. waitlist, host-assigned leader, and **host on the roster**); **no drafts** |
 | **Joined — host-assigned leader** | Host picks viewer as convoy leader → event appears in **Joined** / **All** without manual refresh (realtime refetch); **Leave** blocked; convoy-leader Xbox hint on Detail |
 | **Joined — waitlist** | Full lobby join → event in **Joined**; card shows **Waitlisted** badge; **Leave waitlist** works |
+| Cancelled | Hidden by default; **Cancelled** chip shows only cancelled |
+| Sort | Same keys as Browse (event date / created / fill); drafts stay on top |
 | Drafts API fail | Warning; published list still loads |
 | Completed | Placement badges where applicable |
 | Not signed in | Copy + retry auth |
@@ -381,11 +384,11 @@ At least one mapped message per screen:
 | Cancel | Host cancels published event | Active + waitlist get cancel DM; pending 2h reminders skipped; **host does not** |
 | Published edit | Host changes date/time, tracks, and/or cars → **Save & notify** | Active racers get update DM; waitlist too when **date/time** changes |
 | Add group (empty waitlist) | Host adds group with guild leader | New leader gets **convoy leader assigned** DM |
-| DM button | Open DM → **Open event** | Link opens `forza.events/event/{id}` (or Activity origin) |
+| DM button | Open DM → **Open event** | Link opens `forza.events/event/{slug}` (UUID still works; or Activity origin) |
 | 2h reminder | Event starts in ~2h (cron running) | Active racers + host get soon DM; **Voice** join link when a gathering VC is set; reschedule changes dedupe |
 | Browse subscribe (guest) | Browse as guest | No new-event alerts row; enable from Profile after sign-in |
-| Browse subscribe (signed-in, reachable) | Toggle the Browse row on | Switch stays on; Profile **Notify me about new events** on |
-| Browse subscribe (no mutual guild) | Toggle the Browse row on | Join FRS / Add bot dialog; after join or install + return, toggle works |
+| Browse subscribe (signed-in, reachable) | Click **Subscribe** on the Browse row | Button becomes disabled **Subscribed**; hint about DMs / Profile; refresh hides the row |
+| Browse subscribe (no mutual guild) | Click **Subscribe** on the Browse row | Join FRS / Add bot dialog; after join or install + return, Subscribe works |
 | New-event DM | Publish; wait ~1h; cron running | Opted-in reachable users get **New event** DM; host and already-joined do not |
 | New-event cancel window | Publish then cancel within 1h | Pending `event_published` skipped; no Browse-alert DM |
 | New-event completed window | Publish then submit results within 1h | Send-time skip `event_completed`; no Browse-alert DM |

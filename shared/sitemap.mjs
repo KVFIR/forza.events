@@ -63,7 +63,8 @@ function staticUrlEntry(origin, path) {
 }
 
 function eventUrlEntry(origin, event) {
-  const loc = `${origin}/event/${event.id}`;
+  const key = typeof event.slug === 'string' && event.slug.trim() ? event.slug.trim() : event.id;
+  const loc = `${origin}/event/${encodeURIComponent(key)}`;
   const lastmod = formatSitemapLastmod(event.updated_at ?? event.updatedAt ?? event.starts_at ?? event.startsAt);
   const lastmodTag = lastmod ? `\n    <lastmod>${lastmod}</lastmod>` : '';
   return `  <url>

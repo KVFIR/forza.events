@@ -7,6 +7,8 @@ export type CatalogCar = {
   year: number | null;
   pi: number;
   game: ForzaGame;
+  abbreviation?: string | null;
+  aliases?: string[];
 };
 
 let catalogCache: CatalogCar[] | null = null;
@@ -21,7 +23,14 @@ async function loadCatalog(): Promise<CatalogCar[]> {
 
   const rows: CatalogCar[] = [];
   const push = (catalog: unknown, game: ForzaGame) => {
-    const list = catalog as {make: string; model: string; year: number | null; pi: number}[];
+    const list = catalog as {
+      make: string;
+      model: string;
+      year: number | null;
+      pi: number;
+      abbreviation?: string | null;
+      aliases?: string[];
+    }[];
     list.forEach((c, i) => {
       rows.push({
         id: `catalog-${game}-${i}-${c.make}-${c.model}`.replace(/\s+/g, '-').slice(0, 80),
@@ -30,6 +39,8 @@ async function loadCatalog(): Promise<CatalogCar[]> {
         year: c.year,
         pi: c.pi,
         game,
+        abbreviation: c.abbreviation ?? null,
+        aliases: Array.isArray(c.aliases) ? c.aliases : [],
       });
     });
   };
@@ -53,7 +64,16 @@ export async function searchCarCatalog(
   return catalog
     .filter((c) => c.game === game)
     .filter((c) => {
-      const hay = `${c.make} ${c.model} ${c.year ?? ''} ${c.pi}`.toLowerCase();
+      const hay = [
+        c.make,
+        c.model,
+        c.year ?? '',
+        c.pi,
+        c.abbreviation ?? '',
+        ...(c.aliases ?? []),
+      ]
+        .join(' ')
+        .toLowerCase();
       return hay.includes(q);
     })
     .slice(0, limit);

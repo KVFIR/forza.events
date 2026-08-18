@@ -1,3 +1,5 @@
+import {nestedRatingNumber} from '@edge/driverRatingPayload.ts';
+import {isEventUuid} from '@edge/eventPath.ts';
 import {invokeBrowseEvents, invokeHostDrafts} from './api';
 import {isUnauthorizedApiError} from './apiErrors';
 import {getSupabase, isSupabaseConfigured} from './supabase';
@@ -88,7 +90,11 @@ type DbEventRow = {
     group_index?: number | null;
     waitlisted?: boolean | null;
     joined_at?: string | null;
-    users?: {username: string; avatar_url?: string | null} | null;
+    users?: {
+      username: string;
+      avatar_url?: string | null;
+      player_ratings?: {rating: number; games_rated: number} | {rating: number; games_rated: number}[] | null;
+    } | null;
   }[];
   event_cars?: DbEventCarRow[];
   event_results?: DbEventResultRow[];
@@ -120,6 +126,7 @@ type DbEventCarRow = {
         model: string;
         year: number | null;
         pi: number;
+        abbreviation?: string | null;
       }
     | {
         id: string;
@@ -127,6 +134,7 @@ type DbEventCarRow = {
         model: string;
         year: number | null;
         pi: number;
+        abbreviation?: string | null;
       }[]
     | null;
 };
@@ -146,11 +154,14 @@ export const EVENT_LIST_SELECT = `
     joined_at,
     users!event_participants_discord_id_fkey(username, avatar_url)
   ),
-  event_cars(max_pi, tune_share_code, car_restrictions, cars(id, make, model, year, pi))
+  event_cars(max_pi, tune_share_code, car_restrictions, cars(id, make, model, year, pi, abbreviation))
 `;
 
-/** Event detail by id — includes published results rows + rating deltas. */
-const EVENT_DETAIL_SELECT = `${EVENT_LIST_SELECT},
+/** Event detail — results, rating ledger, roster ELO (not on browse/list). */
+export const EVENT_DETAIL_SELECT = `${EVENT_LIST_SELECT.replace(
+  'users!event_participants_discord_id_fkey(username, avatar_url)',
+  'users!event_participants_discord_id_fkey(username, avatar_url, player_ratings!player_ratings_discord_id_fkey(rating, games_rated))',
+)},
   event_results(discord_id, position, dnf, dns, points, group_index),
   rating_ledger(discord_id, delta, rating_before, rating_after)`;
 
@@ -175,6 +186,7 @@ function mapAllowedCars(eventCars: DbEventCarRow[] | undefined): ForzaEvent['all
         model: string;
         year: number | null;
         pi: number;
+        abbreviation?: string | null;
       } | null;
       if (!car?.id) return null;
       return {
@@ -182,6 +194,7 @@ function mapAllowedCars(eventCars: DbEventCarRow[] | undefined): ForzaEvent['all
         make: car.make,
         model: car.model,
         year: car.year,
+        abbreviation: car.abbreviation ?? null,
         pi: car.pi,
         maxPi: ec.max_pi ?? car.pi,
         tuneShareCode: ec.tune_share_code ?? undefined,
@@ -208,7 +221,7 @@ export function mapDbEventWithRelations(row: DbEventRow): ForzaEvent {
 async function fetchEventsWithRelations(
   buildQuery: (
     supabase: NonNullable<Awaited<ReturnType<typeof getSupabase>>>,
-  ) => PromiseLike<{data: DbEventRow[] | null; error: unknown}>,
+  ) => PromiseLike<{data: unknown; error: unknown}>,
 ): Promise<ForzaEvent[] | null> {
   const supabase = await getSupabase();
   if (!supabase) return null;
@@ -219,7 +232,7 @@ async function fetchEventsWithRelations(
     return null;
   }
 
-  return (data ?? []).map(mapDbEventWithRelations);
+  return ((data as DbEventRow[] | null) ?? []).map(mapDbEventWithRelations);
 }
 
 export type EventResultRow = {
@@ -318,6 +331,7 @@ export function mapDbEvent(row: DbEventRow): ForzaEvent {
       groupIndex: p.group_index ?? 1,
       waitlisted: p.waitlisted ?? false,
       joinedAt: p.joined_at ?? undefined,
+      rating: nestedRatingNumber(p.users?.player_ratings),
     })) ?? [],
   );
 
@@ -534,9 +548,10 @@ export async function fetchPublishedEventsResult(
 }
 
 async function fetchPublishedEventViaPostgrest(id: string): Promise<ForzaEvent | undefined> {
-  const events = await fetchEventsWithRelations((supabase) =>
-    supabase.from('events').select(EVENT_DETAIL_SELECT).eq('id', id).neq('status', 'draft'),
-  );
+  const events = await fetchEventsWithRelations((supabase) => {
+    const q = supabase.from('events').select(EVENT_DETAIL_SELECT).neq('status', 'draft');
+    return isEventUuid(id) ? q.eq('id', id) : q.eq('slug', id);
+  });
   if (events === null) return undefined;
   return events[0];
 }
@@ -616,6 +631,7 @@ export type CarSearchResult = {
   model: string;
   year: number | null;
   pi: number;
+  abbreviation?: string | null;
 };
 
 function sanitizeCarSearchQuery(query: string): string {
@@ -627,7 +643,7 @@ function carSearchIlikePattern(query: string): string {
 }
 
 function mapCarSearchRows(
-  data: {id: string; make: string; model: string; year: number | null; pi: number}[],
+  data: {id: string; make: string; model: string; year: number | null; pi: number; abbreviation?: string | null}[],
 ): CarSearchResult[] {
   return data.map((c) => ({
     id: c.id,
@@ -635,6 +651,7 @@ function mapCarSearchRows(
     model: c.model,
     year: c.year,
     pi: c.pi,
+    abbreviation: c.abbreviation ?? null,
   }));
 }
 
@@ -655,11 +672,11 @@ export async function searchCars(
     const pattern = carSearchIlikePattern(q);
     const {data, error} = await supabase
       .from('cars')
-      .select('id, make, model, year, pi')
+      .select('id, make, model, year, pi, abbreviation')
       .eq('active', true)
       .eq('game', game)
       .or(
-        `search_text.ilike."${pattern}",make.ilike."${pattern}",model.ilike."${pattern}"`,
+        `search_text.ilike."${pattern}",make.ilike."${pattern}",model.ilike."${pattern}",abbreviation.ilike."${pattern}"`,
       )
       .limit(20);
 

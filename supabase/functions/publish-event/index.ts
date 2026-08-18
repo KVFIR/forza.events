@@ -87,7 +87,7 @@ serve(async (req) => {
 
     const {data: eventCars} = await supabase
       .from('event_cars')
-      .select('car_id, max_pi, tune_share_code, car_restrictions, cars(id, make, model, year, pi)')
+      .select('car_id, max_pi, tune_share_code, car_restrictions, cars(id, make, model, year, pi, abbreviation)')
       .eq('event_id', event_id);
 
     const publishBody = buildPublishEventBody(event, eventCars ?? [], guild_id, channel_id);

@@ -2,6 +2,7 @@
 
 export type LeaderboardLastRace = {
   eventId: string;
+  slug?: string | null;
   title: string;
   startsAt: string;
   delta: number;
@@ -32,7 +33,7 @@ export function indexLatestRaces(rows: LatestRaceRow[]): Map<string, Leaderboard
   return map;
 }
 
-type EventJoin = {title?: string | null; starts_at?: string | null};
+type EventJoin = {title?: string | null; starts_at?: string | null; slug?: string | null};
 
 function unwrapEvent(join: EventJoin | EventJoin[] | null | undefined): EventJoin | null {
   if (!join) return null;
@@ -58,6 +59,8 @@ export function mapViewerRaces(rows: LedgerHistoryRow[]): LeaderboardLastRace[] 
       startsAt: event?.starts_at ?? '',
       delta: row.delta,
     };
+    const slug = event?.slug?.trim();
+    if (slug) mapped.slug = slug;
     if (row.rating_after != null) mapped.ratingAfter = row.rating_after;
     out.push(mapped);
   }

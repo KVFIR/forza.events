@@ -7,6 +7,7 @@ export type RosterConvoyLeader = {
   avatarUrl?: string;
   isYou: boolean;
   participationSource?: ParticipationSource;
+  rating?: number;
 };
 
 export function findConvoyLeaderParticipant(
@@ -52,6 +53,7 @@ function rosterLeaderFromParticipant(
     avatarUrl: isHostLeader ? event.hostAvatarUrl : leader.avatarUrl,
     isYou: viewerDiscordId === leader.discordId,
     participationSource: leader.participationSource,
+    rating: leader.rating,
   };
 }
 
@@ -82,6 +84,7 @@ export function resolveConvoyLeader(
     avatarUrl: isHostLeader ? event.hostAvatarUrl : leaderRow?.avatarUrl,
     isYou: viewerDiscordId === discordId,
     participationSource: isHostLeader ? 'host_self_assigned' : 'host_assigned',
+    rating: leaderRow?.rating,
   };
 }
 

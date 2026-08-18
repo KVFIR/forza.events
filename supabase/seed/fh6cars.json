@@ -1,4328 +1,7189 @@
 [
   {
     "make": "Abarth",
+    "model": "Abarth 124 Spider",
+    "year": 2017,
+    "pi": 450,
+    "class": "C",
+    "abbreviation": "Abarth 124 '17",
+    "aliases": [
+      "Abarth 124 '17",
+      "Fiat Spider 124",
+      "Fiat 124 Spider Abarth"
+    ]
+  },
+  {
+    "make": "Abarth",
     "model": "Abarth 595 esseesse",
     "year": 1968,
     "pi": 100,
-    "class": "D"
+    "class": "D",
+    "abbreviation": "Abarth 595 '68",
+    "aliases": [
+      "Abarth 595 '68"
+    ]
   },
   {
     "make": "Abarth",
     "model": "Abarth 695 Biposto",
     "year": 2016,
     "pi": 540,
-    "class": "B"
+    "class": "B",
+    "abbreviation": "Abarth 695 '16",
+    "aliases": [
+      "Abarth 695 '16"
+    ]
   },
   {
     "make": "Abarth",
     "model": "Abarth Fiat 131",
     "year": 1980,
     "pi": 399,
-    "class": "D"
+    "class": "D",
+    "abbreviation": "Abarth 131",
+    "aliases": [
+      "Abarth 131"
+    ]
   },
   {
     "make": "Acura",
     "model": "Acura Integra A-Spec",
     "year": 2023,
     "pi": 484,
-    "class": "C"
+    "class": "C",
+    "abbreviation": "Integra '23",
+    "aliases": [
+      "Integra '23"
+    ]
   },
   {
     "make": "Acura",
     "model": "Acura Integra Type R",
     "year": 2001,
     "pi": 471,
-    "class": "C"
+    "class": "C",
+    "abbreviation": "Acura Integra",
+    "aliases": [
+      "Acura Integra",
+      "Acura ITR '01"
+    ]
   },
   {
     "make": "Acura",
     "model": "Acura NSX Type S",
     "year": 2022,
     "pi": 734,
-    "class": "S1"
+    "class": "S1",
+    "abbreviation": "Acura NSX '22",
+    "aliases": [
+      "Acura NSX '22"
+    ]
   },
   {
     "make": "Acura",
     "model": "Acura RSX Type S",
     "year": 2002,
     "pi": 462,
-    "class": "C"
+    "class": "C",
+    "abbreviation": "Acura RSX",
+    "aliases": [
+      "Acura RSX"
+    ]
   },
   {
     "make": "Alfa Romeo",
     "model": "Alfa Romeo 155 Q4",
     "year": 1992,
     "pi": 439,
-    "class": "C"
+    "class": "C",
+    "abbreviation": "Alfa Romeo 155",
+    "aliases": [
+      "Alfa Romeo 155"
+    ]
   },
   {
     "make": "Alfa Romeo",
     "model": "Alfa Romeo 33 Stradale",
     "year": 1968,
     "pi": 593,
-    "class": "B"
+    "class": "B",
+    "abbreviation": "Alfa Romeo 33S",
+    "aliases": [
+      "Alfa Romeo 33S"
+    ]
   },
   {
     "make": "Alfa Romeo",
     "model": "Alfa Romeo 4C",
     "year": 2014,
     "pi": 644,
-    "class": "A"
+    "class": "A",
+    "abbreviation": null,
+    "aliases": []
   },
   {
     "make": "Alfa Romeo",
     "model": "Alfa Romeo 8C Competizione",
     "year": 2007,
     "pi": 635,
-    "class": "A"
+    "class": "A",
+    "abbreviation": "Alfa Romeo 8C",
+    "aliases": [
+      "Alfa Romeo 8C"
+    ]
+  },
+  {
+    "make": "Alfa Romeo",
+    "model": "Alfa Romeo Autodelta Tipo 33/2 Daytona",
+    "year": 1968,
+    "pi": 696,
+    "class": "A",
+    "abbreviation": "Alfa Tipo 33/2",
+    "aliases": [
+      "Alfa Tipo 33/2"
+    ]
   },
   {
     "make": "Alfa Romeo",
     "model": "Alfa Romeo Giulia GTAm",
     "year": 2021,
-    "pi": 717,
-    "class": "S1"
+    "pi": 711,
+    "class": "S1",
+    "abbreviation": "AR Giulia GTAm",
+    "aliases": [
+      "AR Giulia GTAm"
+    ]
   },
   {
     "make": "Alfa Romeo",
     "model": "Alfa Romeo Giulia Quadrifoglio",
     "year": 2017,
     "pi": 667,
-    "class": "A"
+    "class": "A",
+    "abbreviation": "Alfa Giulia '17",
+    "aliases": [
+      "Alfa Giulia '17"
+    ]
   },
   {
     "make": "Alfa Romeo",
     "model": "Alfa Romeo Giulia Sprint GTA Stradale",
     "year": 1965,
     "pi": 379,
-    "class": "D"
+    "class": "D",
+    "abbreviation": "Alfa Romeo GTA",
+    "aliases": [
+      "Alfa Romeo GTA"
+    ]
   },
   {
     "make": "Alfa Romeo",
     "model": "Alfa Romeo Giulia TZ2",
     "year": 1965,
     "pi": 532,
-    "class": "B"
+    "class": "B",
+    "abbreviation": "Alfa Romeo TZ2",
+    "aliases": [
+      "Alfa Romeo TZ2"
+    ]
   },
   {
     "make": "Alfa Romeo",
     "model": "Alfa Romeo SE 048SP",
     "year": 1990,
     "pi": 978,
-    "class": "R"
+    "class": "R",
+    "abbreviation": "Alfa SE 048SP",
+    "aliases": [
+      "Alfa SE 048SP"
+    ]
   },
   {
     "make": "Alumicraft",
     "model": "Alumicraft #122 Class 1 Buggy",
     "year": 2021,
     "pi": 571,
-    "class": "B"
+    "class": "B",
+    "abbreviation": "#122 AC Class 1",
+    "aliases": [
+      "#122 AC Class 1"
+    ]
   },
   {
     "make": "Alumicraft",
     "model": "Alumicraft #6165 Trick Truck",
     "year": 2022,
     "pi": 485,
-    "class": "C"
+    "class": "C",
+    "abbreviation": "#6165 Truck",
+    "aliases": [
+      "#6165 Truck"
+    ]
   },
   {
     "make": "Alumicraft",
     "model": "Alumicraft Class 10 Race Car",
     "year": 2015,
     "pi": 532,
-    "class": "B"
+    "class": "B",
+    "abbreviation": null,
+    "aliases": []
   },
   {
     "make": "AMG Transport Dynamics",
     "model": "AMG Transport Dynamics M12S Warthog CST",
     "year": 2554,
     "pi": 663,
-    "class": "A"
+    "class": "A",
+    "abbreviation": "M12S Warthog CST",
+    "aliases": [
+      "M12S Warthog CST"
+    ]
   },
   {
     "make": "Apollo",
     "model": "Apollo Intensa Emozione",
     "year": 2019,
     "pi": 916,
-    "class": "R"
+    "class": "R",
+    "abbreviation": "Apollo IE",
+    "aliases": [
+      "Apollo IE",
+      "Apollo IE '18"
+    ]
   },
   {
     "make": "Ariel",
     "model": "Ariel Atom 500 V8",
     "year": 2013,
     "pi": 825,
-    "class": "S2"
+    "class": "S2",
+    "abbreviation": "Ariel Atom",
+    "aliases": [
+      "Ariel Atom",
+      "Ariel Atom '13"
+    ]
   },
   {
     "make": "Ariel",
     "model": "Ariel Nomad",
     "year": 2016,
     "pi": 601,
-    "class": "A"
+    "class": "A",
+    "abbreviation": null,
+    "aliases": []
   },
   {
     "make": "Aston Martin",
     "model": "Aston Martin DB11",
     "year": 2017,
     "pi": 679,
-    "class": "A"
+    "class": "A",
+    "abbreviation": "Aston DB11 '17",
+    "aliases": [
+      "Aston DB11 '17",
+      "AM DB11"
+    ]
   },
   {
     "make": "Aston Martin",
     "model": "Aston Martin DB5",
     "year": 1964,
     "pi": 417,
-    "class": "C"
+    "class": "C",
+    "abbreviation": "AM DB5 '64",
+    "aliases": [
+      "AM DB5 '64",
+      "Aston Martin DB5 Vantage"
+    ]
+  },
+  {
+    "make": "Aston Martin",
+    "model": "Aston Martin DB7 GT",
+    "year": 2003,
+    "pi": 566,
+    "class": "B",
+    "abbreviation": "Aston DB7 GT",
+    "aliases": [
+      "Aston DB7 GT"
+    ]
   },
   {
     "make": "Aston Martin",
     "model": "Aston Martin DBS Superleggera",
     "year": 2019,
     "pi": 736,
-    "class": "S1"
+    "class": "S1",
+    "abbreviation": "AM DBS SL '19",
+    "aliases": [
+      "AM DBS SL '19",
+      "AM DBS '19"
+    ]
   },
   {
     "make": "Aston Martin",
     "model": "Aston Martin DBX",
     "year": 2021,
     "pi": 618,
-    "class": "A"
+    "class": "A",
+    "abbreviation": "AM DBX '21",
+    "aliases": [
+      "AM DBX '21"
+    ]
   },
   {
     "make": "Aston Martin",
     "model": "Aston Martin Valhalla Concept Car",
     "year": 2019,
     "pi": 960,
-    "class": "R"
+    "class": "R",
+    "abbreviation": "Valhalla Concept",
+    "aliases": [
+      "Valhalla Concept",
+      "AM Valhalla '19"
+    ]
   },
   {
     "make": "Aston Martin",
     "model": "Aston Martin Valkyrie",
     "year": 2023,
     "pi": 925,
-    "class": "R"
+    "class": "R",
+    "abbreviation": "AM Valkyrie",
+    "aliases": [
+      "AM Valkyrie",
+      "AM Valkyrie '23"
+    ]
   },
   {
     "make": "Aston Martin",
     "model": "Aston Martin Valkyrie AMR Pro",
     "year": 2022,
     "pi": 989,
-    "class": "R"
+    "class": "R",
+    "abbreviation": "AM Valkyrie AMR",
+    "aliases": [
+      "AM Valkyrie AMR"
+    ]
   },
   {
     "make": "Aston Martin",
     "model": "Aston Martin Vantage",
     "year": 2019,
     "pi": 696,
-    "class": "A"
+    "class": "A",
+    "abbreviation": "AM Vantage '19",
+    "aliases": [
+      "AM Vantage '19"
+    ]
   },
   {
     "make": "Aston Martin",
     "model": "Aston Martin Vulcan",
     "year": 2016,
     "pi": 884,
-    "class": "S2"
+    "class": "S2",
+    "abbreviation": "AM Vulcan",
+    "aliases": [
+      "AM Vulcan",
+      "AM Vulcan '16",
+      "Aston Vulcan"
+    ]
   },
   {
     "make": "Aston Martin",
     "model": "Aston Martin Vulcan AMR Pro",
     "year": 2017,
     "pi": 898,
-    "class": "S2"
+    "class": "S2",
+    "abbreviation": "AM Vulcan AMR",
+    "aliases": [
+      "AM Vulcan AMR",
+      "AM Vulcan AMR '17"
+    ]
   },
   {
     "make": "Audi",
     "model": "Audi #2 Audi Sport quattro S1",
     "year": 1986,
     "pi": 726,
-    "class": "S1"
+    "class": "S1",
+    "abbreviation": "#2 Audi S1",
+    "aliases": [
+      "#2 Audi S1"
+    ]
   },
   {
     "make": "Audi",
     "model": "Audi R8 Coupé V10 GT RWD",
     "year": 2023,
     "pi": 769,
-    "class": "S1"
+    "class": "S1",
+    "abbreviation": "Audi R8 GT '23",
+    "aliases": [
+      "Audi R8 GT '23"
+    ]
   },
   {
     "make": "Audi",
     "model": "Audi R8 Coupé V10 plus 5.2 FSI quattro",
     "year": 2013,
     "pi": 694,
-    "class": "A"
+    "class": "A",
+    "abbreviation": "Audi R8 '13",
+    "aliases": [
+      "Audi R8 '13"
+    ]
   },
   {
     "make": "Audi",
     "model": "Audi R8 LMS",
     "year": 2009,
     "pi": 810,
-    "class": "S2"
+    "class": "S2",
+    "abbreviation": null,
+    "aliases": []
   },
   {
     "make": "Audi",
     "model": "Audi R8 V10 performance",
     "year": 2020,
     "pi": 738,
-    "class": "S1"
+    "class": "S1",
+    "abbreviation": "Audi R8 '20",
+    "aliases": [
+      "Audi R8 '20"
+    ]
   },
   {
     "make": "Audi",
     "model": "Audi R8 V10 plus",
     "year": 2016,
     "pi": 731,
-    "class": "S1"
+    "class": "S1",
+    "abbreviation": "Audi R8 '16",
+    "aliases": [
+      "Audi R8 '16"
+    ]
   },
   {
     "make": "Audi",
     "model": "Audi RS 3 Sedan",
     "year": 2020,
     "pi": 617,
-    "class": "A"
+    "class": "A",
+    "abbreviation": "Audi RS 3 '20",
+    "aliases": [
+      "Audi RS 3 '20"
+    ]
   },
   {
     "make": "Audi",
     "model": "Audi RS 3 Sportback",
     "year": 2011,
     "pi": 565,
-    "class": "B"
+    "class": "B",
+    "abbreviation": "Audi RS 3",
+    "aliases": [
+      "Audi RS 3",
+      "Audi RS 3 '11"
+    ]
   },
   {
     "make": "Audi",
     "model": "Audi RS 4",
     "year": 2006,
     "pi": 593,
-    "class": "B"
+    "class": "B",
+    "abbreviation": "Audi RS 4 '06",
+    "aliases": [
+      "Audi RS 4 '06"
+    ]
   },
   {
     "make": "Audi",
     "model": "Audi RS 4 Avant",
     "year": 2001,
     "pi": 544,
-    "class": "B"
+    "class": "B",
+    "abbreviation": "Audi RS 4 '01",
+    "aliases": [
+      "Audi RS 4 '01"
+    ]
   },
   {
     "make": "Audi",
     "model": "Audi RS 4 Avant",
     "year": 2013,
     "pi": 607,
-    "class": "A"
+    "class": "A",
+    "abbreviation": "Audi RS 4 '13",
+    "aliases": [
+      "Audi RS 4 '13"
+    ]
   },
   {
     "make": "Audi",
     "model": "Audi RS 4 Avant",
     "year": 2018,
     "pi": 637,
-    "class": "A"
+    "class": "A",
+    "abbreviation": "RS 4 Avant '18",
+    "aliases": [
+      "RS 4 Avant '18",
+      "Audi RS 4 '18"
+    ]
   },
   {
     "make": "Audi",
     "model": "Audi RS 5 Coupé",
     "year": 2011,
     "pi": 613,
-    "class": "A"
+    "class": "A",
+    "abbreviation": "Audi RS 5",
+    "aliases": [
+      "Audi RS 5"
+    ]
   },
   {
     "make": "Audi",
     "model": "Audi RS 6",
     "year": 2003,
     "pi": 556,
-    "class": "B"
+    "class": "B",
+    "abbreviation": "Audi RS 6 '03",
+    "aliases": [
+      "Audi RS 6 '03"
+    ]
   },
   {
     "make": "Audi",
     "model": "Audi RS 6",
     "year": 2009,
     "pi": 598,
-    "class": "B"
+    "class": "B",
+    "abbreviation": "Audi RS 6 '09",
+    "aliases": [
+      "Audi RS 6 '09"
+    ]
   },
   {
     "make": "Audi",
     "model": "Audi RS 6 Avant",
     "year": 2015,
     "pi": 640,
-    "class": "A"
+    "class": "A",
+    "abbreviation": "Audi RS 6 '15",
+    "aliases": [
+      "Audi RS 6 '15"
+    ]
   },
   {
     "make": "Audi",
     "model": "Audi RS 6 Avant",
     "year": 2021,
     "pi": 650,
-    "class": "A"
+    "class": "A",
+    "abbreviation": "Audi RS 6 '21",
+    "aliases": [
+      "Audi RS 6 '21"
+    ]
   },
   {
     "make": "Audi",
     "model": "Audi RS 7 Sportback",
     "year": 2013,
     "pi": 620,
-    "class": "A"
+    "class": "A",
+    "abbreviation": "Audi RS 7",
+    "aliases": [
+      "Audi RS 7"
+    ]
   },
   {
     "make": "Audi",
     "model": "Audi RS 7 Sportback",
     "year": 2021,
     "pi": 655,
-    "class": "A"
+    "class": "A",
+    "abbreviation": "Audi RS 7 '21",
+    "aliases": [
+      "Audi RS 7 '21"
+    ]
   },
   {
     "make": "Audi",
     "model": "Audi RS e-tron GT",
     "year": 2021,
     "pi": 677,
-    "class": "A"
+    "class": "A",
+    "abbreviation": "Audi RS e-tron",
+    "aliases": [
+      "Audi RS e-tron",
+      "Audi e-tron '20"
+    ]
   },
   {
     "make": "Audi",
     "model": "Audi S1",
     "year": 2015,
     "pi": 527,
-    "class": "B"
+    "class": "B",
+    "abbreviation": "Audi S1 '15",
+    "aliases": [
+      "Audi S1 '15"
+    ]
   },
   {
     "make": "Audi",
     "model": "Audi Sport quattro",
     "year": 1983,
     "pi": 526,
-    "class": "B"
+    "class": "B",
+    "abbreviation": "Audi quattro",
+    "aliases": [
+      "Audi quattro",
+      "Audi quattro '84"
+    ]
   },
   {
     "make": "Audi",
     "model": "Audi TT RS Coupé",
     "year": 2010,
     "pi": 593,
-    "class": "B"
+    "class": "B",
+    "abbreviation": "Audi TT RS",
+    "aliases": [
+      "Audi TT RS"
+    ]
   },
   {
     "make": "Austin-Healey",
     "model": "Austin-Healey 3000 MkIII",
     "year": 1965,
     "pi": 352,
-    "class": "D"
+    "class": "D",
+    "abbreviation": "Austin 3000 '65",
+    "aliases": [
+      "Austin 3000 '65"
+    ]
   },
   {
     "make": "Autozam",
     "model": "Autozam AZ-1",
     "year": 1993,
     "pi": 342,
-    "class": "D"
+    "class": "D",
+    "abbreviation": "Autozam AZ-1 '93",
+    "aliases": [
+      "Autozam AZ-1 '93"
+    ]
   },
   {
     "make": "BAC",
     "model": "BAC Mono",
     "year": 2014,
     "pi": 766,
-    "class": "S1"
+    "class": "S1",
+    "abbreviation": "BAC Mono '14",
+    "aliases": [
+      "BAC Mono '14"
+    ]
   },
   {
     "make": "Bentley",
     "model": "Bentley Bentayga",
     "year": 2016,
     "pi": 612,
-    "class": "A"
+    "class": "A",
+    "abbreviation": null,
+    "aliases": []
   },
   {
     "make": "Bentley",
     "model": "Bentley Continental GT Convertible",
     "year": 2021,
     "pi": 649,
-    "class": "A"
+    "class": "A",
+    "abbreviation": "Bentley Cont GTC",
+    "aliases": [
+      "Bentley Cont GTC"
+    ]
   },
   {
     "make": "BMW",
     "model": "BMW 2002 Turbo",
     "year": 1973,
     "pi": 425,
-    "class": "C"
+    "class": "C",
+    "abbreviation": "BMW 2002 '73",
+    "aliases": [
+      "BMW 2002 '73"
+    ]
   },
   {
     "make": "BMW",
     "model": "BMW 850CSi",
     "year": 1995,
     "pi": 493,
-    "class": "C"
+    "class": "C",
+    "abbreviation": "BMW 850CSi '95",
+    "aliases": [
+      "BMW 850CSi '95"
+    ]
   },
   {
     "make": "BMW",
     "model": "BMW i8",
     "year": 2015,
     "pi": 665,
-    "class": "A"
+    "class": "A",
+    "abbreviation": "BMW i8 '15",
+    "aliases": [
+      "BMW i8 '15"
+    ]
   },
   {
     "make": "BMW",
     "model": "BMW Isetta 300 Export",
     "year": 1957,
     "pi": 100,
-    "class": "D"
+    "class": "D",
+    "abbreviation": "BMW Isetta",
+    "aliases": [
+      "BMW Isetta"
+    ]
   },
   {
     "make": "BMW",
     "model": "BMW iX xDrive50",
     "year": 2022,
     "pi": 595,
-    "class": "B"
+    "class": "B",
+    "abbreviation": "BMW iX '22",
+    "aliases": [
+      "BMW iX '22"
+    ]
   },
   {
     "make": "BMW",
     "model": "BMW M1",
     "year": 1981,
     "pi": 510,
-    "class": "B"
+    "class": "B",
+    "abbreviation": "BMW M1 '81",
+    "aliases": [
+      "BMW M1 '81"
+    ]
   },
   {
     "make": "BMW",
     "model": "BMW M2",
     "year": 2023,
     "pi": 647,
-    "class": "A"
+    "class": "A",
+    "abbreviation": "BMW M2 '23",
+    "aliases": [
+      "BMW M2 '23"
+    ]
   },
   {
     "make": "BMW",
     "model": "BMW M2 Competition Coupé",
     "year": 2020,
     "pi": 656,
-    "class": "A"
+    "class": "A",
+    "abbreviation": "BMW M2 Comp",
+    "aliases": [
+      "BMW M2 Comp",
+      "BMW M2 '20"
+    ]
   },
   {
     "make": "BMW",
     "model": "BMW M2 Forza Edition",
     "year": 2023,
     "pi": 700,
-    "class": "A"
+    "class": "A",
+    "abbreviation": "BMW M2 FE '23",
+    "aliases": [
+      "BMW M2 FE '23"
+    ]
   },
   {
     "make": "BMW",
     "model": "BMW M3",
     "year": 1988,
     "pi": 474,
-    "class": "C"
+    "class": "C",
+    "abbreviation": "BMW M3 '88",
+    "aliases": [
+      "BMW M3 '88"
+    ]
   },
   {
     "make": "BMW",
     "model": "BMW M3",
     "year": 1997,
     "pi": 549,
-    "class": "B"
+    "class": "B",
+    "abbreviation": "BMW M3 '97",
+    "aliases": [
+      "BMW M3 '97",
+      "BMW E36 M3"
+    ]
   },
   {
     "make": "BMW",
     "model": "BMW M3",
     "year": 2005,
     "pi": 554,
-    "class": "B"
+    "class": "B",
+    "abbreviation": "BMW M3 '05",
+    "aliases": [
+      "BMW M3 '05",
+      "BMW E46 M3",
+      "BMW M3 E46 Coupe"
+    ]
   },
   {
     "make": "BMW",
     "model": "BMW M3",
     "year": 2008,
     "pi": 608,
-    "class": "A"
+    "class": "A",
+    "abbreviation": "BMW M3 '08",
+    "aliases": [
+      "BMW M3 '08"
+    ]
   },
   {
     "make": "BMW",
     "model": "BMW M3 GTS",
     "year": 2010,
     "pi": 678,
-    "class": "A"
+    "class": "A",
+    "abbreviation": "BMW E92 M3 GTS",
+    "aliases": [
+      "BMW E92 M3 GTS",
+      "BMW M3 '10"
+    ]
   },
   {
     "make": "BMW",
     "model": "BMW M4 Competition Coupé",
     "year": 2021,
     "pi": 666,
-    "class": "A"
+    "class": "A",
+    "abbreviation": "BMW M4 '21",
+    "aliases": [
+      "BMW M4 '21"
+    ]
   },
   {
     "make": "BMW",
     "model": "BMW M4 Competition Coupé 'Welcome Pack'",
     "year": 2021,
     "pi": 800,
-    "class": "S1"
+    "class": "S1",
+    "abbreviation": "BMW M4 '21",
+    "aliases": [
+      "BMW M4 '21"
+    ]
   },
   {
     "make": "BMW",
     "model": "BMW M4 Coupé",
     "year": 2014,
     "pi": 679,
-    "class": "A"
+    "class": "A",
+    "abbreviation": "BMW M4 '14",
+    "aliases": [
+      "BMW M4 '14",
+      "BMW M4 Coupe"
+    ]
   },
   {
     "make": "BMW",
     "model": "BMW M4 GTS",
     "year": 2016,
     "pi": 711,
-    "class": "S1"
+    "class": "S1",
+    "abbreviation": "BMW M4 '16",
+    "aliases": [
+      "BMW M4 '16"
+    ]
   },
   {
     "make": "BMW",
     "model": "BMW M5",
     "year": 1988,
     "pi": 469,
-    "class": "C"
+    "class": "C",
+    "abbreviation": "BMW M5 '88",
+    "aliases": [
+      "BMW M5 '88"
+    ]
   },
   {
     "make": "BMW",
     "model": "BMW M5",
     "year": 1995,
     "pi": 516,
-    "class": "B"
+    "class": "B",
+    "abbreviation": "BMW M5 '95",
+    "aliases": [
+      "BMW M5 '95",
+      "BMW E34 M5"
+    ]
   },
   {
     "make": "BMW",
     "model": "BMW M5",
     "year": 2003,
     "pi": 580,
-    "class": "B"
+    "class": "B",
+    "abbreviation": "BMW E39 M5",
+    "aliases": [
+      "BMW E39 M5",
+      "BMW M5 '03"
+    ]
   },
   {
     "make": "BMW",
     "model": "BMW M5",
     "year": 2009,
     "pi": 595,
-    "class": "B"
+    "class": "B",
+    "abbreviation": "BMW E60 M5",
+    "aliases": [
+      "BMW E60 M5",
+      "BMW M5 '09"
+    ]
   },
   {
     "make": "BMW",
     "model": "BMW M5",
     "year": 2012,
     "pi": 652,
-    "class": "A"
+    "class": "A",
+    "abbreviation": "BMW F10 M5",
+    "aliases": [
+      "BMW F10 M5",
+      "BMW M5 '12"
+    ]
   },
   {
     "make": "BMW",
     "model": "BMW M5 CS",
     "year": 2022,
     "pi": 730,
-    "class": "S1"
+    "class": "S1",
+    "abbreviation": "BMW M5 '22",
+    "aliases": [
+      "BMW M5 '22"
+    ]
   },
   {
     "make": "BMW",
     "model": "BMW M8 Competition Coupé",
     "year": 2020,
     "pi": 684,
-    "class": "A"
+    "class": "A",
+    "abbreviation": "BMW M8 Comp",
+    "aliases": [
+      "BMW M8 Comp",
+      "BMW M8 '20"
+    ]
   },
   {
     "make": "BMW",
     "model": "BMW X5 M",
     "year": 2011,
     "pi": 546,
-    "class": "B"
+    "class": "B",
+    "abbreviation": null,
+    "aliases": []
   },
   {
     "make": "BMW",
     "model": "BMW X6 M Competition",
     "year": 2024,
     "pi": 672,
-    "class": "A"
+    "class": "A",
+    "abbreviation": "BMW X6 M '24",
+    "aliases": [
+      "BMW X6 M '24"
+    ]
   },
   {
     "make": "BMW",
     "model": "BMW Z4 M Coupé",
     "year": 2008,
     "pi": 579,
-    "class": "B"
+    "class": "B",
+    "abbreviation": "BMW Z4 '08",
+    "aliases": [
+      "BMW Z4 '08"
+    ]
   },
   {
     "make": "BMW",
     "model": "BMW Z4 Roadster",
     "year": 2019,
     "pi": 634,
-    "class": "A"
+    "class": "A",
+    "abbreviation": "BMW Z4 '19",
+    "aliases": [
+      "BMW Z4 '19"
+    ]
   },
   {
     "make": "Buick",
     "model": "Buick Regal GNX",
     "year": 1987,
     "pi": 454,
-    "class": "C"
+    "class": "C",
+    "abbreviation": "Buick Regal GNX '87",
+    "aliases": [
+      "Buick Regal GNX '87"
+    ]
   },
   {
     "make": "Cadillac",
     "model": "Cadillac ATS-V",
     "year": 2016,
     "pi": 601,
-    "class": "A"
+    "class": "A",
+    "abbreviation": "Caddy ATS-V",
+    "aliases": [
+      "Caddy ATS-V",
+      "Cadillac ATS '16"
+    ]
   },
   {
     "make": "Cadillac",
     "model": "Cadillac CT4-V Blackwing",
     "year": 2022,
     "pi": 650,
-    "class": "A"
+    "class": "A",
+    "abbreviation": "Cadillac CT4-V",
+    "aliases": [
+      "Cadillac CT4-V",
+      "Cadillac CT4 '22"
+    ]
   },
   {
     "make": "Cadillac",
     "model": "Cadillac CT5-V Blackwing",
     "year": 2022,
     "pi": 701,
-    "class": "S1"
+    "class": "S1",
+    "abbreviation": "Cadillac CT5-V",
+    "aliases": [
+      "Cadillac CT5-V",
+      "Cadillac CT5 '22"
+    ]
   },
   {
     "make": "Cadillac",
     "model": "Cadillac CTS-V Sedan",
     "year": 2016,
     "pi": 648,
-    "class": "A"
+    "class": "A",
+    "abbreviation": "Caddy CTS-V '16",
+    "aliases": [
+      "Caddy CTS-V '16",
+      "Cadillac CTS '16"
+    ]
   },
   {
     "make": "Cadillac",
     "model": "Cadillac XTS Limousine",
     "year": 2013,
     "pi": 381,
-    "class": "D"
+    "class": "D",
+    "abbreviation": "Caddy Limo",
+    "aliases": [
+      "Caddy Limo"
+    ]
   },
   {
     "make": "Can-Am",
     "model": "Can-Am Maverick X RS Turbo R",
     "year": 2018,
     "pi": 568,
-    "class": "B"
+    "class": "B",
+    "abbreviation": "Can-Am Maverick",
+    "aliases": [
+      "Can-Am Maverick"
+    ]
   },
   {
     "make": "Casey Currie Motorsports",
     "model": "Casey Currie Motorsports #4402 Ultra 4 'Trophy Jeep'",
     "year": 2019,
     "pi": 641,
-    "class": "A"
+    "class": "A",
+    "abbreviation": "#4402 Ultra 4",
+    "aliases": [
+      "#4402 Ultra 4"
+    ]
   },
   {
     "make": "Chevrolet",
     "model": "Chevrolet 150 Utility Sedan",
     "year": 1955,
     "pi": 221,
-    "class": "D"
+    "class": "D",
+    "abbreviation": "Chevy 150 Sedan",
+    "aliases": [
+      "Chevy 150 Sedan"
+    ]
   },
   {
     "make": "Chevrolet",
     "model": "Chevrolet Bel Air",
     "year": 1957,
     "pi": 320,
-    "class": "D"
+    "class": "D",
+    "abbreviation": "Chevy Bel Air",
+    "aliases": [
+      "Chevy Bel Air"
+    ]
   },
   {
     "make": "Chevrolet",
     "model": "Chevrolet Camaro Super Sport Coupe",
     "year": 1969,
     "pi": 471,
-    "class": "C"
+    "class": "C",
+    "abbreviation": "Chev. Camaro '69",
+    "aliases": [
+      "Chev. Camaro '69",
+      "Chevy Camaro '69",
+      "Chevy Camaro SS"
+    ]
   },
   {
     "make": "Chevrolet",
     "model": "Chevrolet Camaro Z/28",
     "year": 2015,
     "pi": 695,
-    "class": "A"
+    "class": "A",
+    "abbreviation": "Chevy Camaro '15",
+    "aliases": [
+      "Chevy Camaro '15"
+    ]
   },
   {
     "make": "Chevrolet",
     "model": "Chevrolet Camaro Z28",
     "year": 1970,
     "pi": 430,
-    "class": "C"
+    "class": "C",
+    "abbreviation": "Chevy Camaro '70",
+    "aliases": [
+      "Chevy Camaro '70",
+      "Chev. Camaro '70"
+    ]
   },
   {
     "make": "Chevrolet",
     "model": "Chevrolet Camaro Z28",
     "year": 1979,
     "pi": 364,
-    "class": "D"
+    "class": "D",
+    "abbreviation": null,
+    "aliases": []
   },
   {
     "make": "Chevrolet",
     "model": "Chevrolet Camaro ZL1",
     "year": 2017,
     "pi": 727,
-    "class": "S1"
+    "class": "S1",
+    "abbreviation": "Chevy Camaro '17",
+    "aliases": [
+      "Chevy Camaro '17",
+      "Chev. Camaro '17"
+    ]
+  },
+  {
+    "make": "Chevrolet",
+    "model": "Chevrolet Camaro ZL1",
+    "year": 2024,
+    "pi": 718,
+    "class": "S1",
+    "abbreviation": "Chev. Camaro '24",
+    "aliases": [
+      "Chev. Camaro '24"
+    ]
   },
   {
     "make": "Chevrolet",
     "model": "Chevrolet Camaro ZL1 1LE",
     "year": 2018,
     "pi": 728,
-    "class": "S1"
+    "class": "S1",
+    "abbreviation": "Chevy Camaro '18",
+    "aliases": [
+      "Chevy Camaro '18",
+      "Chev. Camaro '18"
+    ]
   },
   {
     "make": "Chevrolet",
     "model": "Chevrolet Chevelle Super Sport 454",
     "year": 1970,
     "pi": 424,
-    "class": "C"
+    "class": "C",
+    "abbreviation": "Chev Chevelle '70",
+    "aliases": [
+      "Chev Chevelle '70",
+      "Chevelle '70"
+    ]
   },
   {
     "make": "Chevrolet",
     "model": "Chevrolet Corvette",
     "year": 1953,
     "pi": 270,
-    "class": "D"
+    "class": "D",
+    "abbreviation": "Corvette '53",
+    "aliases": [
+      "Corvette '53"
+    ]
   },
   {
     "make": "Chevrolet",
     "model": "Chevrolet Corvette",
     "year": 1960,
     "pi": 428,
-    "class": "C"
+    "class": "C",
+    "abbreviation": "Corvette '60",
+    "aliases": [
+      "Corvette '60"
+    ]
   },
   {
     "make": "Chevrolet",
     "model": "Chevrolet Corvette E-Ray",
     "year": 2024,
     "pi": 737,
-    "class": "S1"
+    "class": "S1",
+    "abbreviation": "Corvette E-Ray",
+    "aliases": [
+      "Corvette E-Ray",
+      "Chev. E-Ray '24"
+    ]
   },
   {
     "make": "Chevrolet",
     "model": "Chevrolet Corvette Stingray 427",
     "year": 1967,
     "pi": 510,
-    "class": "B"
+    "class": "B",
+    "abbreviation": "Corvette '67",
+    "aliases": [
+      "Corvette '67",
+      "Chev. C3 427 '67"
+    ]
   },
   {
     "make": "Chevrolet",
     "model": "Chevrolet Corvette Stingray Coupe",
     "year": 2020,
     "pi": 699,
-    "class": "A"
+    "class": "A",
+    "abbreviation": "Corvette C8 '20",
+    "aliases": [
+      "Corvette C8 '20",
+      "Chev. C8 '20",
+      "Chevrolet C8 Corvette Stingray",
+      "Chevrolet Corvette Stingray Coupé"
+    ]
   },
   {
     "make": "Chevrolet",
     "model": "Chevrolet Corvette Z06",
     "year": 2002,
     "pi": 602,
-    "class": "A"
+    "class": "A",
+    "abbreviation": "Corvette '02",
+    "aliases": [
+      "Corvette '02",
+      "Chev. C4 Z06 '02"
+    ]
   },
   {
     "make": "Chevrolet",
     "model": "Chevrolet Corvette Z06",
     "year": 2015,
     "pi": 755,
-    "class": "S1"
+    "class": "S1",
+    "abbreviation": "Corvette '15",
+    "aliases": [
+      "Corvette '15",
+      "Chev. C6 Z06 '15"
+    ]
   },
   {
     "make": "Chevrolet",
     "model": "Chevrolet Corvette Z06",
     "year": 2023,
     "pi": 763,
-    "class": "S1"
+    "class": "S1",
+    "abbreviation": "Corvette Z06 '23",
+    "aliases": [
+      "Corvette Z06 '23",
+      "Chev. C8 Z06 '23"
+    ]
   },
   {
     "make": "Chevrolet",
     "model": "Chevrolet Corvette ZR-1",
     "year": 1970,
     "pi": 497,
-    "class": "C"
+    "class": "C",
+    "abbreviation": "Chev. ZR-1 '70",
+    "aliases": [
+      "Chev. ZR-1 '70"
+    ]
   },
   {
     "make": "Chevrolet",
     "model": "Chevrolet Corvette ZR-1",
     "year": 1995,
     "pi": 576,
-    "class": "B"
+    "class": "B",
+    "abbreviation": "Chev. C4 ZR1 '95",
+    "aliases": [
+      "Chev. C4 ZR1 '95"
+    ]
   },
   {
     "make": "Chevrolet",
     "model": "Chevrolet Corvette ZR1",
     "year": 2009,
     "pi": 712,
-    "class": "S1"
+    "class": "S1",
+    "abbreviation": "Corvette '09",
+    "aliases": [
+      "Corvette '09",
+      "Chev. C6 ZR1 '09"
+    ]
   },
   {
     "make": "Chevrolet",
     "model": "Chevrolet Corvette ZR1",
     "year": 2019,
     "pi": 778,
-    "class": "S1"
+    "class": "S1",
+    "abbreviation": "Corvette '19",
+    "aliases": [
+      "Corvette '19",
+      "Chev. C7 ZR1 '19"
+    ]
   },
   {
     "make": "Chevrolet",
     "model": "Chevrolet El Camino Super Sport 454",
     "year": 1970,
     "pi": 430,
-    "class": "C"
+    "class": "C",
+    "abbreviation": "Chevy El Camino",
+    "aliases": [
+      "Chevy El Camino"
+    ]
   },
   {
     "make": "Chevrolet",
     "model": "Chevrolet Impala Super Sport",
     "year": 1996,
     "pi": 407,
-    "class": "C"
+    "class": "C",
+    "abbreviation": "Chevy Impala '96",
+    "aliases": [
+      "Chevy Impala '96"
+    ]
   },
   {
     "make": "Chevrolet",
     "model": "Chevrolet Impala Super Sport 409",
     "year": 1964,
     "pi": 427,
-    "class": "C"
+    "class": "C",
+    "abbreviation": "Chevy Impala",
+    "aliases": [
+      "Chevy Impala",
+      "Chevrolet Impala SS 409",
+      "Chevrolet Impala SS"
+    ]
   },
   {
     "make": "Chevrolet",
     "model": "Chevrolet K-10 Custom",
     "year": 1972,
     "pi": 268,
-    "class": "D"
+    "class": "D",
+    "abbreviation": "Chevy K10 '72",
+    "aliases": [
+      "Chevy K10 '72"
+    ]
   },
   {
     "make": "Chevrolet",
     "model": "Chevrolet Monte Carlo Super Sport",
     "year": 1988,
     "pi": 282,
-    "class": "D"
+    "class": "D",
+    "abbreviation": "Chevy Montecarlo",
+    "aliases": [
+      "Chevy Montecarlo",
+      "Chev. MC '88"
+    ]
   },
   {
     "make": "Chevrolet",
     "model": "Chevrolet Nova Super Sport 396",
     "year": 1969,
     "pi": 431,
-    "class": "C"
+    "class": "C",
+    "abbreviation": "Chevy Nova '69",
+    "aliases": [
+      "Chevy Nova '69",
+      "Chev. Nova '69",
+      "Nova SS 396"
+    ]
   },
   {
     "make": "Chevrolet",
     "model": "Chevrolet Silverado LT Trail Boss",
     "year": 2020,
     "pi": 449,
-    "class": "C"
+    "class": "C",
+    "abbreviation": "Chevy Trail Boss",
+    "aliases": [
+      "Chevy Trail Boss"
+    ]
   },
   {
     "make": "Datsun",
     "model": "Datsun #269 Attacking the Clock Racing 240Z 'All Carbon Hill Climb Beast'",
     "year": 1972,
     "pi": 951,
-    "class": "R"
+    "class": "R",
+    "abbreviation": "Datsun #269",
+    "aliases": [
+      "Datsun #269"
+    ]
   },
   {
     "make": "Datsun",
     "model": "Datsun 2000 Roadster",
     "year": 1969,
     "pi": 323,
-    "class": "D"
+    "class": "D",
+    "abbreviation": "Datsun 2000",
+    "aliases": [
+      "Datsun 2000"
+    ]
   },
   {
     "make": "Datsun",
     "model": "Datsun 510",
     "year": 1970,
     "pi": 143,
-    "class": "D"
+    "class": "D",
+    "abbreviation": "Datsun 510 '70",
+    "aliases": [
+      "Datsun 510 '70"
+    ]
+  },
+  {
+    "make": "De",
+    "model": "De Tomaso Pantera GT5",
+    "year": 1984,
+    "pi": 562,
+    "class": "B",
+    "abbreviation": "Pantera GT5",
+    "aliases": [
+      "Pantera GT5"
+    ]
   },
   {
     "make": "DeBerti",
     "model": "DeBerti Chevrolet Silverado 1500 Drift Truck",
     "year": 2018,
     "pi": 707,
-    "class": "S1"
+    "class": "S1",
+    "abbreviation": "Silverado DD",
+    "aliases": [
+      "Silverado DD",
+      "Chevrolet Silverado 1500 DeBerti Design Drift Truck"
+    ]
   },
   {
     "make": "DeBerti",
     "model": "DeBerti Ford Super Duty F-250 Lariat 'Transformer'",
     "year": 2019,
     "pi": 548,
-    "class": "B"
+    "class": "B",
+    "abbreviation": "DeBerti F-250",
+    "aliases": [
+      "DeBerti F-250"
+    ]
   },
   {
     "make": "DeBerti",
     "model": "DeBerti Jeep Wrangler Unlimited",
     "year": 2018,
     "pi": 645,
-    "class": "A"
+    "class": "A",
+    "abbreviation": "Jeep Wrangler DD",
+    "aliases": [
+      "Jeep Wrangler DD",
+      "Jeep Wrangler Unlimited DeBerti Design",
+      "DeBerti Wrangler Unlimited"
+    ]
   },
   {
     "make": "DeBerti",
     "model": "DeBerti Toyota Tacoma TRD 'The Performance Truck'",
     "year": 2019,
     "pi": 717,
-    "class": "S1"
+    "class": "S1",
+    "abbreviation": "DD Tacoma TRD",
+    "aliases": [
+      "DD Tacoma TRD"
+    ]
   },
   {
     "make": "DeLorean",
     "model": "DeLorean DMC-12",
     "year": 1982,
     "pi": 357,
-    "class": "D"
+    "class": "D",
+    "abbreviation": null,
+    "aliases": []
   },
   {
     "make": "Dodge",
     "model": "Dodge Challenger R/T",
     "year": 1970,
     "pi": 443,
-    "class": "C"
+    "class": "C",
+    "abbreviation": "D. Challenger 70",
+    "aliases": [
+      "D. Challenger 70"
+    ]
   },
   {
     "make": "Dodge",
     "model": "Dodge Challenger SRT Demon",
     "year": 2018,
     "pi": 678,
-    "class": "A"
+    "class": "A",
+    "abbreviation": "Dodge SRT Demon",
+    "aliases": [
+      "Dodge SRT Demon",
+      "D. Challenger 18"
+    ]
   },
   {
     "make": "Dodge",
     "model": "Dodge Challenger SRT Hellcat",
     "year": 2015,
     "pi": 631,
-    "class": "A"
+    "class": "A",
+    "abbreviation": "Challenger '15",
+    "aliases": [
+      "Challenger '15"
+    ]
   },
   {
     "make": "Dodge",
     "model": "Dodge Challenger SRT Super Stock",
     "year": 2022,
     "pi": 695,
-    "class": "A"
+    "class": "A",
+    "abbreviation": "Challenger '22",
+    "aliases": [
+      "Challenger '22"
+    ]
   },
   {
     "make": "Dodge",
     "model": "Dodge Charger Daytona HEMI",
     "year": 1969,
     "pi": 479,
-    "class": "C"
+    "class": "C",
+    "abbreviation": "Charger Daytona",
+    "aliases": [
+      "Charger Daytona"
+    ]
   },
   {
     "make": "Dodge",
     "model": "Dodge Charger R/T",
     "year": 1969,
     "pi": 417,
-    "class": "C"
+    "class": "C",
+    "abbreviation": "Dodge Charger '69",
+    "aliases": [
+      "Dodge Charger '69",
+      "Dodge Charger 69"
+    ]
   },
   {
     "make": "Dodge",
     "model": "Dodge Charger SRT Hellcat",
     "year": 2015,
     "pi": 637,
-    "class": "A"
+    "class": "A",
+    "abbreviation": "Dodge Charger '15",
+    "aliases": [
+      "Dodge Charger '15",
+      "Dodge Charger 15"
+    ]
   },
   {
     "make": "Dodge",
     "model": "Dodge Coronet Super Bee",
     "year": 1970,
     "pi": 455,
-    "class": "C"
+    "class": "C",
+    "abbreviation": "Dodge Super Bee",
+    "aliases": [
+      "Dodge Super Bee",
+      "Dodge Coronet 70"
+    ]
   },
   {
     "make": "Dodge",
     "model": "Dodge Dart HEMI Super Stock",
     "year": 1968,
     "pi": 540,
-    "class": "B"
+    "class": "B",
+    "abbreviation": "Dodge Dart '68",
+    "aliases": [
+      "Dodge Dart '68"
+    ]
   },
   {
     "make": "Dodge",
     "model": "Dodge Durango SRT Hellcat",
     "year": 2021,
     "pi": 628,
-    "class": "A"
+    "class": "A",
+    "abbreviation": "SRT Durango '21",
+    "aliases": [
+      "SRT Durango '21"
+    ]
   },
   {
     "make": "Dodge",
     "model": "Dodge Ram SRT-10",
     "year": 2006,
     "pi": 547,
-    "class": "B"
+    "class": "B",
+    "abbreviation": null,
+    "aliases": []
   },
   {
     "make": "Dodge",
     "model": "Dodge Viper ACR",
     "year": 2016,
     "pi": 786,
-    "class": "S1"
+    "class": "S1",
+    "abbreviation": "Dodge Viper '16",
+    "aliases": [
+      "Dodge Viper '16",
+      "Viper ACR '16"
+    ]
   },
   {
     "make": "Dodge",
     "model": "Dodge Viper GTS ACR",
     "year": 1999,
     "pi": 598,
-    "class": "B"
+    "class": "B",
+    "abbreviation": "Dodge Viper '99",
+    "aliases": [
+      "Dodge Viper '99",
+      "SRT Viper GTS ACR",
+      "Viper Viper GTS ACR"
+    ]
   },
   {
     "make": "Dodge",
     "model": "Dodge Viper GTS ACR Forza Edition",
     "year": 1999,
     "pi": 700,
-    "class": "A"
+    "class": "A",
+    "abbreviation": "Viper FE '99",
+    "aliases": [
+      "Viper FE '99"
+    ]
   },
   {
     "make": "Dodge",
     "model": "Dodge Viper SRT-10 ACR",
     "year": 2008,
     "pi": 735,
-    "class": "S1"
+    "class": "S1",
+    "abbreviation": "Dodge Viper '08",
+    "aliases": [
+      "Dodge Viper '08"
+    ]
+  },
+  {
+    "make": "Exomotive",
+    "model": "Exomotive Exocet Sport V8 XP-5",
+    "year": 2018,
+    "pi": 841,
+    "class": "S2",
+    "abbreviation": "Exocet '18",
+    "aliases": [
+      "Exocet '18"
+    ]
   },
   {
     "make": "Ferrari",
     "model": "Ferrari #24 Ferrari Spa 330 P4",
     "year": 1967,
     "pi": 684,
-    "class": "A"
+    "class": "A",
+    "abbreviation": "Ferrari 330 P4",
+    "aliases": [
+      "Ferrari 330 P4",
+      "#24 Ferrari P4"
+    ]
   },
   {
     "make": "Ferrari",
     "model": "Ferrari 250 GT Berlinetta Lusso",
     "year": 1962,
     "pi": 475,
-    "class": "C"
+    "class": "C",
+    "abbreviation": "Ferrari 250 GT",
+    "aliases": [
+      "Ferrari 250 GT"
+    ]
   },
   {
     "make": "Ferrari",
     "model": "Ferrari 250 GTO",
     "year": 1962,
     "pi": 494,
-    "class": "C"
+    "class": "C",
+    "abbreviation": null,
+    "aliases": []
   },
   {
     "make": "Ferrari",
     "model": "Ferrari 275 GTB4 Spider",
     "year": 1967,
-    "pi": 490,
-    "class": "C"
+    "pi": 579,
+    "class": "B",
+    "abbreviation": "275 GTB4 '67",
+    "aliases": [
+      "275 GTB4 '67"
+    ]
   },
   {
     "make": "Ferrari",
     "model": "Ferrari 288 GTO",
     "year": 1984,
     "pi": 643,
-    "class": "A"
+    "class": "A",
+    "abbreviation": null,
+    "aliases": []
   },
   {
     "make": "Ferrari",
     "model": "Ferrari 296 GTB",
     "year": 2022,
     "pi": 811,
-    "class": "S2"
+    "class": "S2",
+    "abbreviation": null,
+    "aliases": []
   },
   {
     "make": "Ferrari",
     "model": "Ferrari 430 Scuderia",
     "year": 2007,
     "pi": 702,
-    "class": "S1"
+    "class": "S1",
+    "abbreviation": "Ferrari 430 S",
+    "aliases": [
+      "Ferrari 430 S"
+    ]
   },
   {
     "make": "Ferrari",
     "model": "Ferrari 458 Italia",
     "year": 2009,
     "pi": 721,
-    "class": "S1"
+    "class": "S1",
+    "abbreviation": "Ferrari 458",
+    "aliases": [
+      "Ferrari 458"
+    ]
   },
   {
     "make": "Ferrari",
     "model": "Ferrari 458 Speciale",
     "year": 2013,
     "pi": 768,
-    "class": "S1"
+    "class": "S1",
+    "abbreviation": "Ferrari 458 S",
+    "aliases": [
+      "Ferrari 458 S"
+    ]
   },
   {
     "make": "Ferrari",
     "model": "Ferrari 488 GTB",
     "year": 2015,
     "pi": 770,
-    "class": "S1"
+    "class": "S1",
+    "abbreviation": null,
+    "aliases": []
   },
   {
     "make": "Ferrari",
     "model": "Ferrari 488 Pista",
     "year": 2019,
     "pi": 803,
-    "class": "S2"
+    "class": "S2",
+    "abbreviation": "488 Pista '19",
+    "aliases": [
+      "488 Pista '19",
+      "Ferrari 488"
+    ]
   },
   {
     "make": "Ferrari",
     "model": "Ferrari 512 S",
     "year": 1970,
     "pi": 774,
-    "class": "S1"
+    "class": "S1",
+    "abbreviation": "Ferrari 512S",
+    "aliases": [
+      "Ferrari 512S"
+    ]
   },
   {
     "make": "Ferrari",
     "model": "Ferrari 512 TR",
     "year": 1992,
     "pi": 615,
-    "class": "A"
+    "class": "A",
+    "abbreviation": "Ferrari 512TR",
+    "aliases": [
+      "Ferrari 512TR",
+      "Ferrari 512 '92"
+    ]
   },
   {
     "make": "Ferrari",
     "model": "Ferrari 599XX",
     "year": 2010,
     "pi": 840,
-    "class": "S2"
+    "class": "S2",
+    "abbreviation": null,
+    "aliases": []
   },
   {
     "make": "Ferrari",
     "model": "Ferrari 599XX Evolution",
     "year": 2012,
     "pi": 894,
-    "class": "S2"
+    "class": "S2",
+    "abbreviation": "Ferrari 599XX E",
+    "aliases": [
+      "Ferrari 599XX E"
+    ]
   },
   {
     "make": "Ferrari",
     "model": "Ferrari 812 Superfast",
     "year": 2017,
     "pi": 780,
-    "class": "S1"
+    "class": "S1",
+    "abbreviation": "Ferrari 812",
+    "aliases": [
+      "Ferrari 812",
+      "Ferrari 812 '17"
+    ]
   },
   {
     "make": "Ferrari",
     "model": "Ferrari Dino 246 GT",
     "year": 1969,
     "pi": 428,
-    "class": "C"
+    "class": "C",
+    "abbreviation": "Ferrari Dino",
+    "aliases": [
+      "Ferrari Dino",
+      "Ferrari Dino 246"
+    ]
   },
   {
     "make": "Ferrari",
     "model": "Ferrari Enzo Ferrari",
     "year": 2002,
     "pi": 755,
-    "class": "S1"
+    "class": "S1",
+    "abbreviation": "Ferrari Enzo",
+    "aliases": [
+      "Ferrari Enzo",
+      "Ferrari Enzo '02"
+    ]
   },
   {
     "make": "Ferrari",
     "model": "Ferrari F12tdf",
     "year": 2015,
     "pi": 788,
-    "class": "S1"
+    "class": "S1",
+    "abbreviation": "Ferrari F12 '15",
+    "aliases": [
+      "Ferrari F12 '15"
+    ]
   },
   {
     "make": "Ferrari",
     "model": "Ferrari F355 Berlinetta",
     "year": 1994,
     "pi": 588,
-    "class": "B"
+    "class": "B",
+    "abbreviation": "Ferrari F355",
+    "aliases": [
+      "Ferrari F355"
+    ]
   },
   {
     "make": "Ferrari",
     "model": "Ferrari F40",
     "year": 1987,
     "pi": 678,
-    "class": "A"
+    "class": "A",
+    "abbreviation": "Ferrari F40 '87",
+    "aliases": [
+      "Ferrari F40 '87"
+    ]
   },
   {
     "make": "Ferrari",
     "model": "Ferrari F40 Competizione",
     "year": 1989,
     "pi": 948,
-    "class": "R"
+    "class": "R",
+    "abbreviation": "Ferrari F40 C",
+    "aliases": [
+      "Ferrari F40 C",
+      "Ferrari F40 Comp"
+    ]
   },
   {
     "make": "Ferrari",
     "model": "Ferrari F50",
     "year": 1995,
     "pi": 678,
-    "class": "A"
+    "class": "A",
+    "abbreviation": "Ferrari F50 '95",
+    "aliases": [
+      "Ferrari F50 '95"
+    ]
   },
   {
     "make": "Ferrari",
     "model": "Ferrari F50 GT",
     "year": 1996,
     "pi": 948,
-    "class": "R"
+    "class": "R",
+    "abbreviation": null,
+    "aliases": []
   },
   {
     "make": "Ferrari",
     "model": "Ferrari F8 Tributo",
     "year": 2019,
     "pi": 802,
-    "class": "S2"
+    "class": "S2",
+    "abbreviation": "F8 Tributo '20",
+    "aliases": [
+      "F8 Tributo '20",
+      "Ferrari F8 T '19"
+    ]
   },
   {
     "make": "Ferrari",
     "model": "Ferrari F80",
     "year": 2025,
-    "pi": 920,
-    "class": "R"
+    "pi": 916,
+    "class": "R",
+    "abbreviation": "Ferrari F80 '24",
+    "aliases": [
+      "Ferrari F80 '24"
+    ]
   },
   {
     "make": "Ferrari",
     "model": "Ferrari FXX",
     "year": 2005,
     "pi": 900,
-    "class": "S2"
+    "class": "S2",
+    "abbreviation": null,
+    "aliases": []
   },
   {
     "make": "Ferrari",
     "model": "Ferrari FXX K",
     "year": 2014,
     "pi": 936,
-    "class": "R"
+    "class": "R",
+    "abbreviation": null,
+    "aliases": []
   },
   {
     "make": "Ferrari",
     "model": "Ferrari FXX-K Evo",
     "year": 2018,
     "pi": 957,
-    "class": "R"
+    "class": "R",
+    "abbreviation": "Ferrari FXX-K E",
+    "aliases": [
+      "Ferrari FXX-K E"
+    ]
   },
   {
     "make": "Ferrari",
     "model": "Ferrari FXX-K Evo 'Welcome Pack'",
     "year": 2018,
     "pi": 998,
-    "class": "R"
+    "class": "R",
+    "abbreviation": "Ferrari FXX-K E",
+    "aliases": [
+      "Ferrari FXX-K E"
+    ]
   },
   {
     "make": "Ferrari",
     "model": "Ferrari J50",
     "year": 2017,
     "pi": 772,
-    "class": "S1"
+    "class": "S1",
+    "abbreviation": "Ferrari J50 '17",
+    "aliases": [
+      "Ferrari J50 '17"
+    ]
   },
   {
     "make": "Ferrari",
     "model": "Ferrari J50 Preorder Car",
     "year": 2017,
     "pi": 800,
-    "class": "S1"
+    "class": "S1",
+    "abbreviation": null,
+    "aliases": []
   },
   {
     "make": "Ferrari",
     "model": "Ferrari LaFerrari",
     "year": 2013,
     "pi": 857,
-    "class": "S2"
+    "class": "S2",
+    "abbreviation": "LaFerrari",
+    "aliases": [
+      "LaFerrari",
+      "LaFerrari '13"
+    ]
   },
   {
     "make": "Ferrari",
     "model": "Ferrari Monza SP2",
     "year": 2019,
     "pi": 773,
-    "class": "S1"
+    "class": "S1",
+    "abbreviation": "Ferrari Monza",
+    "aliases": [
+      "Ferrari Monza",
+      "Ferrari Monza 19"
+    ]
   },
   {
     "make": "Ferrari",
     "model": "Ferrari Portofino",
     "year": 2018,
     "pi": 714,
-    "class": "S1"
+    "class": "S1",
+    "abbreviation": "Ferrari Porto '18",
+    "aliases": [
+      "Ferrari Porto '18",
+      "Ferrari Porto 18"
+    ]
   },
   {
     "make": "Ferrari",
     "model": "Ferrari Roma",
     "year": 2020,
     "pi": 735,
-    "class": "S1"
+    "class": "S1",
+    "abbreviation": "Ferrari Roma '20",
+    "aliases": [
+      "Ferrari Roma '20"
+    ]
   },
   {
     "make": "Ferrari",
     "model": "Ferrari SF90 Stradale",
     "year": 2020,
     "pi": 851,
-    "class": "S2"
+    "class": "S2",
+    "abbreviation": "Ferrari SF90 '20",
+    "aliases": [
+      "Ferrari SF90 '20"
+    ]
   },
   {
     "make": "Ford",
     "model": "Ford #11 Rockstar F-150 Trophy Truck",
     "year": 2014,
     "pi": 613,
-    "class": "A"
+    "class": "A",
+    "abbreviation": "#11 Ford F-150",
+    "aliases": [
+      "#11 Ford F-150"
+    ]
   },
   {
     "make": "Ford",
     "model": "Ford #14 Rahal Letterman Lanigan Racing GRC Fiesta",
     "year": 2017,
     "pi": 772,
-    "class": "S1"
+    "class": "S1",
+    "abbreviation": "Ford Fiesta GRC",
+    "aliases": [
+      "Ford Fiesta GRC",
+      "#14 Ford Fiesta"
+    ]
   },
   {
     "make": "Ford",
     "model": "Ford #2 GT40 Mk II",
     "year": 1966,
     "pi": 666,
-    "class": "A"
+    "class": "A",
+    "abbreviation": "#2 Ford GT40",
+    "aliases": [
+      "#2 Ford GT40",
+      "Ford GT40",
+      "Ford #2 GT40 Mk II Le Mans",
+      "Ford #2 GT40 MKII Le Mans",
+      "Ford GT40 Mk II"
+    ]
   },
   {
     "make": "Ford",
     "model": "Ford #2069 Ford Performance Bronco R",
     "year": 2020,
     "pi": 441,
-    "class": "C"
+    "class": "C",
+    "abbreviation": "#2069 Bronco R",
+    "aliases": [
+      "#2069 Bronco R"
+    ]
   },
   {
     "make": "Ford",
     "model": "Ford #25 'Brocky' Ultra4 Bronco RTR",
     "year": 2017,
     "pi": 644,
-    "class": "A"
+    "class": "A",
+    "abbreviation": "#25 Ford Bronco",
+    "aliases": [
+      "#25 Ford Bronco"
+    ]
   },
   {
     "make": "Ford",
     "model": "Ford #4 Ford Focus RS",
     "year": 2001,
     "pi": 639,
-    "class": "A"
+    "class": "A",
+    "abbreviation": "#4 Ford Focus",
+    "aliases": [
+      "#4 Ford Focus"
+    ]
   },
   {
     "make": "Ford",
     "model": "Ford #5 Escort RS1800 MkII",
     "year": 1977,
     "pi": 544,
-    "class": "B"
+    "class": "B",
+    "abbreviation": "#5 Escort '77",
+    "aliases": [
+      "#5 Escort '77"
+    ]
   },
   {
     "make": "Ford",
     "model": "Ford Bronco Raptor",
     "year": 2022,
     "pi": 473,
-    "class": "C"
+    "class": "C",
+    "abbreviation": "Bronco Raptor",
+    "aliases": [
+      "Bronco Raptor"
+    ]
   },
   {
     "make": "Ford",
     "model": "Ford Capri RS3100",
     "year": 1973,
     "pi": 394,
-    "class": "D"
+    "class": "D",
+    "abbreviation": "Ford Capri MkI",
+    "aliases": [
+      "Ford Capri MkI"
+    ]
   },
   {
     "make": "Ford",
     "model": "Ford Crown Victoria Police Interceptor",
     "year": 2010,
     "pi": 354,
-    "class": "D"
+    "class": "D",
+    "abbreviation": "FCVPI",
+    "aliases": [
+      "FCVPI",
+      "Crown Victoria"
+    ]
   },
   {
     "make": "Ford",
     "model": "Ford De Luxe Five-Window Coupe",
     "year": 1932,
     "pi": 100,
-    "class": "D"
+    "class": "D",
+    "abbreviation": "Ford Coupe '32",
+    "aliases": [
+      "Ford Coupe '32"
+    ]
   },
   {
     "make": "Ford",
     "model": "Ford Escort RS Cosworth",
     "year": 1992,
     "pi": 456,
-    "class": "C"
+    "class": "C",
+    "abbreviation": "Ford Escort '92",
+    "aliases": [
+      "Ford Escort '92"
+    ]
   },
   {
     "make": "Ford",
     "model": "Ford F-150 Lightning",
     "year": 2022,
     "pi": 500,
-    "class": "C"
+    "class": "C",
+    "abbreviation": null,
+    "aliases": []
   },
   {
     "make": "Ford",
     "model": "Ford F-150 Raptor R",
     "year": 2023,
     "pi": 536,
-    "class": "B"
+    "class": "B",
+    "abbreviation": "Ford Raptor R",
+    "aliases": [
+      "Ford Raptor R"
+    ]
   },
   {
     "make": "Ford",
     "model": "Ford F-150 Raptor R 'Welcome Pack'",
     "year": 2023,
     "pi": 600,
-    "class": "B"
+    "class": "B",
+    "abbreviation": "Ford Raptor R",
+    "aliases": [
+      "Ford Raptor R"
+    ]
   },
   {
     "make": "Ford",
     "model": "Ford F-150 SVT Lightning",
     "year": 2003,
     "pi": 474,
-    "class": "C"
+    "class": "C",
+    "abbreviation": "Ford Lightning",
+    "aliases": [
+      "Ford Lightning"
+    ]
   },
   {
     "make": "Ford",
     "model": "Ford F-150 XLT Lariat",
     "year": 1986,
     "pi": 263,
-    "class": "D"
+    "class": "D",
+    "abbreviation": "Ford F-150 '86",
+    "aliases": [
+      "Ford F-150 '86"
+    ]
   },
   {
     "make": "Ford",
     "model": "Ford F-150 XLT Lariat Forza Edition",
     "year": 1986,
     "pi": 850,
-    "class": "S2"
+    "class": "S2",
+    "abbreviation": "Ford F-150 '86 FE",
+    "aliases": [
+      "Ford F-150 '86 FE"
+    ]
   },
   {
     "make": "Ford",
     "model": "Ford Fiesta ST",
     "year": 2023,
     "pi": 500,
-    "class": "C"
+    "class": "C",
+    "abbreviation": "Ford Fiesta '23",
+    "aliases": [
+      "Ford Fiesta '23"
+    ]
   },
   {
     "make": "Ford",
     "model": "Ford Focus RS",
     "year": 2003,
     "pi": 484,
-    "class": "C"
+    "class": "C",
+    "abbreviation": "Ford Focus '03",
+    "aliases": [
+      "Ford Focus '03"
+    ]
   },
   {
     "make": "Ford",
     "model": "Ford Focus RS",
     "year": 2009,
     "pi": 551,
-    "class": "B"
+    "class": "B",
+    "abbreviation": "Ford Focus '09",
+    "aliases": [
+      "Ford Focus '09"
+    ]
   },
   {
     "make": "Ford",
     "model": "Ford Focus RS",
     "year": 2017,
     "pi": 588,
-    "class": "B"
+    "class": "B",
+    "abbreviation": "Ford Focus '17",
+    "aliases": [
+      "Ford Focus '17"
+    ]
   },
   {
     "make": "Ford",
     "model": "Ford Focus ST",
     "year": 2022,
     "pi": 594,
-    "class": "B"
+    "class": "B",
+    "abbreviation": "Ford Focus '22",
+    "aliases": [
+      "Ford Focus '22"
+    ]
   },
   {
     "make": "Ford",
     "model": "Ford FPV Limited Edition Pursuit Ute",
     "year": 2014,
     "pi": 563,
-    "class": "B"
+    "class": "B",
+    "abbreviation": "Ford Ute '14",
+    "aliases": [
+      "Ford Ute '14"
+    ]
   },
   {
     "make": "Ford",
     "model": "Ford GT",
     "year": 2005,
     "pi": 676,
-    "class": "A"
+    "class": "A",
+    "abbreviation": "Ford GT '05",
+    "aliases": [
+      "Ford GT '05"
+    ]
   },
   {
     "make": "Ford",
     "model": "Ford GT",
     "year": 2017,
     "pi": 757,
-    "class": "S1"
+    "class": "S1",
+    "abbreviation": "Ford GT '17",
+    "aliases": [
+      "Ford GT '17"
+    ]
   },
   {
     "make": "Ford",
     "model": "Ford M-Sport Fiesta RS",
     "year": 2017,
     "pi": 707,
-    "class": "S1"
+    "class": "S1",
+    "abbreviation": "Ford Fiesta RS",
+    "aliases": [
+      "Ford Fiesta RS"
+    ]
   },
   {
     "make": "Ford",
     "model": "Ford Mustang Boss 302",
     "year": 1969,
     "pi": 468,
-    "class": "C"
+    "class": "C",
+    "abbreviation": null,
+    "aliases": []
   },
   {
     "make": "Ford",
     "model": "Ford Mustang Dark Horse",
     "year": 2024,
     "pi": 669,
-    "class": "A"
+    "class": "A",
+    "abbreviation": "Ford Dark Horse",
+    "aliases": [
+      "Ford Dark Horse"
+    ]
   },
   {
     "make": "Ford",
     "model": "Ford Mustang GT",
     "year": 2024,
     "pi": 628,
-    "class": "A"
+    "class": "A",
+    "abbreviation": "Ford Mustang '24",
+    "aliases": [
+      "Ford Mustang '24"
+    ]
   },
   {
     "make": "Ford",
     "model": "Ford Mustang GT 2+2 Fastback",
     "year": 1968,
     "pi": 394,
-    "class": "D"
+    "class": "D",
+    "abbreviation": "Ford Mustang 2+2 Fastback",
+    "aliases": [
+      "Ford Mustang 2+2 Fastback"
+    ]
   },
   {
     "make": "Ford",
     "model": "Ford Mustang GT 2+2 Fastback Forza Edition",
     "year": 1968,
     "pi": 700,
-    "class": "A"
+    "class": "A",
+    "abbreviation": "Mustang FE '68",
+    "aliases": [
+      "Mustang FE '68"
+    ]
   },
   {
     "make": "Ford",
     "model": "Ford Mustang GT Coupe",
     "year": 1965,
     "pi": 388,
-    "class": "D"
+    "class": "D",
+    "abbreviation": "Ford Mustang '65",
+    "aliases": [
+      "Ford Mustang '65"
+    ]
   },
   {
     "make": "Ford",
     "model": "Ford Mustang RTR Spec 5",
     "year": 2018,
     "pi": 648,
-    "class": "A"
+    "class": "A",
+    "abbreviation": "Ford Mustang S5",
+    "aliases": [
+      "Ford Mustang S5"
+    ]
   },
   {
     "make": "Ford",
     "model": "Ford Mustang Shelby GT350R",
     "year": 2016,
     "pi": 721,
-    "class": "S1"
+    "class": "S1",
+    "abbreviation": "Ford Mustang '16",
+    "aliases": [
+      "Ford Mustang '16",
+      "Ford GT350R '16",
+      "Ford GT-350R '16",
+      "Ford Shelby GT-350R",
+      "Ford Shelby GT350R"
+    ]
   },
   {
     "make": "Ford",
     "model": "Ford Mustang Shelby GT500",
     "year": 2013,
     "pi": 647,
-    "class": "A"
+    "class": "A",
+    "abbreviation": "Ford Mustang '13",
+    "aliases": [
+      "Ford Mustang '13"
+    ]
   },
   {
     "make": "Ford",
     "model": "Ford Mustang Shelby GT500",
     "year": 2020,
     "pi": 734,
-    "class": "S1"
+    "class": "S1",
+    "abbreviation": "Ford GT500 '20",
+    "aliases": [
+      "Ford GT500 '20"
+    ]
   },
   {
     "make": "Ford",
     "model": "Ford Mustang SVT Cobra R",
     "year": 1993,
     "pi": 432,
-    "class": "C"
+    "class": "C",
+    "abbreviation": "Ford Mustang '93",
+    "aliases": [
+      "Ford Mustang '93",
+      "Ford Cobra R '93"
+    ]
   },
   {
     "make": "Ford",
     "model": "Ford Mustang SVT Cobra R",
     "year": 2000,
     "pi": 528,
-    "class": "B"
+    "class": "B",
+    "abbreviation": "Ford Mustang '00",
+    "aliases": [
+      "Ford Mustang '00",
+      "Ford Cobra R '00"
+    ]
   },
   {
     "make": "Ford",
     "model": "Ford Racing Puma",
     "year": 1999,
     "pi": 401,
-    "class": "C"
+    "class": "C",
+    "abbreviation": "Ford Puma '99",
+    "aliases": [
+      "Ford Puma '99"
+    ]
   },
   {
     "make": "Ford",
     "model": "Ford Ranger T6 Rally Raid",
     "year": 2014,
     "pi": 530,
-    "class": "B"
+    "class": "B",
+    "abbreviation": null,
+    "aliases": []
   },
   {
     "make": "Ford",
     "model": "Ford RS200 Evolution",
     "year": 1985,
     "pi": 710,
-    "class": "S1"
+    "class": "S1",
+    "abbreviation": "Ford RS200",
+    "aliases": [
+      "Ford RS200"
+    ]
   },
   {
     "make": "Ford",
     "model": "Ford Sierra Cosworth RS500",
     "year": 1987,
     "pi": 484,
-    "class": "C"
+    "class": "C",
+    "abbreviation": "Ford RS500",
+    "aliases": [
+      "Ford RS500",
+      "Ford Sierra '87"
+    ]
   },
   {
     "make": "Ford",
     "model": "Ford Super Duty F-450 DRW PLATINUM",
     "year": 2020,
     "pi": 379,
-    "class": "D"
+    "class": "D",
+    "abbreviation": "Ford SD F-450",
+    "aliases": [
+      "Ford SD F-450"
+    ]
   },
   {
     "make": "Ford",
     "model": "Ford Super Duty F-450 DRW PLATINUM Forza Edition",
     "year": 2020,
     "pi": 700,
-    "class": "A"
+    "class": "A",
+    "abbreviation": "Ford F-450 FE",
+    "aliases": [
+      "Ford F-450 FE"
+    ]
   },
   {
     "make": "Ford",
     "model": "Ford Supervan 3",
     "year": 1994,
     "pi": 740,
-    "class": "S1"
+    "class": "S1",
+    "abbreviation": null,
+    "aliases": []
   },
   {
     "make": "Ford",
     "model": "Ford Supervan 4",
     "year": 2022,
     "pi": 919,
-    "class": "R"
+    "class": "R",
+    "abbreviation": null,
+    "aliases": []
+  },
+  {
+    "make": "Ford",
+    "model": "Ford Thunderbird",
+    "year": 1957,
+    "pi": 332,
+    "class": "D",
+    "abbreviation": "Ford T-Bird '57",
+    "aliases": [
+      "Ford T-Bird '57"
+    ]
   },
   {
     "make": "Ford",
     "model": "Ford Transit SuperSportVan",
     "year": 2011,
     "pi": 235,
-    "class": "D"
+    "class": "D",
+    "abbreviation": "Ford Transit SSV",
+    "aliases": [
+      "Ford Transit SSV"
+    ]
   },
   {
     "make": "Ford",
     "model": "Ford XB Falcon GT",
     "year": 1973,
     "pi": 422,
-    "class": "C"
+    "class": "C",
+    "abbreviation": "Ford XB Falcon",
+    "aliases": [
+      "Ford XB Falcon",
+      "Ford Falcon '73"
+    ]
   },
   {
     "make": "Formula Drift",
     "model": "Formula Drift #117 599 GTB Fiorano",
     "year": 2007,
     "pi": 767,
-    "class": "S1"
+    "class": "S1",
+    "abbreviation": "Formula D 599",
+    "aliases": [
+      "Formula D 599"
+    ]
   },
   {
     "make": "Formula Drift",
     "model": "Formula Drift #13 Ford Mustang",
     "year": 2015,
     "pi": 739,
-    "class": "S1"
+    "class": "S1",
+    "abbreviation": "#13 Ford Mustang",
+    "aliases": [
+      "#13 Ford Mustang"
+    ]
   },
   {
     "make": "Formula Drift",
     "model": "Formula Drift #151 Toyota GR Supra",
     "year": 2020,
     "pi": 779,
-    "class": "S1"
+    "class": "S1",
+    "abbreviation": "#151 FD Supra",
+    "aliases": [
+      "#151 FD Supra",
+      "FD #151 GR Supra"
+    ]
   },
   {
     "make": "Formula Drift",
     "model": "Formula Drift #34 Toyota Supra MkIV",
     "year": 1995,
     "pi": 759,
-    "class": "S1"
+    "class": "S1",
+    "abbreviation": "#34 Toyota Supra",
+    "aliases": [
+      "#34 Toyota Supra"
+    ]
   },
   {
     "make": "Formula Drift",
     "model": "Formula Drift #411 Toyota Corolla Hatchback",
     "year": 2019,
     "pi": 754,
-    "class": "S1"
+    "class": "S1",
+    "abbreviation": "#411 FD Corolla",
+    "aliases": [
+      "#411 FD Corolla"
+    ]
   },
   {
     "make": "Formula Drift",
     "model": "Formula Drift #43 Dodge Viper SRT10",
     "year": 2006,
     "pi": 748,
-    "class": "S1"
+    "class": "S1",
+    "abbreviation": "#43 Dodge Viper",
+    "aliases": [
+      "#43 Dodge Viper"
+    ]
   },
   {
     "make": "Formula Drift",
     "model": "Formula Drift #530 HSV Maloo Gen-F",
     "year": 2016,
     "pi": 710,
-    "class": "S1"
+    "class": "S1",
+    "abbreviation": "#530 HSV Maloo",
+    "aliases": [
+      "#530 HSV Maloo"
+    ]
   },
   {
     "make": "Formula Drift",
     "model": "Formula Drift #64 Forsberg Racing Nissan Z",
     "year": 2023,
     "pi": 783,
-    "class": "S1"
+    "class": "S1",
+    "abbreviation": "#64 Nissan Z",
+    "aliases": [
+      "#64 Nissan Z"
+    ]
   },
   {
     "make": "Formula Drift",
     "model": "Formula Drift #777 Chevrolet Corvette",
     "year": 2013,
     "pi": 760,
-    "class": "S1"
+    "class": "S1",
+    "abbreviation": "#777 Corvette",
+    "aliases": [
+      "#777 Corvette"
+    ]
   },
   {
     "make": "Formula Drift",
     "model": "Formula Drift #777 Nissan 240SX",
     "year": 1997,
     "pi": 748,
-    "class": "S1"
+    "class": "S1",
+    "abbreviation": "#777 Nissan 240",
+    "aliases": [
+      "#777 Nissan 240",
+      "FD #777 240SX"
+    ]
   },
   {
     "make": "Formula Drift",
     "model": "Formula Drift #91 BMW M2",
     "year": 2020,
     "pi": 748,
-    "class": "S1"
+    "class": "S1",
+    "abbreviation": "No.91 BMW M2",
+    "aliases": [
+      "No.91 BMW M2",
+      "#91 BMW M2"
+    ]
   },
   {
     "make": "Formula Drift",
     "model": "Formula Drift #98 BMW 325i",
     "year": 1989,
     "pi": 726,
-    "class": "S1"
+    "class": "S1",
+    "abbreviation": "#98 BMW 325i",
+    "aliases": [
+      "#98 BMW 325i"
+    ]
   },
   {
     "make": "Formula Drift",
     "model": "Formula Drift #99 Mazda RX-8",
     "year": 2009,
     "pi": 737,
-    "class": "S1"
+    "class": "S1",
+    "abbreviation": "#99 Mazda RX-8",
+    "aliases": [
+      "#99 Mazda RX-8"
+    ]
   },
   {
     "make": "Funco",
     "model": "Funco Motorsports F9",
     "year": 2018,
     "pi": 752,
-    "class": "S1"
+    "class": "S1",
+    "abbreviation": "Funco F9",
+    "aliases": [
+      "Funco F9"
+    ]
   },
   {
     "make": "GMC",
     "model": "GMC HUMMER EV Pickup",
     "year": 2022,
     "pi": 610,
-    "class": "A"
+    "class": "A",
+    "abbreviation": "HUMMER EV Truck",
+    "aliases": [
+      "HUMMER EV Truck"
+    ]
   },
   {
     "make": "GMC",
     "model": "GMC Jimmy",
     "year": 1970,
     "pi": 416,
-    "class": "C"
+    "class": "C",
+    "abbreviation": "GMC K5 Jimmy",
+    "aliases": [
+      "GMC K5 Jimmy"
+    ]
   },
   {
     "make": "GMC",
     "model": "GMC Syclone",
     "year": 1991,
     "pi": 446,
-    "class": "C"
+    "class": "C",
+    "abbreviation": null,
+    "aliases": []
   },
   {
     "make": "GMC",
     "model": "GMC Typhoon",
     "year": 1992,
     "pi": 435,
-    "class": "C"
+    "class": "C",
+    "abbreviation": null,
+    "aliases": []
   },
   {
     "make": "Gordon Murray Automotive",
     "model": "Gordon Murray Automotive T.50",
     "year": 2022,
     "pi": 871,
-    "class": "S2"
+    "class": "S2",
+    "abbreviation": "GMA T.50",
+    "aliases": [
+      "GMA T.50"
+    ]
   },
   {
     "make": "GR",
-    "model": "GR GT Prototype",
+    "model": "GR GR GT (Prototype)",
     "year": 2025,
     "pi": 771,
-    "class": "S1"
+    "class": "S1",
+    "abbreviation": "GR GT Prototype",
+    "aliases": [
+      "GR GT Prototype"
+    ]
+  },
+  {
+    "make": "GR",
+    "model": "GR GR GT (Prototype) (Initial Drive)",
+    "year": 2025,
+    "pi": 771,
+    "class": "S1",
+    "abbreviation": "GR GT Prototype",
+    "aliases": [
+      "GR GT Prototype"
+    ]
   },
   {
     "make": "Hennessey",
     "model": "Hennessey Ford F-150 VelociRaptor 6x6",
     "year": 2019,
     "pi": 520,
-    "class": "B"
+    "class": "B",
+    "abbreviation": "VelociRaptor '19",
+    "aliases": [
+      "VelociRaptor '19"
+    ]
   },
   {
     "make": "Hennessey",
     "model": "Hennessey Venom F5",
     "year": 2021,
     "pi": 870,
-    "class": "S2"
+    "class": "S2",
+    "abbreviation": "Hennessey Venom",
+    "aliases": [
+      "Hennessey Venom"
+    ]
   },
   {
     "make": "Hennessey",
     "model": "Hennessey Venom GT",
     "year": 2012,
     "pi": 845,
-    "class": "S2"
+    "class": "S2",
+    "abbreviation": "Hennessey Venom",
+    "aliases": [
+      "Hennessey Venom"
+    ]
   },
   {
     "make": "Holden",
     "model": "Holden Torana A9X",
     "year": 1977,
     "pi": 413,
-    "class": "C"
+    "class": "C",
+    "abbreviation": "Holden Torana",
+    "aliases": [
+      "Holden Torana",
+      "Holden Torana 77"
+    ]
   },
   {
     "make": "Honda",
     "model": "Honda #19 101 Motorsport CRX WTAC",
     "year": 1990,
     "pi": 877,
-    "class": "S2"
+    "class": "S2",
+    "abbreviation": "#19 CRX WTAC",
+    "aliases": [
+      "#19 CRX WTAC"
+    ]
   },
   {
     "make": "Honda",
     "model": "Honda #21 Hardrace/JDMYard Civic WTAC",
     "year": 1992,
     "pi": 913,
-    "class": "R"
+    "class": "R",
+    "abbreviation": "#21 Civic WTAC",
+    "aliases": [
+      "#21 Civic WTAC"
+    ]
   },
   {
     "make": "Honda",
     "model": "Honda #33 Integra WTAC",
     "year": 2001,
     "pi": 860,
-    "class": "S2"
+    "class": "S2",
+    "abbreviation": "#33 H. Integra",
+    "aliases": [
+      "#33 H. Integra"
+    ]
   },
   {
     "make": "Honda",
     "model": "Honda #52 Evasive Motorsports S2000 WTAC",
     "year": 2004,
     "pi": 888,
-    "class": "S2"
+    "class": "S2",
+    "abbreviation": "#52 S2000 WTAC",
+    "aliases": [
+      "#52 S2000 WTAC"
+    ]
   },
   {
     "make": "Honda",
     "model": "Honda Acty",
     "year": 1994,
     "pi": 100,
-    "class": "D"
+    "class": "D",
+    "abbreviation": "Honda Acty '94",
+    "aliases": [
+      "Honda Acty '94"
+    ]
+  },
+  {
+    "make": "Honda",
+    "model": "Honda Acty 'RakuRaku Express'",
+    "year": 1994,
+    "pi": 100,
+    "class": "D",
+    "abbreviation": "Acty RakuRaku",
+    "aliases": [
+      "Acty RakuRaku"
+    ]
   },
   {
     "make": "Honda",
     "model": "Honda Beat",
     "year": 1991,
     "pi": 283,
-    "class": "D"
+    "class": "D",
+    "abbreviation": "Honda Beat '91",
+    "aliases": [
+      "Honda Beat '91"
+    ]
   },
   {
     "make": "Honda",
     "model": "Honda City E II",
     "year": 1984,
     "pi": 203,
-    "class": "D"
+    "class": "D",
+    "abbreviation": "City E II '84",
+    "aliases": [
+      "City E II '84"
+    ]
   },
   {
     "make": "Honda",
     "model": "Honda Civic CRX Mugen",
     "year": 1984,
     "pi": 390,
-    "class": "D"
+    "class": "D",
+    "abbreviation": "Honda Civic '84",
+    "aliases": [
+      "Honda Civic '84"
+    ]
   },
   {
     "make": "Honda",
     "model": "Honda Civic RS",
     "year": 1974,
     "pi": 254,
-    "class": "D"
+    "class": "D",
+    "abbreviation": "Honda Civic '74",
+    "aliases": [
+      "Honda Civic '74"
+    ]
   },
   {
     "make": "Honda",
     "model": "Honda Civic Si",
     "year": 1986,
     "pi": 253,
-    "class": "D"
+    "class": "D",
+    "abbreviation": "Civic Si '86",
+    "aliases": [
+      "Civic Si '86",
+      "Honda Civic '86"
+    ]
   },
   {
     "make": "Honda",
     "model": "Honda Civic Type R",
     "year": 1997,
     "pi": 430,
-    "class": "C"
+    "class": "C",
+    "abbreviation": "Honda Civic '97",
+    "aliases": [
+      "Honda Civic '97"
+    ]
   },
   {
     "make": "Honda",
     "model": "Honda Civic Type R",
     "year": 2004,
     "pi": 480,
-    "class": "C"
+    "class": "C",
+    "abbreviation": "Honda Civic '04",
+    "aliases": [
+      "Honda Civic '04",
+      "Honda Civic Type-R"
+    ]
   },
   {
     "make": "Honda",
     "model": "Honda Civic Type R",
     "year": 2007,
     "pi": 454,
-    "class": "C"
+    "class": "C",
+    "abbreviation": "Honda Civic '07",
+    "aliases": [
+      "Honda Civic '07"
+    ]
   },
   {
     "make": "Honda",
     "model": "Honda Civic Type R",
     "year": 2008,
     "pi": 514,
-    "class": "B"
+    "class": "B",
+    "abbreviation": "Honda Civic '08",
+    "aliases": [
+      "Honda Civic '08"
+    ]
   },
   {
     "make": "Honda",
     "model": "Honda Civic Type R",
     "year": 2015,
     "pi": 585,
-    "class": "B"
+    "class": "B",
+    "abbreviation": "Honda Civic '15",
+    "aliases": [
+      "Honda Civic '15"
+    ]
   },
   {
     "make": "Honda",
     "model": "Honda Civic Type R",
     "year": 2018,
     "pi": 608,
-    "class": "A"
+    "class": "A",
+    "abbreviation": "Honda Civic '18",
+    "aliases": [
+      "Honda Civic '18"
+    ]
   },
   {
     "make": "Honda",
     "model": "Honda Civic Type R",
     "year": 2023,
     "pi": 620,
-    "class": "A"
+    "class": "A",
+    "abbreviation": "Honda Civic '23",
+    "aliases": [
+      "Honda Civic '23"
+    ]
   },
   {
     "make": "Honda",
     "model": "Honda CR-X SiR",
     "year": 1991,
     "pi": 465,
-    "class": "C"
+    "class": "C",
+    "abbreviation": "Honda CR-X",
+    "aliases": [
+      "Honda CR-X",
+      "Honda CR-X '91"
+    ]
   },
   {
     "make": "Honda",
     "model": "Honda e",
     "year": 2022,
     "pi": 398,
-    "class": "D"
+    "class": "D",
+    "abbreviation": "Honda e '22",
+    "aliases": [
+      "Honda e '22"
+    ]
+  },
+  {
+    "make": "Honda",
+    "model": "Honda N600",
+    "year": 1970,
+    "pi": 100,
+    "class": "D",
+    "abbreviation": "N600 '70",
+    "aliases": [
+      "N600 '70"
+    ]
   },
   {
     "make": "Honda",
     "model": "Honda NSX-R",
     "year": 1992,
     "pi": 572,
-    "class": "B"
+    "class": "B",
+    "abbreviation": "Honda NSX-R '92",
+    "aliases": [
+      "Honda NSX-R '92"
+    ]
   },
   {
     "make": "Honda",
     "model": "Honda NSX-R",
     "year": 2005,
     "pi": 570,
-    "class": "B"
+    "class": "B",
+    "abbreviation": "Honda NSX-R '05",
+    "aliases": [
+      "Honda NSX-R '05"
+    ]
   },
   {
     "make": "Honda",
     "model": "Honda NSX-R GT",
     "year": 2005,
     "pi": 608,
-    "class": "A"
+    "class": "A",
+    "abbreviation": null,
+    "aliases": []
   },
   {
     "make": "Honda",
     "model": "Honda Prelude Si",
     "year": 1994,
     "pi": 410,
-    "class": "C"
+    "class": "C",
+    "abbreviation": "Prelude 94",
+    "aliases": [
+      "Prelude 94",
+      "Honda Prelude 94"
+    ]
   },
   {
     "make": "Honda",
     "model": "Honda Ridgeline Baja Trophy Truck",
     "year": 2015,
     "pi": 579,
-    "class": "B"
+    "class": "B",
+    "abbreviation": "Honda Trophy '15",
+    "aliases": [
+      "Honda Trophy '15"
+    ]
   },
   {
     "make": "Honda",
     "model": "Honda S2000",
     "year": 2003,
     "pi": 503,
-    "class": "B"
+    "class": "B",
+    "abbreviation": null,
+    "aliases": []
+  },
+  {
+    "make": "Honda",
+    "model": "Honda S2000 'Touge Edition'",
+    "year": 2003,
+    "pi": 503,
+    "class": "B",
+    "abbreviation": "Honda S2000 TG",
+    "aliases": [
+      "Honda S2000 TG"
+    ]
   },
   {
     "make": "Honda",
     "model": "Honda S800",
     "year": 1970,
     "pi": 134,
-    "class": "D"
+    "class": "D",
+    "abbreviation": "Honda S800 '70",
+    "aliases": [
+      "Honda S800 '70"
+    ]
+  },
+  {
+    "make": "Honda",
+    "model": "Honda Z GT",
+    "year": 1972,
+    "pi": 100,
+    "class": "D",
+    "abbreviation": "Honda Z '72",
+    "aliases": [
+      "Honda Z '72"
+    ]
   },
   {
     "make": "HSV",
     "model": "HSV GEN-F GTS",
     "year": 2014,
     "pi": 601,
-    "class": "A"
+    "class": "A",
+    "abbreviation": "HSV GTS '14",
+    "aliases": [
+      "HSV GTS '14",
+      "Holden GEN-F '14"
+    ]
   },
   {
     "make": "HSV",
     "model": "HSV Limited Edition Gen-F GTS Maloo",
     "year": 2014,
     "pi": 629,
-    "class": "A"
+    "class": "A",
+    "abbreviation": null,
+    "aliases": []
   },
   {
     "make": "Hyundai",
     "model": "Hyundai i20 N",
     "year": 2021,
     "pi": 564,
-    "class": "B"
+    "class": "B",
+    "abbreviation": null,
+    "aliases": []
   },
   {
     "make": "Hyundai",
     "model": "Hyundai i30 N",
     "year": 2020,
     "pi": 553,
-    "class": "B"
+    "class": "B",
+    "abbreviation": null,
+    "aliases": []
   },
   {
     "make": "Hyundai",
     "model": "Hyundai IONIQ 5 N",
     "year": 2023,
     "pi": 657,
-    "class": "A"
+    "class": "A",
+    "abbreviation": "IONIQ 5 N '23",
+    "aliases": [
+      "IONIQ 5 N '23"
+    ]
   },
   {
     "make": "Hyundai",
     "model": "Hyundai N Vision 74",
     "year": 2022,
     "pi": 692,
-    "class": "A"
+    "class": "A",
+    "abbreviation": "N Vision 74 '22",
+    "aliases": [
+      "N Vision 74 '22"
+    ]
   },
   {
     "make": "Hyundai",
     "model": "Hyundai Veloster N",
     "year": 2019,
     "pi": 532,
-    "class": "B"
+    "class": "B",
+    "abbreviation": "Veloster N",
+    "aliases": [
+      "Veloster N",
+      "Veloster N '19"
+    ]
   },
   {
     "make": "Jaguar",
     "model": "Jaguar C-X75",
     "year": 2010,
     "pi": 810,
-    "class": "S2"
+    "class": "S2",
+    "abbreviation": null,
+    "aliases": []
   },
   {
     "make": "Jaguar",
     "model": "Jaguar D-Type",
     "year": 1956,
     "pi": 506,
-    "class": "B"
+    "class": "B",
+    "abbreviation": "Jag. D-Type",
+    "aliases": [
+      "Jag. D-Type"
+    ]
   },
   {
     "make": "Jaguar",
     "model": "Jaguar E-type",
     "year": 1961,
     "pi": 414,
-    "class": "C"
+    "class": "C",
+    "abbreviation": "Jag. E-Type",
+    "aliases": [
+      "Jag. E-Type",
+      "Jaguar E-type S1",
+      "Jaguar E-type"
+    ]
   },
   {
     "make": "Jaguar",
     "model": "Jaguar Lightweight E-Type",
     "year": 1964,
     "pi": 568,
-    "class": "B"
+    "class": "B",
+    "abbreviation": "Jaguar LW E-Type",
+    "aliases": [
+      "Jaguar LW E-Type"
+    ]
   },
   {
     "make": "Jaguar",
     "model": "Jaguar Sport XJR-15",
     "year": 1991,
     "pi": 716,
-    "class": "S1"
+    "class": "S1",
+    "abbreviation": "Jaguar XJR-15",
+    "aliases": [
+      "Jaguar XJR-15",
+      "Jag. XJR-15 '91"
+    ]
   },
   {
     "make": "Jaguar",
     "model": "Jaguar XJ220",
     "year": 1993,
     "pi": 676,
-    "class": "A"
+    "class": "A",
+    "abbreviation": "Jag. XJ220 '93",
+    "aliases": [
+      "Jag. XJ220 '93"
+    ]
   },
   {
     "make": "Jaguar",
     "model": "Jaguar XJ220S TWR",
     "year": 1993,
     "pi": 750,
-    "class": "S1"
+    "class": "S1",
+    "abbreviation": "Jaguar XJ220S",
+    "aliases": [
+      "Jaguar XJ220S"
+    ]
   },
   {
     "make": "Jeep",
     "model": "Jeep Grand Cherokee Trackhawk",
     "year": 2018,
     "pi": 631,
-    "class": "A"
+    "class": "A",
+    "abbreviation": "Jeep Trackhawk",
+    "aliases": [
+      "Jeep Trackhawk"
+    ]
   },
   {
     "make": "Jeep",
     "model": "Jeep JT",
     "year": 2020,
     "pi": 336,
-    "class": "D"
+    "class": "D",
+    "abbreviation": "Jeep Gladiator",
+    "aliases": [
+      "Jeep Gladiator"
+    ]
   },
   {
     "make": "Jeep",
     "model": "Jeep Trailcat",
     "year": 2016,
     "pi": 635,
-    "class": "A"
+    "class": "A",
+    "abbreviation": null,
+    "aliases": []
   },
   {
     "make": "Jeep",
     "model": "Jeep Wrangler Rubicon",
     "year": 2012,
     "pi": 350,
-    "class": "D"
+    "class": "D",
+    "abbreviation": "Jeep Wrangler",
+    "aliases": [
+      "Jeep Wrangler"
+    ]
   },
   {
     "make": "Jimco",
     "model": "Jimco #179 Hammerhead Class 1",
     "year": 2020,
     "pi": 652,
-    "class": "A"
+    "class": "A",
+    "abbreviation": "#179 Hammerhead",
+    "aliases": [
+      "#179 Hammerhead"
+    ]
   },
   {
     "make": "Jimco",
     "model": "Jimco #240 Fastball Racing Spec Trophy Truck",
     "year": 2019,
     "pi": 511,
-    "class": "B"
+    "class": "B",
+    "abbreviation": "#240 Jimco TT",
+    "aliases": [
+      "#240 Jimco TT"
+    ]
   },
   {
     "make": "Koenigsegg",
     "model": "Koenigsegg Agera",
     "year": 2011,
     "pi": 810,
-    "class": "S2"
+    "class": "S2",
+    "abbreviation": null,
+    "aliases": []
   },
   {
     "make": "Koenigsegg",
     "model": "Koenigsegg Agera RS",
     "year": 2017,
     "pi": 890,
-    "class": "S2"
+    "class": "S2",
+    "abbreviation": "Agera RS",
+    "aliases": [
+      "Agera RS",
+      "Koe. Agera '17"
+    ]
   },
   {
     "make": "Koenigsegg",
     "model": "Koenigsegg CCGT",
     "year": 2008,
     "pi": 900,
-    "class": "S2"
+    "class": "S2",
+    "abbreviation": null,
+    "aliases": []
   },
   {
     "make": "Koenigsegg",
     "model": "Koenigsegg Gemera",
     "year": 2024,
     "pi": 900,
-    "class": "S2"
+    "class": "S2",
+    "abbreviation": "Gemera",
+    "aliases": [
+      "Gemera"
+    ]
   },
   {
     "make": "Koenigsegg",
     "model": "Koenigsegg Jesko",
     "year": 2020,
     "pi": 899,
-    "class": "S2"
+    "class": "S2",
+    "abbreviation": "Koe. Jesko '20",
+    "aliases": [
+      "Koe. Jesko '20"
+    ]
   },
   {
     "make": "Koenigsegg",
     "model": "Koenigsegg One:1",
     "year": 2015,
     "pi": 890,
-    "class": "S2"
+    "class": "S2",
+    "abbreviation": "Koenigsegg One",
+    "aliases": [
+      "Koenigsegg One"
+    ]
   },
   {
     "make": "Koenigsegg",
     "model": "Koenigsegg Regera",
     "year": 2016,
     "pi": 886,
-    "class": "S2"
+    "class": "S2",
+    "abbreviation": "Regera '16",
+    "aliases": [
+      "Regera '16",
+      "Regera"
+    ]
   },
   {
     "make": "KTM",
     "model": "KTM X-Bow GT4",
     "year": 2018,
     "pi": 749,
-    "class": "S1"
+    "class": "S1",
+    "abbreviation": null,
+    "aliases": []
   },
   {
     "make": "Lamborghini",
     "model": "Lamborghini Aventador LP 780-4 Ultimae",
     "year": 2021,
     "pi": 794,
-    "class": "S1"
+    "class": "S1",
+    "abbreviation": "L. Aventador '21",
+    "aliases": [
+      "L. Aventador '21"
+    ]
   },
   {
     "make": "Lamborghini",
     "model": "Lamborghini Aventador LP700-4",
     "year": 2012,
     "pi": 753,
-    "class": "S1"
+    "class": "S1",
+    "abbreviation": "Aventador '12",
+    "aliases": [
+      "Aventador '12",
+      "LP 700-4"
+    ]
   },
   {
     "make": "Lamborghini",
     "model": "Lamborghini Aventador SVJ",
     "year": 2018,
     "pi": 794,
-    "class": "S1"
+    "class": "S1",
+    "abbreviation": "Aventador SVJ",
+    "aliases": [
+      "Aventador SVJ",
+      "L. Aventador '18"
+    ]
   },
   {
     "make": "Lamborghini",
     "model": "Lamborghini Centenario LP 770-4",
     "year": 2016,
     "pi": 792,
-    "class": "S1"
+    "class": "S1",
+    "abbreviation": "Centenario '16",
+    "aliases": [
+      "Centenario '16",
+      "Lambo Centenario",
+      "L. Centenario '16"
+    ]
   },
   {
     "make": "Lamborghini",
     "model": "Lamborghini Countach LP5000 QV",
     "year": 1988,
     "pi": 622,
-    "class": "A"
+    "class": "A",
+    "abbreviation": "Lambo Countach",
+    "aliases": [
+      "Lambo Countach",
+      "L. Countach '88"
+    ]
   },
   {
     "make": "Lamborghini",
     "model": "Lamborghini Countach LPI 800-4",
     "year": 2021,
     "pi": 773,
-    "class": "S1"
+    "class": "S1",
+    "abbreviation": "L. Countach '21",
+    "aliases": [
+      "L. Countach '21"
+    ]
   },
   {
     "make": "Lamborghini",
     "model": "Lamborghini Diablo GTR",
     "year": 1999,
     "pi": 823,
-    "class": "S2"
+    "class": "S2",
+    "abbreviation": "Diablo GTR",
+    "aliases": [
+      "Diablo GTR",
+      "L. Diablo GTR 99"
+    ]
   },
   {
     "make": "Lamborghini",
     "model": "Lamborghini Diablo SV",
     "year": 1997,
     "pi": 649,
-    "class": "A"
+    "class": "A",
+    "abbreviation": "Lambo Diablo SV",
+    "aliases": [
+      "Lambo Diablo SV",
+      "L. Diablo SV '97"
+    ]
   },
   {
     "make": "Lamborghini",
     "model": "Lamborghini Essenza SCV12",
     "year": 2020,
     "pi": 911,
-    "class": "R"
+    "class": "R",
+    "abbreviation": "Lambo Essenza",
+    "aliases": [
+      "Lambo Essenza",
+      "L. Essenza SCV12"
+    ]
   },
   {
     "make": "Lamborghini",
     "model": "Lamborghini Gallardo LP570-4 Spyder Performante",
     "year": 2012,
     "pi": 685,
-    "class": "A"
+    "class": "A",
+    "abbreviation": "Gallardo Spyder",
+    "aliases": [
+      "Gallardo Spyder"
+    ]
   },
   {
     "make": "Lamborghini",
     "model": "Lamborghini Huracán EVO",
     "year": 2020,
     "pi": 761,
-    "class": "S1"
+    "class": "S1",
+    "abbreviation": "Huracán EVO",
+    "aliases": [
+      "Huracán EVO",
+      "L. Hurácan E '20"
+    ]
+  },
+  {
+    "make": "Lamborghini",
+    "model": "Lamborghini Huracán EVO Spyder",
+    "year": 2022,
+    "pi": 757,
+    "class": "S1",
+    "abbreviation": "Huracán Spyder",
+    "aliases": [
+      "Huracán Spyder"
+    ]
   },
   {
     "make": "Lamborghini",
     "model": "Lamborghini Huracán LP 610-4",
     "year": 2014,
     "pi": 738,
-    "class": "S1"
+    "class": "S1",
+    "abbreviation": "Huracán '14",
+    "aliases": [
+      "Huracán '14",
+      "Lambo Huracán"
+    ]
   },
   {
     "make": "Lamborghini",
     "model": "Lamborghini Huracán Sterrato",
     "year": 2023,
     "pi": 738,
-    "class": "S1"
+    "class": "S1",
+    "abbreviation": "Huracán Sterrato",
+    "aliases": [
+      "Huracán Sterrato"
+    ]
   },
   {
     "make": "Lamborghini",
     "model": "Lamborghini Huracán STO",
     "year": 2020,
     "pi": 783,
-    "class": "S1"
+    "class": "S1",
+    "abbreviation": "Huracán STO",
+    "aliases": [
+      "Huracán STO",
+      "L. Huracán S '20"
+    ]
   },
   {
     "make": "Lamborghini",
     "model": "Lamborghini Huracán Tecnica",
     "year": 2022,
     "pi": 747,
-    "class": "S1"
+    "class": "S1",
+    "abbreviation": "Huracán Tecnica",
+    "aliases": [
+      "Huracán Tecnica"
+    ]
   },
   {
     "make": "Lamborghini",
     "model": "Lamborghini Miura P400",
     "year": 1967,
     "pi": 505,
-    "class": "B"
+    "class": "B",
+    "abbreviation": "Miura '67",
+    "aliases": [
+      "Miura '67",
+      "Lambo Miura",
+      "L. Miura '67"
+    ]
   },
   {
     "make": "Lamborghini",
     "model": "Lamborghini Murciélago LP 670-4 SV",
     "year": 2010,
     "pi": 707,
-    "class": "S1"
+    "class": "S1",
+    "abbreviation": "Lambo Murciélago",
+    "aliases": [
+      "Lambo Murciélago",
+      "Murciélago SV"
+    ]
   },
   {
     "make": "Lamborghini",
     "model": "Lamborghini Revuelto",
     "year": 2024,
     "pi": 829,
-    "class": "S2"
+    "class": "S2",
+    "abbreviation": "Revuelto '24",
+    "aliases": [
+      "Revuelto '24"
+    ]
   },
   {
     "make": "Lamborghini",
     "model": "Lamborghini Sesto Elemento",
     "year": 2011,
     "pi": 871,
-    "class": "S2"
+    "class": "S2",
+    "abbreviation": "Sesto Elemento",
+    "aliases": [
+      "Sesto Elemento",
+      "Lambo Sesto"
+    ]
   },
   {
     "make": "Lamborghini",
     "model": "Lamborghini Sián Roadster",
     "year": 2020,
     "pi": 797,
-    "class": "S1"
+    "class": "S1",
+    "abbreviation": null,
+    "aliases": []
+  },
+  {
+    "make": "Lamborghini",
+    "model": "Lamborghini Temerario",
+    "year": 2024,
+    "pi": 801,
+    "class": "S2",
+    "abbreviation": "L. Temerario",
+    "aliases": [
+      "L. Temerario"
+    ]
   },
   {
     "make": "Lamborghini",
     "model": "Lamborghini Urus",
     "year": 2019,
     "pi": 659,
-    "class": "A"
+    "class": "A",
+    "abbreviation": "Urus '19",
+    "aliases": [
+      "Urus '19"
+    ]
   },
   {
     "make": "Lamborghini",
     "model": "Lamborghini Veneno",
     "year": 2013,
     "pi": 834,
-    "class": "S2"
+    "class": "S2",
+    "abbreviation": "Veneno",
+    "aliases": [
+      "Veneno",
+      "Lambo Veneno",
+      "L. Veneno '13"
+    ]
+  },
+  {
+    "make": "Lancia",
+    "model": "Lancia 037 Stradale",
+    "year": 1982,
+    "pi": 555,
+    "class": "B",
+    "abbreviation": "Lancia 037",
+    "aliases": [
+      "Lancia 037"
+    ]
   },
   {
     "make": "Lancia",
     "model": "Lancia Delta HF Integrale Evo",
     "year": 1992,
     "pi": 489,
-    "class": "C"
+    "class": "C",
+    "abbreviation": "Lancia Delta",
+    "aliases": [
+      "Lancia Delta",
+      "Lancia Delta '92"
+    ]
   },
   {
     "make": "Lancia",
     "model": "Lancia Delta S4",
     "year": 1986,
     "pi": 564,
-    "class": "B"
+    "class": "B",
+    "abbreviation": null,
+    "aliases": []
   },
   {
     "make": "Lancia",
     "model": "Lancia Stratos HF Stradale",
     "year": 1974,
     "pi": 483,
-    "class": "C"
+    "class": "C",
+    "abbreviation": "Lancia Stratos",
+    "aliases": [
+      "Lancia Stratos"
+    ]
   },
   {
     "make": "Land Rover",
     "model": "Land Rover Defender 110 X",
     "year": 2020,
     "pi": 427,
-    "class": "C"
+    "class": "C",
+    "abbreviation": "LR Defender '20",
+    "aliases": [
+      "LR Defender '20"
+    ]
   },
   {
     "make": "Land Rover",
     "model": "Land Rover Range Rover Sport SVR",
     "year": 2015,
     "pi": 604,
-    "class": "A"
+    "class": "A",
+    "abbreviation": "Range Rover '15",
+    "aliases": [
+      "Range Rover '15"
+    ]
   },
   {
     "make": "Lexus",
     "model": "Lexus LC 500",
     "year": 2021,
     "pi": 592,
-    "class": "B"
+    "class": "B",
+    "abbreviation": "Lexus LC 500 '21",
+    "aliases": [
+      "Lexus LC 500 '21"
+    ]
   },
   {
     "make": "Lexus",
     "model": "Lexus LFA",
     "year": 2010,
     "pi": 699,
-    "class": "A"
+    "class": "A",
+    "abbreviation": "Lexus LFA '10",
+    "aliases": [
+      "Lexus LFA '10"
+    ]
   },
   {
     "make": "Lexus",
     "model": "Lexus LFA Forza Edition",
     "year": 2010,
     "pi": 900,
-    "class": "S2"
+    "class": "S2",
+    "abbreviation": "Lexus LFA FE",
+    "aliases": [
+      "Lexus LFA FE"
+    ]
   },
   {
     "make": "Lexus",
     "model": "Lexus RC F",
     "year": 2015,
     "pi": 623,
-    "class": "A"
+    "class": "A",
+    "abbreviation": "Lexus RC F '15",
+    "aliases": [
+      "Lexus RC F '15"
+    ]
   },
   {
     "make": "Lincoln",
     "model": "Lincoln Continental",
     "year": 1962,
     "pi": 267,
-    "class": "D"
+    "class": "D",
+    "abbreviation": "Continental '62",
+    "aliases": [
+      "Continental '62"
+    ]
   },
   {
     "make": "Lotus",
     "model": "Lotus Elise GT1",
     "year": 1997,
     "pi": 709,
-    "class": "S1"
+    "class": "S1",
+    "abbreviation": null,
+    "aliases": []
   },
   {
     "make": "Lotus",
     "model": "Lotus Elise Series 1 Sport 190",
     "year": 1999,
     "pi": 589,
-    "class": "B"
+    "class": "B",
+    "abbreviation": "Lotus Elise '99",
+    "aliases": [
+      "Lotus Elise '99",
+      "Lotus Elise Sport"
+    ]
   },
   {
     "make": "Lotus",
     "model": "Lotus Emira",
     "year": 2023,
     "pi": 656,
-    "class": "A"
+    "class": "A",
+    "abbreviation": "Lotus Emira '23",
+    "aliases": [
+      "Lotus Emira '23"
+    ]
   },
   {
     "make": "Lotus",
     "model": "Lotus Evija",
     "year": 2020,
     "pi": 937,
-    "class": "R"
+    "class": "R",
+    "abbreviation": "Lotus Evija '20",
+    "aliases": [
+      "Lotus Evija '20"
+    ]
   },
   {
     "make": "Lotus",
     "model": "Lotus Evija Forza Edition",
     "year": 2020,
     "pi": 900,
-    "class": "S2"
+    "class": "S2",
+    "abbreviation": "Lotus Evija FE",
+    "aliases": [
+      "Lotus Evija FE"
+    ]
   },
   {
     "make": "Lotus",
     "model": "Lotus Exige Cup 430",
     "year": 2018,
     "pi": 732,
-    "class": "S1"
+    "class": "S1",
+    "abbreviation": "Lotus Exige '18",
+    "aliases": [
+      "Lotus Exige '18"
+    ]
   },
   {
     "make": "Lotus",
     "model": "Lotus Scura Motorsports Exige WTAC",
     "year": 2018,
     "pi": 998,
-    "class": "R"
+    "class": "R",
+    "abbreviation": "Exige WTAC",
+    "aliases": [
+      "Exige WTAC"
+    ]
   },
   {
     "make": "Lucid",
     "model": "Lucid Air Sapphire",
     "year": 2024,
     "pi": 820,
-    "class": "S2"
+    "class": "S2",
+    "abbreviation": "Lucid Air",
+    "aliases": [
+      "Lucid Air"
+    ]
   },
   {
     "make": "Maserati",
     "model": "Maserati Ghibli Cup",
     "year": 1997,
     "pi": 591,
-    "class": "B"
+    "class": "B",
+    "abbreviation": "Ghibli '97",
+    "aliases": [
+      "Ghibli '97",
+      "Mas. Ghibli '97"
+    ]
   },
   {
     "make": "Maserati",
     "model": "Maserati MC12",
     "year": 2004,
     "pi": 751,
-    "class": "S1"
+    "class": "S1",
+    "abbreviation": null,
+    "aliases": []
   },
   {
     "make": "Maserati",
     "model": "Maserati MC12 Versione Corsa",
     "year": 2008,
     "pi": 912,
-    "class": "R"
+    "class": "R",
+    "abbreviation": "MC12 Corsa '08",
+    "aliases": [
+      "MC12 Corsa '08"
+    ]
   },
   {
     "make": "Maserati",
     "model": "Maserati MC20",
     "year": 2022,
     "pi": 753,
-    "class": "S1"
+    "class": "S1",
+    "abbreviation": null,
+    "aliases": []
   },
   {
     "make": "Mazda",
     "model": "Mazda #123 Mad Mike 808 Wagon 'FURSTY'",
     "year": 1974,
     "pi": 702,
-    "class": "S1"
+    "class": "S1",
+    "abbreviation": "MM 808 Wagon",
+    "aliases": [
+      "MM 808 Wagon"
+    ]
   },
   {
     "make": "Mazda",
     "model": "Mazda #55 Mazda 787B",
     "year": 1991,
     "pi": 988,
-    "class": "R"
+    "class": "R",
+    "abbreviation": "#55 Mazda 787B",
+    "aliases": [
+      "#55 Mazda 787B",
+      "Mazda #55 787B"
+    ]
   },
   {
     "make": "Mazda",
     "model": "Mazda Cosmo 110S Series II",
     "year": 1972,
     "pi": 394,
-    "class": "D"
+    "class": "D",
+    "abbreviation": "Mazda Cosmo",
+    "aliases": [
+      "Mazda Cosmo",
+      "Mazda Cosmo '72"
+    ]
   },
   {
     "make": "Mazda",
     "model": "Mazda Furai",
     "year": 2008,
     "pi": 926,
-    "class": "R"
+    "class": "R",
+    "abbreviation": null,
+    "aliases": []
   },
   {
     "make": "Mazda",
     "model": "Mazda Mazdaspeed 3",
     "year": 2010,
     "pi": 536,
-    "class": "B"
+    "class": "B",
+    "abbreviation": "Mazda 3",
+    "aliases": [
+      "Mazda 3"
+    ]
   },
   {
     "make": "Mazda",
     "model": "Mazda Mazdaspeed MX-5",
     "year": 2005,
     "pi": 469,
-    "class": "C"
+    "class": "C",
+    "abbreviation": "Mazda MX-5 '05",
+    "aliases": [
+      "Mazda MX-5 '05"
+    ]
   },
   {
     "make": "Mazda",
     "model": "Mazda MX-5",
     "year": 2013,
     "pi": 432,
-    "class": "C"
+    "class": "C",
+    "abbreviation": "Mazda MX-5 '13",
+    "aliases": [
+      "Mazda MX-5 '13"
+    ]
   },
   {
     "make": "Mazda",
     "model": "Mazda MX-5",
     "year": 2016,
     "pi": 499,
-    "class": "C"
+    "class": "C",
+    "abbreviation": "Mazda MX-5 '16",
+    "aliases": [
+      "Mazda MX-5 '16"
+    ]
   },
   {
     "make": "Mazda",
     "model": "Mazda MX-5 Cup",
     "year": 2017,
     "pi": 586,
-    "class": "B"
+    "class": "B",
+    "abbreviation": "Mazda MX-5 C '17",
+    "aliases": [
+      "Mazda MX-5 C '17"
+    ]
   },
   {
     "make": "Mazda",
     "model": "Mazda MX-5 Miata",
     "year": 1994,
     "pi": 329,
-    "class": "D"
+    "class": "D",
+    "abbreviation": "Mazda MX-5 '94",
+    "aliases": [
+      "Mazda MX-5 '94",
+      "Mazda MX-5 Gen 1"
+    ]
   },
   {
     "make": "Mazda",
     "model": "Mazda MX-5 Miata Forza Edition",
     "year": 1994,
     "pi": 850,
-    "class": "S2"
+    "class": "S2",
+    "abbreviation": "MX-5 FE '94",
+    "aliases": [
+      "MX-5 FE '94"
+    ]
   },
   {
     "make": "Mazda",
     "model": "Mazda MX-5 Miata RF",
     "year": 2022,
     "pi": 509,
-    "class": "B"
+    "class": "B",
+    "abbreviation": "Mazda MX-5 RF",
+    "aliases": [
+      "Mazda MX-5 RF"
+    ]
   },
   {
     "make": "Mazda",
     "model": "Mazda RX-3",
     "year": 1973,
     "pi": 328,
-    "class": "D"
+    "class": "D",
+    "abbreviation": "Mazda RX-3 '73",
+    "aliases": [
+      "Mazda RX-3 '73"
+    ]
   },
   {
     "make": "Mazda",
     "model": "Mazda RX-3 Forza Edition",
     "year": 1973,
     "pi": 600,
-    "class": "B"
+    "class": "B",
+    "abbreviation": "Mazda RX-3 FE",
+    "aliases": [
+      "Mazda RX-3 FE"
+    ]
   },
   {
     "make": "Mazda",
     "model": "Mazda RX-7 GSL-SE",
     "year": 1985,
     "pi": 357,
-    "class": "D"
+    "class": "D",
+    "abbreviation": "Mazda RX-7 '85",
+    "aliases": [
+      "Mazda RX-7 '85"
+    ]
   },
   {
     "make": "Mazda",
     "model": "Mazda RX-7 Type R",
     "year": 1992,
     "pi": 548,
-    "class": "B"
+    "class": "B",
+    "abbreviation": "Mazda RX-7 '92",
+    "aliases": [
+      "Mazda RX-7 '92"
+    ]
   },
   {
     "make": "Mazda",
     "model": "Mazda RX-8 R3",
     "year": 2011,
     "pi": 508,
-    "class": "B"
+    "class": "B",
+    "abbreviation": "Mazda RX-8",
+    "aliases": [
+      "Mazda RX-8",
+      "Mazda RX-8 '11"
+    ]
   },
   {
     "make": "Mazda",
     "model": "Mazda Savanna RX-7",
     "year": 1990,
     "pi": 451,
-    "class": "C"
+    "class": "C",
+    "abbreviation": "Mazda RX-7 '90",
+    "aliases": [
+      "Mazda RX-7 '90",
+      "Mazda RX-7 FC'"
+    ]
   },
   {
     "make": "McLaren",
     "model": "McLaren 12C Coupé",
     "year": 2011,
     "pi": 727,
-    "class": "S1"
+    "class": "S1",
+    "abbreviation": "McLaren 12C",
+    "aliases": [
+      "McLaren 12C",
+      "McLaren MP4-12C"
+    ]
   },
   {
     "make": "McLaren",
     "model": "McLaren 570S Coupé",
     "year": 2015,
     "pi": 721,
-    "class": "S1"
+    "class": "S1",
+    "abbreviation": "McLaren 570S",
+    "aliases": [
+      "McLaren 570S"
+    ]
   },
   {
     "make": "McLaren",
     "model": "McLaren 600LT Coupé",
     "year": 2018,
     "pi": 780,
-    "class": "S1"
+    "class": "S1",
+    "abbreviation": "McLaren 600LT",
+    "aliases": [
+      "McLaren 600LT",
+      "McL. 600 '18"
+    ]
   },
   {
     "make": "McLaren",
     "model": "McLaren 620R",
     "year": 2021,
     "pi": 773,
-    "class": "S1"
+    "class": "S1",
+    "abbreviation": "McL. 620 '21",
+    "aliases": [
+      "McL. 620 '21"
+    ]
   },
   {
     "make": "McLaren",
     "model": "McLaren 650S Spider",
     "year": 2014,
     "pi": 765,
-    "class": "S1"
+    "class": "S1",
+    "abbreviation": "650S Spider",
+    "aliases": [
+      "650S Spider"
+    ]
   },
   {
     "make": "McLaren",
     "model": "McLaren 765LT Coupé",
     "year": 2021,
     "pi": 829,
-    "class": "S2"
+    "class": "S2",
+    "abbreviation": "McL. 765 '21",
+    "aliases": [
+      "McL. 765 '21",
+      "McLaren 765LT",
+      "McLaren 765LT Coupe"
+    ]
   },
   {
     "make": "McLaren",
     "model": "McLaren Artura",
     "year": 2023,
     "pi": 766,
-    "class": "S1"
+    "class": "S1",
+    "abbreviation": "McL. Artura '23",
+    "aliases": [
+      "McL. Artura '23"
+    ]
   },
   {
     "make": "McLaren",
     "model": "McLaren F1",
     "year": 1993,
     "pi": 713,
-    "class": "S1"
+    "class": "S1",
+    "abbreviation": "McL. F1 '93",
+    "aliases": [
+      "McL. F1 '93"
+    ]
   },
   {
     "make": "McLaren",
     "model": "McLaren F1 GT",
     "year": 1997,
     "pi": 769,
-    "class": "S1"
+    "class": "S1",
+    "abbreviation": "McL. F1 GT '97",
+    "aliases": [
+      "McL. F1 GT '97"
+    ]
   },
   {
     "make": "McLaren",
     "model": "McLaren P1",
     "year": 2013,
     "pi": 848,
-    "class": "S2"
+    "class": "S2",
+    "abbreviation": "McL. P1 '13",
+    "aliases": [
+      "McL. P1 '13"
+    ]
   },
   {
     "make": "McLaren",
     "model": "McLaren Sabre",
     "year": 2021,
     "pi": 787,
-    "class": "S1"
+    "class": "S1",
+    "abbreviation": "McL. Sabre '21",
+    "aliases": [
+      "McL. Sabre '21"
+    ]
   },
   {
     "make": "McLaren",
     "model": "McLaren Speedtail",
     "year": 2019,
     "pi": 835,
-    "class": "S2"
+    "class": "S2",
+    "abbreviation": "Speedtail '19",
+    "aliases": [
+      "Speedtail '19"
+    ]
   },
   {
     "make": "Mercedes-AMG",
     "model": "Mercedes-AMG C 63 S Coupé",
     "year": 2016,
     "pi": 645,
-    "class": "A"
+    "class": "A",
+    "abbreviation": "M-B C63 AMG '16",
+    "aliases": [
+      "M-B C63 AMG '16",
+      "AMG C 63 '16"
+    ]
   },
   {
     "make": "Mercedes-AMG",
     "model": "Mercedes-AMG E 63 S",
     "year": 2018,
     "pi": 674,
-    "class": "A"
+    "class": "A",
+    "abbreviation": "Mercedes-AMG E 63",
+    "aliases": [
+      "Mercedes-AMG E 63",
+      "M-AMG E 63 '18"
+    ]
   },
   {
     "make": "Mercedes-AMG",
     "model": "Mercedes-AMG GT 4-Door Coupé",
     "year": 2018,
     "pi": 664,
-    "class": "A"
+    "class": "A",
+    "abbreviation": "M-B GT 4 '18",
+    "aliases": [
+      "M-B GT 4 '18",
+      "AMG GT Coupe '18"
+    ]
   },
   {
     "make": "Mercedes-AMG",
     "model": "Mercedes-AMG GT Black Series",
     "year": 2021,
     "pi": 782,
-    "class": "S1"
+    "class": "S1",
+    "abbreviation": "AMG GT Black",
+    "aliases": [
+      "AMG GT Black",
+      "M-AMG GT '20"
+    ]
   },
   {
     "make": "Mercedes-AMG",
     "model": "Mercedes-AMG GT Black Series 'Welcome Pack'",
     "year": 2020,
     "pi": 900,
-    "class": "S2"
+    "class": "S2",
+    "abbreviation": "AMG GT Black",
+    "aliases": [
+      "AMG GT Black",
+      "M-AMG GT '20"
+    ]
   },
   {
     "make": "Mercedes-AMG",
     "model": "Mercedes-AMG GT R",
     "year": 2017,
     "pi": 764,
-    "class": "S1"
+    "class": "S1",
+    "abbreviation": "M-B AMG GTR",
+    "aliases": [
+      "M-B AMG GTR",
+      "AMG GT R '17"
+    ]
   },
   {
     "make": "Mercedes-AMG",
     "model": "Mercedes-AMG GT S",
     "year": 2015,
     "pi": 691,
-    "class": "A"
+    "class": "A",
+    "abbreviation": "M-B AMG GT",
+    "aliases": [
+      "M-B AMG GT"
+    ]
   },
   {
     "make": "Mercedes-AMG",
     "model": "Mercedes-AMG Mercedes-AMG ONE",
     "year": 2021,
     "pi": 900,
-    "class": "S2"
+    "class": "S2",
+    "abbreviation": "M-AMG ONE '21",
+    "aliases": [
+      "M-AMG ONE '21"
+    ]
   },
   {
     "make": "Mercedes-AMG",
     "model": "Mercedes-AMG SL 63",
     "year": 2021,
     "pi": 690,
-    "class": "A"
+    "class": "A",
+    "abbreviation": "M-AMG SL 63 '21",
+    "aliases": [
+      "M-AMG SL 63 '21"
+    ]
   },
   {
     "make": "Mercedes-AMG",
     "model": "Mercedes-AMG SLC 43 Final Edition",
     "year": 2020,
     "pi": 620,
-    "class": "A"
+    "class": "A",
+    "abbreviation": "M-AMG SLC 43 '20",
+    "aliases": [
+      "M-AMG SLC 43 '20"
+    ]
   },
   {
     "make": "Mercedes-Benz",
     "model": "Mercedes-Benz 190E 2.5-16 Evolution II",
     "year": 1990,
     "pi": 460,
-    "class": "C"
+    "class": "C",
+    "abbreviation": "M-B 190E",
+    "aliases": [
+      "M-B 190E",
+      "MB 190E '90"
+    ]
   },
   {
     "make": "Mercedes-Benz",
     "model": "Mercedes-Benz 190E 2.5-16 Evolution II Forza Edition",
     "year": 1990,
     "pi": 700,
-    "class": "A"
+    "class": "A",
+    "abbreviation": "MB 190 E FE",
+    "aliases": [
+      "MB 190 E FE"
+    ]
   },
   {
     "make": "Mercedes-Benz",
     "model": "Mercedes-Benz 300 SL Coupé",
     "year": 1954,
     "pi": 388,
-    "class": "D"
+    "class": "D",
+    "abbreviation": "M-B 300SL",
+    "aliases": [
+      "M-B 300SL",
+      "MB 300 SL '54",
+      "Mercedes-Benz 300SL Gullwing Coupe"
+    ]
   },
   {
     "make": "Mercedes-Benz",
     "model": "Mercedes-Benz 300 SLR",
     "year": 1955,
     "pi": 599,
-    "class": "B"
+    "class": "B",
+    "abbreviation": "M-B 300 SLR",
+    "aliases": [
+      "M-B 300 SLR",
+      "MB 300 SLR"
+    ]
   },
   {
     "make": "Mercedes-Benz",
     "model": "Mercedes-Benz A 45 AMG",
     "year": 2013,
     "pi": 582,
-    "class": "B"
+    "class": "B",
+    "abbreviation": "A45 '13",
+    "aliases": [
+      "A45 '13",
+      "MB A 45 '13"
+    ]
   },
   {
     "make": "Mercedes-Benz",
     "model": "Mercedes-Benz AMG CLK GTR",
     "year": 1998,
     "pi": 713,
-    "class": "S1"
+    "class": "S1",
+    "abbreviation": "M-B CLK-GTR",
+    "aliases": [
+      "M-B CLK-GTR",
+      "MB CLK GTR '98",
+      "Mercedes-Benz AMG Mercedes CLK GTR"
+    ]
   },
   {
     "make": "Mercedes-Benz",
     "model": "Mercedes-Benz AMG Hammer Coupe",
     "year": 1987,
     "pi": 565,
-    "class": "B"
+    "class": "B",
+    "abbreviation": "AMG Hammer Coupe",
+    "aliases": [
+      "AMG Hammer Coupe"
+    ]
   },
   {
     "make": "Mercedes-Benz",
     "model": "Mercedes-Benz C 63 AMG Coupé Black Series",
     "year": 2012,
     "pi": 654,
-    "class": "A"
+    "class": "A",
+    "abbreviation": "M-B C63",
+    "aliases": [
+      "M-B C63",
+      "MB C 63 '12",
+      "Mercedes-Benz C63 AMG Black Series"
+    ]
   },
   {
     "make": "Mercedes-Benz",
     "model": "Mercedes-Benz G 63 AMG 6x6",
     "year": 2014,
     "pi": 489,
-    "class": "C"
+    "class": "C",
+    "abbreviation": "M-B G 63 6X6",
+    "aliases": [
+      "M-B G 63 6X6"
+    ]
   },
   {
     "make": "Mercedes-Benz",
     "model": "Mercedes-Benz G 65 AMG",
     "year": 2013,
     "pi": 530,
-    "class": "B"
+    "class": "B",
+    "abbreviation": "M-B G 65",
+    "aliases": [
+      "M-B G 65"
+    ]
   },
   {
     "make": "Mercedes-Benz",
     "model": "Mercedes-Benz SL 65 AMG Black Series",
     "year": 2009,
     "pi": 699,
-    "class": "A"
+    "class": "A",
+    "abbreviation": "M-B SL65",
+    "aliases": [
+      "M-B SL65",
+      "MB SL 65 '09"
+    ]
   },
   {
     "make": "Mercedes-Benz",
     "model": "Mercedes-Benz Unimog U5023",
     "year": 2014,
     "pi": 100,
-    "class": "D"
+    "class": "D",
+    "abbreviation": "M-B Unimog",
+    "aliases": [
+      "M-B Unimog"
+    ]
   },
   {
     "make": "Mercedes-Benz",
     "model": "Mercedes-Benz X-Class",
     "year": 2018,
     "pi": 258,
-    "class": "D"
+    "class": "D",
+    "abbreviation": "M-B X-Class",
+    "aliases": [
+      "M-B X-Class"
+    ]
   },
   {
     "make": "Meyers",
     "model": "Meyers Manx",
     "year": 1971,
     "pi": 201,
-    "class": "D"
+    "class": "D",
+    "abbreviation": null,
+    "aliases": []
   },
   {
     "make": "Meyers",
     "model": "Meyers Manx 2.0",
     "year": 2023,
     "pi": 540,
-    "class": "B"
+    "class": "B",
+    "abbreviation": "Meyers Manx 2.0",
+    "aliases": [
+      "Meyers Manx 2.0"
+    ]
   },
   {
     "make": "MG",
     "model": "MG Metro 6R4",
     "year": 1986,
     "pi": 627,
-    "class": "A"
+    "class": "A",
+    "abbreviation": null,
+    "aliases": []
   },
   {
     "make": "MINI",
     "model": "MINI Cooper S",
     "year": 1965,
     "pi": 158,
-    "class": "D"
+    "class": "D",
+    "abbreviation": "MINI '65",
+    "aliases": [
+      "MINI '65",
+      "MINI Cooper '65"
+    ]
   },
   {
     "make": "MINI",
     "model": "MINI John Cooper Works GP",
     "year": 2012,
     "pi": 509,
-    "class": "B"
+    "class": "B",
+    "abbreviation": "Mini Cooper '12",
+    "aliases": [
+      "Mini Cooper '12",
+      "Mini JCW '12",
+      "MINI JCW GP '12"
+    ]
   },
   {
     "make": "MINI",
     "model": "MINI John Cooper Works GP",
     "year": 2021,
     "pi": 599,
-    "class": "B"
+    "class": "B",
+    "abbreviation": "MINI JCW GP '21",
+    "aliases": [
+      "MINI JCW GP '21"
+    ]
   },
   {
     "make": "MINI",
     "model": "MINI X-Raid All4 Racing Countryman",
     "year": 2013,
     "pi": 523,
-    "class": "B"
+    "class": "B",
+    "abbreviation": "MINI X-Raid",
+    "aliases": [
+      "MINI X-Raid"
+    ]
   },
   {
     "make": "MINI",
     "model": "MINI X-Raid John Cooper Works Buggy",
     "year": 2018,
     "pi": 514,
-    "class": "B"
+    "class": "B",
+    "abbreviation": "MINI JCW Buggy",
+    "aliases": [
+      "MINI JCW Buggy"
+    ]
   },
   {
     "make": "Mitsubishi",
     "model": "Mitsubishi #1 Sierra Sierra Enterprises Lancer Evolution Time Attack",
     "year": 2005,
     "pi": 962,
-    "class": "R"
+    "class": "R",
+    "abbreviation": "#1 Evolution TA",
+    "aliases": [
+      "#1 Evolution TA"
+    ]
   },
   {
     "make": "Mitsubishi",
     "model": "Mitsubishi #269 Attacking the Clock Racing Minicab Time Attack",
     "year": 1990,
     "pi": 166,
-    "class": "D"
+    "class": "D",
+    "abbreviation": "Mit. Minicab TA",
+    "aliases": [
+      "Mit. Minicab TA"
+    ]
   },
   {
     "make": "Mitsubishi",
     "model": "Mitsubishi Eclipse GSX",
     "year": 1995,
     "pi": 436,
-    "class": "C"
+    "class": "C",
+    "abbreviation": "Eclipse GSX",
+    "aliases": [
+      "Eclipse GSX",
+      "Eclipse '95",
+      "Mit. Eclipse '95"
+    ]
   },
   {
     "make": "Mitsubishi",
     "model": "Mitsubishi Galant VR-4",
     "year": 1992,
     "pi": 432,
-    "class": "C"
+    "class": "C",
+    "abbreviation": "Galant VR-4",
+    "aliases": [
+      "Galant VR-4",
+      "Mit. Galant '92"
+    ]
   },
   {
     "make": "Mitsubishi",
     "model": "Mitsubishi GTO",
     "year": 1997,
     "pi": 495,
-    "class": "C"
+    "class": "C",
+    "abbreviation": "Mit. GTO '97",
+    "aliases": [
+      "Mit. GTO '97"
+    ]
   },
   {
     "make": "Mitsubishi",
     "model": "Mitsubishi Lancer Evolution III GSR",
     "year": 1995,
     "pi": 517,
-    "class": "B"
+    "class": "B",
+    "abbreviation": "Mit. Evo III '95",
+    "aliases": [
+      "Mit. Evo III '95"
+    ]
   },
   {
     "make": "Mitsubishi",
     "model": "Mitsubishi Lancer Evolution IX MR",
     "year": 2006,
     "pi": 521,
-    "class": "B"
+    "class": "B",
+    "abbreviation": "Lancer MR '06",
+    "aliases": [
+      "Lancer MR '06",
+      "Mit. Evo IX '06"
+    ]
   },
   {
     "make": "Mitsubishi",
     "model": "Mitsubishi Lancer Evolution VI GSR TM Edition",
     "year": 2001,
     "pi": 574,
-    "class": "B"
+    "class": "B",
+    "abbreviation": "Mit. Evo. TME",
+    "aliases": [
+      "Mit. Evo. TME"
+    ]
   },
   {
     "make": "Mitsubishi",
     "model": "Mitsubishi Lancer Evolution VIII MR",
     "year": 2004,
     "pi": 555,
-    "class": "B"
+    "class": "B",
+    "abbreviation": "Lancer MR '04",
+    "aliases": [
+      "Lancer MR '04",
+      "Mit. Evo VIII 04"
+    ]
   },
   {
     "make": "Mitsubishi",
     "model": "Mitsubishi Lancer Evolution VIII MR 'Welcome Pack'",
     "year": 2004,
     "pi": 700,
-    "class": "A"
+    "class": "A",
+    "abbreviation": "Lancer MR '04",
+    "aliases": [
+      "Lancer MR '04",
+      "Mit. Evo VIII 04"
+    ]
   },
   {
     "make": "Mitsubishi",
     "model": "Mitsubishi Lancer Evolution X GSR",
     "year": 2008,
     "pi": 534,
-    "class": "B"
+    "class": "B",
+    "abbreviation": "Lancer GSR '08",
+    "aliases": [
+      "Lancer GSR '08",
+      "Mit. Evo X '08"
+    ]
   },
   {
     "make": "Mitsubishi",
     "model": "Mitsubishi Montero Evolution",
     "year": 1997,
     "pi": 346,
-    "class": "D"
+    "class": "D",
+    "abbreviation": "Montero Evo",
+    "aliases": [
+      "Montero Evo"
+    ]
   },
   {
     "make": "Mitsubishi",
     "model": "Mitsubishi Montero Exceed 2800 TD",
     "year": 1995,
     "pi": 190,
-    "class": "D"
+    "class": "D",
+    "abbreviation": "Montero '95",
+    "aliases": [
+      "Montero '95"
+    ]
+  },
+  {
+    "make": "Mitsubishi",
+    "model": "Mitsubishi Starion ESI-R",
+    "year": 1988,
+    "pi": 446,
+    "class": "C",
+    "abbreviation": "Starion ESI-R",
+    "aliases": [
+      "Starion ESI-R"
+    ]
   },
   {
     "make": "Nissan",
     "model": "Nissan #11 Tomica Skyline Turbo Super Silhouette",
     "year": 1983,
     "pi": 847,
-    "class": "S2"
+    "class": "S2",
+    "abbreviation": "#11 Skyline '84",
+    "aliases": [
+      "#11 Skyline '84",
+      "Nis. #11 Skyline",
+      "Nissan #11 Skyline Turbo Super Silhouette"
+    ]
   },
   {
     "make": "Nissan",
     "model": "Nissan #12 Skyline GT-R (BNR32 Gr.A) JTC",
     "year": 1990,
     "pi": 858,
-    "class": "S2"
+    "class": "S2",
+    "abbreviation": "#12 N. Skyline",
+    "aliases": [
+      "#12 N. Skyline"
+    ]
   },
   {
     "make": "Nissan",
     "model": "Nissan #23 Pennzoil NISMO Skyline GT-R",
     "year": 1998,
     "pi": 848,
-    "class": "S2"
+    "class": "S2",
+    "abbreviation": "Nis. #23 GT-R",
+    "aliases": [
+      "Nis. #23 GT-R"
+    ]
   },
   {
     "make": "Nissan",
     "model": "Nissan #32 Skyline WTAC 'Xtreme GTR'",
     "year": 1993,
     "pi": 923,
-    "class": "R"
+    "class": "R",
+    "abbreviation": "#32 Skyline WTAC",
+    "aliases": [
+      "#32 Skyline WTAC"
+    ]
   },
   {
     "make": "Nissan",
     "model": "Nissan #36 Dream Project S15 Silvia WTAC",
     "year": 2000,
     "pi": 996,
-    "class": "R"
+    "class": "R",
+    "abbreviation": "#36 Silvia WTAC",
+    "aliases": [
+      "#36 Silvia WTAC"
+    ]
   },
   {
     "make": "Nissan",
     "model": "Nissan 240SX",
     "year": 1993,
     "pi": 339,
-    "class": "D"
+    "class": "D",
+    "abbreviation": "Nissan 240SX",
+    "aliases": [
+      "Nissan 240SX",
+      "Nissan 240SX '93"
+    ]
   },
   {
     "make": "Nissan",
     "model": "Nissan 370Z",
     "year": 2010,
     "pi": 568,
-    "class": "B"
+    "class": "B",
+    "abbreviation": null,
+    "aliases": []
   },
   {
     "make": "Nissan",
     "model": "Nissan 370Z Nismo",
     "year": 2019,
     "pi": 603,
-    "class": "A"
+    "class": "A",
+    "abbreviation": "Nissan 370Z '19",
+    "aliases": [
+      "Nissan 370Z '19",
+      "Nissan 370Z N 19"
+    ]
   },
   {
     "make": "Nissan",
     "model": "Nissan Be-1",
     "year": 1987,
     "pi": 175,
-    "class": "D"
+    "class": "D",
+    "abbreviation": "Nissan Be-1 '87",
+    "aliases": [
+      "Nissan Be-1 '87"
+    ]
   },
   {
     "make": "Nissan",
     "model": "Nissan Fairlady Z",
     "year": 2003,
     "pi": 534,
-    "class": "B"
+    "class": "B",
+    "abbreviation": "Fairlady Z '03",
+    "aliases": [
+      "Fairlady Z '03",
+      "Nissan Z '03"
+    ]
   },
   {
     "make": "Nissan",
     "model": "Nissan Fairlady Z 432",
     "year": 1969,
     "pi": 369,
-    "class": "D"
+    "class": "D",
+    "abbreviation": "Fairlady Z '69",
+    "aliases": [
+      "Fairlady Z '69",
+      "Nissan Z 432 '69"
+    ]
   },
   {
     "make": "Nissan",
     "model": "Nissan Fairlady Z Version S Twin Turbo",
     "year": 1994,
     "pi": 497,
-    "class": "C"
+    "class": "C",
+    "abbreviation": "Fairlady Z '94",
+    "aliases": [
+      "Fairlady Z '94",
+      "Nissan Z '94"
+    ]
   },
   {
     "make": "Nissan",
     "model": "Nissan Figaro",
     "year": 1991,
     "pi": 234,
-    "class": "D"
+    "class": "D",
+    "abbreviation": "Figaro '91",
+    "aliases": [
+      "Figaro '91"
+    ]
   },
   {
     "make": "Nissan",
     "model": "Nissan Gloria Gran Turismo",
     "year": 1995,
     "pi": 498,
-    "class": "C"
+    "class": "C",
+    "abbreviation": "Gloria GT '95",
+    "aliases": [
+      "Gloria GT '95"
+    ]
   },
   {
     "make": "Nissan",
     "model": "Nissan GT-R (R35)",
     "year": 2017,
     "pi": 709,
-    "class": "S1"
+    "class": "S1",
+    "abbreviation": "Nissan GT-R '17",
+    "aliases": [
+      "Nissan GT-R '17",
+      "Nissan GT-R"
+    ]
   },
   {
     "make": "Nissan",
     "model": "Nissan GT-R Black Edition (R35)",
     "year": 2012,
     "pi": 703,
-    "class": "S1"
+    "class": "S1",
+    "abbreviation": "Nissan GT-R '12",
+    "aliases": [
+      "Nissan GT-R '12",
+      "Nissan GT-R Black Edition"
+    ]
+  },
+  {
+    "make": "Nissan",
+    "model": "Nissan GT-R Black Edition (R35) 'Touge Edition'",
+    "year": 2012,
+    "pi": 691,
+    "class": "A",
+    "abbreviation": "Nissan GT-R TG",
+    "aliases": [
+      "Nissan GT-R TG"
+    ]
   },
   {
     "make": "Nissan",
     "model": "Nissan GT-R Black Edition (R35) Forza Edition",
     "year": 2012,
     "pi": 850,
-    "class": "S2"
+    "class": "S2",
+    "abbreviation": "GT-R FE '12",
+    "aliases": [
+      "GT-R FE '12"
+    ]
   },
   {
     "make": "Nissan",
     "model": "Nissan GT-R NISMO",
     "year": 2024,
     "pi": 741,
-    "class": "S1"
+    "class": "S1",
+    "abbreviation": "NISMO GT-R '24",
+    "aliases": [
+      "NISMO GT-R '24"
+    ]
+  },
+  {
+    "make": "Nissan",
+    "model": "Nissan GT-R NISMO 'Initial Drive'",
+    "year": 2024,
+    "pi": 741,
+    "class": "S1",
+    "abbreviation": "GT-R ID",
+    "aliases": [
+      "GT-R ID"
+    ]
   },
   {
     "make": "Nissan",
     "model": "Nissan GT-R NISMO (R35)",
     "year": 2020,
     "pi": 736,
-    "class": "S1"
+    "class": "S1",
+    "abbreviation": "Nissan GT-R '20",
+    "aliases": [
+      "Nissan GT-R '20",
+      "Nissan GT-R N 20"
+    ]
   },
   {
     "make": "Nissan",
     "model": "Nissan NISMO GT-R LM",
     "year": 1995,
     "pi": 544,
-    "class": "B"
+    "class": "B",
+    "abbreviation": "Nissan GT-R '95",
+    "aliases": [
+      "Nissan GT-R '95"
+    ]
   },
   {
     "make": "Nissan",
     "model": "Nissan PAO",
     "year": 1989,
     "pi": 145,
-    "class": "D"
+    "class": "D",
+    "abbreviation": "Nissan PAO '89",
+    "aliases": [
+      "Nissan PAO '89"
+    ]
+  },
+  {
+    "make": "Nissan",
+    "model": "Nissan Patrol",
+    "year": 1972,
+    "pi": 157,
+    "class": "D",
+    "abbreviation": "Nis. Patrol '72",
+    "aliases": [
+      "Nis. Patrol '72"
+    ]
   },
   {
     "make": "Nissan",
     "model": "Nissan Pulsar GTI-R",
     "year": 1990,
     "pi": 486,
-    "class": "C"
+    "class": "C",
+    "abbreviation": "Nissan Pulsar",
+    "aliases": [
+      "Nissan Pulsar",
+      "Nissan Pulsar 90"
+    ]
   },
   {
     "make": "Nissan",
     "model": "Nissan R390 (GT1)",
     "year": 1998,
     "pi": 774,
-    "class": "S1"
+    "class": "S1",
+    "abbreviation": "Nissan R390 '98",
+    "aliases": [
+      "Nissan R390 '98",
+      "Nissan R390"
+    ]
   },
   {
     "make": "Nissan",
     "model": "Nissan S-Cargo",
     "year": 1989,
     "pi": 131,
-    "class": "D"
+    "class": "D",
+    "abbreviation": "S-Cargo '89",
+    "aliases": [
+      "S-Cargo '89"
+    ]
   },
   {
     "make": "Nissan",
     "model": "Nissan S-Cargo Forza Edition",
     "year": 1989,
     "pi": 800,
-    "class": "S1"
+    "class": "S1",
+    "abbreviation": "S-Cargo FE",
+    "aliases": [
+      "S-Cargo FE"
+    ]
   },
   {
     "make": "Nissan",
     "model": "Nissan Safari Turbo",
     "year": 1985,
     "pi": 123,
-    "class": "D"
+    "class": "D",
+    "abbreviation": "Nissan Safari",
+    "aliases": [
+      "Nissan Safari"
+    ]
   },
   {
     "make": "Nissan",
     "model": "Nissan Silvia K's",
     "year": 1989,
     "pi": 455,
-    "class": "C"
+    "class": "C",
+    "abbreviation": "Nissan Silvia 89",
+    "aliases": [
+      "Nissan Silvia 89"
+    ]
   },
   {
     "make": "Nissan",
     "model": "Nissan Silvia K's",
     "year": 1994,
     "pi": 499,
-    "class": "C"
+    "class": "C",
+    "abbreviation": "Silvia '94",
+    "aliases": [
+      "Silvia '94",
+      "Silvia S14",
+      "Nissan Silvia 94"
+    ]
   },
   {
     "make": "Nissan",
     "model": "Nissan Silvia K's Aero",
     "year": 1998,
     "pi": 494,
-    "class": "C"
+    "class": "C",
+    "abbreviation": "Silvia '98",
+    "aliases": [
+      "Silvia '98",
+      "Nissan Silvia 98"
+    ]
   },
   {
     "make": "Nissan",
     "model": "Nissan Silvia Spec-R",
     "year": 2002,
     "pi": 551,
-    "class": "B"
+    "class": "B",
+    "abbreviation": "Nissan Silvia 02",
+    "aliases": [
+      "Nissan Silvia 02"
+    ]
+  },
+  {
+    "make": "Nissan",
+    "model": "Nissan Skyline 2000 Turbo RS",
+    "year": 1983,
+    "pi": 414,
+    "class": "C",
+    "abbreviation": "Skyline T RS '83",
+    "aliases": [
+      "Skyline T RS '83"
+    ]
   },
   {
     "make": "Nissan",
     "model": "Nissan Skyline 2000GT-R",
     "year": 1971,
     "pi": 380,
-    "class": "D"
+    "class": "D",
+    "abbreviation": "Nissan GT-R '71",
+    "aliases": [
+      "Nissan GT-R '71"
+    ]
   },
   {
     "make": "Nissan",
     "model": "Nissan Skyline GT-R",
     "year": 1992,
     "pi": 541,
-    "class": "B"
+    "class": "B",
+    "abbreviation": "Skyline GT-R '92",
+    "aliases": [
+      "Skyline GT-R '92"
+    ]
   },
   {
     "make": "Nissan",
     "model": "Nissan Skyline GT-R 40th Anniversary",
     "year": 1998,
     "pi": 547,
-    "class": "B"
+    "class": "B",
+    "abbreviation": "GT-R 40AE",
+    "aliases": [
+      "GT-R 40AE"
+    ]
   },
   {
     "make": "Nissan",
     "model": "Nissan Skyline GT-R V-Spec",
     "year": 1997,
     "pi": 555,
-    "class": "B"
+    "class": "B",
+    "abbreviation": "Nis. Skyline '97",
+    "aliases": [
+      "Nis. Skyline '97",
+      "Nissan GT-R '97",
+      "Nissan GT-R R33"
+    ]
   },
   {
     "make": "Nissan",
     "model": "Nissan Skyline GT-R V-spec II",
     "year": 2000,
     "pi": 590,
-    "class": "B"
+    "class": "B",
+    "abbreviation": null,
+    "aliases": []
   },
   {
     "make": "Nissan",
     "model": "Nissan Skyline GTS-R",
     "year": 1987,
     "pi": 432,
-    "class": "C"
+    "class": "C",
+    "abbreviation": "Nissan GTS-R '87",
+    "aliases": [
+      "Nissan GTS-R '87",
+      "Nissan GT-R '87",
+      "Nissan Skyline GTS-R (R31)",
+      "Nissan Skyline GTS-R (HR31)"
+    ]
   },
   {
     "make": "Nissan",
     "model": "Nissan Skyline H/T 2000GT-R",
     "year": 1973,
     "pi": 407,
-    "class": "C"
+    "class": "C",
+    "abbreviation": "Nissan GT-R '73",
+    "aliases": [
+      "Nissan GT-R '73"
+    ]
   },
   {
     "make": "Nissan",
     "model": "Nissan Stagea RS FOUR V",
     "year": 1997,
     "pi": 439,
-    "class": "C"
+    "class": "C",
+    "abbreviation": "N. Stagea '97",
+    "aliases": [
+      "N. Stagea '97"
+    ]
   },
   {
     "make": "Nissan",
     "model": "Nissan Z NISMO",
     "year": 2024,
     "pi": 652,
-    "class": "A"
+    "class": "A",
+    "abbreviation": "Z NISMO '24",
+    "aliases": [
+      "Z NISMO '24"
+    ]
   },
   {
     "make": "Noble",
     "model": "Noble M600",
     "year": 2010,
     "pi": 793,
-    "class": "S1"
+    "class": "S1",
+    "abbreviation": null,
+    "aliases": []
   },
   {
     "make": "Opel",
     "model": "Opel Manta 400",
     "year": 1984,
     "pi": 576,
-    "class": "B"
+    "class": "B",
+    "abbreviation": null,
+    "aliases": []
   },
   {
     "make": "Pagani",
     "model": "Pagani Huayra BC Coupe",
     "year": 2016,
     "pi": 851,
-    "class": "S2"
+    "class": "S2",
+    "abbreviation": "Pagani Huarya 16",
+    "aliases": [
+      "Pagani Huarya 16"
+    ]
   },
   {
     "make": "Pagani",
     "model": "Pagani Huayra R",
     "year": 2021,
     "pi": 954,
-    "class": "R"
+    "class": "R",
+    "abbreviation": "Huayra R '21",
+    "aliases": [
+      "Huayra R '21",
+      "Huayra R '22",
+      "Pagani Huayra 22"
+    ]
   },
   {
     "make": "Pagani",
     "model": "Pagani Zonda Cinque Roadster",
     "year": 2010,
     "pi": 812,
-    "class": "S2"
+    "class": "S2",
+    "abbreviation": "Pagani Zonda C",
+    "aliases": [
+      "Pagani Zonda C"
+    ]
   },
   {
     "make": "Pagani",
     "model": "Pagani Zonda R",
     "year": 2009,
     "pi": 918,
-    "class": "R"
+    "class": "R",
+    "abbreviation": null,
+    "aliases": []
   },
   {
     "make": "Peel",
     "model": "Peel P50",
     "year": 1962,
     "pi": 100,
-    "class": "D"
+    "class": "D",
+    "abbreviation": null,
+    "aliases": []
   },
   {
     "make": "Peel",
     "model": "Peel P50 Trolli Edition",
     "year": 1962,
     "pi": 100,
-    "class": "D"
+    "class": "D",
+    "abbreviation": "Peel P50 Trolli",
+    "aliases": [
+      "Peel P50 Trolli"
+    ]
   },
   {
     "make": "Penhall",
     "model": "Penhall The Cholla",
     "year": 2011,
     "pi": 541,
-    "class": "B"
+    "class": "B",
+    "abbreviation": "Penhall Cholla",
+    "aliases": [
+      "Penhall Cholla"
+    ]
   },
   {
     "make": "Peugeot",
     "model": "Peugeot 205 Rallye",
     "year": 1991,
     "pi": 350,
-    "class": "D"
+    "class": "D",
+    "abbreviation": "Peugeot 205 R",
+    "aliases": [
+      "Peugeot 205 R"
+    ]
   },
   {
     "make": "Peugeot",
     "model": "Peugeot 205 Turbo 16",
     "year": 1984,
     "pi": 500,
-    "class": "C"
+    "class": "C",
+    "abbreviation": "Peugeot 205 '84",
+    "aliases": [
+      "Peugeot 205 '84",
+      "Peugeot 205 T16"
+    ]
   },
   {
     "make": "Peugeot",
     "model": "Peugeot 207 Super 2000",
     "year": 2007,
     "pi": 632,
-    "class": "A"
+    "class": "A",
+    "abbreviation": "Peugeot 207 S",
+    "aliases": [
+      "Peugeot 207 S"
+    ]
   },
   {
     "make": "Plymouth",
     "model": "Plymouth Barracuda Formula S",
     "year": 1968,
     "pi": 445,
-    "class": "C"
+    "class": "C",
+    "abbreviation": "1968 Barracuda S",
+    "aliases": [
+      "1968 Barracuda S",
+      "Barracuda"
+    ]
   },
   {
     "make": "Plymouth",
     "model": "Plymouth Cuda 426 HEMI",
     "year": 1971,
     "pi": 441,
-    "class": "C"
+    "class": "C",
+    "abbreviation": "Plymouth Cuda",
+    "aliases": [
+      "Plymouth Cuda",
+      "Plymouth Cuda 71"
+    ]
   },
   {
     "make": "Plymouth",
     "model": "Plymouth Fury",
     "year": 1958,
     "pi": 361,
-    "class": "D"
+    "class": "D",
+    "abbreviation": null,
+    "aliases": []
   },
   {
     "make": "Polaris",
     "model": "Polaris RZR Pro XP Factory Racing Limited Edition",
     "year": 2021,
     "pi": 439,
-    "class": "C"
+    "class": "C",
+    "abbreviation": "RZR Racing",
+    "aliases": [
+      "RZR Racing"
+    ]
   },
   {
     "make": "Polaris",
     "model": "Polaris RZR Pro XP Ultimate",
     "year": 2021,
     "pi": 496,
-    "class": "C"
+    "class": "C",
+    "abbreviation": "Polaris RZR Pro",
+    "aliases": [
+      "Polaris RZR Pro"
+    ]
   },
   {
     "make": "Pontiac",
     "model": "Pontiac Firebird Trans Am",
     "year": 1977,
     "pi": 311,
-    "class": "D"
+    "class": "D",
+    "abbreviation": "Pontiac T/A '77",
+    "aliases": [
+      "Pontiac T/A '77"
+    ]
   },
   {
     "make": "Pontiac",
     "model": "Pontiac Firebird Trans Am GTA",
     "year": 1987,
     "pi": 382,
-    "class": "D"
+    "class": "D",
+    "abbreviation": "Pontiac T/A '87",
+    "aliases": [
+      "Pontiac T/A '87"
+    ]
   },
   {
     "make": "Porsche",
     "model": "Porsche #185 959 Prodrive Rally Raid",
     "year": 1986,
     "pi": 623,
-    "class": "A"
+    "class": "A",
+    "abbreviation": "#185 Porsche 959",
+    "aliases": [
+      "#185 Porsche 959"
+    ]
+  },
+  {
+    "make": "Porsche",
+    "model": "Porsche #203 Porsche AG 961",
+    "year": 1987,
+    "pi": 840,
+    "class": "S2",
+    "abbreviation": "#203 Porsche 961",
+    "aliases": [
+      "#203 Porsche 961"
+    ]
   },
   {
     "make": "Porsche",
     "model": "Porsche #3 917 LH",
     "year": 1970,
     "pi": 776,
-    "class": "S1"
+    "class": "S1",
+    "abbreviation": "Porsche 917 LH",
+    "aliases": [
+      "Porsche 917 LH"
+    ]
   },
   {
     "make": "Porsche",
     "model": "Porsche #3 917 LH",
     "year": 1970,
     "pi": 998,
-    "class": "R"
+    "class": "R",
+    "abbreviation": "Porsche 917 FE",
+    "aliases": [
+      "Porsche 917 FE"
+    ]
   },
   {
     "make": "Porsche",
     "model": "Porsche #70 Porsche Motorsport 935",
     "year": 2019,
     "pi": 853,
-    "class": "S2"
+    "class": "S2",
+    "abbreviation": "#70 Porsche 935",
+    "aliases": [
+      "#70 Porsche 935",
+      "Porsche #70 935"
+    ]
   },
   {
     "make": "Porsche",
     "model": "Porsche 718 Cayman GT4 RS",
     "year": 2022,
     "pi": 737,
-    "class": "S1"
+    "class": "S1",
+    "abbreviation": "P. 718 GT4 '22",
+    "aliases": [
+      "P. 718 GT4 '22"
+    ]
   },
   {
     "make": "Porsche",
     "model": "Porsche 718 Cayman GTS",
     "year": 2018,
     "pi": 675,
-    "class": "A"
+    "class": "A",
+    "abbreviation": "Porsche 718 GTS",
+    "aliases": [
+      "Porsche 718 GTS",
+      "P. 718 GTS '18"
+    ]
   },
   {
     "make": "Porsche",
     "model": "Porsche 911 Carrera RS",
     "year": 1973,
     "pi": 490,
-    "class": "C"
+    "class": "C",
+    "abbreviation": "Porsche 911 '73",
+    "aliases": [
+      "Porsche 911 '73",
+      "P. 911 RS '73"
+    ]
   },
   {
     "make": "Porsche",
     "model": "Porsche 911 Carrera S",
     "year": 2019,
     "pi": 714,
-    "class": "S1"
+    "class": "S1",
+    "abbreviation": "Porsche 911 '19",
+    "aliases": [
+      "Porsche 911 '19",
+      "P. 911 CS '19"
+    ]
   },
   {
     "make": "Porsche",
     "model": "Porsche 911 GT1 Strassenversion",
     "year": 1997,
     "pi": 746,
-    "class": "S1"
+    "class": "S1",
+    "abbreviation": "Porsche 996 GT1",
+    "aliases": [
+      "Porsche 996 GT1",
+      "Porsche 911 GT1",
+      "P. 911 GT1 '97"
+    ]
   },
   {
     "make": "Porsche",
     "model": "Porsche 911 GT2",
     "year": 1995,
     "pi": 644,
-    "class": "A"
+    "class": "A",
+    "abbreviation": "911 GT2 '95",
+    "aliases": [
+      "911 GT2 '95",
+      "Porsche 993 GT2",
+      "P. 911 GT2 '95"
+    ]
+  },
+  {
+    "make": "Porsche",
+    "model": "Porsche 911 GT2 'Initial Drive'",
+    "year": 1995,
+    "pi": 645,
+    "class": "A",
+    "abbreviation": "P. 911 GT2 ID",
+    "aliases": [
+      "P. 911 GT2 ID"
+    ]
   },
   {
     "make": "Porsche",
     "model": "Porsche 911 GT2 RS",
     "year": 2018,
     "pi": 803,
-    "class": "S2"
+    "class": "S2",
+    "abbreviation": "911 GT2 RS '18",
+    "aliases": [
+      "911 GT2 RS '18",
+      "P. 911 GT2 RS '18"
+    ]
   },
   {
     "make": "Porsche",
     "model": "Porsche 911 GT3",
     "year": 2004,
     "pi": 674,
-    "class": "A"
+    "class": "A",
+    "abbreviation": "911 GT3 '04",
+    "aliases": [
+      "911 GT3 '04",
+      "Porsche 996 GT3",
+      "P. 911 GT3 '04",
+      "Porsche 911 GT3 (996)"
+    ]
   },
   {
     "make": "Porsche",
     "model": "Porsche 911 GT3",
     "year": 2021,
     "pi": 752,
-    "class": "S1"
+    "class": "S1",
+    "abbreviation": "911 GT3 '21",
+    "aliases": [
+      "911 GT3 '21",
+      "P. 911 GT3 '21"
+    ]
   },
   {
     "make": "Porsche",
     "model": "Porsche 911 GT3 RS",
     "year": 2019,
     "pi": 760,
-    "class": "S1"
+    "class": "S1",
+    "abbreviation": "911 GT3 RS '19",
+    "aliases": [
+      "911 GT3 RS '19",
+      "P. 911 GT3 RS 19"
+    ]
   },
   {
     "make": "Porsche",
     "model": "Porsche 911 GT3 RS",
     "year": 2023,
     "pi": 758,
-    "class": "S1"
+    "class": "S1",
+    "abbreviation": "P. 911 GT3 RS '23",
+    "aliases": [
+      "P. 911 GT3 RS '23"
+    ]
   },
   {
     "make": "Porsche",
     "model": "Porsche 911 GT3 RS 4.0",
     "year": 2012,
     "pi": 726,
-    "class": "S1"
+    "class": "S1",
+    "abbreviation": "911 GT3 RS4 '12",
+    "aliases": [
+      "911 GT3 RS4 '12"
+    ]
   },
   {
     "make": "Porsche",
     "model": "Porsche 911 Rallye",
     "year": 2023,
     "pi": 700,
-    "class": "A"
+    "class": "A",
+    "abbreviation": "P. 911 Rallye",
+    "aliases": [
+      "P. 911 Rallye"
+    ]
   },
   {
     "make": "Porsche",
     "model": "Porsche 911 Turbo 3.3",
     "year": 1982,
     "pi": 550,
-    "class": "B"
+    "class": "B",
+    "abbreviation": "911 Turbo '82",
+    "aliases": [
+      "911 Turbo '82",
+      "P. 911 Turbo '82"
+    ]
   },
   {
     "make": "Porsche",
     "model": "Porsche 911 Turbo S",
     "year": 2023,
     "pi": 774,
-    "class": "S1"
+    "class": "S1",
+    "abbreviation": "911 Turbo S '23",
+    "aliases": [
+      "911 Turbo S '23"
+    ]
   },
   {
     "make": "Porsche",
     "model": "Porsche 911 Turbo S Leichtbau",
     "year": 1993,
     "pi": 652,
-    "class": "A"
+    "class": "A",
+    "abbreviation": "911 Turbo '93",
+    "aliases": [
+      "911 Turbo '93",
+      "P. 911 Turbo '93"
+    ]
   },
   {
     "make": "Porsche",
     "model": "Porsche 918 Spyder",
     "year": 2014,
     "pi": 858,
-    "class": "S2"
+    "class": "S2",
+    "abbreviation": "Porsche 918",
+    "aliases": [
+      "Porsche 918",
+      "918 Spyder '14",
+      "P. 918 Spyder 14"
+    ]
   },
   {
     "make": "Porsche",
     "model": "Porsche 928 GTS",
     "year": 1993,
     "pi": 563,
-    "class": "B"
+    "class": "B",
+    "abbreviation": "1993 928 GTS",
+    "aliases": [
+      "1993 928 GTS",
+      "P. 928 GTS '93"
+    ]
   },
   {
     "make": "Porsche",
     "model": "Porsche 944 Turbo",
     "year": 1989,
     "pi": 539,
-    "class": "B"
+    "class": "B",
+    "abbreviation": "Porsche 944",
+    "aliases": [
+      "Porsche 944",
+      "P. 944 Turbo '89"
+    ]
   },
   {
     "make": "Porsche",
     "model": "Porsche 959",
     "year": 1987,
     "pi": 661,
-    "class": "A"
+    "class": "A",
+    "abbreviation": "P. 959 '87",
+    "aliases": [
+      "P. 959 '87"
+    ]
   },
   {
     "make": "Porsche",
     "model": "Porsche 968 Turbo S",
     "year": 1993,
     "pi": 594,
-    "class": "B"
+    "class": "B",
+    "abbreviation": "Porsche 968",
+    "aliases": [
+      "Porsche 968",
+      "P. 968 Turbo '93"
+    ]
   },
   {
     "make": "Porsche",
     "model": "Porsche Carrera GT",
     "year": 2003,
     "pi": 758,
-    "class": "S1"
+    "class": "S1",
+    "abbreviation": "Porsche Carrera",
+    "aliases": [
+      "Porsche Carrera",
+      "Carrera GT",
+      "P.CarreraGT '03"
+    ]
   },
   {
     "make": "Porsche",
     "model": "Porsche Cayenne Turbo",
     "year": 2018,
     "pi": 638,
-    "class": "A"
+    "class": "A",
+    "abbreviation": "Porsche Cayenne",
+    "aliases": [
+      "Porsche Cayenne"
+    ]
   },
   {
     "make": "Porsche",
     "model": "Porsche Cayman GT3 WTAC",
     "year": 2005,
     "pi": 856,
-    "class": "S2"
+    "class": "S2",
+    "abbreviation": null,
+    "aliases": []
   },
   {
     "make": "Porsche",
     "model": "Porsche Macan LPR Rally Raid",
     "year": 2018,
     "pi": 528,
-    "class": "B"
+    "class": "B",
+    "abbreviation": "Porsche Macan RR",
+    "aliases": [
+      "Porsche Macan RR"
+    ]
   },
   {
     "make": "Porsche",
     "model": "Porsche Mission R",
     "year": 2022,
     "pi": 865,
-    "class": "S2"
+    "class": "S2",
+    "abbreviation": "Porsche MissionR",
+    "aliases": [
+      "Porsche MissionR"
+    ]
   },
   {
     "make": "Porsche",
     "model": "Porsche Taycan Turbo S",
     "year": 2020,
     "pi": 725,
-    "class": "S1"
+    "class": "S1",
+    "abbreviation": "Porsche Taycan S",
+    "aliases": [
+      "Porsche Taycan S",
+      "P. Taycan '20"
+    ]
   },
   {
     "make": "Radical",
     "model": "Radical RXC Turbo",
     "year": 2015,
     "pi": 842,
-    "class": "S2"
+    "class": "S2",
+    "abbreviation": "Radical RXC",
+    "aliases": [
+      "Radical RXC",
+      "Radical RXC '15"
+    ]
   },
   {
     "make": "Ram",
     "model": "Ram 1500 TRX",
     "year": 2024,
     "pi": 514,
-    "class": "B"
+    "class": "B",
+    "abbreviation": "RAM TRX '24",
+    "aliases": [
+      "RAM TRX '24"
+    ]
   },
   {
     "make": "Reliant",
     "model": "Reliant Supervan III",
     "year": 1972,
     "pi": 100,
-    "class": "D"
+    "class": "D",
+    "abbreviation": "Reliant Supervan",
+    "aliases": [
+      "Reliant Supervan"
+    ]
   },
   {
     "make": "Renault",
     "model": "Renault 5 Turbo",
     "year": 1980,
     "pi": 417,
-    "class": "C"
+    "class": "C",
+    "abbreviation": "Ren. 5 Turbo '80",
+    "aliases": [
+      "Ren. 5 Turbo '80"
+    ]
   },
   {
     "make": "Renault",
     "model": "Renault 8 Gordini",
     "year": 1967,
     "pi": 322,
-    "class": "D"
+    "class": "D",
+    "abbreviation": "Renault 8",
+    "aliases": [
+      "Renault 8",
+      "Ren. 8 G '67"
+    ]
   },
   {
     "make": "Renault",
     "model": "Renault Clio Williams",
     "year": 1993,
     "pi": 400,
-    "class": "D"
+    "class": "D",
+    "abbreviation": "Renault Clio '93",
+    "aliases": [
+      "Renault Clio '93",
+      "Ren. Clio '93"
+    ]
   },
   {
     "make": "Renault",
     "model": "Renault Megane R.S.",
     "year": 2018,
     "pi": 547,
-    "class": "B"
+    "class": "B",
+    "abbreviation": "Megane R.S. '18",
+    "aliases": [
+      "Megane R.S. '18",
+      "Ren. Megane '18"
+    ]
   },
   {
     "make": "Renault",
     "model": "Renault Mégane R26.R",
     "year": 2008,
     "pi": 561,
-    "class": "B"
+    "class": "B",
+    "abbreviation": "Mégane R26.R",
+    "aliases": [
+      "Mégane R26.R",
+      "Ren. Megane '08"
+    ]
   },
   {
     "make": "Renault",
     "model": "Renault Megane RS 250",
     "year": 2010,
     "pi": 538,
-    "class": "B"
+    "class": "B",
+    "abbreviation": "Renault Megane",
+    "aliases": [
+      "Renault Megane"
+    ]
   },
   {
     "make": "Rimac",
     "model": "Rimac Nevera",
     "year": 2021,
     "pi": 913,
-    "class": "R"
+    "class": "R",
+    "abbreviation": "Rimac Nevera '21",
+    "aliases": [
+      "Rimac Nevera '21"
+    ]
   },
   {
     "make": "RIVIAN",
     "model": "RIVIAN R1T",
     "year": 2021,
     "pi": 607,
-    "class": "A"
+    "class": "A",
+    "abbreviation": null,
+    "aliases": []
   },
   {
     "make": "RJ Anderson",
     "model": "RJ Anderson #37 Polaris RZR Pro 2 Truck",
     "year": 2016,
     "pi": 674,
-    "class": "A"
+    "class": "A",
+    "abbreviation": "RJ Pro 2 Truck",
+    "aliases": [
+      "RJ Pro 2 Truck",
+      "#37 Pro 2 Truck"
+    ]
   },
   {
     "make": "RJ Anderson",
     "model": "RJ Anderson #37 Polaris RZR Pro 4 Truck",
     "year": 2021,
     "pi": 677,
-    "class": "A"
+    "class": "A",
+    "abbreviation": "#37 Pro 4 Truck",
+    "aliases": [
+      "#37 Pro 4 Truck"
+    ]
   },
   {
     "make": "Saleen",
     "model": "Saleen S7 LM",
     "year": 2017,
     "pi": 835,
-    "class": "S2"
+    "class": "S2",
+    "abbreviation": null,
+    "aliases": []
   },
   {
     "make": "Schuppan",
     "model": "Schuppan 962CR",
     "year": 1993,
     "pi": 764,
-    "class": "S1"
+    "class": "S1",
+    "abbreviation": null,
+    "aliases": []
   },
   {
     "make": "Shelby",
     "model": "Shelby Cobra 427 S/C",
     "year": 1965,
     "pi": 582,
-    "class": "B"
+    "class": "B",
+    "abbreviation": "Shelby Cobra 427",
+    "aliases": [
+      "Shelby Cobra 427"
+    ]
   },
   {
     "make": "Shelby",
     "model": "Shelby Cobra Daytona Coupe",
     "year": 1965,
     "pi": 515,
-    "class": "B"
+    "class": "B",
+    "abbreviation": "Shelby Daytona",
+    "aliases": [
+      "Shelby Daytona"
+    ]
   },
   {
     "make": "SIERRA Cars",
     "model": "SIERRA Cars #23 Yokohama ALPHA",
     "year": 2020,
     "pi": 926,
-    "class": "R"
+    "class": "R",
+    "abbreviation": "#23 Sierra Alpha",
+    "aliases": [
+      "#23 Sierra Alpha"
+    ]
   },
   {
     "make": "SIERRA Cars",
     "model": "SIERRA Cars 700R",
     "year": 2021,
     "pi": 346,
-    "class": "D"
+    "class": "D",
+    "abbreviation": "SIERRA 700R",
+    "aliases": [
+      "SIERRA 700R"
+    ]
   },
   {
     "make": "SIERRA Cars",
     "model": "SIERRA Cars RX3",
     "year": 2021,
     "pi": 635,
-    "class": "A"
+    "class": "A",
+    "abbreviation": "SIERRA RX3",
+    "aliases": [
+      "SIERRA RX3"
+    ]
   },
   {
     "make": "SRT",
     "model": "SRT Viper GTS",
     "year": 2013,
     "pi": 707,
-    "class": "S1"
+    "class": "S1",
+    "abbreviation": "SRT Viper '13",
+    "aliases": [
+      "SRT Viper '13",
+      "Dodge Viper '13"
+    ]
   },
   {
     "make": "Subaru",
     "model": "Subaru BRAT GL",
     "year": 1980,
     "pi": 159,
-    "class": "D"
+    "class": "D",
+    "abbreviation": "Subaru BRAT",
+    "aliases": [
+      "Subaru BRAT",
+      "SUBARU BRAT GL",
+      "Subaru BRAT DL"
+    ]
   },
   {
     "make": "Subaru",
     "model": "Subaru BRZ",
     "year": 2013,
     "pi": 463,
-    "class": "C"
+    "class": "C",
+    "abbreviation": "SUBARU BRZ '13",
+    "aliases": [
+      "SUBARU BRZ '13",
+      "SUBARU BRZ"
+    ]
   },
   {
     "make": "Subaru",
     "model": "Subaru BRZ",
     "year": 2022,
     "pi": 551,
-    "class": "B"
+    "class": "B",
+    "abbreviation": "SUBARU BRZ '22",
+    "aliases": [
+      "SUBARU BRZ '22"
+    ]
   },
   {
     "make": "Subaru",
     "model": "Subaru BRZ Forza Edition",
     "year": 2022,
     "pi": 700,
-    "class": "A"
+    "class": "A",
+    "abbreviation": "SUBARU BRZ FE",
+    "aliases": [
+      "SUBARU BRZ FE"
+    ]
   },
   {
     "make": "Subaru",
     "model": "Subaru Impreza 22B-STi Version",
     "year": 1998,
     "pi": 600,
-    "class": "B"
+    "class": "B",
+    "abbreviation": "Subaru 22B",
+    "aliases": [
+      "Subaru 22B",
+      "SUBARU 22B '98",
+      "SUBARU Impreza 22B-STi Version",
+      "SUBARU Impreza 22B STi"
+    ]
+  },
+  {
+    "make": "Subaru",
+    "model": "Subaru Impreza 22B-STi Version 'Touge Edition'",
+    "year": 1998,
+    "pi": 600,
+    "class": "B",
+    "abbreviation": "SUBARU 22B TG",
+    "aliases": [
+      "SUBARU 22B TG"
+    ]
   },
   {
     "make": "Subaru",
     "model": "Subaru IMPREZA WRX STI",
     "year": 2004,
     "pi": 552,
-    "class": "B"
+    "class": "B",
+    "abbreviation": "SUBARU WRX '04",
+    "aliases": [
+      "SUBARU WRX '04",
+      "SUBARU IMPREZA WRX STI"
+    ]
   },
   {
     "make": "Subaru",
     "model": "Subaru IMPREZA WRX STI",
     "year": 2005,
     "pi": 570,
-    "class": "B"
+    "class": "B",
+    "abbreviation": "SUBARU WRX '05",
+    "aliases": [
+      "SUBARU WRX '05",
+      "SUBARU Impreza WRX STi"
+    ]
   },
   {
     "make": "Subaru",
     "model": "Subaru IMPREZA WRX STI",
     "year": 2008,
     "pi": 539,
-    "class": "B"
+    "class": "B",
+    "abbreviation": "Subaru WRX '08",
+    "aliases": [
+      "Subaru WRX '08",
+      "SUBARU IMPREZA WRX STI,",
+      "and"
+    ]
   },
   {
     "make": "Subaru",
     "model": "Subaru LEGACY B4 2.0 GT",
     "year": 2005,
     "pi": 549,
-    "class": "B"
+    "class": "B",
+    "abbreviation": null,
+    "aliases": []
   },
   {
     "make": "Subaru",
     "model": "Subaru LEGACY RS",
     "year": 1990,
     "pi": 406,
-    "class": "C"
+    "class": "C",
+    "abbreviation": null,
+    "aliases": []
   },
   {
     "make": "Subaru",
     "model": "Subaru STI S209",
     "year": 2019,
     "pi": 575,
-    "class": "B"
+    "class": "B",
+    "abbreviation": null,
+    "aliases": []
   },
   {
     "make": "Subaru",
     "model": "Subaru SVX",
     "year": 1996,
     "pi": 466,
-    "class": "C"
+    "class": "C",
+    "abbreviation": null,
+    "aliases": []
   },
   {
     "make": "Subaru",
     "model": "Subaru Vivio RX-R",
     "year": 1994,
     "pi": 281,
-    "class": "D"
+    "class": "D",
+    "abbreviation": "SUBARU Vivio '94",
+    "aliases": [
+      "SUBARU Vivio '94"
+    ]
   },
   {
     "make": "Subaru",
     "model": "Subaru Vivio RX-R Forza Edition",
     "year": 1994,
     "pi": 900,
-    "class": "S2"
+    "class": "S2",
+    "abbreviation": "Subaru Vivio FE",
+    "aliases": [
+      "Subaru Vivio FE"
+    ]
   },
   {
     "make": "Subaru",
     "model": "Subaru WRX",
     "year": 2022,
     "pi": 538,
-    "class": "B"
+    "class": "B",
+    "abbreviation": "SUBARU WRX '22",
+    "aliases": [
+      "SUBARU WRX '22"
+    ]
   },
   {
     "make": "Subaru",
     "model": "Subaru WRX STI",
     "year": 2011,
     "pi": 547,
-    "class": "B"
+    "class": "B",
+    "abbreviation": "Subaru WRX '11",
+    "aliases": [
+      "Subaru WRX '11",
+      "SUBARU WRX STI"
+    ]
   },
   {
     "make": "Subaru",
     "model": "Subaru WRX STI",
     "year": 2015,
     "pi": 555,
-    "class": "B"
+    "class": "B",
+    "abbreviation": "SUBARU WRX '15",
+    "aliases": [
+      "SUBARU WRX '15",
+      "SUBARU WRX STI"
+    ]
   },
   {
     "make": "Subaru",
     "model": "Subaru WRX STI ARX Supercar",
     "year": 2018,
     "pi": 758,
-    "class": "S1"
+    "class": "S1",
+    "abbreviation": "Subaru STI ARX",
+    "aliases": [
+      "Subaru STI ARX"
+    ]
   },
   {
     "make": "Toyota",
     "model": "Toyota #1 T100 Baja Truck",
     "year": 1993,
     "pi": 584,
-    "class": "B"
+    "class": "B",
+    "abbreviation": "#1 Toyota Baja",
+    "aliases": [
+      "#1 Toyota Baja"
+    ]
   },
   {
     "make": "Toyota",
     "model": "Toyota 2000GT",
     "year": 1969,
     "pi": 377,
-    "class": "D"
+    "class": "D",
+    "abbreviation": "Toyota 2000 '69",
+    "aliases": [
+      "Toyota 2000 '69"
+    ]
   },
   {
     "make": "Toyota",
     "model": "Toyota 4Runner TRD Pro",
     "year": 2019,
     "pi": 421,
-    "class": "C"
+    "class": "C",
+    "abbreviation": null,
+    "aliases": []
   },
   {
     "make": "Toyota",
     "model": "Toyota 86",
     "year": 2013,
     "pi": 460,
-    "class": "C"
+    "class": "C",
+    "abbreviation": null,
+    "aliases": []
   },
   {
     "make": "Toyota",
     "model": "Toyota 86 'Stories'",
     "year": 2013,
     "pi": 685,
-    "class": "A"
+    "class": "A",
+    "abbreviation": "86 Stories",
+    "aliases": [
+      "86 Stories"
+    ]
   },
   {
     "make": "Toyota",
     "model": "Toyota Altezza RS200 Z EDITION",
     "year": 1999,
     "pi": 461,
-    "class": "C"
+    "class": "C",
+    "abbreviation": "Toy. Altezza '99",
+    "aliases": [
+      "Toy. Altezza '99"
+    ]
   },
   {
     "make": "Toyota",
     "model": "Toyota Camry TRD",
     "year": 2023,
     "pi": 525,
-    "class": "B"
+    "class": "B",
+    "abbreviation": "Toyota Camry '23",
+    "aliases": [
+      "Toyota Camry '23"
+    ]
+  },
+  {
+    "make": "Toyota",
+    "model": "Toyota Celica GT",
+    "year": 1974,
+    "pi": 287,
+    "class": "D",
+    "abbreviation": "Toyota Celica '74",
+    "aliases": [
+      "Toyota Celica '74",
+      "Toyota Celica 74"
+    ]
   },
   {
     "make": "Toyota",
     "model": "Toyota Celica GT-Four RC ST185",
     "year": 1992,
     "pi": 438,
-    "class": "C"
+    "class": "C",
+    "abbreviation": "Toyota Celica '92",
+    "aliases": [
+      "Toyota Celica '92",
+      "Toyota Celica 92"
+    ]
   },
   {
     "make": "Toyota",
     "model": "Toyota Celica GT-Four ST205",
     "year": 1994,
     "pi": 479,
-    "class": "C"
+    "class": "C",
+    "abbreviation": "Toyota Celica '94",
+    "aliases": [
+      "Toyota Celica '94",
+      "Toyota Celica 94"
+    ]
   },
   {
     "make": "Toyota",
     "model": "Toyota Celica Sport Specialty II",
     "year": 2003,
     "pi": 433,
-    "class": "C"
+    "class": "C",
+    "abbreviation": "Toyota Celica '03",
+    "aliases": [
+      "Toyota Celica '03",
+      "Toyota Celica 03",
+      "Toyota Celica SS-I"
+    ]
   },
   {
     "make": "Toyota",
     "model": "Toyota Chaser 2.5 Tourer V",
     "year": 1997,
     "pi": 504,
-    "class": "B"
+    "class": "B",
+    "abbreviation": "Toyota Chaser V",
+    "aliases": [
+      "Toyota Chaser V"
+    ]
   },
   {
     "make": "Toyota",
     "model": "Toyota Chaser GT Twin Turbo",
     "year": 1991,
     "pi": 484,
-    "class": "C"
+    "class": "C",
+    "abbreviation": "Chaser GT TT '91",
+    "aliases": [
+      "Chaser GT TT '91"
+    ]
   },
   {
     "make": "Toyota",
     "model": "Toyota Corolla SR5",
     "year": 1974,
     "pi": 197,
-    "class": "D"
+    "class": "D",
+    "abbreviation": "Toyota Corolla",
+    "aliases": [
+      "Toyota Corolla",
+      "Toyota Corolla74"
+    ]
   },
   {
     "make": "Toyota",
     "model": "Toyota Crown Super Deluxe Taxi",
     "year": 2005,
     "pi": 181,
-    "class": "D"
+    "class": "D",
+    "abbreviation": "T. Crown Taxi",
+    "aliases": [
+      "T. Crown Taxi"
+    ]
   },
   {
     "make": "Toyota",
     "model": "Toyota FJ40",
     "year": 1979,
     "pi": 157,
-    "class": "D"
+    "class": "D",
+    "abbreviation": null,
+    "aliases": []
   },
   {
     "make": "Toyota",
     "model": "Toyota GR Corolla",
     "year": 2023,
     "pi": 596,
-    "class": "B"
+    "class": "B",
+    "abbreviation": "GR Corolla '23",
+    "aliases": [
+      "GR Corolla '23"
+    ]
   },
   {
     "make": "Toyota",
     "model": "Toyota GR Supra",
     "year": 2020,
     "pi": 616,
-    "class": "A"
+    "class": "A",
+    "abbreviation": "Toyota Supra '20",
+    "aliases": [
+      "Toyota Supra '20"
+    ]
   },
   {
     "make": "Toyota",
     "model": "Toyota GR Yaris",
     "year": 2021,
     "pi": 558,
-    "class": "B"
+    "class": "B",
+    "abbreviation": null,
+    "aliases": []
   },
   {
     "make": "Toyota",
     "model": "Toyota GR86",
     "year": 2022,
     "pi": 556,
-    "class": "B"
+    "class": "B",
+    "abbreviation": "Toyota GR86 '22",
+    "aliases": [
+      "Toyota GR86 '22"
+    ]
   },
   {
     "make": "Toyota",
     "model": "Toyota J&J Motorsport Supra WTAC",
     "year": 1995,
     "pi": 828,
-    "class": "S2"
+    "class": "S2",
+    "abbreviation": "JJM Supra WTAC",
+    "aliases": [
+      "JJM Supra WTAC"
+    ]
   },
   {
     "make": "Toyota",
     "model": "Toyota JPN Taxi",
     "year": 2017,
     "pi": 248,
-    "class": "D"
+    "class": "D",
+    "abbreviation": null,
+    "aliases": []
   },
   {
     "make": "Toyota",
     "model": "Toyota Land Cruiser",
     "year": 2025,
     "pi": 456,
-    "class": "C"
+    "class": "C",
+    "abbreviation": null,
+    "aliases": []
   },
   {
     "make": "Toyota",
     "model": "Toyota Land Cruiser Arctic Trucks AT37",
     "year": 2016,
     "pi": 332,
-    "class": "D"
+    "class": "D",
+    "abbreviation": "Toyota AT37",
+    "aliases": [
+      "Toyota AT37"
+    ]
   },
   {
     "make": "Toyota",
     "model": "Toyota MR2 GT",
     "year": 1995,
     "pi": 522,
-    "class": "B"
+    "class": "B",
+    "abbreviation": "Toyota MR2 '95",
+    "aliases": [
+      "Toyota MR2 '95"
+    ]
   },
   {
     "make": "Toyota",
     "model": "Toyota MR2 SC",
     "year": 1989,
     "pi": 397,
-    "class": "D"
+    "class": "D",
+    "abbreviation": "Toyota MR2 '89",
+    "aliases": [
+      "Toyota MR2 '89"
+    ]
+  },
+  {
+    "make": "Toyota",
+    "model": "Toyota Prius Prime XSE Premium",
+    "year": 2024,
+    "pi": 472,
+    "class": "C",
+    "abbreviation": "Toyota Prius '24",
+    "aliases": [
+      "Toyota Prius '24"
+    ]
   },
   {
     "make": "Toyota",
     "model": "Toyota Sera",
     "year": 1991,
     "pi": 344,
-    "class": "D"
+    "class": "D",
+    "abbreviation": "Toyota Sera '91",
+    "aliases": [
+      "Toyota Sera '91"
+    ]
   },
   {
     "make": "Toyota",
     "model": "Toyota Soarer 2.5 GT-T",
     "year": 1997,
     "pi": 491,
-    "class": "C"
+    "class": "C",
+    "abbreviation": "Soarer '97",
+    "aliases": [
+      "Soarer '97"
+    ]
   },
   {
     "make": "Toyota",
     "model": "Toyota Sports 800",
     "year": 1965,
     "pi": 141,
-    "class": "D"
+    "class": "D",
+    "abbreviation": null,
+    "aliases": []
   },
   {
     "make": "Toyota",
     "model": "Toyota Sports 800 Fanta Edition",
     "year": 1965,
     "pi": 141,
-    "class": "D"
+    "class": "D",
+    "abbreviation": "Sports 800 FE",
+    "aliases": [
+      "Sports 800 FE"
+    ]
   },
   {
     "make": "Toyota",
     "model": "Toyota Sprinter Trueno GT Apex",
     "year": 1985,
     "pi": 376,
-    "class": "D"
+    "class": "D",
+    "abbreviation": "Toyota Trueno",
+    "aliases": [
+      "Toyota Trueno",
+      "Toyota AE86 '85"
+    ]
+  },
+  {
+    "make": "Toyota",
+    "model": "Toyota Sprinter Trueno GT Apex 'Touge Edition'",
+    "year": 1985,
+    "pi": 412,
+    "class": "C",
+    "abbreviation": "Toyota AE86 TG",
+    "aliases": [
+      "Toyota AE86 TG"
+    ]
   },
   {
     "make": "Toyota",
     "model": "Toyota Sprinter Trueno GT-APEX Forza Edition",
     "year": 1985,
     "pi": 600,
-    "class": "B"
+    "class": "B",
+    "abbreviation": "Toyota AE86 FE",
+    "aliases": [
+      "Toyota AE86 FE"
+    ]
   },
   {
     "make": "Toyota",
     "model": "Toyota Starlet Glanza V",
     "year": 1996,
     "pi": 435,
-    "class": "C"
+    "class": "C",
+    "abbreviation": "Toy. Starlet '96",
+    "aliases": [
+      "Toy. Starlet '96"
+    ]
   },
   {
     "make": "Toyota",
     "model": "Toyota Supra 2.0 GT",
     "year": 1992,
     "pi": 454,
-    "class": "C"
+    "class": "C",
+    "abbreviation": "Toyota Supra '92",
+    "aliases": [
+      "Toyota Supra '92",
+      "Toyota Supra 2.0 GT Twin Turbo"
+    ]
   },
   {
     "make": "Toyota",
     "model": "Toyota Supra RZ",
     "year": 1998,
     "pi": 526,
-    "class": "B"
+    "class": "B",
+    "abbreviation": "Toyota Supra '98",
+    "aliases": [
+      "Toyota Supra '98"
+    ]
   },
   {
     "make": "Toyota",
     "model": "Toyota Tacoma TRD Pro",
     "year": 2019,
     "pi": 409,
-    "class": "C"
+    "class": "C",
+    "abbreviation": "Toyota Tacoma",
+    "aliases": [
+      "Toyota Tacoma"
+    ]
   },
   {
     "make": "Toyota",
     "model": "Toyota Tacoma TRD Pro Forza Edition",
     "year": 2019,
     "pi": 998,
-    "class": "R"
+    "class": "R",
+    "abbreviation": "Tacoma FE",
+    "aliases": [
+      "Tacoma FE"
+    ]
   },
   {
     "make": "TVR",
     "model": "TVR Cerbera Speed 12",
     "year": 1998,
     "pi": 770,
-    "class": "S1"
+    "class": "S1",
+    "abbreviation": "TVR Speed 12",
+    "aliases": [
+      "TVR Speed 12"
+    ]
   },
   {
     "make": "TVR",
     "model": "TVR Griffith",
     "year": 2018,
     "pi": 729,
-    "class": "S1"
+    "class": "S1",
+    "abbreviation": "TVR Grifith '18",
+    "aliases": [
+      "TVR Grifith '18"
+    ]
   },
   {
     "make": "TVR",
     "model": "TVR Sagaris",
     "year": 2005,
     "pi": 672,
-    "class": "A"
+    "class": "A",
+    "abbreviation": null,
+    "aliases": []
   },
   {
     "make": "Ultima",
     "model": "Ultima Evolution Coupe 1020",
     "year": 2015,
     "pi": 925,
-    "class": "R"
+    "class": "R",
+    "abbreviation": "Ultima 1020 '15",
+    "aliases": [
+      "Ultima 1020 '15",
+      "Ultima 1020",
+      "Ultima Evo '15"
+    ]
   },
   {
     "make": "Volkswagen",
     "model": "Volkswagen #34 Volkswagen Andretti Rally Cross Beetle",
     "year": 2017,
     "pi": 764,
-    "class": "S1"
+    "class": "S1",
+    "abbreviation": "#34 Beetle",
+    "aliases": [
+      "#34 Beetle"
+    ]
   },
   {
     "make": "Volkswagen",
     "model": "Volkswagen Beetle",
     "year": 1963,
     "pi": 100,
-    "class": "D"
+    "class": "D",
+    "abbreviation": null,
+    "aliases": []
   },
   {
     "make": "Volkswagen",
     "model": "Volkswagen Class 5/1600 Baja Bug",
     "year": 1969,
     "pi": 260,
-    "class": "D"
+    "class": "D",
+    "abbreviation": "VW Class 5 Bug",
+    "aliases": [
+      "VW Class 5 Bug"
+    ]
   },
   {
     "make": "Volkswagen",
     "model": "Volkswagen Corrado VR6",
     "year": 1995,
     "pi": 426,
-    "class": "C"
+    "class": "C",
+    "abbreviation": "VW Corrado",
+    "aliases": [
+      "VW Corrado",
+      "VW Corrado '95"
+    ]
   },
   {
     "make": "Volkswagen",
     "model": "Volkswagen Golf GTI",
     "year": 1983,
     "pi": 314,
-    "class": "D"
+    "class": "D",
+    "abbreviation": "VW Golf GTI '83",
+    "aliases": [
+      "VW Golf GTI '83",
+      "VW GTI Mk1 '83"
+    ]
   },
   {
     "make": "Volkswagen",
     "model": "Volkswagen Golf Gti 16v Mk2",
     "year": 1992,
     "pi": 308,
-    "class": "D"
+    "class": "D",
+    "abbreviation": "VW Golf '92",
+    "aliases": [
+      "VW Golf '92",
+      "VW Golf GTi Mk2",
+      "VW GTI Mk2 '92"
+    ]
   },
   {
     "make": "Volkswagen",
     "model": "Volkswagen Golf R",
     "year": 2010,
     "pi": 526,
-    "class": "B"
+    "class": "B",
+    "abbreviation": "VW Golf '10",
+    "aliases": [
+      "VW Golf '10"
+    ]
   },
   {
     "make": "Volkswagen",
     "model": "Volkswagen Golf R",
     "year": 2014,
     "pi": 536,
-    "class": "B"
+    "class": "B",
+    "abbreviation": "VW Golf '14",
+    "aliases": [
+      "VW Golf '14",
+      "VW Golf R '14"
+    ]
   },
   {
     "make": "Volkswagen",
     "model": "Volkswagen Golf R",
     "year": 2021,
     "pi": 546,
-    "class": "B"
+    "class": "B",
+    "abbreviation": "VW Golf R '21",
+    "aliases": [
+      "VW Golf R '21"
+    ]
   },
   {
     "make": "Volkswagen",
     "model": "Volkswagen Golf R",
     "year": 2022,
     "pi": 548,
-    "class": "B"
+    "class": "B",
+    "abbreviation": "VW Golf R '22",
+    "aliases": [
+      "VW Golf R '22"
+    ]
   },
   {
     "make": "Volkswagen",
     "model": "Volkswagen Pickup LX",
     "year": 1982,
     "pi": 100,
-    "class": "D"
+    "class": "D",
+    "abbreviation": "VW Pickup '82",
+    "aliases": [
+      "VW Pickup '82"
+    ]
   },
   {
     "make": "Volkswagen",
     "model": "Volkswagen Rallye Golf",
     "year": 1989,
     "pi": 440,
-    "class": "C"
+    "class": "C",
+    "abbreviation": "VW Rallye Golf",
+    "aliases": [
+      "VW Rallye Golf"
+    ]
   },
   {
     "make": "Volkswagen",
     "model": "Volkswagen Scirocco R",
     "year": 2011,
     "pi": 548,
-    "class": "B"
+    "class": "B",
+    "abbreviation": "VW Scirocco '11",
+    "aliases": [
+      "VW Scirocco '11"
+    ]
   },
   {
     "make": "Volkswagen",
     "model": "Volkswagen Type 2 De Luxe",
     "year": 1963,
     "pi": 100,
-    "class": "D"
+    "class": "D",
+    "abbreviation": "VW Type 2",
+    "aliases": [
+      "VW Type 2"
+    ]
   },
   {
     "make": "Volvo",
     "model": "Volvo 242 Turbo Evolution",
     "year": 1983,
     "pi": 435,
-    "class": "C"
+    "class": "C",
+    "abbreviation": "Volvo 242 Turbo",
+    "aliases": [
+      "Volvo 242 Turbo"
+    ]
   },
   {
     "make": "Wuling",
     "model": "Wuling Hongguang Mini EV",
     "year": 2022,
     "pi": 100,
-    "class": "D"
+    "class": "D",
+    "abbreviation": "Wuling Mini EV",
+    "aliases": [
+      "Wuling Mini EV"
+    ]
   },
   {
     "make": "Wuling",
     "model": "Wuling Sunshine S",
     "year": 2013,
     "pi": 107,
-    "class": "D"
+    "class": "D",
+    "abbreviation": null,
+    "aliases": []
   },
   {
     "make": "Wuling",
     "model": "Wuling Sunshine S Forza Edition",
     "year": 2020,
     "pi": 800,
-    "class": "S1"
+    "class": "S1",
+    "abbreviation": "Sunshine FE",
+    "aliases": [
+      "Sunshine FE"
+    ]
   },
   {
     "make": "Zenvo",
     "model": "Zenvo TSR-S",
     "year": 2019,
     "pi": 906,
-    "class": "R"
+    "class": "R",
+    "abbreviation": null,
+    "aliases": []
   }
 ]

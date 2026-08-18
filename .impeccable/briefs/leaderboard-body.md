@@ -2,7 +2,7 @@
 
 - **Mode:** Operate
 - **Audience:** Racers and guests opening Ladder in Discord Activity or on forza.events
-- **Job:** Scan the global rated field. A signed-in driver also sees their standing (and ranked-race log when they have races), then the field. Last-race titles open Event Detail (`/event/:id`).
+- **Job:** Scan the global rated field. A signed-in driver also sees their standing (and ranked-race log when they have races), then the field. Last-race titles open Event Detail (`/event/:slug`; UUID still resolves).
 - **Direction:** Comp C timing tower (seed `bfea84de`) + driver avatars + one-row status plate. Approved: `.impeccable/mocks/leaderboard-comp-c-tower.png`. Memorable moment: a hairline board you scan like a tower — not a trophy podium and not a second Profile.
 - **Keep:** Neon Pits (Panel, 10px tracked caps labels, violet interaction). No page H1 and no subtitle (nav already says Ladder). Guest access. No provisional asterisk or footnote.
 - **Anti-goals:** trophies/podium, page-level “LADDER” heading, invented sidebar items from the comp, last-race as cover EventCards, giant hero metrics

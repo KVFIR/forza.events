@@ -182,6 +182,7 @@ describe('patchEventAfterSelfJoin', () => {
           gamertag: 'Old',
           participationSource: 'host_assigned' as const,
           isConvoyLeader: true,
+          rating: 1514,
         },
         {discordId: 'u2', username: 'B', gamertag: 'GT2', participationSource: 'self_join' as const},
       ],
@@ -190,6 +191,7 @@ describe('patchEventAfterSelfJoin', () => {
     expect(next.currentPlayers).toBe(2);
     expect(next.participants[0]?.gamertag).toBe('NewGT');
     expect(next.participants[0]?.participationSource).toBe('host_assigned');
+    expect(next.participants[0]?.rating).toBe(1514);
   });
 
   it('does not exceed maxPlayers when incrementing', () => {

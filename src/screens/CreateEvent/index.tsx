@@ -8,6 +8,7 @@ import {PublishedTargetSummary} from './components/PublishedTargetSummary';
 import {PUBLISH_STEP_INDEX} from './constants';
 import {useEffect, useRef, useState} from 'react';
 import {useCreateEventForm} from './useCreateEventForm';
+import {eventDetailPath} from '@edge/eventPath.ts';
 import {EventStep} from './steps/EventStep';
 import {PublishStep} from './steps/PublishStep';
 import {SignInRequiredState} from '../../components/SignInRequiredState';
@@ -123,9 +124,9 @@ export function CreateEvent() {
   }
 
   async function handleSaveDraft() {
-    const id = await persistDraft();
-    if (!id) return;
-    navigate(`/event/${id}`, {replace: true, state: {from: '/my-events'}});
+    const saved = await persistDraft();
+    if (!saved) return;
+    navigate(eventDetailPath(saved), {replace: true, state: {from: '/my-events'}});
   }
 
   function requestSaveChanges() {
@@ -137,9 +138,9 @@ export function CreateEvent() {
   }
 
   async function handleSaveChanges() {
-    const id = await persistDraft();
-    if (!id) return;
-    navigate(isPublished ? `/event/${id}` : '/my-events', {
+    const saved = await persistDraft();
+    if (!saved) return;
+    navigate(isPublished ? eventDetailPath(saved) : '/my-events', {
       replace: true,
       ...(isPublished ? {state: {from: '/my-events'}} : {}),
     });
@@ -160,10 +161,10 @@ export function CreateEvent() {
     if (publishingRef.current) return;
     publishingRef.current = true;
     try {
-      const id = await persistDraft();
-      if (!id || !token) return;
-      setEventId(id);
-      await confirmPublish(id);
+      const saved = await persistDraft();
+      if (!saved || !token) return;
+      setEventId(saved.id);
+      await confirmPublish(saved);
     } finally {
       publishingRef.current = false;
     }
@@ -175,10 +176,10 @@ export function CreateEvent() {
         setShowPublishModal(false);
         return;
       }
-      const id = await persistDraft();
-      if (!id) return;
+      const saved = await persistDraft();
+      if (!saved) return;
       if (!values.targetChannelId) return;
-      await confirmPublish(id);
+      await confirmPublish(saved);
     })();
   }
 

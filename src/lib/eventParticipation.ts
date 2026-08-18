@@ -100,6 +100,7 @@ export function patchEventAfterSelfJoin(
     groupIndex,
     waitlisted,
     joinedAt: existing?.joinedAt ?? new Date().toISOString(),
+    rating: existing?.rating,
   };
 
   const participants =

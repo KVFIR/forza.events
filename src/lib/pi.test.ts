@@ -3,11 +3,15 @@ import {
   FH6_CLASS_BANDS,
   PI_MAX,
   PI_MIN,
+  classRangeLabel,
   clampPi,
   formatMaxPi,
+  formatPiRange,
   isPiInRange,
   piRangeI18nParams,
   piToClass,
+  restrictedCarsClassRange,
+  restrictedCarsPiBounds,
 } from './pi';
 
 describe('piToClass', () => {
@@ -43,6 +47,32 @@ describe('PI limits', () => {
     expect(formatMaxPi(998)).toBe('R 998');
     expect(formatMaxPi(999)).toBe('X 999');
     expect(formatMaxPi(900)).toBe('S2 900');
+  });
+
+  it('formatPiRange omits a repeated class letter', () => {
+    expect(formatPiRange(600, 600)).toBe('B 600');
+    expect(formatPiRange(520, 600)).toBe('B 520–600');
+    expect(formatPiRange(600, 765)).toBe('B 600–S1 765');
+    expect(formatPiRange(600, 600, 'fh5')).toBe('C 600');
+  });
+
+  it('classRangeLabel collapses a single band', () => {
+    expect(classRangeLabel(501, 600)).toBe('B');
+    expect(classRangeLabel(501, 800)).toBe('B–S1');
+  });
+
+  it('restrictedCarsClassRange reads maxPi span', () => {
+    expect(restrictedCarsClassRange([])).toBeNull();
+    expect(restrictedCarsClassRange([{maxPi: 600}, {maxPi: 600}])).toBe('B');
+    expect(restrictedCarsClassRange([{maxPi: 600}, {maxPi: 765}])).toBe('B–S1');
+  });
+
+  it('restrictedCarsPiBounds returns min and max', () => {
+    expect(restrictedCarsPiBounds([])).toBeNull();
+    expect(restrictedCarsPiBounds([{maxPi: 600}, {maxPi: 765}])).toEqual({
+      minPi: 600,
+      maxPi: 765,
+    });
   });
 
   it('piRangeI18nParams matches caps', () => {

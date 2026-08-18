@@ -22,6 +22,8 @@ export interface EventAllowedCar {
   make: string;
   model: string;
   year?: number | null;
+  /** Wiki HUD name when known. */
+  abbreviation?: string | null;
   pi: number;
   maxPi: number;
   tuneShareCode?: string;
@@ -43,6 +45,8 @@ export interface EventParticipant {
   waitlisted?: boolean;
   /** Queue ordering — oldest first when waitlisted. */
   joinedAt?: string;
+  /** Global ELO when the driver has at least one rated race. */
+  rating?: number;
 }
 
 export interface ForzaEvent {

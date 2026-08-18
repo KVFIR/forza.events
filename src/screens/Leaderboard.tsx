@@ -15,6 +15,7 @@ import {
   type LeaderboardViewer,
 } from '../lib/api';
 import {formatEventStart} from '../lib/datetime';
+import {eventDetailPath} from '@edge/eventPath.ts';
 import {formatDiscordHandle} from '../lib/discordHandle';
 import {cn} from '../lib/cn';
 import {sectionLabelClass} from '../components/ui/formStyles';
@@ -70,7 +71,7 @@ function LastRaceLink({
   }
   return (
     <TextLink
-      to={`/event/${race.eventId}`}
+      to={eventDetailPath({id: race.eventId, slug: race.slug})}
       tone="subtle"
       className={cn('block min-w-0 truncate text-sm', className)}
     >

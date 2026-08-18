@@ -22,6 +22,7 @@ import {useResolveEventDisplayStatus} from '../../hooks/useResolveEventDisplaySt
 import {useEventDetailParticipation} from '../../hooks/useEventDetailParticipation';
 import {useDebouncedCallback} from '../../hooks/useDebouncedCallback';
 import {useEventLiveUpdates} from '../../hooks/useEventLiveUpdates';
+import {isEventUuid} from '@edge/eventPath.ts';
 import {fetchEventById} from '../../lib/events';
 import {buildEventDetailViewModel} from './eventDetailView';
 import {trackOnce} from '../../lib/analytics';
@@ -70,7 +71,7 @@ export function EventDetail() {
       .then((ev) => {
         if (ev) {
           setEvent(ev);
-          clearLobbyPatch(id);
+          clearLobbyPatch(ev.id);
         }
       })
       .catch((err) => console.error('syncEventFromServer', err));
@@ -97,10 +98,10 @@ export function EventDetail() {
 
   const debouncedReloadEvent = useDebouncedCallback(reloadEvent, 400);
 
-  useEventLiveUpdates(id, debouncedReloadEvent);
+  useEventLiveUpdates(event?.id ?? (id && isEventUuid(id) ? id : undefined), debouncedReloadEvent);
 
   const {resultRows, resultsLoadFailed, retryResultsLoad} = useEventDetailResults({
-    eventId: id,
+    routeKey: id,
     event,
     routeState,
     refreshKey,
@@ -288,11 +289,18 @@ export function EventDetail() {
         viewerDiscordId={user.discordId}
       />
 
-      <EventDetailInfoPanel event={event} when={view.when} />
+      <EventDetailInfoPanel
+        event={event}
+        when={view.when}
+        showJoinXboxHint={view.showJoinXboxHint}
+        joinXboxLeader={view.viewerConvoyLeader?.gamertag}
+        showConvoyLeaderXboxHint={view.showConvoyLeaderXboxHint}
+      />
 
       <EventDetailDescription description={event.description ?? ''} />
 
       <EventDetailParticipants
+        key={event.id}
         view={view}
         viewerDiscordId={user.discordId}
         accessToken={discordToken}

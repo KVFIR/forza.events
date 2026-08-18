@@ -1,5 +1,5 @@
 import './App.css';
-import {lazy, Suspense} from 'react';
+import {lazy, Suspense, useEffect, type ReactNode} from 'react';
 import {useTranslation} from 'react-i18next';
 import {
   createBrowserRouter,
@@ -21,7 +21,6 @@ import {DiscordRichPresenceProvider} from './context/DiscordRichPresenceContext'
 import {JoinedEventsProvider} from './context/JoinedEventsContext';
 import {PageMetaProvider} from './context/PageMetaContext';
 import {DiscordRichPresenceSync} from './components/DiscordRichPresenceSync';
-import type {ReactNode} from 'react';
 import {PageLoading} from './components/ui/PageLoading';
 import {useBrowserSignInGate} from './hooks/useBrowserSignInGate';
 import {isPublicLegalBrowserPath} from './lib/publicLegalPaths';
@@ -79,7 +78,7 @@ function AppShell({children}: {children: ReactNode}) {
   }
 
   return (
-    <div className="min-h-screen" data-discord-layout="focused">
+    <div className="min-h-screen overflow-x-clip" data-discord-layout="focused">
       {children}
     </div>
   );
@@ -88,6 +87,13 @@ function AppShell({children}: {children: ReactNode}) {
 function AppRoutes() {
   const location = useLocation();
   const {isSignedIn} = useAuth();
+
+  useEffect(() => {
+    history.scrollRestoration = 'manual';
+    if (location.hash) return;
+    window.scrollTo({top: 0, left: 0, behavior: 'auto'});
+  }, [location.pathname, location.hash]);
+
   const signInGate = useBrowserSignInGate();
   const isLegalPage = isPublicLegalBrowserPath(location.pathname);
   const isAnalyticsPage = isLocalAnalyticsDashboardPath(location.pathname);

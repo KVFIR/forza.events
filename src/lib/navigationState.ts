@@ -1,8 +1,9 @@
 import type {EventResultRow, EventResultsFetchOutcome} from './events';
 import {sanitizeReferrer} from './returnTo';
+import {eventMatchesRouteKey} from '@edge/eventPath.ts';
 import type {ForzaEvent} from './types';
 
-/** `location.state` for `/event/:id` (seeded after host submit). */
+/** `location.state` for `/event/:slug` or `/event/:id` (seeded after host submit). */
 export type EventDetailLocationState = {
   event?: ForzaEvent;
   /** Set when returning from submit with a successful results read. */
@@ -13,9 +14,9 @@ export type EventDetailLocationState = {
 
 export function eventDetailRouteSeed(
   state: EventDetailLocationState | null | undefined,
-  eventId: string,
+  routeKey: string,
 ): {event: ForzaEvent; resultRows?: EventResultRow[]} | null {
-  if (!state?.event || state.event.id !== eventId) return null;
+  if (!state?.event || !eventMatchesRouteKey(state.event, routeKey)) return null;
   return {
     event: state.event,
     ...(state.resultRows !== undefined ? {resultRows: state.resultRows} : {}),

@@ -44,7 +44,7 @@ describe('mapViewerRaces', () => {
           event_id: 'e1',
           delta: 14,
           rating_after: 1514,
-          events: {title: 'Night Circuit', starts_at: '2026-05-01T18:00:00Z'},
+          events: {title: 'Night Circuit', starts_at: '2026-05-01T18:00:00Z', slug: 'night-circuit-20260501'},
         },
         {
           event_id: 'e2',
@@ -60,6 +60,7 @@ describe('mapViewerRaces', () => {
         startsAt: '2026-05-01T18:00:00Z',
         delta: 14,
         ratingAfter: 1514,
+        slug: 'night-circuit-20260501',
       },
       {
         eventId: 'e2',

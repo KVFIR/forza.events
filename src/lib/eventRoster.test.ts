@@ -76,6 +76,7 @@ describe('resolveConvoyLeader', () => {
           gamertag: 'HostGT',
           isConvoyLeader: true,
           participationSource: 'host_self_assigned',
+          rating: 1514,
         }),
         participant({discordId: 'p2', gamertag: 'BGT'}),
       ],
@@ -84,6 +85,7 @@ describe('resolveConvoyLeader', () => {
     expect(convoy?.discordId).toBe('host-1');
     expect(convoy?.gamertag).toBe('HostGT');
     expect(convoy?.username).toBe('Host');
+    expect(convoy?.rating).toBe(1514);
   });
 
   it('resolves discord handle for assigned leader without duplicating gamertag', () => {

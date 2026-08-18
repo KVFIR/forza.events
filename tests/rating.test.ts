@@ -45,6 +45,14 @@ describe('driverRatingFromRow', () => {
       provisional: true,
     });
   });
+
+  it('nestedRatingNumber unwraps object or one-row array', async () => {
+    const {nestedRatingNumber} = await import('@edge/driverRatingPayload.ts');
+    expect(nestedRatingNumber(null)).toBeUndefined();
+    expect(nestedRatingNumber({rating: 1000, games_rated: 0})).toBeUndefined();
+    expect(nestedRatingNumber({rating: 1514, games_rated: 3})).toBe(1514);
+    expect(nestedRatingNumber([{rating: 1514, games_rated: 3}])).toBe(1514);
+  });
 });
 
 describe('orderRatedDrivers', () => {

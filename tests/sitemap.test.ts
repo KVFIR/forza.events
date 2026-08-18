@@ -32,6 +32,7 @@ describe('sitemap', () => {
       events: [
         {
           id: '94d86ab7-ce55-49f8-84e3-91f3b9a7b39c',
+          slug: 'sunset-sprint-20260714',
           updated_at: '2026-07-14T10:00:00.000Z',
         },
       ],
@@ -40,10 +41,30 @@ describe('sitemap', () => {
     expect(xml).toContain('<loc>https://forza.events/</loc>');
     expect(xml).toContain('<loc>https://forza.events/terms</loc>');
     expect(xml).toContain('<loc>https://forza.events/privacy</loc>');
+    expect(xml).toContain('<loc>https://forza.events/event/sunset-sprint-20260714</loc>');
+    expect(xml).toContain('<lastmod>2026-07-14</lastmod>');
+  });
+
+  it('sitemap falls back to id when slug is missing', () => {
+    const xml = buildSitemapXml({
+      siteOrigin: origin,
+      staticPaths: [],
+      events: [{id: '94d86ab7-ce55-49f8-84e3-91f3b9a7b39c'}],
+    });
     expect(xml).toContain(
       '<loc>https://forza.events/event/94d86ab7-ce55-49f8-84e3-91f3b9a7b39c</loc>',
     );
-    expect(xml).toContain('<lastmod>2026-07-14</lastmod>');
+  });
+
+  it('percent-encodes unicode slugs in loc', () => {
+    const xml = buildSitemapXml({
+      siteOrigin: origin,
+      staticPaths: [],
+      events: [{id: '94d86ab7-ce55-49f8-84e3-91f3b9a7b39c', slug: 'летний-круиз-20260818'}],
+    });
+    expect(xml).toContain(
+      `<loc>https://forza.events/event/${encodeURIComponent('летний-круиз-20260818')}</loc>`,
+    );
   });
 });
 

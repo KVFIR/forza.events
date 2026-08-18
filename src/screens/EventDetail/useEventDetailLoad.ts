@@ -1,5 +1,6 @@
 import {useEffect, useMemo, useRef, useState} from 'react';
 import {fetchEventById} from '../../lib/events';
+import {eventMatchesRouteKey} from '@edge/eventPath.ts';
 import {mergeOptimisticEventPatch, type EventLobbyPatch} from '../../lib/eventParticipation';
 import type {ForzaEvent} from '../../lib/types';
 
@@ -17,9 +18,8 @@ export function useEventDetailLoad(input: {
   const fetchSeqRef = useRef(0);
 
   const displayEvent = useMemo(
-    () =>
-      event && id ? mergeOptimisticEventPatch(event, getLobbyPatch(id)) : undefined,
-    [event, id, getLobbyPatch],
+    () => (event ? mergeOptimisticEventPatch(event, getLobbyPatch(event.id)) : undefined),
+    [event, getLobbyPatch],
   );
 
   useEffect(() => {
@@ -29,7 +29,7 @@ export function useEventDetailLoad(input: {
 
     if (idChanged) {
       loadedForIdRef.current = id;
-      setEvent(routeEvent?.id === id ? routeEvent : undefined);
+      setEvent(routeEvent && eventMatchesRouteKey(routeEvent, id) ? routeEvent : undefined);
       setLoading(true);
     }
 
@@ -38,7 +38,7 @@ export function useEventDetailLoad(input: {
         if (fetchSeqRef.current !== seq) return;
         if (ev) {
           setEvent(ev);
-        } else if (!routeEvent || routeEvent.id !== id) {
+        } else if (!routeEvent || !eventMatchesRouteKey(routeEvent, id)) {
           setEvent(undefined);
         }
       })

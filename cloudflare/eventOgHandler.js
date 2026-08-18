@@ -12,16 +12,20 @@ import {resolveDefaultOgImage, buildStaticCrawlerBody} from '../shared/sitePageM
 
 const DEFAULT_SUPABASE_ORIGIN = 'https://uoysqfczahqmctbrrizn.supabase.co';
 
-async function fetchPublishedEvent(eventId, env) {
+function postgrestEq(value) {
+  return `eq."${String(value).replace(/\\/g, '\\\\').replace(/"/g, '\\"')}"`;
+}
+
+async function fetchPublishedEvent(eventKey, isUuid, env) {
   const anonKey = env.SUPABASE_ANON_KEY?.trim();
   if (!anonKey) return {kind: 'error', reason: 'missing_key'};
 
   const origin = (env.SUPABASE_ORIGIN || DEFAULT_SUPABASE_ORIGIN).replace(/\/$/, '');
   const params = new URLSearchParams({
-    id: `eq.${eventId}`,
+    [isUuid ? 'id' : 'slug']: postgrestEq(eventKey),
     status: 'neq.draft',
     discord_message_id: 'not.is.null',
-    select: 'id,title,type,cover_image_url,starts_at,current_players,max_players,status',
+    select: 'id,slug,title,type,cover_image_url,starts_at,current_players,max_players,status',
   });
 
   try {
@@ -93,7 +97,7 @@ export async function handleEventRoute(request, env) {
   }
 
   const pageUrl = `${siteOrigin(env)}${url.pathname}`;
-  const outcome = await fetchPublishedEvent(parsed.eventId, env);
+  const outcome = await fetchPublishedEvent(parsed.eventId, parsed.isUuid, env);
   if (outcome.kind === 'error') {
     return errorHtml(pageUrl, env);
   }
@@ -101,9 +105,11 @@ export async function handleEventRoute(request, env) {
     return notFoundHtml(pageUrl, env);
   }
 
+  const slug = typeof outcome.event.slug === 'string' ? outcome.event.slug.trim() : '';
+  const canonicalUrl = `${siteOrigin(env)}/event/${encodeURIComponent(slug || parsed.eventId)}${parsed.isResults ? '/results' : ''}`;
   const meta = buildEventPageMeta(outcome.event, {
     siteOrigin: siteOrigin(env),
-    pageUrl,
+    pageUrl: canonicalUrl,
     isResults: parsed.isResults,
   });
   const jsonLd = buildEventJsonLd(outcome.event, meta, {siteOrigin: siteOrigin(env)});

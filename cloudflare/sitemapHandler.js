@@ -12,7 +12,7 @@ async function fetchPublishedEventsForSitemap(env) {
   const params = new URLSearchParams({
     status: 'neq.draft',
     discord_message_id: 'not.is.null',
-    select: 'id,updated_at,starts_at',
+    select: 'id,slug,updated_at,starts_at',
     order: 'starts_at.desc',
     limit: String(SITEMAP_EVENT_LIMIT),
   });

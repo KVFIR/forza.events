@@ -111,6 +111,7 @@ export function BrowseEvents() {
         isRefreshing={isRefreshing}
         loadError={loadError}
         onRetry={refetch}
+        cardDensity="cover"
         emptyTitle={loadError ? errorTitle : emptyTitle}
         emptyDescription={loadError ? errorDescription : undefined}
         emptyAction={

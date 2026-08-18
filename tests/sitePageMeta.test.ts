@@ -55,7 +55,8 @@ describe('sitePageMeta parity', () => {
     expect(isEventPagePath(`/event/${id}`)).toBe(true);
     expect(isEventPagePath(`/event/${id}/results`)).toBe(true);
     expect(isEventPagePath(`/event/${id}/results/`)).toBe(true);
-    expect(isEventPagePath('/event/not-a-uuid')).toBe(false);
+    expect(isEventPagePath('/event/sunset-sprint-20260715')).toBe(true);
+    expect(isEventPagePath('/event/sunset-sprint-20260715/results')).toBe(true);
     expect(isEventPagePath('/create')).toBe(false);
   });
 });

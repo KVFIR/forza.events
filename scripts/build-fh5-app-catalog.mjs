@@ -2,7 +2,7 @@
 /**
  * Build app car catalog (supabase/seed/fh5cars.json) from scraped Fandom data.
  *
- * Schema: { make, model, year, pi, class }
+ * Schema: { make, model, year, pi, class, abbreviation, aliases }
  * - model: display name without year
  * - class: PI band via FH5 rules (src/lib/pi.ts)
  *
@@ -11,7 +11,7 @@
 import {readFileSync, writeFileSync} from 'node:fs';
 import {dirname, join} from 'node:path';
 import {fileURLToPath} from 'node:url';
-import {PI_MAX, PI_MIN, piToClassFh5, stripYearFromModelTitle} from './catalogModelUtils.mjs';
+import {PI_MAX, PI_MIN, piToClassFh5, stripYearFromModelTitle, catalogAliases, filterRaceNumberAliases} from './catalogModelUtils.mjs';
 
 const root = dirname(fileURLToPath(import.meta.url));
 const inputPath = process.argv[2] ?? join(root, '../data/fh5_fandom_cars.json');
@@ -84,12 +84,15 @@ function catalogRow(car, duplicateVehicles) {
   const model = catalogModelName(car, duplicateVehicles);
   if (!make || !model) return null;
 
+  const aliases = filterRaceNumberAliases(model, catalogAliases(car));
   return {
     make,
     model,
     year: parseYear(car.year),
     pi,
     class: piToClassFh5(pi),
+    abbreviation: aliases[0] ?? null,
+    aliases,
   };
 }
 

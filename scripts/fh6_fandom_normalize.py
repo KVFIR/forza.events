@@ -4,6 +4,7 @@
 from __future__ import annotations
 
 import re
+from html import unescape
 
 from fh6_fandom_mappings import (
     ASPIRATION,
@@ -14,6 +15,37 @@ from fh6_fandom_mappings import (
     NAV_MAKE,
     format_drivetrain,
 )
+
+# Keep in sync with parseWikiAbbreviations in supabase/functions/_shared/carAbbreviation.ts
+_ABBREV_LEAD = re.compile(
+    r"abbreviated\s+as\s+(.+?)(?:\s*[-–—]\s+is\b|\s+is\s+an?\s)",
+    re.IGNORECASE | re.DOTALL,
+)
+_ABBREV_QUOTED = re.compile(r'"([^"]+)"|“([^”]+)”')
+_ABBREV_REF = re.compile(r"<ref\b[^>]*>.*?</ref>|<ref\b[^>]*/>", re.IGNORECASE | re.DOTALL)
+_ABBREV_LINK = re.compile(r"\[\[(?:[^\]]+\|)?([^\]]+)\]\]")
+
+
+def parse_abbreviated_as(wt: str) -> list[str]:
+    """Quoted in-game names from the wiki lead: abbreviated as "X" or "Y"."""
+    if not wt:
+        return []
+    m = _ABBREV_LEAD.search(wt)
+    if not m:
+        return []
+    blob = _ABBREV_REF.sub("", m.group(1))
+    aliases: list[str] = []
+    seen: set[str] = set()
+    for a, b in _ABBREV_QUOTED.findall(blob):
+        s = unescape((a or b).strip())
+        s = _ABBREV_LINK.sub(r"\1", s)
+        s = re.sub(r"'{2,}", "", s).strip()
+        key = s.lower()
+        if s and key not in seen:
+            seen.add(key)
+            aliases.append(s)
+    return aliases
+
 
 # Longest-first prefix match for Make from Vehicle title.
 _MANUFACTURER_PREFIXES: tuple[str, ...] = tuple(
@@ -222,6 +254,16 @@ def normalize_car(car: dict, duplicate_vehicles: frozenset[str] | None = None) -
     asp = (car.get("aspiration") or "").strip().lower()
     out["aspiration_label"] = ASPIRATION.get(asp, car.get("aspiration") or "")
     out["edition"] = edition_label(car.get("unlock_code") or "")
+    aliases = [str(a).strip() for a in (car.get("abbreviated_as") or []) if str(a).strip()]
+    seen_alias: set[str] = set()
+    unique_aliases: list[str] = []
+    for a in aliases:
+        k = a.lower()
+        if k in seen_alias:
+            continue
+        seen_alias.add(k)
+        unique_aliases.append(a)
+    out["abbreviated_as"] = unique_aliases
     out["catalog_model"] = catalog_model_name(out, duplicate_vehicles)
     out["row_key"] = "|".join(
         [
@@ -238,6 +280,17 @@ if __name__ == "__main__":
     import json
     import sys
     from pathlib import Path
+
+    if sys.argv[1:2] == ["--selfcheck"]:
+        assert parse_abbreviated_as(
+            'The 2016 \'\'\'Abarth 695 Biposto\'\'\' - abbreviated as "Abarth 695 \'16" - is a track'
+        ) == ["Abarth 695 '16"]
+        assert parse_abbreviated_as(
+            'abbreviated as "Lambo Huracán P" or "L. Huracán \'18" - is an all-wheel'
+        ) == ["Lambo Huracán P", "L. Huracán '18"]
+        assert parse_abbreviated_as("The 2016 '''Ariel Nomad''' is a rear-wheel") == []
+        print("parse_abbreviated_as ok")
+        raise SystemExit(0)
 
     path = Path(sys.argv[1] if len(sys.argv) > 1 else Path(__file__).resolve().parents[1] / "data" / "fh6_fandom_cars.json")
     payload = json.loads(path.read_text(encoding="utf-8"))

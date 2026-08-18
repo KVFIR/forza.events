@@ -1,256 +1,314 @@
-import {useEffect, useState} from 'react';
+import {useEffect, useState, type ReactNode} from 'react';
 import {useTranslation} from 'react-i18next';
 import {Link, useLocation} from 'react-router-dom';
-import {Users} from 'lucide-react';
+import {Star, Users} from 'lucide-react';
 import type {ParticipantEventResult} from '../lib/participantResults';
 import {participantResultLabel} from '../lib/participantResultsLabel';
-import type {EventAllowedCar, ForzaEvent} from '../lib/types';
+import type {ForzaEvent} from '../lib/types';
 import {eventTypeMeta} from '../lib/eventTypes';
 import {cn} from '../lib/cn';
 import {isDraftEvent} from '../lib/eventList';
 import {formatLobbyCount} from '../lib/constants';
 import {totalCapacity} from '../lib/eventSpec';
 import {resolveOrganiserLabel} from '../lib/organiser';
-import {formatEventStart} from '../lib/datetime';
+import {formatEventStart, formatEventStartsIn} from '../lib/datetime';
+import {eventDetailPath} from '@edge/eventPath.ts';
 import {defaultCoverPath} from '../lib/eventCovers';
-import {formatCarListDisplayNames} from '../lib/carDisplay';
+import {formatCarEmbedName, formatCarListDisplayNames} from '../lib/carDisplay';
 import {formatOpenBuildCarRulesDisplay, openBuildHasDisplayRules} from '../lib/carRules';
-import {piToClass} from '../lib/pi';
+import {
+  formatMaxPi,
+  formatPiRange,
+  piClassColor,
+  piToClass,
+  restrictedCarsPiBounds,
+  type CarClassLetter,
+} from '../lib/pi';
 import {normalizeEventGame} from '../lib/eventGames';
-import {GameBadge} from './ui/Badge';
 import {useAuth} from '../context/AuthContext';
 import {useResolveEventDisplayStatus} from '../hooks/useResolveEventDisplayStatus';
 import {EventCover} from './EventCover';
+
+type CardDensity = 'cover' | 'compact';
 
 type Props = {
   event: ForzaEvent;
   /** User's published result on this event (My Events / Profile history). */
   participantResult?: ParticipantEventResult;
+  /** Browse = taller cover-led overlay. Lists stay compact. */
+  density?: CardDensity;
 };
 
-const classColor: Record<string, string> = {
-  D: 'text-slate-400',
-  C: 'text-yellow-400/90',
-  B: 'text-orange-400/90',
-  A: 'text-red-400/90',
-  S1: 'text-violet-400/90',
-  S2: 'text-fuchsia-400/90',
-  R: 'text-amber-400/90',
-  X: 'text-rose-300/95',
+/** Caption gradient — base-color alpha stops, not `transparent` (same as event-detail-hero-fade). */
+const COVER_FADE_STYLE = {
+  background:
+    'linear-gradient(to top, rgb(6 6 14) 0%, rgb(6 6 14 / 0.92) 22%, rgb(6 6 14 / 0.55) 55%, rgb(6 6 14 / 0) 100%)',
+} as const;
+
+const PI_CLASS_BORDER: Record<CarClassLetter, string> = {
+  D: 'border-slate-400/35',
+  C: 'border-yellow-400/35',
+  B: 'border-orange-400/35',
+  A: 'border-red-400/35',
+  S1: 'border-violet-400/35',
+  S2: 'border-fuchsia-400/35',
+  R: 'border-amber-400/35',
+  X: 'border-rose-300/40',
 };
 
-const MAX_CARS_SHOWN = 4;
-
-function CarList({cars, game}: {cars: EventAllowedCar[]; game: ForzaEvent['game']}) {
-  const {t} = useTranslation();
-  const shown = cars.slice(0, MAX_CARS_SHOWN);
-  const extra = cars.length - shown.length;
-  const labels = formatCarListDisplayNames(
-    cars.map((c) => ({carId: c.carId, make: c.make, model: c.model, year: c.year})),
-  );
-  const g = normalizeEventGame(game);
-
+function ColoredPi({
+  pi,
+  game,
+  children,
+}: {
+  pi: number;
+  game: ForzaEvent['game'];
+  children?: ReactNode;
+}) {
+  const letter = piToClass(pi, game);
   return (
-    <div className="hidden min-[500px]:block w-[10.5rem] shrink-0 text-left">
-      <ul className="flex flex-col divide-y divide-white/[0.05]">
-        {shown.map((car) => {
-          const maxClass = piToClass(car.maxPi, g);
-          const carLabel = labels.get(car.carId) ?? car.model;
-
-          return (
-            <li
-              key={car.carId}
-              className="grid grid-cols-[minmax(0,1fr)_2.75rem] items-center gap-x-2.5 py-1 text-[10px] leading-tight first:pt-0 last:pb-0"
-            >
-              <span
-                className="truncate font-medium text-slate-200"
-                title={carLabel}
-              >
-                {carLabel}
-              </span>
-              <span
-                className={cn(
-                  'text-right font-bold tabular-nums',
-                  classColor[maxClass] ?? 'text-muted',
-                )}
-              >
-                {maxClass} {car.maxPi}
-              </span>
-            </li>
-          );
-        })}
-      </ul>
-      {extra > 0 ? (
-        <p className="mt-1 text-[10px] leading-none text-muted">
-          {t('eventCard.moreCars', {count: extra})}
-        </p>
-      ) : null}
-    </div>
+    <span
+      className={cn(
+        'inline-flex items-center rounded-md border px-1.5 py-px font-bold tabular-nums',
+        piClassColor[letter] ?? 'text-muted',
+        PI_CLASS_BORDER[letter] ?? 'border-white/20',
+      )}
+    >
+      {children ?? formatMaxPi(pi, game)}
+    </span>
   );
 }
 
-function OpenBuildSummary({event}: {event: ForzaEvent}) {
+function ColoredPiRange({
+  minPi,
+  maxPi,
+  game,
+}: {
+  minPi: number;
+  maxPi: number;
+  game: ForzaEvent['game'];
+}) {
+  if (minPi === maxPi) return <ColoredPi pi={maxPi} game={game} />;
+  if (piToClass(minPi, game) === piToClass(maxPi, game)) {
+    return (
+      <ColoredPi pi={maxPi} game={game}>
+        {formatPiRange(minPi, maxPi, game)}
+      </ColoredPi>
+    );
+  }
+  return (
+    <span className="inline-flex items-center gap-1 whitespace-nowrap">
+      <ColoredPi pi={minPi} game={game} />
+      <span className="text-slate-500">–</span>
+      <ColoredPi pi={maxPi} game={game} />
+    </span>
+  );
+}
+
+function CoverCarLine({event}: {event: ForzaEvent}) {
+  const {t} = useTranslation();
+  const game = normalizeEventGame(event.game);
+
+  if (event.carRuleMode === 'restricted_list' && event.allowedCars.length > 0) {
+    const cars = event.allowedCars;
+    const span = restrictedCarsPiBounds(cars);
+    if (!span) return null;
+    const labels = formatCarListDisplayNames(
+      cars.map((c) => ({
+        carId: c.carId,
+        make: c.make,
+        model: c.model,
+        year: c.year,
+        abbreviation: c.abbreviation,
+      })),
+    );
+    const names = cars.map((c) => labels.get(c.carId) ?? formatCarEmbedName(c));
+    const visibleNames = names.slice(0, 5);
+    const extra = names.length - visibleNames.length;
+    const pi =
+      cars.length === 1 ? (
+        <ColoredPi pi={cars[0]!.maxPi} game={game} />
+      ) : (
+        <ColoredPiRange minPi={span.minPi} maxPi={span.maxPi} game={game} />
+      );
+    const title = `${names.join(' · ')} · ${formatPiRange(span.minPi, span.maxPi, game)}`;
+    return (
+      <div
+        className="hidden min-w-0 max-w-[10.5rem] shrink-0 text-right min-[500px]:block"
+        title={title}
+      >
+        <div className="flex flex-col items-end gap-px text-xs leading-tight text-slate-400">
+          {visibleNames.map((name, i) => (
+            <span key={cars[i]!.carId} className="max-w-full truncate text-right">
+              {name}
+            </span>
+          ))}
+          {extra > 0 ? <span className="text-right">+{extra}</span> : null}
+          <span className="mt-1 shrink-0 text-right">{pi}</span>
+        </div>
+      </div>
+    );
+  }
+
+  if (!openBuildHasDisplayRules(event)) return null;
   const display = formatOpenBuildCarRulesDisplay(event);
   if (!display) return null;
-  const twoCol = Boolean(display.notes && display.piLabel);
-  const piClass = display.piLabel
-    ? piToClass(event.maxPi!, normalizeEventGame(event.game))
-    : null;
+  const label = display.notes?.trim() || t('common.openBuild');
+  const pi = event.maxPi != null ? <ColoredPi pi={event.maxPi} game={game} /> : null;
+  const title = [label, display.piLabel].filter(Boolean).join(' · ');
 
   return (
-    <div className="hidden min-[500px]:block w-[10.5rem] shrink-0 text-left">
-      <ul className="flex flex-col gap-1">
-        <li
-          className={cn(
-            'text-[10px] leading-tight',
-            twoCol && 'grid grid-cols-[minmax(0,1fr)_2.75rem] items-center gap-x-2.5',
-          )}
-        >
-          {display.notes ? (
-            <span className="truncate font-medium text-slate-200" title={display.notes}>
-              {display.notes}
-            </span>
-          ) : null}
-          {display.piLabel && piClass ? (
-            <span
-              className={cn(
-                'font-bold tabular-nums',
-                twoCol && 'text-right',
-                classColor[piClass] ?? 'text-muted',
-              )}
-            >
-              {display.piLabel}
-            </span>
-          ) : null}
-        </li>
-      </ul>
+    <div
+      className="hidden min-w-0 max-w-[10.5rem] shrink-0 text-right min-[500px]:block"
+      title={title}
+    >
+      <div className="flex min-w-0 items-baseline justify-end gap-x-2 text-xs leading-tight">
+        <span className="min-w-0 truncate text-right font-medium text-slate-200">{label}</span>
+        {pi ? <span className="shrink-0 text-right">{pi}</span> : null}
+      </div>
     </div>
   );
 }
 
-export function EventCard({event, participantResult}: Props) {
+export function EventCard({event, participantResult, density = 'compact'}: Props) {
   const {pathname} = useLocation();
   const {t} = useTranslation();
   const when = formatEventStart(event.startsAt);
+  const startsIn = formatEventStartsIn(event.startsAt);
   const draft = isDraftEvent(event);
   const displayStatus = useResolveEventDisplayStatus(event);
   const ended = !draft && displayStatus === 'ended';
+  const cancelled = event.lifecycle === 'cancelled';
   const live = !draft && displayStatus === 'live';
+  const upcoming = !draft && !live && !ended && !cancelled && Boolean(startsIn);
+  const dimmed = ended || cancelled;
+  const coverLed = density === 'cover';
   const placement = participantResultLabel(participantResult, t);
   const {user} = useAuth();
   const isHost = event.hostDiscordId === user.discordId;
   const organiserLabel = resolveOrganiserLabel(event);
   const coverSrc = event.coverImageUrl ?? defaultCoverPath(event.type);
   const [coverReady, setCoverReady] = useState(false);
-  const cardTo = draft && isHost ? `/create?edit=${event.id}` : `/event/${event.id}`;
+  const cardTo = draft && isHost ? `/create?edit=${event.id}` : eventDetailPath(event);
   useEffect(() => {
     setCoverReady(false);
   }, [coverSrc, event.id]);
 
   const cardInner = (
+    <div
+      className={cn(
+        'relative flex flex-col justify-end overflow-hidden rounded-xl transition-all duration-200',
+        coverLed ? 'min-h-[13.5rem]' : 'min-h-[8.25rem]',
+        draft
+          ? 'border border-dashed border-sky-500/35'
+          : 'border border-white/[0.08]',
+      )}
+    >
+      <EventCover
+        src={coverSrc}
+        variant="card"
+        fill
+        imgClassName={cn(
+          'transition-all duration-300 group-hover:scale-[1.02]',
+          coverReady ? 'opacity-100' : 'opacity-0',
+        )}
+        onReady={() => setCoverReady(true)}
+      />
+      {!coverReady ? (
+        <div className="absolute inset-0 animate-pulse bg-white/[0.04]" aria-hidden />
+      ) : null}
+      {dimmed ? (
         <div
-          className={cn(
-            'relative overflow-hidden rounded-xl border transition-all duration-200 min-h-[7.5rem]',
-            draft
-              ? 'border border-dashed border-b-0 border-sky-500/25 bg-sky-950/20 hover:border-sky-500/40'
-              : ended
-                ? 'border-white/[0.05] grayscale opacity-70 hover:opacity-80'
-                : 'border-white/[0.08] hover:border-white/[0.12]',
-          )}
-        >
-          <EventCover
-            src={coverSrc}
-            variant="card"
-            fill
-            imgClassName={cn(
-              'transition-all duration-300 group-hover:scale-[1.02]',
-              coverReady ? 'opacity-100' : 'opacity-0',
-            )}
-            onReady={() => setCoverReady(true)}
-          />
-          {!coverReady ? (
-            <div
-              className="absolute inset-0 animate-pulse bg-white/[0.04]"
-              aria-hidden
-            />
-          ) : null}
-          <div className="absolute inset-0 bg-gradient-to-r from-base/80 via-base/70 to-base/60" />
-          <div className="absolute inset-0 bg-black/25 transition-colors duration-200 group-hover:bg-black/20" />
-
-          <div className="relative flex flex-col gap-3 px-4 pt-3 pb-4 min-[500px]:flex-row min-[500px]:items-start min-[500px]:gap-4">
-            <div className="min-w-0 flex-1 text-left">
-              <h2
-                className="text-lg font-semibold leading-snug text-white line-clamp-2 min-[500px]:line-clamp-none"
-                title={event.title}
-              >
-                {event.title}
-              </h2>
-              <p className="mt-0.5 flex min-w-0 items-center gap-1.5 truncate text-xs text-slate-400">
-                <GameBadge
-                  game={normalizeEventGame(event.game)}
-                  variant="short"
-                  className="shrink-0"
-                />
-                <span className="min-w-0 truncate">{organiserLabel}</span>
-                {isHost && (
-                  <span className="shrink-0 text-[9px] font-bold uppercase tracking-widest text-accent-purple-light">
-                    · You
-                  </span>
-                )}
-              </p>
-              <p className="mt-0.5 text-xs text-muted">{when}</p>
-              {draft ? (
-                <p className="mt-1.5 text-[10px] font-bold uppercase tracking-widest text-sky-300/90">
-                  Draft · not published
-                </p>
-              ) : (
-                <p className="mt-1.5 flex items-center gap-1 text-xs text-slate-400">
-                  <Users className="h-3 w-3 shrink-0" />
-                  {formatLobbyCount(event.currentPlayers, totalCapacity(event))}
-                  {event.isRanked && (
-                    <span className="ml-1 text-[9px] font-bold uppercase tracking-widest text-amber-300/90">
-                      · {t('eventStatus.ranked')}
-                    </span>
-                  )}
-                  {ended && (
-                    <span className="ml-1 text-[9px] font-bold uppercase tracking-widest text-muted">
-                      · {t('eventStatus.ended')}
-                    </span>
-                  )}
-                  {live && (
-                    <span className="ml-1 text-[9px] font-bold uppercase tracking-widest text-accent-green">
-                      · {t('eventStatus.live')}
-                    </span>
-                  )}
-                  {placement && (
-                    <span className="ml-1 text-[9px] font-bold uppercase tracking-widest text-amber-300">
-                      · {placement}
-                    </span>
-                  )}
-                </p>
-              )}
-            </div>
-
-            {event.carRuleMode === 'restricted_list' && event.allowedCars.length > 0 && (
-              <CarList cars={event.allowedCars} game={event.game} />
-            )}
-            {event.carRuleMode === 'anything_goes' && openBuildHasDisplayRules(event) && (
-              <OpenBuildSummary event={event} />
-            )}
-          </div>
-
-          <div
-            className={cn(
-              'absolute inset-x-0 bottom-0 h-[2px]',
-              eventTypeMeta(event.type).accentBar,
-            )}
-          />
+          className="pointer-events-none absolute inset-0 z-[2] bg-base/70 transition-colors duration-200 group-hover:bg-base/60"
+          aria-hidden
+        />
+      ) : null}
+      <div
+        className={cn(
+          'pointer-events-none absolute inset-x-0 bottom-0',
+          coverLed ? 'h-[58%]' : 'h-[72%]',
+        )}
+        style={COVER_FADE_STYLE}
+        aria-hidden
+      />
+      <div className="relative z-[1] flex min-w-0 items-end gap-3 px-4 pb-3 pt-4">
+        <div className="min-w-0 flex-1 text-left">
+          <h2
+            className="line-clamp-2 text-lg font-semibold leading-snug text-white"
+            title={event.title}
+          >
+            {event.isRanked ? (
+              <Star
+                className="mr-1.5 inline h-[0.95em] w-[0.95em] -translate-y-px text-amber-400"
+                aria-hidden
+              />
+            ) : null}
+            {event.isRanked ? (
+              <span className="sr-only">{t('eventStatus.ranked')} </span>
+            ) : null}
+            {event.title}
+          </h2>
+          <p className="mt-0.5 truncate text-xs text-slate-400">{organiserLabel}</p>
+          <p className="mt-1 flex min-w-0 flex-wrap items-center gap-x-3 gap-y-0.5 text-xs text-slate-400">
+            {draft ? <span>{t('eventStatus.draft')}</span> : null}
+            {cancelled ? <span>{t('eventStatus.cancelled')}</span> : null}
+            {ended && !cancelled ? <span>{t('eventStatus.ended')}</span> : null}
+            {live ? (
+              <span className="inline-flex items-center gap-1">
+                <span className="h-1.5 w-1.5 rounded-full bg-accent-green" aria-hidden />
+                {t('eventStatus.live')}
+              </span>
+            ) : null}
+            {upcoming && startsIn ? <span>{startsIn}</span> : null}
+            <span className="truncate">{when}</span>
+            {!draft ? (
+              <span className="inline-flex shrink-0 items-center gap-1">
+                <Users className="h-3 w-3 shrink-0" />
+                {formatLobbyCount(event.currentPlayers, totalCapacity(event))}
+              </span>
+            ) : null}
+          </p>
         </div>
+        {placement || coverLed ? (
+          <div className="flex min-w-0 shrink-0 flex-col items-end justify-end gap-1">
+            {placement ? (
+              <p className="flex items-baseline justify-end gap-1.5 text-sm font-semibold tabular-nums leading-none text-white">
+                {event.isRanked && participantResult?.ratingDelta != null ? (
+                  <span
+                    className={cn(
+                      'text-xs font-medium',
+                      participantResult.ratingDelta > 0
+                        ? 'text-accent-green'
+                        : participantResult.ratingDelta < 0
+                          ? 'text-red-300/90'
+                          : 'text-muted',
+                    )}
+                  >
+                    {participantResult.ratingDelta > 0
+                      ? `+${participantResult.ratingDelta}`
+                      : String(participantResult.ratingDelta)}
+                  </span>
+                ) : null}
+                <span>{placement}</span>
+              </p>
+            ) : null}
+            {coverLed ? <CoverCarLine event={event} /> : null}
+          </div>
+        ) : null}
+      </div>
+      <div
+        className={cn('absolute inset-x-0 bottom-0 h-0.5', eventTypeMeta(event.type).accentBar)}
+      />
+    </div>
   );
 
   return (
     <article className="group relative">
-      <Link to={cardTo} state={{event, from: pathname}} className="block">
+      <Link
+        to={cardTo}
+        state={{event, from: pathname}}
+        className="block rounded-xl focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent-purple-light"
+      >
         {cardInner}
       </Link>
     </article>

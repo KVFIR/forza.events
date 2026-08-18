@@ -1,7 +1,15 @@
+import {
+  displayNameHasYearSuffix,
+  synthesizeCarAbbreviation,
+} from '@edge/carAbbreviation.ts';
+
+export {displayNameHasYearSuffix};
+
 export type CarNameParts = {
   make: string;
   model: string;
   year?: number | null;
+  abbreviation?: string | null;
   id?: string;
   carId?: string;
 };
@@ -34,8 +42,8 @@ export function formatYearShort(year: number | null | undefined): string {
   return `'${String(y).slice(-2).padStart(2, '0')}`;
 }
 
-/** FH catalog stores full in-game name in `model` (usually prefixed with make). No year. */
-export function formatCarDisplayName(car: CarNameParts): string {
+/** Full catalog title (make + model). Wiki HUD names go through `abbreviation`. */
+export function formatCarFullName(car: CarNameParts): string {
   const model = stripYearFromModelTitle(car.model.trim());
   const make = car.make.trim();
   if (!make || !model) return model || make;
@@ -45,9 +53,16 @@ export function formatCarDisplayName(car: CarNameParts): string {
   return `${make} ${model}`;
 }
 
+/** Wiki "abbreviated as" when present; otherwise a HUD-length fallback. */
+export function formatCarDisplayName(car: CarNameParts): string {
+  const abbr = car.abbreviation?.trim();
+  if (abbr) return abbr;
+  return synthesizeCarAbbreviation(formatCarFullName(car), resolveCarYear(car));
+}
+
 /** Collision key = what the viewer sees (so "BMW"+"M3" and "BMW"+"BMW M3" match). */
-function carListKey(car: CarNameParts): string {
-  return formatCarDisplayName(car).toLowerCase();
+function carListKey(car: CarNameParts, full: boolean): string {
+  return (full ? formatCarFullName(car) : formatCarDisplayName(car)).toLowerCase();
 }
 
 function carRowId(car: CarNameParts, index: number): string {
@@ -57,23 +72,41 @@ function carRowId(car: CarNameParts, index: number): string {
 /**
  * Labels for a car list. When several cars share the same display name and have years,
  * append `'YY` (e.g. Audi RS 4 Avant '01) — only on colliding rows.
+ * `full: true` keeps catalog titles (Create / Event Detail); default is HUD abbreviation.
  */
 export function formatCarListDisplayNames(
   cars: readonly CarNameParts[],
+  options?: {full?: boolean},
 ): Map<string, string> {
+  const full = Boolean(options?.full);
+  const labelOf = full ? formatCarFullName : formatCarDisplayName;
   const counts = new Map<string, number>();
   for (const car of cars) {
-    const key = carListKey(car);
+    const key = carListKey(car, full);
     counts.set(key, (counts.get(key) ?? 0) + 1);
   }
 
   const out = new Map<string, string>();
   cars.forEach((car, index) => {
-    const base = formatCarDisplayName(car);
-    const key = carListKey(car);
+    const base = labelOf(car);
+    const key = carListKey(car, full);
     const ambiguous = (counts.get(key) ?? 0) > 1;
-    const suffix = ambiguous ? formatYearShort(resolveCarYear(car)) : '';
+    const suffix =
+      ambiguous && !displayNameHasYearSuffix(base) ? formatYearShort(resolveCarYear(car)) : '';
     out.set(carRowId(car, index), suffix ? `${base} ${suffix}` : base);
+  });
+  if (full) return out;
+  const seen = new Map<string, number>();
+  for (const label of out.values()) {
+    const k = label.toLowerCase();
+    seen.set(k, (seen.get(k) ?? 0) + 1);
+  }
+  cars.forEach((car, index) => {
+    const id = carRowId(car, index);
+    const label = out.get(id);
+    if (label && (seen.get(label.toLowerCase()) ?? 0) > 1) {
+      out.set(id, formatCarFullName(car));
+    }
   });
   return out;
 }

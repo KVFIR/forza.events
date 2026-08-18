@@ -10,6 +10,7 @@ import {jsonResponse, optionsResponse} from '../_shared/cors.ts';
 import {optionalDiscordUser} from '../_shared/discordRequestAuth.ts';
 import {rateLimitPublicRead} from '../_shared/rateLimitPresets.ts';
 import {hostDraftStatusFilter} from '../_shared/draftEvents.ts';
+import {isEventUuid} from '../_shared/eventPath.ts';
 import {adminClient} from '../_shared/supabase.ts';
 
 serve(async (req) => {
@@ -54,11 +55,11 @@ serve(async (req) => {
     }
 
     if (eventId) {
-      const {data, error} = await supabase
-        .from('events')
-        .select(EVENT_DETAIL_SELECT)
-        .eq('id', eventId)
-        .maybeSingle();
+      const base = supabase.from('events').select(EVENT_DETAIL_SELECT);
+      const {data, error} = await (isEventUuid(eventId)
+        ? base.eq('id', eventId)
+        : base.eq('slug', eventId)
+      ).maybeSingle();
 
       if (error) {
         console.error('browse-events', error);
@@ -69,8 +70,9 @@ serve(async (req) => {
         return jsonResponse({data: []}, 200, req);
       }
 
-      if (data.status === 'draft') {
-        if (!discordUser || data.host_discord_id !== discordUser.id) {
+      const row = data as unknown as {status: string; host_discord_id: string};
+      if (row.status === 'draft') {
+        if (!discordUser || row.host_discord_id !== discordUser.id) {
           return jsonResponse({data: []}, 200, req);
         }
       }

@@ -122,6 +122,10 @@ export async function processNotificationBatch(
   let failed = 0;
   let skipped = 0;
   const publishedCtx = new Map<string, PublishedSendCtx | null | 'load_failed'>();
+  const eventUrlKeyById = await loadEventUrlKeys(
+    supabase,
+    batch.map((row: {event_id: string}) => row.event_id),
+  );
 
   for (const row of batch) {
     const kind = row.kind as string;
@@ -186,7 +190,7 @@ export async function processNotificationBatch(
     const embed = buildNotificationEmbed(kind, user.notification_locale, payload);
     const result = await sendUserDm(
       row.recipient_discord_id,
-      row.event_id,
+      eventUrlKeyById.get(row.event_id) ?? row.event_id,
       embed,
       openEventButtonLabel(user.notification_locale),
     );
@@ -228,6 +232,25 @@ async function markOutbox(
 
 function sleep(ms: number): Promise<void> {
   return new Promise((r) => setTimeout(r, ms));
+}
+
+async function loadEventUrlKeys(
+  supabase: ReturnType<typeof adminClient>,
+  eventIds: string[],
+): Promise<Map<string, string>> {
+  const ids = [...new Set(eventIds.filter(Boolean))];
+  const map = new Map<string, string>();
+  if (ids.length === 0) return map;
+  const {data, error} = await supabase.from('events').select('id, slug').in('id', ids);
+  if (error) {
+    console.error(JSON.stringify({msg: 'notification event slug load failed', detail: error.message}));
+    return map;
+  }
+  for (const row of data ?? []) {
+    const slug = typeof row.slug === 'string' ? row.slug.trim() : '';
+    map.set(row.id, slug || row.id);
+  }
+  return map;
 }
 
 export function enrichPayloadForSend(

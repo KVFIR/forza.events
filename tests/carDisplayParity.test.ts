@@ -16,12 +16,18 @@ describe('car display parity', () => {
 
   it('client and Edge formatCarDisplayName match', () => {
     expect(edgeFormatCarDisplayName(car)).toBe(formatCarDisplayName(car));
-    expect(formatCarDisplayName(car)).toBe('Acura Integra Type R');
+    expect(formatCarDisplayName(car)).toBe("Acura Integra '01");
+  });
+
+  it('uses wiki abbreviation when present', () => {
+    const named = {...car, abbreviation: "Acura ITR '01"};
+    expect(formatCarDisplayName(named)).toBe("Acura ITR '01");
+    expect(edgeFormatCarDisplayName(named)).toBe("Acura ITR '01");
   });
 
   it('client and Edge formatCarEmbedName match (no year prefix)', () => {
     expect(edgeFormatCarEmbedName(car)).toBe(formatCarEmbedName(car));
-    expect(formatCarEmbedName(car)).toBe('Acura Integra Type R');
+    expect(formatCarEmbedName(car)).toBe("Acura Integra '01");
   });
 
   it('adds make when model omits it', () => {
@@ -47,6 +53,49 @@ describe('car display parity', () => {
     expect(labels.get('a')).toBe("Audi RS 4 Avant '01");
     expect(labels.get('b')).toBe("Audi RS 4 Avant '13");
     expect(labels.get('c')).toBe('Ford GT');
+    expect(edgeFormatCarListDisplayNames(cars)).toEqual(labels);
+  });
+
+  it('does not double a year suffix already on the abbreviation', () => {
+    const cars = [
+      {id: 'a', make: 'Audi', model: 'Audi RS 4 Avant', year: 2001, abbreviation: "Audi RS4 '01"},
+      {id: 'b', make: 'Audi', model: 'Audi RS 4 Avant', year: 2013, abbreviation: "Audi RS4 '13"},
+    ];
+    const labels = formatCarListDisplayNames(cars);
+    expect(labels.get('a')).toBe("Audi RS4 '01");
+    expect(labels.get('b')).toBe("Audi RS4 '13");
+    expect(edgeFormatCarListDisplayNames(cars)).toEqual(labels);
+  });
+
+  it('full list labels keep catalog titles even when abbreviation is set', () => {
+    const cars = [
+      {id: 'a', make: 'Acura', model: 'Acura Integra Type R', year: 2001, abbreviation: "Acura ITR '01"},
+    ];
+    const labels = formatCarListDisplayNames(cars, {full: true});
+    expect(labels.get('a')).toBe('Acura Integra Type R');
+    expect(edgeFormatCarListDisplayNames(cars, {full: true})).toEqual(labels);
+  });
+
+  it('falls back to the catalog title when HUD names still collide', () => {
+    const cars = [
+      {
+        id: 'stock',
+        make: 'BMW',
+        model: 'BMW M4 Competition Coupé',
+        year: 2021,
+        abbreviation: "BMW M4 '21",
+      },
+      {
+        id: 'wp',
+        make: 'BMW',
+        model: "BMW M4 Competition Coupé 'Welcome Pack'",
+        year: 2021,
+        abbreviation: "BMW M4 '21",
+      },
+    ];
+    const labels = formatCarListDisplayNames(cars);
+    expect(labels.get('stock')).toBe('BMW M4 Competition Coupé');
+    expect(labels.get('wp')).toBe("BMW M4 Competition Coupé 'Welcome Pack'");
     expect(edgeFormatCarListDisplayNames(cars)).toEqual(labels);
   });
 

@@ -18,6 +18,8 @@ from html import unescape
 from pathlib import Path
 from typing import Any
 
+from fh6_fandom_normalize import duplicate_vehicle_names, normalize_car, parse_abbreviated_as
+
 API = "https://forza.fandom.com/api.php"
 UA = "ForzaEventsResearch/1.0 (local spreadsheet; contact: dev)"
 
@@ -375,12 +377,14 @@ def main() -> None:
     for row in rows:
         wt_page = wikitexts.get(row["wiki_title"], "")
         if not wt_page:
+            row["abbreviated_as"] = []
             continue
         box = parse_car_infobox(wt_page)
         stats = parse_fh5_car_stats(wt_page)
         layout_code = box.get("layout", "").lower()
         row.update(
             {
+                "abbreviated_as": parse_abbreviated_as(wt_page),
                 "manufacturer_code": box.get("manufacturer", ""),
                 "make": "",  # filled by normalize_car after scrape
                 "model": box.get("model", ""),
@@ -400,8 +404,6 @@ def main() -> None:
                 **{f"detail_{k}": v for k, v in stats.items()},
             }
         )
-
-    from fh6_fandom_normalize import duplicate_vehicle_names, normalize_car
 
     dup_vehicles = duplicate_vehicle_names(rows)
     rows = [normalize_car(r, dup_vehicles) for r in rows]

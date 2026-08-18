@@ -1,6 +1,6 @@
 import {NavLink} from 'react-router-dom';
 import {useTranslation} from 'react-i18next';
-import {CalendarDays, Compass, PlusCircle, Trophy, User2, type LucideIcon} from 'lucide-react';
+import {CalendarDays, Compass, PlusCircle, Star, User2, type LucideIcon} from 'lucide-react';
 import {AuthStatusIndicator} from './AuthStatusIndicator';
 import {Logo} from './ui/Logo';
 import {navShellBorderClass} from './ui/formStyles';
@@ -14,7 +14,7 @@ const navBrandBarClass = cn(
 const NAV_ITEMS: {to: string; end: boolean; icon: LucideIcon; labelKey: string}[] = [
   {to: '/', end: true, icon: Compass, labelKey: 'nav.browse'},
   {to: '/my-events', end: true, icon: CalendarDays, labelKey: 'nav.myEvents'},
-  {to: '/leaderboard', end: true, icon: Trophy, labelKey: 'nav.leaderboard'},
+  {to: '/leaderboard', end: true, icon: Star, labelKey: 'nav.leaderboard'},
   {to: '/create', end: false, icon: PlusCircle, labelKey: 'nav.create'},
   {to: '/profile', end: false, icon: User2, labelKey: 'nav.profile'},
 ];
@@ -38,7 +38,7 @@ function NavItem({
           'group relative transition-all duration-200',
           isSide
             ? cn(
-                'flex items-center gap-3 rounded-lg px-3 py-2.5 text-[11px] font-semibold uppercase tracking-widest',
+                'flex items-center gap-3 rounded-lg px-3 py-2.5 text-[10px] font-semibold uppercase tracking-widest',
                 isActive
                   ? 'bg-white/[0.06] text-accent-purple-light'
                   : 'text-muted hover:bg-white/[0.03] hover:text-slate-300',
@@ -65,7 +65,9 @@ function NavItem({
               isActive && '[filter:drop-shadow(0_0_8px_rgba(139,92,246,0.9))]',
             )}
           />
-          <span className={isActive ? 'text-glow-purple' : ''}>{t(labelKey)}</span>
+          <span className={cn(!isSide && 'text-center', isActive && 'text-glow-purple')}>
+            {t(labelKey)}
+          </span>
         </>
       )}
     </NavLink>

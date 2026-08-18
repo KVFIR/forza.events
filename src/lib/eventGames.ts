@@ -34,8 +34,6 @@ export type EventGameOption = {
     border: string;
     text: string;
     bg: string;
-    /** Card short label: colored text only (no chrome). */
-    short: string;
   };
   /** Stronger chip selected state for list filters. */
   chipSelected: string;
@@ -43,7 +41,7 @@ export type EventGameOption = {
 
 /**
  * FH5 = warm red, FH6 = cool fuchsia — deliberately far apart on the hue wheel.
- * Keep Badge / EventCard / SegmentGroup / filter chips in sync.
+ * Keep Badge / SegmentGroup / filter chips in sync.
  */
 export const EVENT_GAMES: EventGameOption[] = [
   {
@@ -52,8 +50,6 @@ export const EVENT_GAMES: EventGameOption[] = [
       border: 'border-red-500/20',
       text: 'text-red-300/80',
       bg: 'bg-red-500/[0.07]',
-      /** Meta-line short label (beside organiser). */
-      short: 'text-red-400/70',
     },
     chipSelected: 'border-red-400/50 bg-red-600/25 text-red-100',
   },
@@ -63,8 +59,6 @@ export const EVENT_GAMES: EventGameOption[] = [
       border: 'border-fuchsia-500/20',
       text: 'text-fuchsia-300/80',
       bg: 'bg-fuchsia-500/[0.07]',
-      /** Meta-line short label (beside organiser). */
-      short: 'text-fuchsia-400/70',
     },
     chipSelected: 'border-fuchsia-400/50 bg-fuchsia-600/25 text-fuchsia-100',
   },

@@ -45,6 +45,54 @@ export function formatMaxPi(maxPi: number, game: ForzaGame = 'fh6'): string {
   return `${piToClass(p, game)} ${p}`;
 }
 
+/** `B 600`, same-class `B 600–650`, or `B 600–S1 765`. */
+export function formatPiRange(
+  minPi: number,
+  maxPi: number,
+  game: ForzaGame = 'fh6',
+): string {
+  const min = clampPi(minPi);
+  const max = clampPi(maxPi);
+  const from = piToClass(min, game);
+  const to = piToClass(max, game);
+  if (min === max) return `${from} ${min}`;
+  if (from === to) return `${from} ${min}–${max}`;
+  return `${from} ${min}–${to} ${max}`;
+}
+
+/** Class letter or `B–S1` when min/max straddle bands. */
+export function classRangeLabel(
+  minPi: number,
+  maxPi: number,
+  game: ForzaGame = 'fh6',
+): string {
+  const from = piToClass(minPi, game);
+  const to = piToClass(maxPi, game);
+  return from === to ? from : `${from}–${to}`;
+}
+
+export function restrictedCarsPiBounds(
+  cars: readonly {maxPi: number}[],
+): {minPi: number; maxPi: number} | null {
+  if (cars.length === 0) return null;
+  let minPi = cars[0]!.maxPi;
+  let maxPi = cars[0]!.maxPi;
+  for (const car of cars) {
+    if (car.maxPi < minPi) minPi = car.maxPi;
+    if (car.maxPi > maxPi) maxPi = car.maxPi;
+  }
+  return {minPi, maxPi};
+}
+
+export function restrictedCarsClassRange(
+  cars: readonly {maxPi: number}[],
+  game: ForzaGame = 'fh6',
+): string | null {
+  const span = restrictedCarsPiBounds(cars);
+  if (!span) return null;
+  return classRangeLabel(span.minPi, span.maxPi, game);
+}
+
 export const piClassColor: Record<CarClassLetter, string> = {
   D: 'text-slate-400',
   C: 'text-yellow-400/90',

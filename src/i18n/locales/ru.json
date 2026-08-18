@@ -29,7 +29,11 @@
     "addBotHint": "Если вы управляете Discord-сервером.",
     "newEventsProfileLabel": "Уведомлять о новых событиях",
     "newEventsToggleOn": "Уведомления о новых событиях",
-    "newEventsToggleOff": "Уведомления о новых событиях выключены"
+    "newEventsToggleOff": "Уведомления о новых событиях выключены",
+    "newEventsBrowseLead": "ЛС в Discord, когда выходят новые события.",
+    "newEventsBrowseSubscribe": "Подписаться",
+    "newEventsBrowseSubscribed": "Подписан",
+    "newEventsBrowseEnabledHint": "Бот будет писать в ЛС Discord. Отключить можно в профиле."
   },
   "common": {
     "back": "Назад",
@@ -179,6 +183,7 @@
     "scopeJoined": "Участие",
     "filterAria": "Фильтр моих событий",
     "filterScope": "Список",
+    "filterByCancelled": "Фильтр отменённых событий",
     "unableToLoad": "Не удалось загрузить ваши события",
     "loadError": "Не удалось загрузить события",
     "noJoined": "Вы пока ни в одном событии",
@@ -208,7 +213,10 @@
   "eventTypes": {
     "road": "Шоссе",
     "dirt": "Грунт",
-    "cruise": "Встреча и круиз"
+    "cruise": "Встреча и круиз",
+    "roadShort": "Шоссе",
+    "dirtShort": "Грунт",
+    "cruiseShort": "Круиз"
   },
   "eventGames": {
     "fh5": "FH5",
@@ -221,6 +229,7 @@
     "full": "Мест нет",
     "live": "Идёт",
     "ended": "Завершено",
+    "cancelled": "Отменено",
     "draft": "Черновик",
     "restrictedList": "Список машин",
     "anythingGoes": "Любая машина",
@@ -238,10 +247,12 @@
     "joinWaitlist": "В лист ожидания",
     "leaveWaitlist": "Выйти из очереди",
     "waitlisted": "В очереди",
-    "xboxHintTitle": "Вы зарегистрированы",
-    "xboxHintBody": "В Xbox добавьте лидера конвоя {{leader}} в друзья и зайдите в его конвой незадолго до начала ивента.",
-    "convoyLeaderXboxHintTitle": "Вы лидер конвоя",
-    "convoyLeaderXboxHintBody": "В Xbox принимайте заявки в друзья от гонщиков. Сделайте профиль видимым и в Forza выберите convoy privacy Friends, чтобы они могли зайти. После гонки не забудьте отправить хосту скриншот с результатами."
+    "xboxHintBody": "В Xbox добавьте {{leader}} в друзья и зайдите в его конвой незадолго до старта.",
+    "convoyLeaderXboxHintSteps": [
+      "Принимайте заявки в друзья в Xbox",
+      "Профиль видимый · в Forza convoy privacy Friends",
+      "Отправьте хосту скриншот результатов"
+    ]
   },
   "addGroup": {
     "button": "Добавить конвой {{n}}",
@@ -334,8 +345,6 @@
     "voice": "Голос",
     "joinVoice": "Зайти в голосовой",
     "joinVoiceNamed": "Зайти в {{name}}",
-    "rankedTitle": "Рейтинговая гонка",
-    "rankedExplainer": "Ваш результат обновляет рейтинг гонщика — даже при DNF (считается последним местом). Он влияет на место в таблице лидеров и будет учитываться при формировании конвоев.",
     "ratingPendingTitle": "Рейтинг не применён",
     "ratingPendingBody": "Результаты сохранены, но обновление рейтинга не удалось. Повторите, чтобы применить ELO.",
     "retryRatings": "Применить рейтинг",
@@ -606,10 +615,10 @@
     "defaultConfirm": "Подтвердить"
   },
   "eventCard": {
-    "moreCars_one": "+{{count}} ещё",
-    "moreCars_few": "+{{count}} ещё",
-    "moreCars_many": "+{{count}} ещё",
-    "moreCars_other": "+{{count}} ещё"
+    "carCount_one": "{{count}} машина",
+    "carCount_few": "{{count}} машины",
+    "carCount_many": "{{count}} машин",
+    "carCount_other": "{{count}} машин"
   },
   "eventList": {
     "none": "Нет событий",

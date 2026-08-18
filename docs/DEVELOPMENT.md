@@ -134,7 +134,7 @@ npx wrangler login
 npm run deploy:cf-worker
 ```
 
-The Worker routes `forza.events/supabase*` and `forza.events/event*` intercept before Railway. Redeploy after Supabase ref changes (`wrangler.toml` → `SUPABASE_ORIGIN`). Link previews on `/event/:id` need `npx wrangler secret put SUPABASE_ANON_KEY` on the Worker.
+The Worker routes `forza.events/supabase*` and `forza.events/event*` intercept before Railway. Redeploy after Supabase ref changes (`wrangler.toml` → `SUPABASE_ORIGIN`). Link previews on `/event/:slug` (and `/event/:id`) need `npx wrangler secret put SUPABASE_ANON_KEY` on the Worker.
 
 **Discord OAuth** (`discord.com`) may still be unreachable without VPN — the proxy fixes browse, profile, and covers after sign-in, not the login redirect itself.
 
@@ -193,7 +193,7 @@ npm run deploy:functions  # --no-verify-jwt on each
 
 ## Covers
 
-Standard aspect ratio: **16:9** (1280×720 uploads). Client `compressCoverForUpload` center-crops then scales; bundled defaults are regenerated with `npm run optimize:covers` (same crop). UI uses `COVER_ASPECT_CLASS` on create preview and review; event detail hero uses `COVER_HERO_BAND_CLASS` + `COVER_PAGE_BLEED_CLASS` (full width — avoid `aspect-video` + `max-h` on bleed heroes).
+Standard aspect ratio: **16:9** (1280×720 uploads). Client `compressCoverForUpload` center-crops then scales; bundled defaults are regenerated with `npm run optimize:covers` (same crop). UI uses `COVER_ASPECT_CLASS` on create preview and review; event detail hero uses `COVER_HERO_BAND_CLASS` and breaks out to viewport width from `md` (from the sidebar edge on `lg+` — avoid `aspect-video` + `max-h` on bleed heroes).
 
 | Asset | Location |
 |-------|----------|

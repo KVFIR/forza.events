@@ -81,6 +81,14 @@ describe('eventPageMeta parity', () => {
     );
     expect(buildClientMeta(baseEvent, opts).title).toContain('Results');
   });
+
+  it('percent-encodes unicode slugs when pageUrl is omitted', () => {
+    const slug = 'летний-круиз-20260818';
+    const opts = {siteOrigin: 'https://forza.events'};
+    const encoded = `https://forza.events/event/${encodeURIComponent(slug)}`;
+    expect(buildSharedMeta({...baseDbEvent, slug}, opts).url).toBe(encoded);
+    expect(buildClientMeta({...baseEvent, slug}, opts).url).toBe(encoded);
+  });
 });
 
 describe('eventPageMeta shared', () => {
@@ -88,10 +96,24 @@ describe('eventPageMeta shared', () => {
     expect(parseEventPagePath('/event/94d86ab7-ce55-49f8-84e3-91f3b9a7b39c')).toEqual({
       eventId: '94d86ab7-ce55-49f8-84e3-91f3b9a7b39c',
       isResults: false,
+      isUuid: true,
     });
     expect(parseEventPagePath('/event/94d86ab7-ce55-49f8-84e3-91f3b9a7b39c/results')).toEqual({
       eventId: '94d86ab7-ce55-49f8-84e3-91f3b9a7b39c',
       isResults: true,
+      isUuid: true,
+    });
+    expect(parseEventPagePath('/event/sunset-sprint-20260715')).toEqual({
+      eventId: 'sunset-sprint-20260715',
+      isResults: false,
+      isUuid: false,
+    });
+    expect(
+      parseEventPagePath(`/event/${encodeURIComponent('летний-круиз-20260818')}`),
+    ).toEqual({
+      eventId: 'летний-круиз-20260818',
+      isResults: false,
+      isUuid: false,
     });
     expect(parseEventPagePath('/events/foo')).toBeNull();
   });

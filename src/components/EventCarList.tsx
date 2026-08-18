@@ -1,7 +1,7 @@
 import {useEffect, useRef, useState} from 'react';
 import {ChevronDown, ChevronUp, Trash2} from 'lucide-react';
 import {useTranslation} from 'react-i18next';
-import {formatCarListDisplayNames} from '../lib/carDisplay';
+import {formatCarListDisplayNames, formatCarFullName} from '../lib/carDisplay';
 import {piToClass} from '../lib/pi';
 import type {ForzaGame} from '../lib/eventGames';
 import {MaxPiInput} from './MaxPiInput';
@@ -22,6 +22,7 @@ export type EventCarEntry = {
   make: string;
   model: string;
   year: number | null;
+  abbreviation?: string | null;
   pi: number;
   maxPi: number;
   tuneShareCode: string;
@@ -45,6 +46,7 @@ function toEntry(c: CarSearchResult): EventCarEntry {
     make: c.make,
     model: c.model,
     year: c.year,
+    abbreviation: c.abbreviation ?? null,
     pi: c.pi,
     maxPi: c.pi,
     tuneShareCode: '',
@@ -67,7 +69,13 @@ export function EventCarList({
   const {collapsedIds, setCollapsedIds, collapseAll} = useCollapseAllOnLoad(collapseAllKey);
   const wrapRef = useRef<HTMLDivElement>(null);
   const listLabels = formatCarListDisplayNames(
-    cars.map((c) => ({id: c.id, make: c.make, model: c.model, year: c.year})),
+    cars.map((c) => ({
+      id: c.id,
+      make: c.make,
+      model: c.model,
+      year: c.year,
+    })),
+    {full: true},
   );
 
   useEffect(() => {
@@ -165,17 +173,20 @@ export function EventCarList({
               {results.length === 0 ? (
                 <li className="px-3 py-3 text-sm text-muted">{t('create.carSearchNoMatch')}</li>
               ) : (
-                results.map((c) => (
-                  <DropdownItem key={c.id} onClick={() => addCar(c)}>
-                    <span>
-                      {c.model}
-                      {c.year ? ` · ${c.year}` : ''}
-                    </span>
-                    <span className="text-xs text-muted">
-                      {piToClass(c.pi, game)} {c.pi}
-                    </span>
-                  </DropdownItem>
-                ))
+                results.map((c) => {
+                  const name = formatCarFullName(c);
+                  return (
+                    <DropdownItem key={c.id} onClick={() => addCar(c)}>
+                      <span>
+                        {name}
+                        {c.year ? ` · ${c.year}` : ''}
+                      </span>
+                      <span className="text-xs text-muted">
+                        {piToClass(c.pi, game)} {c.pi}
+                      </span>
+                    </DropdownItem>
+                  );
+                })
               )}
             </DropdownList>
           )}

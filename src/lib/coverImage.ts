@@ -22,14 +22,14 @@ export const COVER_UPLOAD_QUALITY = 0.82;
 /** Tailwind class matching {@link COVER_ASPECT_RATIO}. */
 export const COVER_ASPECT_CLASS = 'aspect-video';
 
-/** Full-bleed inside `.app-main-column` — see `.cover-page-bleed` in `index.css`. */
+/** Full-bleed cover inside `.app-main-column` — see `.cover-page-bleed` in `index.css`. */
 export const COVER_PAGE_BLEED_CLASS = 'cover-page-bleed';
 
 /**
  * Event detail hero height (full width). Do not pair with `aspect-video` + `max-h-*` —
  * that shrinks width and left-aligns the band.
  */
-export const COVER_HERO_BAND_CLASS = 'h-44 sm:h-52';
+export const COVER_HERO_BAND_CLASS = 'h-64 sm:h-80 lg:h-96';
 
 export type CoverDisplayVariant = 'card' | 'hero' | 'preview';
 

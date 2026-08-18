@@ -10,13 +10,13 @@ import {eventDetailRouteSeed, type EventDetailLocationState} from '../lib/naviga
 import type {ForzaEvent} from '../lib/types';
 
 type Options = {
-  eventId: string | undefined;
+  routeKey: string | undefined;
   event: ForzaEvent | undefined;
   routeState: EventDetailLocationState | null;
   refreshKey: number;
 };
 
-export function useEventDetailResults({eventId, event, routeState, refreshKey}: Options) {
+export function useEventDetailResults({routeKey, event, routeState, refreshKey}: Options) {
   const [resultsState, setResultsState] = useState<EventDetailResultsState>({
     rows: [],
     loadFailed: false,
@@ -28,22 +28,23 @@ export function useEventDetailResults({eventId, event, routeState, refreshKey}: 
   }, []);
 
   useEffect(() => {
-    if (!eventId) return;
+    if (!routeKey) return;
 
-    const seed = eventDetailRouteSeed(routeState, eventId);
+    const seed = eventDetailRouteSeed(routeState, routeKey);
     if (seed?.resultRows !== undefined) {
       setResultsState({rows: seed.resultRows, loadFailed: false});
-      seededIdRef.current = eventId;
+      seededIdRef.current = routeKey;
       return;
     }
 
-    if (seededIdRef.current !== eventId) {
-      seededIdRef.current = eventId;
+    if (seededIdRef.current !== routeKey) {
+      seededIdRef.current = routeKey;
       setResultsState({rows: [], loadFailed: false});
     }
-  }, [eventId, routeState]);
+  }, [routeKey, routeState]);
 
   useEffect(() => {
+    const eventId = event?.id;
     if (!eventId || !event) return;
 
     let cancelled = false;
@@ -73,14 +74,14 @@ export function useEventDetailResults({eventId, event, routeState, refreshKey}: 
     return () => {
       cancelled = true;
     };
-  }, [eventId, event, refreshKey, applyLoadOutcome]);
+  }, [event, refreshKey, applyLoadOutcome]);
 
   const retryResultsLoad = useCallback(() => {
-    if (!eventId || !event) return;
-    void loadResultRowsForPublishedEvent(eventId, event, {forceNetwork: true}).then((outcome) =>
+    if (!event?.id) return;
+    void loadResultRowsForPublishedEvent(event.id, event, {forceNetwork: true}).then((outcome) =>
       applyLoadOutcome(outcome.rows, outcome.failed),
     );
-  }, [eventId, event, applyLoadOutcome]);
+  }, [event, applyLoadOutcome]);
 
   return {
     resultRows: resultsState.rows,

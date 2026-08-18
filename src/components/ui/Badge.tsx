@@ -1,4 +1,5 @@
 import {useTranslation} from 'react-i18next';
+import {Star} from 'lucide-react';
 import type {CarRuleMode, EventType} from '../../lib/types';
 import {eventTypeMeta} from '../../lib/eventTypes';
 import {eventGameMeta, normalizeEventGame, type ForzaGame} from '../../lib/eventGames';
@@ -31,30 +32,18 @@ export function Badge({type, className}: Props) {
 export function GameBadge({
   game,
   className,
-  /** `short` = FH5/FH6 beside organiser (cards); `full` = Forza Horizon N (detail). */
-  variant = 'full',
 }: {
   game: ForzaGame;
   className?: string;
-  variant?: 'short' | 'full';
 }) {
   const {t} = useTranslation();
   const g = normalizeEventGame(game);
   const meta = eventGameMeta(g);
-  const short = variant === 'short';
   return (
     <span
-      className={cn(
-        short
-          ? cn(
-              'inline-flex items-center text-[10px] font-bold uppercase tracking-wider',
-              meta.badge.short,
-            )
-          : cn(badgeBaseClass, meta.badge.bg, meta.badge.border, meta.badge.text),
-        className,
-      )}
+      className={cn(badgeBaseClass, meta.badge.bg, meta.badge.border, meta.badge.text, className)}
     >
-      {t(short ? `eventGames.${g}` : `eventGames.${g}Full`)}
+      {t(`eventGames.${g}Full`)}
     </span>
   );
 }
@@ -89,10 +78,11 @@ export function RankedBadge({className}: {className?: string}) {
     <span
       className={cn(
         badgeBaseClass,
-        'border-amber-500/25 bg-amber-500/[0.08] text-amber-200/90',
+        'gap-1 border-amber-500/25 bg-amber-500/[0.08] text-amber-200/90',
         className,
       )}
     >
+      <Star className="h-2.5 w-2.5 shrink-0 fill-current" aria-hidden />
       {t('eventStatus.ranked')}
     </span>
   );
@@ -153,7 +143,7 @@ export function StatusBadge({status, className}: StatusProps) {
     <span
       className={cn(
         badgeBaseClass,
-        'gap-1.5',
+        'gap-1',
         s.bg,
         s.border,
         s.text,

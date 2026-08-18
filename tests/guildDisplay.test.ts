@@ -1,7 +1,10 @@
 import {describe, expect, it} from 'vitest';
 import {isDiscordLinkUrl, parseGuildInviteUrl} from '../src/lib/guildDisplay';
-import {EVENT_LIST_SELECT} from '../src/lib/events';
-import {EVENT_LIST_SELECT as EDGE_EVENT_LIST_SELECT} from '@edge/eventListSelect.ts';
+import {EVENT_DETAIL_SELECT, EVENT_LIST_SELECT} from '../src/lib/events';
+import {
+  EVENT_DETAIL_SELECT as EDGE_EVENT_DETAIL_SELECT,
+  EVENT_LIST_SELECT as EDGE_EVENT_LIST_SELECT,
+} from '@edge/eventListSelect.ts';
 
 describe('parseGuildInviteUrl', () => {
   it('reads invite_url from guild settings', () => {
@@ -37,5 +40,16 @@ describe('EVENT_LIST_SELECT parity', () => {
     expect(EDGE_EVENT_LIST_SELECT.replace(/\s+/g, ' ').trim()).toBe(
       EVENT_LIST_SELECT.replace(/\s+/g, ' ').trim(),
     );
+  });
+
+  it('client and Edge detail selects match', () => {
+    expect(EDGE_EVENT_DETAIL_SELECT.replace(/\s+/g, ' ').trim()).toBe(
+      EVENT_DETAIL_SELECT.replace(/\s+/g, ' ').trim(),
+    );
+  });
+
+  it('loads roster ratings only on detail', () => {
+    expect(EVENT_LIST_SELECT).not.toContain('player_ratings');
+    expect(EVENT_DETAIL_SELECT).toContain('player_ratings');
   });
 });

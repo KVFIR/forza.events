@@ -1,18 +1,22 @@
-import {useCallback, useEffect, useRef, useState} from 'react';
+import {useCallback, useId, useState} from 'react';
 import {useTranslation} from 'react-i18next';
 import {NotificationDmSetupDialog} from './NotificationDmSetupDialog';
-import {NotificationBellToggle} from './NotificationBellToggle';
+import {Button} from './ui/Button';
 import {useAuth} from '../context/AuthContext';
 import {useNotificationDmReachability} from '../hooks/useNotificationDmReachability';
 import {isApiConfigured, updateProfile} from '../lib/api';
 import {track} from '../lib/analytics';
 import {saveDiscordSession} from '../lib/discordAuth';
 import {isStandaloneBrowser} from '../lib/discord';
-import {notificationToggleActive} from '../lib/notificationDm';
+import {busyLabel} from '../i18n/busyLabels';
+
+/** Survives SPA remounts; a full reload clears it so the hint does not return. */
+let showEnabledHint = false;
 
 /** Browse opt-in: Discord DM when a new event is published. Same pref as Profile. Signed-in only. */
 export function NewEventAlertsBanner() {
   const {t} = useTranslation();
+  const leadId = useId();
   const {
     user,
     refreshUser,
@@ -24,94 +28,88 @@ export function NewEventAlertsBanner() {
   } = useAuth();
   const token = getAccessToken();
   const prefOn = user.newEventNotificationsEnabled === true;
-  const {
-    reachable,
-    loading: reachabilityLoading,
-    checked,
-    recheck,
-  } = useNotificationDmReachability(isSignedIn ? token : null, prefOn);
-  const reachableRef = useRef(reachable);
-  const recheckingRef = useRef(false);
+  const {reachable, checked, recheck} = useNotificationDmReachability(
+    isSignedIn ? token : null,
+    false,
+  );
   const [saving, setSaving] = useState(false);
   const [botBlockedOpen, setBotBlockedOpen] = useState(false);
-  reachableRef.current = reachable;
-  const subscribed = notificationToggleActive(prefOn, checked, reachable);
+  const [justEnabled, setJustEnabled] = useState(showEnabledHint);
+  const subscribed = prefOn && justEnabled;
 
-  useEffect(() => {
-    if (!isSignedIn || !token || !prefOn) return;
-
-    const recheckIfNeeded = () => {
-      if (document.visibilityState !== 'visible') return;
-      if (reachableRef.current || recheckingRef.current) return;
-      recheckingRef.current = true;
-      void recheck({fresh: true}).finally(() => {
-        recheckingRef.current = false;
-      });
-    };
-
-    window.addEventListener('visibilitychange', recheckIfNeeded);
-    window.addEventListener('focus', recheckIfNeeded);
-    return () => {
-      window.removeEventListener('visibilitychange', recheckIfNeeded);
-      window.removeEventListener('focus', recheckIfNeeded);
-    };
-  }, [isSignedIn, token, recheck, prefOn]);
-
-  const persist = useCallback(async (enabled: boolean) => {
+  const persist = useCallback(async () => {
     if (!token) return;
     setSaving(true);
     try {
-      if (enabled) {
-        const ok = checked && reachable ? true : await recheck({fresh: true});
-        if (!ok) {
-          setBotBlockedOpen(true);
-          return;
-        }
+      const ok = checked && reachable ? true : await recheck({fresh: true});
+      if (!ok) {
+        setBotBlockedOpen(true);
+        return;
       }
       if (!isApiConfigured()) {
-        refreshUser({...user, newEventNotificationsEnabled: enabled});
+        refreshUser({...user, newEventNotificationsEnabled: true});
+        showEnabledHint = true;
+        setJustEnabled(true);
         return;
       }
       const {user: updated} = await updateProfile(token, {
-        new_event_notifications_enabled: enabled,
+        new_event_notifications_enabled: true,
       });
       refreshUser(updated);
       if (isStandaloneBrowser()) {
         saveDiscordSession({accessToken: token, user: updated});
       }
-      track(
-        enabled ? 'notification_new_event_enable' : 'notification_new_event_disable',
-        {outcome: 'success'},
-      );
+      track('notification_new_event_enable', {outcome: 'success'});
+      showEnabledHint = true;
+      setJustEnabled(true);
     } finally {
       setSaving(false);
     }
   }, [token, checked, reachable, recheck, refreshUser, user]);
 
   if (!isConfigured || authLoading || !isSignedIn) return null;
+  if (prefOn && !justEnabled) return null;
 
-  const busy = saving || authRetrying || (reachabilityLoading && !checked);
+  const busy = saving || authRetrying;
 
   return (
     <>
-      <div className="mb-3 rounded-xl border border-white/[0.06] px-3 py-2.5">
-        <NotificationBellToggle
-          enabled={subscribed}
-          disabled={busy}
-          label={t('notifications.newEventsProfileLabel')}
-          switchOnLabel={t('notifications.newEventsToggleOn')}
-          switchOffLabel={t('notifications.newEventsToggleOff')}
-          onChange={(next) => {
-            if (saving || authRetrying) return;
-            void persist(next);
+      <div className="mb-3 flex flex-wrap items-center justify-between gap-x-3 gap-y-2 rounded-xl border border-white/10 px-3 py-2">
+        <p
+          id={leadId}
+          className="min-w-0 flex-1 text-xs leading-snug text-slate-300"
+          role={subscribed ? 'status' : undefined}
+        >
+          {subscribed
+            ? t('notifications.newEventsBrowseEnabledHint')
+            : t('notifications.newEventsBrowseLead')}
+        </p>
+        <Button
+          variant={subscribed ? 'success' : 'open'}
+          size="toolbar"
+          className="h-7 shrink-0 px-2.5 py-0"
+          disabled={busy || subscribed}
+          aria-busy={busy}
+          aria-describedby={leadId}
+          onClick={() => {
+            if (subscribed) return;
+            void persist();
           }}
-        />
+        >
+          {busy
+            ? busyLabel('saving')
+            : subscribed
+              ? t('notifications.newEventsBrowseSubscribed')
+              : t('notifications.newEventsBrowseSubscribe')}
+        </Button>
       </div>
-      <NotificationDmSetupDialog
-        open={botBlockedOpen}
-        source="notification_new_event_enable"
-        onClose={() => setBotBlockedOpen(false)}
-      />
+      {subscribed ? null : (
+        <NotificationDmSetupDialog
+          open={botBlockedOpen}
+          source="notification_new_event_enable"
+          onClose={() => setBotBlockedOpen(false)}
+        />
+      )}
     </>
   );
 }

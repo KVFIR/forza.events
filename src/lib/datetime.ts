@@ -1,3 +1,4 @@
+import {formatDistanceToNow} from 'date-fns';
 import {formatInTimeZone, fromZonedTime} from 'date-fns-tz';
 import {dateFnsLocale} from '../i18n/dateLocale';
 
@@ -47,4 +48,11 @@ export function formatEventStart(startsAt: string): string {
   return formatInTimeZone(new Date(startsAt), defaultTimezone(), 'EEE d MMM, HH:mm', {
     locale,
   });
+}
+
+/** Relative wait until start; null once the start time has passed. */
+export function formatEventStartsIn(startsAt: string): string | null {
+  const start = new Date(startsAt);
+  if (Number.isNaN(start.getTime()) || start.getTime() <= Date.now()) return null;
+  return formatDistanceToNow(start, {locale: dateFnsLocale(), addSuffix: true});
 }

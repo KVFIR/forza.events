@@ -1,4 +1,5 @@
 import {isPublishedToDiscord} from './eventSpec';
+import {userHasParticipantRow} from './events';
 import type {AppUser, EventType, ForzaEvent} from './types';
 
 export type EventSortKey = 'event_date' | 'created' | 'fill';
@@ -44,14 +45,22 @@ function compareBySortKey(a: ForzaEvent, b: ForzaEvent, sort: EventSortKey): num
   }
 }
 
-/** Active first (asc/desc per key); completed uses the same key, except event_date (newest past first). */
+function isPastListEvent(event: ForzaEvent): boolean {
+  return (
+    event.lifecycle === 'completed' ||
+    event.lifecycle === 'cancelled' ||
+    event.lifecycle === 'archived'
+  );
+}
+
+/** Active first (asc/desc per key); past uses the same key, except event_date (newest past first). */
 export function sortEvents(events: ForzaEvent[], sort: EventSortKey): ForzaEvent[] {
-  const active = events.filter((e) => e.lifecycle !== 'completed');
-  const completed = events.filter((e) => e.lifecycle === 'completed');
+  const active = events.filter((e) => !isPastListEvent(e));
+  const past = events.filter(isPastListEvent);
   const byKey = (a: ForzaEvent, b: ForzaEvent) => compareBySortKey(a, b, sort);
-  const completedOrder =
+  const pastOrder =
     sort === 'event_date' ? (a: ForzaEvent, b: ForzaEvent) => byKey(b, a) : byKey;
-  return [...active.sort(byKey), ...completed.sort(completedOrder)];
+  return [...active.sort(byKey), ...past.sort(pastOrder)];
 }
 
 export function filterByEventType(events: ForzaEvent[], type: EventType | 'all'): ForzaEvent[] {
@@ -72,6 +81,19 @@ export type RankedFilter = 'all' | 'ranked';
 export function filterByRanked(events: ForzaEvent[], ranked: RankedFilter): ForzaEvent[] {
   if (ranked === 'all') return events;
   return events.filter((e) => e.isRanked);
+}
+
+export type CancelledFilter = 'hide' | 'cancelled';
+
+/** Default `hide` drops cancelled; `cancelled` keeps only those rows. */
+export function filterByCancelled(
+  events: ForzaEvent[],
+  filter: CancelledFilter,
+): ForzaEvent[] {
+  if (filter === 'cancelled') {
+    return events.filter((e) => e.lifecycle === 'cancelled');
+  }
+  return events.filter((e) => e.lifecycle !== 'cancelled');
 }
 
 export function isDraftEvent(event: ForzaEvent): boolean {
@@ -113,13 +135,19 @@ export function buildScopedMyEventsList(
   return mergeHostDraftsFirst(drafts, published);
 }
 
-/** Active events first, then completed (newest start date first within each group). */
+/** Drafts stay on top; published follow `sortEvents`. */
+export function sortMyEventsPublished(
+  events: ForzaEvent[],
+  sort: EventSortKey,
+): ForzaEvent[] {
+  const drafts = events.filter(isDraftEvent);
+  const published = events.filter((e) => !isDraftEvent(e));
+  return [...drafts, ...sortEvents(published, sort)];
+}
+
+/** Active first, then past (newest start among past when sorting by event date). */
 export function sortMyEventsList(events: ForzaEvent[]): ForzaEvent[] {
-  const active = events.filter((e) => e.status !== 'ended');
-  const ended = events.filter((e) => e.status === 'ended');
-  const byDateDesc = (a: ForzaEvent, b: ForzaEvent) =>
-    new Date(b.startsAt).getTime() - new Date(a.startsAt).getTime();
-  return [...active.sort(byDateDesc), ...ended.sort(byDateDesc)];
+  return sortEvents(events, 'event_date');
 }
 
 export function filterMyEvents(
@@ -135,7 +163,7 @@ export function filterMyEvents(
       case 'hosted':
         return hosted;
       case 'joined':
-        return participating;
+        return participating || userHasParticipantRow(e, user);
       case 'all':
       default:
         return hosted || participating;

@@ -58,7 +58,7 @@ export function isPublicBrowserPath(pathname?: string): boolean {
   if (normalized === '/auth/callback') return true;
   if (normalized === '/' || normalized === '/leaderboard') return true;
   if (normalized === '/bot-installed') return true;
-  // /event/:id and /event/:id/results (host entry redirects non-hosts)
+  // /event/:slugOrId and /event/:slugOrId/results (UUID still resolves)
   if (/^\/event\/[^/]+(?:\/results)?$/.test(normalized)) return true;
   return false;
 }

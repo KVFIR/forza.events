@@ -17,6 +17,7 @@ import {track} from '../../lib/analytics';
 import {compressCoverForUpload} from '../../lib/coverImage';
 import {defaultCoverPath, isBundledDefaultCover} from '../../lib/eventCovers';
 import {fetchEventById} from '../../lib/events';
+import {eventDetailPath} from '@edge/eventPath.ts';
 import {
   defaultTimezone,
   localInputToUtc,
@@ -76,6 +77,7 @@ export function useCreateEventForm() {
   const [saving, setSaving] = useState(false);
   const [loadingEdit, setLoadingEdit] = useState(!!editId);
   const [eventId, setEventId] = useState<string | null>(editId);
+  const [eventSlug, setEventSlug] = useState<string | null>(null);
   const [showPublishModal, setShowPublishModal] = useState(false);
   const [deleteConfirmOpen, setDeleteConfirmOpen] = useState(false);
   const [cancelConfirmOpen, setCancelConfirmOpen] = useState(false);
@@ -261,14 +263,15 @@ export function useCreateEventForm() {
         }
         loadedEditRef.current = editId;
         if (ev.hostDiscordId !== user.discordId) {
-          navigate(`/event/${editId}`, {replace: true});
+          navigate(eventDetailPath(ev), {replace: true});
           return;
         }
         if (!canEditEvent(ev, user)) {
-          navigate(`/event/${editId}`, {replace: true});
+          navigate(eventDetailPath(ev), {replace: true});
           return;
         }
         setEventId(ev.id);
+        setEventSlug(ev.slug);
         const published = isPublishedToDiscord(ev);
         setIsPublished(published);
         setCanCancelPublished(canCancelPublishedEvent(ev, user));
@@ -305,6 +308,7 @@ export function useCreateEventForm() {
             make: c.make,
             model: c.model,
             year: c.year ?? null,
+            abbreviation: c.abbreviation ?? null,
             pi: c.pi,
             maxPi: c.maxPi,
             tuneShareCode: c.tuneShareCode ?? '',
@@ -438,16 +442,16 @@ export function useCreateEventForm() {
     };
   }
 
-  async function confirmPublish(id: string): Promise<void> {
+  async function confirmPublish(saved: {id: string; slug: string}): Promise<void> {
     if (!token || !targetGuildId || !targetChannelId) return;
     setSaving(true);
     setGlobalError(null);
     try {
-      await publishEvent(token, id, targetGuildId, targetChannelId, targetGuildName);
-      track('publish', {outcome: 'success', event_id: id});
+      await publishEvent(token, saved.id, targetGuildId, targetChannelId, targetGuildName);
+      track('publish', {outcome: 'success', event_id: saved.id});
       bumpRefresh();
       setShowPublishModal(false);
-      navigate(`/event/${id}`, {replace: true, state: {from: '/my-events'}});
+      navigate(eventDetailPath(saved), {replace: true, state: {from: '/my-events'}});
     } catch (e) {
       setGlobalError(e instanceof Error ? e.message : String(e));
     } finally {
@@ -512,7 +516,7 @@ export function useCreateEventForm() {
       track('cancel_event', {outcome: 'success', event_id: id});
       setCancelConfirmOpen(false);
       bumpRefresh();
-      navigate(`/event/${id}`, {replace: true, state: {from: '/my-events'}});
+      navigate(eventDetailPath({id, slug: eventSlug}), {replace: true, state: {from: '/my-events'}});
       return true;
     } catch (e) {
       setGlobalError(String(e));
@@ -522,7 +526,7 @@ export function useCreateEventForm() {
     }
   }
 
-  async function persistDraft(): Promise<string | null> {
+  async function persistDraft(): Promise<{id: string; slug: string} | null> {
     const outcome = validateDraftFormOutcome(
       values,
       user.xboxGamertag,
@@ -545,6 +549,7 @@ export function useCreateEventForm() {
     try {
       const result = await saveEvent(token, buildPayload());
       const id = result.id;
+      const slug = result.slug?.trim() || id;
       // Drafts may omit guild_id until publish — still upload cover (path uses draft/ or guild/).
       if (coverFile) {
         const compressed = await compressCoverForUpload(coverFile);
@@ -555,10 +560,11 @@ export function useCreateEventForm() {
         await saveEvent(token, {...buildPayload(), id, cover_image_url: url});
       }
       setEventId(id);
+      setEventSlug(slug);
       loadedEditRef.current = id;
       bumpRefresh();
       track('draft_save', {outcome: 'success', event_id: id});
-      return id;
+      return {id, slug};
     } catch (e) {
       setGlobalError(String(e));
       return null;

@@ -5,6 +5,7 @@ import {
   datetimeLocalInputBounds,
   defaultTimezone,
   formatEventStart,
+  formatEventStartsIn,
   localInputToUtc,
   normalizeDatetimeLocalInput,
   utcToLocalInput,
@@ -43,5 +44,14 @@ describe('datetime', () => {
     expect(formatEventStart(startsAt)).toBe(
       formatInTimeZone(new Date(startsAt), viewerTz, pattern, {locale}),
     );
+  });
+
+  it('formatEventStartsIn is null after start', () => {
+    expect(formatEventStartsIn(new Date(Date.now() - 60_000).toISOString())).toBeNull();
+  });
+
+  it('formatEventStartsIn describes a future start', () => {
+    const label = formatEventStartsIn(new Date(Date.now() + 3 * 60 * 60 * 1000).toISOString());
+    expect(label && label.length > 0).toBe(true);
   });
 });

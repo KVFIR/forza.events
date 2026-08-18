@@ -34,6 +34,10 @@ describe('eventDetailRouteSeed', () => {
     expect(eventDetailRouteSeed({event: event('a')}, 'b')).toBeNull();
   });
 
+  it('matches a navigation seed by slug', () => {
+    expect(eventDetailRouteSeed({event: event('a')}, 'race')?.event.id).toBe('a');
+  });
+
   it('includes empty resultRows when explicitly seeded', () => {
     const seed = eventDetailRouteSeed(
       {event: event('ev-1'), resultRows: []},

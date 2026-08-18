@@ -22,6 +22,7 @@ export const EVENT_TYPE_LABEL_EN: Record<EventType, string> = {
 type EventMetaInput = Pick<
   ForzaEvent,
   | 'id'
+  | 'slug'
   | 'title'
   | 'type'
   | 'startsAt'
@@ -83,8 +84,10 @@ export function buildEventPageMeta(
   options?: {siteOrigin?: string; pageUrl?: string; isResults?: boolean},
 ): PageMeta {
   const origin = (options?.siteOrigin ?? 'https://forza.events').replace(/\/$/, '');
+  const key = event.slug?.trim() || event.id;
   const url =
-    options?.pageUrl ?? `${origin}/event/${event.id}${options?.isResults ? '/results' : ''}`;
+    options?.pageUrl ??
+    `${origin}/event/${encodeURIComponent(key)}${options?.isResults ? '/results' : ''}`;
   const typeLabel = EVENT_TYPE_LABEL_EN[normalizeEventType(event.type)];
   const when = formatEventOgDate(event.startsAt);
   const suffix = lifecycleSuffix(event.lifecycle);

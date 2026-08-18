@@ -167,7 +167,7 @@ Controls `8px` (`rounded-lg`), panels `12px` (`rounded-xl`), modals `16px` (`rou
 - **Open / Leave / Full:** Tinted chips.
 
 ### Cards
-Cover-led event unit on `#0e1020` with white/7 hairline; hover purple ring. Quiet FH5/FH6 badge by organiser. No FULL / Waitlisted chips.
+Cover-led event unit on `#0e1020` with white/7 hairline. No game mark on the card; no FULL / Waitlisted chips.
 
 ### Navigation
 Desktop: glass sidebar, uppercase tracked items, gradient active bar, text-glow on the active label. Mobile: brand bar + equal top tabs.

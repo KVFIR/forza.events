@@ -161,6 +161,29 @@ describe('filterMyEvents', () => {
     expect(filterMyEvents([ev], user, 'joined', participating)).toHaveLength(1);
   });
 
+  it('includes host with a roster seat in joined scope', () => {
+    const hosted = event([
+      {
+        discordId: 'host',
+        username: 'Host',
+        isConvoyLeader: true,
+        participationSource: 'host_self_assigned',
+      },
+    ]);
+    const host = {...user, discordId: 'host'};
+    expect(
+      filterMyEvents([hosted], host, 'joined', (e) => userIsParticipating(e, host)),
+    ).toHaveLength(1);
+  });
+
+  it('excludes host without a roster seat from joined scope', () => {
+    const hosted = event([]);
+    const host = {...user, discordId: 'host'};
+    expect(
+      filterMyEvents([hosted], host, 'joined', (e) => userIsParticipating(e, host)),
+    ).toHaveLength(0);
+  });
+
   it('excludes waitlisted racers from active joined checks', () => {
     expect(userIsJoined(ev, user)).toBe(false);
   });

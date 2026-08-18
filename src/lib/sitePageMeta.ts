@@ -44,8 +44,7 @@ const STATIC_PAGES: Record<string, {title: string; description: string}> = {
   },
 };
 
-export const EVENT_PAGE_PATH_RE =
-  /^\/event\/[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}(?:\/results)?\/?$/i;
+export const EVENT_PAGE_PATH_RE = /^\/event\/[^/]+(?:\/results)?\/?$/i;
 
 export function normalizeSitePath(pathname: string): string {
   const pathOnly = pathname.split('?')[0].split('#')[0];

@@ -8,6 +8,7 @@ import {useTranslation} from 'react-i18next';
 import type {ParticipantEventResult} from '../lib/participantResults';
 import type {ForzaEvent} from '../lib/types';
 import type {HostDraftsLoadError, PublishedEventsLoadError} from '../lib/events';
+import {cn} from '../lib/cn';
 
 type Props = {
   events: ForzaEvent[];
@@ -24,6 +25,8 @@ type Props = {
   filters?: ReactNode;
   /** Published placement per event for the signed-in participant. */
   participantResults?: Map<string, ParticipantEventResult>;
+  /** Browse uses cover-led cards; My Events stays compact. */
+  cardDensity?: 'cover' | 'compact';
 };
 
 export function EventList({
@@ -38,6 +41,7 @@ export function EventList({
   sortControl,
   filters,
   participantResults,
+  cardDensity = 'compact',
 }: Props) {
   const {t} = useTranslation();
   const hasFetchError = !!loadError && events.length === 0 && !isLoading;
@@ -68,18 +72,19 @@ export function EventList({
   return (
     <ContentReveal>
       {(filters || sortControl) ? (
-        <div className="mb-3 flex min-w-0 items-start gap-3">
+        <div className="mb-3 flex min-w-0 items-center gap-3">
           {filters ? <div className="min-w-0 flex-1 space-y-1.5">{filters}</div> : null}
-          {sortControl ? <div className="shrink-0 pt-px">{sortControl}</div> : null}
+          {sortControl ? <div className="shrink-0">{sortControl}</div> : null}
         </div>
       ) : null}
 
-      <ul className="flex list-none flex-col gap-2">
+      <ul className={cn('flex list-none flex-col', cardDensity === 'cover' ? 'gap-3' : 'gap-2')}>
         {events.map((event) => (
           <li key={event.id}>
             <EventCard
               event={event}
               participantResult={participantResults?.get(event.id)}
+              density={cardDensity}
             />
           </li>
         ))}
@@ -94,7 +99,7 @@ export function EventList({
       )}
 
       <div className="mt-3 flex min-w-0 items-center gap-2">
-        <p className="shrink-0 text-[11px] font-medium text-muted">{countLabel}</p>
+        <p className="shrink-0 text-[10px] font-medium text-muted">{countLabel}</p>
         {isRefreshing ? (
           <Spinner size="sm" label={t('loading.refreshing')} className="shrink-0" muted />
         ) : null}

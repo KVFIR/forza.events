@@ -464,6 +464,7 @@ export async function retryEventRatings(discordToken: string, eventId: string) {
 
 export type LeaderboardLastRace = {
   eventId: string;
+  slug?: string | null;
   title: string;
   startsAt: string;
   delta: number;

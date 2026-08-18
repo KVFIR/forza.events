@@ -1,9 +1,10 @@
-import {useLayoutEffect, useRef, useState} from 'react';
+import {useLayoutEffect, useRef, useState, type ReactNode, type RefObject} from 'react';
 import {useTranslation} from 'react-i18next';
 import {ParticipantDisplayNames} from '../../../components/ParticipantDisplayNames';
 import {UserAvatar} from '../../../components/UserAvatar';
 import {TextButton} from '../../../components/ui/TextButton';
 import {formatLobbyCount} from '../../../lib/constants';
+import {nextHideTrailing, nextSharedHideRating} from '../../../lib/rosterOverflow';
 import type {EventParticipant} from '../../../lib/types';
 import type {RosterConvoyLeader, RosterGroup} from '../../../lib/eventRoster';
 import type {EventDetailViewModel} from '../eventDetailView';
@@ -27,6 +28,32 @@ function SeatNumber({n}: {n: number}) {
   );
 }
 
+function ParticipantRating({
+  rating,
+  show,
+  hidden,
+}: {
+  rating?: number;
+  show?: boolean;
+  hidden?: boolean;
+}) {
+  const {t} = useTranslation();
+  if (!show || hidden) return null;
+  const tbd = rating == null;
+  return (
+    <span
+      data-roster-rating=""
+      className={cn(
+        'shrink-0 text-xs font-semibold tabular-nums',
+        tbd ? 'text-muted' : 'text-slate-300',
+      )}
+      aria-label={`${t('profile.rating')} ${tbd ? t('profile.ratingTbd') : rating}`}
+    >
+      {tbd ? t('profile.ratingTbd') : rating}
+    </span>
+  );
+}
+
 function primaryTextWidth(primary: HTMLElement): number {
   const node = primary.firstChild;
   if (node instanceof Text && node.textContent) {
@@ -37,81 +64,189 @@ function primaryTextWidth(primary: HTMLElement): number {
   return primary.scrollWidth;
 }
 
-function LeaderCard({
-  leader,
-  hostDiscordId,
-  position,
-}: {
-  leader: RosterConvoyLeader;
-  hostDiscordId: string;
-  position: number;
-}) {
-  const {t} = useTranslation();
-  const isHost = leader.discordId === hostDiscordId;
-  const badgeClass =
-    'shrink-0 text-right text-[9px] font-bold uppercase leading-tight tracking-wide text-accent-green/90';
+/** Per-card: drop leader/host badges only after the shared rating hide. */
+function useRosterBadgeOverflow(
+  gamertag: string | undefined,
+  username: string,
+  hasBadges: boolean,
+  hideRating: boolean,
+  locale: string,
+) {
   const cardRef = useRef<HTMLDivElement>(null);
   const badgeRef = useRef<HTMLDivElement>(null);
-  const badgeWidthRef = useRef(0);
+  const badgeWRef = useRef(0);
   const hideBadgesRef = useRef(false);
   const [hideBadges, setHideBadges] = useState(false);
 
   useLayoutEffect(() => {
     const card = cardRef.current;
-    if (!card) return;
+    if (!card || !hasBadges) return;
 
     const sync = () => {
       const primary = card.querySelector<HTMLElement>('.min-w-0.flex-1 > p');
       if (!primary) return;
 
-      const measuredBadgeW = badgeRef.current?.offsetWidth ?? 0;
-      if (measuredBadgeW > 0) {
-        badgeWidthRef.current = measuredBadgeW;
+      const badgeW = badgeRef.current?.offsetWidth ?? 0;
+      if (badgeW > 0) badgeWRef.current = badgeW;
+
+      const nextHidden = nextHideTrailing(
+        hideBadgesRef.current,
+        primaryTextWidth(primary),
+        primary.clientWidth,
+        badgeWRef.current,
+      );
+
+      if (nextHidden !== hideBadgesRef.current) {
+        hideBadgesRef.current = nextHidden;
+        setHideBadges(nextHidden);
       }
-
-      const textW = primaryTextWidth(primary);
-      const slotW = primary.clientWidth;
-      const badgeW = badgeWidthRef.current;
-      const gap = 8;
-      const showBadges = hideBadgesRef.current
-        ? badgeW > 0 && textW <= slotW - badgeW - gap + 1
-        : textW <= slotW + 1;
-      const nextHidden = !showBadges;
-
-      if (hideBadgesRef.current === nextHidden) return;
-
-      hideBadgesRef.current = nextHidden;
-      setHideBadges(nextHidden);
     };
 
     const ro = new ResizeObserver(sync);
     ro.observe(card);
     sync();
     return () => ro.disconnect();
-  }, [leader.gamertag, leader.username, isHost, t]);
+  }, [gamertag, username, hasBadges, hideRating, locale]);
+
+  return {cardRef, badgeRef, hideBadges};
+}
+
+function useSharedRatingHide(
+  listRef: RefObject<HTMLDivElement>,
+  enabled: boolean,
+  rosterKey: string,
+) {
+  const hideRef = useRef(false);
+  const ratingWRef = useRef(0);
+  const [hideRating, setHideRating] = useState(false);
+
+  useLayoutEffect(() => {
+    if (!enabled) {
+      hideRef.current = false;
+      setHideRating(false);
+      return;
+    }
+
+    const root = listRef.current;
+    if (!root) return;
+
+    const sync = () => {
+      const cards = [...root.querySelectorAll<HTMLElement>('[data-roster-card]')].map((card) => {
+        const primary = card.querySelector<HTMLElement>('.min-w-0.flex-1 > p');
+        const ratingEl = card.querySelector<HTMLElement>('[data-roster-rating]');
+        const liveW = ratingEl?.offsetWidth ?? 0;
+        if (liveW > ratingWRef.current) ratingWRef.current = liveW;
+        const hasRating = card.dataset.hasRating === '1';
+        return {
+          textW: primary ? primaryTextWidth(primary) : 0,
+          slotW: primary?.clientWidth ?? 0,
+          ratingW: hasRating ? (liveW > 0 ? liveW : ratingWRef.current) : 0,
+        };
+      });
+      const next = nextSharedHideRating(hideRef.current, cards);
+      if (next !== hideRef.current) {
+        hideRef.current = next;
+        setHideRating(next);
+      }
+    };
+
+    const ro = new ResizeObserver(sync);
+    ro.observe(root);
+    sync();
+    return () => ro.disconnect();
+    // hideRating lives in hideRef — a dep would re-measure after unmount and loop.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [enabled, rosterKey]);
+
+  return hideRating;
+}
+
+function RosterCard({
+  className,
+  seat,
+  avatarSrc,
+  avatarName,
+  avatarVariant,
+  gamertag,
+  username,
+  rating,
+  showRating,
+  hideRating,
+  badges,
+  badgeClassName,
+}: {
+  className: string;
+  seat: number;
+  avatarSrc?: string;
+  avatarName: string;
+  avatarVariant: 'green' | 'purple' | 'neutral';
+  gamertag?: string;
+  username: string;
+  rating?: number;
+  showRating?: boolean;
+  hideRating?: boolean;
+  badges?: ReactNode;
+  badgeClassName?: string;
+}) {
+  const {i18n} = useTranslation();
+  const {cardRef, badgeRef, hideBadges} = useRosterBadgeOverflow(
+    gamertag,
+    username,
+    Boolean(badges),
+    Boolean(hideRating),
+    i18n.language,
+  );
 
   return (
     <div
       ref={cardRef}
-      className="flex items-center gap-2 rounded-lg border border-accent-green/25 bg-accent-green/10 px-3 py-2"
+      data-roster-card=""
+      data-has-rating={showRating ? '1' : '0'}
+      className={cn('flex items-center gap-2 rounded-lg border px-3 py-2', className)}
     >
-      <SeatNumber n={position} />
-      <UserAvatar
-        src={leader.avatarUrl}
-        name={leader.username ?? leader.gamertag}
-        size="xs"
-        variant="green"
-      />
+      <SeatNumber n={seat} />
+      <UserAvatar src={avatarSrc} name={avatarName} size="xs" variant={avatarVariant} />
       <div className="min-w-0 flex-1">
-        <ParticipantDisplayNames gamertag={leader.gamertag} username={leader.username ?? ''} />
+        <ParticipantDisplayNames gamertag={gamertag} username={username} />
       </div>
-      {hideBadges ? null : (
-        <div ref={badgeRef} className={cn(badgeClass, isHost && 'flex flex-col gap-0.5')}>
-          <span>{t('eventDetail.convoyLeaderBadgeShort')}</span>
-          {isHost ? <span>{t('eventDetail.hostBadgeShort')}</span> : null}
+      {badges && !hideBadges ? (
+        <div ref={badgeRef} className={badgeClassName}>
+          {badges}
         </div>
-      )}
+      ) : null}
+      <ParticipantRating rating={rating} show={showRating} hidden={hideRating} />
     </div>
+  );
+}
+
+function LeaderCard({
+  leader,
+  position,
+  showRating,
+  hideRating,
+}: {
+  leader: RosterConvoyLeader;
+  position: number;
+  showRating: boolean;
+  hideRating: boolean;
+}) {
+  const {t} = useTranslation();
+
+  return (
+    <RosterCard
+      className="border-accent-green/25 bg-accent-green/10"
+      seat={position}
+      avatarSrc={leader.avatarUrl}
+      avatarName={leader.username ?? leader.gamertag}
+      avatarVariant="green"
+      gamertag={leader.gamertag}
+      username={leader.username ?? ''}
+      rating={leader.rating}
+      showRating={showRating}
+      hideRating={hideRating}
+      badgeClassName="shrink-0 text-right text-[10px] font-bold uppercase leading-tight tracking-wide text-accent-green/90"
+      badges={<span>{t('eventDetail.convoyLeaderBadgeShort')}</span>}
+    />
   );
 }
 
@@ -119,26 +254,32 @@ function DriverCard({
   p,
   viewerDiscordId,
   position,
+  showRating,
+  hideRating,
 }: {
   p: EventParticipant;
   viewerDiscordId: string;
   position: number;
+  showRating: boolean;
+  hideRating: boolean;
 }) {
   return (
-    <div
-      className={cn(
-        'flex items-center gap-2 rounded-lg border px-3 py-2',
+    <RosterCard
+      className={
         p.discordId === viewerDiscordId
           ? 'border-accent-purple/25 bg-accent-purple/10'
-          : 'border-white/[0.06] bg-card',
-      )}
-    >
-      <SeatNumber n={position} />
-      <UserAvatar src={p.avatarUrl} name={p.gamertag ?? p.username} size="xs" variant="purple" />
-      <div className="min-w-0 flex-1">
-        <ParticipantDisplayNames gamertag={p.gamertag} username={p.username} />
-      </div>
-    </div>
+          : 'border-white/[0.06] bg-card'
+      }
+      seat={position}
+      avatarSrc={p.avatarUrl}
+      avatarName={p.gamertag ?? p.username}
+      avatarVariant="purple"
+      gamertag={p.gamertag}
+      username={p.username}
+      rating={p.rating}
+      showRating={showRating}
+      hideRating={hideRating}
+    />
   );
 }
 
@@ -148,9 +289,13 @@ export function EventDetailParticipants({
   accessToken,
   onRosterChanged,
 }: Props) {
-  const {t} = useTranslation();
+  const {t, i18n} = useTranslation();
   const {ev, groups, waitlist, canChangeGroupLeader, showGroupRoster, canBalanceGroupRoster, canShuffleGroupRoster, canBalanceShuffleGroupRoster} = view;
   const multiGroup = groups.length > 1;
+  const showRating = Boolean(ev.isRanked);
+  const listRef = useRef<HTMLDivElement>(null);
+  const rosterKey = `${i18n.language}:${ev.participants.map((p) => `${p.discordId}:${p.rating ?? ''}`).join(',')}`;
+  const hideRating = useSharedRatingHide(listRef, showRating, rosterKey);
   const [changingGroupIndex, setChangingGroupIndex] = useState<number | null>(null);
 
   function groupCount(group: RosterGroup): number {
@@ -184,7 +329,7 @@ export function EventDetailParticipants({
         <p className="mb-3 text-sm font-semibold text-white">{t('eventDetail.participants')}</p>
       )}
 
-      <div className="space-y-4">
+      <div ref={listRef} className="space-y-4">
         {groups.map((group) => (
           <div key={group.groupIndex} className="space-y-2">
             {multiGroup || canChangeGroupLeader ? (
@@ -219,8 +364,9 @@ export function EventDetailParticipants({
                   {group.leader ? (
                     <LeaderCard
                       leader={group.leader}
-                      hostDiscordId={ev.hostDiscordId}
                       position={1}
+                      showRating={showRating}
+                      hideRating={hideRating}
                     />
                   ) : null}
                   {group.drivers.map((p, i) => (
@@ -229,6 +375,8 @@ export function EventDetailParticipants({
                       p={p}
                       viewerDiscordId={viewerDiscordId}
                       position={(group.leader ? 1 : 0) + i + 1}
+                      showRating={showRating}
+                      hideRating={hideRating}
                     />
                   ))}
                 </div>
@@ -249,26 +397,23 @@ export function EventDetailParticipants({
             </div>
             <div className="grid grid-cols-2 gap-2">
               {waitlist.map((p, i) => (
-                <div
+                <RosterCard
                   key={p.discordId}
-                  className={cn(
-                    'flex items-center gap-2 rounded-lg border px-3 py-2',
+                  className={
                     p.discordId === viewerDiscordId
                       ? 'border-accent-purple/25 bg-accent-purple/10'
-                      : 'border-white/[0.06] bg-card',
-                  )}
-                >
-                  <SeatNumber n={i + 1} />
-                  <UserAvatar
-                    src={p.avatarUrl}
-                    name={p.gamertag ?? p.username}
-                    size="xs"
-                    variant="neutral"
-                  />
-                  <div className="min-w-0">
-                    <ParticipantDisplayNames gamertag={p.gamertag} username={p.username} />
-                  </div>
-                </div>
+                      : 'border-white/[0.06] bg-card'
+                  }
+                  seat={i + 1}
+                  avatarSrc={p.avatarUrl}
+                  avatarName={p.gamertag ?? p.username}
+                  avatarVariant="neutral"
+                  gamertag={p.gamertag}
+                  username={p.username}
+                  rating={p.rating}
+                  showRating={showRating}
+                  hideRating={hideRating}
+                />
               ))}
             </div>
           </div>

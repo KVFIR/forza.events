@@ -3,6 +3,7 @@ import {openBuildHasDisplayRules} from './carRules.ts';
 import {eventHasStarted} from './eventSpec.ts';
 import {resolveCoverAbsolute} from './eventCovers.ts';
 import {openEventCustomId} from './eventLaunch.ts';
+import {eventUrlKey} from './eventPath.ts';
 import {eventTypeEmbedColor} from './eventTypes.ts';
 import {eventGameLabelFullEn, normalizeEventGame, type ForzaGame} from './eventGames.ts';
 import type {CarRuleMode} from './eventSpec.ts';
@@ -25,6 +26,7 @@ export type EmbedAllowedCar = {
   make: string;
   model: string;
   year: number | null;
+  abbreviation?: string | null;
   max_pi: number;
   tune_share_code: string | null;
   car_restrictions: string[];
@@ -32,6 +34,7 @@ export type EmbedAllowedCar = {
 
 export type EmbedEventInput = {
   id: string;
+  slug?: string | null;
   title: string;
   type: string;
   game?: string | null;
@@ -75,17 +78,18 @@ type EventCarJoinRow = {
   tune_share_code: string | null;
   car_restrictions: string[] | null;
   cars:
-    | {make: string; model: string; year: number | null}
-    | {make: string; model: string; year: number | null}[]
+    | {make: string; model: string; year: number | null; abbreviation?: string | null}
+    | {make: string; model: string; year: number | null; abbreviation?: string | null}[]
     | null;
 };
 
 export function slugify(title: string): string {
-  const base = title
-    .toLowerCase()
-    .replace(/[^a-z0-9]+/g, '-')
-    .replace(/^-|-$/g, '')
-    .slice(0, 40);
+  const base =
+    title
+      .toLowerCase()
+      .replace(/[^\p{Letter}\p{Number}]+/gu, '-')
+      .replace(/^-|-$/g, '')
+      .slice(0, 40) || 'event';
   const date = new Date().toISOString().slice(0, 10).replace(/-/g, '');
   return `${base}-${date}`;
 }
@@ -100,6 +104,7 @@ export function mapEventCarsForEmbed(eventCars: EventCarJoinRow[]): EmbedAllowed
       make: car.make,
       model: car.model,
       year: car.year,
+      abbreviation: car.abbreviation ?? null,
       max_pi: ec.max_pi,
       tune_share_code: ec.tune_share_code,
       car_restrictions: ec.car_restrictions ?? [],
@@ -108,9 +113,13 @@ export function mapEventCarsForEmbed(eventCars: EventCarJoinRow[]): EmbedAllowed
   return mapped;
 }
 
-export function eventDetailUrl(eventId: string, origin: string): string {
+export function eventDetailUrl(
+  eventOrId: string | {id: string; slug?: string | null},
+  origin: string,
+): string {
   const base = origin.trim().replace(/\/$/, '');
-  return `${base}/event/${eventId}`;
+  const key = typeof eventOrId === 'string' ? eventOrId : eventUrlKey(eventOrId);
+  return `${base}/event/${encodeURIComponent(key)}`;
 }
 
 function discordTimestamp(iso: string, style: 'F' | 'R' = 'F'): string {
@@ -262,6 +271,7 @@ function fitRestrictedCarFields(
       make: car.make,
       model: car.model,
       year: car.year,
+      abbreviation: car.abbreviation,
     })),
   );
 
@@ -570,7 +580,7 @@ export function buildEventEmbed(event: EmbedEventInput) {
 
   const embed = {
     title,
-    url: eventDetailUrl(event.id, siteOrigin),
+    url: eventDetailUrl(event, siteOrigin),
     description,
     color: lifecycle.color,
     image: {url: coverUrl},

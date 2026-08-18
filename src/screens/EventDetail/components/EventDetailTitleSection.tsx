@@ -3,14 +3,12 @@ import {useNavigate} from 'react-router-dom';
 import {busyLabel} from '../../../i18n/busyLabels';
 import {Badge, DraftBadge, GameBadge, RankedBadge, StatusBadge} from '../../../components/ui/Badge';
 import {Button} from '../../../components/ui/Button';
-import {Alert} from '../../../components/ui/Alert';
 import {
   participationButtonLabel,
   participationButtonVariant,
 } from '../../../lib/eventActions';
-import {cn} from '../../../lib/cn';
 import type {EventStatus, ForzaEvent} from '../../../lib/types';
-import {eventDetailHintClass} from '../../../components/eventDetailHintStyles';
+import {eventDetailPath} from '@edge/eventPath.ts';
 import type {EventDetailViewModel} from '../eventDetailView';
 import {EventRegistrationProgress} from './EventDetailProgressSection';
 
@@ -42,9 +40,6 @@ type Props = {
     | 'fillPct'
     | 'showRegistrationProgress'
     | 'registrationOpen'
-    | 'showJoinXboxHint'
-    | 'showConvoyLeaderXboxHint'
-    | 'viewerConvoyLeader'
     | 'totalCapacity'
     | 'onWaitlist'
     | 'willWaitlist'
@@ -136,7 +131,7 @@ export function EventDetailTitleSection({
           size="toolbar"
           className="shrink-0 whitespace-nowrap"
           onClick={() =>
-            navigate(`/event/${event.id}/results`, {state: {from: detailFrom}})
+            navigate(eventDetailPath(event, {results: true}), {state: {from: detailFrom}})
           }
         >
           {t('eventDetail.submitResults')}
@@ -194,36 +189,22 @@ export function EventDetailTitleSection({
     <div>
       <div className="relative z-10 -mt-10 flex items-center gap-3 sm:-mt-12">
         <div className="min-w-0 flex-1">
-          <div className="flex flex-wrap items-center gap-2">
-            <GameBadge game={event.game} variant="full" />
-            <Badge type={event.type} />
-            {event.isRanked ? <RankedBadge /> : null}
-            {view.isDraft ? <DraftBadge /> : <StatusBadge status={displayStatus} />}
+          <h1 className="text-xl font-black tracking-tight text-white">{event.title}</h1>
+          <div className="mt-1.5 flex flex-wrap items-center gap-1.5">
+            <GameBadge className="px-1.5 py-px" game={event.game} />
+            <Badge className="px-1.5 py-px" type={event.type} />
+            {event.isRanked ? <RankedBadge className="px-1.5 py-px" /> : null}
+            {view.isDraft ? (
+              <DraftBadge className="px-1.5 py-px" />
+            ) : (
+              <StatusBadge className="px-1.5 py-px" status={displayStatus} />
+            )}
           </div>
-          <h1 className="mt-1.5 text-xl font-black tracking-tight text-white">{event.title}</h1>
         </div>
         {titleRowAction ? <div className="shrink-0">{titleRowAction}</div> : null}
       </div>
 
       <EventRegistrationProgress view={view} />
-
-      {view.showJoinXboxHint && view.viewerConvoyLeader ? (
-        <Alert
-          variant="info"
-          title={t('participation.xboxHintTitle')}
-          className={cn('mt-2', eventDetailHintClass)}
-        >
-          {t('participation.xboxHintBody', {leader: view.viewerConvoyLeader.gamertag})}
-        </Alert>
-      ) : view.showConvoyLeaderXboxHint ? (
-        <Alert
-          variant="info"
-          title={t('participation.convoyLeaderXboxHintTitle')}
-          className={cn('mt-2', eventDetailHintClass)}
-        >
-          {t('participation.convoyLeaderXboxHintBody')}
-        </Alert>
-      ) : null}
     </div>
   );
 }

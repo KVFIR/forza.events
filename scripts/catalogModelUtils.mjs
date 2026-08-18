@@ -42,3 +42,42 @@ export function piToClassFh5(pi) {
 export function piToClass(pi, game) {
   return game === 'fh5' ? piToClassFh5(pi) : piToClassFh6(pi);
 }
+
+/** Wiki "abbreviated as" aliases from the scrape dump (first = HUD name). */
+export function catalogAliases(car) {
+  const raw = Array.isArray(car.abbreviated_as) ? car.abbreviated_as : [];
+  const aliases = [];
+  const seen = new Set();
+  for (const a of raw) {
+    const s = String(a ?? '').trim();
+    const k = s.toLowerCase();
+    if (!s || seen.has(k)) continue;
+    seen.add(k);
+    aliases.push(s);
+  }
+  return aliases;
+}
+
+function raceNumbersIn(text) {
+  return new Set([...String(text ?? '').matchAll(/#(\d+)/g)].map((m) => m[1]));
+}
+
+/**
+ * Drop wiki HUD aliases whose #N is not on the catalog title (copy-paste leads).
+ * If every numbered alias is wrong, keep a title prefix through the race number.
+ */
+export function filterRaceNumberAliases(model, aliases) {
+  const titleNums = raceNumbersIn(model);
+  if (titleNums.size === 0) return aliases;
+  const matched = aliases.filter((a) => {
+    const nums = raceNumbersIn(a);
+    if (nums.size === 0) return true;
+    for (const n of nums) {
+      if (titleNums.has(n)) return true;
+    }
+    return false;
+  });
+  if (matched.length) return matched;
+  const fallback = String(model).match(/^(.*?#\d+)/);
+  return fallback ? [fallback[1].trim()] : [];
+}

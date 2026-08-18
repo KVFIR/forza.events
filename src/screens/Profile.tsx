@@ -352,6 +352,21 @@ export function Profile() {
         />
       </div>
 
+      {active.length > 0 && (
+        <section className="mt-6">
+          <p className="mb-3 text-[10px] font-medium uppercase tracking-[0.14em] text-muted">
+            {t('profile.upcoming')}
+          </p>
+          <ul className="flex list-none flex-col gap-2">
+            {active.slice(0, 2).map((event) => (
+              <li key={event.id}>
+                <EventCard event={event} />
+              </li>
+            ))}
+          </ul>
+        </section>
+      )}
+
       {recentCompleted.length > 0 && (
         <section className="mt-6">
           <div className="mb-3 flex items-center justify-between gap-2">
@@ -369,21 +384,6 @@ export function Profile() {
                   event={event}
                   participantResult={participantPlacements.get(event.id)}
                 />
-              </li>
-            ))}
-          </ul>
-        </section>
-      )}
-
-      {active.length > 0 && (
-        <section className="mt-6">
-          <p className="mb-3 text-[10px] font-medium uppercase tracking-[0.14em] text-muted">
-            {t('profile.upcoming')}
-          </p>
-          <ul className="flex list-none flex-col gap-2">
-            {active.slice(0, 2).map((event) => (
-              <li key={event.id}>
-                <EventCard event={event} />
               </li>
             ))}
           </ul>

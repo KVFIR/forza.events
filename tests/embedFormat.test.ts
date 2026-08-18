@@ -106,8 +106,20 @@ describe('buildEventEmbed', () => {
   });
 
   it('links embed title to the public event detail URL', () => {
+    const embed = buildEventEmbed(event({id: 'evt-42', slug: 'open-build-night-20260715'})).embeds[0];
+    expect(embed.url).toBe('https://forza.events/event/open-build-night-20260715');
+  });
+
+  it('falls back to id when slug is missing', () => {
     const embed = buildEventEmbed(event({id: 'evt-42'})).embeds[0];
     expect(embed.url).toBe('https://forza.events/event/evt-42');
+  });
+
+  it('percent-encodes unicode slugs in the embed url', () => {
+    const embed = buildEventEmbed(event({id: 'evt-42', slug: 'летний-круиз-20260818'})).embeds[0];
+    expect(embed.url).toBe(
+      `https://forza.events/event/${encodeURIComponent('летний-круиз-20260818')}`,
+    );
   });
 
   it('puts full game name in footer, not a Game field', () => {

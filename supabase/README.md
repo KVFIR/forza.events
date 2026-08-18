@@ -153,6 +153,7 @@ Host: `000000000000000001`, guild `000000000000000001`.
 - `data/fh6_fandom_cars.json` / `fh5_fandom_cars.json` — full wiki scrapes
 - `cars.game` + `events.game` (`fh5` | `fh6`, migration `029`); existing rows default `fh6`
 - Model titles strip `(YYYY)` — year is the `year` column only
+- `cars.abbreviation` — wiki HUD name (migration `039`); extra aliases are folded into `search_text` by `seed:cars`
 - `save-event` resolves cars by id/lookup within the event’s game only (no arbitrary catalog inserts)
 
 ```bash
@@ -161,7 +162,7 @@ npm run data:fh6:scrape    # scrape → fh6_fandom_cars.json + fh6cars.json
 npm run data:fh5:catalog   # rebuild fh5cars.json from scrape dump
 npm run data:fh6:catalog   # rebuild fh6cars.json from scrape dump
 npm run data:fh6:xlsx      # optional spreadsheet from fh6_fandom_cars.json
-supabase db push           # apply 029_forza_game if needed
+supabase db push           # apply 029_forza_game / 039_car_abbreviation if needed
 npm run seed:cars          # upsert both catalogs (linked CLI); does not delete event_cars
 ```
 

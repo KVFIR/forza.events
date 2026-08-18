@@ -10,7 +10,7 @@
  *   npm run seed:cars              # prefers Supabase CLI (--linked)
  *   node scripts/seed-cars.mjs --service-role  # SUPABASE_SERVICE_ROLE_KEY + JS upsert
  *
- * Requires migration 029_forza_game.sql applied first.
+ * Requires migrations 029_forza_game.sql and 039_car_abbreviation.sql.
  */
 import {execSync} from 'node:child_process';
 import {readFileSync, writeFileSync, existsSync} from 'node:fs';
@@ -18,7 +18,7 @@ import {tmpdir} from 'node:os';
 import {dirname, join} from 'node:path';
 import {fileURLToPath} from 'node:url';
 import {createClient} from '@supabase/supabase-js';
-import {stripYearFromModelTitle} from './catalogModelUtils.mjs';
+import {catalogAliases, filterRaceNumberAliases, stripYearFromModelTitle} from './catalogModelUtils.mjs';
 
 const root = dirname(fileURLToPath(import.meta.url));
 const repoRoot = join(root, '..');
@@ -42,12 +42,24 @@ function loadCatalogRows() {
       continue;
     }
     for (const c of cars) {
+      const model = stripYearFromModelTitle(c.model);
+      const aliases = filterRaceNumberAliases(
+        model,
+        catalogAliases({
+          abbreviated_as: [
+            typeof c.abbreviation === 'string' ? c.abbreviation : '',
+            ...(Array.isArray(c.aliases) ? c.aliases : []),
+          ],
+        }),
+      );
       rows.push({
         game,
         make: c.make,
-        model: stripYearFromModelTitle(c.model),
+        model,
         year: c.year,
         pi: c.pi,
+        abbreviation: aliases[0] ?? null,
+        aliases,
       });
     }
   }
@@ -65,7 +77,8 @@ function escSql(s) {
 }
 
 function carSearchText(c) {
-  return [c.make, c.model, c.year != null ? String(c.year) : '', String(c.pi)]
+  const extra = [c.abbreviation, ...(c.aliases ?? [])].filter(Boolean);
+  return [c.make, c.model, c.year != null ? String(c.year) : '', String(c.pi), ...extra]
     .join(' ')
     .trim()
     .toLowerCase();
@@ -84,6 +97,7 @@ function buildSyncSql(rows) {
     '  model text NOT NULL,',
     '  year integer NOT NULL,',
     '  pi integer NOT NULL,',
+    '  abbreviation text,',
     '  search_text text NOT NULL',
     ') ON COMMIT DROP;',
   ];
@@ -94,21 +108,26 @@ function buildSyncSql(rows) {
     const vals = chunk
       .map((c) => {
         const y = c.year;
+        const abbr =
+          c.abbreviation == null || c.abbreviation === ''
+            ? 'NULL'
+            : `'${escSql(c.abbreviation)}'`;
         const st = escSql(carSearchText(c));
-        return `('${c.game}', '${escSql(c.make)}', '${escSql(c.model)}', ${y}, ${c.pi}, '${st}')`;
+        return `('${c.game}', '${escSql(c.make)}', '${escSql(c.model)}', ${y}, ${c.pi}, ${abbr}, '${st}')`;
       })
       .join(',\n  ');
     lines.push(
-      `INSERT INTO _catalog_staging (game, make, model, year, pi, search_text) VALUES\n  ${vals};`,
+      `INSERT INTO _catalog_staging (game, make, model, year, pi, abbreviation, search_text) VALUES\n  ${vals};`,
     );
   }
 
   lines.push(
-    `INSERT INTO cars (game, make, model, year, pi, search_text, active)
-SELECT game, make, model, year, pi, search_text, true
+    `INSERT INTO cars (game, make, model, year, pi, abbreviation, search_text, active)
+SELECT game, make, model, year, pi, abbreviation, search_text, true
 FROM _catalog_staging
 ON CONFLICT (game, make, model, year, pi)
 DO UPDATE SET
+  abbreviation = EXCLUDED.abbreviation,
   search_text = EXCLUDED.search_text,
   active = true;`,
     `UPDATE cars c
@@ -148,6 +167,7 @@ async function syncViaServiceRole() {
       year: c.year,
       pi: c.pi,
       search_text: carSearchText(c),
+      abbreviation: c.abbreviation,
       active: true,
     }));
     const {error} = await supabase.from('cars').upsert(chunk, {

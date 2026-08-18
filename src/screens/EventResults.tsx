@@ -21,6 +21,7 @@ import {formatDiscordHandle} from '../lib/discordHandle';
 import {buildResultSubmitRows} from '../lib/eventResults';
 import {resolveResultsRoster} from '../lib/eventRoster';
 import {fetchEventById, fetchEventResults} from '../lib/events';
+import {eventDetailPath} from '@edge/eventPath.ts';
 import {usePageMetaOverride} from '../context/PageMetaContext';
 import {buildEventPageMeta} from '../lib/eventPageMeta';
 import {
@@ -341,9 +342,8 @@ export function EventResults() {
   const {setRichPresenceOverride} = useRichPresenceOverride();
 
   const displayEvent = useMemo(
-    () =>
-      event && id ? mergeOptimisticEventPatch(event, getLobbyPatch(id)) : null,
-    [event, id, getLobbyPatch],
+    () => (event ? mergeOptimisticEventPatch(event, getLobbyPatch(event.id)) : null),
+    [event, getLobbyPatch],
   );
 
   useEffect(() => {
@@ -368,13 +368,13 @@ export function EventResults() {
 
   const goToEventDetail = useCallback(
     (
-      eventId: string,
+      target: {id: string; slug?: string | null},
       options?: {
         replace?: boolean;
         state?: Parameters<typeof buildEventDetailLocationState>[0];
       },
     ) => {
-      navigate(`/event/${eventId}`, {
+      navigate(eventDetailPath(target), {
         replace: options?.replace ?? true,
         state: buildEventDetailLocationState(options?.state, detailFrom),
       });
@@ -387,7 +387,7 @@ export function EventResults() {
     setRecheckingResults(true);
     setResultsCheckFailed(false);
     try {
-      const savedOutcome = await fetchEventResults(id);
+      const savedOutcome = await fetchEventResults(event.id);
       const savedCount = savedCountFromResultsFetch(savedOutcome);
 
       if (savedOutcome.error === 'fetch_failed') {
@@ -396,7 +396,7 @@ export function EventResults() {
       }
 
       if (shouldLeaveResultsScreen(event, savedCount, user)) {
-        goToEventDetail(id);
+        goToEventDetail(event);
       }
     } catch (err) {
       console.error('EventResults recheck', err);
@@ -425,7 +425,7 @@ export function EventResults() {
         if (cancelled) return;
 
         if (!loaded) {
-          goToEventDetail(id);
+          goToEventDetail({id});
           return;
         }
 
@@ -433,11 +433,11 @@ export function EventResults() {
         setTitle(loaded.title);
 
         if (shouldLeaveResultsScreen(loaded, null, user)) {
-          goToEventDetail(id);
+          goToEventDetail(loaded);
           return;
         }
 
-        const savedOutcome = await fetchEventResults(id);
+        const savedOutcome = await fetchEventResults(loaded.id);
         if (cancelled) return;
 
         const savedCount = savedCountFromResultsFetch(savedOutcome);
@@ -447,7 +447,7 @@ export function EventResults() {
         }
 
         if (shouldLeaveResultsScreen(loaded, savedCount, user)) {
-          goToEventDetail(id);
+          goToEventDetail(loaded);
           return;
         }
 
@@ -460,7 +460,7 @@ export function EventResults() {
       } catch (err) {
         if (!cancelled) {
           console.error('EventResults load', err);
-          goToEventDetail(id);
+          goToEventDetail({id});
         }
       } finally {
         if (!cancelled) setLoading(false);
@@ -493,7 +493,7 @@ export function EventResults() {
     : [];
 
   async function handleSubmit() {
-    if (!id || !entry || !entryComplete) return;
+    if (!event || !entry || !entryComplete) return;
     setSaving(true);
     setError(null);
 
@@ -529,11 +529,11 @@ export function EventResults() {
         throw new Error(t('results.noParticipants'));
       }
 
-      const submitRes = await submitEventResults(token, id, payload);
-      track('submit_results', {outcome: 'success', event_id: id});
+      const submitRes = await submitEventResults(token, event.id, payload);
+      track('submit_results', {outcome: 'success', event_id: event.id});
       const [updated, savedOutcome] = await Promise.all([
-        fetchEventById(id, {discordToken: token}),
-        fetchEventResults(id),
+        fetchEventById(event.id, {discordToken: token}),
+        fetchEventResults(event.id),
       ]);
       bumpRefresh();
       const detailEvent = updated ?? event;
@@ -542,7 +542,7 @@ export function EventResults() {
         submitRes.rating_applied === false
           ? {...detailEvent, isRanked: true, ratingApplied: false}
           : detailEvent;
-      goToEventDetail(id, {
+      goToEventDetail(seeded, {
         state: buildEventDetailNavigateStateAfterSubmit(
           seeded,
           savedOutcome,
@@ -553,9 +553,9 @@ export function EventResults() {
       if (
         e instanceof ApiRequestError &&
         e.code === API_ERROR_CODES.RESULTS_ALREADY_SUBMITTED &&
-        id
+        event
       ) {
-        goToEventDetail(id);
+        goToEventDetail(event);
         return;
       }
       setError(e instanceof Error ? e.message : String(e));
@@ -575,9 +575,9 @@ export function EventResults() {
   return (
     <ContentReveal className="pb-10 pt-5">
       <TextLink
-        to={id ? `/event/${id}` : '/'}
+        to={event ? eventDetailPath(event) : '/'}
         state={
-          id ? buildEventDetailLocationState(undefined, detailFrom) : undefined
+          event ? buildEventDetailLocationState(undefined, detailFrom) : undefined
         }
         tone="nav"
         className="mb-5 inline-flex items-center gap-1.5"

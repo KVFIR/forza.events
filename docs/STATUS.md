@@ -31,7 +31,7 @@ Remaining work is mostly **Activity E2E in pilot guilds**, **Railway frontend re
 | Browse Events | Done | Activity: `browse-events`; localhost: PostgREST + same `isBrowseFeedEvent` filter (published open/live + completed; cancelled/archived excluded; started/live stay visible) |
 | Event Detail | Done | Join/leave, host actions, balance groups, results, live updates, optional Join voice |
 | Create Event | Done | 4 steps; cover via `upload-cover`; convoy leader via `list-guild-members`; optional gathering voice channel |
-| My Events | Done | Hosted/joined + host drafts merge |
+| My Events | Done | Hosted/joined + host drafts merge; cancelled hidden by default; Browse-style sort |
 | Profile | Done | Gamertag + DM notification prefs (`user-profile`) + driver rating |
 | Leaderboard / ranked ELO | Done | Phase A+B: `031`–`033`, pairwise ELO on `submit-results`, `/leaderboard` (last race + Δ via `038`), Browse Ranked filter |
 | Discord Activity auth | Done | SDK → `token-exchange` → `authenticate` |
@@ -40,7 +40,7 @@ Remaining work is mostly **Activity E2E in pilot guilds**, **Railway frontend re
 | Supabase schema | Done | `001_baseline` + `002`–`010` |
 | Edge Functions | Done | `npm run deploy:functions` |
 | Realtime lobby | Done | `events` + `event_participants` |
-| FH5 / FH6 cars + event game | Done | `events.game` / `cars.game` (`029`); Create selector; Browse filter (default All); card/detail/embed badges |
+| FH5 / FH6 cars + event game | Done | `events.game` / `cars.game` (`029`); Create selector; Browse filter (default All); Event Detail + embed; no card mark |
 | FH6 cars catalog | Done | Autocomplete; no client inserts into `cars` |
 | FH5 cars catalog | Done | Fandom scrape → `fh5cars.json`; same seed path |
 | Cover storage | Done | Host-only upload; public read |

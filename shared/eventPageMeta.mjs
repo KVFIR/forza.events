@@ -19,8 +19,10 @@ export const EVENT_TYPE_LABEL_EN = {
   cruise: 'Cruise',
 };
 
-export const EVENT_PATH_RE =
-  /^\/event\/([0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12})(?:\/results)?\/?$/i;
+export const EVENT_UUID_RE =
+  /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+
+export const EVENT_PATH_RE = /^\/event\/([^/]+)(?:\/results)?\/?$/i;
 
 const CRAWLER_UA_RE =
   /bot|facebookexternalhit|discordbot|slackbot|telegrambot|twitterbot|linkedinbot|whatsapp|embedly|pinterest|applebot|bingbot|bingpreview|skypeuripreview|vkshare|redditbot|google-inspectiontool|google-extended|gptbot|chatgpt-user|anthropic-ai|claude-web|claudebot|perplexitybot|bytespider|meta-externalagent|cohere-ai/i;
@@ -28,7 +30,14 @@ const CRAWLER_UA_RE =
 export function parseEventPagePath(pathname) {
   const m = pathname.match(EVENT_PATH_RE);
   if (!m) return null;
-  return {eventId: m[1], isResults: /\/results\/?$/i.test(pathname)};
+  let eventId;
+  try {
+    eventId = decodeURIComponent(m[1]);
+  } catch {
+    eventId = m[1];
+  }
+  if (!eventId) return null;
+  return {eventId, isResults: /\/results\/?$/i.test(pathname), isUuid: EVENT_UUID_RE.test(eventId)};
 }
 
 export function isLinkPreviewCrawler(userAgent) {
@@ -83,7 +92,9 @@ function lifecycleSuffix(status) {
 
 export function buildEventPageMeta(event, {siteOrigin, pageUrl, isResults = false} = {}) {
   const origin = (siteOrigin ?? 'https://forza.events').replace(/\/$/, '');
-  const url = pageUrl ?? `${origin}/event/${event.id}${isResults ? '/results' : ''}`;
+  const key = event.slug?.trim() || event.id;
+  const url =
+    pageUrl ?? `${origin}/event/${encodeURIComponent(key)}${isResults ? '/results' : ''}`;
   const typeLabel = EVENT_TYPE_LABEL_EN[normalizeEventType(event.type)] ?? 'Road racing';
   const when = formatEventOgDate(event.starts_at ?? event.startsAt);
   const status = event.status ?? event.lifecycle ?? 'open';
