@@ -49,4 +49,31 @@ describe('normalizeClientEvent', () => {
       )?.meta,
     ).toEqual({});
   });
+
+  it('accepts retry_event_ratings', () => {
+    expect(
+      normalizeClientEvent({name: 'retry_event_ratings', outcome: 'success'}, 'activity', '1')
+        ?.event_name,
+    ).toBe('retry_event_ratings');
+  });
+
+  it('keeps discord_id from session_expired when the request has no token user', () => {
+    expect(
+      normalizeClientEvent(
+        {name: 'session_expired', discord_id: '123456789012345678'},
+        'browser_web',
+        null,
+      )?.discord_id,
+    ).toBe('123456789012345678');
+  });
+
+  it('ignores body discord_id on other events without a token user', () => {
+    expect(
+      normalizeClientEvent(
+        {name: 'join', outcome: 'success', discord_id: '123456789012345678'},
+        'browser_web',
+        null,
+      )?.discord_id,
+    ).toBeNull();
+  });
 });

@@ -52,8 +52,14 @@ describe('analyticsHealthWatch', () => {
     expect(healthWatchSummary(items).banner).toBe('No signals in this window');
   });
 
-  it('surfaces missing DM migration in watch list', () => {
-    const items = buildWatchItems(emptySummary(), undefined, null);
-    expect(items.some((item) => item.id === 'dm_metrics')).toBe(true);
+  it('does not go critical on browser network volume', () => {
+    const summary = emptySummary(14);
+    summary.funnel = {api_error: 90};
+    summary.errors_by_surface = {browser_web: 90};
+    summary.top_errors = [
+      {code: 'NETWORK_ERROR', function_name: 'browse-events', count: 90},
+    ];
+    const items = buildWatchItems(summary, undefined, null);
+    expect(items.find((item) => item.id === 'api_errors')?.status).toBe('ok');
   });
 });

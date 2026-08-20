@@ -15,11 +15,12 @@ import {
   type NotificationDashboard,
 } from '../lib/analyticsDashboard';
 import {
-  buildWatchItems,
-  healthWatchSummary,
-  type WatchItem,
-  type WatchStatus,
-} from '../lib/analyticsHealthWatch';
+  buildErrorHeadline,
+  classifiedCount,
+  classifyApiError,
+  ERROR_CLASS_LABEL,
+  type ErrorHeadline,
+} from '../lib/analyticsErrorClass';
 import {isLocalDevHost} from '../lib/runtime';
 import {cn} from '../lib/cn';
 
@@ -28,8 +29,8 @@ const DAY_OPTIONS = [1, 7, 14, 30, 90] as const;
 const DASHBOARD_TABS = [
   {
     id: 'overview',
-    label: 'Overview',
-    description: 'Headline volume, conversion rates, and engagement for the selected window.',
+    label: 'Brief',
+    description: 'What actually broke — Activity vs browser noise, classified.',
   },
   {
     id: 'surfaces',
@@ -149,6 +150,64 @@ function formatRate(rate: number | null | undefined): string {
   return `${rate}%`;
 }
 
+function formatDayTick(day: string): string {
+  const parsed = new Date(`${day}T00:00:00Z`);
+  if (Number.isNaN(parsed.getTime())) return day.slice(5);
+  return parsed.toLocaleDateString('en-US', {month: 'short', day: 'numeric', timeZone: 'UTC'});
+}
+
+const HEADLINE_BOX: Record<ErrorHeadline['tone'], string> = {
+  ok: 'border-emerald-500/35 bg-emerald-950/20 text-emerald-100/90',
+  info: 'border-white/12 bg-surface/60 text-slate-200',
+  warning: 'border-orange-400/40 bg-orange-950/20 text-orange-100/90',
+  danger: 'border-red-400/40 bg-red-950/25 text-red-100/90',
+};
+
+function HeadlineBanner({headline}: {headline: ErrorHeadline}) {
+  return (
+    <div className={cn('rounded-xl border px-4 py-3', HEADLINE_BOX[headline.tone])}>
+      <p className="text-sm font-semibold text-white">{headline.title}</p>
+      <p className="mt-1 text-sm">{headline.body}</p>
+    </div>
+  );
+}
+
+function DailyErrorChart({
+  rows,
+}: {
+  rows: {day: string; errors: number; events: number}[];
+}) {
+  if (rows.length === 0) return null;
+  const max = Math.max(1, ...rows.map((row) => row.errors));
+  return (
+    <div>
+      <p className={cn(sectionLabelClass, 'mb-1')}>API errors per day</p>
+      <p className="mb-3 text-xs text-muted">api_error rows · UTC</p>
+      <div className="flex h-44 items-end gap-1">
+        {rows.map((row) => {
+          const height = row.errors === 0 ? 0 : Math.max(4, Math.round((row.errors / max) * 100));
+          return (
+            <div
+              key={row.day}
+              className="flex min-w-0 flex-1 flex-col items-center justify-end gap-1"
+              title={`${row.day}: ${row.errors} errors · ${row.events} events`}
+            >
+              <span className="text-[10px] tabular-nums text-slate-300">
+                {row.errors > 0 ? row.errors : ''}
+              </span>
+              <div
+                className="w-full rounded-t bg-red-400/75"
+                style={{height: `${height}%`}}
+              />
+              <span className="text-[10px] text-muted">{formatDayTick(row.day)}</span>
+            </div>
+          );
+        })}
+      </div>
+    </div>
+  );
+}
+
 function recordRows(record: Record<string, number> | undefined): {key: string; value: number}[] {
   if (!record) return [];
   return Object.entries(record).map(([key, value]) => ({key, value: Number(value) || 0}));
@@ -161,92 +220,6 @@ function funnelGroupRows(
   return keys
     .map((key) => ({key, value: funnel[key] ?? 0}))
     .filter((row) => row.value > 0);
-}
-
-const WATCH_STATUS_BORDER: Record<WatchStatus, string> = {
-  ok: 'border-emerald-500/45',
-  warn: 'border-amber-400/55',
-  critical: 'border-red-400/65',
-  unknown: 'border-white/15',
-};
-
-const WATCH_STATUS_LABEL: Record<WatchStatus, string> = {
-  ok: 'OK',
-  warn: 'Watch',
-  critical: 'Alert',
-  unknown: '—',
-};
-
-const WATCH_STATUS_TEXT: Record<WatchStatus, string> = {
-  ok: 'text-emerald-300/90',
-  warn: 'text-amber-300/90',
-  critical: 'text-red-300/90',
-  unknown: 'text-muted',
-};
-
-function OverviewHealthWatch({
-  items,
-  onInspectTab,
-}: {
-  items: WatchItem[];
-  onInspectTab: (tab: DashboardTabId) => void;
-}) {
-  const {banner, bannerTone, criticalCount} = healthWatchSummary(items);
-  const bannerClass =
-    bannerTone === 'ok'
-      ? 'text-emerald-300/90'
-      : bannerTone === 'muted'
-        ? 'text-muted'
-        : criticalCount > 0
-          ? 'text-red-300/90'
-          : 'text-amber-300/90';
-
-  return (
-    <div className="flex flex-col gap-3">
-      <div className="flex flex-wrap items-center justify-between gap-2">
-        <p className={cn(sectionLabelClass)}>Health watch</p>
-        <p className={cn('text-xs font-semibold', bannerClass)}>{banner}</p>
-      </div>
-      <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-3">
-        {items.map((item) => {
-          const interactive = Boolean(item.tab);
-          const Tag = interactive ? 'button' : 'div';
-          return (
-            <Tag
-              key={item.id}
-              type={interactive ? 'button' : undefined}
-              className={cn(
-                'rounded-lg border border-l-4 bg-surface/60 p-4 text-left',
-                WATCH_STATUS_BORDER[item.status],
-                interactive &&
-                  'cursor-pointer transition hover:bg-surface/80 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-amber-400/50',
-              )}
-              onClick={interactive ? () => onInspectTab(item.tab as DashboardTabId) : undefined}
-            >
-              <div className="flex items-start justify-between gap-2">
-                <p className={cn(sectionLabelClass, 'mb-2')}>{item.label}</p>
-                <span
-                  className={cn(
-                    'text-[10px] font-bold uppercase tracking-widest',
-                    WATCH_STATUS_TEXT[item.status],
-                  )}
-                >
-                  {WATCH_STATUS_LABEL[item.status]}
-                </span>
-              </div>
-              <p className="text-2xl font-bold tabular-nums text-white">{item.value}</p>
-              <p className="mt-1 text-xs text-muted">{item.hint}</p>
-              {interactive ? (
-                <p className="mt-2 text-[10px] font-semibold uppercase tracking-wider text-slate-500">
-                  Open {item.tab} →
-                </p>
-              ) : null}
-            </Tag>
-          );
-        })}
-      </div>
-    </div>
-  );
 }
 
 function DashboardSection({
@@ -296,7 +269,7 @@ function DashboardTabBar({
             className={cn(
               'shrink-0 border-b-2 px-3 py-2.5 text-xs font-semibold transition',
               selected
-                ? 'border-amber-400 text-white'
+                ? 'border-accent-purple text-white'
                 : 'border-transparent text-slate-400 hover:border-white/20 hover:text-slate-200',
             )}
             onClick={() => onChange(tab.id)}
@@ -515,7 +488,7 @@ function NotificationSection({
 }
 
 export function AnalyticsDashboard() {
-  const [days, setDays] = useState<number>(7);
+  const [days, setDays] = useState<number>(14);
   const [activeTab, setActiveTab] = useState<DashboardTabId>(readStoredTab);
   const [summary, setSummary] = useState<AnalyticsDashboardSummary | null>(null);
   const [loading, setLoading] = useState(false);
@@ -567,9 +540,24 @@ export function AnalyticsDashboard() {
       ? Math.round((100 * notifications.dm_prefs.enabled) / dmPrefsTotal)
       : null;
   const activeTabMeta = DASHBOARD_TABS.find((tab) => tab.id === activeTab) ?? DASHBOARD_TABS[0];
-  const watchItems = summary
-    ? buildWatchItems(summary, notifications, ingestFailureSummary)
+  const apiErrors = summary?.funnel.api_error ?? 0;
+  const activityErrors = summary?.errors_by_surface.activity ?? 0;
+  const headline = summary
+    ? buildErrorHeadline({
+        apiErrors,
+        totalEvents: summary.total_events,
+        activityErrors,
+        sessionExpired: summary.funnel.session_expired ?? 0,
+        top: summary.top_errors,
+      })
+    : null;
+  const activityRecent = summary
+    ? (summary.activity_recent_errors ??
+      summary.recent_errors.filter((row) => row.surface === 'activity'))
     : [];
+  const hostErrorRows = recordRows(summary?.errors_by_host).filter((row) => row.key !== 'unknown');
+  const bugCount = summary ? classifiedCount(summary.top_errors, 'bug') : 0;
+  const dmFailed = notifications?.delivery.failed ?? 0;
 
   const selectTab = (tab: DashboardTabId) => {
     setActiveTab(tab);
@@ -583,13 +571,11 @@ export function AnalyticsDashboard() {
       <header className="flex flex-col gap-4">
         <div className="flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
           <div>
-            <p className="text-[10px] font-bold uppercase tracking-[0.14em] text-amber-300/90">
-              Local dev only
-            </p>
-            <h1 className="text-2xl font-black tracking-tight text-white">Analytics dashboard</h1>
+            <h1 className="text-2xl font-black tracking-tight text-white">Analytics</h1>
             <p className="mt-1 max-w-2xl text-sm text-muted">
-              Product telemetry from <code className="text-slate-300">client_events</code> and
-              Discord DM delivery from <code className="text-slate-300">notification_outbox</code>.
+              Local only. Reads <code className="text-slate-300">client_events</code> and{' '}
+              <code className="text-slate-300">notification_outbox</code>. Brief classifies errors
+              so Discord Activity bugs are not buried under localhost noise.
             </p>
           </div>
           <div className="flex flex-wrap items-center gap-2">
@@ -627,8 +613,9 @@ export function AnalyticsDashboard() {
           <p className="mt-2 text-amber-100/80">
             Set <code className="text-amber-50">ANALYTICS_DASHBOARD_SECRET</code> in{' '}
             <code className="text-amber-50">.env</code>, run{' '}
-            <code className="text-amber-50">npm run sync:secrets</code>, apply migrations{' '}
-            <code className="text-amber-50">023</code> + <code className="text-amber-50">026</code>,
+            <code className="text-amber-50">npm run sync:secrets</code>,             apply migrations{' '}
+            <code className="text-amber-50">023</code> + <code className="text-amber-50">026</code>{' '}
+            + <code className="text-amber-50">041</code>,
             redeploy <code className="text-amber-50">analytics-dashboard</code>.
           </p>
         </div>
@@ -676,36 +663,129 @@ export function AnalyticsDashboard() {
           <DashboardSection title={activeTabMeta.label} description={activeTabMeta.description}>
             {activeTab === 'overview' ? (
               <>
-                <OverviewHealthWatch items={watchItems} onInspectTab={selectTab} />
+                {headline ? <HeadlineBanner headline={headline} /> : null}
 
-                <div>
-                  <p className={cn(sectionLabelClass, 'mb-3')}>Volume</p>
-                  <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
-                    <StatCard label="Sessions" value={formatNumber(summary.sessions)} />
-                    <StatCard
-                      label="Unique users"
-                      value={formatNumber(summary.unique_users)}
-                      hint="Discord ID only"
-                    />
-                    <StatCard
-                      label="Client events"
-                      value={formatNumber(summary.total_events)}
-                      hint="Raw rows in client_events"
-                    />
-                    <StatCard
-                      label="Event views"
-                      value={formatNumber(summary.funnel.event_view ?? 0)}
-                      hint={`${formatNumber(engagement?.sessions ?? 0)} sessions`}
-                    />
-                  </div>
+                <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-5">
+                  <StatCard
+                    label="API errors"
+                    value={formatNumber(apiErrors)}
+                    hint={`${summary.total_events > 0 ? ((100 * apiErrors) / summary.total_events).toFixed(1) : '0'}% of client events`}
+                  />
+                  <StatCard
+                    label="On Activity"
+                    value={formatNumber(activityErrors)}
+                    hint="Discord iframe — the product"
+                  />
+                  <StatCard
+                    label="Bugs"
+                    value={formatNumber(bugCount)}
+                    hint="INTERNAL or 5xx INVALID_RESPONSE"
+                  />
+                  <StatCard
+                    label="Sessions"
+                    value={formatNumber(summary.sessions)}
+                    hint={`${formatNumber(summary.unique_users)} users`}
+                  />
+                  <StatCard
+                    label="DM failures"
+                    value={formatNumber(dmFailed)}
+                    hint={
+                      notifications
+                        ? `${formatNumber(notifications.delivery.sent)} sent`
+                        : 'Apply 026'
+                    }
+                  />
                 </div>
+
+                <DailyErrorChart rows={summary.daily} />
+
+                <DataTable title="Top API errors" emptyLabel="No API errors in this window.">
+                  {summary.top_errors.length > 0 ? (
+                    <table className="w-full min-w-[36rem] text-sm">
+                      <thead>
+                        <tr className="text-left text-[10px] font-bold uppercase tracking-widest text-muted">
+                          <th className="pb-2 pr-3 text-right">Count</th>
+                          <th className="pb-2 pr-3">Code</th>
+                          <th className="pb-2 pr-3">Function</th>
+                          <th className="pb-2 pr-3">HTTP</th>
+                          <th className="pb-2">Class</th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        {summary.top_errors.map((row) => {
+                          const cls = classifyApiError(
+                            row.code,
+                            row.http_status,
+                            row.function_name,
+                          );
+                          const countLabel =
+                            row.distinct_ts != null && row.distinct_ts < row.count
+                              ? `${formatNumber(row.count)} (${formatNumber(row.distinct_ts)} ts)`
+                              : formatNumber(row.count);
+                          return (
+                            <tr
+                              key={`${row.code}:${row.function_name ?? ''}:${row.http_status ?? ''}`}
+                              className="border-t border-white/5"
+                            >
+                              <td className="py-2 pr-3 text-right font-mono tabular-nums text-slate-200">
+                                {countLabel}
+                              </td>
+                              <td className="py-2 pr-3 font-mono text-slate-200">{row.code}</td>
+                              <td className="py-2 pr-3 text-muted">{row.function_name ?? '—'}</td>
+                              <td className="py-2 pr-3 font-mono tabular-nums text-muted">
+                                {row.http_status ?? '—'}
+                              </td>
+                              <td className="py-2 text-muted">{ERROR_CLASS_LABEL[cls]}</td>
+                            </tr>
+                          );
+                        })}
+                      </tbody>
+                    </table>
+                  ) : null}
+                </DataTable>
+
+                <DataTable
+                  title="Activity errors"
+                  emptyLabel="No Activity API errors in this window."
+                >
+                  {activityRecent.length > 0 ? (
+                    <table className="w-full min-w-[36rem] text-sm">
+                      <thead>
+                        <tr className="text-left text-[10px] font-bold uppercase tracking-widest text-muted">
+                          <th className="pb-2 pr-3">Time</th>
+                          <th className="pb-2 pr-3">Code</th>
+                          <th className="pb-2 pr-3">Function</th>
+                          <th className="pb-2 text-right">HTTP</th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        {activityRecent.map((row, index) => (
+                          <tr key={`${row.at}:${index}`} className="border-t border-white/5">
+                            <td className="py-2 pr-3 whitespace-nowrap text-muted">
+                              {new Date(row.at).toLocaleString()}
+                            </td>
+                            <td className="py-2 pr-3 font-mono text-slate-200">{row.code}</td>
+                            <td className="py-2 pr-3 text-muted">{row.function_name ?? '—'}</td>
+                            <td className="py-2 text-right font-mono tabular-nums text-muted">
+                              {row.http_status ?? '—'}
+                            </td>
+                          </tr>
+                        ))}
+                      </tbody>
+                    </table>
+                  ) : null}
+                </DataTable>
+
+                {hostErrorRows.length > 0 ? (
+                  <KeyValueTable title="Errors by host" rows={hostErrorRows} />
+                ) : null}
 
                 <div>
                   <p className={cn(sectionLabelClass, 'mb-3')}>Conversion</p>
                   <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
-                    <ConversionCard title="Auth success rate" metric={summary.conversion?.auth} />
-                    <ConversionCard title="Join success rate" metric={summary.conversion?.join} />
-                    <ConversionCard title="Publish success rate" metric={summary.conversion?.publish} />
+                    <ConversionCard title="Auth" metric={summary.conversion?.auth} />
+                    <ConversionCard title="Join" metric={summary.conversion?.join} />
+                    <ConversionCard title="Publish" metric={summary.conversion?.publish} />
                     <StatCard
                       label="Event views / session"
                       value={
@@ -800,28 +880,41 @@ export function AnalyticsDashboard() {
                     rows={recordRows(summary.errors_by_function)}
                     emptyLabel="No API errors in window"
                   />
+                  {hostErrorRows.length > 0 ? (
+                    <KeyValueTable title="By host" rows={hostErrorRows} />
+                  ) : null}
                 </div>
 
                 <DataTable title="Top API errors" emptyLabel="No API errors in this window.">
                   {summary.top_errors.length > 0 ? (
-                    <table className="w-full min-w-[32rem] text-sm">
+                    <table className="w-full min-w-[36rem] text-sm">
                       <thead>
                         <tr className="text-left text-[10px] font-bold uppercase tracking-widest text-muted">
+                          <th className="pb-2 pr-3 text-right">Count</th>
                           <th className="pb-2 pr-3">Code</th>
                           <th className="pb-2 pr-3">Function</th>
-                          <th className="pb-2 text-right">Count</th>
+                          <th className="pb-2 pr-3">HTTP</th>
+                          <th className="pb-2">Class</th>
                         </tr>
                       </thead>
                       <tbody>
                         {summary.top_errors.map((row) => (
                           <tr
-                            key={`${row.code}:${row.function_name ?? ''}`}
+                            key={`${row.code}:${row.function_name ?? ''}:${row.http_status ?? ''}`}
                             className="border-t border-white/5"
                           >
+                            <td className="py-2 pr-3 text-right font-mono tabular-nums text-slate-200">
+                              {formatNumber(row.count)}
+                            </td>
                             <td className="py-2 pr-3 font-mono text-slate-200">{row.code}</td>
                             <td className="py-2 pr-3 text-muted">{row.function_name ?? '—'}</td>
-                            <td className="py-2 text-right font-mono tabular-nums text-slate-200">
-                              {formatNumber(row.count)}
+                            <td className="py-2 pr-3 font-mono tabular-nums text-muted">
+                              {row.http_status ?? '—'}
+                            </td>
+                            <td className="py-2 text-muted">
+                              {ERROR_CLASS_LABEL[
+                                classifyApiError(row.code, row.http_status, row.function_name)
+                              ]}
                             </td>
                           </tr>
                         ))}
@@ -837,6 +930,7 @@ export function AnalyticsDashboard() {
                         <tr className="text-left text-[10px] font-bold uppercase tracking-widest text-muted">
                           <th className="pb-2 pr-3">Time</th>
                           <th className="pb-2 pr-3">Surface</th>
+                          <th className="pb-2 pr-3">Host</th>
                           <th className="pb-2 pr-3">Code</th>
                           <th className="pb-2 pr-3">Function</th>
                           <th className="pb-2 text-right">HTTP</th>
@@ -849,6 +943,7 @@ export function AnalyticsDashboard() {
                               {new Date(row.at).toLocaleString()}
                             </td>
                             <td className="py-2 pr-3 text-slate-200">{row.surface}</td>
+                            <td className="py-2 pr-3 text-muted">{row.host ?? '—'}</td>
                             <td className="py-2 pr-3 font-mono text-slate-200">{row.code}</td>
                             <td className="py-2 pr-3 text-muted">{row.function_name ?? '—'}</td>
                             <td className="py-2 text-right font-mono tabular-nums text-muted">

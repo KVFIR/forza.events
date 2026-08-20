@@ -15,6 +15,7 @@ export type AnalyticsEventInput = {
   http_status?: number;
   function_name?: string;
   event_id?: string;
+  discord_id?: string;
   meta?: Record<string, string | number | boolean>;
 };
 
@@ -172,9 +173,17 @@ export async function flushAnalytics(): Promise<void> {
   }
 }
 
+function analyticsHost(): string | undefined {
+  if (typeof window === 'undefined') return undefined;
+  const host = window.location.hostname.trim();
+  return host || undefined;
+}
+
 export function track(name: string, props: Omit<AnalyticsEventInput, 'name'> = {}): void {
   if (!analyticsEnabled()) return;
-  queue.push({name, ...props});
+  const host = analyticsHost();
+  const meta = host ? {host, ...props.meta} : props.meta;
+  queue.push({name, ...props, meta});
   scheduleFlush();
 }
 

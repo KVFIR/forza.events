@@ -57,10 +57,26 @@ export type AnalyticsDashboardSummary = {
   };
   host_actions: Record<string, number>;
   notifications?: NotificationDashboard;
-  top_errors: {code: string; function_name: string | null; count: number}[];
+  top_errors: {
+    code: string;
+    function_name: string | null;
+    http_status?: number | null;
+    count: number;
+    distinct_ts?: number;
+  }[];
   errors_by_surface: Record<string, number>;
   errors_by_function: Record<string, number>;
+  errors_by_host?: Record<string, number>;
   recent_errors: {
+    at: string;
+    surface: string;
+    code: string;
+    function_name: string | null;
+    http_status: number | null;
+    event_id: string | null;
+    host?: string | null;
+  }[];
+  activity_recent_errors?: {
     at: string;
     surface: string;
     code: string;

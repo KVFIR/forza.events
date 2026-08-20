@@ -1,3 +1,7 @@
+import {
+  apiErrorHealthStatus,
+  classifyApiError,
+} from './analyticsErrorClass';
 import type {
   AnalyticsDashboardSummary,
   ConversionMetric,
@@ -33,6 +37,17 @@ export function conversionWatchStatus(metric: ConversionMetric | undefined): Wat
   if (metric.failed >= 3 && (metric.rate === null || metric.rate < 80)) return 'critical';
   if (metric.failed > 0 && (metric.rate === null || metric.rate < 95)) return 'warn';
   return 'ok';
+}
+
+/** Ignore network/validation volume — Activity bugs and parse failures matter. */
+export function apiErrorWatchStatusFromSummary(
+  summary: AnalyticsDashboardSummary,
+): WatchStatus {
+  return apiErrorHealthStatus({
+    apiErrors: summary.funnel.api_error ?? 0,
+    activityErrors: summary.errors_by_surface.activity ?? 0,
+    top: summary.top_errors,
+  });
 }
 
 /** ponytail: scale fixed thresholds by window length — upgrade to per-surface baselines if noise grows. */
@@ -90,7 +105,11 @@ export function buildWatchItems(
   const joins = summary.funnel.join ?? 0;
   const publishes = summary.host_actions.publish ?? summary.funnel.publish ?? 0;
   const apiErrors = summary.funnel.api_error ?? 0;
+  const activityErrors = summary.errors_by_surface.activity ?? 0;
   const topError = summary.top_errors[0];
+  const topClass = topError
+    ? classifyApiError(topError.code, topError.http_status, topError.function_name)
+    : null;
 
   if (ingestFailureSummary) {
     items.push({
@@ -146,11 +165,11 @@ export function buildWatchItems(
     label: 'API errors',
     value: formatNumber(apiErrors),
     hint: topError
-      ? `${topError.code}${topError.function_name ? ` · ${topError.function_name}` : ''} (${formatNumber(topError.count)})`
+      ? `${topError.code}${topError.function_name ? ` · ${topError.function_name}` : ''} (${formatNumber(topError.count)} · ${topClass}) · Activity ${formatNumber(activityErrors)}`
       : apiErrors > 0
-        ? 'See Errors tab'
+        ? `Activity ${formatNumber(activityErrors)}`
         : 'No API errors',
-    status: apiErrorWatchStatus(apiErrors, summary.days),
+    status: apiErrorWatchStatusFromSummary(summary),
     tab: 'errors',
   });
 

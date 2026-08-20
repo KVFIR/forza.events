@@ -29,6 +29,7 @@ export const ALLOWED_CLIENT_EVENT_NAMES = new Set<string>([
   'notification_new_event_disable',
   'empty_guild_list',
   'api_error',
+  'retry_event_ratings',
 ]);
 const MAX_META_KEYS = 10;
 const MAX_META_STRING = 200;
@@ -40,6 +41,7 @@ export type IncomingClientEvent = {
   http_status?: unknown;
   function_name?: unknown;
   event_id?: unknown;
+  discord_id?: unknown;
   meta?: unknown;
 };
 
@@ -68,6 +70,12 @@ function parseUuid(value: unknown): string | null {
   return /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i.test(trimmed)
     ? trimmed
     : null;
+}
+
+function parseDiscordSnowflake(value: unknown): string | null {
+  if (typeof value !== 'string') return null;
+  const trimmed = value.trim();
+  return /^\d{17,20}$/.test(trimmed) ? trimmed : null;
 }
 
 function parseHttpStatus(value: unknown): number | null {
@@ -113,7 +121,9 @@ export function normalizeClientEvent(
     api_code: trimText(raw.api_code, 64),
     http_status: parseHttpStatus(raw.http_status),
     function_name: trimText(raw.function_name, 64),
-    discord_id: discordId,
+    discord_id:
+      discordId ??
+      (name === 'session_expired' ? parseDiscordSnowflake(raw.discord_id) : null),
     event_id: parseUuid(raw.event_id),
     meta: sanitizeMeta(raw.meta),
   };
