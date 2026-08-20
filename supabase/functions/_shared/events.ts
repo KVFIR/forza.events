@@ -74,6 +74,7 @@ export type EmbedGroupSummary = {
 };
 
 type EventCarJoinRow = {
+  sort_order?: number | null;
   max_pi: number;
   tune_share_code: string | null;
   car_restrictions: string[] | null;
@@ -96,7 +97,10 @@ export function slugify(title: string): string {
 
 export function mapEventCarsForEmbed(eventCars: EventCarJoinRow[]): EmbedAllowedCar[] {
   const mapped: EmbedAllowedCar[] = [];
-  for (const ec of eventCars ?? []) {
+  const ordered = [...(eventCars ?? [])].sort(
+    (a, b) => (a.sort_order ?? 0) - (b.sort_order ?? 0),
+  );
+  for (const ec of ordered) {
     const raw = ec.cars;
     const car = Array.isArray(raw) ? raw[0] : raw;
     if (!car) continue;

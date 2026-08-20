@@ -590,7 +590,7 @@ async function persistEventCars(
 
   const {error} = await supabase
     .from('event_cars')
-    .insert(resolved.map((r) => ({...r, event_id: eventId})));
+    .insert(resolved.map((r, i) => ({...r, event_id: eventId, sort_order: i})));
   if (error) {
     console.error('persistEventCars insert', error);
     return VALIDATION_CODES.CARS_SYNC_FAILED;

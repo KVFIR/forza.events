@@ -1,7 +1,7 @@
 import {describe, expect, it} from 'vitest';
 import {formatPiClassEmoji, formatPiV2} from '../supabase/functions/_shared/discordPiEmoji.ts';
 import {formatEventCarsV2, formatEventCarsV2Blocks} from '../supabase/functions/_shared/embedCarsV2.ts';
-import type {EmbedAllowedCar} from '../supabase/functions/_shared/events.ts';
+import {mapEventCarsForEmbed, type EmbedAllowedCar} from '../supabase/functions/_shared/events.ts';
 
 const THIN = '\u2009';
 const PI_B = formatPiV2(600, 'fh6');
@@ -188,5 +188,34 @@ describe('formatEventCarsV2 restricted list', () => {
       {maxChars: 90},
     );
     expect(out).toBe(`🚗 **Cars**\n${PI_B}\nMake Car 0 (1990); \`Rule 0\`\n+4`);
+  });
+});
+
+describe('mapEventCarsForEmbed', () => {
+  it('orders by host add index, not UUID or name', () => {
+    const out = mapEventCarsForEmbed([
+      {
+        sort_order: 2,
+        max_pi: 600,
+        tune_share_code: null,
+        car_restrictions: [],
+        cars: {make: 'Porsche', model: '911', year: 1973},
+      },
+      {
+        sort_order: 0,
+        max_pi: 600,
+        tune_share_code: null,
+        car_restrictions: [],
+        cars: {make: 'Abarth', model: 'Fiat 131', year: 1980},
+      },
+      {
+        sort_order: 1,
+        max_pi: 600,
+        tune_share_code: null,
+        car_restrictions: [],
+        cars: {make: 'Ford', model: 'Escort', year: 1977},
+      },
+    ]);
+    expect(out.map((c) => c.make)).toEqual(['Abarth', 'Ford', 'Porsche']);
   });
 });

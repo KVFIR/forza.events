@@ -88,6 +88,7 @@ describe('cloudflare static OG helpers', () => {
     const {isStaticAssetPath} = await import('../shared/sitePageMeta.mjs');
     expect(isStaticAssetPath('/og/site.webp')).toBe(true);
     expect(isStaticAssetPath('/covers/cover-road-2.webp')).toBe(true);
+    expect(isStaticAssetPath('/cars/fh6/abarth_fiat_131_1980_399.webp')).toBe(true);
     expect(isStaticAssetPath('/assets/index-abc.js')).toBe(true);
     expect(isStaticAssetPath('/logo/logo.png')).toBe(true);
     expect(isStaticAssetPath('/terms')).toBe(false);

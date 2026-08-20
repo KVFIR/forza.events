@@ -71,6 +71,7 @@ export function isStaticAssetPath(pathname) {
   return (
     path.startsWith('/assets/') ||
     path.startsWith('/covers/') ||
+    path.startsWith('/cars/') ||
     path.startsWith('/og/') ||
     path.startsWith('/logo/')
   );

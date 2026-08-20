@@ -52,4 +52,8 @@ describe('EVENT_LIST_SELECT parity', () => {
     expect(EVENT_LIST_SELECT).not.toContain('player_ratings');
     expect(EVENT_DETAIL_SELECT).toContain('player_ratings');
   });
+
+  it('returns event_cars in host add order', () => {
+    expect(EVENT_LIST_SELECT).toContain('order: sort_order');
+  });
 });

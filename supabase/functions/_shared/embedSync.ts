@@ -80,8 +80,9 @@ export async function enrichEmbedEvent(
   if (event.car_rule_mode === 'restricted_list' && !allowed_cars?.length) {
     const {data: eventCars} = await supabase
       .from('event_cars')
-      .select('max_pi, tune_share_code, car_restrictions, cars(make, model, year, abbreviation)')
-      .eq('event_id', event.id);
+      .select('max_pi, sort_order, tune_share_code, car_restrictions, cars(make, model, year, abbreviation)')
+      .eq('event_id', event.id)
+      .order('sort_order');
     allowed_cars = mapEventCarsForEmbed(eventCars ?? []);
   }
 

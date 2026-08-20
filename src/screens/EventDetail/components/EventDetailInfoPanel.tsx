@@ -1,23 +1,24 @@
 import {useEffect, useMemo, useState} from 'react';
 import {useTranslation} from 'react-i18next';
-import {AtSign, Calendar, Crown, Mic, User, Car, Shield, Wrench, Volume2} from 'lucide-react';
-import {formatDiscordHandle} from '../../../lib/discordHandle';
+import {Calendar, Crown, Mic, Shield, Wrench, Volume2} from 'lucide-react';
 import {RoadIcon} from '../../../components/icons/RoadIcon';
 import type {EventTrack, ForzaEvent} from '../../../lib/types';
 import {formatCarFullName} from '../../../lib/carDisplay';
+import {carThumbUrl, handleCarThumbError} from '../../../lib/carThumb';
 import {
   formatOpenBuildCarRulesDisplay,
   openBuildHasDisplayRules,
 } from '../../../lib/carRules';
 import {piClassColor, piToClass} from '../../../lib/pi';
 import {normalizeEventGame} from '../../../lib/eventGames';
-import {sectionLabelClass} from '../../../components/ui/formStyles';
 import {resolveEventGroups} from '../../../lib/eventRoster';
 import {openExternalUrl} from '../../../lib/discordInstall';
 import {
   eventVoiceJoinUrl,
+  isEventFinalized,
   voiceChannelMention,
 } from '../../../lib/eventSpec';
+import {formatEventStartsIn} from '../../../lib/datetime';
 import {TextButton} from '../../../components/ui/TextButton';
 import {cn} from '../../../lib/cn';
 import {dismissHint, isHintDismissed} from '../../../lib/hintDismiss';
@@ -102,7 +103,7 @@ export function EventDetailInfoPanel({
   const showConvoyLeaderList = convoyLeaderGroups.length > 1 || multiGroup;
   const joinVoiceUrl = eventVoiceJoinUrl(event);
   const voiceMention = voiceChannelMention(event.voiceChannelName);
-  const hostMention = formatDiscordHandle(event.hostUsername);
+  const startsIn = isEventFinalized(event) ? null : formatEventStartsIn(event.startsAt);
   const xboxHintId = showConvoyLeaderXboxHint
     ? 'xbox-leader'
     : showJoinXboxHint
@@ -121,9 +122,10 @@ export function EventDetailInfoPanel({
     <div className="mt-5 divide-y divide-white/[0.05]" onCopy={handleShareCodeCopy}>
       <div className={rowClass}>
         <Calendar className={iconClass} />
-        <div>
-          <p className={sectionLabelClass}>{t('eventDetail.dateTime')}</p>
+        <div className="min-w-0">
+          <p className="sr-only">{t('eventDetail.dateTime')}</p>
           <p className="mt-0.5 text-sm text-slate-200">{when}</p>
+          {startsIn ? <p className="mt-0.5 text-xs text-muted">{startsIn}</p> : null}
         </div>
       </div>
 
@@ -131,7 +133,7 @@ export function EventDetailInfoPanel({
         <div className={rowClass}>
           <Mic className={iconClass} />
           <div className="min-w-0">
-            <p className={sectionLabelClass}>{t('eventDetail.voice')}</p>
+            <p className="sr-only">{t('eventDetail.voice')}</p>
             <TextButton
               tone="action"
               className={discordTextLinkClass}
@@ -156,44 +158,17 @@ export function EventDetailInfoPanel({
         </div>
       ) : null}
 
-      <div className={rowClass}>
-        <User className={iconClass} />
-        <div className="min-w-0">
-          <p className={sectionLabelClass}>{t('eventDetail.host')}</p>
-          {event.hostDiscordId.trim() ? (
-            <TextButton
-              tone="action"
-              className={discordTextLinkClass}
-              title={hostMention}
-              onClick={() =>
-                void openExternalUrl(`https://discord.com/users/${event.hostDiscordId.trim()}`)
-              }
-            >
-              <span className={discordTextLinkUnderlineClass}>
-                <AtSign className={mentionIconClass} aria-hidden />
-                <span className="min-w-0 truncate">{hostMention.slice(1)}</span>
-              </span>
-            </TextButton>
-          ) : (
-            <p className="mt-0.5 inline-flex items-center gap-0.5 text-sm font-medium text-slate-200">
-              <AtSign className={mentionIconClass} aria-hidden />
-              <span className="min-w-0 truncate">{hostMention.slice(1)}</span>
-            </p>
-          )}
-        </div>
-      </div>
-
       {convoyLeaderGroups.length > 0 || showXboxHint ? (
         <div className={rowClass}>
           <Crown className={iconClass} />
           <div className="min-w-0">
-            <p className={sectionLabelClass}>
+            <p className="sr-only">
               {showConvoyLeaderList
                 ? t('eventDetail.convoyLeaders')
                 : t('eventDetail.convoyLeader')}
             </p>
             {showConvoyLeaderList ? (
-              <ul className="mt-1 space-y-0.5">
+              <ul className="space-y-0.5">
                 {convoyLeaderGroups.map(({groupIndex, gamertag}) => (
                   <li
                     key={groupIndex}
@@ -245,16 +220,16 @@ export function EventDetailInfoPanel({
         <div className={rowClass}>
           <RoadIcon className={iconClass} />
           <div className="min-w-0">
-            <p className={sectionLabelClass}>{t('eventDetail.tracks')}</p>
+            <p className="sr-only">{t('eventDetail.tracks')}</p>
             {event.tracks!.length === 1 ? (
-              <p className="mt-1 text-sm text-slate-200">
+              <p className="text-sm text-slate-200">
                 <TrackDisplayLine
                   track={event.tracks![0]}
                   fallbackName={t('create.trackFallback', {n: 1})}
                 />
               </p>
             ) : (
-              <ol className="mt-1 space-y-0.5">
+              <ol className="space-y-0.5">
                 {event.tracks!.map((track, i) => (
                   <li
                     key={`${track.name}-${track.shareCode ?? ''}-${i}`}
@@ -279,11 +254,10 @@ export function EventDetailInfoPanel({
 
       {showCarRulesRow ? (
       <div className={rowClass}>
-        <Car className={iconClass} />
         <div className="min-w-0 flex-1">
-          <p className={sectionLabelClass}>{t('eventDetail.carRules')}</p>
+          <p className="sr-only">{t('eventDetail.carRules')}</p>
           {event.carRuleMode === 'anything_goes' && openBuildDisplay ? (
-            <ul className="mt-1.5 flex flex-col gap-1">
+            <ul className="flex flex-col gap-1">
               <li
                 className={cn(
                   carRuleRowClass,
@@ -308,44 +282,57 @@ export function EventDetailInfoPanel({
               </li>
             </ul>
           ) : event.allowedCars.length === 0 ? (
-            <p className="mt-1 text-sm text-muted">{t('eventDetail.restrictedSoon')}</p>
+            <p className="text-sm text-muted">{t('eventDetail.restrictedSoon')}</p>
           ) : (
-            <ul className="mt-1.5 space-y-2">
+            <ul className="space-y-2">
               {event.allowedCars.map((c) => {
                 const maxClass = piToClass(c.maxPi, game);
                 const name = formatCarFullName(c);
                 return (
-                  <li key={c.carId}>
-                    <div className={carRuleRowClass}>
-                      <span className="truncate font-medium text-slate-200">
-                        {name}
-                        {c.year ? `\u2002${c.year}` : ''}
-                      </span>
+                  <li key={c.carId} className="flex items-start gap-2.5">
+                    <span className="h-10 w-[4.5rem] shrink-0 overflow-hidden">
+                      <img
+                        src={carThumbUrl(c, game)}
+                        alt=""
+                        width={160}
+                        height={90}
+                        decoding="async"
+                        className="h-full w-full origin-center scale-[1.12] object-contain"
+                        onError={handleCarThumbError}
+                      />
+                    </span>
+                    <div className="flex min-w-0 flex-1 items-center gap-3">
+                      <div className="min-w-0 flex-1">
+                        <div className="truncate text-sm font-medium leading-tight text-slate-200">
+                          {name}
+                          {c.year ? `\u2002${c.year}` : ''}
+                        </div>
+                        {(c.tuneShareCode || c.restrictions.length > 0) && (
+                          <div className="mt-1 flex flex-wrap gap-x-3 gap-y-0.5 text-xs text-muted">
+                            {c.tuneShareCode ? (
+                              <span className="flex items-center gap-1">
+                                <Wrench className="h-3 w-3 shrink-0" />
+                                <ShareCodeText value={c.tuneShareCode} />
+                              </span>
+                            ) : null}
+                            {c.restrictions.map((r) => (
+                              <span key={r} className="flex items-center gap-1">
+                                <Shield className="h-3 w-3 shrink-0" />
+                                {r}
+                              </span>
+                            ))}
+                          </div>
+                        )}
+                      </div>
                       <span
                         className={cn(
-                          'text-right font-bold tabular-nums',
+                          'w-14 shrink-0 text-right text-sm font-bold tabular-nums',
                           piClassColor[maxClass] ?? 'text-muted',
                         )}
                       >
                         {maxClass} {c.maxPi}
                       </span>
                     </div>
-                    {(c.tuneShareCode || c.restrictions.length > 0) && (
-                      <div className="mt-1 flex flex-wrap gap-x-3 gap-y-0.5 text-xs text-muted">
-                        {c.tuneShareCode ? (
-                          <span className="flex items-center gap-1">
-                            <Wrench className="h-3 w-3 shrink-0" />
-                            <ShareCodeText value={c.tuneShareCode} />
-                          </span>
-                        ) : null}
-                        {c.restrictions.map((r) => (
-                          <span key={r} className="flex items-center gap-1">
-                            <Shield className="h-3 w-3 shrink-0" />
-                            {r}
-                          </span>
-                        ))}
-                      </div>
-                    )}
                   </li>
                 );
               })}

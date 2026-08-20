@@ -25,7 +25,8 @@
     "data:fh5:catalog": "node scripts/build-fh5-app-catalog.mjs",
     "data:fh6:scrape": "python3 scripts/scrape_fh6_fandom_cars.py",
     "data:fh6:xlsx": "python3 scripts/build_fh6_fandom_xlsx.py",
-    "data:fh6:catalog": "node scripts/build-fh6-app-catalog.mjs"
+    "data:fh6:catalog": "node scripts/build-fh6-app-catalog.mjs",
+    "data:car-thumbs": "node scripts/download-car-thumbs.mjs"
   },
   "dependencies": {
     "@discord/embedded-app-sdk": "^2.5.0",

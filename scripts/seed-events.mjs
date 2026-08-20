@@ -120,6 +120,7 @@ async function main() {
       carRows.push({
         event_id: inserted.id,
         car_id: car.id,
+        sort_order: carRows.length,
         max_pi: spec.max_pi ?? ev.max_pi,
         car_restrictions: spec.restrictions ?? [],
       });
