@@ -6,11 +6,11 @@ export type TextButtonTone = 'action' | 'nav' | 'emphasis' | 'subtle';
 
 const toneClass: Record<TextButtonTone, string> = {
   action:
-    'text-xs font-semibold text-accent-purple transition-colors hover:text-accent-purple-light',
+    'text-xs font-medium text-slate-200 transition-colors hover:text-white',
   nav: 'text-xs font-semibold uppercase tracking-widest text-muted transition-colors hover:text-accent-purple-light',
   emphasis:
-    'text-sm font-semibold text-accent-purple transition-colors hover:text-accent-purple-light',
-  subtle: 'text-xs font-semibold text-muted transition-colors hover:text-slate-200',
+    'text-sm font-medium text-slate-200 transition-colors hover:text-white',
+  subtle: 'text-xs font-medium text-muted transition-colors hover:text-slate-200',
 };
 
 type TextButtonProps = ButtonHTMLAttributes<HTMLButtonElement> & {

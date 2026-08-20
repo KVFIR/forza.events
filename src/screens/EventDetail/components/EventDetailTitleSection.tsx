@@ -224,8 +224,18 @@ function titleStatusChip(
       return <DraftBadge className={chipClass} />;
     case 'open':
     case 'live':
-      if (displayStatus === 'open' || displayStatus === 'ended') return null;
-      return <StatusBadge className={chipClass} status={displayStatus} />;
+      switch (displayStatus) {
+        case 'live':
+          return <StatusBadge className={chipClass} status="live" />;
+        case 'open':
+        case 'full':
+        case 'ended':
+          return null;
+        default: {
+          const _never: never = displayStatus;
+          return _never;
+        }
+      }
     default: {
       const _never: never = lifecycle;
       return _never;

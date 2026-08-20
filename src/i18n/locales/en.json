@@ -342,7 +342,7 @@
     "deleteDraftDesc": "Delete this draft permanently? This cannot be undone.",
     "cancelEventTitle": "Cancel event?",
     "cancelEventDesc": "The Discord announcement will be updated and registration will close.",
-    "joinServer": "Join server",
+    "hostedBy": "Hosted by",
     "voice": "Voice",
     "joinVoice": "Join voice",
     "joinVoiceNamed": "Join {{name}}",

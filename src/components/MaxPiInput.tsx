@@ -57,10 +57,18 @@ export function MaxPiInput({value, onChange, game = 'fh6', id, error, className,
   }
 
   return (
-    <div className={cn('flex min-w-0', className)}>
+    <div
+      className={cn(
+        'flex min-w-0 overflow-hidden rounded-lg border bg-white/[0.03]',
+        classLetter ? piClassBorderColor[classLetter] : 'border-white/[0.08]',
+        'focus-within:border-white/20',
+        error && 'border-red-500/50 focus-within:border-red-400/60',
+        className,
+      )}
+    >
       <span
         className={cn(
-          'flex w-11 shrink-0 items-center justify-center rounded-l-lg border border-r-0 bg-white/[0.06] text-sm font-black tabular-nums',
+          'flex w-11 shrink-0 items-center justify-center border-r bg-white/[0.06] text-sm font-black tabular-nums',
           classLetter
             ? [piClassColor[classLetter], piClassBorderColor[classLetter]]
             : 'border-white/[0.08] text-muted',
@@ -79,8 +87,8 @@ export function MaxPiInput({value, onChange, game = 'fh6', id, error, className,
         title={t('validation.piRange', range)}
         className={cn(
           inputClass,
-          'min-w-0 flex-1 rounded-l-none',
-          error && 'border-red-500/50 focus:border-red-400/60',
+          'min-w-0 flex-1 rounded-none border-0 bg-transparent',
+          'focus:border-0 focus:outline-none',
         )}
         value={draft}
         onChange={(e) => {

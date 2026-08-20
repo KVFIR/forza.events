@@ -206,7 +206,6 @@ export function EventCarList({
           {cars.map((c) => {
             const collapsed = isCollapsed(c.id);
             const displayName = listLabels.get(c.id) ?? c.model;
-            const maxClass = piToClass(c.maxPi, game);
             return (
             <li key={c.id}>
               <Panel variant="soft" className="p-0">
@@ -235,14 +234,6 @@ export function EventCarList({
                   <p className="truncate text-sm font-semibold leading-tight text-white">
                     {displayName}
                   </p>
-                </span>
-                <span
-                  className={cn(
-                    'shrink-0 text-sm font-bold tabular-nums',
-                    piClassColor[maxClass] ?? 'text-muted',
-                  )}
-                >
-                  {maxClass} {c.maxPi}
                 </span>
                 <Button
                   type="button"

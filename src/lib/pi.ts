@@ -105,25 +105,25 @@ export const piClassHex: Record<CarClassLetter, string> = {
 };
 
 export const piClassColor: Record<CarClassLetter, string> = {
-  D: 'text-[#49b7f8]',
-  C: 'text-[#faca33]',
-  B: 'text-[#f8682c]',
-  A: 'text-[#f91648]',
-  S1: 'text-[#ba66e9]',
-  S2: 'text-[#185cdf]',
-  R: 'text-[#d7189a]',
-  X: 'text-[#16d858]',
+  D: 'text-[#49b7f8]/80',
+  C: 'text-[#faca33]/80',
+  B: 'text-[#f8682c]/80',
+  A: 'text-[#f91648]/70',
+  S1: 'text-[#ba66e9]/80',
+  S2: 'text-[#185cdf]/80',
+  R: 'text-[#d7189a]/80',
+  X: 'text-[#16d858]/80',
 };
 
 export const piClassBorderColor: Record<CarClassLetter, string> = {
-  D: 'border-[#49b7f8]/35',
-  C: 'border-[#faca33]/35',
-  B: 'border-[#f8682c]/35',
-  A: 'border-[#f91648]/35',
-  S1: 'border-[#ba66e9]/35',
-  S2: 'border-[#185cdf]/35',
-  R: 'border-[#d7189a]/35',
-  X: 'border-[#16d858]/35',
+  D: 'border-[#49b7f8]/30',
+  C: 'border-[#faca33]/30',
+  B: 'border-[#f8682c]/30',
+  A: 'border-[#f91648]/25',
+  S1: 'border-[#ba66e9]/30',
+  S2: 'border-[#185cdf]/30',
+  R: 'border-[#d7189a]/30',
+  X: 'border-[#16d858]/30',
 };
 
 export function clampPi(value: number): number {

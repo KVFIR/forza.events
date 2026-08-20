@@ -39,10 +39,9 @@ describe('datetime', () => {
     const startsAt = '2030-06-15T12:00:00.000Z';
     const viewerTz = defaultTimezone();
     const locale = dateFnsLocale();
-    const pattern = 'EEE d MMM, HH:mm';
 
     expect(formatEventStart(startsAt)).toBe(
-      formatInTimeZone(new Date(startsAt), viewerTz, pattern, {locale}),
+      formatInTimeZone(new Date(startsAt), viewerTz, 'EEE d MMM, HH:mm', {locale}),
     );
   });
 

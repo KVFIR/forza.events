@@ -1,8 +1,9 @@
 import {useTranslation} from 'react-i18next';
 import {UserAvatar} from '../../../components/UserAvatar';
 import {TextButton} from '../../../components/ui/TextButton';
+import {formatDiscordHandle} from '../../../lib/discordHandle';
 import {openExternalUrl} from '../../../lib/discordInstall';
-import {resolveOrganiserGuildName, resolveOrganiserLabel} from '../../../lib/organiser';
+import {resolveOrganiserGuildName} from '../../../lib/organiser';
 import type {ForzaEvent} from '../../../lib/types';
 
 type Props = {
@@ -11,38 +12,64 @@ type Props = {
 
 export function EventDetailOrganiser({event}: Props) {
   const {t} = useTranslation();
-  const label = resolveOrganiserLabel(event);
-  const hasGuild = Boolean(resolveOrganiserGuildName(event));
-  const showGuildBrand = hasGuild && (event.guildIconUrl || event.guildInviteUrl);
+  const guild = resolveOrganiserGuildName(event);
+  const hostMention = formatDiscordHandle(event.hostUsername);
+  const hostId = event.hostDiscordId.trim();
+  const invite = event.guildInviteUrl;
+  if (!guild && !hostMention) return null;
 
-  if (!showGuildBrand) {
-    return (
-      <p className="mt-8 text-xs text-muted">{label}</p>
-    );
-  }
+  const guildIcon = event.guildIconUrl ? (
+    <UserAvatar
+      src={event.guildIconUrl}
+      name={guild ?? ''}
+      size="xs"
+      variant="neutral"
+      className="!rounded-md"
+    />
+  ) : null;
 
   return (
     <div className="mt-8 flex flex-wrap items-center gap-x-2.5 gap-y-1">
-      <UserAvatar
-        src={event.guildIconUrl}
-        name={label}
-        size="xs"
-        variant="neutral"
-        className="!rounded-md"
-      />
-      <p className="text-xs text-muted">{label}</p>
-      {event.guildInviteUrl ? (
-        <>
-          <span className="text-xs text-muted" aria-hidden>
-            ·
-          </span>
+      {guild ? (
+        invite ? (
           <TextButton
             tone="action"
-            className="!text-xs"
-            onClick={() => void openExternalUrl(event.guildInviteUrl!)}
+            className="inline-flex items-center gap-2.5"
+            onClick={() => void openExternalUrl(invite)}
           >
-            {t('eventDetail.joinServer')}
+            {guildIcon}
+            {guild}
           </TextButton>
+        ) : (
+          <span className="inline-flex items-center gap-2.5 text-xs text-muted">
+            {guildIcon}
+            {guild}
+          </span>
+        )
+      ) : null}
+      {hostMention ? (
+        <>
+          {guild ? (
+            <span className="text-xs text-muted" aria-hidden>
+              ·
+            </span>
+          ) : null}
+          <span className="inline-flex min-w-0 items-baseline gap-1 text-xs text-muted">
+            {t('eventDetail.hostedBy')}
+            {hostId ? (
+              <TextButton
+                tone="action"
+                title={hostMention}
+                onClick={() =>
+                  void openExternalUrl(`https://discord.com/users/${hostId}`)
+                }
+              >
+                {hostMention}
+              </TextButton>
+            ) : (
+              <span>{hostMention}</span>
+            )}
+          </span>
         </>
       ) : null}
     </div>

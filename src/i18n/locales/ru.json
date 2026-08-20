@@ -342,7 +342,7 @@
     "deleteDraftDesc": "Черновик будет удалён безвозвратно.",
     "cancelEventTitle": "Отменить событие?",
     "cancelEventDesc": "Объявление в Discord обновится, регистрация закроется.",
-    "joinServer": "Вступить на сервер",
+    "hostedBy": "Хост",
     "voice": "Голос",
     "joinVoice": "Зайти в голосовой",
     "joinVoiceNamed": "Зайти в {{name}}",
