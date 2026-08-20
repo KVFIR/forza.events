@@ -55,7 +55,7 @@ Manual QA matrix aligned with current code behavior (not an abstract checklist).
 
 - [ ] Cold start: authorize → `token-exchange` → `authenticate` → profile shows Discord name/avatar.
 - [ ] Browse does **not** wait for auth (`usePublishedEvents` without token).
-- [ ] **Browser web (`forza.events` / localhost):** guest can open Browse, Event Detail, Ladder without OAuth; Join / Create / Profile / My Events soft-prompt Discord sign-in. Cold-open `/event/{slug}` (no Browse `location.state`) shows the published event. Unknown slug **or UUID** after auth is not-found — not the host-draft sign-in wall.
+- [ ] **Browser web (`forza.events` / localhost):** guest can open Browse, Event Detail, Ladder without OAuth; Join / Create / Profile / My Events soft-prompt Discord sign-in. Cold-open `/event/{slug}` (no Browse `location.state`) shows the published event. Unknown slug **or UUID** after auth is not-found — not the host-draft sign-in wall. Reload and a second tab stay signed in (Discord 5xx / two-tab refresh must not wipe `localStorage`).
 - [ ] My Events / Create / Join work after auth.
 - [ ] Re-enter Activity in same session — `prompt: 'none'`, minimal prompts.
 

@@ -27,7 +27,7 @@ GitHub Actions runs the same on every push/PR to `main` / `master`.
 
 Open http://localhost:5180 → tap the auth status pill in the **navbar** (or Profile) to **Sign in with Discord** before using the app (Browse, Event Detail, join/create/publish).
 
-**Analytics dashboard (local only):** set `ANALYTICS_DASHBOARD_SECRET` in `.env`, run `npm run sync:secrets`, `supabase db push` (migrations `021`–`024`), deploy functions, then open http://localhost:5180/analytics — no Discord sign-in required. Set `ANALYTICS_TRACK_SECRET` in `.env` / Railway build env so prod ingest is not rejected. Retention: daily GitHub Action `.github/workflows/prune-client-analytics.yml` (or `bash scripts/invoke-prune-client-analytics.sh`).
+**Analytics dashboard (local only):** set `ANALYTICS_DASHBOARD_SECRET` in `.env`, run `npm run sync:secrets`, `supabase db push` (migrations `021`–`024`, `026`, `041`), deploy functions, then open http://localhost:5180/analytics — no Discord sign-in required. The Brief tab classifies API errors (Activity vs localhost noise). Set `ANALYTICS_TRACK_SECRET` in `.env` / Railway build env so prod ingest is not rejected. Retention: daily GitHub Action `.github/workflows/prune-client-analytics.yml` (or `bash scripts/invoke-prune-client-analytics.sh`).
 
 ---
 
@@ -61,7 +61,7 @@ Add the same URL under Discord → OAuth2 → Redirects.
 - `http://localhost:5180/auth/callback`, `http://127.0.0.1:5180/auth/callback`
 - Optional: `DISCORD_REDIRECT_URI_ALLOWLIST` (comma-separated, Supabase secret)
 
-Silent browser re-auth: `POST token-exchange` with `{refresh_token}` (no `redirect_uri`). Client stores refresh + expiry in `localStorage` and refreshes near expiry or on Edge 401. After shipping this, existing browser sessions need **one** Discord sign-in to pick up a refresh token.
+Silent browser re-auth: `POST token-exchange` with `{refresh_token}` (no `redirect_uri`). Client stores refresh + expiry in `localStorage` and refreshes near expiry or on Edge 401. Discord `400 invalid_grant` clears the session; Discord 429/5xx on verify or refresh keep it (public Browse/Ladder continue as guest; mutations return 503). After shipping this, existing browser sessions need **one** Discord sign-in to pick up a refresh token.
 
 ### Optional
 
@@ -204,6 +204,7 @@ Standard aspect ratio: **16:9** (1280×720 uploads). Client `compressCoverForUpl
 | Asset | Location |
 |-------|----------|
 | Default covers | `public/covers/*.webp` |
+| Car thumbs | `public/cars/fh5/` and `fh6/*.webp`, plus `public/cars/null.webp` (`npm run data:car-thumbs`) |
 | Custom uploads | `event-covers` bucket via **`upload-cover`** only |
 
 Anonymous Storage writes on `event-covers` are revoked in the baseline schema — uploads go through the Edge Function only.

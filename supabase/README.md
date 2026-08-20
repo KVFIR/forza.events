@@ -59,6 +59,8 @@ npx supabase migration repair --linked --status applied 006 --yes
 | `023_analytics_dashboard_enriched.sql` | Enriched dashboard RPC: conversion, funnel by surface, recent errors |
 | `024_analytics_dashboard_fixes.sql` | Join conversion uses join-only errors; event views per session metric |
 | `026_analytics_notifications.sql` | Dashboard: notification outbox aggregates + `notification_dm_*` client prefs |
+| `041_analytics_error_brief.sql` | Dashboard RPC: error HTTP status, distinct timestamps, host, Activity-only recent errors |
+| `042_event_cars_sort_order.sql` | `event_cars.sort_order` — host add order for restricted-list cars |
 | `027_nullable_event_max_pi.sql` | `events.max_pi` nullable — open build may omit PI cap |
 | `028_apply_event_group_moves.sql` | `apply_event_group_moves` RPC — host move/balance active non-leaders between groups |
 | `035_submit_results_guest_roster.sql` | `submit_event_results` upserts raced guests / waitlisted as `host_assigned` (skip capacity); unique `(event_id, discord_id)` on `event_results` |
