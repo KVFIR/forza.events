@@ -1,8 +1,8 @@
 import {coalesceInflight, dedupCacheKey} from './apiDedup';
 import {ApiRequestError, apiErrorFromPayload} from './apiErrors';
-import {trackApiError, trackNetworkError} from './analytics';
+import {track, trackApiError, trackNetworkError} from './analytics';
 import {API_ERROR_CODES} from './apiErrorCodes';
-import {clearDiscordSession} from './discordAuth';
+import {clearDiscordSession, loadDiscordSession} from './discordAuth';
 import {SESSION_EXPIRED_EVENT} from './sessionEvents';
 import {ensureDiscordSupabaseProxy} from './discordUrlProxy';
 import {CLIENT_SURFACE_HEADER, resolveClientSurface} from './clientSurface';
@@ -23,6 +23,18 @@ export function isApiConfigured(): boolean {
   return isSupabaseConfigured() || Boolean(import.meta.env.VITE_API_BASE_URL);
 }
 
+function markSessionExpired(discordId?: string): void {
+  track('session_expired', {
+    outcome: 'error',
+    api_code: 'UNAUTHORIZED',
+    discord_id: discordId ?? loadDiscordSession()?.user.discordId,
+  });
+  clearDiscordSession();
+  if (typeof window !== 'undefined') {
+    window.dispatchEvent(new Event(SESSION_EXPIRED_EVENT));
+  }
+}
+
 function invokeErrorMeta(
   body: Record<string, unknown>,
 ): Record<string, string | number | boolean> | undefined {
@@ -39,6 +51,11 @@ type TokenExchangeResult = {
   refresh_token?: string | null;
   expires_in?: number;
   user: import('./types').AppUser;
+};
+
+/** Refresh may omit `user` when Discord already rotated tokens but profile fetch failed. */
+type TokenRefreshResult = Omit<TokenExchangeResult, 'user'> & {
+  user?: TokenExchangeResult['user'];
 };
 
 async function invoke<T>(
@@ -96,7 +113,10 @@ async function invoke<T>(
         code: API_ERROR_CODES.INVALID_RESPONSE,
         status: res.status,
       });
-      trackApiError(name, apiError, {eventId, meta: errorMeta});
+      trackApiError(name, apiError, {
+        eventId,
+        meta: {...errorMeta, content_type: contentType.slice(0, 80) || 'json'},
+      });
       throw apiError;
     }
   } else {
@@ -106,7 +126,10 @@ async function invoke<T>(
       code: API_ERROR_CODES.INVALID_RESPONSE,
       status: res.status,
     });
-    trackApiError(name, apiError, {eventId, meta: errorMeta});
+    trackApiError(name, apiError, {
+      eventId,
+        meta: {...errorMeta, content_type: contentType.slice(0, 80) || 'non_json'},
+    });
     throw apiError;
   }
 
@@ -114,6 +137,7 @@ async function invoke<T>(
     // Stale Discord access token → try refresh_token once, then clear session.
     let sessionExpired = false;
     if (res.status === 401 && discordAccessToken && !options?.didRefresh) {
+      const expiredId = loadDiscordSession()?.user.discordId;
       try {
         const {refreshStoredDiscordSession} = await import('./discordSessionRefresh');
         const refreshed = await refreshStoredDiscordSession({force: true});
@@ -122,20 +146,14 @@ async function invoke<T>(
           setDiscordSession(refreshed.accessToken, refreshed.user);
           return invoke(name, body, refreshed.accessToken, {didRefresh: true});
         }
-        clearDiscordSession();
+        markSessionExpired(expiredId);
         sessionExpired = true;
-        if (typeof window !== 'undefined') {
-          window.dispatchEvent(new Event(SESSION_EXPIRED_EVENT));
-        }
       } catch {
         // Refresh transport failure — keep stored session; surface the original 401.
       }
     } else if (res.status === 401 && discordAccessToken && options?.didRefresh) {
-      clearDiscordSession();
+      markSessionExpired();
       sessionExpired = true;
-      if (typeof window !== 'undefined') {
-        window.dispatchEvent(new Event(SESSION_EXPIRED_EVENT));
-      }
     }
     const apiError = apiErrorFromPayload(data, res.status);
     // session_expired is the canonical signal; skip N×api_error from parallel Profile mounts.
@@ -183,7 +201,7 @@ export async function exchangeToken(
 
 /** Silent Discord OAuth refresh (`grant_type=refresh_token` via token-exchange). */
 export async function refreshDiscordToken(refreshToken: string) {
-  return invoke<TokenExchangeResult>(
+  return invoke<TokenRefreshResult>(
     'token-exchange',
     {refresh_token: refreshToken},
     null,

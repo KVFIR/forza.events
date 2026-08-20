@@ -26,7 +26,6 @@ serve(async (req) => {
   if (readLimited) return readLimited;
 
   const auth = await optionalDiscordUser(req);
-  if (auth instanceof Response) return auth;
 
   if (auth) {
     const limited = await rateLimitAuth(req, auth.id);

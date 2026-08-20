@@ -92,6 +92,61 @@ describe('refreshStoredDiscordSession', () => {
     expect(loadDiscordSession()?.accessToken).toBe('new-access');
   });
 
+  it('keeps stored profile when refresh omits user', async () => {
+    const user = seedExpiringSession();
+    refreshDiscordToken.mockResolvedValue({
+      access_token: 'new-access',
+      refresh_token: 'refresh-2',
+      expires_in: 604800,
+    });
+
+    const next = await refreshStoredDiscordSession({force: true});
+    expect(next?.accessToken).toBe('new-access');
+    expect(next?.user.discordId).toBe(user.discordId);
+    expect(loadDiscordSession()?.user.discordId).toBe('u1');
+  });
+
+  it('keeps a session another tab already rotated when refresh returns invalid_grant', async () => {
+    const user = seedExpiringSession();
+    refreshDiscordToken.mockImplementation(async () => {
+      saveDiscordSession({
+        accessToken: 'other-tab-access',
+        refreshToken: 'refresh-2',
+        expiresAt: Date.now() + 7 * 24 * 60 * 60 * 1000,
+        user,
+      });
+      throw new ApiRequestError('expired', {
+        code: API_ERROR_CODES.UNAUTHORIZED,
+        status: 401,
+      });
+    });
+
+    const next = await refreshStoredDiscordSession({force: true});
+    expect(next?.accessToken).toBe('other-tab-access');
+    expect(loadDiscordSession()?.refreshToken).toBe('refresh-2');
+  });
+
+  it('skips Discord when the refresh lock waits on a tab that already rotated', async () => {
+    const user = seedExpiringSession();
+    vi.stubGlobal('navigator', {
+      locks: {
+        request: async (_name: string, cb: () => Promise<unknown>) => {
+          saveDiscordSession({
+            accessToken: 'from-lock-winner',
+            refreshToken: 'refresh-2',
+            expiresAt: Date.now() + 7 * 24 * 60 * 60 * 1000,
+            user,
+          });
+          return cb();
+        },
+      },
+    });
+
+    const next = await refreshStoredDiscordSession({force: true});
+    expect(refreshDiscordToken).not.toHaveBeenCalled();
+    expect(next?.accessToken).toBe('from-lock-winner');
+  });
+
   it('clears storage and returns null on hard Discord auth failure', async () => {
     seedExpiringSession();
     refreshDiscordToken.mockRejectedValue(

@@ -4,6 +4,8 @@ import {jsonResponse, optionsResponse} from '../_shared/cors.ts';
 import {
   avatarUrl,
   discordUniqueUsername,
+  clientStatusForDiscordOAuthRefresh,
+  DiscordOAuthRequestError,
   exchangeCode,
   fetchDiscordUser,
   refreshAccessToken,
@@ -85,14 +87,19 @@ serve(async (req) => {
       try {
         tokens = await refreshAccessToken(refreshToken);
       } catch (e) {
+        const discordStatus = e instanceof DiscordOAuthRequestError ? e.status : 0;
         const detail = e instanceof Error ? e.message : String(e);
-        console.error(JSON.stringify({msg: 'token-exchange discord refresh', detail}));
-        return appErrorResponse(
-          req,
-          401,
-          API_ERROR_CODES.UNAUTHORIZED,
-          'Discord session expired. Sign in again.',
-        );
+        console.error(JSON.stringify({msg: 'token-exchange discord refresh', detail, discordStatus}));
+        const clientStatus = clientStatusForDiscordOAuthRefresh(discordStatus);
+        if (clientStatus === 401) {
+          return appErrorResponse(
+            req,
+            401,
+            API_ERROR_CODES.UNAUTHORIZED,
+            'Discord session expired. Sign in again.',
+          );
+        }
+        return appErrorResponse(req, 503, API_ERROR_CODES.TOO_MANY_REQUESTS);
       }
     } else {
       let safeRedirect: string;
@@ -105,11 +112,33 @@ serve(async (req) => {
       tokens = await exchangeCode(code, safeRedirect);
     }
 
-    const result = await tokenExchangeUserPayload(
-      tokens,
-      typeof guild_id === 'string' ? guild_id : undefined,
-    );
+    let result: Awaited<ReturnType<typeof tokenExchangeUserPayload>>;
+    try {
+      result = await tokenExchangeUserPayload(
+        tokens,
+        typeof guild_id === 'string' ? guild_id : undefined,
+      );
+    } catch (e) {
+      if (refreshToken) {
+        const detail = e instanceof Error ? e.message : String(e);
+        console.error(JSON.stringify({msg: 'token-exchange user after refresh', detail}));
+        return jsonResponse({
+          access_token: tokens.access_token,
+          refresh_token: tokens.refresh_token ?? null,
+          expires_in: tokens.expires_in,
+        }, 200, req);
+      }
+      throw e;
+    }
     if (result.error) {
+      if (refreshToken) {
+        console.error(JSON.stringify({msg: 'token-exchange user load after refresh', detail: result.error.message}));
+        return jsonResponse({
+          access_token: tokens.access_token,
+          refresh_token: tokens.refresh_token ?? null,
+          expires_in: tokens.expires_in,
+        }, 200, req);
+      }
       return databaseErrorResponse(req, 'token-exchange user load', result.error);
     }
 

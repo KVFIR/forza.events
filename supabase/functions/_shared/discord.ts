@@ -63,6 +63,24 @@ export type DiscordOAuthTokens = {
   scope: string;
 };
 
+/** Discord `/oauth2/token` failure. Message prefix stays `{label}: {status}` for token-exchange. */
+export class DiscordOAuthRequestError extends Error {
+  readonly status: number;
+  constructor(label: string, status: number, body: string) {
+    super(`${label}: ${status} ${body}`);
+    this.name = 'DiscordOAuthRequestError';
+    this.status = status;
+  }
+}
+
+/**
+ * Map Discord `/oauth2/token` (refresh) HTTP status to the client.
+ * Only `400 invalid_grant` is a dead session; 429/5xx/`invalid_client` must not log the user out.
+ */
+export function clientStatusForDiscordOAuthRefresh(discordStatus: number): 401 | 503 {
+  return discordStatus === 400 ? 401 : 503;
+}
+
 async function discordOAuthTokenRequest(
   body: URLSearchParams,
   failureLabel: string,
@@ -74,7 +92,7 @@ async function discordOAuthTokenRequest(
   });
   if (!res.ok) {
     const text = await res.text();
-    throw new Error(`${failureLabel}: ${res.status} ${text}`);
+    throw new DiscordOAuthRequestError(failureLabel, res.status, text);
   }
   return res.json();
 }
@@ -117,16 +135,19 @@ export async function refreshAccessToken(refreshToken: string): Promise<DiscordO
 }
 
 export async function fetchDiscordUser(accessToken: string): Promise<DiscordUser> {
-  const res = await fetch('https://discord.com/api/users/@me', {
+  const res = await discordApiFetch('https://discord.com/api/users/@me', {
     headers: {Authorization: `Bearer ${accessToken}`},
   });
+  if (res.status === 429) {
+    throw new DiscordRateLimitError();
+  }
   if (!res.ok) {
     throw new Error(`Discord user fetch failed: ${res.status}`);
   }
   return res.json();
 }
 
-/** Thrown when Discord rate-limits token verification, so callers can return 503 instead of 401. */
+/** Thrown when Discord is sick (429 or 5xx) during token verification — callers return 503, not 401. */
 export class DiscordRateLimitError extends Error {
   constructor() {
     super('DISCORD_RATE_LIMITED');
@@ -156,7 +177,7 @@ const verifyTokenCache = new Map<string, {user: DiscordUser; expiresAt: number}>
 /**
  * Resolve the Discord user for an access token, with a short per-isolate cache.
  * Returns null only for genuinely invalid tokens; throws {@link DiscordRateLimitError}
- * on rate limits so a transient 429 is never mistaken for an expired session.
+ * on 429/5xx so a Discord blip is never mistaken for an expired session.
  */
 export async function verifyDiscordToken(
   accessToken: string | null | undefined,
@@ -170,7 +191,7 @@ export async function verifyDiscordToken(
   const res = await discordApiFetch('https://discord.com/api/users/@me', {
     headers: {Authorization: `Bearer ${accessToken}`},
   });
-  if (res.status === 429) {
+  if (res.status === 429 || res.status >= 500) {
     throw new DiscordRateLimitError();
   }
   if (!res.ok) {

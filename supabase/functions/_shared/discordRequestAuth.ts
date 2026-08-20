@@ -32,17 +32,17 @@ export async function requireDiscordUser(
 }
 
 /**
- * Optional Discord auth (e.g. browse feed). Same rate-limit mapping when a token is present.
+ * Optional Discord auth (e.g. browse feed).
+ * Discord 429/5xx → anonymous (`null`), not 503 — public reads stay up; session is not expired.
+ * Callers that must have a user (`host_drafts`) use {@link requireDiscordUser} (503 on blip, 401 if missing).
  */
 export async function optionalDiscordUser(
   req: Request,
-): Promise<DiscordUser | null | Response> {
+): Promise<DiscordUser | null> {
   try {
     return await verifyDiscordToken(discordAccessTokenFrom(req));
   } catch (e) {
-    if (isDiscordRateLimitError(e)) {
-      return appErrorResponse(req, 503, API_ERROR_CODES.TOO_MANY_REQUESTS);
-    }
+    if (isDiscordRateLimitError(e)) return null;
     throw e;
   }
 }

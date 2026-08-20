@@ -30,9 +30,7 @@ serve(async (req) => {
       return jsonResponse({error: 'Bad request'}, 400, req);
     }
 
-    const discordUserOrErr = await optionalDiscordUser(req);
-    if (discordUserOrErr instanceof Response) return discordUserOrErr;
-    const discordUser = discordUserOrErr;
+    const discordUser = await optionalDiscordUser(req);
     const surface = parseClientSurface(req.headers.get(CLIENT_SURFACE_HEADER));
 
     const rows = events
