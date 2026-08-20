@@ -21,7 +21,7 @@ import {
 } from '../_shared/embedResults.ts';
 import {deferSyncPublishedEmbedByEventId} from '../_shared/embedSync.ts';
 import {joinEventParticipant, leaveEventParticipant} from '../_shared/eventJoin.ts';
-import {eventIdFromOpenEventCustomId} from '../_shared/eventLaunch.ts';
+import {eventIdFromOpenEventCustomId, isOpenAppCustomId} from '../_shared/eventLaunch.ts';
 import {validateGamertag} from '../_shared/gamertag.ts';
 import {enforceRateLimit} from '../_shared/rateLimit.ts';
 import {adminClient} from '../_shared/supabase.ts';
@@ -341,6 +341,9 @@ serve(async (req) => {
     }
     if (eventIdFromViewResultsCustomId(customId)) {
       return handleViewResults(interaction);
+    }
+    if (isOpenAppCustomId(customId)) {
+      return json({type: RESPONSE_LAUNCH_ACTIVITY});
     }
     const eventId = eventIdFromOpenEventCustomId(customId);
     if (eventId) {
