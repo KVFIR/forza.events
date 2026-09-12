@@ -16,6 +16,22 @@ describe('notificationDiff', () => {
     expect(tracksOrCarsChanged(before, after)).toEqual({tracks: false, cars: true});
   });
 
+  it('fingerprints duplicate catalog cars with different tunes separately', () => {
+    const one = normalizeCarsForDiff('restricted_list', null, '', [
+      {car_id: 'car-1', max_pi: 800, tune_share_code: '111 111 111', car_restrictions: []},
+    ]);
+    const twoBuilds = normalizeCarsForDiff('restricted_list', null, '', [
+      {car_id: 'car-1', max_pi: 800, tune_share_code: '111 111 111', car_restrictions: []},
+      {car_id: 'car-1', max_pi: 900, tune_share_code: '222 222 222', car_restrictions: ['No engine swap']},
+    ]);
+    expect(one).not.toBe(twoBuilds);
+    const reordered = normalizeCarsForDiff('restricted_list', null, '', [
+      {car_id: 'car-1', max_pi: 900, tune_share_code: '222 222 222', car_restrictions: ['No engine swap']},
+      {car_id: 'car-1', max_pi: 800, tune_share_code: '111 111 111', car_restrictions: []},
+    ]);
+    expect(reordered).toBe(twoBuilds);
+  });
+
   it('normalizes tracks consistently', () => {
     expect(normalizeTracksForDiff([{name: ' A '}])).toBe(normalizeTracksForDiff([{name: 'A'}]));
   });

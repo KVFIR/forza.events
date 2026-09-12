@@ -17,7 +17,8 @@ import {formatShareCode} from './shareCode.ts';
 export const IS_COMPONENTS_V2 = 32768;
 const COMPLETED_COLOR = 0x374151;
 const CANCELLED_COLOR = 0x6b7280;
-const TEXT_MAX = 4000;
+/** Per Text Display and across all Text Displays in one message (Discord rejects PATCH at 4001). */
+export const V2_DISPLAYABLE_TEXT_MAX = 4000;
 const THIN = '\u2009';
 const DEFAULT_APP_ORIGIN = 'https://forza.events';
 const DEFAULT_MAX_PLAYERS = 12;
@@ -32,8 +33,22 @@ function siteOrigin(): string {
   );
 }
 
-function clipText(content: string): string {
-  return content.length <= TEXT_MAX ? content : `${content.slice(0, TEXT_MAX - 1)}…`;
+function clipText(content: string, max = V2_DISPLAYABLE_TEXT_MAX): string {
+  if (max <= 0 || !content) return '';
+  if (content.length <= max) return content;
+  if (max === 1) return '…';
+  return `${content.slice(0, max - 1)}…`;
+}
+
+/** Sum of Text Display `content` lengths (Discord's displayable-text cap). */
+export function v2DisplayableTextSize(node: unknown): number {
+  if (Array.isArray(node)) {
+    return node.reduce<number>((n, child) => n + v2DisplayableTextSize(child), 0);
+  }
+  if (!node || typeof node !== 'object') return 0;
+  const rec = node as {type?: unknown; content?: unknown; components?: unknown; accessory?: unknown};
+  const here = rec.type === 10 && typeof rec.content === 'string' ? rec.content.length : 0;
+  return here + v2DisplayableTextSize(rec.components) + v2DisplayableTextSize(rec.accessory);
 }
 
 function titleHeading(title: string, url: string): string {
@@ -117,16 +132,6 @@ export function buildEventMessageV2(event: EmbedEventInput): {
     track_codes: event.track_codes,
   });
   const trackLine = tracks.map(formatTrackV2).filter(Boolean).join('; ');
-  const carBlocks = formatEventCarsV2Blocks({
-    game: event.game,
-    car_rule_mode: event.car_rule_mode,
-    max_pi: event.max_pi,
-    additional_car_restrictions: event.additional_car_restrictions,
-    allowed_cars: event.allowed_cars,
-  });
-  const carContent = carBlocks
-    ? [carBlocks.header, carBlocks.shared, carBlocks.list].filter(Boolean).join('\n')
-    : null;
   const subtitle = formatEmbedSubtitle({
     status,
     startsAt: event.starts_at,
@@ -143,12 +148,46 @@ export function buildEventMessageV2(event: EmbedEventInput): {
   ]
     .filter(Boolean)
     .join('\n');
-  const about = event.description?.trim() ?? '';
+  const titleTextRaw = titleHeading(event.title, url);
+  const subtitleTextRaw = `-# ${subtitle}`;
+  const participants = clipText(formatParticipants(event), V2_DISPLAYABLE_TEXT_MAX);
 
   const joinBtn = button(3, JOIN_EVENT_BUTTON_LABEL, joinEventCustomId(id));
   const viewResultsBtn = button(2, VIEW_RESULTS_BUTTON_LABEL, viewResultsCustomId(id));
   const openBtn = button(2, OPEN_IN_APP_BUTTON_LABEL, openEventCustomId(id));
   const titleAccessory = canJoin ? joinBtn : status === 'completed' ? viewResultsBtn : null;
+
+  let rest = V2_DISPLAYABLE_TEXT_MAX - participants.length;
+  let titleText = titleTextRaw;
+  let subtitleText = subtitleTextRaw;
+  let titleCombined: string | null = null;
+  if (titleAccessory) {
+    titleText = clipText(titleTextRaw, rest);
+    rest -= titleText.length;
+    subtitleText = clipText(subtitleTextRaw, rest);
+    rest -= subtitleText.length;
+  } else {
+    titleCombined = clipText(`${titleTextRaw}\n${subtitleTextRaw}`, rest);
+    rest -= titleCombined.length;
+  }
+  const metaClipped = clipText(meta, rest);
+  rest -= metaClipped.length;
+  const about = clipText(event.description?.trim() ?? '', rest);
+  rest -= about.length;
+  const carBlocks = formatEventCarsV2Blocks(
+    {
+      game: event.game,
+      car_rule_mode: event.car_rule_mode,
+      max_pi: event.max_pi,
+      additional_car_restrictions: event.additional_car_restrictions,
+      allowed_cars: event.allowed_cars,
+    },
+    {maxChars: rest},
+  );
+  const carContent = clipText(
+    carBlocks ? [carBlocks.header, carBlocks.shared, carBlocks.list].filter(Boolean).join('\n') : '',
+    rest,
+  );
 
   const children: V2Node[] = [
     {
@@ -157,31 +196,33 @@ export function buildEventMessageV2(event: EmbedEventInput): {
     },
   ];
   if (titleAccessory) {
-    children.push({
-      type: 9,
-      components: [{type: 10, content: clipText(titleHeading(event.title, url))}],
-      accessory: titleAccessory,
-    });
-    children.push({type: 10, content: clipText(`-# ${subtitle}`)});
-  } else {
+    if (titleText) {
+      children.push({
+        type: 9,
+        components: [{type: 10, content: titleText}],
+        accessory: titleAccessory,
+      });
+    }
+    if (subtitleText) children.push({type: 10, content: subtitleText});
+  } else if (titleCombined) {
     children.push({
       type: 10,
-      content: clipText(`${titleHeading(event.title, url)}\n-# ${subtitle}`),
+      content: titleCombined,
     });
   }
-  if (meta) children.push({type: 10, content: clipText(meta)});
+  if (metaClipped) children.push({type: 10, content: metaClipped});
   if (about) {
     children.push({type: 14, divider: true, spacing: 1});
-    children.push({type: 10, content: clipText(about)});
+    children.push({type: 10, content: about});
   }
   if (carContent) {
     children.push({type: 14, divider: true, spacing: 1});
-    children.push({type: 10, content: clipText(carContent)});
+    children.push({type: 10, content: carContent});
   }
   children.push({type: 14, divider: true, spacing: 1});
   children.push({
     type: 9,
-    components: [{type: 10, content: clipText(formatParticipants(event))}],
+    components: [{type: 10, content: participants}],
     accessory: openBtn,
   });
 

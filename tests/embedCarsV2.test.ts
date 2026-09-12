@@ -218,4 +218,27 @@ describe('mapEventCarsForEmbed', () => {
     ]);
     expect(out.map((c) => c.make)).toEqual(['Abarth', 'Ford', 'Porsche']);
   });
+
+  it('keeps two rows of the same catalog car (alt builds)', () => {
+    const catalog = {make: 'Ford', model: 'Ford GT', year: 2017, abbreviation: 'Ford GT'};
+    const out = mapEventCarsForEmbed([
+      {
+        sort_order: 0,
+        max_pi: 800,
+        tune_share_code: '111 111 111',
+        car_restrictions: [],
+        cars: catalog,
+      },
+      {
+        sort_order: 1,
+        max_pi: 900,
+        tune_share_code: '222 222 222',
+        car_restrictions: ['No engine swap'],
+        cars: catalog,
+      },
+    ]);
+    expect(out).toHaveLength(2);
+    expect(out.map((c) => c.max_pi)).toEqual([800, 900]);
+    expect(out.map((c) => c.tune_share_code)).toEqual(['111 111 111', '222 222 222']);
+  });
 });

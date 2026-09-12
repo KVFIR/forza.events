@@ -552,11 +552,9 @@ async function resolveEventCars(
   if (mode !== 'restricted_list' || cars.length === 0) return [];
 
   const rows: ResolvedEventCar[] = [];
-  const seenCarIds = new Set<string>();
   for (const c of cars) {
     const carId = await resolveCarId(supabase, c, game);
-    if (!carId || seenCarIds.has(carId)) continue;
-    seenCarIds.add(carId);
+    if (!carId) continue;
     rows.push({
       car_id: carId,
       max_pi: c.max_pi ?? PI_MAX,

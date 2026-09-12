@@ -1,8 +1,13 @@
 import {describe, expect, it} from 'vitest';
 import {JOIN_EVENT_BUTTON_LABEL, OPEN_IN_APP_BUTTON_LABEL} from '../supabase/functions/_shared/embedJoin.ts';
 import {VIEW_RESULTS_BUTTON_LABEL} from '../supabase/functions/_shared/embedResults.ts';
-import {IS_COMPONENTS_V2, buildEventMessageV2} from '../supabase/functions/_shared/embedV2.ts';
-import type {EmbedEventInput} from '../supabase/functions/_shared/events.ts';
+import {
+  IS_COMPONENTS_V2,
+  V2_DISPLAYABLE_TEXT_MAX,
+  buildEventMessageV2,
+  v2DisplayableTextSize,
+} from '../supabase/functions/_shared/embedV2.ts';
+import type {EmbedAllowedCar, EmbedEventInput} from '../supabase/functions/_shared/events.ts';
 
 const EVENT_ID = '87c1403e-730a-44cb-98f8-d0e20918bc1c';
 
@@ -86,5 +91,47 @@ describe('buildEventMessageV2', () => {
     );
     expect(JSON.stringify(live)).toContain('<#vc-1>');
     expect(JSON.stringify(cancelled)).not.toContain('<#vc-1>');
+  });
+
+  it('stays under Discord’s displayable-text cap when About + cars would overflow', () => {
+    const allowed_cars: EmbedAllowedCar[] = Array.from({length: 32}, (_, i) => ({
+      make: 'Nissan',
+      model: `Skyline GT-R V-Spec ${i}`,
+      year: 1997,
+      max_pi: i < 16 ? 750 : 751,
+      tune_share_code: null,
+      car_restrictions: i % 2 === 0 ? ['Grip'] : ['Top Speed'],
+    }));
+    const payload = buildEventMessageV2(
+      event({
+        description: `${'Правила турнира. '.repeat(80)}\n${'A'.repeat(800)}`,
+        car_rule_mode: 'restricted_list',
+        allowed_cars,
+        current_players: 10,
+        groups: [{group_index: 1, leader_gamertag: 'WraithellONE', count: 10}],
+      }),
+    );
+    expect(v2DisplayableTextSize(payload)).toBeLessThanOrEqual(V2_DISPLAYABLE_TEXT_MAX);
+    expect(JSON.stringify(payload)).toContain('**10/12**');
+    expect(JSON.stringify(payload)).toContain('WraithellONE');
+  });
+
+  it('stays under the displayable-text cap when reserved title/meta would overflow', () => {
+    const payload = buildEventMessageV2(
+      event({
+        title: 'A'.repeat(5000),
+        description: 'B'.repeat(2000),
+        tracks: Array.from({length: 10}, (_, i) => ({
+          name: `Track ${i} ${'N'.repeat(120)}`,
+          share_code: '123 456 789',
+          format: 'Sprint',
+        })),
+        current_players: 10,
+        groups: [{group_index: 1, leader_gamertag: 'WraithellONE', count: 10}],
+      }),
+    );
+    expect(v2DisplayableTextSize(payload)).toBeLessThanOrEqual(V2_DISPLAYABLE_TEXT_MAX);
+    expect(JSON.stringify(payload)).toContain('**10/12**');
+    expect(JSON.stringify(payload)).toContain('WraithellONE');
   });
 });

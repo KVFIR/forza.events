@@ -1,6 +1,9 @@
-import type {CarPayload} from './eventSpec.ts';
-
 type TrackRow = {name?: string; share_code?: string | null; format?: string | null};
+
+/** Catalog payload or DB `event_cars` row — kept local so client `@edge` import does not pull Deno `eventSpec`. */
+type CarsDiffRow =
+  | {id: string; max_pi?: number | null; tune_share_code?: string | null; car_restrictions?: string[]}
+  | {car_id: string; max_pi: number; tune_share_code: string | null; car_restrictions: string[]};
 
 export function normalizeTracksForDiff(tracks: unknown): string {
   const rows = Array.isArray(tracks) ? (tracks as TrackRow[]) : [];
@@ -16,7 +19,7 @@ export function normalizeCarsForDiff(
   mode: string | null | undefined,
   maxPi: number | null | undefined,
   additionalRestrictions: string | null | undefined,
-  cars: CarPayload[] | {car_id: string; max_pi: number; tune_share_code: string | null; car_restrictions: string[]}[],
+  cars: CarsDiffRow[],
 ): string {
   const payload = {
     mode: mode ?? 'anything_goes',
@@ -39,7 +42,15 @@ export function normalizeCarsForDiff(
           restrictions: [...(c.car_restrictions ?? [])].sort(),
         };
       })
-      .sort((a, b) => String(a.id).localeCompare(String(b.id))),
+      .sort((a, b) => {
+        const byId = String(a.id).localeCompare(String(b.id));
+        if (byId !== 0) return byId;
+        const byTune = a.tune.localeCompare(b.tune);
+        if (byTune !== 0) return byTune;
+        const byPi = (a.max_pi ?? 0) - (b.max_pi ?? 0);
+        if (byPi !== 0) return byPi;
+        return JSON.stringify(a.restrictions).localeCompare(JSON.stringify(b.restrictions));
+      }),
   };
   return JSON.stringify(payload);
 }

@@ -66,12 +66,14 @@ function carListKey(car: CarNameParts, full: boolean): string {
 }
 
 function carRowId(car: CarNameParts, index: number): string {
-  return car.carId ?? car.id ?? `idx-${index}`;
+  // Instance id (event_cars row / Create `id`); catalog `carId` is not unique for alt builds.
+  return car.id ?? car.carId ?? `idx-${index}`;
 }
 
 /**
- * Labels for a car list. When several cars share the same display name and have years,
- * append `'YY` (e.g. Audi RS 4 Avant '01) — only on colliding rows.
+ * Labels for a car list. When several cars share the same display name and have
+ * *different* years, append `'YY` (e.g. Audi RS 4 Avant '01) — only on colliding rows.
+ * Same-year alt builds keep the base name (PI / tune distinguish them in the row).
  * `full: true` keeps catalog titles (Create / Event Detail); default is HUD abbreviation.
  */
 export function formatCarListDisplayNames(
@@ -81,18 +83,28 @@ export function formatCarListDisplayNames(
   const full = Boolean(options?.full);
   const labelOf = full ? formatCarFullName : formatCarDisplayName;
   const counts = new Map<string, number>();
+  const years = new Map<string, Set<number | ''>>();
   for (const car of cars) {
     const key = carListKey(car, full);
     counts.set(key, (counts.get(key) ?? 0) + 1);
+    const y = resolveCarYear(car);
+    let set = years.get(key);
+    if (!set) {
+      set = new Set();
+      years.set(key, set);
+    }
+    set.add(y ?? '');
   }
 
   const out = new Map<string, string>();
   cars.forEach((car, index) => {
     const base = labelOf(car);
     const key = carListKey(car, full);
-    const ambiguous = (counts.get(key) ?? 0) > 1;
+    const yearsDiffer = (years.get(key)?.size ?? 0) > 1;
     const suffix =
-      ambiguous && !displayNameHasYearSuffix(base) ? formatYearShort(resolveCarYear(car)) : '';
+      (counts.get(key) ?? 0) > 1 && yearsDiffer && !displayNameHasYearSuffix(base)
+        ? formatYearShort(resolveCarYear(car))
+        : '';
     out.set(carRowId(car, index), suffix ? `${base} ${suffix}` : base);
   });
   if (full) return out;
