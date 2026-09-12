@@ -11,7 +11,7 @@ Remaining work is mostly **Activity E2E in pilot guilds**, **Railway frontend re
 | Layer | State |
 |-------|--------|
 | React Activity (UI) | Done — Browse, Detail, Create (wizard), My Events, Profile, Leaderboard, i18n (EN + RU) |
-| Supabase schema | Done — migrations `001`–`040` (apply `040` for Discord Components V2 publish cards) |
+| Supabase schema | Done — migrations `001`–`043` (apply `043` for duplicate restricted-list cars / alt builds) |
 | Edge Functions | Done — 23 functions ([`supabase/README.md`](../supabase/README.md)) |
 | Security hardening | Done — storage, RLS scope, CORS, rate limits, publish validation |
 | Local browser dev | Done — Discord OAuth + Supabase (not mock mode) |
@@ -28,7 +28,7 @@ Remaining work is mostly **Activity E2E in pilot guilds**, **Railway frontend re
 
 | Area | Status | Notes |
 |------|--------|-------|
-| Browse Events | Done | Activity: `browse-events`; localhost: PostgREST + same `isBrowseFeedEvent` filter (published open/live + completed; cancelled/archived excluded; started/live stay visible) |
+| Browse Events | Done | Activity: `browse-events`; localhost: PostgREST + same `isBrowseFeedEvent` filter (published open/live + completed; cancelled/archived excluded; started/live stay visible). UI default Upcoming; chip Completed; sort date/fill |
 | Event Detail | Done | Join/leave, host actions, balance groups, results, live updates, optional Join voice |
 | Create Event | Done | 4 steps; cover via `upload-cover`; convoy leader via `list-guild-members`; optional gathering voice channel |
 | My Events | Done | Hosted/joined + host drafts merge; cancelled hidden by default; Browse-style sort |

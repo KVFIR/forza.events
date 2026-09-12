@@ -90,12 +90,12 @@ Manual QA matrix aligned with current code behavior (not an abstract checklist).
 
 ### Load and filters
 
-- [ ] Browse feed = published open/live + successfully completed (`isBrowseFeedEvent`: not draft, not cancelled/archived; completed stay visible below active).
+- [ ] Browse feed loads published open/live + successfully completed (`isBrowseFeedEvent`: not draft, not cancelled/archived). UI default hides completed; chip **Completed** shows past races only (newest first under Date sort).
 - [ ] Type filter: `road`, `dirt`, `cruise` + **All**.
 - [ ] Game filter: **All** (default) / FH5 / FH6; cards have no game mark; Detail shows full game badge.
 - [ ] Ranked filter: **All** / **Ranked**; ranked cards/detail show Ranked badge.
-- [ ] Sort: event date / created / fill.
-- [ ] Empty filter → “no match” + clear filters (clears type, game, **and** ranked).
+- [ ] Sort: **Event date** (default) / **Fill** (no Created).
+- [ ] Empty filter → “no match” + clear filters (clears type, game, ranked, **and** Completed → upcoming).
 - [ ] Cards: type, date, organiser (`guildName` or host), fill, cover via **proxy URL**.
 - [ ] Nav **Ladder** → `/leaderboard` loads top ratings (no page subtitle); muted last-race names open Event Detail; signed-in drivers always see campaign plate (identity left, rank / rating / races on the right; unrated → dash / dash / 0) and a ranked-race log when they have races (rating after each race + signed delta, no “Δ” prefix). No provisional asterisk or footnote.
 
@@ -103,7 +103,7 @@ Manual QA matrix aligned with current code behavior (not an abstract checklist).
 
 - [ ] B join/leave → A’s Browse count updates without refresh.
 - [ ] Host publishes → A sees new event (INSERT/refetch).
-- [ ] Cancelled → removed from browse feed; completed stays (below active).
+- [ ] Cancelled → removed from browse feed; completed stays in the payload and appears under the **Completed** chip (below active if both were shown).
 
 ### Errors
 
@@ -250,7 +250,7 @@ Manual QA matrix aligned with current code behavior (not an abstract checklist).
 
 | Area | Cases |
 |------|--------|
-| **Cars** | `anything_goes` optional PI cap + optional extra restrictions (empty → no car-rules UI/embed field); `restricted_list` ≥1 catalog car; tuning restrictions on embed |
+| **Cars** | `anything_goes` optional PI cap + optional extra restrictions (empty → no car-rules UI/embed field); `restricted_list` ≥1 catalog car (same car may be added more than once for alt builds); tuning restrictions on embed |
 | **Tracks** | 0, 1, many; dedupe on save |
 | **Target** | Guild list = user guilds ∩ bot installed; empty → Add bot → Refresh |
 | **Target** | Manage Server **role** on a server the user does not own still lists it (not owner-only) |
@@ -291,7 +291,7 @@ Manual QA matrix aligned with current code behavior (not an abstract checklist).
 | **Joined — host-assigned leader** | Host picks viewer as convoy leader → event appears in **Joined** / **All** without manual refresh (realtime refetch); **Leave** blocked; convoy-leader Xbox hint on Detail |
 | **Joined — waitlist** | Full lobby join → event in **Joined**; card shows **Waitlisted** badge; **Leave waitlist** works |
 | Cancelled | Hidden by default; **Cancelled** chip shows only cancelled |
-| Sort | Same keys as Browse (event date / created / fill); drafts stay on top |
+| Sort | Same keys as Browse (event date / fill); drafts stay on top |
 | Drafts API fail | Warning; published list still loads |
 | Completed | Compact cards show finish (`P2` / DNF / DNS) and ranked Δ |
 | Not signed in | Copy + retry auth |
