@@ -102,16 +102,8 @@ function CoverCarLine({event}: {event: ForzaEvent}) {
     const cars = event.allowedCars;
     const span = restrictedCarsPiBounds(cars);
     if (!span) return null;
-    const labels = formatCarListDisplayNames(
-      cars.map((c) => ({
-        carId: c.carId,
-        make: c.make,
-        model: c.model,
-        year: c.year,
-        abbreviation: c.abbreviation,
-      })),
-    );
-    const names = cars.map((c) => labels.get(c.carId) ?? formatCarEmbedName(c));
+    const labels = formatCarListDisplayNames(cars);
+    const names = cars.map((c) => labels.get(c.id) ?? formatCarEmbedName(c));
     const visibleNames = names.slice(0, 5);
     const extra = names.length - visibleNames.length;
     const pi =
@@ -128,7 +120,7 @@ function CoverCarLine({event}: {event: ForzaEvent}) {
       >
         <div className="flex flex-col items-end gap-px text-xs leading-tight text-slate-400">
           {visibleNames.map((name, i) => (
-            <span key={cars[i]!.carId} className="max-w-full truncate text-right">
+            <span key={cars[i]!.id} className="max-w-full truncate text-right">
               {name}
             </span>
           ))}

@@ -17,8 +17,10 @@ import {FieldLabel} from './ui/FieldLabel';
 import {Panel} from './ui/Panel';
 import {useCollapseAllOnLoad} from '../hooks/useCollapseAllOnLoad';
 
+/** Same identity as `EventAllowedCar`: `id` = row instance, `carId` = catalog. */
 export type EventCarEntry = {
   id: string;
+  carId: string;
   make: string;
   model: string;
   year: number | null;
@@ -40,9 +42,14 @@ type Props = {
   collapseAllKey?: string | null;
 };
 
+function newRowId(): string {
+  return crypto.randomUUID();
+}
+
 function toEntry(c: CarSearchResult): EventCarEntry {
   return {
-    id: c.id,
+    id: newRowId(),
+    carId: c.id,
     make: c.make,
     model: c.model,
     year: c.year,
@@ -68,15 +75,7 @@ export function EventCarList({
   const [open, setOpen] = useState(false);
   const {collapsedIds, setCollapsedIds, collapseAll} = useCollapseAllOnLoad(collapseAllKey);
   const wrapRef = useRef<HTMLDivElement>(null);
-  const listLabels = formatCarListDisplayNames(
-    cars.map((c) => ({
-      id: c.id,
-      make: c.make,
-      model: c.model,
-      year: c.year,
-    })),
-    {full: true},
-  );
+  const listLabels = formatCarListDisplayNames(cars, {full: true});
 
   useEffect(() => {
     if (cars.length === 0) {
@@ -92,13 +91,10 @@ export function EventCarList({
       return;
     }
     const timer = setTimeout(() => {
-      void searchCars(query, {game}).then((r) => {
-        const picked = new Set(cars.map((c) => c.id));
-        setResults(r.filter((c) => !picked.has(c.id)));
-      });
+      void searchCars(query, {game}).then(setResults);
     }, 250);
     return () => clearTimeout(timer);
-  }, [query, cars, game]);
+  }, [query, game]);
 
   useEffect(() => {
     function onDocClick(e: MouseEvent) {
@@ -123,29 +119,29 @@ export function EventCarList({
     setOpen(false);
   }
 
-  function toggleCollapsed(id: string) {
+  function toggleCollapsed(rowId: string) {
     setCollapsedIds((prev) => {
       const next = new Set(prev);
-      if (next.has(id)) next.delete(id);
-      else next.add(id);
+      if (next.has(rowId)) next.delete(rowId);
+      else next.add(rowId);
       return next;
     });
   }
 
-  function isCollapsed(id: string) {
-    return collapsedIds.has(id);
+  function isCollapsed(rowId: string) {
+    return collapsedIds.has(rowId);
   }
 
-  function update(id: string, patch: Partial<EventCarEntry>) {
-    onChange(cars.map((c) => (c.id === id ? {...c, ...patch} : c)));
+  function update(rowId: string, patch: Partial<EventCarEntry>) {
+    onChange(cars.map((c) => (c.id === rowId ? {...c, ...patch} : c)));
   }
 
-  function remove(id: string) {
-    onChange(cars.filter((c) => c.id !== id));
+  function remove(rowId: string) {
+    onChange(cars.filter((c) => c.id !== rowId));
     setCollapsedIds((prev) => {
-      if (!prev.has(id)) return prev;
+      if (!prev.has(rowId)) return prev;
       const next = new Set(prev);
-      next.delete(id);
+      next.delete(rowId);
       return next;
     });
   }
@@ -203,9 +199,13 @@ export function EventCarList({
         <EmptyPlaceholder>{t('create.noCarsYet')}</EmptyPlaceholder>
       ) : (
         <ul className="space-y-3">
-          {cars.map((c) => {
+            {cars.map((c) => {
             const collapsed = isCollapsed(c.id);
             const displayName = listLabels.get(c.id) ?? c.model;
+            const letter = piToClass(c.maxPi, game);
+            const collapsedHint = collapsed
+              ? [c.tuneShareCode, ...c.restrictions].map((s) => s.trim()).filter(Boolean).join(' · ')
+              : '';
             return (
             <li key={c.id}>
               <Panel variant="soft" className="p-0">
@@ -234,6 +234,17 @@ export function EventCarList({
                   <p className="truncate text-sm font-semibold leading-tight text-white">
                     {displayName}
                   </p>
+                  {collapsedHint ? (
+                    <p className="truncate text-xs leading-tight text-muted">{collapsedHint}</p>
+                  ) : null}
+                </span>
+                <span
+                  className={cn(
+                    'shrink-0 text-xs font-bold tabular-nums',
+                    piClassColor[letter] ?? 'text-muted',
+                  )}
+                >
+                  {letter} {c.maxPi}
                 </span>
                 <Button
                   type="button"

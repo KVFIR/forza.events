@@ -283,7 +283,7 @@ export function useCreateEventForm() {
             maxPi: ev.maxPi,
             additionalCarRestrictions: ev.additionalCarRestrictions ?? '',
             cars: ev.allowedCars.map((c) => ({
-              id: c.carId,
+              carId: c.carId,
               maxPi: c.maxPi,
               tuneShareCode: c.tuneShareCode,
               restrictions: c.restrictions,
@@ -304,7 +304,8 @@ export function useCreateEventForm() {
         setAdditionalCarRestrictions(ev.additionalCarRestrictions ?? '');
         setEventCars(
           ev.allowedCars.map((c) => ({
-            id: c.carId,
+            id: c.id,
+            carId: c.carId,
             make: c.make,
             model: c.model,
             year: c.year ?? null,
@@ -429,7 +430,7 @@ export function useCreateEventForm() {
       cars:
         carRuleMode === 'restricted_list'
           ? eventCars.map((c) => ({
-              id: c.id,
+              id: c.carId,
               make: c.make,
               model: c.model,
               year: c.year,
@@ -707,7 +708,7 @@ export function useCreateEventForm() {
           maxPi,
           additionalCarRestrictions,
           cars: eventCars.map((c) => ({
-            id: c.id,
+            carId: c.carId,
             maxPi: c.maxPi,
             tuneShareCode: c.tuneShareCode,
             restrictions: c.restrictions,

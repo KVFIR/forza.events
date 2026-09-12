@@ -49,4 +49,24 @@ describe('publishedNotifyFieldsChanged', () => {
       ),
     ).toBe(false);
   });
+
+  it('does not notify when alt-build rows are only reordered', () => {
+    const cars = [
+      {carId: 'car-1', maxPi: 800, tuneShareCode: '111 111 111', restrictions: []},
+      {carId: 'car-1', maxPi: 900, tuneShareCode: '222 222 222', restrictions: ['No engine swap']},
+    ];
+    const withCars = {...baseline, carRuleMode: 'restricted_list' as const, cars};
+    expect(
+      publishedNotifyFieldsChanged({...withCars, cars: [cars[1]!, cars[0]!]}, withCars),
+    ).toBe(false);
+    expect(
+      publishedNotifyFieldsChanged(
+        {
+          ...withCars,
+          cars: [...cars, {carId: 'car-1', maxPi: 800, tuneShareCode: '333 333 333', restrictions: []}],
+        },
+        withCars,
+      ),
+    ).toBe(true);
+  });
 });

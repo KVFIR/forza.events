@@ -83,6 +83,57 @@ describe('fetchEventById', () => {
     expect(getSupabase).not.toHaveBeenCalled();
   });
 
+  it('maps two event_cars rows of the same catalog car', async () => {
+    const catalog = {id: 'catalog-1', make: 'Ford', model: 'Ford GT', year: 2017, pi: 800};
+    invokeBrowseEvents.mockResolvedValue({
+      data: [
+        {
+          ...rankedDetailRow,
+          event_cars: [
+            {
+              id: 'row-1',
+              sort_order: 0,
+              max_pi: 800,
+              tune_share_code: '111 111 111',
+              car_restrictions: [],
+              cars: catalog,
+            },
+            {
+              id: 'row-2',
+              sort_order: 1,
+              max_pi: 900,
+              tune_share_code: '222 222 222',
+              car_restrictions: ['No engine swap'],
+              cars: catalog,
+            },
+          ],
+        },
+      ],
+    });
+    const event = await fetchEventById('summer-cup');
+    expect(event?.allowedCars).toEqual([
+      expect.objectContaining({id: 'row-1', carId: 'catalog-1', maxPi: 800}),
+      expect.objectContaining({id: 'row-2', carId: 'catalog-1', maxPi: 900}),
+    ]);
+  });
+
+  it('synthesizes unique ids when event_cars.id is missing', async () => {
+    const catalog = {id: 'catalog-1', make: 'Ford', model: 'Ford GT', year: 2017, pi: 800};
+    invokeBrowseEvents.mockResolvedValue({
+      data: [
+        {
+          ...rankedDetailRow,
+          event_cars: [
+            {sort_order: 0, max_pi: 800, cars: catalog},
+            {sort_order: 0, max_pi: 900, cars: catalog},
+          ],
+        },
+      ],
+    });
+    const event = await fetchEventById('summer-cup');
+    expect(event?.allowedCars.map((c) => c.id)).toEqual(['catalog-1:0', 'catalog-1:1']);
+  });
+
   it('skips PostgREST when Edge confirms a miss', async () => {
     shouldUseDirectSupabaseReads.mockReturnValue(true);
     await expect(fetchEventById('summer-cup')).resolves.toBeUndefined();

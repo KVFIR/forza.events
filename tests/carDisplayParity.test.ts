@@ -109,4 +109,16 @@ describe('car display parity', () => {
     expect(labels.get('b')).toBe("BMW M3 '05");
     expect(edgeFormatCarListDisplayNames(cars)).toEqual(labels);
   });
+
+  it('keeps distinct map keys for the same catalog car twice (alt builds)', () => {
+    const cars = [
+      {id: 'row-1', carId: 'catalog-1', make: 'Ford', model: 'Ford GT', year: 2017},
+      {id: 'row-2', carId: 'catalog-1', make: 'Ford', model: 'Ford GT', year: 2017},
+    ];
+    const labels = formatCarListDisplayNames(cars, {full: true});
+    expect(labels.get('row-1')).toBe('Ford GT');
+    expect(labels.get('row-2')).toBe('Ford GT');
+    expect(labels.size).toBe(2);
+    expect(edgeFormatCarListDisplayNames(cars, {full: true})).toEqual(labels);
+  });
 });

@@ -289,7 +289,7 @@ export function EventDetailInfoPanel({
                 const maxClass = piToClass(c.maxPi, game);
                 const name = formatCarFullName(c);
                 return (
-                  <li key={c.carId} className="flex items-start gap-2.5">
+                  <li key={c.id} className="flex items-start gap-2.5">
                     <span className="h-10 w-[4.5rem] shrink-0 overflow-hidden">
                       <img
                         src={carThumbUrl(c, game)}

@@ -55,5 +55,6 @@ describe('EVENT_LIST_SELECT parity', () => {
 
   it('returns event_cars in host add order', () => {
     expect(EVENT_LIST_SELECT).toContain('order: sort_order');
+    expect(EVENT_LIST_SELECT).toContain('event_cars(order: sort_order, id,');
   });
 });

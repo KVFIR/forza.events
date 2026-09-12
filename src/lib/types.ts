@@ -18,6 +18,9 @@ import type {EventTrack} from './eventTracks';
 export type {EventTrack};
 
 export interface EventAllowedCar {
+  /** `event_cars.id` — unique even when the same catalog car appears twice. */
+  id: string;
+  /** Catalog `cars.id`. */
   carId: string;
   make: string;
   model: string;

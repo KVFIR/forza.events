@@ -116,6 +116,7 @@ type DbEventResultRow = {
 };
 
 type DbEventCarRow = {
+  id?: string | null;
   sort_order?: number | null;
   max_pi?: number | null;
   tune_share_code?: string | null;
@@ -155,7 +156,7 @@ export const EVENT_LIST_SELECT = `
     joined_at,
     users!event_participants_discord_id_fkey(username, avatar_url)
   ),
-  event_cars(order: sort_order, sort_order, max_pi, tune_share_code, car_restrictions, cars(id, make, model, year, pi, abbreviation))
+  event_cars(order: sort_order, id, sort_order, max_pi, tune_share_code, car_restrictions, cars(id, make, model, year, pi, abbreviation))
 `;
 
 /** Event detail — results, rating ledger, roster ELO (not on browse/list). */
@@ -180,7 +181,7 @@ export function mapDbEventResultRows(rows: DbEventResultRow[] | null | undefined
 function mapAllowedCars(eventCars: DbEventCarRow[] | undefined): ForzaEvent['allowedCars'] {
   return [...(eventCars ?? [])]
     .sort((a, b) => (a.sort_order ?? 0) - (b.sort_order ?? 0))
-    .map((ec) => {
+    .map((ec, index) => {
       const raw = ec.cars;
       const car = (Array.isArray(raw) ? raw[0] : raw) as {
         id: string;
@@ -192,6 +193,7 @@ function mapAllowedCars(eventCars: DbEventCarRow[] | undefined): ForzaEvent['all
       } | null;
       if (!car?.id) return null;
       return {
+        id: ec.id?.trim() || `${car.id}:${index}`,
         carId: car.id,
         make: car.make,
         model: car.model,
