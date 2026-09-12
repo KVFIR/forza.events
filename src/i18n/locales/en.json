@@ -145,7 +145,6 @@
     "filterGame": "Game",
     "filterType": "Type",
     "sortEventDate": "Event date",
-    "sortCreated": "Created",
     "sortFill": "Fill",
     "filterByType": "Filter by event type",
     "filterByGame": "Filter by game",
@@ -158,7 +157,9 @@
     "errorDiscordTitle": "Could not reach the database",
     "errorDiscordDesc": "In Discord Developer Portal add URL mapping {{prefix}} → your-project.supabase.co",
     "filterRanked": "Ranked",
-    "filterByRanked": "Filter ranked events"
+    "filterByRanked": "Filter ranked events",
+    "filterCompleted": "Completed",
+    "filterByCompleted": "Filter completed events"
   },
   "leaderboard": {
     "statRank": "Rank",
@@ -215,7 +216,7 @@
     "cruise": "Meet & cruise",
     "roadShort": "Road",
     "dirtShort": "Dirt",
-    "cruiseShort": "Cruise"
+    "cruiseShort": "Meet"
   },
   "eventGames": {
     "fh5": "FH5",

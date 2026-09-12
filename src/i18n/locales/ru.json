@@ -145,7 +145,6 @@
     "filterGame": "Игра",
     "filterType": "Тип",
     "sortEventDate": "Дата события",
-    "sortCreated": "Создано",
     "sortFill": "Заполненность",
     "filterByType": "Фильтр по типу события",
     "filterByGame": "Фильтр по игре",
@@ -158,7 +157,9 @@
     "errorDiscordTitle": "Не удалось подключиться к базе",
     "errorDiscordDesc": "В Discord Developer Portal добавьте URL mapping {{prefix}} → your-project.supabase.co",
     "filterRanked": "Рейтинг",
-    "filterByRanked": "Фильтр рейтинговых событий"
+    "filterByRanked": "Фильтр рейтинговых событий",
+    "filterCompleted": "Завершённые",
+    "filterByCompleted": "Фильтр завершённых событий"
   },
   "leaderboard": {
     "statRank": "Место",
@@ -215,7 +216,7 @@
     "cruise": "Встреча и круиз",
     "roadShort": "Шоссе",
     "dirtShort": "Грунт",
-    "cruiseShort": "Круиз"
+    "cruiseShort": "Встреча"
   },
   "eventGames": {
     "fh5": "FH5",

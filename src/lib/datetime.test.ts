@@ -1,5 +1,6 @@
 import {formatInTimeZone} from 'date-fns-tz';
 import {describe, expect, it} from 'vitest';
+import i18n from '../i18n';
 import {dateFnsLocale} from '../i18n/dateLocale';
 import {
   datetimeLocalInputBounds,
@@ -49,8 +50,16 @@ describe('datetime', () => {
     expect(formatEventStartsIn(new Date(Date.now() - 60_000).toISOString())).toBeNull();
   });
 
-  it('formatEventStartsIn describes a future start', () => {
-    const label = formatEventStartsIn(new Date(Date.now() + 3 * 60 * 60 * 1000).toISOString());
-    expect(label && label.length > 0).toBe(true);
+  it('formatEventStartsIn describes a future start without approximate hedges', async () => {
+    const startsAt = new Date(Date.now() + 2 * 60 * 60 * 1000).toISOString();
+    const prev = i18n.language;
+    try {
+      await i18n.changeLanguage('ru');
+      expect(formatEventStartsIn(startsAt)).toBe('через 2 часа');
+      await i18n.changeLanguage('en');
+      expect(formatEventStartsIn(startsAt)).toBe('in 2 hours');
+    } finally {
+      await i18n.changeLanguage(prev);
+    }
   });
 });

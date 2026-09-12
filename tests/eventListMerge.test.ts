@@ -2,6 +2,7 @@ import {describe, expect, it} from 'vitest';
 import {
   buildScopedMyEventsList,
   filterByCancelled,
+  filterByLifecycle,
   resolveMyEventsCatalogLoading,
   sortEvents,
   sortMyEventsPublished,
@@ -87,20 +88,27 @@ describe('sortEvents', () => {
     expect(sortEvents([older, newer], 'event_date').map((e) => e.id)).toEqual(['new', 'old']);
   });
 
-  it('keeps created newest-first for completed events', () => {
-    const older = event('old', 'Old', {
+  it('sorts fill among upcoming when past is filtered out', () => {
+    const empty = event('empty', 'Empty', {
+      lifecycle: 'open',
+      status: 'open',
+      currentPlayers: 0,
+      maxPlayers: 12,
+    });
+    const fuller = event('fuller', 'Fuller', {
+      lifecycle: 'open',
+      status: 'open',
+      currentPlayers: 10,
+      maxPlayers: 12,
+    });
+    const pastFull = event('past', 'Past', {
       lifecycle: 'completed',
       status: 'ended',
-      createdAt: '2026-06-01T12:00:00.000Z',
-      startsAt: '2026-06-01T12:00:00.000Z',
+      currentPlayers: 12,
+      maxPlayers: 12,
     });
-    const newer = event('new', 'New', {
-      lifecycle: 'completed',
-      status: 'ended',
-      createdAt: '2026-07-01T12:00:00.000Z',
-      startsAt: '2026-07-01T12:00:00.000Z',
-    });
-    expect(sortEvents([older, newer], 'created').map((e) => e.id)).toEqual(['new', 'old']);
+    const upcomingOnly = filterByLifecycle([empty, fuller, pastFull], 'upcoming');
+    expect(sortEvents(upcomingOnly, 'fill').map((e) => e.id)).toEqual(['empty', 'fuller']);
   });
 
   it('keeps cancelled after active when sorting by event date', () => {
@@ -118,6 +126,25 @@ describe('sortEvents', () => {
       'soon',
       'cx',
     ]);
+  });
+});
+
+describe('filterByLifecycle', () => {
+  const open = event('open', 'Open', {lifecycle: 'open', status: 'open'});
+  const live = event('live', 'Live', {lifecycle: 'live', status: 'live'});
+  const completed = event('done', 'Done', {lifecycle: 'completed', status: 'ended'});
+  const cancelled = event('cx', 'Cancelled', {lifecycle: 'cancelled', status: 'ended'});
+
+  it('upcoming keeps live and open, drops past', () => {
+    expect(
+      filterByLifecycle([open, live, completed, cancelled], 'upcoming').map((e) => e.id),
+    ).toEqual(['open', 'live']);
+  });
+
+  it('completed keeps successfully completed only', () => {
+    expect(
+      filterByLifecycle([open, live, completed, cancelled], 'completed').map((e) => e.id),
+    ).toEqual(['done']);
   });
 });
 

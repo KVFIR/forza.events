@@ -2,9 +2,12 @@ import {isPublishedToDiscord} from './eventSpec';
 import {userHasParticipantRow} from './events';
 import type {AppUser, EventType, ForzaEvent} from './types';
 
-export type EventSortKey = 'event_date' | 'created' | 'fill';
+export type EventSortKey = 'event_date' | 'fill';
 
 export type MyEventsScope = 'all' | 'hosted' | 'joined';
+
+/** Browse: default upcoming; Completed chip shows past races only. */
+export type LifecycleFilter = 'upcoming' | 'completed';
 
 /** Gate My Events list until auth resolves and optional host drafts are ready. */
 export function resolveMyEventsCatalogLoading(input: {
@@ -28,11 +31,6 @@ export function eventFillRatio(event: ForzaEvent): number {
 
 function compareBySortKey(a: ForzaEvent, b: ForzaEvent, sort: EventSortKey): number {
   switch (sort) {
-    case 'created':
-      return (
-        new Date(b.createdAt ?? b.startsAt).getTime() -
-        new Date(a.createdAt ?? a.startsAt).getTime()
-      );
     case 'fill':
       return eventFillRatio(a) - eventFillRatio(b);
     case 'event_date':
@@ -81,6 +79,17 @@ export type RankedFilter = 'all' | 'ranked';
 export function filterByRanked(events: ForzaEvent[], ranked: RankedFilter): ForzaEvent[] {
   if (ranked === 'all') return events;
   return events.filter((e) => e.isRanked);
+}
+
+/** Default `upcoming` drops past; `completed` keeps successfully completed only. */
+export function filterByLifecycle(
+  events: ForzaEvent[],
+  filter: LifecycleFilter,
+): ForzaEvent[] {
+  if (filter === 'completed') {
+    return events.filter((e) => e.lifecycle === 'completed');
+  }
+  return events.filter((e) => !isPastListEvent(e));
 }
 
 export type CancelledFilter = 'hide' | 'cancelled';

@@ -58,7 +58,6 @@ export function MyEvents() {
 
   const sortOptions: {value: EventSortKey; label: string}[] = [
     {value: 'event_date', label: t('browse.sortEventDate')},
-    {value: 'created', label: t('browse.sortCreated')},
     {value: 'fill', label: t('browse.sortFill')},
   ];
 

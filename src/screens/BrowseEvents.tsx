@@ -2,7 +2,7 @@ import {useMemo, useState, useEffect} from 'react';
 import {useTranslation} from 'react-i18next';
 import type {EventType} from '../lib/types';
 import {trackOncePerSession} from '../lib/analytics';
-import {EVENT_TYPES, eventTypeLabel, eventTypeMeta} from '../lib/eventTypes';
+import {EVENT_TYPES, eventTypeMeta} from '../lib/eventTypes';
 import {EVENT_GAMES, eventGameLabel, type ForzaGame} from '../lib/eventGames';
 import {EventList} from '../components/EventList';
 import {EventListFilterChips} from '../components/EventListFilterChips';
@@ -11,7 +11,16 @@ import {NewEventAlertsBanner} from '../components/NewEventAlertsBanner';
 import {useAuth} from '../context/AuthContext';
 import {DISCORD_SUPABASE_PROXY_PREFIX} from '../lib/supabaseEnv';
 import {usePublishedEvents} from '../hooks/usePublishedEvents';
-import {filterByEventType, filterByGame, filterByRanked, sortEvents, type EventSortKey, type RankedFilter} from '../lib/eventList';
+import {
+  filterByEventType,
+  filterByGame,
+  filterByLifecycle,
+  filterByRanked,
+  sortEvents,
+  type EventSortKey,
+  type LifecycleFilter,
+  type RankedFilter,
+} from '../lib/eventList';
 
 type TypeFilter = EventType | 'all';
 type GameFilter = ForzaGame | 'all';
@@ -36,7 +45,7 @@ export function BrowseEvents() {
         const meta = eventTypeMeta(et.value);
         return {
           value: et.value,
-          label: eventTypeLabel(et.value),
+          label: t(`eventTypes.${et.value}Short`),
           selectedClassName: `${meta.badge.border} ${meta.badge.bg} ${meta.badge.text}`,
         };
       }),
@@ -54,9 +63,19 @@ export function BrowseEvents() {
     [t],
   );
 
+  const completedOptions = useMemo(
+    () => [
+      {
+        value: 'completed' as const,
+        label: t('browse.filterCompleted'),
+        selectedClassName: 'border-white/20 bg-white/[0.08] text-slate-200',
+      },
+    ],
+    [t],
+  );
+
   const sortOptions: {value: EventSortKey; label: string}[] = [
     {value: 'event_date', label: t('browse.sortEventDate')},
-    {value: 'created', label: t('browse.sortCreated')},
     {value: 'fill', label: t('browse.sortFill')},
   ];
 
@@ -64,6 +83,7 @@ export function BrowseEvents() {
   const [typeFilter, setTypeFilter] = useState<TypeFilter>('all');
   const [gameFilter, setGameFilter] = useState<GameFilter>('all');
   const [rankedFilter, setRankedFilter] = useState<RankedFilter>('all');
+  const [lifecycleFilter, setLifecycleFilter] = useState<LifecycleFilter>('upcoming');
   const [sort, setSort] = useState<EventSortKey>('event_date');
 
   useEffect(() => {
@@ -74,16 +94,21 @@ export function BrowseEvents() {
     const byType = filterByEventType(events, typeFilter);
     const byGame = filterByGame(byType, gameFilter);
     const byRanked = filterByRanked(byGame, rankedFilter);
-    return sortEvents(byRanked, sort);
-  }, [events, typeFilter, gameFilter, rankedFilter, sort]);
+    const byLifecycle = filterByLifecycle(byRanked, lifecycleFilter);
+    return sortEvents(byLifecycle, sort);
+  }, [events, typeFilter, gameFilter, rankedFilter, lifecycleFilter, sort]);
 
   const hasActiveFilters =
-    typeFilter !== 'all' || gameFilter !== 'all' || rankedFilter !== 'all';
+    typeFilter !== 'all' ||
+    gameFilter !== 'all' ||
+    rankedFilter !== 'all' ||
+    lifecycleFilter !== 'upcoming';
 
   const clearFilters = () => {
     setTypeFilter('all');
     setGameFilter('all');
     setRankedFilter('all');
+    setLifecycleFilter('upcoming');
   };
 
   const errorTitle =
@@ -151,6 +176,14 @@ export function BrowseEvents() {
               options={rankedOptions}
               deselectValue="all"
               aria-label={t('browse.filterByRanked')}
+            />
+            <span className="h-3 w-px shrink-0 bg-white/10" aria-hidden />
+            <EventListFilterChips
+              value={lifecycleFilter}
+              onChange={setLifecycleFilter}
+              options={completedOptions}
+              deselectValue="upcoming"
+              aria-label={t('browse.filterByCompleted')}
             />
           </div>
         }

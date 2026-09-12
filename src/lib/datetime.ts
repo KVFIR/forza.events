@@ -1,4 +1,4 @@
-import {formatDistanceToNow} from 'date-fns';
+import {formatDistanceToNowStrict} from 'date-fns';
 import {formatInTimeZone, fromZonedTime} from 'date-fns-tz';
 import {dateFnsLocale} from '../i18n/dateLocale';
 
@@ -54,5 +54,5 @@ export function formatEventStart(startsAt: string): string {
 export function formatEventStartsIn(startsAt: string): string | null {
   const start = new Date(startsAt);
   if (Number.isNaN(start.getTime()) || start.getTime() <= Date.now()) return null;
-  return formatDistanceToNow(start, {locale: dateFnsLocale(), addSuffix: true});
+  return formatDistanceToNowStrict(start, {locale: dateFnsLocale(), addSuffix: true});
 }
