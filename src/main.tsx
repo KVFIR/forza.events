@@ -3,8 +3,11 @@ import {createRoot} from 'react-dom/client';
 import './i18n';
 import App from './App';
 import {trackSessionStart} from './lib/analytics';
+import {installChunkLoadRecovery} from './lib/chunkLoadRecovery';
 import {getSupabase, isSupabaseConfigured, isDiscordActivityFrame} from './lib/supabase';
 import './index.css';
+
+installChunkLoadRecovery();
 
 if (isDiscordActivityFrame()) {
   void import('./lib/discordUrlProxy').then(({ensureDiscordSupabaseProxy}) =>

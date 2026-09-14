@@ -2,6 +2,7 @@ import {useEffect} from 'react';
 import {useTranslation} from 'react-i18next';
 import {isRouteErrorResponse, useRouteError} from 'react-router-dom';
 import {isLocalDevHost} from '../lib/runtime';
+import {clearChunkReloadGuard, lockChunkReloadGuard} from '../lib/chunkLoadRecovery';
 import {Button} from './ui/Button';
 import {EmptyState} from './ui/EmptyState';
 import {Logo} from './ui/Logo';
@@ -30,7 +31,8 @@ export function isChunkLoadError(error: unknown): boolean {
   ).toLowerCase();
 
   return (
-    haystack.includes('failed to fetch dynamically imported module') ||
+    haystack.includes('dynamically imported module') ||
+    haystack.includes('failed to load module script') ||
     haystack.includes('loading chunk') ||
     haystack.includes('importing a module script failed') ||
     haystack.includes('chunkloaderror')
@@ -45,7 +47,13 @@ export function RouteErrorFallback() {
   const chunk = isChunkLoadError(error);
   const message = routeErrorMessage(error);
 
+  const retry = () => {
+    clearChunkReloadGuard();
+    window.location.reload();
+  };
+
   useEffect(() => {
+    lockChunkReloadGuard();
     console.error('[route]', error);
   }, [error]);
 
@@ -54,10 +62,10 @@ export function RouteErrorFallback() {
       <EmptyState
         icon="⚠️"
         title={chunk ? t('errors.route.prodChunkTitle') : t('errors.route.prodTitle')}
-        description={t('errors.route.prodDesc')}
+        description={chunk ? t('errors.route.prodChunkDesc') : t('errors.route.prodDesc')}
         action={{
           label: t('common.tryAgain'),
-          onClick: () => window.location.reload(),
+          onClick: retry,
         }}
         className="min-h-screen py-20"
       />
@@ -77,7 +85,7 @@ export function RouteErrorFallback() {
         <pre className="max-h-48 overflow-auto whitespace-pre-wrap break-all rounded-lg border border-white/10 bg-black/40 p-3 text-left text-xs text-slate-300">
           {message}
         </pre>
-        <Button type="button" variant="secondary" onClick={() => window.location.reload()}>
+        <Button type="button" variant="secondary" onClick={retry}>
           {t('common.tryAgain')}
         </Button>
       </div>

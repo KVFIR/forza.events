@@ -68,7 +68,8 @@
       "devChunkHint": "Common after HMR or a bad save while Vite is running. Hard-refresh the tab (or restart the dev server), then try again.",
       "prodTitle": "Something went wrong",
       "prodChunkTitle": "This page needs a refresh",
-      "prodDesc": "Please reload and try again."
+      "prodDesc": "Please reload and try again.",
+      "prodChunkDesc": "A page script failed to load. Reload to pick up the latest version."
     }
   },
   "loading": {
