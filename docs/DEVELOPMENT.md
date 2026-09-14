@@ -269,7 +269,8 @@ Quick smoke before a PR or local iteration:
 
 - [ ] `supabase db push` applied (`001`–`006`)
 - [ ] `npm run deploy:functions` succeeded
-- [ ] Railway rebuild if `APP_ORIGIN` / client env changed
+- [ ] Railway rebuild if `APP_ORIGIN` / client env / `Caddyfile` changed — hashed `/assets/*` must 404 when missing (never SPA HTML)
+- [ ] Then `npx wrangler deploy` when Worker / `railwayProxy` / `Caddyfile` cache rules changed (Caddy before Worker)
 
 ### Discord Activity (pilot)
 

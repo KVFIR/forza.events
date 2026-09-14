@@ -44,6 +44,7 @@ Manual QA matrix aligned with current code behavior (not an abstract checklist).
 | 0.5 | Railway `APP_ORIGIN` | Cover images in embed + `<img>` via proxy |
 | 0.6 | Edge Functions deployed with `--no-verify-jwt` | Invalid Discord token → app `401`; **not** gateway `UNAUTHORIZED_NO_AUTH_HEADER` |
 | 0.7 | Hard refresh Activity after deploy | Old bundle does not mask fixes |
+| 0.10 | Missing hashed `/assets/*.js` | HTTP **404** (not SPA HTML); one auto-reload then chunk error screen with **Try again** |
 | 0.8 | `supabase db push` includes `017`–`019` + `036` + `037` + `040` + `npm run deploy:functions` (`process-notifications`, `save-event`, `publish-event`) | DM outbox + claim RPC live; new-event alert pref column; voice invite column; V2 publish cards; cron can deliver |
 | 0.9 | GitHub Actions `process-notifications` workflow + repo secrets (or minute cron via `scripts/invoke-process-notifications.sh`) | 2h reminders + outbox drain |
 
@@ -367,6 +368,7 @@ At least one mapped message per screen:
 6. RU toggle on one screen  
 7. Profile bell off → no opt-out DMs; waitlist promote DM still arrives  
 8. Crawler: Googlebot `/event/{slug}` returns 200 with the event title (not 404); Discord unfurl on a slug URL shows the event card  
+9. Stale hashed JS: `/assets/<old-hash>.js` is 404, not `index.html`; Browse still loads after refresh  
 
 ---
 

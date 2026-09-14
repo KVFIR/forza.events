@@ -2,7 +2,13 @@
  * Transparent Supabase proxy for browser clients in regions that block *.supabase.co.
  * Deploy to route forza.events/supabase/* (see wrangler.toml).
  */
+import {headersForOrigin, requestForOrigin} from './originHeaders.js';
+
 const DEFAULT_ORIGIN = 'https://uoysqfczahqmctbrrizn.supabase.co';
+
+export function isWebSocketUpgrade(request) {
+  return request.headers.get('Upgrade')?.toLowerCase() === 'websocket';
+}
 
 export async function proxySupabase(request, env) {
   const origin = (env.SUPABASE_ORIGIN || DEFAULT_ORIGIN).replace(/\/$/, '');
@@ -15,17 +21,15 @@ export async function proxySupabase(request, env) {
 
   const upstreamPath = url.pathname.slice(prefix.length) || '/';
   const targetUrl = `${origin}${upstreamPath}${url.search}`;
+  const host = new URL(origin).host;
 
-  const headers = new Headers(request.headers);
-  headers.set('host', new URL(origin).host);
-
-  if (request.headers.get('Upgrade')?.toLowerCase() === 'websocket') {
-    return fetch(targetUrl, {headers, method: request.method});
+  if (isWebSocketUpgrade(request)) {
+    return fetch(requestForOrigin(request, targetUrl, {host, websocket: true}));
   }
 
   return fetch(targetUrl, {
     method: request.method,
-    headers,
+    headers: headersForOrigin(request.headers, {host}),
     body: ['GET', 'HEAD'].includes(request.method) ? undefined : request.body,
     redirect: 'follow',
   });

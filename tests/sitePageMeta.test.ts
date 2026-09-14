@@ -82,6 +82,8 @@ describe('cloudflare static OG helpers', () => {
     await expect(import('../cloudflare/sitemapHandler.js')).resolves.toBeDefined();
     await expect(import('../cloudflare/robotsHandler.js')).resolves.toBeDefined();
     await expect(import('../cloudflare/railwayProxy.js')).resolves.toBeDefined();
+    await expect(import('../cloudflare/originHeaders.js')).resolves.toBeDefined();
+    await expect(import('../cloudflare/supabaseProxy.js')).resolves.toBeDefined();
   });
 
   it('isStaticAssetPath matches embed assets but not app routes', async () => {

@@ -19,13 +19,39 @@
 		respond 200
 	}
 
+	# Public files — real 404s (never SPA HTML). Cache only 200s.
+	# `status` is a response matcher (`match status`), not a named request matcher.
+	@siteFiles {
+		path /assets/* /covers/* /cars/* /og/* /logo/*
+	}
+	handle @siteFiles {
+		root * dist
+		encode gzip
+		file_server
+	}
+
+	@assets path /assets/*
+	header @assets Cache-Control "public, max-age=31536000, immutable" {
+		match status 200
+	}
+
+	@media path /covers/* /cars/* /og/* /logo/*
+	header @media Cache-Control "public, max-age=604800" {
+		match status 200
+	}
+
+	header @siteFiles Cache-Control "no-cache" {
+		match status 4xx 5xx
+	}
+
 	# /supabase on forza.events is proxied by Cloudflare Worker (wrangler.toml), not Caddy.
 	# Caddy → *.supabase.co fails with Cloudflare Error 1000 when forza.events is CF-proxied.
 	# Vite dev uses vite.config.ts proxy; production requires: npm run deploy:cf-worker
 	handle {
 		root * dist
+		header Cache-Control "no-cache"
 		encode gzip
-		file_server
 		try_files {path} /index.html
+		file_server
 	}
 }

@@ -13,16 +13,16 @@ import {fetchPublishedEvents} from './sitemapHandler.js';
 
 const HOME_CRAWLER_EVENT_LIMIT = 50;
 
-export async function handleStaticRoute(request, env) {
+export async function handleStaticRoute(request, env, ctx) {
   const url = new URL(request.url);
   const pathname = normalizeSitePath(url.pathname);
 
   if (isStaticAssetPath(pathname)) {
-    return proxyToRailway(request, env);
+    return proxyToRailway(request, env, ctx);
   }
 
   if (!isLinkPreviewCrawler(request.headers.get('user-agent'))) {
-    return proxyToRailway(request, env);
+    return proxyToRailway(request, env, ctx);
   }
 
   const origin = siteOrigin(env);

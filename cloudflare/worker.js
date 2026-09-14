@@ -6,7 +6,7 @@ import {proxySupabase} from './supabaseProxy.js';
 import {normalizeSitePath} from '../shared/sitePageMeta.mjs';
 
 export default {
-  async fetch(request, env) {
+  async fetch(request, env, ctx) {
     const {pathname} = new URL(request.url);
     const path = normalizeSitePath(pathname);
 
@@ -23,9 +23,9 @@ export default {
     }
 
     if (pathname.startsWith('/event/')) {
-      return handleEventRoute(request, env);
+      return handleEventRoute(request, env, ctx);
     }
 
-    return handleStaticRoute(request, env);
+    return handleStaticRoute(request, env, ctx);
   },
 };
