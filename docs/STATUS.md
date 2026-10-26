@@ -1,88 +1,48 @@
 # Implementation status
 
-Last updated: 2026-08-18
+Last updated: 2026-10-26
 
-## Summary
-
-The frozen MVP is **implemented in code** and wired to a **live Supabase project** (`uoysqfczahqmctbrrizn`). The Activity reads and writes real data when `.env` is configured. There is **no mock-data fallback**.
-
-Remaining work is mostly **Activity E2E in pilot guilds**, **Railway frontend redeploy after changes**, and **pilot feedback** — not greenfield implementation. **Discord application verification** (Developer Portal) is **approved**.
+Feature development has stopped. This file records what shipped. The app remains live at **`https://forza.events`** (Discord Activity and guest site) on Supabase (`uoysqfczahqmctbrrizn`) and Railway. There is **no mock-data fallback**. Discord **application verification** was approved on 2026-05-31.
 
 | Layer | State |
 |-------|--------|
-| React Activity (UI) | Done — Browse, Detail, Create (wizard), My Events, Profile, Leaderboard, i18n (EN + RU) |
-| Supabase schema | Done — migrations `001`–`043` (apply `043` for duplicate restricted-list cars / alt builds) |
-| Edge Functions | Done — 23 functions ([`supabase/README.md`](../supabase/README.md)) |
-| Security hardening | Done — storage, RLS scope, CORS, rate limits, publish validation |
-| Local browser dev | Done — Discord OAuth + Supabase (not mock mode) |
-| Sample content | Done — optional `sample-*` seed |
-| Production infra | Done — Supabase + Railway (`forzaevents.up.railway.app`) |
-| Discord app verification | Done — Developer Portal approved (2026-05-31) |
-| Production launch | Partial — Activity E2E in pilot guilds still open |
+| React UI | Done — Browse, Detail, Create (Event → Publish), My Events, Profile, Ladder, i18n (EN + RU) |
+| Schema | Done — migrations `001`–`043` ([`supabase/README.md`](../supabase/README.md)) |
+| Edge Functions | Done — 23 via `npm run deploy:functions` |
+| Security | Done — storage, RLS, CORS, rate limits, publish validation |
+| Browser web | Done — guest showcase on `forza.events` / localhost; raw Railway hostname is Activity-only |
+| Infra | Done — Railway SPA + Cloudflare Worker (Supabase proxy, OG, sitemap) |
+| Production launch | Live — feature work stopped |
 
-**Docs map:** product [`PLAN.md`](PLAN.md) · Discord setup [`DISCORD_PLATFORM.md`](DISCORD_PLATFORM.md) · pilot community server [`PILOT_COMMUNITY.md`](PILOT_COMMUNITY.md) · local dev [`DEVELOPMENT.md`](DEVELOPMENT.md) · manual QA [`E2E.md`](E2E.md) · agents [`AGENTS.md`](../AGENTS.md).
+**Docs:** product [`PLAN.md`](PLAN.md) · Discord [`DISCORD_PLATFORM.md`](DISCORD_PLATFORM.md) · pilot server [`PILOT_COMMUNITY.md`](PILOT_COMMUNITY.md) · local [`DEVELOPMENT.md`](DEVELOPMENT.md) · QA [`E2E.md`](E2E.md) · agents [`AGENTS.md`](../AGENTS.md).
 
 ---
 
 ## Feature matrix
 
-| Area | Status | Notes |
-|------|--------|-------|
-| Browse Events | Done | Activity: `browse-events`; localhost: PostgREST + same `isBrowseFeedEvent` filter (published open/live + completed; cancelled/archived excluded; started/live stay visible). UI default Upcoming; chip Completed; sort date/fill |
-| Event Detail | Done | Join/leave, host actions, balance groups, results, live updates, optional Join voice |
-| Create Event | Done | 4 steps; cover via `upload-cover`; convoy leader via `list-guild-members`; optional gathering voice channel |
-| My Events | Done | Hosted/joined + host drafts merge; cancelled hidden by default; Browse-style sort |
-| Profile | Done | Gamertag + DM notification prefs (`user-profile`) + driver rating |
-| Leaderboard / ranked ELO | Done | Phase A+B: `031`–`033`, pairwise ELO on `submit-results`, `/leaderboard` (last race + Δ via `038`), Browse Ranked filter |
-| Discord Activity auth | Done | SDK → `token-exchange` → `authenticate` |
-| Browser localhost auth | Done | `/auth/callback` + `localStorage` session + refresh_token |
-| Production browser tab (`forza.events`) | Done | Discord OAuth required (`BrowserAuthGate`); raw `*.up.railway.app` still Activity-only gate |
-| Supabase schema | Done | `001_baseline` + `002`–`010` |
-| Edge Functions | Done | `npm run deploy:functions` |
-| Realtime lobby | Done | `events` + `event_participants` |
-| FH5 / FH6 cars + event game | Done | `events.game` / `cars.game` (`029`); Create selector; Browse filter (default All); Event Detail + embed; no card mark |
-| FH6 cars catalog | Done | Autocomplete; no client inserts into `cars` |
-| FH5 cars catalog | Done | Fandom scrape → `fh5cars.json`; same seed path |
-| Cover storage | Done | Host-only upload; public read |
-| Security (RLS/CORS/rate) | Done | Baseline + `003`/`004` migrations + Edge shared modules |
-| Sample seed | Done | `npm run seed:events` |
-| i18n | Done | EN default; RU toggle on profile; notification copy follows `notification_locale` |
-| Discord DM notifications | Done | Outbox + `process-notifications` cron; Profile bell opt-out; Browse new-event alerts (`036`, opt-in, +1h); 2h reminder Voice link (`037`) |
-| Client analytics | Done | `client_events` + `track-event`; local `/analytics` dashboard; daily `prune-client-analytics` cron |
-| Bot process | Deferred | [`bot/README.md`](../bot/README.md) |
+| Area | Notes |
+|------|--------|
+| Browse | Edge `browse-events`; UI default Upcoming; chip Completed; sort date/fill; Game / Type / Ranked filters |
+| Event Detail | Join/leave/waitlist, host actions, reorganize convoys, results, realtime, optional Join voice |
+| Create | Two steps; cover via `upload-cover`; convoy leader via `list-guild-members`; optional gathering VC |
+| My Events | Hosted/joined + host drafts on top; cancelled hidden by default |
+| Profile | Gamertag, DM prefs, driver rating |
+| Ladder / ranked | Pairwise ELO (`031`–`034`); last race + Δ (`038`); Browse Ranked filter |
+| Auth | Activity SDK → `token-exchange`; browser `localStorage` + refresh token |
+| Cars | FH5 + FH6 catalogs; no client inserts; restricted list may repeat a car (`043`) |
+| DMs | Outbox + `process-notifications`; transactional bell default on; Browse new-event alerts opt-in |
+| Analytics | `client_events` + `track-event`; local `/analytics`; daily prune cron |
+| Bot process | Deferred — [`bot/README.md`](../bot/README.md) |
 
 ---
 
-## Frozen MVP alignment
+## Product alignment
 
-Confirmed in code and schema:
-
-- Publish requires server + channel; locked after publish (client + `assertTargetNotLocked`). Optional gathering voice channel is editable until start.
-- Event types: `road`, `dirt`, `cruise`; track codes optional
-- Car rules: `anything_goes` or `restricted_list`; optional tuning restriction templates
-- Published events editable only before start
-- After start: road/dirt → submit results (tap-to-order; by convoy or overall) or cancel; cruise → mark finished (no standings) or cancel
-- Results immutable after submit; host may add guild members / waitlisted racers on submit (`035`); cruise has no results UI
-- Full events block joins (DB trigger + API)
-- Production: Discord Activity only (no standalone web OAuth on Railway origin)
-
----
-
-## Database
-
-```bash
-supabase link --project-ref uoysqfczahqmctbrrizn
-supabase db push
-```
-
-| Migration | Purpose |
-|-----------|---------|
-| `001_baseline.sql` | Full schema, RLS, realtime, storage |
-| `002_event_tracks_jsonb.sql` | `events.tracks` jsonb |
-| `003_security_publish_results.sql` | Publish lock, results RPC, scoped RLS |
-| `004_rpc_submit_hardening.sql` | Hardened `submit_event_results` |
-
-Details: [`supabase/README.md`](../supabase/README.md).
+- Publish needs server + channel; locked after publish. Gathering voice is editable until start. Game and Ranked are locked after publish.
+- Types: `road`, `dirt`, `cruise`. Car rules: `anything_goes` or `restricted_list`.
+- Drafts freely editable. Published field edits until start. After start: reorganize convoys, submit results / mark finished, cancel.
+- Full groups waitlist; host may add up to 5 convoys. Results: positions / DNF / DNS; immutable after submit; host may add guild guests (`035`).
+- Surfaces: Activity primary; `forza.events` guest browse; Railway origin is not a standalone web app.
 
 ---
 
@@ -90,30 +50,29 @@ Details: [`supabase/README.md`](../supabase/README.md).
 
 | Check | Result |
 |-------|--------|
-| Supabase project | `uoysqfczahqmctbrrizn` (FORZA.EVENTS) |
-| Migrations | `001`–`033` (`031`–`033` driver ratings + FRS allowlist + atomic apply — push before Edge/Railway) |
-| Edge Functions | 23 via `deploy:functions` |
-| Activity hosting | Railway `https://forzaevents.up.railway.app` |
-| Discord application verification | Approved — legal URLs on deploy origin |
-| Discord Activity OAuth | `https://127.0.0.1` + `token-exchange` allowlist |
+| Supabase | `uoysqfczahqmctbrrizn` |
+| Migrations | `001`–`043` — `supabase db push` |
+| Edge | 23 functions, `--no-verify-jwt` |
+| SPA | Railway `https://forzaevents.up.railway.app` |
+| Web | `https://forza.events` (Worker + Caddy) |
+| Activity OAuth | `https://127.0.0.1` |
+| Browser OAuth | `https://forza.events/auth/callback` |
 
-Set **`APP_ORIGIN`** on Railway to the deploy URL (embed cover URLs + Edge CORS). Redeploy frontend after changing env at build time.
+Set **`APP_ORIGIN=https://forza.events`** on Railway (build) and Supabase. Redeploy frontend after changing build-time env.
 
 ---
 
-## Remaining work before pilot sign-off
+## Left open when development stopped
 
-| Task | Where |
+Manual checks that were never closed. Notes, not a plan to resume.
+
+| Note | Where |
 |------|--------|
 | Portal + proxy + bot install | [`DISCORD_PLATFORM.md`](DISCORD_PLATFORM.md#operational-checklist) |
 | Local smoke | [`DEVELOPMENT.md`](DEVELOPMENT.md#testing-checklist) |
 | Full Activity matrix | [`E2E.md`](E2E.md) |
 
-### Pilot goals
-
-- [ ] 3–5 real Forza Discord servers
-- [ ] Hosts publish without manual workarounds
-- [ ] Players discover via Activity, not only embed links
+The original pilot aim was a handful of Forza Discord servers publishing without workarounds.
 
 ---
 
@@ -122,21 +81,22 @@ Set **`APP_ORIGIN`** on Railway to the deploy URL (embed cover URLs + Edge CORS)
 | Symptom | Likely cause | Fix |
 |---------|----------------|-----|
 | Empty Browse (Discord only) | Missing URL mapping or dropped `apikey` | `/supabase` mapping; `createSupabaseFetch`; deploy functions |
-| CORS / preflight failed | Origin not allowlisted | Set `APP_ORIGIN`; add `ALLOWED_CORS_ORIGINS` if needed; redeploy functions |
-| Cover upload 403 | Anon storage writes revoked | Use `upload-cover` Edge Function |
-| `invalid_grant` on Railway in browser | Activity OAuth ≠ web redirect | Use Discord Activity; localhost for dev |
-| Production tab shows gate | By design | Open via App Launcher or embed |
-| OAuth redirect fails | URI mismatch | Match `.env` and Discord portal |
-| `Too many requests` | Rate limit | Wait 1 min; adjust limits only if needed |
-| `seed:events` fails | No service role | `SUPABASE_SERVICE_ROLE_KEY` in `.env` |
-| Publish stuck / 409 `PUBLISH_IN_PROGRESS` | Crashed mid-publish | Wait 5 min (lock TTL) or clear `publish_started_at` on draft row |
-| Double Discord embed after publish | Old code / race before `003` | `db push` + redeploy `publish-event`; delete duplicate message manually |
-| DMs not delivered | Cron not scheduled or missing `NOTIFICATION_CRON_SECRET` | Supabase secret + GitHub Actions secrets (see `.github/workflows/process-notifications.yml`) |
-| Analytics empty / 403 ingest | Missing `ANALYTICS_TRACK_SECRET` on Railway build or Supabase | Set in `.env`, `npm run sync:secrets`, redeploy frontend; check `/analytics` ingest banner locally |
-| `client_events` table missing | Migrations `021`–`026` not pushed | `supabase db push` |
+| CORS / preflight failed | Origin not allowlisted | Set `APP_ORIGIN`; optional `ALLOWED_CORS_ORIGINS`; redeploy functions |
+| Cover upload 403 | Anon storage writes revoked | Use `upload-cover` |
+| `invalid_grant` on Railway hostname | Activity OAuth ≠ that origin | Use Activity or `forza.events` / localhost |
+| Production Railway tab shows gate | By design | App Launcher, embed, or `forza.events` |
+| JS chunk 502 / HTML instead of JS | Worker forwarded `CDN-Loop`/`Host`, or Caddy SPA-fallback on `/assets` | `originHeaders.js`; Caddy `file_server` only for site files; hashed miss must 404 |
+| Realtime fails on `forza.events` | Worker dropped the WebSocket upgrade | `requestForOrigin` (do not `new Request(clone, {headers})`) |
+| OAuth redirect fails | URI mismatch | Match `.env`, portal Redirects, `oauthRedirect.ts` |
+| `Too many requests` | Rate limit or Discord 429 | Wait; mutations 503, public reads stay up |
+| `seed:events` fails | No service role | `SUPABASE_SERVICE_ROLE_KEY` |
+| Publish stuck / 409 `PUBLISH_IN_PROGRESS` | Crashed mid-publish | Wait 5 min or clear `publish_started_at` |
+| DMs not delivered | Cron / secret | `NOTIFICATION_CRON_SECRET` + GitHub Actions (or `scripts/invoke-process-notifications.sh`) |
+| Analytics empty / 403 ingest | Missing `ANALYTICS_TRACK_SECRET` | `.env`, `npm run sync:secrets`, Railway build env |
+| Guest Event Detail all **TBD** ELO | List payload / skipped Edge | `browse-events` `{event_id}` |
 
 ---
 
-## Deferred until after MVP
+## Deferred
 
 See [`BACKLOG.md`](BACKLOG.md) and [`PLAN.md`](PLAN.md#what-is-explicitly-out-of-mvp).

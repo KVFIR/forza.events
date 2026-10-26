@@ -45,8 +45,8 @@ Manual QA matrix aligned with current code behavior (not an abstract checklist).
 | 0.6 | Edge Functions deployed with `--no-verify-jwt` | Invalid Discord token → app `401`; **not** gateway `UNAUTHORIZED_NO_AUTH_HEADER` |
 | 0.7 | Hard refresh Activity after deploy | Old bundle does not mask fixes |
 | 0.10 | Missing hashed `/assets/*.js` | HTTP **404** (not SPA HTML); one auto-reload then chunk error screen with **Try again** |
-| 0.8 | `supabase db push` includes `017`–`019` + `036` + `037` + `040` + `npm run deploy:functions` (`process-notifications`, `save-event`, `publish-event`) | DM outbox + claim RPC live; new-event alert pref column; voice invite column; V2 publish cards; cron can deliver |
-| 0.9 | GitHub Actions `process-notifications` workflow + repo secrets (or minute cron via `scripts/invoke-process-notifications.sh`) | 2h reminders + outbox drain |
+| 0.8 | `supabase db push` (`001`–`043`) + `npm run deploy:functions` | Schema + Edge live (DMs, voice invite, V2 cards, ranked, duplicate cars) |
+| 0.9 | GitHub Actions `process-notifications` (or `scripts/invoke-process-notifications.sh`) | 2h reminders + outbox drain |
 
 ---
 
@@ -124,7 +124,7 @@ Manual QA matrix aligned with current code behavior (not an abstract checklist).
 | Successful join | Leave button; count up; Discord embed updated |
 | Leave before start | Slot freed; embed updated |
 | **After `starts_at`** | Leave disabled; “Registered” / closed |
-| **All groups full** | Button shows **Join waitlist**; 13th joins waitlist (`waitlisted`), not `EVENT_FULL` |
+| All convoys full | Button shows **Join waitlist**; 13th joins waitlist (`waitlisted`), not `EVENT_FULL` |
 | **Host** | No Join; Edit / post-start actions only |
 | **Convoy leader** (host-assigned) | Leader UI; **cannot leave** (`LEADER_CANNOT_LEAVE`) |
 | Join updates profile | `xbox_gamertag` written to `users` |
@@ -134,14 +134,14 @@ Manual QA matrix aligned with current code behavior (not an abstract checklist).
 
 | Condition | Expected |
 |-----------|----------|
-| Full group 1, then join | Row goes to **Waitlist** section; button = **Leave waitlist** |
-| Group 1 has open seats but group 2 is smaller | Next **Join** lands in the **smallest** open group (tie-break lower group number) |
-| Active racer leaves before start | Earliest waitlisted racer auto-promoted into freed group; count steady |
-| Host, every active group full (12/24/36…) | **Add group N** button; picker lists waitlist (if any), active non-leaders from other groups, host (if not already a convoy leader), plus guild search |
-| 12/12, waitlist empty, host adds group 2 (guild pick leader) | `group_count = 2`; new group has leader only; group 1 still full; next **Join** lands in **group 2**; embed shows second group field |
-| Add group confirmed | `group_count++`; leader + oldest queued racers fill the new group (leader-only when waitlist empty); vacated seat in the source group backfills from waitlist; embed gains a per-group field |
-| `group_count = 5` | Add group hidden (`GROUPS_MAXED` if forced); total capacity 60 |
-| Open seat in any active group | Add group hidden (`LOBBY_NOT_FULL` if forced) |
+| Full convoy 1, then join | Row goes to **Waitlist**; button = **Leave waitlist** |
+| Convoy 1 has open seats but convoy 2 is smaller | Next **Join** lands in the **smallest** open convoy (tie-break lower number) |
+| Active racer leaves before start | Earliest waitlisted racer auto-promoted into the freed convoy; count steady |
+| Host, every active convoy full (12/24/36…) | **Add convoy N**; picker lists waitlist (if any), active non-leaders from other convoys, host (if not already a convoy leader), plus guild search |
+| 12/12, waitlist empty, host adds convoy 2 (guild pick leader) | `group_count = 2`; new convoy has leader only; convoy 1 still full; next **Join** lands in **convoy 2**; card shows second convoy field |
+| Add convoy confirmed | `group_count++`; leader + oldest queued racers fill the new convoy (leader-only when waitlist empty); vacated seat in the source convoy backfills from waitlist |
+| `group_count = 5` | Add convoy hidden (`GROUPS_MAXED` if forced); total capacity 60 |
+| Open seat in any active convoy | Add convoy hidden (`LOBBY_NOT_FULL` if forced) |
 
 ### Change convoy leader (published, host)
 
@@ -157,12 +157,12 @@ Manual QA matrix aligned with current code behavior (not an abstract checklist).
 | Same leader picked again | `unchanged: true`; no DMs, no embed churn |
 | After `starts_at` | **Change leader** hidden; API `REGISTRATION_AFTER_START` |
 
-### Balance groups (published, host, `group_count` ≥ 2)
+### Reorganize convoys (published, host, `groupCount` ≥ 2)
 
 | Condition | Expected |
 |-----------|----------|
-| Host, before `starts_at`, 2+ groups, roster action available | **Reorganize groups** opens a confirmation modal; warns that moved racers get a Discord DM |
-| Uneven sizes + 2+ drivers | Modal offers **Balance groups** and **Shuffle** |
+| Host, before or after `starts_at` until finalized, 2+ convoys | **Reorganize convoys** always visible; disabled grey + tip when no safe plan; modal ChoiceRow (no copy about DMs) |
+| Uneven sizes + 2+ drivers | Modal offers **Balance** and **Shuffle** (`balance_shuffle` only when shuffle-after-balance succeeds) |
 | Even sizes, 2+ drivers | Modal offers **Shuffle** only with confirm button |
 | Balance / shuffle confirmed | Leaders stay; roster updates; DMs to moved racers |
 | Already balanced | `unchanged: true`; no DMs |
@@ -173,9 +173,9 @@ Manual QA matrix aligned with current code behavior (not an abstract checklist).
 
 - [ ] Hero cover (16:9 band); default by event type.
 - [ ] Organiser: real server name, not placeholder `Server`.
-- [ ] Roster: per-group sections (leader + drivers) with `n/12`, then a Waitlist section with queue positions; Xbox lobby hint when not leader. Guests see Xbox gamertag only (no Discord `@handle`); signed-in viewers still see the handle under the GT.
+- [ ] Roster: per-convoy sections (leader + drivers) with `n/12`, then Waitlist with queue positions. Xbox join hint only for **active** (non-waitlisted) joined racers, naming **their** convoy leader. Guests see Xbox GT only; signed-in viewers see `@handle` under the GT.
 - [ ] Track codes, car rules, tuning restrictions, optional description text.
-- [ ] **Join voice** when the host set a gathering voice channel (opens a `discord.gg` invite to that VC so non-members can join the server + voice; label is `#channel-name` when known); hidden after cancel/completed/archived.
+- [ ] **Join voice** when the host set a gathering voice channel (`discord.gg` invite so non-members join the server + VC; speaker icon + cached channel name, not `#`); hidden after cancel/completed/archived.
 - [ ] Realtime: second client join → roster and count update without F5.
 
 ### Back navigation (`location.state.from`)
@@ -235,7 +235,7 @@ Manual QA matrix aligned with current code behavior (not an abstract checklist).
 
 **Steps:** Event → Publish.
 
-**Persistence:** manual save only (no autosave / WIP / leave guard).
+**Persistence:** manual save only (no autosave / WIP / leave guard). **Save as draft** navigates to `/event/{slug}`.
 
 ### Event step
 
@@ -244,7 +244,7 @@ Manual QA matrix aligned with current code behavior (not an abstract checklist).
 - [ ] Game: FH5 | FH6 (default FH6); changing game clears restricted cars; car search scoped to game; locked after publish.
 - [ ] Cover: default → custom → compress 16:9.
 - [ ] Cover upload **after** first draft save (`upload-cover` + `guild_id`).
-- [ ] **Save as draft** → My Events.
+- [ ] **Save as draft** → Event Detail (`/event/{slug}`).
 - [ ] **Continue to publish** → Publish step.
 
 ### Publish step
@@ -258,10 +258,10 @@ Manual QA matrix aligned with current code behavior (not an abstract checklist).
 | **Target** | Guild change → channels load after guild list; channel re-validate; voice channel list from same `list-channels` (`voice_channels`); optional, cleared on guild change |
 | **Target** | Rate limit / transient API error → saved channel **not** cleared on re-open `?edit=` |
 | **Target** | No Manage Server → forbidden with clear copy |
-| **Ranked** | Create step 2 (after server): toggle when allowlisted + road/dirt. Published edit (before start): same toggle under locked target summary. Save can flip ranked on/off until start. |
+| **Ranked** | Create Publish step (after server): toggle when allowlisted + road/dirt. **Locked after publish** (`RANKED_LOCKED`); summary still shows the mark. |
 | **Convoy** | Self (host gamertag) vs `list-guild-members` picker |
-| **Publish** | Save as draft **without leaving** Publish step |
-| **Publish** | Save draft without channel → OK; My Events from Event step |
+| **Publish** | Save as draft without channel → OK; lands on Event Detail |
+| **Publish** | Save draft from Event step → Event Detail; appears in My Events |
 | **Publish** | Publish blocked without channel / leader / cars (restricted) |
 | **Publish** | Publish modal if channel skipped |
 | **Publish** | Success: V2 card in channel (Join + Open); guild/channel locked |
@@ -290,7 +290,7 @@ Manual QA matrix aligned with current code behavior (not an abstract checklist).
 | **Hosted** | Own events + drafts |
 | **Joined** | Any roster row (incl. waitlist, host-assigned leader, and **host on the roster**); **no drafts** |
 | **Joined — host-assigned leader** | Host picks viewer as convoy leader → event appears in **Joined** / **All** without manual refresh (realtime refetch); **Leave** blocked; convoy-leader Xbox hint on Detail |
-| **Joined — waitlist** | Full lobby join → event in **Joined**; card shows **Waitlisted** badge; **Leave waitlist** works |
+| **Joined — waitlist** | Full lobby join → event in **Joined**; Event Detail **Leave waitlist** (cards omit a Waitlisted badge) |
 | Cancelled | Hidden by default; **Cancelled** chip shows only cancelled |
 | Sort | Same keys as Browse (event date / fill); drafts stay on top |
 | Drafts API fail | Warning; published list still loads |
@@ -317,12 +317,12 @@ Verify **in channel** after each action:
 
 | Action | Embed |
 |--------|--------|
-| Publish | Title, date, optional **Voice** mention, tracks, cars/rules, **n/12**, leader, cover, Register button; **Ranked** field when `is_ranked` |
+| Publish | Title, date, optional **Voice**, tracks, cars/rules, **n/12**, leader, cover; **Join event** + **Open in FORZA.EVENTS**; Ranked mark when `is_ranked` |
 | Join / leave | Participant count |
 | Save published | Fields updated |
-| Cancel | CANCELLED, grey, button disabled |
-| Submit results | COMPLETED, button relabelled |
-| After `starts_at` | LIVE; registration closed in copy; **View** button still enabled |
+| Cancel | Grey V2 card; Join gone, Open stays |
+| Submit results | Completed; **View results** ephemeral standings |
+| After `starts_at` | LIVE; Join gone; Open stays |
 | Full lobby | 12/12 consistent with Activity |
 
 **Negative:** message deleted in Discord → app does not crash; Edge logs `{ok:false}` for ops.
@@ -386,7 +386,7 @@ At least one mapped message per screen:
 | Host group full (lobby) | Last open seat in the **last** group fills (all groups full) | Host gets **group filled** DM for that group |
 | Cancel | Host cancels published event | Active + waitlist get cancel DM; pending 2h reminders skipped; **host does not** |
 | Published edit | Host changes date/time, tracks, and/or cars → **Save & notify** | Active racers get update DM; waitlist too when **date/time** changes |
-| Add group (empty waitlist) | Host adds group with guild leader | New leader gets **convoy leader assigned** DM |
+| Add convoy (empty waitlist) | Host adds convoy with guild leader | New leader gets **convoy leader assigned** DM |
 | DM buttons | Open a transactional DM | **Open in FORZA.EVENTS** launches the Activity; **Open in browser** opens `forza.events/event/{slug}` |
 | 2h reminder | Event starts in ~2h (cron running) | Active racers + host get soon DM; **Voice** join link when a gathering VC is set; reschedule changes dedupe |
 | Browse subscribe (guest) | Browse as guest | No new-event alerts row; enable from Profile after sign-in |

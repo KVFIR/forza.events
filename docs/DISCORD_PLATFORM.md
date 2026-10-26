@@ -1,159 +1,112 @@
 # Discord Activity reference
 
-Last updated: 2026-08-18
+Last updated: 2026-09-15
 
-## What matters for FORZA.EVENTS
+- Primary surface is a **Discord Activity** (iframe + `@discord/embedded-app-sdk`). `https://forza.events` is a guest browser showcase; the raw Railway hostname is not.
+- Server-side: Supabase Edge Functions + bot token for guild/channel APIs and card posts.
+- Interactions Endpoint handles embed buttons → `LAUNCH_ACTIVITY` / join / results.
 
-- FORZA.EVENTS is a **Discord Activity**, not a standalone website in production.
-- The UI runs in an iframe; Discord talks to the app via `@discord/embedded-app-sdk`.
-- Server-side: Supabase Edge Functions + bot token for guild/channel APIs and embed posts.
-- Interactions Endpoint handles embed button → `LAUNCH_ACTIVITY`.
-
-## Application verification
-
-Discord **application verification** is **approved** (2026-05-31). Terms and Privacy URLs on the deploy origin (`APP_ORIGIN`) must stay reachable and match what is set in Developer Portal → **General Information** — see [Legal URLs](#legal-urls-app-verification) below.
+Application verification is **approved** (2026-05-31). Terms and Privacy on `APP_ORIGIN` must stay reachable and match Developer Portal → **General Information**.
 
 ## Entry paths
 
 1. **App Launcher** — primary discovery inside Discord.
-2. **Published event embed** — `Open in FORZA.EVENTS` → `LAUNCH_ACTIVITY` (type `12`) + `launch_intents` fallback.
+2. **Published event card** — `Open in FORZA.EVENTS` → `LAUNCH_ACTIVITY` (type `12`) + `launch_intents` fallback; `join_event:{uuid}` joins in-channel.
 
-Also supported by Discord: voice channels, DMs, group DMs (guild context may be null — `launch_intents.guild_id` is nullable).
+Also: voice channels, DMs, group DMs (`launch_intents.guild_id` may be null).
 
 ## Rich Presence
 
-Custom profile status while the Activity is open uses Embedded App SDK `setActivity()` (see [`src/lib/discordRichPresence.ts`](../src/lib/discordRichPresence.ts)).
+SDK `setActivity()` — [`src/lib/discordRichPresence.ts`](../src/lib/discordRichPresence.ts). Scope `rpc.activities.write`. Copy is always **English**. Event line includes role/status and `n/N` when published (`party.size` too). Image URLs use `VITE_APP_ORIGIN`. Type RPC `5` (Competing). Sync runs only in the Activity iframe. After a scope change, re-open the Activity so Discord re-issues the token.
 
-| Requirement | Notes |
-|-------------|--------|
-| OAuth scope | `rpc.activities.write` — included in Activity `authorize()` (`DISCORD_ACTIVITY_OAUTH_SCOPES`) |
-| When it updates | Route changes + **Event Detail** / **Results** / **Create** (draft title) screen overrides |
-| Copy | Always **English** on the profile (`RICH_PRESENCE_EN` in `discordRichPresence.ts`) — UI locale does not affect Rich Presence; event types use `eventTypeLabelEn()` → `en.json` `eventTypes` |
-| Event state line | Role (`Hosting`, `Registered`) or status (`Event full`, `Race in progress`, …) with `n/12` suffix when the event is published to Discord (`discordMessageId`); same count in `party.size` for clients that render it |
-| Assets | URLs use `VITE_APP_ORIGIN` when set (Discord fetches server-side), else iframe origin — `/logo/logo.png`, bundled `/covers/*` |
-| Activity type | RPC `5` (Competing) |
-| Localhost | Rich Presence sync runs only in the Activity iframe (`isDiscordActivityFrame()`), not in a standalone browser tab |
-
-After deploying a scope change, users may need to **re-open** the Activity (or use in-app auth retry) so Discord re-issues a token with `rpc.activities.write`.
-
-## Auth flow (matches Discord docs)
+## Auth (Activity)
 
 1. `await sdk.ready()`
 2. `sdk.commands.authorize({ client_id, response_type: 'code', scope: ['identify','guilds','rpc.activities.write'], prompt: 'none' })`
-3. Backend `token-exchange` exchanges `code` for `access_token` (+ `refresh_token` / `expires_in`; with allowlisted `redirect_uri`) — or refreshes via `{refresh_token}`
+3. `token-exchange` (`code` + allowlisted `redirect_uri`, or `{refresh_token}`)
 4. `sdk.commands.authenticate({ access_token })`
 
-Activity redirect URI in portal: **`https://127.0.0.1`** (not the Railway deploy URL).
+Activity redirect: **`https://127.0.0.1`**. Browser: `http://localhost:5180/auth/callback` and `https://forza.events/auth/callback` (`oauthRedirect.ts`).
 
-Local browser dev: `http://localhost:5180/auth/callback`. Production browser web: `https://forza.events/auth/callback` (requires `DISCORD_REDIRECT_URI` or `APP_ORIGIN` on Supabase — see `oauthRedirect.ts`).
+## Layout modes
 
-## Layout modes (focused / PIP / grid)
-
-When users minimize the Activity, Discord sends `ACTIVITY_LAYOUT_MODE_UPDATE` (`subscribeDiscordLayoutMode` → `DiscordLayoutProvider`).
-
-| `layout_mode` | UX in FORZA.EVENTS |
-|---------------|---------------------|
-| **0 — focused** | Full app (browse, create, profile, event detail) |
-| **1 — PIP** | Centered FORZA.EVENTS logo only — expand the activity for controls |
-| **2 — grid** | Full app (same as focused) |
-
-We do **not** call `setOrientationLockState` — the activity follows the device orientation (portrait on phones is allowed). Logo-only mode is **not** inferred from viewport size.
+`ACTIVITY_LAYOUT_MODE_UPDATE` → `DiscordLayoutProvider`. **0 focused** / **2 grid** = full app. **1 PIP** = centered logo only. We do **not** call `setOrientationLockState`. Logo-only is not inferred from viewport size.
 
 ## Networking (Activity proxy)
 
-Activities are served through Discord’s proxy (`*.discordsays.com`).
+Served through `*.discordsays.com`.
 
 | Requirement | Implementation |
 |-------------|----------------|
 | URL mapping | Prefix `/supabase` → `<project-ref>.supabase.co` (no `https://`, no `/.proxy/` in prefix) |
 | Client rewrite | `patchUrlMappings` in `src/lib/discordUrlProxy.ts` |
-| Dropped headers | `createSupabaseFetch(anonKey)` re-applies `apikey` and `Authorization` on every request |
-| Cover images in UI | Discord CSP `img-src` blocks `*.supabase.co`; `coverDisplayUrl()` rewrites Storage URLs to `/supabase/...` (same-origin) |
-| Browse in iframe | Prefer **`browse-events`** Edge Function over raw PostgREST |
+| Dropped headers | `createSupabaseFetch(anonKey)` re-applies `apikey` and `Authorization` |
+| Cover `<img>` | `coverDisplayUrl()` rewrites Storage URLs to `/supabase/...` (CSP blocks `*.supabase.co`) |
+| Browse | Prefer **`browse-events`** over raw PostgREST |
 
-Edge Function **CORS** allows origins: `APP_ORIGIN`, `*.discordsays.com`, `*.discord.com`, localhost dev ports, optional `ALLOWED_CORS_ORIGINS`. Requests without a matching `Origin` do not get `Access-Control-Allow-Origin` (intentional).
+Edge CORS: `APP_ORIGIN`, `*.discordsays.com`, `*.discord.com`, localhost ports, optional `ALLOWED_CORS_ORIGINS`. No matching `Origin` → no `Access-Control-Allow-Origin`.
+
+Browser web on `forza.events` uses the Cloudflare Worker (`/supabase/*`, OG, sitemap) — [`DEVELOPMENT.md`](DEVELOPMENT.md#regional-access).
 
 ## Interactions Endpoint
-
-URL:
 
 ```text
 https://<project-ref>.supabase.co/functions/v1/interactions-endpoint
 ```
 
-- Verifies `X-Signature-Ed25519` + `X-Signature-Timestamp` with `DISCORD_PUBLIC_KEY`
-- PING → `{ "type": 1 }`
-- Button `open_event:{uuid}` → `{ "type": 12 }` + optional `launch_intents` row
-- Button `open_app` → `{ "type": 12 }` (welcome / open Activity, no event)
-- Button `view_results:{uuid}` (also `open_event:{uuid}:results`) → ephemeral standings
-- Button `join_event:{uuid}` → gamertag modal (or join if `users.xbox_gamertag` is set) → same roster path as `event-participation`; ephemeral receipt has `leave_event:{uuid}` (updates that ephemeral, not the public card)
+Verifies Ed25519 with `DISCORD_PUBLIC_KEY`. PING → `{ type: 1 }`. Buttons: `open_event:{uuid}` → type 12 + optional `launch_intents`; `open_app` → type 12 (no event); `view_results:{uuid}` → ephemeral standings; `join_event:{uuid}` → same roster path as Activity (gamertag modal if needed); receipt includes `leave_event:{uuid}`.
 
-New publishes post **Components V2** (`flags` `1 << 15`). Pre-`040` messages stay classic embeds (`events.discord_components_v2` is false).
+New publishes use **Components V2**. Pre-`040` messages stay classic embeds. No CORS — Discord server-to-server only.
 
-No CORS — Discord server-to-server only.
-
-## Publish target (host)
+## Publish target
 
 | Step | API |
 |------|-----|
-| Servers (user ∩ bot) | `list-guilds` |
-| Channels (bot can post) | `list-channels` |
-| Validate selection | `validate-channel` |
-| Post embed | `publish-event` |
+| Servers (user ∩ bot, Manage Server / Administrator / owner) | `list-guilds` |
+| Postable text + visible voice | `list-channels` |
+| Validate | `validate-channel` |
+| Post card | `publish-event` |
 
-Host must be guild member with **Manage Server** (or Administrator), including via a role on a server they do not own. OAuth guild `permissions` can miss owner bits and 2FA-stripped Manage Server — `list-guilds` checks `owner` then recovers remaining bot guilds serially via member+roles; `requireManageGuildAccess` does the same for the selected guild (Discord 429 stays 429, not 403). Server re-validates channel permissions (bot View Channel, Send Messages, Embed Links).
+OAuth guild `permissions` can miss owner bits and 2FA-stripped Manage Server — recover via `owner` then bot member+roles; Discord 429 stays 429, not 403. Bot needs View Channel, Send Messages, Embed Links, **Create Invite** (channel invite + gathering-VC invite).
 
-**Bot install:** `scope=bot`, **Requires OAuth2 Code Grant = OFF**. User-install alone does not create a publish target.
+**Bot install:** `scope=bot`, **Requires OAuth2 Code Grant = OFF**. User-install alone is not a publish target.
 
 ## Operational checklist
 
-[Discord Developer Portal](https://discord.com/developers/applications):
+[Developer Portal](https://discord.com/developers/applications):
 
-1. **Activities enabled** — App Launcher + `LAUNCH_ACTIVITY`.
-2. **Activity URL Mapping** — `https://forzaevents.up.railway.app` (must match Railway `APP_ORIGIN`).
-3. **Second mapping** — `/supabase` → `<project-ref>.supabase.co`.
-4. **OAuth2 Redirects**
-   - `https://127.0.0.1` — Activity (required)
-   - `http://localhost:5180/auth/callback` — optional local browser dev
-5. **Interactions Endpoint URL** — see above.
-6. **Bot** — token in Supabase secrets; Code Grant off.
-7. **Privileged Gateway Intent: Server Members** — required for `list-guild-members` (convoy leader search when creating events).
-8. **Install in pilot guilds** — bot must be in server before `list-guilds` returns it.
-9. **Channel permissions** — bot can post in chosen announcement channels.
+1. Activities enabled — App Launcher + `LAUNCH_ACTIVITY`.
+2. Activity URL Mapping — where the SPA loads (`https://forza.events` or Railway) plus `/supabase` → `<project-ref>.supabase.co`.
+3. OAuth2 Redirects: `https://127.0.0.1`, `https://forza.events/auth/callback`, `http://localhost:5180/auth/callback`.
+4. Interactions Endpoint URL (above).
+5. Bot token in Supabase secrets; Code Grant off; **Server Members** intent (convoy leader / results guest search).
+6. Install the bot in pilot guilds; channel permissions include **Create Invite**.
 
-### Supabase / Railway
+### Supabase / Railway / Worker
 
-- `npm run sync:secrets` — Discord secrets
-- `npm run deploy:functions` — all Edge functions (incl. `list-guild-members`), `--no-verify-jwt`
-- `supabase db push` — migrations `001`–`006`
-- Railway: `APP_ORIGIN` = deploy URL; rebuild frontend after env changes
+- `npm run sync:secrets`
+- `supabase db push` (`001`–`043`)
+- `npm run deploy:functions` (`--no-verify-jwt`)
+- Railway `APP_ORIGIN=https://forza.events`; rebuild after env changes
+- `npm run deploy:cf-worker` after Worker / Caddy cache changes (Caddy first)
 
-### Legal URLs (app verification)
-
-Configured in Developer Portal → **General Information** (verification **approved** 2026-05-31). Keep URLs in sync if `APP_ORIGIN` changes:
+### Legal URLs
 
 | Field | URL |
 |-------|-----|
-| Terms of Service | `https://<APP_ORIGIN>/terms` |
-| Privacy Policy | `https://<APP_ORIGIN>/privacy` |
+| Terms of Service | `https://forza.events/terms` |
+| Privacy Policy | `https://forza.events/privacy` |
 
-Production example: `https://forzaevents.up.railway.app/terms` and `/privacy`. These paths load in a normal browser tab without the Discord-only gate (`publicLegalPaths` in `src/lib/publicLegalPaths.ts`) and are linked from Profile inside the Activity. Optional build-time: `VITE_LEGAL_CONTACT_EMAIL` (default `rudolfs@oas.lv`), `VITE_LEGAL_OPERATOR_NAME` (individual controller in Latvia).
+These paths skip `DiscordOnlyGate`. Optional build-time: `VITE_LEGAL_CONTACT_EMAIL`, `VITE_LEGAL_OPERATOR_NAME`.
 
 ### Validate in Discord
 
-Use the full manual matrix in [`E2E.md`](E2E.md) (P0 sections: infra, auth, deep link, publish target, embed sync, join rules). Minimum smoke: auth → browse → publish → embed button → join/leave count on embed → Rich Presence on profile.
+[`E2E.md`](E2E.md) P0: infra, auth, deep link, publish target, embed sync, join. Minimum smoke: auth → browse → publish → card button → join/leave count on card → Rich Presence.
 
 ## Out of MVP
 
-Reminders, threads, participant roles, scheduled bot jobs — see [`PLAN.md`](PLAN.md).
+Threads, participant roles, always-on bot jobs — [`PLAN.md`](PLAN.md), [`BACKLOG.md`](BACKLOG.md).
 
 ## Links
 
-- [`PLAN.md`](PLAN.md) — product contract
-- [`PILOT_COMMUNITY.md`](PILOT_COMMUNITY.md) — pilot Discord server setup (channels, roles, onboarding)
-- [`STATUS.md`](STATUS.md) — implementation state
-- [`DEVELOPMENT.md`](DEVELOPMENT.md) — local workflow
-- [`E2E.md`](E2E.md) — Activity manual QA matrix
-- [`AGENTS.md`](../AGENTS.md) — agent implementation notes
-- [Embedded App SDK](https://github.com/discord/embedded-app-sdk)
-- [Discord API — Interactions](https://discord.com/developers/docs/interactions/overview)
+[`PLAN.md`](PLAN.md) · [`PILOT_COMMUNITY.md`](PILOT_COMMUNITY.md) · [`STATUS.md`](STATUS.md) · [`DEVELOPMENT.md`](DEVELOPMENT.md) · [`E2E.md`](E2E.md) · [`AGENTS.md`](../AGENTS.md) · [Embedded App SDK](https://github.com/discord/embedded-app-sdk) · [Interactions](https://discord.com/developers/docs/interactions/overview)

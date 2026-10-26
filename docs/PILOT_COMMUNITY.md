@@ -1,117 +1,61 @@
 # Pilot community server
 
-Last updated: 2026-08-16
+Last updated: 2026-09-15
 
-Recorded setup for the **FORZA.EVENTS** support / pilot Discord server (**Forza Racing Series**).
+**Forza Racing Series** — support / pilot Discord for FORZA.EVENTS.
 
-**Related:** [`DISCORD_PLATFORM.md`](DISCORD_PLATFORM.md) · [`PLAN.md`](PLAN.md) · [`BACKLOG.md`](BACKLOG.md)
+[`DISCORD_PLATFORM.md`](DISCORD_PLATFORM.md) · [`PLAN.md`](PLAN.md) · [`BACKLOG.md`](BACKLOG.md)
 
----
+## Guild
 
-## Guild ID
+| | |
+|--|--|
+| **Server** | Forza Racing Series |
+| **`guild_id`** | `925000150638809178` |
+| **Invite** | `https://discord.gg/hx4X9YdE46` — keep in sync with `discord_guilds.settings.invite_url` and `SUPPORT_GUILD_INVITE_URL` (`src/lib/discordInstall.ts`) |
 
-| Server | `guild_id` |
-|--------|------------|
-| **Forza Racing Series** (pilot) | `925000150638809178` |
+Ranked allowlist: migration `032` seeds this id into `rating_enabled_guilds`.
 
-Public invite (DM-reachability CTA + Join server): `https://discord.gg/hx4X9YdE46` — keep in sync with `discord_guilds.settings.invite_url` and `SUPPORT_GUILD_INVITE_URL` in `src/lib/discordInstall.ts`.
+Publish: host with **Manage Server**; bot needs View Channel, Send Messages, Embed Links, Create Invite in `#forza-events`. No auto role ping, reminders-as-bot, or event threads (Edge DMs still send). Optional `ping_role_id` on publish is backlog.
 
-Ranked allowlist: migration `032` inserts this id into `rating_enabled_guilds`.
-
----
-
-## Product context
-
-| Item | State |
-|------|--------|
-| Game | Forza Horizon 6 only |
-| Event types in app | `road`, `dirt`, `cruise` |
-| Race feed | `#forza-events` — FORZA.EVENTS bot embed target |
-| Publish | Host with **Manage Server**; bot needs View Channel, Send Messages, Embed Links in target channel |
-| MVP | No auto role ping on publish, no reminders, no event threads ([`PLAN.md`](PLAN.md), [`BACKLOG.md`](BACKLOG.md) §4) |
-| Planned | Optional `ping_role_id` on publish — one role mention in message `content`, no re-ping on embed sync |
-
----
-
-## Server channels
+## Channels
 
 | Category | Channels |
 |----------|----------|
 | INFO | `#welcome`, `#rules`, `#правила`, `#announcements`, `#объявления` |
-| EVENTS | `#forza-events`, `#hall-of-fame` |
+| EVENTS | `#forza-events` (app card target), `#hall-of-fame` |
 | COMMUNITY | `#general`, `#ru-chat`, `#gallery`, `#forza-news`, voice |
 | ARCHIVE | `#fm-events`, `#fh5-events` — `@everyone` View denied |
-| STAFF | `#backstage`, admin/mod channels |
-
----
+| STAFF | `#backstage`, admin/mod |
 
 ## Roles
 
 | Role | Assignment | Function |
 |------|------------|----------|
-| **EN** | Onboarding Q1 | `#rules`, `#announcements`, `#general` |
-| **RU** | Onboarding Q1 | `#правила`, `#объявления`, `#ru-chat` |
-| **FH6 events** | Onboarding Q2 (optional) | Ping for all race announcements |
-| **Play with streamer** | Onboarding Q2 (optional) | Ping for streamer-hosted races only |
-| **Crew** | Manual | Event prep; access `#backstage` |
+| **EN** / **RU** | Onboarding Q1 | Language channels |
+| **FH6 events** | Onboarding Q2 (optional) | Ping for race announcements |
+| **Play with streamer** | Onboarding Q2 (optional) | Streamer-hosted races |
+| **Crew** | Manual | `#backstage` event prep |
 | **Host** | Manual | Publish in FORZA.EVENTS |
-| **FM events, FH5 events, FM featured multiplayer, Ready for practice** | Legacy | Not in onboarding; kept for existing members |
+| Legacy FM/FH5/practice roles | Existing members | Not in onboarding |
 
-Onboarding does **not** assign game roles (FH5/FM) or format roles (Competitive/Casual).
+`#forza-events` is visible to everyone; `FH6 events` does not gate the channel.
 
----
+**Onboarding:** language (required) → optional event pings (multi-select). Default channels: `#welcome`, `#forza-events`, `#hall-of-fame`, `#gallery`, `#forza-news`, voice (+ `#general` if EN-default).
 
-## Onboarding
-
-**Default channels:** `#welcome`, `#forza-events`, `#hall-of-fame`, `#gallery`, `#forza-news`, voice (+ `#general` if EN-default).
-
-| # | Question | Required | Outcome |
-|---|----------|----------|---------|
-| 1 | Language | Yes | EN or RU role + language channels |
-| 2 | Event pings | No | `FH6 events` and/or `Play with streamer` (multiple allowed) |
-
-`FH6 events` does not gate channels — `#forza-events` is visible to all.
-
----
-
-## Rules (server copy)
-
-Rules §1 (respect) and §2 (clean racing): enforcement may include Discord moderation **and** a **FORZA.EVENTS platform ban** (wording: “may” until product enforcement exists).
-
----
+Rules §1–§2: Discord moderation and a possible FORZA.EVENTS platform ban (“may” until product enforcement exists).
 
 ## Event operations
 
-**Recurring schedule:** two weekly slots — **Road** (competitive), **Cruise** (community).
+Two weekly slots: **Road** (competitive), **Cruise** (community). App supports FH5 and FH6.
 
-**Announcement flow:**
-
-1. Publish in FORZA.EVENTS → embed in `#forza-events`.
-2. Discord Scheduled Event per race; time mirrored in `#announcements` / `#объявления`.
-3. Pings: `@FH6 events` on publish (manual reply under embed until publish role ping ships) and T-24h in announcements; streamer races also `@Play with streamer`. No `@everyone`.
-
-**Post-race:** results → `#hall-of-fame`; media → `#gallery`.
-
-**Until publish role ping ships:** after publish, reply under embed with `@FH6 events` (+ `@Play with streamer` for streamer races).
-
----
+1. Publish in FORZA.EVENTS → card in `#forza-events`.
+2. Discord Scheduled Event; time mirrored in `#announcements` / `#объявления`.
+3. Pings: reply `@FH6 events` under the card (and `@Play with streamer` when relevant) until publish role ping ships. T-24h in announcements. No `@everyone`.
+4. Post-race: results → `#hall-of-fame`; media → `#gallery`.
 
 ## Launch sequence
 
-| Phase | Criteria |
-|-------|----------|
-| Foundation | Onboarding live; bot installed; `#forza-events` permissions; publish → join E2E verified |
-| Seed | Future events published in app; Crew in `#backstage` |
-| Warm-up | Closed races with core group completed |
-| Reactivation | EN + RU announcement; one-time legacy role ping; `@FH6 events` CTA |
-| Ritual | Fixed weekly slot days/times |
+Foundation (onboarding + bot + `#forza-events` + publish→join E2E) → Seed (future events, Crew in `#backstage`) → Warm-up (closed races) → Reactivation (EN+RU announcement, legacy role ping) → Ritual (fixed weekly slots).
 
----
-
-## Crew / backstage
-
-| Item | Value |
-|------|--------|
-| Role name | **Crew** |
-| Channel | `#backstage` |
-| Scope | Tracks, car lists, PI, tunes, weekly templates — prep only, not public LFG |
+**Crew / `#backstage`:** tracks, car lists, PI, tunes, weekly templates — prep only, not public LFG.

@@ -22,7 +22,7 @@ Success means players discover and join through the Activity (and related embeds
 
 ## Positioning
 
-Activity-first Discord app with a **global public browse feed** across servers, plus a publish loop that posts a Discord embed and opens back into the Activity. A neighboring product that is only a website, only a bot, or only a single-server calendar could not truthfully claim this loop.
+Activity-first Discord app with a **global public browse feed** across servers, plus a publish loop that posts a Discord card and opens back into the Activity. A neighboring product that is only a website, only a bot, or only a single-server calendar could not truthfully claim this loop.
 
 ## Operating Context
 
@@ -59,7 +59,7 @@ Activity-first Discord app with a **global public browse feed** across servers, 
 
 - Live product: Discord Activity + `https://forza.events` guest showcase; production Supabase + Railway hosting.
 - Brand assets: `public/logo/`, `public/covers/`, `public/og/site.webp`.
-- Product contract docs: `docs/PLAN.md` (frozen MVP), `docs/STATUS.md`, `docs/E2E.md`, `AGENTS.md`.
+- Product contract docs: `docs/PLAN.md`, `docs/STATUS.md`, `docs/E2E.md`, `AGENTS.md`.
 - Do **not** fabricate testimonials, pilot community quotes, benchmarks, or pricing claims.
 
 ## Product Principles

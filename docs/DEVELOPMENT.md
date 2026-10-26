@@ -1,6 +1,6 @@
 # Local development guide
 
-English UI with optional Russian (`EN | RU` on Profile). This document describes how to run and test FORZA.EVENTS against a real Supabase backend.
+English UI with optional Russian (`EN | RU` on Profile). Run against a real Supabase project — there is no mock mode.
 
 See also: [`STATUS.md`](STATUS.md), [`PLAN.md`](PLAN.md), [`DISCORD_PLATFORM.md`](DISCORD_PLATFORM.md), [`E2E.md`](E2E.md), [`.env.example`](../.env.example), [`AGENTS.md`](../AGENTS.md).
 
@@ -10,24 +10,18 @@ See also: [`STATUS.md`](STATUS.md), [`PLAN.md`](PLAN.md), [`DISCORD_PLATFORM.md`
 
 ```bash
 cp .env.example .env
-# Fill DISCORD_* and SUPABASE_* (see below)
+# Fill DISCORD_* and SUPABASE_*
 npm install
 npm run dev
 ```
 
-### CI checks (before push)
-
 ```bash
-npm run typecheck
-npm run test
-npm run build
+npm run typecheck && npm run lint && npm run test && npm run build
 ```
 
-GitHub Actions runs the same on every push/PR to `main` / `master`.
+Open http://localhost:5180 — Browse / Event Detail / Ladder work as a guest. **Sign in with Discord** (navbar pill or soft-gate) for join / create / publish.
 
-Open http://localhost:5180 → tap the auth status pill in the **navbar** (or Profile) to **Sign in with Discord** before using the app (Browse, Event Detail, join/create/publish).
-
-**Analytics dashboard (local only):** set `ANALYTICS_DASHBOARD_SECRET` in `.env`, run `npm run sync:secrets`, `supabase db push` (migrations `021`–`024`, `026`, `041`), deploy functions, then open http://localhost:5180/analytics — no Discord sign-in required. The Brief tab classifies API errors (Activity vs localhost noise). Set `ANALYTICS_TRACK_SECRET` in `.env` / Railway build env so prod ingest is not rejected. Retention: daily GitHub Action `.github/workflows/prune-client-analytics.yml` (or `bash scripts/invoke-prune-client-analytics.sh`).
+**Analytics (local only):** `ANALYTICS_DASHBOARD_SECRET` in `.env`, `npm run sync:secrets`, `supabase db push`, deploy functions → http://localhost:5180/analytics (no Discord sign-in). Brief tab classifies API errors. Prod ingest needs `ANALYTICS_TRACK_SECRET` on Railway build. Retention: `.github/workflows/prune-client-analytics.yml`.
 
 ---
 
@@ -37,121 +31,88 @@ Open http://localhost:5180 → tap the auth status pill in the **navbar** (or Pr
 
 | Variable | Source |
 |----------|--------|
-| `DISCORD_CLIENT_ID` | Discord Developer Portal → Application ID |
+| `DISCORD_CLIENT_ID` | Developer Portal → Application ID |
 | `DISCORD_CLIENT_SECRET` | OAuth2 → Client Secret |
 | `DISCORD_PUBLIC_KEY` | General Information → Public Key |
 | `DISCORD_BOT_TOKEN` | Bot → Token |
-| `SUPABASE_URL` | Supabase → Project Settings → API |
-| `SUPABASE_ANON_KEY` | Same page → `anon` / publishable key |
+| `SUPABASE_URL` | Project Settings → API |
+| `SUPABASE_ANON_KEY` | Same page → `anon` key |
 
-Vite maps `DISCORD_CLIENT_ID`, `SUPABASE_URL`, and `SUPABASE_ANON_KEY` at build time (see `vite.config.ts`).
+Vite inlines `DISCORD_CLIENT_ID`, `SUPABASE_URL`, and `SUPABASE_ANON_KEY` at build time.
 
-### Localhost browser OAuth
+### Browser OAuth
 
 | Variable | Value |
 |----------|--------|
-| `DISCORD_REDIRECT_URI` | `http://localhost:5180/auth/callback` |
+| `DISCORD_REDIRECT_URI` | `http://localhost:5180/auth/callback` (local) or `https://forza.events/auth/callback` (prod) |
 
-Add the same URL under Discord → OAuth2 → Redirects.
+Add the same URLs under Discord → OAuth2 → Redirects. `token-exchange` allowlists `DISCORD_REDIRECT_URI`, `https://127.0.0.1` (Activity), localhost callbacks, plus optional `DISCORD_REDIRECT_URI_ALLOWLIST`.
 
-`token-exchange` only accepts allowlisted `redirect_uri` values (`oauthRedirect.ts`) for the authorization-code path:
-
-- `DISCORD_REDIRECT_URI`
-- `https://127.0.0.1` (Discord Activity)
-- `http://localhost:5180/auth/callback`, `http://127.0.0.1:5180/auth/callback`
-- Optional: `DISCORD_REDIRECT_URI_ALLOWLIST` (comma-separated, Supabase secret)
-
-Silent browser re-auth: `POST token-exchange` with `{refresh_token}` (no `redirect_uri`). Client stores refresh + expiry in `localStorage` and refreshes near expiry or on Edge 401. Discord `400 invalid_grant` clears the session; Discord 429/5xx on verify or refresh keep it (public Browse/Ladder continue as guest; mutations return 503). After shipping this, existing browser sessions need **one** Discord sign-in to pick up a refresh token.
+Silent re-auth: `POST token-exchange` `{refresh_token}` (no `redirect_uri`). Client stores refresh + expiry in **`localStorage`**. Discord `400 invalid_grant` clears the session; 429/5xx keep it (public reads continue as guest; mutations 503). Sessions saved before refresh-token support need one re-login.
 
 ### Optional
 
 | Variable | Use |
 |----------|-----|
-| `SUPABASE_SERVICE_ROLE_KEY` | `npm run seed:events`, `scripts/seed-cars.mjs` |
-| `APP_ORIGIN` | Embed cover URLs; Edge Function CORS allowlist (no trailing slash) |
-| `ALLOWED_CORS_ORIGINS` | Extra origins for Edge CORS (Supabase secret; comma-separated) |
-| `VITE_API_BASE_URL` | Override Edge Functions base URL |
-| `VITE_DEV_LOADING_DELAY_MS` | Artificial loading delay for UI testing |
+| `SUPABASE_SERVICE_ROLE_KEY` | `seed:events`, `seed:cars` |
+| `APP_ORIGIN` | Embed image URLs + Edge CORS (no trailing slash). Prod: `https://forza.events` |
+| `ALLOWED_CORS_ORIGINS` | Extra Edge CORS origins |
+| `VITE_API_BASE_URL` | Override Edge base URL |
+| `VITE_DEV_LOADING_DELAY_MS` | Artificial loading delay |
 
-### Railway + forza.events (production)
+### Production (`forza.events`)
 
-Set at **build time** on Railway (redeploy after changes):
+Railway **build** env: `DISCORD_CLIENT_ID`, `SUPABASE_URL`, `SUPABASE_ANON_KEY`, `APP_ORIGIN=https://forza.events`.
 
-```env
-DISCORD_CLIENT_ID=...
-SUPABASE_URL=...
-SUPABASE_ANON_KEY=...
-APP_ORIGIN=https://forza.events
-```
-
-On **Supabase** secrets (via `npm run sync:secrets` or dashboard):
+Supabase secrets (`npm run sync:secrets`):
 
 ```env
 APP_ORIGIN=https://forza.events
 DISCORD_REDIRECT_URI=https://forza.events/auth/callback
-NOTIFICATION_CRON_SECRET=<random hex>   # same value as GitHub secret below
+NOTIFICATION_CRON_SECRET=<random hex>
 ```
 
-On **GitHub** → repo → **Settings → Secrets and variables → Actions** (for `.github/workflows/process-notifications.yml`):
+GitHub Actions (`.github/workflows/process-notifications.yml`): `VITE_SUPABASE_URL`, `VITE_SUPABASE_ANON_KEY`, `NOTIFICATION_CRON_SECRET` (same value). Schedule is every **5 minutes**. Mutations also call `deferNotificationDelivery`.
 
-```env
-VITE_SUPABASE_URL=https://<project-ref>.supabase.co
-VITE_SUPABASE_ANON_KEY=<anon key>
-NOTIFICATION_CRON_SECRET=<same as Supabase>
-```
+Portal Redirects: `https://127.0.0.1` (Activity), `https://forza.events/auth/callback`, `http://localhost:5180/auth/callback`, and `www` if you serve it.
 
-Scheduled workflow runs every **5 minutes** (GitHub minimum). Mutations also trigger immediate delivery via `deferNotificationDelivery` on Edge. Manual run: **Actions → Process notifications → Run workflow**.
+Activity OAuth stays on `https://127.0.0.1`. Raw `*.up.railway.app` shows **Open in Discord** unless that host is `VITE_APP_ORIGIN`.
 
-Discord Developer Portal → OAuth2 → Redirects — add **both**:
+#### Cloudflare DNS
 
-- `https://127.0.0.1` (Activity iframe)
-- `https://forza.events/auth/callback` (browser web)
-- `https://www.forza.events/auth/callback` (if you serve `www`)
+1. Railway custom domain `forza.events` (optional `www`).
+2. Cloudflare CNAME → Railway hostname, proxy **on**. SSL/TLS **Full**.
+3. Optional: redirect `www` → apex.
+4. Activity **URL Mapping** must match where the iframe loads (custom domain or Railway).
+5. Portal Terms / Privacy: `https://forza.events/terms` and `/privacy`.
 
-Activity OAuth still uses `https://127.0.0.1` — not `APP_ORIGIN`. Browser tabs on **forza.events** and **localhost** support guest browse (Browse / Event Detail / Ladder); Discord OAuth is soft-prompted on Join, Create, Profile, My Events (`SignInRequiredState` / navbar pill). Explicit `/sign-in` shows `BrowserSignInScreen`. The raw Railway hostname (`*.up.railway.app`) still shows **Open in Discord** unless you add it to `VITE_APP_ORIGIN` at build time.
+#### Regional access
 
-```bash
-railway variable set APP_ORIGIN=https://forza.events
-```
+`*.supabase.co` is often blocked. Browser web uses same-origin `https://forza.events/supabase/...`.
 
-#### Cloudflare DNS (forza.events)
-
-1. Railway → service → **Settings** → **Networking** → **Custom Domain** → add `forza.events` (and optionally `www.forza.events`).
-2. Cloudflare → DNS → **CNAME** `forza.events` → Railway target hostname (proxy **on** is fine).
-3. SSL/TLS → **Full** (Railway terminates HTTPS on the custom domain).
-4. Optional: redirect `www` → apex in Cloudflare **Redirect Rules**.
-5. Discord Activities **URL Mapping** prefix stays pointed at the same Railway service (custom domain or `*.up.railway.app` — keep mapping in sync with where the Activity loads).
-6. Update Developer Portal **Terms** / **Privacy** URLs to `https://forza.events/terms` and `/privacy`.
-
-#### Regional access (e.g. Russia without VPN)
-
-`*.supabase.co` is often blocked. Production browser web on **forza.events** routes API and Storage through the same origin (`https://forza.events/supabase/...`).
-
-**Do not** reverse-proxy Supabase from Railway Caddy when forza.events is Cloudflare-proxied — Cloudflare returns **Error 1000 (dns_loop)**. Use the **Cloudflare Worker** in `cloudflare/worker.js` instead:
+**Do not** reverse-proxy Supabase from Caddy while Cloudflare proxies the hostname (Error **1000 dns_loop**). Use the Worker:
 
 ```bash
 npx wrangler login
 npm run deploy:cf-worker
 ```
 
-The Worker routes `forza.events/supabase*` and `forza.events/event*` intercept before Railway. Redeploy after Supabase ref changes (`wrangler.toml` → `SUPABASE_ORIGIN`). Link previews on `/event/:slug` (and `/event/:id`) need `npx wrangler secret put SUPABASE_ANON_KEY` on the Worker.
+Routes: `forza.events/supabase*`, `forza.events/event*`, `forza.events/*`. After a Supabase ref change, update `wrangler.toml` `SUPABASE_ORIGIN`. Event OG needs `npx wrangler secret put SUPABASE_ANON_KEY`.
 
-**Discord OAuth** (`discord.com`) may still be unreachable without VPN — the proxy fixes browse, profile, and covers after sign-in, not the login redirect itself.
+Worker origin fetches must strip `CDN-Loop` / `Host` / `cf-*` (`cloudflare/originHeaders.js`). WebSocket realtime: clone the upgrade Request — do not `new Request(clone, {headers})`. Caddy serves `/assets`, `/covers`, `/cars`, `/og`, `/logo` as `file_server` only (missing hashed JS → **404**, never SPA HTML).
+
+**Discord OAuth** (`discord.com`) may still need a VPN — the proxy does not fix the login redirect.
 
 ---
 
-## Database migrations
-
-Target project: `uoysqfczahqmctbrrizn` (or your linked ref).
+## Database
 
 ```bash
-supabase link --project-ref <ref>
+supabase link --project-ref uoysqfczahqmctbrrizn
 supabase db push
 ```
 
-Apply all migrations with `supabase db push` (`001`–`006` — see [`supabase/README.md`](../supabase/README.md)). After applying, seed the cars catalog and optionally sample events.
-
-After any schema change that affects security (RLS, storage policies), redeploy Edge Functions.
+Migrations `001`–`043`: [`supabase/README.md`](../supabase/README.md). Then `npm run seed:cars` and optionally `npm run seed:events`. After RLS/storage changes, redeploy Edge Functions.
 
 ---
 
@@ -159,92 +120,75 @@ After any schema change that affects security (RLS, storage policies), redeploy 
 
 ### Browser (localhost + forza.events)
 
-1. **Sign in** → Discord OAuth
-2. `/auth/callback` with `code`
-3. `token-exchange` → access token + `users` row
-4. `sessionStorage` until Sign out
+1. Sign in → Discord OAuth → `/auth/callback` → `token-exchange` → `users` row
+2. Session in **`localStorage`** until Sign out
 
-On **localhost**, Browse reads via PostgREST (`shouldUseDirectSupabaseReads`). On **forza.events** and in the Activity iframe, Browse uses the **`browse-events`** Edge Function. **My Events** / Profile use `include_completed` for past events. Compact-card finish/Δ and Event Detail result retries: Edge `browse-events` first, PostgREST fallback on every browser surface (`canUsePostgrestReads`). Join/create/publish always use Edge Functions + Discord token.
+| Surface | Supabase path |
+|---------|----------------|
+| **localhost** | Vite `/supabase` → `*.supabase.co`. Browse may use PostgREST (`canUsePostgrestReads`). |
+| **Activity iframe** | Discord mapping `/supabase` → project. Proxy **strips `apikey`** — `createSupabaseFetch` re-applies it. Prefer Edge `browse-events`. |
+| **forza.events** | Worker `/supabase/*`. REST 401 only if `apikey` is missing. Public reads still prefer Edge. |
 
-| Surface | How the client reaches Supabase |
-|---------|----------------------------------|
-| **localhost tab** | Vite proxies `/supabase` → `*.supabase.co`. PostgREST works. Edge optional (Browse skips it so `npm run dev` does not need a function deploy). |
-| **Discord Activity iframe** | Discord URL mapping `/supabase` → project host. Proxy **strips `apikey`**. `createSupabaseFetch` re-applies headers. PostgREST works after `patchUrlMappings`. Public lists still prefer Edge. |
-| **forza.events tab** | Cloudflare Worker proxies `/supabase/*` (direct `*.supabase.co` is blocked in some regions). REST works when `apikey` is present (401 only if missing). Public event/result reads still prefer Edge `browse-events`; PostgREST is the fallback. Mutations already go through `api.ts` `invoke()`. |
+Join/create/publish always use Edge + `x-discord-access-token`. Compact finish/Δ and Event Detail retries: Edge `{event_ids}` / `{event_id}` first, PostgREST fallback. My Events / Profile pass `include_completed`.
 
-### Discord Activity (iframe)
+### Discord Activity
 
-1. `initDiscordActivity()` → SDK `authorize` (`identify`, `guilds`, `rpc.activities.write`)
+1. `initDiscordActivity()` → `authorize` (`identify`, `guilds`, `rpc.activities.write`)
 2. `token-exchange` with `redirect_uri: https://127.0.0.1`
 3. `authenticate(access_token)`
-4. API calls use `createSupabaseFetch(anonKey)` so `apikey` / `Authorization` survive Discord’s proxy
+4. `createSupabaseFetch(anonKey)` on every Edge/PostgREST call
 
 ---
 
-## Edge Functions (local testing)
+## Edge Functions
 
-All functions from [`scripts/deploy-edge-functions.sh`](../scripts/deploy-edge-functions.sh) are invoked from `src/lib/api.ts` with:
-
-- `apikey` + `Authorization: Bearer <anon>`
-- `x-discord-access-token` when signed in
-
-Deploy after changes:
+Canonical list: [`scripts/deploy-edge-functions.sh`](../scripts/deploy-edge-functions.sh). Client `src/lib/api.ts` always sends `apikey` + `Authorization: Bearer <anon>` and `x-discord-access-token` when signed in.
 
 ```bash
-npm run sync:secrets      # DISCORD_* → Supabase
-npm run deploy:functions  # --no-verify-jwt on each
+npm run sync:secrets
+npm run deploy:functions   # --no-verify-jwt on each
 ```
 
 ---
 
 ## Covers
 
-Standard aspect ratio: **16:9** (1280×720 uploads). Client `compressCoverForUpload` center-crops then scales; bundled defaults are regenerated with `npm run optimize:covers` (same crop). UI uses `COVER_ASPECT_CLASS` on create preview and review; event detail hero uses `COVER_HERO_BAND_CLASS` and breaks out to viewport width from `md` (from the sidebar edge on `lg+` — avoid `aspect-video` + `max-h` on bleed heroes).
+**16:9** (1280×720). Client `compressCoverForUpload` center-crops then scales. Bundled defaults: `npm run optimize:covers`.
 
 | Asset | Location |
 |-------|----------|
 | Default covers | `public/covers/*.webp` |
-| Car thumbs | `public/cars/fh5/` and `fh6/*.webp`, plus `public/cars/null.webp` (`npm run data:car-thumbs`) |
-| Custom uploads | `event-covers` bucket via **`upload-cover`** only |
+| Car thumbs | `public/cars/fh5/`, `fh6/`, `null.webp` (`npm run data:car-thumbs`) |
+| Custom | `event-covers` via **`upload-cover` only** |
 
-Anonymous Storage writes on `event-covers` are revoked in the baseline schema — uploads go through the Edge Function only.
-
-Flow:
-
-1. Save draft (`save-event`) → get `event_id`
-2. `compressCoverForUpload` (client)
-3. `uploadCoverImage(discordToken, guildId?, eventId, file)` → Edge Function (`guild_id` optional for drafts)
-4. Save again with `cover_image_url`
-
-```bash
-npm run optimize:covers   # regenerate bundled WebP
-```
+Flow: save draft → compress → `uploadCoverImage` → save again with `cover_image_url`.
 
 ---
 
 ## Create Event wizard
 
-Implementation: **`src/screens/CreateEvent/index.tsx`** only — do not add `CreateEvent.tsx` beside the folder.
+**`src/screens/CreateEvent/index.tsx` only** — do not add a sibling `CreateEvent.tsx`.
 
-**Steps:** Event → Publish (two steps in `StepIndicator`).
+**Steps:** Event → Publish. Forward tab clicks run `tryContinue`; backward tabs skip validation.
 
-**Persistence:** explicit **Save as draft** / **Save changes** only — no autosave, session WIP, or leave guard. Step 0 save navigates to My Events; Publish-step save stays on the wizard. Browser `?edit={id}` requires Discord sign-in before the form loads.
+**Persistence:** explicit Save only (no autosave / leave guard). **Save as draft** navigates to `/event/{slug}`. Browser `?edit={id}` requires sign-in; missing/foreign draft → My Events.
 
-Validation: `validation.ts`, `src/lib/eventSpec.ts`
+Validation: `src/lib/eventSpec.ts` ↔ `_shared/eventSpec.ts`.
 
-**Mobile layout:** On a narrow viewport (~320px), Create → Basics: the `datetime-local` field must not cause horizontal page scroll; event-type segment labels should stay readable in EN and RU (`SegmentGroup` grid + `index.css` WebKit picker rules).
+**Mobile:** ~320px Create → Basics must not horizontal-scroll on `datetime-local` (`index.css` WebKit picker + `Input` overflow).
 
 ---
 
 ## Commands
 
 ```bash
-npm run dev              # port 5180
-npm run typecheck
-npm run build
+npm run dev                 # port 5180
+npm run typecheck && npm run lint && npm run test && npm run build
 npm run sync:secrets
 npm run deploy:functions
-npm run seed:events      # SERVICE_ROLE_KEY
+npm run deploy:cf-worker
+npm run seed:events         # SERVICE_ROLE_KEY
+npm run seed:cars
 npm run optimize:covers
 ```
 
@@ -252,30 +196,26 @@ npm run optimize:covers
 
 ## Testing checklist
 
-Quick smoke before a PR or local iteration:
-
 ### Local (browser)
 
-- [ ] Browse lists events (seed or real data)
-- [ ] Sign in → Sign out
-- [ ] Create draft (Event step → Save as draft) → My Events
-- [ ] Create draft (Publish step → Save as draft) → stays on wizard; appears in My Events after refresh/navigate
-- [ ] Open `/create?edit={draftId}` (signed in) → loads publish step
-- [ ] Create Event (narrow ~320px): no horizontal scroll on date/time; event type segments readable (EN + RU)
+- [ ] Guest: Browse, Event Detail, Ladder without OAuth
+- [ ] Sign in → Sign out; second tab stays signed in
+- [ ] Create draft → Save as draft → Event Detail; appears in My Events
+- [ ] `/create?edit={draftId}` (signed in) loads the wizard
+- [ ] Narrow ~320px: no horizontal scroll on date/time; type segments readable (EN + RU)
 - [ ] Upload cover → image on card/detail
-- [ ] Join / leave (signed in, non-host event)
+- [ ] Join / leave (signed in, non-host)
 
 ### After deploy
 
-- [ ] `supabase db push` applied (`001`–`006`)
-- [ ] `npm run deploy:functions` succeeded
-- [ ] Railway rebuild if `APP_ORIGIN` / client env / `Caddyfile` changed — hashed `/assets/*` must 404 when missing (never SPA HTML)
-- [ ] Then `npx wrangler deploy` when Worker / `railwayProxy` / `Caddyfile` cache rules changed (Caddy before Worker)
+- [ ] `supabase db push` (`001`–`043`)
+- [ ] `npm run deploy:functions`
+- [ ] Railway rebuild if client env / `Caddyfile` changed — hashed `/assets/*` 404 when missing
+- [ ] `npm run deploy:cf-worker` if Worker / `originHeaders` / cache rules changed (**Caddy before Worker**)
 
-### Discord Activity (pilot)
+### Discord Activity
 
-Full manual matrix (auth, embed deep links, publish target, embed sync, races, i18n): **[`E2E.md`](E2E.md)**.  
-Portal prerequisites: [`DISCORD_PLATFORM.md`](DISCORD_PLATFORM.md#operational-checklist). **Application verification** in the Developer Portal is **approved** (2026-05-31); keep `/terms` and `/privacy` on `APP_ORIGIN` in sync with the portal.
+Full matrix: [`E2E.md`](E2E.md). Portal: [`DISCORD_PLATFORM.md`](DISCORD_PLATFORM.md#operational-checklist).
 
 ---
 
